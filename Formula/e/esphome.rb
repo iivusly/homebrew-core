@@ -3,18 +3,18 @@ class Esphome < Formula
 
   desc "Make creating custom firmwares for ESP32/ESP8266 super easy"
   homepage "https://github.com/esphome/esphome"
-  url "https://files.pythonhosted.org/packages/3d/b1/4c2beb23b58f95de3b55ed2b8676c3c3ffe16a15e5ce1a2fb3dd916374d1/esphome-2024.7.0.tar.gz"
-  sha256 "dde489390acefafd8f85a2378479736ec292311d4ab991bec82e2e6e2a56075d"
+  url "https://files.pythonhosted.org/packages/b9/27/36fae72bac314116c7dfa098a64ad6a6529aed887c05e711211ae6128e33/esphome-2024.7.3.tar.gz"
+  sha256 "fb1b9675e552c83f24984794f134c327283ea3801496ab5e36fcc9d2e1063595"
   license "MIT"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "8178591a8b449dd9e0c741d94b0d0b6f19f27ee8760875f06dd9007336cf2439"
-    sha256 cellar: :any,                 arm64_ventura:  "b9176465a3673e5c7aab631a0a124c2a3023f7e09c40beba9e37bd097c8d63f6"
-    sha256 cellar: :any,                 arm64_monterey: "9272ee750f18c469bbee5262a0fd0e93ada7af19bf15a4aac01eb54e866a5e03"
-    sha256 cellar: :any,                 sonoma:         "877d965502e76ff72e6ba414a9fede5de5d721c600b9f2200410d565909a56ea"
-    sha256 cellar: :any,                 ventura:        "3c61a42e09618a0cf8c7dac5f89968375b716a0d3c2880b6a2a47d4f4b7325be"
-    sha256 cellar: :any,                 monterey:       "cab7eff79244f3531c14d26368aa693e3e41a1f1939d56d4f3e47bbc9014d0da"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "9de2da199900b6e542ddacd69abf5d7063be120edd0aba275e9824c7499837aa"
+    sha256 cellar: :any,                 arm64_sonoma:   "09991b3f42e8690935bb1fd689fd7ec1d77335aac43ebd5950090e8b91a3e810"
+    sha256 cellar: :any,                 arm64_ventura:  "768f3829ee1f302020d15de1c10fbba2d52d4b50a33c8dc7602bd57e5037d3e5"
+    sha256 cellar: :any,                 arm64_monterey: "99fd793cde9cb76db66c6f9da4ef7863687e54cec061c05e1f1142b4a000515d"
+    sha256 cellar: :any,                 sonoma:         "fce19547e527c1ed50845c3ba8d5f0839ef896a4c54acb1f3d8345241eb279b6"
+    sha256 cellar: :any,                 ventura:        "694c17d0dff9719a985f7824db557fd6b2db600c0459cb70a38e7a7e104aa0d8"
+    sha256 cellar: :any,                 monterey:       "d867c32aebdb027634fa71263c4aee23487b6ebef0681a93d15146a0b9620570"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:   "944f91c91226da8e9ce3d00076d2ce17321ddf79ebf5f2dbc08a5f8874393720"
   end
 
   depends_on "certifi"
@@ -30,8 +30,8 @@ class Esphome < Formula
   end
 
   resource "aiohappyeyeballs" do
-    url "https://files.pythonhosted.org/packages/cc/83/f731ac54f82fc25984ee4d6abadf69b824dde03b629a1348f459e7b35d5a/aiohappyeyeballs-2.3.2.tar.gz"
-    sha256 "77e15a733090547a1f5369a1287ddfc944bd30df0eb8993f585259c34b405f4e"
+    url "https://files.pythonhosted.org/packages/3c/c1/52b8ecc87576f8b06fd5132e3ab8550209c958fb450e6d185b15835da82c/aiohappyeyeballs-2.3.4.tar.gz"
+    sha256 "7e1ae8399c320a8adec76f6c919ed5ceae6edd4c3672f4d9eae2b27e37c80ff6"
   end
 
   resource "ajsonrpc" do
@@ -160,8 +160,8 @@ class Esphome < Formula
   end
 
   resource "protobuf" do
-    url "https://files.pythonhosted.org/packages/71/a5/d61e4263e62e6db1990c120d682870e5c50a30fb6b26119a214c7a014847/protobuf-5.27.2.tar.gz"
-    sha256 "f3ecdef226b9af856075f28227ff2c90ce3a594d092c39bee5513573f25e2714"
+    url "https://files.pythonhosted.org/packages/1b/61/0671db2ab2aee7c92d6c1b617c39b30a4cd973950118da56d77e7f397a9d/protobuf-5.27.3.tar.gz"
+    sha256 "82460903e640f2b7e34ee81a947fdaad89de796d324bcbc38ff5430bcdead82c"
   end
 
   resource "pyelftools" do
@@ -294,6 +294,6 @@ class Esphome < Formula
     return if Hardware::CPU.arm?
 
     ENV.remove_macosxsdk if OS.mac?
-    system "#{bin}/esphome", "compile", "test.yaml"
+    system bin/"esphome", "compile", "test.yaml"
   end
 end

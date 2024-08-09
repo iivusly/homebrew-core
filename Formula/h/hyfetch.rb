@@ -53,9 +53,10 @@ class Hyfetch < Formula
       "pride_month_disable": false
     }
     EOS
-    system "#{bin}/neowofetch", "--config", "none", "--color_blocks", "off",
+
+    system bin/"neowofetch", "--config", "none", "--color_blocks", "off",
                               "--disable", "wm", "de", "term", "gpu"
-    system "#{bin}/hyfetch", "-C", testpath/"hyfetch.json",
+    system bin/"hyfetch", "-C", testpath/"hyfetch.json",
                              "--args=\"--config none --color_blocks off --disable wm de term gpu\""
   end
 end

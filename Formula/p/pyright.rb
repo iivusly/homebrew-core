@@ -1,27 +1,25 @@
-require "language/node"
-
 class Pyright < Formula
   desc "Static type checker for Python"
   homepage "https://github.com/microsoft/pyright"
-  url "https://registry.npmjs.org/pyright/-/pyright-1.1.372.tgz"
-  sha256 "90be4ee1c8789bf77a34b2d295f403245fda76d56029fbf1329d7520ecd094f7"
+  url "https://registry.npmjs.org/pyright/-/pyright-1.1.375.tgz"
+  sha256 "a7b064ac82052fe13e16e91096c247af7dfdbf91322d0075a2b03fdb29bc4116"
   license "MIT"
   head "https://github.com/microsoft/pyright.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "0ea96681e5d3d2cfcde14227346fa5cc03d57143d0199e4330b495fb9cfe16cf"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "0ea96681e5d3d2cfcde14227346fa5cc03d57143d0199e4330b495fb9cfe16cf"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "0ea96681e5d3d2cfcde14227346fa5cc03d57143d0199e4330b495fb9cfe16cf"
-    sha256 cellar: :any_skip_relocation, sonoma:         "ea635860fa8709e1a41399582735cc2d48ff1b1c987cbfa283ec02efde5e1597"
-    sha256 cellar: :any_skip_relocation, ventura:        "ea635860fa8709e1a41399582735cc2d48ff1b1c987cbfa283ec02efde5e1597"
-    sha256 cellar: :any_skip_relocation, monterey:       "ea635860fa8709e1a41399582735cc2d48ff1b1c987cbfa283ec02efde5e1597"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "2b0076c0b82c0afe625e637243daae6456bce304999864f5b699ddcd3ea7854d"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "c843bcce2e8f96108828025a3b3e8fe7e7cc143f8f2a33f0c3489e0079c18508"
+    sha256 cellar: :any_skip_relocation, arm64_ventura:  "c843bcce2e8f96108828025a3b3e8fe7e7cc143f8f2a33f0c3489e0079c18508"
+    sha256 cellar: :any_skip_relocation, arm64_monterey: "c843bcce2e8f96108828025a3b3e8fe7e7cc143f8f2a33f0c3489e0079c18508"
+    sha256 cellar: :any_skip_relocation, sonoma:         "ff9f175ad88445f06998e26247d1a7caa662fa911acbeee01f826d3d0d4b11fe"
+    sha256 cellar: :any_skip_relocation, ventura:        "ff9f175ad88445f06998e26247d1a7caa662fa911acbeee01f826d3d0d4b11fe"
+    sha256 cellar: :any_skip_relocation, monterey:       "ff9f175ad88445f06998e26247d1a7caa662fa911acbeee01f826d3d0d4b11fe"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:   "c843bcce2e8f96108828025a3b3e8fe7e7cc143f8f2a33f0c3489e0079c18508"
   end
 
   depends_on "node"
 
   def install
-    system "npm", "install", *Language::Node.std_npm_install_args(libexec)
+    system "npm", "install", *std_npm_args
     bin.install_symlink Dir["#{libexec}/bin/*"]
   end
 

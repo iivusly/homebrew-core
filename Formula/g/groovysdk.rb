@@ -26,7 +26,7 @@ class Groovysdk < Formula
 
   def install
     # We don't need Windows' files.
-    rm_f Dir["bin/*.bat"]
+    rm(Dir["bin/*.bat"])
 
     bin.install Dir["bin/*"]
     libexec.install "conf", "lib", "src", "doc"
@@ -36,6 +36,6 @@ class Groovysdk < Formula
   end
 
   test do
-    system "#{bin}/grape", "install", "org.activiti", "activiti-engine", "5.16.4"
+    system bin/"grape", "install", "org.activiti", "activiti-engine", "5.16.4"
   end
 end

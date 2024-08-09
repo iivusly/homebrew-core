@@ -1,20 +1,20 @@
-class RustupInit < Formula
+class Rustup < Formula
   desc "Rust toolchain installer"
   homepage "https://github.com/rust-lang/rustup"
   url "https://github.com/rust-lang/rustup/archive/refs/tags/1.27.1.tar.gz"
   sha256 "f5ba37f2ba68efec101198dca1585e6e7dd7640ca9c526441b729a79062d3b77"
   license any_of: ["Apache-2.0", "MIT"]
+  revision 1
   head "https://github.com/rust-lang/rustup.git", branch: "master"
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "013f6c53bb2e86339ce87aa9b0037c3f4b8f90b284f7ffe5cd6c61c40009fb11"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "108787dd49e54c94323548f4d1e734d014d2393b1a2d4f2809ed45a25c7e2287"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "af73b45b59e043cb9289bb3b542dae84f2a971d688a140e61c5946f3242cecb6"
-    sha256 cellar: :any_skip_relocation, sonoma:         "6c02a888a58c2d3814b4fbca069002155321fdb1e3de895e96eb99721fced270"
-    sha256 cellar: :any_skip_relocation, ventura:        "8785b4a6132a59a3d9db5fa5c0c5e723d3113ffc5e1e1069de961b8b5072a2f7"
-    sha256 cellar: :any_skip_relocation, monterey:       "70883eb56cf51f9bf8eca13d79b3a86e2621a197c3a5ebdaf20e8721d1d34eaa"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "24da7814d4e6496bb1edca5baf93e52150a163065ab4cf24c826846252e26208"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "26582463ad820eaa27d0da47d107800898f2a10908a73be36227e72529697a8a"
+    sha256 cellar: :any_skip_relocation, arm64_ventura:  "3d52d818014950191f497a00f0a0dffabde39c9e7a188d6e1476d9173f98bc63"
+    sha256 cellar: :any_skip_relocation, arm64_monterey: "c9f17a7aaca93101e2d8dd1e6fa98ba4ee6dd987fdfeffa396b8a8b0bf755996"
+    sha256 cellar: :any_skip_relocation, sonoma:         "ef57ece836e59426b665c4c95ef8f59db8190635f7f825ba22e299f39e14c5c7"
+    sha256 cellar: :any_skip_relocation, ventura:        "8592640754f7de0bb6def3179d27cd4a007e8578b5f76370cb2beec4b0458f68"
+    sha256 cellar: :any_skip_relocation, monterey:       "6153529df50ce2932ccfcabbeb9a3ab3a032f2ad1868e01e5d4506ba47a4328c"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:   "d2a2680e7e8697fa93b216bce8be1633148a9daaadbce3487625e5765992e41f"
   end
 
   keg_only "it conflicts with rust"

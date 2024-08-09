@@ -1,26 +1,24 @@
-require "language/node"
-
 class Asyncapi < Formula
   desc "All in one CLI for all AsyncAPI tools"
   homepage "https://github.com/asyncapi/cli"
-  url "https://registry.npmjs.org/@asyncapi/cli/-/cli-2.1.1.tgz"
-  sha256 "82c3ca1a869f9718f4ecbab7bb98754ca1adb51a99b1b2ea7c9271b71ed35099"
+  url "https://registry.npmjs.org/@asyncapi/cli/-/cli-2.3.2.tgz"
+  sha256 "7045e0c08eda29eb2c5347f58900992a7e70b1df6c6c3c1519ea200422db4590"
   license "Apache-2.0"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "4e60cc92d8609bdaa142ee7b8ed44b00dd2ec06bee1832f3d59f6dbb824a0521"
-    sha256 cellar: :any,                 arm64_ventura:  "4e60cc92d8609bdaa142ee7b8ed44b00dd2ec06bee1832f3d59f6dbb824a0521"
-    sha256 cellar: :any,                 arm64_monterey: "4e60cc92d8609bdaa142ee7b8ed44b00dd2ec06bee1832f3d59f6dbb824a0521"
-    sha256 cellar: :any,                 sonoma:         "4d1cffae24c9c91d87be6fe8a6c877615d27e8e124b27007197d1015ff113671"
-    sha256 cellar: :any,                 ventura:        "4d1cffae24c9c91d87be6fe8a6c877615d27e8e124b27007197d1015ff113671"
-    sha256 cellar: :any,                 monterey:       "4d1cffae24c9c91d87be6fe8a6c877615d27e8e124b27007197d1015ff113671"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "196a18314e9fc6ae3e4a1638a30691f264c5002a6f351230e3e58143f355ea89"
+    sha256 cellar: :any,                 arm64_sonoma:   "5bef59f9631958584181f32f56a70c9814c272c1bd0bb8d898cb2f9b38f2ccd1"
+    sha256 cellar: :any,                 arm64_ventura:  "5bef59f9631958584181f32f56a70c9814c272c1bd0bb8d898cb2f9b38f2ccd1"
+    sha256 cellar: :any,                 arm64_monterey: "5bef59f9631958584181f32f56a70c9814c272c1bd0bb8d898cb2f9b38f2ccd1"
+    sha256 cellar: :any,                 sonoma:         "b1af0f54708115e7c8efe1f13cef9b3fd8a3021aa1ee3469049469825425f495"
+    sha256 cellar: :any,                 ventura:        "b1af0f54708115e7c8efe1f13cef9b3fd8a3021aa1ee3469049469825425f495"
+    sha256 cellar: :any,                 monterey:       "b1af0f54708115e7c8efe1f13cef9b3fd8a3021aa1ee3469049469825425f495"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:   "eea3bfd9f314b08ba50fdb45d0bd0a02efc57084cbaf70f4326504244f8afe0b"
   end
 
   depends_on "node"
 
   def install
-    system "npm", "install", *Language::Node.std_npm_install_args(libexec)
+    system "npm", "install", *std_npm_args
     bin.install_symlink Dir["#{libexec}/bin/*"]
 
     # Replace universal binaries with their native slices

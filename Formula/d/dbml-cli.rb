@@ -1,26 +1,24 @@
-require "language/node"
-
 class DbmlCli < Formula
   desc "Convert DBML file to SQL and vice versa"
   homepage "https://www.dbml.org/cli/"
-  url "https://registry.npmjs.org/@dbml/cli/-/cli-3.6.0.tgz"
-  sha256 "c1741b3507a7db10b6176e09c92d50d4fd59d2d13b28e72c773ee4ec5b6e9d07"
+  url "https://registry.npmjs.org/@dbml/cli/-/cli-3.6.2.tgz"
+  sha256 "47ed9fd06bd6926126d7c25963bf75f8ef73694bd088418dacc819d4a3a430fc"
   license "Apache-2.0"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "5ea1a40c5cfa0409c40e475e33324fa21507213750d2edda27b7cc4be3edbbce"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "5ea1a40c5cfa0409c40e475e33324fa21507213750d2edda27b7cc4be3edbbce"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "5ea1a40c5cfa0409c40e475e33324fa21507213750d2edda27b7cc4be3edbbce"
-    sha256 cellar: :any_skip_relocation, sonoma:         "03ae570d640f86525db2e7c816c646a8ecaca165d04f27b8d02c0d7274c13a8e"
-    sha256 cellar: :any_skip_relocation, ventura:        "03ae570d640f86525db2e7c816c646a8ecaca165d04f27b8d02c0d7274c13a8e"
-    sha256 cellar: :any_skip_relocation, monterey:       "03ae570d640f86525db2e7c816c646a8ecaca165d04f27b8d02c0d7274c13a8e"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "e78b72a1b806474fd8035f1484da2d8efb847409ede12e1d8a872bffd1cd74da"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "a91397151628a405c704a03e275cc0b10e7bf0ebca1e1b258c62b8c89a0b2cca"
+    sha256 cellar: :any_skip_relocation, arm64_ventura:  "a91397151628a405c704a03e275cc0b10e7bf0ebca1e1b258c62b8c89a0b2cca"
+    sha256 cellar: :any_skip_relocation, arm64_monterey: "a91397151628a405c704a03e275cc0b10e7bf0ebca1e1b258c62b8c89a0b2cca"
+    sha256 cellar: :any_skip_relocation, sonoma:         "1a30ba4196f8d0e3619df50872badfb8e1fb0fe0adc5596b8e253ecfb1be1718"
+    sha256 cellar: :any_skip_relocation, ventura:        "1a30ba4196f8d0e3619df50872badfb8e1fb0fe0adc5596b8e253ecfb1be1718"
+    sha256 cellar: :any_skip_relocation, monterey:       "1a30ba4196f8d0e3619df50872badfb8e1fb0fe0adc5596b8e253ecfb1be1718"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:   "a29fac275b9a00efdd92886c7b6265db044aab0d3b1cb6da0381a5ee32c3dbee"
   end
 
   depends_on "node"
 
   def install
-    system "npm", "install", *Language::Node.std_npm_install_args(libexec)
+    system "npm", "install", *std_npm_args
     bin.install_symlink Dir["#{libexec}/bin/*"]
 
     # Replace universal binaries with native slices

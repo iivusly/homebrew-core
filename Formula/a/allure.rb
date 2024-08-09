@@ -24,7 +24,7 @@ class Allure < Formula
 
   def install
     # Remove all windows files
-    rm_f Dir["bin/*.bat"]
+    rm(Dir["bin/*.bat"])
 
     libexec.install Dir["*"]
     bin.install Dir["#{libexec}/bin/*"]
@@ -57,6 +57,6 @@ class Allure < Formula
         ]
       }
     EOS
-    system "#{bin}/allure", "generate", "#{testpath}/allure-results", "-o", "#{testpath}/allure-report"
+    system bin/"allure", "generate", "#{testpath}/allure-results", "-o", "#{testpath}/allure-report"
   end
 end

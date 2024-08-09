@@ -4,6 +4,7 @@ class Dnsdist < Formula
   url "https://downloads.powerdns.com/releases/dnsdist-1.9.6.tar.bz2"
   sha256 "f6c48d95525693fea6bd9422f3fdf69a77c75b06f02ed14ff0f42072f72082c9"
   license "GPL-2.0-only"
+  revision 1
 
   livecheck do
     url "https://downloads.powerdns.com/releases/"
@@ -11,26 +12,24 @@ class Dnsdist < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "589214929847369c0730f11d568c5f25250fc6f1c87919be631f15e49d9db07d"
-    sha256 cellar: :any,                 arm64_ventura:  "b52110d6639296ca40cf444c1e0e5ae6c7760729f2bc57ece278f25aab9050e5"
-    sha256 cellar: :any,                 arm64_monterey: "a45cf4f07cbe8ee7d65d85744061a066bb507b3a78155426e8594d7bfd90222e"
-    sha256 cellar: :any,                 sonoma:         "ea230e5c6fea39057fb3db53bb703c1089130544165f81b5ada82174a82da041"
-    sha256 cellar: :any,                 ventura:        "efba84e59f8cb0a74342139979e49559801aa1516e8a17bd9165c1afa8b5b055"
-    sha256 cellar: :any,                 monterey:       "3682d43176077c130a78e588565d9fceaf92e4c2d2b6de464f0bf27112f9d27b"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "55021557883edbb9a2b4608fab76079dfd561ef072a694ef2b7dfe3d88bd72e7"
+    sha256 cellar: :any,                 arm64_sonoma:   "f7f89d8ad3ddc39d685647806e6e7fdc27598d88482d03f6cbe7e8c46fa70086"
+    sha256 cellar: :any,                 arm64_ventura:  "f1c2b1824b1d93d70ea9b0f2a4136f2175f07978e3fb2285168f12ed9c91e054"
+    sha256 cellar: :any,                 arm64_monterey: "eb84c592e200e31311a0e21d3a2571126254a21df238c2db1264cf99de7a0879"
+    sha256 cellar: :any,                 sonoma:         "1ff1e1c1902cf165e9ff4ff2a904f0ce558450a2174162f4587e000dacfaf59b"
+    sha256 cellar: :any,                 ventura:        "4b38254b5be1090d4cfc3144c679319a4343a4c32112391d5dbce055095ee4a3"
+    sha256 cellar: :any,                 monterey:       "b305717021c135e7ca43b9a92199a486792bf7cb553a0b6adcc2cba52c58b1e8"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:   "aeeab87e8d305be4de7b99c159e9422070b47ce4e4bd74e382f97229b6ded5c9"
   end
 
   depends_on "boost" => :build
   depends_on "pkg-config" => :build
+  depends_on "tinycdb" => :build # TODO: make runtime dependency when `tinycdb` formula has a shared library
   depends_on "abseil"
-  depends_on "cdb"
   depends_on "fstrm"
-  depends_on "h2o"
   depends_on "libnghttp2"
   depends_on "libsodium"
   depends_on "luajit"
   depends_on "openssl@3"
-  depends_on "protobuf"
   depends_on "re2"
 
   uses_from_macos "libedit"

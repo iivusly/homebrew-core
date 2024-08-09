@@ -2,18 +2,18 @@ class AliyunCli < Formula
   desc "Universal Command-Line Interface for Alibaba Cloud"
   homepage "https://github.com/aliyun/aliyun-cli"
   url "https://github.com/aliyun/aliyun-cli.git",
-      tag:      "v3.0.214",
-      revision: "635d1d3df297be8215e4c1b33ba5ce9f7430c6df"
+      tag:      "v3.0.216",
+      revision: "3b0f2b062b7fe66c052d727ed069808963468811"
   license "Apache-2.0"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "c4134a878ebc42ac09ddb67082e49951f860c3d741f76d339da20ee518a47422"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "91484feeb83f3bcdeba3220efd8b3444805129d64d4554f64e308643482282ee"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "bc14ad9f21dbde3d42b0c942d9f743005d946920e4ed5570cabb614b03a708e4"
-    sha256 cellar: :any_skip_relocation, sonoma:         "32ab998b66eddda5be893888c0741ae7b5cfc3386228156bf9faf2e24cf8d03f"
-    sha256 cellar: :any_skip_relocation, ventura:        "d8a9aad382b74f7bc970d63593cffe698fd0d49b8cbb529736b74ce14dea30a4"
-    sha256 cellar: :any_skip_relocation, monterey:       "0136bd0dd73d200b9fc940ae5166b32d6e9fbf7cb63ea2ab0176127de354200b"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "89377f25e3c5b6badd49667e2eb290c54545c436cd02f001696aecc62f7240e2"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "86b28621335e83cc45d7b4456bc5e8b8e135aabdf8b702681b9481025f7ed8bb"
+    sha256 cellar: :any_skip_relocation, arm64_ventura:  "271f4c60a924c687b8c248ef3f83afb10a12fd62efd522c577852f7cfec6e806"
+    sha256 cellar: :any_skip_relocation, arm64_monterey: "e417b19e718cec41712aaaa6194e203dbe915602acf143c6b497f5d1c87c5e4d"
+    sha256 cellar: :any_skip_relocation, sonoma:         "04aa8a5ad794cafc848b2e4e5240c0543ae8e8b92a28bad23234640c3631474d"
+    sha256 cellar: :any_skip_relocation, ventura:        "b9acf035022f3a1e7e8a0a63c0315f8009274b0d73fdf4f90962561f86e50eb7"
+    sha256 cellar: :any_skip_relocation, monterey:       "167c21c2a5a2f8a31bd9e863c3fb6eea905036ec658c0290f35cdf4db408e7b6"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:   "ab4d149db5299d87c52afe9c16340efeba2385707aa01c72b8a5962d9d3ad11e"
   end
 
   depends_on "go" => :build

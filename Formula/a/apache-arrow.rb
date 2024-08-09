@@ -5,16 +5,17 @@ class ApacheArrow < Formula
   mirror "https://archive.apache.org/dist/arrow/arrow-17.0.0/apache-arrow-17.0.0.tar.gz"
   sha256 "9d280d8042e7cf526f8c28d170d93bfab65e50f94569f6a790982a878d8d898d"
   license "Apache-2.0"
+  revision 2
   head "https://github.com/apache/arrow.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "0445d1e1869d2f397207a734dda88c3d864f9156db8a22122b81f6f3552f53e3"
-    sha256 cellar: :any,                 arm64_ventura:  "71a268fa8f11e4116def72b59b71d63ca2e75475be96f1e7f8b6206b50c77994"
-    sha256 cellar: :any,                 arm64_monterey: "a96739f6a23ecb6e95af11f06e57caa3da088a86dee3362ba98e109037bcbf57"
-    sha256 cellar: :any,                 sonoma:         "462b9ba5283196910774ea84847b5437f79846d3fe39957a69ad1b799fada955"
-    sha256 cellar: :any,                 ventura:        "4c6150ba272575c11e6aa395d0054233f298f1e302b85eb160fc3e2fc1e9b0c1"
-    sha256 cellar: :any,                 monterey:       "42aa9fe86396a58aaa41ac28d3c7b37cc745ea156395038d68c149c8b83cc970"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "df18a0f60b0b15533c007468299237d42f601f3d0c883e2242a080bca4bba2a3"
+    sha256 cellar: :any,                 arm64_sonoma:   "45224340c35fc9c9dd805fbf873f832c7f7a1df8ca9f80e2dcd9e26bb758c5af"
+    sha256 cellar: :any,                 arm64_ventura:  "7f8945b88f024eb7568d32c50bd707bd81dfa80a0107e821ca0962d534d09a74"
+    sha256 cellar: :any,                 arm64_monterey: "3178e82de784db940047746ebaa2f4f93c2b42e4f5ee28cfb0c67e53b6bfdc48"
+    sha256 cellar: :any,                 sonoma:         "d57704b06f0f808398e230f086c7559dd5d8082ba50bffa52beaa132832e3c4d"
+    sha256 cellar: :any,                 ventura:        "9a142e24a8f98dcec4a5c3584ff2b45f04c68c5c14b45499009cb5ce9cee2a63"
+    sha256 cellar: :any,                 monterey:       "1143c182d6cda6839b78e97ecaa7c83cdb975b0a9ed4c653e814f1e96b81e2da"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:   "958f8228ef0e79d917575563f9f76afb46c44e64017cbb91cd142f91927e7086"
   end
 
   depends_on "boost" => :build

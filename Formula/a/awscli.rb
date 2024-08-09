@@ -3,22 +3,22 @@ class Awscli < Formula
 
   desc "Official Amazon AWS command-line interface"
   homepage "https://aws.amazon.com/cli/"
-  url "https://github.com/aws/aws-cli/archive/refs/tags/2.17.14.tar.gz"
-  sha256 "eaeb4efac3497b16128ae289b9c97b99c52055a6eb9291d2af1ef2792d63804c"
+  url "https://github.com/aws/aws-cli/archive/refs/tags/2.17.26.tar.gz"
+  sha256 "867d1ca089d9b0ace155b712a3dae3a411abecd0c680a5bfca3993e2a97feb53"
   license "Apache-2.0"
   head "https://github.com/aws/aws-cli.git", branch: "v2"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "c1fb622139b7bc868bb0c9cc554a82c16ac107b3a754e6b9d85b3a90e0d5a9c4"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "662ba9aa732c8e2631ee2afd2dff704de22ba90b6a3b9fe9ee0f1efe502d0fe4"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "5859ae7962d63bb1c2039a8b3b28bdf038340f66f2f2d63df35739e6b2607eab"
-    sha256 cellar: :any_skip_relocation, sonoma:         "f81d84b29b9b606be6cb49240eb9ff529c3a8844a2b3399d93b7a254e9455093"
-    sha256 cellar: :any_skip_relocation, ventura:        "8a639bab9c5233ca051998e118c5d2b8be0199a1f108bd2f8806c28f8997c439"
-    sha256 cellar: :any_skip_relocation, monterey:       "687cd846ab91a8877e14c3aca6084fabfaa6ba2a1c406554c28bb6e9a71eb46a"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "e3f21d0f120d1c2b4cc32bb61a60c4af1513f8ea57097e19daef5a43348c836c"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "cfbf81163f59ff9d02aec22fa3b3006d0debabf726e6942bde3a964d27c90099"
+    sha256 cellar: :any_skip_relocation, arm64_ventura:  "845c316d98fe0385d826b19784100d1b3b43c6bc4e9a4b769d7cd92859a87713"
+    sha256 cellar: :any_skip_relocation, arm64_monterey: "9ead1877ed7ff87494050b3e3ebfd07af09b7609560bd0ecd51034bd832edb91"
+    sha256 cellar: :any_skip_relocation, sonoma:         "8313663c9e75195bd5b52208bbafce8df789f23372e1ecc83a3c1811487d68fa"
+    sha256 cellar: :any_skip_relocation, ventura:        "968859b4bcc124e34ccd9ac3666ce2e5ffe3a4e587a964a52e18eb6504374884"
+    sha256 cellar: :any_skip_relocation, monterey:       "11302e97c1c223b8cd5a92add53a4fba9215ce2965fb9c84b62078cb67bd94c8"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:   "74583a33f1d009fb634438cc41bfc6ec82222030f1082819a9e9a8178e4ab937"
   end
 
-  depends_on "cmake" => :build # for awscrt
+  depends_on "cmake" => :build
   depends_on "cryptography"
   depends_on "python@3.11" # Python 3.12 issue: https://github.com/aws/aws-cli/issues/8342
 
@@ -26,8 +26,8 @@ class Awscli < Formula
   uses_from_macos "mandoc"
 
   resource "awscrt" do
-    url "https://files.pythonhosted.org/packages/c9/95/9faca9e404fd3cd72fa8f75d4f33f16032f3598a841e83dc81c687b4b80a/awscrt-0.20.11.tar.gz"
-    sha256 "c3dbfb7f1909457952e645373e72b69f90c50c465ee6a46d9bbdc12acb79803c"
+    url "https://files.pythonhosted.org/packages/7f/74/7789c268de69be3f6179abdba36a5e7c079997a8de73aea13e70a98d4494/awscrt-0.21.2.tar.gz"
+    sha256 "37ace28d0d7a91f90862dd2994872a15962b7b4f1376e0b7b01a821954611507"
   end
 
   resource "colorama" do
@@ -76,8 +76,8 @@ class Awscli < Formula
   end
 
   resource "setuptools" do
-    url "https://files.pythonhosted.org/packages/65/d8/10a70e86f6c28ae59f101a9de6d77bf70f147180fbf40c3af0f64080adc3/setuptools-70.3.0.tar.gz"
-    sha256 "f171bab1dfbc86b132997f26a119f6056a57950d058587841a0082e8830f9dc5"
+    url "https://files.pythonhosted.org/packages/5e/11/487b18cc768e2ae25a919f230417983c8d5afa1b6ee0abd8b6db0b89fa1d/setuptools-72.1.0.tar.gz"
+    sha256 "8d243eff56d095e5817f796ede6ae32941278f542e0f941867cc05ae52b162ec"
   end
 
   resource "six" do
@@ -121,9 +121,7 @@ class Awscli < Formula
     ENV.append_to_cflags "-Wno-incompatible-function-pointer-types" if DevelopmentTools.clang_build_version >= 1500
 
     venv = virtualenv_create(libexec, python3, system_site_packages: false)
-    venv.pip_install resources.reject { |r| r.name == "awscrt" }
-    # The `awscrt` resource requires `setuptools` & `wheel`, so they must be installed first
-    venv.pip_install resource("awscrt")
+    venv.pip_install resources
     venv.pip_install_and_link buildpath, build_isolation: false
 
     pkgshare.install "awscli/examples"
@@ -151,6 +149,6 @@ class Awscli < Formula
   test do
     assert_match "topics", shell_output("#{bin}/aws help")
     site_packages = libexec/Language::Python.site_packages(python3)
-    assert_includes Dir[site_packages/"awscli/data/*"], "#{site_packages}/awscli/data/ac.index"
+    assert_includes site_packages.glob("awscli/data/*"), site_packages/"awscli/data/ac.index"
   end
 end

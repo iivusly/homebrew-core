@@ -1,19 +1,19 @@
 class Qsv < Formula
   desc "Ultra-fast CSV data-wrangling toolkit"
   homepage "https://github.com/jqnatividad/qsv"
-  url "https://github.com/jqnatividad/qsv/archive/refs/tags/0.129.0.tar.gz"
-  sha256 "5eacdaa3bb782ae2ef77e6ea91daef42316e13663ccef7c008a0ae4d04939d89"
+  url "https://github.com/jqnatividad/qsv/archive/refs/tags/0.131.1.tar.gz"
+  sha256 "9038f09a0e1523bcf3a993bd95a36f8dd1c640e7ffbbe9404e018d41a7d82b66"
   license any_of: ["MIT", "Unlicense"]
   head "https://github.com/jqnatividad/qsv.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "9b4148b38f572bf50a5b4ed1e77fbd615a0b4c133b319c0b7c323d2647fc28b7"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "30522600f940d0177e6cbcced9cdd938b0eaa6156d2475e195b2a14d996442a9"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "dcfe768b100ea295e350331fe67d60c38bdc0594695751d797d21c9c2fc06b45"
-    sha256 cellar: :any_skip_relocation, sonoma:         "a0b861160a4ed1129b27cd7bbb89b4b58a927917e3ccc026cdc564f52fd09e25"
-    sha256 cellar: :any_skip_relocation, ventura:        "fe323764d6267b8305de9577dda8342dfaac50570f8c553e213093d8d3edb86f"
-    sha256 cellar: :any_skip_relocation, monterey:       "e8ddb6e3819fe68bad87830c2bb9aa1f3b5d46cd1e1f0ec28a1cd015f879509f"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "0e63400d3d7f959b3c7c1b3479093f0845a9130fd0be8bb1dcded4ca1616a442"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "3bf43f86f4ea1c205bee4488f8f4ca8f75f52628204df1a6e4e2fd4c0ef79a94"
+    sha256 cellar: :any_skip_relocation, arm64_ventura:  "054809865d1d89b1568716ae04cddc3ec383a5ad78a4446806726d253288057d"
+    sha256 cellar: :any_skip_relocation, arm64_monterey: "f0280090a51d6f3dd40faa41437792e99fc36d9603e083316e3abbf7b60f0faf"
+    sha256 cellar: :any_skip_relocation, sonoma:         "cc259f3df9bfbb6622b073d786f45f8253132350111aa618778e6108976fb863"
+    sha256 cellar: :any_skip_relocation, ventura:        "70f6e644f314f35bde182d04c52d8264b4985aad5136982bc27bc9f95af45370"
+    sha256 cellar: :any_skip_relocation, monterey:       "273973961c5f651c4d810360d47d7ee2287ae76261ce7190dbe64ba8e631d315"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:   "d1cef1b3f4322953bc679ae2e223dcf06cfd3616e7ec26b4312a4da62789eb73"
   end
 
   depends_on "rust" => :build
@@ -24,6 +24,9 @@ class Qsv < Formula
 
   def install
     system "cargo", "install", *std_cargo_args, "--features", "apply,luau,feature_capable"
+    bash_completion.install "contrib/completions/examples/qsv.bash" => "qsv"
+    fish_completion.install "contrib/completions/examples/qsv.fish"
+    zsh_completion.install "contrib/completions/examples/qsv.zsh" => "_qsv"
   end
 
   test do
