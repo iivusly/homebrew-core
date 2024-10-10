@@ -1,18 +1,17 @@
 class OsctrlCli < Formula
   desc "Fast and efficient osquery management"
   homepage "https://osctrl.net"
-  url "https://github.com/jmpsec/osctrl/archive/refs/tags/v0.3.8.tar.gz"
-  sha256 "03c2c3c79357b646628458fea9344f24c6ba75bc28301eb535022f73c752b103"
+  url "https://github.com/jmpsec/osctrl/archive/refs/tags/v0.4.0.tar.gz"
+  sha256 "c6f0a1970c78c06c183756c26bddd11b142a004ff623e4546dc98446f7888e58"
   license "MIT"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "699da64670a658cf1d286c32477d4634f665d87b80ac484a5639c53414abf0a8"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "699da64670a658cf1d286c32477d4634f665d87b80ac484a5639c53414abf0a8"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "699da64670a658cf1d286c32477d4634f665d87b80ac484a5639c53414abf0a8"
-    sha256 cellar: :any_skip_relocation, sonoma:         "0943d1f8d9df225823b2bfcce6b3fa1d29e7ff6ec6668a4303900c42f351ef40"
-    sha256 cellar: :any_skip_relocation, ventura:        "0943d1f8d9df225823b2bfcce6b3fa1d29e7ff6ec6668a4303900c42f351ef40"
-    sha256 cellar: :any_skip_relocation, monterey:       "0943d1f8d9df225823b2bfcce6b3fa1d29e7ff6ec6668a4303900c42f351ef40"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "19fb2dcb44b855b03dea3e943b6bfbc6dfb399590d8a1b06fad84b4bd3433885"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "742a060e252a041287f6303f3a2ce89987d97dca52a66fa47a0fabf92b772acb"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "742a060e252a041287f6303f3a2ce89987d97dca52a66fa47a0fabf92b772acb"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "742a060e252a041287f6303f3a2ce89987d97dca52a66fa47a0fabf92b772acb"
+    sha256 cellar: :any_skip_relocation, sonoma:        "72d7ef5029612fb328c8e4638228d4db4654fbec9b021e799979e3f25e4ee564"
+    sha256 cellar: :any_skip_relocation, ventura:       "72d7ef5029612fb328c8e4638228d4db4654fbec9b021e799979e3f25e4ee564"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ed0a44956ce7f35a83ae7669c89e563254ada2b23ad9872572dcb75813cfbab1"
   end
 
   depends_on "go" => :build

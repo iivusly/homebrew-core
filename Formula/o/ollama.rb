@@ -2,8 +2,8 @@ class Ollama < Formula
   desc "Create, run, and share large language models (LLMs)"
   homepage "https://ollama.com/"
   url "https://github.com/ollama/ollama.git",
-      tag:      "v0.3.9",
-      revision: "a1cef4d0a5f31280ea82b350605775931a6163cb"
+      tag:      "v0.3.12",
+      revision: "e9e9bdb8d904f009e8b1e54af9f77624d481cfb2"
   license "MIT"
   head "https://github.com/ollama/ollama.git", branch: "main"
 
@@ -16,26 +16,29 @@ class Ollama < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "ed0184c5d99bac1ddbe92009404af8b5b6bae6230a95a7a5b7dca6bae8b57875"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "7be4081d1b10cc8d1ab998eca7cda1a788c3cd548f27ac513e082de9ea1e0650"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "de1c22dbe45f62dcd9e6425e897cd767b293b9c086d971e2d6336d36cd344a18"
-    sha256 cellar: :any_skip_relocation, sonoma:         "3cb9d56cf374f9b502df166b1b6f0ac0be0bf25c83df41c22ffd112a5cc2b47a"
-    sha256 cellar: :any_skip_relocation, ventura:        "8cdb70b8d3f573ee365bdaf2df4af59a109ef0be81c9b8f05a7b7aa433942781"
-    sha256 cellar: :any_skip_relocation, monterey:       "277d34feef2e648cd7fed1d0a53836cf0286d247c8fb9ff720b4653acbbe2a4d"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "d6a665044d572520e302b4c79df100a572c46aafdad18dae5fa1fdc3ee606549"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "8a55141778f6466a4177f87db3c9693bc8a7ab5730919e24895888d50505e103"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "7b396ce9f32930b7dea1d8f6a4ef5bcbee4269755629d335beca0c026c29b636"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "90dc99f4788b0033b1ff22a7c1c16d94240484203ab42751e1c1c227e29c89c7"
+    sha256 cellar: :any_skip_relocation, sonoma:        "84bbb613e355a95634db587e92e70745fe0c1247a1d4cf772321ba30d7a845cb"
+    sha256 cellar: :any_skip_relocation, ventura:       "326da8c1dcd2c0fa46d6947017c655bc32708b63f2783671a7b1f7c68268b0b7"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "19b45b966d9f4369325b9eaeaf5817c125d321584d00db5f0f78e927cb66fdc7"
   end
 
   depends_on "cmake" => :build
   depends_on "go" => :build
 
   def install
-    # Fix build by setting SDKROOT
+    # Silence tens of thousands of SDK warnings
     ENV["SDKROOT"] = MacOS.sdk_path if OS.mac?
-    # Fix "ollama --version"
-    inreplace "version/version.go", /var Version string = "[\d.]+"/, "var Version string = \"#{version}\""
+
+    ldflags = %W[
+      -s -w
+      -X=github.com/ollama/ollama/version.Version=#{version}
+      -X=github.com/ollama/ollama/server.mode=release
+    ]
 
     system "go", "generate", "./..."
-    system "go", "build", *std_go_args(ldflags: "-s -w")
+    system "go", "build", *std_go_args(ldflags:)
   end
 
   service do

@@ -5,6 +5,7 @@
   "botan",
   "fftw",
   "highway",
+  "knot",
   "libvpx",
   "nsd",
   "openblas",
@@ -12,5 +13,6 @@
   "open-mpi",
   "qt",
   "spidermonkey",
-  "vc"
+  "vc",
+  "xxhash"
 ]

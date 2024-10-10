@@ -1,14 +1,13 @@
 class Typescript < Formula
   desc "Language for application scale JavaScript development"
   homepage "https://www.typescriptlang.org/"
-  url "https://registry.npmjs.org/typescript/-/typescript-5.5.4.tgz"
-  sha256 "2680b6354d462a1d90a2cf10c790e071f1c45081c9d4561cb47ce23c934d8586"
+  url "https://registry.npmjs.org/typescript/-/typescript-5.6.3.tgz"
+  sha256 "ef67f8d8ad895858024b7339d3e34bf112cae3c5db1f538c3079038b17ae30fa"
   license "Apache-2.0"
   head "https://github.com/Microsoft/TypeScript.git", branch: "main"
 
   bottle do
-    rebuild 2
-    sha256 cellar: :any_skip_relocation, all: "822f45e678ec43dbfecc36a60c127f287df0f5d6f53f81095be64d38427bc957"
+    sha256 cellar: :any_skip_relocation, all: "bf602cf259393ac57bce7f5f1a99bc3ca95e63cba68f082cf2f0bcfbe8018f4f"
   end
 
   depends_on "node"

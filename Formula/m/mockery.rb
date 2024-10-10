@@ -1,8 +1,8 @@
 class Mockery < Formula
   desc "Mock code autogenerator for Golang"
   homepage "https://github.com/vektra/mockery"
-  url "https://github.com/vektra/mockery/archive/refs/tags/v2.45.0.tar.gz"
-  sha256 "71e3ae413dc636c4bee2ae21e73ffd20e209e0124ea4168a39e3133c06601b85"
+  url "https://github.com/vektra/mockery/archive/refs/tags/v2.46.2.tar.gz"
+  sha256 "740407dd46872216dc3a7e55bff188d982a533b2f0f8a00c75fbc0eea2645343"
   license "BSD-3-Clause"
   head "https://github.com/vektra/mockery.git", branch: "master"
 
@@ -12,13 +12,12 @@ class Mockery < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "4745d71be499b8884e6504fa0feb5cda5902db6e69501f55cada8279c2f12641"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "4745d71be499b8884e6504fa0feb5cda5902db6e69501f55cada8279c2f12641"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "4745d71be499b8884e6504fa0feb5cda5902db6e69501f55cada8279c2f12641"
-    sha256 cellar: :any_skip_relocation, sonoma:         "2891f1cb5321d25b3a53621cbb60445010c5056ff28332fa7e426d71daf98066"
-    sha256 cellar: :any_skip_relocation, ventura:        "2891f1cb5321d25b3a53621cbb60445010c5056ff28332fa7e426d71daf98066"
-    sha256 cellar: :any_skip_relocation, monterey:       "2891f1cb5321d25b3a53621cbb60445010c5056ff28332fa7e426d71daf98066"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "67cf5fd06fd2bcb91efd2e7546a774bbfafd08c780d406a7ae8e3b517e77c60d"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "ff52d2f1e842e2bb23bc103760fba6d68035bb1542cb76932b25a8a498c609cd"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "ff52d2f1e842e2bb23bc103760fba6d68035bb1542cb76932b25a8a498c609cd"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "ff52d2f1e842e2bb23bc103760fba6d68035bb1542cb76932b25a8a498c609cd"
+    sha256 cellar: :any_skip_relocation, sonoma:        "14ad01dd50dfb06a7ebbd02090226fd647756ce54d9e292138a2922d707ffde1"
+    sha256 cellar: :any_skip_relocation, ventura:       "14ad01dd50dfb06a7ebbd02090226fd647756ce54d9e292138a2922d707ffde1"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "1c88e2a6742c389d46e4f4fdee6c8147156ab299cb87456e37903dce11efc887"
   end
 
   depends_on "go" => :build

@@ -1,18 +1,17 @@
 class DbmlCli < Formula
   desc "Convert DBML file to SQL and vice versa"
   homepage "https://www.dbml.org/cli/"
-  url "https://registry.npmjs.org/@dbml/cli/-/cli-3.8.0.tgz"
-  sha256 "e9da38c02fabf76bfae8a71666d7be4d7dbd2b8c4f7b6dc50b77e0182bb06bc8"
+  url "https://registry.npmjs.org/@dbml/cli/-/cli-3.9.0.tgz"
+  sha256 "d896acd2a8cdb5e695fcfef7e1c5f9388e50daf56aea695209117247194184eb"
   license "Apache-2.0"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "df608dd6b8817b12a942ef724ae0ede01086c644b54a1aec7aa0f91d8d12ffe0"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "df608dd6b8817b12a942ef724ae0ede01086c644b54a1aec7aa0f91d8d12ffe0"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "df608dd6b8817b12a942ef724ae0ede01086c644b54a1aec7aa0f91d8d12ffe0"
-    sha256 cellar: :any_skip_relocation, sonoma:         "d2bae3f0b9448310439569bbaf0a577fa1f68dd94c2151533281fa9ca219dffe"
-    sha256 cellar: :any_skip_relocation, ventura:        "d2bae3f0b9448310439569bbaf0a577fa1f68dd94c2151533281fa9ca219dffe"
-    sha256 cellar: :any_skip_relocation, monterey:       "d2bae3f0b9448310439569bbaf0a577fa1f68dd94c2151533281fa9ca219dffe"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "df608dd6b8817b12a942ef724ae0ede01086c644b54a1aec7aa0f91d8d12ffe0"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "9fb538717a61d72f23dad32191bcb4b48208d77b51773c8e3f644ca9c89b2033"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "9fb538717a61d72f23dad32191bcb4b48208d77b51773c8e3f644ca9c89b2033"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "9fb538717a61d72f23dad32191bcb4b48208d77b51773c8e3f644ca9c89b2033"
+    sha256 cellar: :any_skip_relocation, sonoma:        "45ba3eeaee8fe6398f8089fec784e637e233ed3496d00aae890d7ac4d343c026"
+    sha256 cellar: :any_skip_relocation, ventura:       "45ba3eeaee8fe6398f8089fec784e637e233ed3496d00aae890d7ac4d343c026"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "1143ea62e0ef33cae2515fb1c9da15dec83b3ae898272992a64dfc5b7470aafa"
   end
 
   depends_on "node"

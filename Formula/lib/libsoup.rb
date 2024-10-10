@@ -6,6 +6,7 @@ class Libsoup < Formula
   license "LGPL-2.0-or-later"
 
   bottle do
+    sha256 arm64_sequoia:  "9fcb49ad84f965739e207e3d9440a27e1550592d68352803d21c1f9e2ed03ff8"
     sha256 arm64_sonoma:   "2c5bfa2252c66240bba80feeb8bd18f7a88a781e5711bdbea05506d2da4c3099"
     sha256 arm64_ventura:  "96be2a6e6beeb036721afec7dd63dddf4dc147763649379bb4a71deb442f82fe"
     sha256 arm64_monterey: "0ab8e230da6730afc01f483bc6d0ea044eafe2ddf96b9c6e7277c6d879c9a0fd"
@@ -21,7 +22,6 @@ class Libsoup < Formula
   depends_on "pkg-config" => [:build, :test]
   depends_on "python@3.12" => :build
   depends_on "vala" => :build
-  depends_on "icu4c" => :test
 
   depends_on "glib"
   depends_on "glib-networking"
@@ -70,7 +70,6 @@ class Libsoup < Formula
       }
     EOS
 
-    ENV.prepend_path "PKG_CONFIG_PATH", Formula["icu4c"].opt_lib/"pkgconfig"
     pkg_config_flags = shell_output("pkg-config --cflags --libs libsoup-3.0").chomp.split
     system ENV.cc, "test.c", "-o", "test", *pkg_config_flags
     system "./test"

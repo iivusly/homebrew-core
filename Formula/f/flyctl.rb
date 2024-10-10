@@ -2,8 +2,8 @@ class Flyctl < Formula
   desc "Command-line tools for fly.io services"
   homepage "https://fly.io"
   url "https://github.com/superfly/flyctl.git",
-      tag:      "v0.2.125",
-      revision: "19c7e647cdb47a0673e1e523d6445651961a5a84"
+      tag:      "v0.3.18",
+      revision: "283170a44f19153850fcd8d830f2e27ce4ebfe18"
   license "Apache-2.0"
   head "https://github.com/superfly/flyctl.git", branch: "master"
 
@@ -18,13 +18,12 @@ class Flyctl < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "54bfeca205000c73e6b4642f78acd49c24abb60e532189ed0549eec31c36f142"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "54bfeca205000c73e6b4642f78acd49c24abb60e532189ed0549eec31c36f142"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "54bfeca205000c73e6b4642f78acd49c24abb60e532189ed0549eec31c36f142"
-    sha256 cellar: :any_skip_relocation, sonoma:         "a335cf7168b566f0d7fb67a1f954bdcde0c03df38e49787b5b73efdc5f6acd26"
-    sha256 cellar: :any_skip_relocation, ventura:        "a335cf7168b566f0d7fb67a1f954bdcde0c03df38e49787b5b73efdc5f6acd26"
-    sha256 cellar: :any_skip_relocation, monterey:       "a335cf7168b566f0d7fb67a1f954bdcde0c03df38e49787b5b73efdc5f6acd26"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "b61a528c47f2c3712619a73cbbec7d5be15980b5bee0ac712faac559b4c57877"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "3149152081af2239ef5d2cb5be5bcdb08d198768d031cff344b2c6494fbf70cd"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "3149152081af2239ef5d2cb5be5bcdb08d198768d031cff344b2c6494fbf70cd"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "3149152081af2239ef5d2cb5be5bcdb08d198768d031cff344b2c6494fbf70cd"
+    sha256 cellar: :any_skip_relocation, sonoma:        "64309424d30a89c4943655862956bfcd437d8e63b60fb3603ab7cc0227da0809"
+    sha256 cellar: :any_skip_relocation, ventura:       "64309424d30a89c4943655862956bfcd437d8e63b60fb3603ab7cc0227da0809"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "85fcd07fa0a8a46603daff4ba96db0a882a561676d79a1d99d9dfcabf0a1090f"
   end
 
   depends_on "go" => :build

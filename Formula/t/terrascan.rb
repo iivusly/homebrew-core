@@ -1,25 +1,25 @@
 class Terrascan < Formula
   desc "Detect compliance and security violations across Infrastructure as Code"
   homepage "https://runterrascan.io/"
-  url "https://github.com/tenable/terrascan/archive/refs/tags/v1.19.3.tar.gz"
-  sha256 "426c37bfc70996b80cd708bd473ec46673c47ed4a6ad8bf1bc5355a53170d461"
+  url "https://github.com/tenable/terrascan/archive/refs/tags/v1.19.9.tar.gz"
+  sha256 "13c120a63d7024ca8c54422e047424e318622625336ed77b2c1a36ef5fb1441c"
   license "Apache-2.0"
   head "https://github.com/tenable/terrascan.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "37253ef3f12ce16d4ce7ecc1a5d86816764a553992e3af454c8a978737fe6216"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "266099d7586400962e11dff7e25523c3f01e007cc76fda855633ef840e03ae47"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "fa9e1fca9c1e9afe9ac5e05bc0e8a7d416a7a17e597effd19f7f88982d6e1a31"
-    sha256 cellar: :any_skip_relocation, sonoma:         "5295a9f6250958e829e68b8674aa9e4e628b6254a8469dce5dd676dadd5a09e3"
-    sha256 cellar: :any_skip_relocation, ventura:        "13481a79824311fc33cbc679100df60180f336310f19fcf30ac0a272f186b324"
-    sha256 cellar: :any_skip_relocation, monterey:       "834621abc71598233c2072736e1a07f12279d0b80599c9f072dd980effa297ad"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "894012e79d326e78e425c052d985cfaf90d14bb0faf44808d0e6349b6a4d2130"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "7b2fb5ff41488184a925a6b87cc13e096305eacab2f3d27ab0f7aac5d0c511b5"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "3e885c60f5d7131d1554da25f5a93098ee3a1e9c62e84d0f8de6fa5d2041f31e"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "1eb67275ff0c8438e897b0b468a5045c4c77c32f9eab47eb54acb554e191d877"
+    sha256 cellar: :any_skip_relocation, sonoma:        "c79b75a565ee40b3a0b2cb8a5bad1fca37e81feadbb9b2aec8590877315f1c89"
+    sha256 cellar: :any_skip_relocation, ventura:       "b6ada05d7e18a63bfa1f35a22a3b604195f1b00d942da71dd1903abdeab78431"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "0f5129f6cbc94f6ff53a5e88f37b1953c58079eb42ef67046a67d3e6d24cfd51"
   end
 
   depends_on "go" => :build
 
   def install
-    system "go", "build", *std_go_args(ldflags: "-s -w"), "./cmd/terrascan"
+    ldflags = "-s -w -X google.golang.org/protobuf/reflect/protoregistry.conflictPolicy=ignore"
+    system "go", "build", *std_go_args(ldflags:), "./cmd/terrascan"
   end
 
   test do

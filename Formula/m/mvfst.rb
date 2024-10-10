@@ -1,19 +1,18 @@
 class Mvfst < Formula
   desc "QUIC transport protocol implementation"
   homepage "https://github.com/facebook/mvfst"
-  url "https://github.com/facebook/mvfst/archive/refs/tags/v2024.08.26.00.tar.gz"
-  sha256 "6db7639be0b68cce47d98335cc0c3375a4a48d13bdc77f7f25dd433cef8ad24f"
+  url "https://github.com/facebook/mvfst/archive/refs/tags/v2024.10.07.00.tar.gz"
+  sha256 "5609061c376e37378c1a05ec80ed07924d7e2732a8f02ba7b5b2272735f58374"
   license "MIT"
   head "https://github.com/facebook/mvfst.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "ae22742fc059e00f66c016b03edf82fee192ed1d177374cf15aa5a5f6d420dae"
-    sha256 cellar: :any,                 arm64_ventura:  "d8be7fbf82c3b649d5810eb1ba68eac91cc778e91ee9a4571c1fd57b86917b70"
-    sha256 cellar: :any,                 arm64_monterey: "b89b2c9471eecf26f269f574549ac1304d8a650f83ee4c3f7d1c733452c4efb1"
-    sha256 cellar: :any,                 sonoma:         "ec611c9d9d3558f7fc84d5321d74a80bdc09f026c93e85697f4f8c617ddc6f7c"
-    sha256 cellar: :any,                 ventura:        "4b992da41ab986e7b33c293037fedbc8c53324841e78c16d96b96370dab4724b"
-    sha256 cellar: :any,                 monterey:       "73f3e0c591e489288bac5963fce326d6e83c2cc291dbadd6a6cb33c62d814b67"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "f3e537dacc81870b7a14b33d9a00f84c39d5911857e074086a84241b8331aa88"
+    sha256 cellar: :any,                 arm64_sequoia: "20a03242b5175d2d1e97bb5bf21d1b70ed0337ffb68a7a2f18774bcaf8548b1a"
+    sha256 cellar: :any,                 arm64_sonoma:  "dcdf0971a7f21ef014cd1eecbe97dca35f38bde5d85badc168daf20b8b62033f"
+    sha256 cellar: :any,                 arm64_ventura: "ddfbc740098486d047b715145173377a4a37260d2d8809fcea077f1f1c955416"
+    sha256 cellar: :any,                 sonoma:        "98f6ec13588cd5fa031b3041c0be1e48364863687edd5c910235ea4ec5759cd0"
+    sha256 cellar: :any,                 ventura:       "b3167a4c54baac0a17a68e1f55a35fa210e4d34577f3b5e41da36cc091ae8c89"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "affa06c9040070bd52d285186ee368ab3d181c56ce7809f236be4cf421a6eb59"
   end
 
   depends_on "cmake" => [:build, :test]
@@ -26,6 +25,12 @@ class Mvfst < Formula
   depends_on "glog"
   depends_on "libsodium"
   depends_on "openssl@3"
+
+  # Fix missing symbols. CMake version of:
+  # https://github.com/facebook/mvfst/commit/0b2743fdae9b746659815afdf00611fe7999282e
+  # https://github.com/facebook/mvfst/commit/654c5b90d2e9431e71f0dd3d5be990200306acc4
+  # Upstreamed at: https://github.com/facebook/mvfst/pull/354
+  patch :DATA
 
   def install
     shared_args = ["-DBUILD_SHARED_LIBS=ON", "-DCMAKE_INSTALL_RPATH=#{rpath}"]
@@ -86,3 +91,29 @@ class Mvfst < Formula
     Process.kill "TERM", server_pid
   end
 end
+
+__END__
+diff --git a/quic/api/CMakeLists.txt b/quic/api/CMakeLists.txt
+index 5522347c5..a0a34761e 100644
+--- a/quic/api/CMakeLists.txt
++++ b/quic/api/CMakeLists.txt
+@@ -47,6 +47,7 @@ add_library(
+   QuicPacketScheduler.cpp
+   QuicStreamAsyncTransport.cpp
+   QuicTransportBase.cpp
++  QuicTransportBaseLite.cpp
+   QuicTransportFunctions.cpp
+ )
+ 
+diff --git a/quic/state/CMakeLists.txt b/quic/state/CMakeLists.txt
+index 0916546fe..14297bb30 100644
+--- a/quic/state/CMakeLists.txt
++++ b/quic/state/CMakeLists.txt
+@@ -55,6 +55,7 @@ add_library(
+   mvfst_state_ack_handler
+   AckEvent.cpp
+   AckHandlers.cpp
++  AckedPacketIterator.cpp
+ )
+ 
+ set_property(TARGET mvfst_state_ack_handler PROPERTY VERSION ${PACKAGE_VERSION})

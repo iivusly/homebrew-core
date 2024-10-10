@@ -1,18 +1,17 @@
 class AngularCli < Formula
   desc "CLI tool for Angular"
   homepage "https://angular.dev/cli"
-  url "https://registry.npmjs.org/@angular/cli/-/cli-18.2.2.tgz"
-  sha256 "fb7da6a582a8014c64cc41f72528e8f32ef30a8ed979b1a729d455c344a4a68e"
+  url "https://registry.npmjs.org/@angular/cli/-/cli-18.2.8.tgz"
+  sha256 "41a4ec997a6b013d2491bad11702c08558e8a99b12dc9ab3e20e4055cea12cdb"
   license "MIT"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "c0038a67cd852ec65172ad08c211977d445901c28851d409fb88f911a2bd899f"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "c0038a67cd852ec65172ad08c211977d445901c28851d409fb88f911a2bd899f"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "c0038a67cd852ec65172ad08c211977d445901c28851d409fb88f911a2bd899f"
-    sha256 cellar: :any_skip_relocation, sonoma:         "80148bacf8f41b7a0c0063aeb2ab1e819aa320d5590e057538ebccd07431ccb4"
-    sha256 cellar: :any_skip_relocation, ventura:        "80148bacf8f41b7a0c0063aeb2ab1e819aa320d5590e057538ebccd07431ccb4"
-    sha256 cellar: :any_skip_relocation, monterey:       "80148bacf8f41b7a0c0063aeb2ab1e819aa320d5590e057538ebccd07431ccb4"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "c0038a67cd852ec65172ad08c211977d445901c28851d409fb88f911a2bd899f"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "3be03a42615ee323a6d13931dd9d649b1f378965ae083b184e38acca55b50b5e"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "3be03a42615ee323a6d13931dd9d649b1f378965ae083b184e38acca55b50b5e"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "3be03a42615ee323a6d13931dd9d649b1f378965ae083b184e38acca55b50b5e"
+    sha256 cellar: :any_skip_relocation, sonoma:        "dd20ff12998c83103e046b4bc117e7c99b2888b6033edac352d5b6a353e0fe33"
+    sha256 cellar: :any_skip_relocation, ventura:       "dd20ff12998c83103e046b4bc117e7c99b2888b6033edac352d5b6a353e0fe33"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "3be03a42615ee323a6d13931dd9d649b1f378965ae083b184e38acca55b50b5e"
   end
 
   depends_on "node"

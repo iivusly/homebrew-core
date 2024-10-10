@@ -1,27 +1,29 @@
 class Pulsarctl < Formula
   desc "CLI for Apache Pulsar written in Go"
   homepage "https://streamnative.io/"
-  url "https://github.com/streamnative/pulsarctl/archive/refs/tags/v3.3.1.4.tar.gz"
-  sha256 "7d1b564588e4e25e5dc85848bb9152567b374f21ae2f9a7810caf0d6381aaadb"
+  url "https://github.com/streamnative/pulsarctl/archive/refs/tags/v3.3.1.8.tar.gz"
+  sha256 "cfd3493cd2116c625048d9b23715dd474da4b8a3bb6c27365f7f90328fb2ec8c"
   license "Apache-2.0"
   head "https://github.com/streamnative/pulsarctl.git", branch: "master"
 
   # Upstream creates releases that use a stable tag (e.g., `v1.2.3`) but are
   # labeled as "pre-release" on GitHub before the version is released, so it's
-  # necessary to use the `GithubLatest` strategy.
+  # necessary to check releases instead of Git tags. Upstream also publishes
+  # releases for multiple major/minor versions and the "latest" release
+  # may not be the highest stable version, so we have to use the
+  # `GithubReleases` strategy while this is the case.
   livecheck do
     url :stable
-    strategy :github_latest
+    strategy :github_releases
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "19f7eadd75ab4255af830d38c25586f5b9508302e4570bdd3846ec3c83ea7657"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "0a2fb8ef9f51fb0bb0c06fb272d586112c84a467247c59ba413dfc50175df3cb"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "bc2c2f3963c96ee765165c4c0fd7c2503ee3d652a5a34e74446b89f5a104cf93"
-    sha256 cellar: :any_skip_relocation, sonoma:         "46ec62154babbaa3f558be2ef903ae76b04578a4bc8c69a6ec47b8cd09982c58"
-    sha256 cellar: :any_skip_relocation, ventura:        "4d036ba125a8620ae8d2472818d776e39ecbe73cf8c2acce38856446fb02e470"
-    sha256 cellar: :any_skip_relocation, monterey:       "fb1212879bdf0388a8a114fa4e2c9352955ae538592497102462654594567f44"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "ebd25ece0b9b06827feca94f0d79755c6d78209278d9b4b4d50c29d6c7588d9c"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "dd8e37d00d22d688adf6957c2ff171290e77fc402698df3c89c9d7a34d12ae47"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "137c783ca54b9a56ca5e5e985fdeab241d92793595752a0301737a05ef8b46c8"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "fa0a3bbf92d117020a08185462e184bfcba1c281bdec876652dcab03e10c7821"
+    sha256 cellar: :any_skip_relocation, sonoma:        "4fc9a3b2dcb8fae8ad0286d38607b0271ab617443d5999b8a47df7227e021e0c"
+    sha256 cellar: :any_skip_relocation, ventura:       "99da3238780189df25afd82b2c4ddbcf05464d680ec4d38ad906266ab8283227"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "203fbab1217d6249285c301cb483377a98e47c415e7bca4e88e6992352d84a26"
   end
 
   depends_on "go" => :build

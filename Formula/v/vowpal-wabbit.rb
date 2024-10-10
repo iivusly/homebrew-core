@@ -8,6 +8,7 @@ class VowpalWabbit < Formula
   head "https://github.com/VowpalWabbit/vowpal_wabbit.git", branch: "master"
 
   bottle do
+    sha256 cellar: :any,                 arm64_sequoia:  "bfef4211753bcf8837355692e4dcf46bee9de1961bd62e4b15f8f3143bf372ed"
     sha256 cellar: :any,                 arm64_sonoma:   "073c2e2a642481bde881c5af08b53ce124d29213ee4dab14758c06dc7860b998"
     sha256 cellar: :any,                 arm64_ventura:  "fe719b69d82bd1ca7000eea32ffa7c3a0123d4dbdba0e0e22289fb24f05e2250"
     sha256 cellar: :any,                 arm64_monterey: "da19bcacdc1135ef3eb98109f473d22bd7753fc850d1e4e3da0eb95023b6b2ca"
@@ -30,6 +31,7 @@ class VowpalWabbit < Formula
     depends_on "sse2neon" => :build
   end
 
+  # Reported at https://github.com/VowpalWabbit/vowpal_wabbit/issues/4700
   patch :DATA
 
   def install
@@ -111,32 +113,6 @@ class VowpalWabbit < Formula
 end
 
 __END__
-diff --git a/ext_libs/ext_libs.cmake b/ext_libs/ext_libs.cmake
-index 1ef57fe..20972fc 100644
---- a/ext_libs/ext_libs.cmake
-+++ b/ext_libs/ext_libs.cmake
-@@ -107,7 +107,7 @@ endif()
- 
- add_library(sse2neon INTERFACE)
- if(VW_SSE2NEON_SYS_DEP)
--  find_path(SSE2NEON_INCLUDE_DIRS "sse2neon/sse2neon.h")
-+  find_path(SSE2NEON_INCLUDE_DIRS "sse2neon.h")
-   target_include_directories(sse2neon SYSTEM INTERFACE "${SSE2NEON_INCLUDE_DIRS}")
- else()
-   # This submodule is placed into a nested subdirectory since it exposes its
-diff --git a/vowpalwabbit/core/src/reductions/lda_core.cc b/vowpalwabbit/core/src/reductions/lda_core.cc
-index f078d9c..ede5e06 100644
---- a/vowpalwabbit/core/src/reductions/lda_core.cc
-+++ b/vowpalwabbit/core/src/reductions/lda_core.cc
-@@ -33,7 +33,7 @@ VW_WARNING_STATE_POP
- #include "vw/io/logger.h"
- 
- #if defined(__ARM_NEON)
--#  include <sse2neon/sse2neon.h>
-+#  include <sse2neon.h>
- #endif
- 
- #include <algorithm>
 diff --git a/vowpalwabbit/config/src/cli_help_formatter.cc b/vowpalwabbit/config/src/cli_help_formatter.cc
 index 8cc6dfe..530d200 100644
 --- a/vowpalwabbit/config/src/cli_help_formatter.cc

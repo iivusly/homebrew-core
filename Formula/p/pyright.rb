@@ -1,19 +1,18 @@
 class Pyright < Formula
   desc "Static type checker for Python"
   homepage "https://github.com/microsoft/pyright"
-  url "https://registry.npmjs.org/pyright/-/pyright-1.1.379.tgz"
-  sha256 "df7d4477fbc28a8ea85448b0feb6cb06672a3a49b59b5bdf9715e27775b1af14"
+  url "https://registry.npmjs.org/pyright/-/pyright-1.1.384.tgz"
+  sha256 "e14e5c6842def12e5acd6383a2251c6ec17ad77650c5f1fefdade88bfa3f1d9d"
   license "MIT"
   head "https://github.com/microsoft/pyright.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "b56102263fd3fdec25f01561fa11e607cde576a3b0103abb17140ae99d7ec0f7"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "b56102263fd3fdec25f01561fa11e607cde576a3b0103abb17140ae99d7ec0f7"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "b56102263fd3fdec25f01561fa11e607cde576a3b0103abb17140ae99d7ec0f7"
-    sha256 cellar: :any_skip_relocation, sonoma:         "e0af3666b98c7455fc429dec70a6482dfac598ebca9ff48fcb2993cc6ba5b411"
-    sha256 cellar: :any_skip_relocation, ventura:        "e0af3666b98c7455fc429dec70a6482dfac598ebca9ff48fcb2993cc6ba5b411"
-    sha256 cellar: :any_skip_relocation, monterey:       "e0af3666b98c7455fc429dec70a6482dfac598ebca9ff48fcb2993cc6ba5b411"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "b56102263fd3fdec25f01561fa11e607cde576a3b0103abb17140ae99d7ec0f7"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "8aca30c321440d3c0351506612be2ee6c8b777f554ab329dd86d9aeb8b54105c"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "8aca30c321440d3c0351506612be2ee6c8b777f554ab329dd86d9aeb8b54105c"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "8aca30c321440d3c0351506612be2ee6c8b777f554ab329dd86d9aeb8b54105c"
+    sha256 cellar: :any_skip_relocation, sonoma:        "1cf0a0bb7e6e44071573737d2155995bfaf028d9d8703dc3661d9cf317c79633"
+    sha256 cellar: :any_skip_relocation, ventura:       "1cf0a0bb7e6e44071573737d2155995bfaf028d9d8703dc3661d9cf317c79633"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "8aca30c321440d3c0351506612be2ee6c8b777f554ab329dd86d9aeb8b54105c"
   end
 
   depends_on "node"

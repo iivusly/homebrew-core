@@ -1,8 +1,8 @@
 class Gtk4 < Formula
   desc "Toolkit for creating graphical user interfaces"
   homepage "https://gtk.org/"
-  url "https://download.gnome.org/sources/gtk/4.14/gtk-4.14.5.tar.xz"
-  sha256 "5547f2b9f006b133993e070b87c17804e051efda3913feaca1108fa2be41e24d"
+  url "https://download.gnome.org/sources/gtk/4.16/gtk-4.16.3.tar.xz"
+  sha256 "2ec53e07d18c9f003b39e4a6a838054d9259e048b6c4c05d80c0d05aa721d944"
   license "LGPL-2.1-or-later"
 
   livecheck do
@@ -11,13 +11,12 @@ class Gtk4 < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "91707419b88b5d666898ba30a059897110641293f6ce1d602dfd51076e129258"
-    sha256 arm64_ventura:  "abf0b4b61f5d3c87328986dcb08ebd821879909367bf9fa9feff758e97f3bb52"
-    sha256 arm64_monterey: "b2eca390766bbe96317aed281103636b391a5948cedd24b0128aad012e2e66e3"
-    sha256 sonoma:         "77f5bef853a8cf40afe4d38e2bf5ae4c365ff24634c9d5f2b7170750408fb162"
-    sha256 ventura:        "8da15fe0eba18ef4b952dbf104b00649bbb30554b35be0c5c9800f0424fbf84c"
-    sha256 monterey:       "3a51a6b4bd19c22fe04f4c8145f826962d5687a58861dde56d70184f963c8c4e"
-    sha256 x86_64_linux:   "9e53798297c2c6e3988a73aecf5e431f5164cb3bc959a553fc84dac76001707a"
+    sha256 arm64_sequoia: "e0aff4fa117f64210693f8d3cbe3f8ed7a7fb63870bbb2278b4ed6f431996d2f"
+    sha256 arm64_sonoma:  "b720a909d5893948a165083a546fed3239e33d522647a072f9f5875ee29d59ba"
+    sha256 arm64_ventura: "dc7c3c7e9d4b8b268f5b51f8c38ecb064f47568c262e0b7ee41528cf9c84b3d3"
+    sha256 sonoma:        "d0f53e0f9940d36ef38b99c1059f696fafa4df150ff7d58d1e7da238f5fcb4f1"
+    sha256 ventura:       "9de9dbbf42814d0adca92883b6b38b13d6a5d5a71047657ce2e1daa8b2b056e5"
+    sha256 x86_64_linux:  "320d3fe79f0902414ee4d5c8133e493d1f4ef4be02faca56056716ea24bb1448"
   end
 
   depends_on "docbook" => :build
@@ -65,11 +64,10 @@ class Gtk4 < Formula
 
   def install
     args = %w[
-      -Dgtk_doc=false
-      -Dman-pages=true
-      -Dintrospection=enabled
       -Dbuild-examples=false
       -Dbuild-tests=false
+      -Dintrospection=enabled
+      -Dman-pages=true
       -Dmedia-gstreamer=disabled
       -Dvulkan=disabled
     ]

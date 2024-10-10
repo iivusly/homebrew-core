@@ -7,6 +7,7 @@ class Proxsuite < Formula
   head "https://github.com/Simple-Robotics/proxsuite.git", branch: "main"
 
   bottle do
+    sha256 cellar: :any,                 arm64_sequoia:  "23034630476e74271706b395357d46ec16bb3b90a1370839629724ee3fda27de"
     sha256 cellar: :any,                 arm64_sonoma:   "ca70c376b0a3759a4c95571c61fdcbd1ff793cef20457572fdd08cd622594a82"
     sha256 cellar: :any,                 arm64_ventura:  "3e6bf30c36a80f68ddbbf9ad638bc1ea4a2326584f90d6ac2b29308b475e1674"
     sha256 cellar: :any,                 arm64_monterey: "0726349c4172e3a0d03ca44be63ee8feec13999dd139d213f9da3ade150bcc89"
@@ -19,7 +20,6 @@ class Proxsuite < Formula
   depends_on "cmake" => :build
   depends_on "doxygen" => :build
   depends_on "pkg-config" => :build
-  depends_on "python-setuptools" => :build
   depends_on "eigen"
   depends_on "numpy"
   depends_on "python@3.12"
@@ -33,27 +33,20 @@ class Proxsuite < Formula
   def install
     system "git", "submodule", "update", "--init", "--recursive" if build.head?
 
-    pyver = Language::Python.major_minor_version python3
-    python_exe = Formula["python@#{pyver}"].opt_libexec/"bin/python"
-
     ENV.prepend_path "PYTHONPATH", Formula["eigenpy"].opt_prefix/Language::Python.site_packages
 
-    # simde include dir can be removed after https://github.com/Simple-Robotics/proxsuite/issues/65
     system "cmake", "-S", ".", "-B", "build",
-                    "-DPYTHON_EXECUTABLE=#{python_exe}",
+                    "-DPYTHON_EXECUTABLE=#{which(python3)}",
                     "-DBUILD_UNIT_TESTS=OFF",
                     "-DBUILD_PYTHON_INTERFACE=ON",
                     "-DINSTALL_DOCUMENTATION=ON",
-                    "-DSimde_INCLUDE_DIR=#{Formula["simde"].opt_prefix/"include"}",
                     *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
   end
 
   test do
-    pyver = Language::Python.major_minor_version python3
-    python_exe = Formula["python@#{pyver}"].opt_libexec/"bin/python"
-    system python_exe, "-c", <<~EOS
+    system python3, "-c", <<~EOS
       import proxsuite
       qp = proxsuite.proxqp.dense.QP(10,0,0)
       assert qp.model.H.shape[0] == 10 and qp.model.H.shape[1] == 10

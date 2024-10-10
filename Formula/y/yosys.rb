@@ -3,19 +3,18 @@ class Yosys < Formula
   homepage "https://yosyshq.net/yosys/"
   # pull from git tag to get submodules
   url "https://github.com/YosysHQ/yosys.git",
-      tag:      "yosys-0.45",
-      revision: "3e0dc2ff1ee0dfec10e96b7eaaa774231ba4a248"
+      tag:      "0.46",
+      revision: "e97731b9dda91fa5fa53ed87df7c34163ba59a41"
   license "ISC"
   head "https://github.com/YosysHQ/yosys.git", branch: "main"
 
   bottle do
-    sha256 arm64_sonoma:   "1d4318a4d819fca8fc93af86d19cf9d9ed8782c4867c16ce51b577f677ff195e"
-    sha256 arm64_ventura:  "c4123b638f8a9273a90917e51d20f8edea6a9e64cf038b05d28225d186b9a224"
-    sha256 arm64_monterey: "7839f5634a993c4c6e2c8f37551d80fd2142ab78db6d3feb233adcfbccb0fbc7"
-    sha256 sonoma:         "372833bf11f3d95033ac373abbd9440f2766cd9b68fee841b11a14f1d47dad98"
-    sha256 ventura:        "848e66c0f4adeeed78f0edb62557e3f856bc4fe0bb5580c28a91b529e481bb81"
-    sha256 monterey:       "f6bff3439866afff57bcbe53470ed86c04a1cf02598d2851bc192ba0b0e25d9e"
-    sha256 x86_64_linux:   "6971a541213213afff96cddce5893944076f12dd35270ec9be64f817eeea31c5"
+    sha256 arm64_sequoia: "2a04f4b241f947cc6bb50b8a114cc2db3c055954804ef9cb29bd9da389955577"
+    sha256 arm64_sonoma:  "2e3f002dce8463250271d2336fe6e4e2baf67d82667724d4eeab13f7c84668f9"
+    sha256 arm64_ventura: "98f1878f83244b947945b7c3ab47cede4b41f08c822dc51329206e28129136f7"
+    sha256 sonoma:        "6ee0575c1c3d11a57d54f8342e6c225f6df7fc69eb5e8d840cfe59c07af91a64"
+    sha256 ventura:       "7eb3b7f050b2ae09c3c5c229f4f7c55995d52786cf84ea18ba759fcf932fbc3e"
+    sha256 x86_64_linux:  "62b4b41163de8ee55b179fa2262e163c949848263236e4ec175cca2b83c51e5c"
   end
 
   depends_on "bison" => :build

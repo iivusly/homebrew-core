@@ -1,18 +1,17 @@
 class Eslint < Formula
   desc "AST-based pattern checker for JavaScript"
   homepage "https://eslint.org"
-  url "https://registry.npmjs.org/eslint/-/eslint-9.9.1.tgz"
-  sha256 "9330e387bf443fa545124abff4c746b10a88fc6f3236606b7f12cc2133256095"
+  url "https://registry.npmjs.org/eslint/-/eslint-9.12.0.tgz"
+  sha256 "ab67c1c95b8202705efb25b9a56005c8fcb2e6c007c0b6be542288c1fe1ee10b"
   license "MIT"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "ac20ca8ba59d55e7f6d4b5b78cf77b6308b0395c93564a72f4d6a4377128f79f"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "ac20ca8ba59d55e7f6d4b5b78cf77b6308b0395c93564a72f4d6a4377128f79f"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "ac20ca8ba59d55e7f6d4b5b78cf77b6308b0395c93564a72f4d6a4377128f79f"
-    sha256 cellar: :any_skip_relocation, sonoma:         "e42d574f3a5aa14763a611e5f6a45a7b70876ec84cf9fdcc578ae19e4131ef4d"
-    sha256 cellar: :any_skip_relocation, ventura:        "e42d574f3a5aa14763a611e5f6a45a7b70876ec84cf9fdcc578ae19e4131ef4d"
-    sha256 cellar: :any_skip_relocation, monterey:       "e42d574f3a5aa14763a611e5f6a45a7b70876ec84cf9fdcc578ae19e4131ef4d"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "ac20ca8ba59d55e7f6d4b5b78cf77b6308b0395c93564a72f4d6a4377128f79f"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "e816261b95765e65ebb8473595be5588969fb04a95af26a14634b678eeaacb8b"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "e816261b95765e65ebb8473595be5588969fb04a95af26a14634b678eeaacb8b"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "e816261b95765e65ebb8473595be5588969fb04a95af26a14634b678eeaacb8b"
+    sha256 cellar: :any_skip_relocation, sonoma:        "012ff1069a1cd3872e3500ffa3eb484c86ec6dc4ad88e3276ce6160a51b37259"
+    sha256 cellar: :any_skip_relocation, ventura:       "012ff1069a1cd3872e3500ffa3eb484c86ec6dc4ad88e3276ce6160a51b37259"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "e816261b95765e65ebb8473595be5588969fb04a95af26a14634b678eeaacb8b"
   end
 
   depends_on "node"

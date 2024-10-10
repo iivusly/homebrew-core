@@ -2,9 +2,10 @@ class Mavsdk < Formula
   desc "API and library for MAVLink compatible systems written in C++17"
   homepage "https://mavsdk.mavlink.io"
   url "https://github.com/mavlink/MAVSDK.git",
-      tag:      "v2.12.5",
-      revision: "71126ac267a10d1c5a7fcb7a3c963688b2b32277"
+      tag:      "v2.12.9",
+      revision: "9c136fdd6131b95751184e5147866f5f912aa663"
   license "BSD-3-Clause"
+  revision 1
 
   livecheck do
     url :stable
@@ -12,13 +13,12 @@ class Mavsdk < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "4084387c6a2ddc8f9a1834511a9ac2e196bee91ef97f8d8ca7e1dbf5ab57c2a9"
-    sha256 cellar: :any,                 arm64_ventura:  "902330ae245c3842785cfb8fb83af46da6ba4cf396f5936ea250551c93ead08c"
-    sha256 cellar: :any,                 arm64_monterey: "0c3f4c1133716278d89a184b91a8534d842af5171cc27eec9df01ef732e4f5c0"
-    sha256 cellar: :any,                 sonoma:         "c6e8a7d1ecc2cfae0f1d817e9838c0c1085603aeb39e06591ded370fc4be470f"
-    sha256 cellar: :any,                 ventura:        "1a0545a280df7e103e32de63b6f2b0f47b89e3c8caf9642e6686f91593a80eb6"
-    sha256 cellar: :any,                 monterey:       "49d6e62f160200feb30e7e6fe3113a233a90f21bde5b6f7ff23e6fc74f9e1ffc"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "64b1ce78896deca06732cfe8650fef957f5ba9ca40e9526c58d6014f7e4c7d5e"
+    sha256 cellar: :any,                 arm64_sequoia: "d653162ce73f77512acc923dd8183af22b43b1c0b431f0406e0fa1ef4a7bed02"
+    sha256 cellar: :any,                 arm64_sonoma:  "1f3d6ecd9883f9aa007392bf6f1a4715b8b23b8e9b633c7199d77af657cc9dc7"
+    sha256 cellar: :any,                 arm64_ventura: "d92acce41cad94b972cd4391a64e8ee03ac58107e8331d2d825d5523ceb869dd"
+    sha256 cellar: :any,                 sonoma:        "02f61446f03089ae4baed83381a0549986cab61995780b805580e0ebbccbd4af"
+    sha256 cellar: :any,                 ventura:       "d03ea2753c8d9783978eb8721e274e64b6bd688c1f92d43109c457056af34935"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "a360880fe09134e53a1d6f3bbdc236c98266c8f61abc4ad09b681983e5a9dc32"
   end
 
   depends_on "cmake" => :build

@@ -1,18 +1,17 @@
 class Rollup < Formula
   desc "Next-generation ES module bundler"
   homepage "https://rollupjs.org/"
-  url "https://registry.npmjs.org/rollup/-/rollup-4.21.2.tgz"
-  sha256 "0267d49e19776dcadf1ad0afb0881e0724d4793cf68b756a843ff4532f8808f0"
+  url "https://registry.npmjs.org/rollup/-/rollup-4.24.0.tgz"
+  sha256 "d38ec87eb99a1e460b118152ffdf5ed3117167f346fdfb9b476a12e43ea34a8a"
   license all_of: ["ISC", "MIT"]
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "8d6810e47adc91ada51588fc8cc9519f0a3a1a7f568078ae685f5a6529631c98"
-    sha256 cellar: :any,                 arm64_ventura:  "8d6810e47adc91ada51588fc8cc9519f0a3a1a7f568078ae685f5a6529631c98"
-    sha256 cellar: :any,                 arm64_monterey: "8d6810e47adc91ada51588fc8cc9519f0a3a1a7f568078ae685f5a6529631c98"
-    sha256 cellar: :any,                 sonoma:         "0eb5f5e8ec29c77574c7acf4d2f9eeefeb83ad637868af05fb9aa31df6af5fe9"
-    sha256 cellar: :any,                 ventura:        "0eb5f5e8ec29c77574c7acf4d2f9eeefeb83ad637868af05fb9aa31df6af5fe9"
-    sha256 cellar: :any,                 monterey:       "0eb5f5e8ec29c77574c7acf4d2f9eeefeb83ad637868af05fb9aa31df6af5fe9"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "228f1dfe6431e457e2956ede9d58e202fe73c91c83bde00410b53b6ddf483d7b"
+    sha256 cellar: :any,                 arm64_sequoia: "fa3ce4739918b37e36d909d724f1f9e45f64361e392d2e0631f79cae821a01ae"
+    sha256 cellar: :any,                 arm64_sonoma:  "fa3ce4739918b37e36d909d724f1f9e45f64361e392d2e0631f79cae821a01ae"
+    sha256 cellar: :any,                 arm64_ventura: "fa3ce4739918b37e36d909d724f1f9e45f64361e392d2e0631f79cae821a01ae"
+    sha256 cellar: :any,                 sonoma:        "5825a23ab69809a4b8e1518243f107f6ea0b2339f2cf4503532eb4d4550447a0"
+    sha256 cellar: :any,                 ventura:       "5825a23ab69809a4b8e1518243f107f6ea0b2339f2cf4503532eb4d4550447a0"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "3571ab20728d25a4650821168091cc63e566cda2348d3f810df13c5cf81f336e"
   end
 
   depends_on "node"

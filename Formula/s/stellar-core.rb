@@ -16,6 +16,7 @@ class StellarCore < Formula
   end
 
   bottle do
+    sha256 cellar: :any,                 arm64_sequoia:  "d27bf9f7b85ed2b096c96dd87e5eb07dacb468b36745382771fbe4b806b28311"
     sha256 cellar: :any,                 arm64_sonoma:   "6050375e677593dbefe6a2cd87339dfdb2cbcc33fc8a6089fdf3d614a3f56c68"
     sha256 cellar: :any,                 arm64_ventura:  "c901d6d438b358488ac813fa40dcb05503425cf7049a9a2972118269ba07f160"
     sha256 cellar: :any,                 arm64_monterey: "3d454b4ed02f39b9aaf522ece2169a7d2396a07b0da55f83b3c85d2b994f91f3"
@@ -28,7 +29,6 @@ class StellarCore < Formula
   depends_on "autoconf" => :build
   depends_on "automake" => :build
   depends_on "bison" => :build # Bison 3.0.4+
-  depends_on "coreutils" => :build
   depends_on "libtool" => :build
   depends_on "pandoc" => :build
   depends_on "pkg-config" => :build
@@ -37,7 +37,12 @@ class StellarCore < Formula
   depends_on "libpqxx"
   depends_on "libsodium"
   depends_on macos: :catalina # Requires C++17 filesystem
+
   uses_from_macos "flex" => :build
+
+  on_sonoma :or_older do
+    depends_on "coreutils" => :build # for sha256sum
+  end
 
   on_linux do
     depends_on "libunwind"

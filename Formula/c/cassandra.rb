@@ -4,30 +4,29 @@ class Cassandra < Formula
 
   desc "Eventually consistent, distributed key-value store"
   homepage "https://cassandra.apache.org"
-  url "https://www.apache.org/dyn/closer.lua?path=cassandra/4.1.6/apache-cassandra-4.1.6-bin.tar.gz"
-  mirror "https://archive.apache.org/dist/cassandra/4.1.6/apache-cassandra-4.1.6-bin.tar.gz"
-  sha256 "2f51ce787812cce2ffb3db83a9a23248537fb52123884b0855551a0555ae8d03"
+  url "https://www.apache.org/dyn/closer.lua?path=cassandra/5.0.1/apache-cassandra-5.0.1-bin.tar.gz"
+  mirror "https://archive.apache.org/dist/cassandra/5.0.1/apache-cassandra-5.0.1-bin.tar.gz"
+  sha256 "73f4c807b0aa4036500d5dc54e30ef82bcf549ab1917eff2bbc7189b0337ea84"
   license "Apache-2.0"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "2ace5138682d1969c48ad11c39749a239aa2cefb1a6fcbfedfa112ff05cbedd7"
-    sha256 cellar: :any,                 arm64_ventura:  "a3b34cd9c7374fef974caeace7ffd91fc6cdd56e7f1efd6cfd6f95d84b1001ba"
-    sha256 cellar: :any,                 arm64_monterey: "6746ed2cff35a8ccb4a5a302d6d42f82d6930811264ef865f6f6212168cee12d"
-    sha256 cellar: :any,                 sonoma:         "83ad7e4db3584bfa7602cc68d74aa47c8831f3bdb5a47b968f6e89560e812805"
-    sha256 cellar: :any,                 ventura:        "97b9c8919e0a267a618d7925ce887288b21d471a0f0f2337aca1429ccabd3650"
-    sha256 cellar: :any,                 monterey:       "a5f592f9469270b5e6eaa5352081ebbe96cebbf43a1dd2115bbfdde03a3d1ed2"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "243e8ffd3cc36824a52d27606e2ca1e06e3c2246d808aab84961a14415d667b8"
+    sha256 cellar: :any,                 arm64_sequoia: "ebfe5ac870d922f590c2469886d9c90f0b5d6cb77c18010c4ee5704c37d061fd"
+    sha256 cellar: :any,                 arm64_sonoma:  "c6d7018a817f7a666771db1456ac7a6a1aa18aed2e6b20c2e3107c58384e3440"
+    sha256 cellar: :any,                 arm64_ventura: "b114d9ced19ff5e7ec3324db3ce90a3858648178e7cf71d3a05763f9942ec76b"
+    sha256 cellar: :any,                 sonoma:        "7701b8b7d2974f8470aa8ab84b4a484ceeca4f01c8be7a8a21a84b141b805065"
+    sha256 cellar: :any,                 ventura:       "5d2c9368db7e1c11b5f78ae0ae56fab3cff1fdaf45aadf7abb3ce83a917dd70c"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ebddaf051d89a491cb93dd5a91f86c36493dbc85d389f0ae4446ce07f2f2bf5b"
   end
 
   depends_on "libev"
-  depends_on "openjdk@11"
-  depends_on "python@3.12"
+  depends_on "openjdk@17"
+  depends_on "python@3.11" # required 3.6-3.11
 
   conflicts_with "emqx", because: "both install `nodetool` binaries"
 
   resource "cassandra-driver" do
-    url "https://files.pythonhosted.org/packages/07/46/cdf1e69263d8c2fe7a05a8f16ae67910b62cc40ba313ffbae3bc5025519a/cassandra-driver-3.29.1.tar.gz"
-    sha256 "38e9c2a2f2a9664bb03f1f852d5fccaeff2163942b5db35dffcf8bf32a51cfe5"
+    url "https://files.pythonhosted.org/packages/b2/6f/d25121afaa2ea0741d05d2e9921a7ca9b4ce71634b16a8aaee21bd7af818/cassandra-driver-3.29.2.tar.gz"
+    sha256 "c4310a7d0457f51a63fb019d8ef501588c491141362b53097fbc62fa06559b7c"
   end
 
   resource "click" do
@@ -45,11 +44,16 @@ class Cassandra < Formula
     sha256 "1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"
   end
 
+  resource "wcwidth" do
+    url "https://files.pythonhosted.org/packages/6c/63/53559446a878410fc5a5974feb13d31d78d752eb18aeba59c7fef1af7598/wcwidth-0.2.13.tar.gz"
+    sha256 "72ea0c06399eb286d978fdedb6923a9eb47e1c486ce63e9b4e64fc18303972b5"
+  end
+
   def install
     (var/"lib/cassandra").mkpath
     (var/"log/cassandra").mkpath
 
-    python3 = "python3.12"
+    python3 = "python3.11"
     venv = virtualenv_create(libexec/"vendor", python3)
     venv.pip_install resources
 
@@ -75,7 +79,7 @@ class Cassandra < Formula
               "cassandra_storagedir=\"#{var}/lib/cassandra\""
 
       s.gsub! "#JAVA_HOME=/usr/local/jdk6",
-              "JAVA_HOME=#{Language::Java.overridable_java_home_env("11")[:JAVA_HOME]}"
+              "JAVA_HOME=#{Language::Java.overridable_java_home_env("17")[:JAVA_HOME]}"
     end
 
     rm Dir["bin/*.bat", "bin/*.ps1"]

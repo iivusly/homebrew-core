@@ -1,25 +1,24 @@
 class Awsdac < Formula
   desc "CLI tool for drawing AWS architecture"
   homepage "https://github.com/awslabs/diagram-as-code"
-  url "https://github.com/awslabs/diagram-as-code/archive/refs/tags/v0.21.4.tar.gz"
-  sha256 "5ad21ca13d25536297dd807c6c9ea0d3fbc9f2a0a13895406ccd9958034b671f"
+  url "https://github.com/awslabs/diagram-as-code/archive/refs/tags/v0.21.6.tar.gz"
+  sha256 "1b3e955eb9df643246d3a9b88d2b951b0eb5cfb9b3d667ded2a4dbd5476551c3"
   license "Apache-2.0"
   head "https://github.com/awslabs/diagram-as-code.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "d5b90bbc66843e5736a378bed695afe73b91609747723ad94d9a79d029e16495"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "d5b90bbc66843e5736a378bed695afe73b91609747723ad94d9a79d029e16495"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "d5b90bbc66843e5736a378bed695afe73b91609747723ad94d9a79d029e16495"
-    sha256 cellar: :any_skip_relocation, sonoma:         "cd5510caded9eb26eb4dd173fbcece738ea5c9befe7d0d546f5ceef6ceda9cc6"
-    sha256 cellar: :any_skip_relocation, ventura:        "cd5510caded9eb26eb4dd173fbcece738ea5c9befe7d0d546f5ceef6ceda9cc6"
-    sha256 cellar: :any_skip_relocation, monterey:       "cd5510caded9eb26eb4dd173fbcece738ea5c9befe7d0d546f5ceef6ceda9cc6"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "adcac8fef947c7328f92f04c88f6f6a03f7850ff6eda76e8c61641b801aa30e1"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "adcac8fef947c7328f92f04c88f6f6a03f7850ff6eda76e8c61641b801aa30e1"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "adcac8fef947c7328f92f04c88f6f6a03f7850ff6eda76e8c61641b801aa30e1"
+    sha256 cellar: :any_skip_relocation, sonoma:        "341ad9e33312dde036869e78abdee6e39c13d4e48c5fd574031b0421e4386949"
+    sha256 cellar: :any_skip_relocation, ventura:       "341ad9e33312dde036869e78abdee6e39c13d4e48c5fd574031b0421e4386949"
   end
 
   depends_on "go" => :build
   depends_on :macos # linux build blocked by https://github.com/awslabs/diagram-as-code/issues/12
 
   def install
-    system "go", "build", *std_go_args(ldflags: "-s -w"), "./cmd/awsdac"
+    system "go", "build", *std_go_args(ldflags: "-s -w -X main.version=#{version}"), "./cmd/awsdac"
   end
 
   test do

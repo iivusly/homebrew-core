@@ -1,20 +1,18 @@
 class Incus < Formula
   desc "CLI client for interacting with Incus"
   homepage "https://linuxcontainers.org/incus"
-  url "https://linuxcontainers.org/downloads/incus/incus-6.4.tar.xz"
-  sha256 "6748a61f4a066bcd807c38ca13693f7ede1903d9b44825f1b5bcea4220edeee7"
+  url "https://linuxcontainers.org/downloads/incus/incus-6.6.tar.xz"
+  sha256 "72cde6f30ff7e9764f6f24a2d11fb49593b06ce2b64f6fd032ce3d1fdcad1f28"
   license "Apache-2.0"
   head "https://github.com/lxc/incus.git", branch: "main"
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "9f4182d138a3c690323cd3a41c918adc74070bff430fec89c3982ae90299c9a7"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "9f4182d138a3c690323cd3a41c918adc74070bff430fec89c3982ae90299c9a7"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "9f4182d138a3c690323cd3a41c918adc74070bff430fec89c3982ae90299c9a7"
-    sha256 cellar: :any_skip_relocation, sonoma:         "3655349c15f631735c5354ffbf8a81d16a2efa22f7d13028eea5646b2ac75786"
-    sha256 cellar: :any_skip_relocation, ventura:        "3655349c15f631735c5354ffbf8a81d16a2efa22f7d13028eea5646b2ac75786"
-    sha256 cellar: :any_skip_relocation, monterey:       "3655349c15f631735c5354ffbf8a81d16a2efa22f7d13028eea5646b2ac75786"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "7949a48b1091acd47f41d0e2c29e7c57f491c7845bd90cb7d5f96d26aaf9696a"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "c78a6b4a33e7e71f5a50dcec683d657af989bda1b3014774d12cf03c9fdb310d"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "c78a6b4a33e7e71f5a50dcec683d657af989bda1b3014774d12cf03c9fdb310d"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "c78a6b4a33e7e71f5a50dcec683d657af989bda1b3014774d12cf03c9fdb310d"
+    sha256 cellar: :any_skip_relocation, sonoma:        "2d1e1b64bea28bf4983f9c7a24439f7351c7d15101adfb87cc45ee1fe54a2bc1"
+    sha256 cellar: :any_skip_relocation, ventura:       "2d1e1b64bea28bf4983f9c7a24439f7351c7d15101adfb87cc45ee1fe54a2bc1"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "c674d06c5e1d830ea7b20792df267e95f972b0e4c0024d2815518b9ed4c0a630"
   end
 
   depends_on "go" => :build

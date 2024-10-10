@@ -1,29 +1,19 @@
 class Bear < Formula
   desc "Generate compilation database for clang tooling"
   homepage "https://github.com/rizsotto/Bear"
+  url "https://github.com/rizsotto/Bear/archive/refs/tags/3.1.5.tar.gz"
+  sha256 "4ac7b041222dcfc7231c6570d5bd76c39eaeda7a075ee2385b84256e7d659733"
   license "GPL-3.0-or-later"
-  revision 6
+  revision 2
   head "https://github.com/rizsotto/Bear.git", branch: "master"
 
-  stable do
-    url "https://github.com/rizsotto/Bear/archive/refs/tags/3.1.4.tar.gz"
-    sha256 "a1105023795b3e1b9abc29c088cdec5464cc9f3b640b5078dc90a505498da5ff"
-
-    # fmt 11 compatibility
-    patch do
-      url "https://github.com/rizsotto/Bear/commit/8afeafe61299c87449023d63336389f159b55808.patch?full_index=1"
-      sha256 "40d273a1f1497c2e593fc657a0cdf45831da308c00e3425e5eddb790afceb45f"
-    end
-  end
-
   bottle do
-    sha256 arm64_sonoma:   "a71e4df765e22c66615e4d5785a0ae97e866a7cd6a1f7d56c1ebb8da864ac6d0"
-    sha256 arm64_ventura:  "d241829b00774e8a623956b2d924eeaeba43aad1109eb97d8130bfedfa6e084d"
-    sha256 arm64_monterey: "e3669040059256e4303a2675385fe220ad2c668d952ab861ef2c76ed5b891f93"
-    sha256 sonoma:         "562ace56e8f2224cfe823b9e6034f677ab917985e86e29f30e609d4f025a9e1e"
-    sha256 ventura:        "6e40bc30b6973c062101cfa6aea43d95ac9bb0cc29e866385868c112f5c87e7e"
-    sha256 monterey:       "8d78f598ff4c6a1ea00fc49bf2d04d3f7329458b6621959620da5c163e057d51"
-    sha256 x86_64_linux:   "c1217184270d2543f486b8464feb0ddc6f8883163ad3cf41a440290edbfdc19a"
+    sha256 arm64_sequoia: "18dd2ee3f505791a0d468bb55e13a2fdac1ee71049c0d33cbbe408a3046037ed"
+    sha256 arm64_sonoma:  "94d32a9e8af491ee9dc034355ccb32acca92e1221c29439559d61a4e04dea272"
+    sha256 arm64_ventura: "258464f7442c89a6e545fa60202d028f2b6528f29e6f91dc844ca1d73f33f73e"
+    sha256 sonoma:        "e0f5b2b1c208f00b94d372f1a39c28aead64cbb8a267e82537579d867dc7313a"
+    sha256 ventura:       "8fccf1406a155d4e2be7238db702f700dc52a40adc3f69b6f0ab2698cd697242"
+    sha256 x86_64_linux:  "d0ce6f871f82f85bcbcea010af843624865f4e51e0227570a78ec88dd6d55139"
   end
 
   depends_on "cmake" => :build
