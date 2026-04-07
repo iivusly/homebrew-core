@@ -4,7 +4,8 @@ class Mplayer < Formula
   url "https://mplayerhq.hu/MPlayer/releases/MPlayer-1.5.tar.xz"
   sha256 "650cd55bb3cb44c9b39ce36dac488428559799c5f18d16d98edb2b7256cbbf85"
   license all_of: ["GPL-2.0-only", "GPL-2.0-or-later"]
-  revision 1
+  revision 2
+  compatibility_version 1
 
   livecheck do
     url "https://mplayerhq.hu/MPlayer/releases/"
@@ -12,14 +13,13 @@ class Mplayer < Formula
   end
 
   bottle do
-    rebuild 2
-    sha256 cellar: :any,                 arm64_sonoma:   "203e6bd9b216cf53d6042de09ed3c4dc1070cd56034279b7eebf3f8f18379b10"
-    sha256 cellar: :any,                 arm64_ventura:  "1b17dde1bb0e77e6b994464b92081b3be76df73ab89634c978711c5bb8f4e593"
-    sha256 cellar: :any,                 arm64_monterey: "c5516ace4b68e19b4ebcce79ca80ae09bdd7a950054963241333eec4275a80b0"
-    sha256 cellar: :any,                 sonoma:         "25f304026cc023e94a49693c47193d3068199cf978d270889fb514f4427495bf"
-    sha256 cellar: :any,                 ventura:        "6e159e7274b6c6a461eaf17a9121c97e840a1eeaf93228ee1508d57eed6ad230"
-    sha256 cellar: :any,                 monterey:       "ee6ac92f78cb0f428c78f4184ac2e5fb391f6a7cc6083541f3df483bf9a2239e"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "364ce29a5a68f3ebbcf8dec1f198cfb84e7efb4de60064a06af90babc8ece54d"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "1d27bc5e20a020dfc9cbda188a2d8af4cb54203b3a29bf97205ec5ba5c15038c"
+    sha256 cellar: :any,                 arm64_sequoia: "5acd5d7ebed8bc44b0aff0360bf20ec76cfb1a732349f8ece45bf84517db0b47"
+    sha256 cellar: :any,                 arm64_sonoma:  "c6dee8142133e094cff65c33b6b3aa7ca538e977dedd89e903d6a323460715d7"
+    sha256 cellar: :any,                 sonoma:        "5f089d84929885e170a96efba53a2f48adca16fcba31fccabf7efc9ed29f14f8"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "b4a9bf7aa318aebb060bf0ef17d93ed5f335d79f7e2a56f2d3181755216c9ff4"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "6fe472a2eaa853dea397a8cf67c22788a961d4edd3723f96bf3d439003ee1bc3"
   end
 
   head do
@@ -30,8 +30,7 @@ class Mplayer < Formula
     patch :DATA
   end
 
-  depends_on "pkg-config" => :build
-  depends_on "yasm" => :build
+  depends_on "pkgconf" => :build
   depends_on "fontconfig"
   depends_on "freetype"
   depends_on "jpeg-turbo"
@@ -41,7 +40,14 @@ class Mplayer < Formula
   uses_from_macos "bzip2"
   uses_from_macos "libxml2"
   uses_from_macos "ncurses"
-  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
+
+  on_intel do
+    depends_on "nasm" => :build
+  end
 
   def install
     # Work around build failure with newer Clang
@@ -68,6 +74,8 @@ class Mplayer < Formula
       --enable-freetype
       --disable-libbs2b
     ]
+    args << "--yasm=nasm" if Hardware::CPU.intel?
+
     system "./configure", *args
     system "make"
     system "make", "install"

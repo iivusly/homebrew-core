@@ -1,18 +1,17 @@
 class Miniserve < Formula
   desc "High performance static file server"
   homepage "https://github.com/svenstaro/miniserve"
-  url "https://github.com/svenstaro/miniserve/archive/refs/tags/v0.27.1.tar.gz"
-  sha256 "b65580574ca624072b1a94d59ebf201ab664eacacb46a5043ef7b81ebb538f80"
+  url "https://github.com/svenstaro/miniserve/archive/refs/tags/v0.33.0.tar.gz"
+  sha256 "eacef6128688c02409b0aba34c550a80fa5a714979c6c8e21e20c6a0aa2bc33a"
   license "MIT"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "2e88ed7a4692ef71f8756e12c6ee5ffacd3eabf49e46921c168d82457991f1b3"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "43d1b1d6b117bf724e90ab833d44bb292010437de66941beb60cb106c55f3b08"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "a38b42d03092adc1f76c24ce2427558ffb095c4311b27dc91e0e83bc8cc9828b"
-    sha256 cellar: :any_skip_relocation, sonoma:         "22f0b5f3b4a3e8bb50951a6e15715847e1b2e60a97042be536f2ebeaa1e235ab"
-    sha256 cellar: :any_skip_relocation, ventura:        "46cc01f37e9ce86f6cb36cab4ef6616c7dd4d112505702ec83b3f0532171ac46"
-    sha256 cellar: :any_skip_relocation, monterey:       "58cbc71a43994a41cfd1cf78ad0cb2ca0d308a7a1618c6659c519f09433dae34"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "d2808c4c82f492fc736ba467d978e78ce3bfb5c61ad3da0e4cb394e98243243e"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "51a652974e5b6cbc0c900aa59db2d90ee9b09bdc4eee6d4ac53439508aac1778"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "489497e4fd12e21775e64294921ae04dd4c584e227ffdd2128993dec836d28a1"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "eae7278059d876c2e570d00c79d9d0ffcd33beb6a76177f3a914bc8d5ad269cd"
+    sha256 cellar: :any_skip_relocation, sonoma:        "c234fcbed960c1ce0590db9111b6ced642f9b52ceb70ac09956f07775406da31"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "4054184cc0c0ae822c6e09b27b0b7134d96b0981b31631a328008a8689507c90"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "24966360e41ff69713840bfbac5c95c02bc9b55856123230745108787a1536f2"
   end
 
   depends_on "rust" => :build
@@ -26,13 +25,10 @@ class Miniserve < Formula
 
   test do
     port = free_port
-    pid = fork do
-      exec bin/"miniserve", bin/"miniserve", "-i", "127.0.0.1", "--port", port.to_s
-    end
-
-    sleep 2
+    pid = spawn bin/"miniserve", bin/"miniserve", "-i", "127.0.0.1", "--port", port.to_s
 
     begin
+      sleep 2
       read = (bin/"miniserve").read
       assert_equal read, shell_output("curl localhost:#{port}")
     ensure

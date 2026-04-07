@@ -4,6 +4,7 @@ class Kcov < Formula
   url "https://github.com/SimonKagstrom/kcov/archive/refs/tags/v43.tar.gz"
   sha256 "4cbba86af11f72de0c7514e09d59c7927ed25df7cebdad087f6d3623213b95bf"
   license "GPL-2.0-or-later"
+  revision 1
   head "https://github.com/SimonKagstrom/kcov.git", branch: "master"
 
   # We check the Git tags because, as of writing, the "latest" release on GitHub
@@ -14,31 +15,35 @@ class Kcov < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "94d6789bde6e8890e31d5b572b72fac76ade148172c0899c502349678c5835bf"
-    sha256 arm64_ventura:  "9b67dcb9cc579b68aff46237a149dce6e17f7be5b584b5a9f2b162858b80e29a"
-    sha256 arm64_monterey: "791011db4ed3b46ab785f7553249de53f848841aeecba334a5a35766e7e80bca"
-    sha256 sonoma:         "2c1319f3032eed31ecd3c41452383a525a44b1a2aa4e7a0a2c0a9094d0e58f91"
-    sha256 ventura:        "62dfd4348ff4fe56aeb5960c04c5e52f25dd3605964c6d9f4a7e460e3b34ff90"
-    sha256 monterey:       "b7205b776c7509a7fa80a4788308604ec44b8bb37496716e547ee7fc0dad1ab4"
-    sha256 x86_64_linux:   "e2854f13f8bf4b6ff6db16c274f95e558eaa9bd61e80f0074556c543b6a4ac5f"
+    rebuild 1
+    sha256 arm64_tahoe:   "66b47f9d61f53b74499405515b06143e082dbbb6dc2c7b5c1a5899f70a5e6627"
+    sha256 arm64_sequoia: "011a405bdcae2f4b98225fd2acaa344dc8f4e1146d11a1278b57d90fc549c8c1"
+    sha256 arm64_sonoma:  "d1f7d21d5295a410fe7f7f1eee6af7893fe25100470079e899129081cd680220"
+    sha256 sonoma:        "01edb51341252ffc753b17bdbdb63cf6c352cc2535742aa2f13c2915f07dda07"
+    sha256 arm64_linux:   "7038d1494b3b56a5fc8f4d3f0b3bf3960597cd0516bf28bc90a2adf4068689b4"
+    sha256 x86_64_linux:  "ad1cff7d8d0f3b6d044604c0ea0c6635048f01a9f2494724a91eac68646135a4"
   end
 
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
 
   depends_on "dwarfutils"
   depends_on "openssl@3"
 
   uses_from_macos "python" => :build
   uses_from_macos "curl"
-  uses_from_macos "zlib"
 
   on_linux do
     depends_on "elfutils"
+    depends_on "zlib-ng-compat"
   end
 
   def install
-    system "cmake", "-S", ".", "-B", "build", *std_cmake_args, "-DSPECIFY_RPATH=ON"
+    # Fix to find libdwarf header files
+    # Issue ref: https://github.com/SimonKagstrom/kcov/issues/475
+    inreplace "cmake/FindDwarfutils.cmake", "libdwarf-0", "libdwarf-#{Formula["dwarfutils"].version.major}"
+
+    system "cmake", "-S", ".", "-B", "build", "-DSPECIFY_RPATH=ON", *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
   end
@@ -50,6 +55,6 @@ class Kcov < Formula
     EOS
 
     system bin/"kcov", testpath/"out", testpath/"hello.bash"
-    assert_predicate testpath/"out/hello.bash/coverage.json", :exist?
+    assert_path_exists testpath/"out/hello.bash/coverage.json"
   end
 end

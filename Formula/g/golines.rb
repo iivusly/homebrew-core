@@ -1,38 +1,44 @@
 class Golines < Formula
   desc "Golang formatter that fixes long lines"
   homepage "https://github.com/segmentio/golines"
-  url "https://github.com/segmentio/golines/archive/refs/tags/v0.12.2.tar.gz"
-  sha256 "6f3c462dc707b4441733dbcbef624c61cce829271db64bd994d43e50be95a211"
+  url "https://github.com/segmentio/golines/archive/refs/tags/v0.13.0.tar.gz"
+  sha256 "ec1933e0fb73cf0517fd007d325603007aa65ce430267a70fc78cfea43d9716e"
   license "MIT"
   head "https://github.com/segmentio/golines.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "0dc4bef5b399d03b8626c287f69dd1053f67a264745534ed74650b0f5836ed35"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "71db471b15d2097c568876c4d9bb1e518c464ab5975cc44319b62c1d8019cc82"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "8a66936ba1408201f4a983a97674df7f264d96faa3042eaea5d67e9e9399f243"
-    sha256 cellar: :any_skip_relocation, sonoma:         "0f9c40205f9bde8207f3c30d3b0188a68300f10f8bf2cdfce9f1e4c6156edf0e"
-    sha256 cellar: :any_skip_relocation, ventura:        "c70ffc9ce915ec300b0ca5320f144b282bf51f63fe5cf9879c75d2cd5adaf815"
-    sha256 cellar: :any_skip_relocation, monterey:       "9546e25a342e830eb4a307068167a68b4c5f714b1ae7fb0bc66242dacc72ce48"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "c0fcaa9315813afba851b606dedde377a1083eeea1da796f0467cafd820cbba3"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "0a9cd3736e5ea0b6729260f8248667baec0c80eea786497407b7fa78d60c8879"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "710c57a0a2617f276e3a28d562681aee915ed9a07df2c26c75dda51f706a76c7"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "710c57a0a2617f276e3a28d562681aee915ed9a07df2c26c75dda51f706a76c7"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "710c57a0a2617f276e3a28d562681aee915ed9a07df2c26c75dda51f706a76c7"
+    sha256 cellar: :any_skip_relocation, sonoma:        "e2ee8ae303535f819313db09acfb54a1cfb649bd9ec3620cf8f9f4a5984fc675"
+    sha256 cellar: :any_skip_relocation, ventura:       "e2ee8ae303535f819313db09acfb54a1cfb649bd9ec3620cf8f9f4a5984fc675"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "de399995aed9ac22003ca96152ebc08604c49482a6034f509dd7e55e0387af91"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "e70a09df4e69252b296398c24b6a557c5b16044117eb4d9987ae15c260b7dc57"
   end
 
   depends_on "go" => :build
 
   def install
-    system "go", "build", *std_go_args(ldflags: "-s -w")
+    ldflags = "-s -w -X main.version=#{version} -X main.commit=#{tap.user} -X main.date=#{time.iso8601}"
+    system "go", "build", *std_go_args(ldflags:)
   end
 
   test do
-    (testpath/"given.go").write <<~EOS
+    assert_match version.to_s, shell_output("#{bin}/golines --version")
+
+    (testpath/"given.go").write <<~GO
       package main
 
       var strings = []string{"foo", "bar", "baz"}
-    EOS
-    (testpath/"expected.go").write <<~EOS
+    GO
+
+    (testpath/"expected.go").write <<~GO
       package main
 
       var strings = []string{\n\t"foo",\n\t"bar",\n\t"baz",\n}
-    EOS
-    assert_equal shell_output("#{bin}/golines --max-len=30 given.go"), (testpath/"expected.go").read
+    GO
+
+    assert_equal (testpath/"expected.go").read, shell_output("#{bin}/golines --max-len=30 given.go")
   end
 end

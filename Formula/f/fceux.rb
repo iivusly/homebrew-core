@@ -1,8 +1,12 @@
 class Fceux < Formula
   desc "All-in-one NES/Famicom Emulator"
   homepage "https://fceux.com/"
-  license "GPL-2.0-only"
-  revision 3
+  license all_of: [
+    "GPL-2.0-or-later",
+    "LGPL-2.1-or-later", # src/drivers/common/{hq2x.cpp,nes_ntsc*}
+    "MIT", # src/emufile*, src/drivers/Qt/TasEditor/, src/lua/
+  ]
+  revision 9
   head "https://github.com/TASEmulators/fceux.git", branch: "master"
 
   stable do
@@ -12,28 +16,27 @@ class Fceux < Formula
 
     # patch for `New timeStamp.cpp file renders fceux x86-only` issue
     patch do
-      url "https://raw.githubusercontent.com/Homebrew/formula-patches/cd40795/fceux/2.6.6-arm.patch"
+      url "https://raw.githubusercontent.com/Homebrew/homebrew-core/1cf441a0/Patches/fceux/2.6.6-arm.patch"
       sha256 "0890494f4b5db5fa11b94e418d505cea87dc9b9f55cdc6c97e9b5699aeada4ac"
     end
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "f19e8cc59d907ac3461882c01b7d6a7e6b740e1bb808e131f03351f437e18137"
-    sha256 cellar: :any,                 arm64_ventura:  "ad14c19cee60ac3ff7744574efefbc5f1b79cebbecb59889610897dcdc87e02c"
-    sha256 cellar: :any,                 arm64_monterey: "feef0ae851b641755c0ff1b6183e80946bd3af2a585195e1a70b3f4062a2a361"
-    sha256 cellar: :any,                 sonoma:         "5bb45a8a6be0636d8a8ff18d5f98c3c6c4c034e4c5badd35d63ae430b61f1141"
-    sha256 cellar: :any,                 ventura:        "cf540cf08ebc5b2bd3c4b3b73f03fe993097eb9155cf94cb52acb8c34de362e2"
-    sha256 cellar: :any,                 monterey:       "b512fb7f161b6ded4ca25c81b3986777363eb7ceaf5cbabbb74bd9e18ee9bce6"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "173565783554d7ddc1e65ef4bd515c2418c805a6cc093d5577bdde389c57cc2b"
+    sha256 cellar: :any,                 arm64_tahoe:   "9bbe75f88e4ef4f07b66016f279989d0152b3b9b4eda6205116248a8ff493e7f"
+    sha256 cellar: :any,                 arm64_sequoia: "badb3805a8337d784f6708f2105b9c5b7cd388166ee101597011fb73e1ec3e3e"
+    sha256 cellar: :any,                 arm64_sonoma:  "a9913d680aac448b262ee33b2e6e5296493e8c861c25859a08f4091fb5823848"
+    sha256                               sonoma:        "3b270af853ae3f5485310667683262f23d2420940db6e1eaa0291a01e0d9409d"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "23e56b704f9059aca2ac48e73eeae0c74ada48f58296ac98e58f5a6f69479044"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "6d51564f3c8477453d8b0ea8045237bf8c8c73e770679b3a60518eeda71a3c40"
   end
 
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
 
   depends_on "ffmpeg"
   depends_on "libarchive"
   depends_on "minizip"
-  depends_on "qt"
+  depends_on "qtbase"
   depends_on "sdl2"
   depends_on "x264"
   depends_on "x265"
@@ -41,23 +44,26 @@ class Fceux < Formula
   on_linux do
     depends_on "mesa"
     depends_on "mesa-glu"
-    depends_on "zlib"
+    depends_on "zlib-ng-compat"
   end
 
-  fails_with gcc: "5"
-
   def install
-    ENV["CXXFLAGS"] = "-DPUBLIC_RELEASE=1" if build.stable?
-    system "cmake", ".", *std_cmake_args, "-DQT6=ON"
-    system "make"
-    cp "src/auxlib.lua", "output/luaScripts"
-    fceux_path = OS.mac? ? "src/fceux.app/Contents/MacOS" : "src"
-    libexec.install Pathname.new(fceux_path)/"fceux"
-    pkgshare.install ["output/luaScripts", "output/palettes", "output/tools"]
-    (bin/"fceux").write <<~EOS
-      #!/bin/bash
-      LUA_PATH=#{pkgshare}/luaScripts/?.lua #{libexec}/fceux "$@"
-    EOS
+    # Workaround until upstream handles newer minizip 1.3.2 cflags after
+    # https://github.com/madler/zlib/commit/7e6f0784cc0c33e8d5fcb368248168c6656f73c8
+    ENV.append_to_cflags "-I#{Formula["minizip"].opt_include}/minizip"
+
+    args = ["-DQT6=ON"]
+    args << "-DPUBLIC_RELEASE=1" if build.stable?
+    system "cmake", "-S", ".", "-B", ".", *args, *std_cmake_args
+    system "cmake", "--build", "."
+    if OS.mac?
+      cp "src/auxlib.lua", "output/luaScripts"
+      bin.install "src/fceux.app/Contents/MacOS/fceux"
+      pkgshare.install "output/luaScripts", "output/palettes", "output/tools"
+    else
+      system "cmake", "--install", "."
+    end
+    bin.env_script_all_files libexec, LUA_PATH: "#{pkgshare}/luaScripts/?.lua"
   end
 
   test do

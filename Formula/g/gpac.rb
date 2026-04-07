@@ -1,41 +1,57 @@
-# Installs a relatively minimalist version of the GPAC tools. The
-# most commonly used tool in this package is the MP4Box metadata
-# interleaver, which has relatively few dependencies.
-#
-# The challenge with building everything is that Gpac depends on
-# a much older version of FFMpeg and WxWidgets than the version
-# that Brew installs
-
 class Gpac < Formula
   desc "Multimedia framework for research and academic purposes"
-  homepage "https://gpac.wp.mines-telecom.fr/"
-  url "https://github.com/gpac/gpac/archive/refs/tags/v2.4.0.tar.gz"
-  sha256 "99c8c994d5364b963d18eff24af2576b38d38b3460df27d451248982ea16157a"
+  homepage "https://gpac.io/"
+  url "https://github.com/gpac/gpac/archive/refs/tags/v26.02.0.tar.gz"
+  sha256 "7a265e1cd58b317d8c9175816a54e0ab14199c21d81eb779047d7088fca52ae4"
   license "LGPL-2.1-or-later"
+  compatibility_version 1
   head "https://github.com/gpac/gpac.git", branch: "master"
 
-  bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "0db848b31b7bda589b829bef38fd0d99575d1303691a04a915d66548b3dac128"
-    sha256 cellar: :any,                 arm64_ventura:  "e02c1581892fd72215874516724a24eb30fb7862a1e5d45ebd7cce0b840a3908"
-    sha256 cellar: :any,                 arm64_monterey: "b15f699737dc4e58fda9c8753ea2aa2f323baa0423b5424230852bdb0e35b258"
-    sha256 cellar: :any,                 sonoma:         "d689fcb607e52f1111fb9ddfb6bf107a40592e16c7f7f536bcbece0b76e69145"
-    sha256 cellar: :any,                 ventura:        "be9dbecc82418f0ff125b5838d56ff7e37c7818f64f090df2fc0e35fdec969b4"
-    sha256 cellar: :any,                 monterey:       "618101f402082ebc311574e2de377212b20386b346f1f12ab008ded4b647e5fa"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "3fa932d0f671a1643b20f381bba3181328431e5ef9555444a8d25a983ace36e1"
+  livecheck do
+    url :stable
+    regex(/^v?(\d+(?:\.\d+)+)$/i)
   end
 
-  depends_on "pkg-config" => :build
-  depends_on "openssl@3"
+  bottle do
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "b2d9c99d0d9bc24cd5c392091cb890363af39d9214ee1a2c35422208f06bff2c"
+    sha256 cellar: :any,                 arm64_sequoia: "be8bb6b0bbbf25456bbd19a39cbca7110e1b49e6bd6dba5eb3e12d9c0e8b1329"
+    sha256 cellar: :any,                 arm64_sonoma:  "182ced8e20d0530398046fe48a6b0a5dbdf816a271cadda5d612b8fda236a70c"
+    sha256                               sonoma:        "f31f73e8e8c7a7aec8b554b7a860b9e49081d0bc45299083e86316ded86be2f6"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "c7ad558c0a70fcf23b5fa5d5e30adfeccd1776c3d96306a2e2e9e3b55ffa4232"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "5a2cd87687f784c99df64a1580d282cf9b93c0922f3f4fe1457ba11c0ffc308e"
+  end
 
-  uses_from_macos "zlib"
+  depends_on "pkgconf" => :build
+  depends_on "ffmpeg"
+  depends_on "freetype"
+  depends_on "jpeg-turbo"
+  depends_on "libnghttp2"
+  depends_on "libpng"
+  depends_on "libvorbis"
+  depends_on "libx11"
+  depends_on "libxext"
+  depends_on "openjpeg"
+  depends_on "openssl@3"
+  depends_on "sdl2"
+  depends_on "theora"
+  depends_on "xz"
+
+  on_macos do
+    depends_on "libogg"
+  end
+
+  on_linux do
+    depends_on "alsa-lib"
+    depends_on "libxv"
+    depends_on "pulseaudio"
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     args = %W[
-      --disable-wx
-      --disable-pulseaudio
       --prefix=#{prefix}
       --mandir=#{man}
-      --disable-x11
     ]
 
     system "./configure", *args
@@ -44,7 +60,12 @@ class Gpac < Formula
   end
 
   test do
-    system bin/"MP4Box", "-add", test_fixtures("test.mp3"), testpath/"out.mp4"
-    assert_predicate testpath/"out.mp4", :exist?
+    system bin/"MP4Box", "-add", test_fixtures("test.mp3"), testpath/"mp4box.mp4"
+    assert_path_exists testpath/"mp4box.mp4"
+
+    system bin/"gpac", "-i", test_fixtures("test.mp3"), "-o", testpath/"gpac.mp4"
+    assert_path_exists testpath/"gpac.mp4"
+
+    assert_match "ft_font", shell_output("#{bin}/gpac -h modules")
   end
 end

@@ -1,26 +1,28 @@
 class Evince < Formula
   desc "GNOME document viewer"
   homepage "https://apps.gnome.org/Evince/"
-  url "https://download.gnome.org/sources/evince/46/evince-46.3.1.tar.xz"
-  sha256 "945c20a6f23839b0d5332729171458e90680da8264e99c6f9f41c219c7eeee7c"
+  url "https://download.gnome.org/sources/evince/48/evince-48.1.tar.xz"
+  sha256 "7d8b9a6fa3a05d3f5b9048859027688c73a788ff6e923bc3945126884943fa10"
   license "GPL-2.0-or-later"
+  revision 1
 
   bottle do
-    sha256 arm64_sonoma:   "21852215aea592397425ed58039e347dbea319f9fecae3f753cd5acdcc147b94"
-    sha256 arm64_ventura:  "0cddc507eaf18b5d52c8f52983f3b646be142db4c8e470918534d66afdd0f19d"
-    sha256 arm64_monterey: "69ccf42eee57f2e1558bad935514778be45476869fc9358212f8dde85ea1f4a8"
-    sha256 sonoma:         "9cd783e163d622d63f0d1d5e0a48a7dde9aab95ceae0352fa0992c0b9acad2f3"
-    sha256 ventura:        "40428930fe5a7a103e279f2b914ddea2e113f0a2831992067d564cc09e8d8c18"
-    sha256 monterey:       "e4efa202ef6cf72f3ac992ba590523a26f438a73b502044202be3d1e9f4a8ab1"
-    sha256 x86_64_linux:   "5547d26ffb2d3e5e96dc34180d02c5bceccc8b0d10eec5d262c2744f809f3d32"
+    rebuild 1
+    sha256 arm64_tahoe:   "3b7e9c903699d610e7e118ac6268b5f2b0dcbbadd553257be807aaca0b2ff4d9"
+    sha256 arm64_sequoia: "c79bd492a970f0a2faaa173dd9129a9ddee30f3cb67f6700cce4564bdafe0b2a"
+    sha256 arm64_sonoma:  "4146849007042d512b61feeb08fa4db530eeb43a55d4b7718b77ba477a2cd3c0"
+    sha256 sonoma:        "3a2e85b4add1137e10a843ef53563a53ef6bbaf2d92b05223edfee1009880767"
+    sha256 arm64_linux:   "9d5b11ec7436eec5ece2dfd76ddc9b912135f1b5f5c0493fb5aca1fad97a9e33"
+    sha256 x86_64_linux:  "696a73056be75f55f4ebeb0ad5976bf7366cfebc128a13436a1a1d606354cd6d"
   end
 
   depends_on "desktop-file-utils" => :build # for update-desktop-database
+  depends_on "gettext" => :build # for msgfmt
   depends_on "gobject-introspection" => :build
   depends_on "itstool" => :build
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
 
   depends_on "adwaita-icon-theme"
   depends_on "at-spi2-core"
@@ -41,14 +43,13 @@ class Evince < Formula
   depends_on "poppler"
 
   uses_from_macos "libxml2"
-  uses_from_macos "zlib"
 
   on_macos do
     depends_on "gettext"
   end
 
   on_linux do
-    depends_on "gettext" => :build # for msgfmt
+    depends_on "zlib-ng-compat"
   end
 
   def install

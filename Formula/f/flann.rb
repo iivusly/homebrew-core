@@ -4,28 +4,32 @@ class Flann < Formula
   url "https://github.com/flann-lib/flann/archive/refs/tags/1.9.2.tar.gz"
   sha256 "e26829bb0017f317d9cc45ab83ddcb8b16d75ada1ae07157006c1e7d601c8824"
   license "BSD-3-Clause"
-  revision 2
+  revision 4
+  compatibility_version 1
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "95cc1c8ebe8089d9f3b3cddcc4121b8758f27746f54ccb2a4e14120d31bced00"
-    sha256 cellar: :any,                 arm64_ventura:  "b2c90010e7196565617ad2eece7f618f9e6ee94546e9712d45949574a510bf88"
-    sha256 cellar: :any,                 arm64_monterey: "72b11ab5cb95c3635aca8a29551ed61810a407fc03ab4cef01981c1edb5e8929"
-    sha256 cellar: :any,                 sonoma:         "d9b4d3fc2e2bf9bfd4387ec0ebc63892946f32650cc6e6fc0428c80c46bb0de4"
-    sha256 cellar: :any,                 ventura:        "c7530e21771003003ecbe1075341c8a2fbf6d126abee489b2c5531a8c4f46e0c"
-    sha256 cellar: :any,                 monterey:       "226c0dc7a561f5860f667d2605fc9dfa22c535469eb9bc50ace723ed8f5a771b"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "9b54ae5296e98088861829c1b4a0bb994dddcf666c5e5f90814a6bc291bdacd4"
+    sha256 cellar: :any,                 arm64_tahoe:   "6635599071926575a5e3eef3bd48521d93b5fb74da6e21fbf60d99c4b6823ff1"
+    sha256 cellar: :any,                 arm64_sequoia: "ae73ea70a53e2f253d8c189d830b5607a6ec395cda17e418fcc5cca06d2ee4e4"
+    sha256 cellar: :any,                 arm64_sonoma:  "e711080a6b6135afbc04dd206b201b9fb8ac1627b760d080eed9403ac361d6dc"
+    sha256 cellar: :any,                 sonoma:        "9ac7f30cfe97912e5ea39b164fc24d1031af8db3cae79c357bcd6c3149325af4"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "998d5a26830677da31aea0f6131483c3ac3922c1f2b4e7ba71641bd2902a641c"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "f9d5d3a9637124dff3e43fd033f0887a2520b63fe57a0605951cf888e87b7fb2"
   end
 
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "hdf5"
   depends_on "lz4"
 
   def install
-    system "cmake", "-S", ".", "-B", "build",
-                    "-DBUILD_PYTHON_BINDINGS:BOOL=OFF",
-                    "-DBUILD_MATLAB_BINDINGS:BOOL=OFF",
-                    *std_cmake_args
+    args = %W[
+      -DBUILD_PYTHON_BINDINGS=OFF
+      -DBUILD_MATLAB_BINDINGS=OFF
+      -DCMAKE_INSTALL_RPATH=#{rpath}
+    ]
+    # Workaround to build with CMake 4
+    args << "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
+    system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
   end

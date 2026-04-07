@@ -1,25 +1,27 @@
 class Mongosh < Formula
   desc "MongoDB Shell to connect, configure, query, and work with your MongoDB database"
   homepage "https://github.com/mongodb-js/mongosh"
-  url "https://registry.npmjs.org/@mongosh/cli-repl/-/cli-repl-2.3.0.tgz"
-  sha256 "a341b978f0232fe75d66ec188e50e8f7e56cccdd785f009a06b00d706c3e9021"
+  url "https://registry.npmjs.org/@mongosh/cli-repl/-/cli-repl-2.8.2.tgz"
+  sha256 "0755e3ecbd9c0c701ceda2ac7cc09abd115488d51d81b35ee1b3059624847cb4"
   license "Apache-2.0"
+  compatibility_version 1
+
+  no_autobump! because: :bumped_by_upstream
 
   bottle do
-    sha256                               arm64_sonoma:   "30ae1687f4caed315ba8ee84f1ebf4ec106d94e94d6004ac7793baab42c08827"
-    sha256                               arm64_ventura:  "130a3c74d86f4df7c41a3aea0eb40c6d01ac11e77753120340ecce1235083b07"
-    sha256                               arm64_monterey: "df3c9eed709efbc49a1fd2488ef7ed109a6f87fdc3539528d2b559620fa6762b"
-    sha256                               sonoma:         "7fc6be19d25b869f8f8d3d737d38a1d1ca8d85e06e41283b6cbf7392d4739c8e"
-    sha256                               ventura:        "a660b7b1288b29bee155e2e8d42f3bee9a3dd86ab54ce673f69e7884526e3da6"
-    sha256                               monterey:       "9d0987f49d4ff5c8a54e744565c34e975167b9dc0c544228754c0106fd70167e"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "17c01d0987ac1390d4ba1eb9003ed869d70f9db4d93ee8fd2347089ce329ca98"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "d67cc5c70961c77a5c3ecf6aeac41082d7623310f1458f00ce5e55b625e2a0a6"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "d67cc5c70961c77a5c3ecf6aeac41082d7623310f1458f00ce5e55b625e2a0a6"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "d67cc5c70961c77a5c3ecf6aeac41082d7623310f1458f00ce5e55b625e2a0a6"
+    sha256 cellar: :any_skip_relocation, sonoma:        "483a78843385fe722bf8c07ac6e936f90ce4f3ed0b59a1295a8cb8b950047b57"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "0d38657b01483b66c75e0d436ec172972b6d2c2e33eb2e4876bae098048b549d"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "0d38657b01483b66c75e0d436ec172972b6d2c2e33eb2e4876bae098048b549d"
   end
 
   depends_on "node"
 
   def install
     system "npm", "install", *std_npm_args
-    bin.install_symlink Dir["#{libexec}/bin/*"]
+    bin.install_symlink libexec.glob("bin/*")
   end
 
   test do

@@ -1,18 +1,17 @@
 class Nvc < Formula
   desc "VHDL compiler and simulator"
-  homepage "https://github.com/nickg/nvc"
-  url "https://github.com/nickg/nvc/releases/download/r1.13.3/nvc-1.13.3.tar.gz"
-  sha256 "c657d052d8a1eeba2dd97e92330c676de0a6d4d4c2eedea25adec64405dd87c7"
+  homepage "https://www.nickg.me.uk/nvc/"
+  url "https://github.com/nickg/nvc/releases/download/r1.19.3/nvc-1.19.3.tar.gz"
+  sha256 "ce2c2d48e097928170489c4193194a51fb97ae9b5d8828de88b279ae02672021"
   license "GPL-3.0-or-later"
 
   bottle do
-    sha256 arm64_sonoma:   "fe46bbdeade65da8ec99e79c535c4d69dd3d46745cf4f3cda8185bea1312fad1"
-    sha256 arm64_ventura:  "e0b90c0ae68c17fd83c7f27ae1c687a84ba5c45897a33f2ef14dbd6c6d30556e"
-    sha256 arm64_monterey: "7db131cbc9501cc3975c9a0ddccaf0fdd39edca29ef0086c8649df9fe89c54e7"
-    sha256 sonoma:         "700914b4632de546cfe0130684ba6fa8859db1c67c1aa71a550ccbf770bec128"
-    sha256 ventura:        "60932cf07d654fc4850bbe007848775a0ff43a32002917aa7000105574e326ae"
-    sha256 monterey:       "8596232f85a898c1f00a87711a562604d702a198168fdd3b22fc1ce0d038e0f1"
-    sha256 x86_64_linux:   "84d8d313cfe8892e33346657105fb7b2432471489a108779f8ddc7e53885ea06"
+    sha256 arm64_tahoe:   "2cdbb1f94e69bc27c5f24f2930cd76ea99852a592ebc2a3f6c1d22026df2d136"
+    sha256 arm64_sequoia: "b0bef2ccd32347faefe149940dee2ce53b5bde4a47c604718d1f88c66e5600e5"
+    sha256 arm64_sonoma:  "a76845ff90a3f4d7cabc3b31904ff13b532748440614eefdd7775a9c313ec9ac"
+    sha256 sonoma:        "233a646700ec2c69d01cad557b91973552d702eb49f24a69139dad7616fa74e7"
+    sha256 arm64_linux:   "63acb3ca9c7c8df8d326abd1f24f91cd71372e94d45f3d6eddafd6b01befb3aa"
+    sha256 x86_64_linux:  "cc47f5559b9a9753da327230e580b872303c99ef46f5bda1982ccfdd316ad885"
   end
 
   head do
@@ -23,19 +22,17 @@ class Nvc < Formula
   end
 
   depends_on "check" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "llvm"
   depends_on "zstd"
 
   uses_from_macos "flex" => :build
   uses_from_macos "libffi"
-  uses_from_macos "zlib"
 
   on_linux do
     depends_on "elfutils"
+    depends_on "zlib-ng-compat"
   end
-
-  fails_with gcc: "5" # LLVM is built with GCC
 
   def install
     system "./autogen.sh" if build.head?
@@ -46,11 +43,8 @@ class Nvc < Formula
     # In-tree builds are not supported.
     mkdir "build" do
       system "../configure", "--with-llvm=#{Formula["llvm"].opt_bin}/llvm-config",
-                             "--prefix=#{prefix}",
-                             "--with-system-cc=#{ENV.cc}",
-                             "--disable-silent-rules"
-      inreplace ["Makefile", "config.h"], Superenv.shims_path/ENV.cc, ENV.cc
-      ENV.deparallelize
+                             "--disable-silent-rules",
+                             *std_configure_args
       system "make", "V=1"
       system "make", "V=1", "install"
     end

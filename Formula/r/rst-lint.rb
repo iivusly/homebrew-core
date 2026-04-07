@@ -3,20 +3,19 @@ class RstLint < Formula
 
   desc "ReStructuredText linter"
   homepage "https://github.com/twolfson/restructuredtext-lint"
-  url "https://files.pythonhosted.org/packages/48/9c/6d8035cafa2d2d314f34e6cd9313a299de095b26e96f1c7312878f988eec/restructuredtext_lint-1.4.0.tar.gz"
-  sha256 "1b235c0c922341ab6c530390892eb9e92f90b9b75046063e047cacfb0f050c45"
+  url "https://files.pythonhosted.org/packages/ca/e6/eefcad2228f4124f17e01064428fbcd0ade06a274f3063ce3a126a569d6b/restructuredtext_lint-2.0.2.tar.gz"
+  sha256 "dd25209b9e0b726929d8306339faf723734a3137db382bcf27294fa18a6bc52b"
   license "Unlicense"
 
   bottle do
-    rebuild 7
-    sha256 cellar: :any_skip_relocation, all: "56c00a43d134bbd568cad5f2b57f17f70322645830eedba5b4682e3407e9aa1b"
+    sha256 cellar: :any_skip_relocation, all: "185f8cb77b1622016cf30ee43d7aaf5674fe67c424bc5b706a38515f538bcf7e"
   end
 
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   resource "docutils" do
-    url "https://files.pythonhosted.org/packages/1f/53/a5da4f2c5739cf66290fac1431ee52aff6851c7c8ffd8264f13affd7bcdd/docutils-0.20.1.tar.gz"
-    sha256 "f08a4e276c3a1583a86dce3e34aba3fe04d02bba2dd51ed16106244e8a923e3b"
+    url "https://files.pythonhosted.org/packages/d9/02/111134bfeb6e6c7ac4c74594e39a59f6c0195dc4846afbeac3cba60f1927/docutils-0.22.3.tar.gz"
+    sha256 "21486ae730e4ca9f622677b1412b879af1791efcfba517e4c6f60be543fc8cdd"
   end
 
   def install
@@ -29,7 +28,7 @@ class RstLint < Formula
       Hello World
       ===========
     EOS
-    assert_equal "", shell_output("#{bin}/rst-lint pass.rst")
+    assert_empty shell_output("#{bin}/rst-lint pass.rst")
 
     # test invocation on a file with a whitespace style issue
     (testpath/"fail.rst").write <<~EOS

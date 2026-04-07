@@ -1,10 +1,9 @@
 class Beast < Formula
   desc "Bayesian Evolutionary Analysis Sampling Trees"
   homepage "https://beast.community/"
-  url "https://github.com/beast-dev/beast-mcmc/archive/refs/tags/v1.10.4.tar.gz"
-  sha256 "6e28e2df680364867e088acd181877a5d6a1d664f70abc6eccc2ce3a34f3c54a"
+  url "https://github.com/beast-dev/beast-mcmc/archive/refs/tags/v10.5.0.tar.gz"
+  sha256 "6287ebbe85e65e44f421b7e9ec3fd17d9a736ff909dfa3b4ab6b1b1fd361b52b"
   license "LGPL-2.1-or-later"
-  revision 1
   head "https://github.com/beast-dev/beast-mcmc.git", branch: "master"
 
   livecheck do
@@ -13,33 +12,29 @@ class Beast < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "866aef5c9a4b0665a8236c5e3fc491d1ca9bdb37df7daddaad5a4648a99d685b"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "018aee24bf0c6acb6872084c61c13f573052a4a02fcfec563209193527a31741"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "0cd65d3171bde73b59cc5d5489eb2ab07c284225e3b30c2c160de61ec29df98a"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "5f9d2180a3cecd5c8b361318f792a34496e958081b1d9fc731dbd933673498a5"
-    sha256 cellar: :any_skip_relocation, sonoma:         "a0f22074d46e0c0876a787f2807776f83010424fd0e964b1b3703bd7912dc8f1"
-    sha256 cellar: :any_skip_relocation, ventura:        "60b399b07572609d7661317b1e54c99cbb704d229ea78df4afdcf4adc74db659"
-    sha256 cellar: :any_skip_relocation, monterey:       "ec4938ae3249e4f6d1a312c14550ec4da837a7b572bbd0d4b7238fb5ca7f0728"
-    sha256 cellar: :any_skip_relocation, big_sur:        "90bc7bcf414bfc4d9a68e7dbade089260bb12483939a78a136cdb9b2ea1a3bcb"
-    sha256 cellar: :any_skip_relocation, catalina:       "5f4b312595410d83df9099dc15657241dc4cb758d58a5836565127275a6fb912"
-    sha256 cellar: :any_skip_relocation, mojave:         "d441fd3733557c8de6c227663566e9ac668562a7ecf113504a8c604490752763"
-    sha256 cellar: :any_skip_relocation, high_sierra:    "2c157d2d74ef17b3fcf8f5cf11d62d1b7ba939f0d7d48872d83706cbeb2b2908"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "cce35bb9ee56a4a093d8893c401609b868eea6782d269d716af31a620d0f82ab"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "f6bea503ebf5a08dec482d702efc5deb9a582e508b02c0801676e5b12d81cc38"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "3b8a6e27f0f6d7d2ea5975527fcaeb26e12e85084ada04504faf8648e49c68aa"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "14251bfb6655c4a41182c877f335e7a52d94b0cf19944b6a84503114ffe9d225"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "0d3c7f2ada5fe41129297cb1d3982c820795caf49df73ef195809a105b6fc7b1"
+    sha256 cellar: :any_skip_relocation, sonoma:        "26662c5e73e42985a75df7fb1fa10f74eff789aa3271daf497323c8c66725dee"
+    sha256 cellar: :any_skip_relocation, ventura:       "293196654c48f797b253a1d07ce9bab5836d5682fbe1772f26a6dc8f64875977"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "68647073986327f94f8ee9ec7e8d4b0e34cb8555378591e99e0ab19f480d9e83"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "34a93fd16e042a40f5d18973a31931ea504884cacb750acaabb1772a891435d3"
   end
 
   depends_on "ant" => :build
   depends_on "beagle"
-  depends_on "openjdk@11"
+  depends_on "openjdk"
 
   def install
-    ENV["JAVA_HOME"] = Language::Java.java_home("11")
+    ENV["JAVA_HOME"] = Language::Java.java_home
     system "ant", "linux"
-    libexec.install Dir["release/Linux/BEASTv*/*"]
+    libexec.install Dir["release/Linux/BEAST_X_v*/*"]
     pkgshare.install_symlink libexec/"examples"
     bin.install Dir[libexec/"bin/*"]
 
-    env = Language::Java.overridable_java_home_env("11")
-    env["PATH"] = "$JAVA_HOME/bin:$PATH" if OS.linux?
+    env = Language::Java.overridable_java_home_env
+    env["PATH"] = "${JAVA_HOME}/bin:${PATH}" if OS.linux?
     bin.env_script_all_files libexec/"bin", env
     inreplace libexec/"bin/beast", "/usr/local", HOMEBREW_PREFIX
   end
@@ -62,7 +57,7 @@ class Beast < Formula
 
     %w[ops log trees].each do |ext|
       output = "testUCRelaxedClockLogNormal." + ext
-      assert_predicate testpath/output, :exist?, "Failed to create #{output}"
+      assert_path_exists testpath/output, "Failed to create #{output}"
     end
   end
 end

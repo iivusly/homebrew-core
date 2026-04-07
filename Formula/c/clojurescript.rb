@@ -1,8 +1,8 @@
 class Clojurescript < Formula
   desc "Clojure to JS compiler"
   homepage "https://github.com/clojure/clojurescript"
-  url "https://github.com/clojure/clojurescript/releases/download/r1.11.132/cljs.jar"
-  sha256 "7c227c807ca9493fe442b4da1c94d1aec0910c067f2716d2beb0cc7b6e5028c8"
+  url "https://github.com/clojure/clojurescript/releases/download/r1.12.134/cljs.jar"
+  sha256 "89ba5a16fa3b0e74b1206f652c0d14eda5157fdcf8c42f51fc175a4d4c10c48a"
   license "EPL-1.0"
   head "https://github.com/clojure/clojurescript.git", branch: "master"
 
@@ -13,9 +13,10 @@ class Clojurescript < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, all: "1ffb43adb1800fbf4dae1c3bc4c1f858c5aa7188497ee564307e156a151405b5"
+    sha256 cellar: :any_skip_relocation, all: "df0df68b4ae1cd3cf1bc44201af2b2290e9e82def0afa28da47d37104e359011"
   end
 
+  depends_on "node" => :test
   depends_on "openjdk"
 
   def install
@@ -31,12 +32,11 @@ class Clojurescript < Formula
   end
 
   test do
-    (testpath/"t.cljs").write <<~EOS
+    (testpath/"hello.cljs").write <<~CLOJURE
       (ns hello)
-      (defn ^:export greet [n]
-        (str "Hello " n))
-    EOS
+      (println "Hello world!")
+    CLOJURE
 
-    system bin/"cljsc", testpath/"t.cljs"
+    assert_equal "Hello world!\n", shell_output("#{bin}/cljsc --target node #{testpath}/hello.cljs")
   end
 end

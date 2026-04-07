@@ -1,9 +1,10 @@
 class Pybind11 < Formula
   desc "Seamless operability between C++11 and Python"
   homepage "https://github.com/pybind/pybind11"
-  url "https://github.com/pybind/pybind11/archive/refs/tags/v2.13.5.tar.gz"
-  sha256 "b1e209c42b3a9ed74da3e0b25a4f4cd478d89d5efbb48f04b277df427faf6252"
+  url "https://github.com/pybind/pybind11/archive/refs/tags/v3.0.3.tar.gz"
+  sha256 "787459e1e186ee82001759508fefa408373eae8a076ffe0078b126c6f8f0ec5e"
   license "BSD-3-Clause"
+  compatibility_version 1
 
   livecheck do
     url :stable
@@ -11,19 +12,12 @@ class Pybind11 < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "32db552c7241a9a94ecb052c054a5da1a8e4bf2095ec621f52b90a4a366acef5"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "32db552c7241a9a94ecb052c054a5da1a8e4bf2095ec621f52b90a4a366acef5"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "32db552c7241a9a94ecb052c054a5da1a8e4bf2095ec621f52b90a4a366acef5"
-    sha256 cellar: :any_skip_relocation, sonoma:         "f20f6f224a7d18ea56c93b6e8ee9eebcea956d5a471190a3bd790f83aedbfee2"
-    sha256 cellar: :any_skip_relocation, ventura:        "f20f6f224a7d18ea56c93b6e8ee9eebcea956d5a471190a3bd790f83aedbfee2"
-    sha256 cellar: :any_skip_relocation, monterey:       "f20f6f224a7d18ea56c93b6e8ee9eebcea956d5a471190a3bd790f83aedbfee2"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "32db552c7241a9a94ecb052c054a5da1a8e4bf2095ec621f52b90a4a366acef5"
+    sha256 cellar: :any_skip_relocation, all: "f0b5e787c739690f4d244c535cc23209e2e6dd0c78b7f64a2d1cd5511ba23fa7"
   end
 
   depends_on "cmake" => :build
-  depends_on "python-setuptools" => :build
-  depends_on "python@3.11" => [:build, :test]
-  depends_on "python@3.12" => [:build, :test]
+  depends_on "python@3.13" => [:build, :test]
+  depends_on "python@3.14" => [:build, :test]
 
   def pythons
     deps.map(&:to_formula)
@@ -35,17 +29,32 @@ class Pybind11 < Formula
     system "cmake", "-S", ".", "-B", "build", "-DPYBIND11_TEST=OFF", "-DPYBIND11_NOPYTHON=ON", *std_cmake_args
     system "cmake", "--install", "build"
 
+    # build an `:all` bottle.
+    inreplace share/"pkgconfig/pybind11.pc", /^prefix=$/, "\\0#{opt_prefix}"
+
     pythons.each do |python|
       # Install Python package too
       python_exe = python.opt_libexec/"bin/python"
-      system python_exe, "-m", "pip", "install", *std_pip_args(prefix: libexec), "."
-
-      site_packages = Language::Python.site_packages(python_exe)
-      pth_contents = "import site; site.addsitedir('#{libexec/site_packages}')\n"
-      (prefix/site_packages/"homebrew-pybind11.pth").write pth_contents
+      system python_exe, "-m", "pip", "install", *std_pip_args(build_isolation: true), "."
 
       pyversion = Language::Python.major_minor_version(python_exe)
-      bin.install libexec/"bin/pybind11-config" => "pybind11-config-#{pyversion}"
+      (buildpath/"pybind11-config-#{pyversion}").write <<~BASH
+        #!/bin/bash
+        exec -a "$0" "#{python.opt_bin}/python#{pyversion}" -m pybind11 "$@"
+      BASH
+      chmod "+x", "pybind11-config-#{pyversion}"
+      bin.install "pybind11-config-#{pyversion}"
+
+      site_packages_pybind11 = prefix/Language::Python.site_packages(python_exe)/"pybind11"
+
+      # Avoid installing duplicate files from the prefix
+      site_packages_share = site_packages_pybind11/"share"
+      rm_r site_packages_share.children
+      site_packages_share.install_symlink share.children
+
+      site_packages_include = site_packages_pybind11/"include"
+      rm_r site_packages_include
+      site_packages_include.install_symlink include.children
 
       next if python != pythons.max_by(&:version)
 
@@ -55,7 +64,7 @@ class Pybind11 < Formula
   end
 
   test do
-    (testpath/"example.cpp").write <<~EOS
+    (testpath/"example.cpp").write <<~CPP
       #include <pybind11/pybind11.h>
 
       int add(int i, int j) {
@@ -66,12 +75,12 @@ class Pybind11 < Formula
           m.doc() = "pybind11 example plugin";
           m.def("add", &add, "A function which adds two numbers");
       }
-    EOS
+    CPP
 
-    (testpath/"example.py").write <<~EOS
+    (testpath/"example.py").write <<~PYTHON
       import example
       example.add(1,2)
-    EOS
+    PYTHON
 
     pythons.each do |python|
       python_exe = python.opt_libexec/"bin/python"
@@ -87,17 +96,25 @@ class Pybind11 < Formula
       system ENV.cxx, "-shared", "-fPIC", "-O3", "-std=c++11", "example.cpp", "-o", "example.so", *python_flags
       system python_exe, "example.py"
 
-      test_module = shell_output("#{python_exe} -m pybind11 --includes")
-      assert_match (libexec/site_packages).to_s, test_module
+      test_module = shell_output(
+        "#{python_exe} -m pybind11 --includes",
+      ).chomp.gsub(python.opt_prefix.to_s, HOMEBREW_PREFIX.to_s)
+      assert_match (HOMEBREW_PREFIX/site_packages/"pybind11").to_s, test_module
 
-      test_script = shell_output("#{bin}/pybind11-config-#{pyversion} --includes")
-      assert_match test_module, test_script
+      test_script = shell_output(
+        "#{bin}/pybind11-config-#{pyversion} --includes",
+      ).chomp.gsub(python.opt_prefix.to_s, HOMEBREW_PREFIX.to_s)
+      assert_equal test_module, test_script
 
       next if python != pythons.max_by(&:version)
 
-      test_module = shell_output("#{python_exe} -m pybind11 --includes")
-      test_script = shell_output("#{bin}/pybind11-config --includes")
-      assert_match test_module, test_script
+      test_module = shell_output(
+        "#{python_exe} -m pybind11 --includes",
+      ).chomp.gsub(python.opt_prefix.to_s, HOMEBREW_PREFIX.to_s)
+      test_script = shell_output(
+        "#{bin}/pybind11-config --includes",
+      ).chomp.gsub(python.opt_prefix.to_s, HOMEBREW_PREFIX.to_s)
+      assert_equal test_module, test_script
     end
   end
 end

@@ -1,8 +1,8 @@
 class Kmod < Formula
   desc "Linux kernel module handling"
   homepage "https://git.kernel.org/pub/scm/utils/kernel/kmod/kmod.git"
-  url "https://mirrors.edge.kernel.org/pub/linux/utils/kernel/kmod/kmod-33.tar.xz"
-  sha256 "dc768b3155172091f56dc69430b5481f2d76ecd9ccb54ead8c2540dbcf5ea9bc"
+  url "https://mirrors.edge.kernel.org/pub/linux/utils/kernel/kmod/kmod-34.2.tar.xz"
+  sha256 "5a5d5073070cc7e0c7a7a3c6ec2a0e1780850c8b47b3e3892226b93ffcb9cb54"
   license all_of: ["LGPL-2.1-or-later", "GPL-2.0-or-later"]
 
   livecheck do
@@ -11,22 +11,32 @@ class Kmod < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "22ddfea85715ea371171452f7cb754e1433bcea2135fb786c480d4cfee27ab70"
+    rebuild 1
+    sha256 arm64_linux:  "61677724c3f5a7390c6fb6b7ea9bb8a63d579be87223b4d1bc4a958c5a2413dd"
+    sha256 x86_64_linux: "bf100adc797109c78f5a9811d224673e36f7670f90677cbf4d6ce1b5fbe49d3e"
   end
 
+  depends_on "meson" => :build
+  depends_on "ninja" => :build
+  depends_on "pkgconf" => :build
   depends_on "scdoc" => :build
   depends_on :linux
+  depends_on "openssl@3"
+  depends_on "xz"
+  depends_on "zlib-ng-compat"
+  depends_on "zstd"
 
   def install
-    system "./configure", "--with-bashcompletiondir=#{bash_completion}", "--disable-silent-rules", *std_configure_args
-    system "make", "install"
-
-    bin.install_symlink "kmod" => "depmod"
-    bin.install_symlink "kmod" => "lsmod"
-    bin.install_symlink "kmod" => "modinfo"
-    bin.install_symlink "kmod" => "insmod"
-    bin.install_symlink "kmod" => "modprobe"
-    bin.install_symlink "kmod" => "rmmod"
+    args = %W[
+      -Dbashcompletiondir=#{bash_completion}
+      -Dfishcompletiondir=#{fish_completion}
+      -Dzshcompletiondir=#{zsh_completion}
+      -Dsysconfdir=#{etc}
+      -Dmanpages=true
+    ]
+    system "meson", "setup", "build", *args, *std_meson_args
+    system "meson", "compile", "-C", "build", "--verbose"
+    system "meson", "install", "-C", "build"
   end
 
   test do

@@ -2,19 +2,18 @@ class Gojq < Formula
   desc "Pure Go implementation of jq"
   homepage "https://github.com/itchyny/gojq"
   url "https://github.com/itchyny/gojq.git",
-      tag:      "v0.12.16",
-      revision: "0607aa5af33a4f980e3e769a1820db80e3cc7b23"
+      tag:      "v0.12.19",
+      revision: "b7ebffbfc038677520df0bae4c8c2d877f88ffea"
   license "MIT"
   head "https://github.com/itchyny/gojq.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "6d3a1f03ff3bb4f6e4de770a27adbf1ec9f2bd45a6596bf28bf35860fbf10988"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "6d3a1f03ff3bb4f6e4de770a27adbf1ec9f2bd45a6596bf28bf35860fbf10988"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "6d3a1f03ff3bb4f6e4de770a27adbf1ec9f2bd45a6596bf28bf35860fbf10988"
-    sha256 cellar: :any_skip_relocation, sonoma:         "4b473c2429f8843e306a800f0be08daa2d0c291725d9ac169aa0c4145bd4ea22"
-    sha256 cellar: :any_skip_relocation, ventura:        "4b473c2429f8843e306a800f0be08daa2d0c291725d9ac169aa0c4145bd4ea22"
-    sha256 cellar: :any_skip_relocation, monterey:       "4b473c2429f8843e306a800f0be08daa2d0c291725d9ac169aa0c4145bd4ea22"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "308dc8d13b4be74896a795a2870faac42ff6a0d2684f05f73194780dbf42fee7"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "8de3e810c66fed0188b58bef39125979ba6c4caf159401c8e2972efc340b76d7"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "8de3e810c66fed0188b58bef39125979ba6c4caf159401c8e2972efc340b76d7"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "8de3e810c66fed0188b58bef39125979ba6c4caf159401c8e2972efc340b76d7"
+    sha256 cellar: :any_skip_relocation, sonoma:        "47394fe55df1ddf2d82ba5c0a598c6639efa44c7888ed121db3667359a5cfe45"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "1f24d5472b589c533aa56b8b10dd906d8d8ec5b0afc04c919074065b06b70608"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "710783baeebc1b41002428920e1f460c70cd8df53af3c1e47c030d3d291d1daf"
   end
 
   depends_on "go" => :build

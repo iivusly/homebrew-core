@@ -4,16 +4,15 @@ class Bastet < Formula
   url "https://github.com/fph/bastet/archive/refs/tags/0.43.2.tar.gz"
   sha256 "f219510afc1d83e4651fbffd5921b1e0b926d5311da4f8fa7df103dc7f2c403f"
   license "GPL-3.0-or-later"
-  revision 9
+  revision 13
 
   bottle do
-    sha256 arm64_sonoma:   "99510b92a64c32f9abda92c23c45f7700950c4b656c90c4f45dcffa7b21c0a69"
-    sha256 arm64_ventura:  "b95a617b157fac8e977ed972c638ff36b388dec9c1ff2d2ae03a75eac78971bf"
-    sha256 arm64_monterey: "beaa5643a5e1898e3c4a750b08b1ab48a950ccbaaed03ab258c30660cb905444"
-    sha256 sonoma:         "733d2f4f060507d9f93c70ebf3541c1342f7ad26b3e1ff04748a0e334cd042f4"
-    sha256 ventura:        "f8aeb7ace53406c2c65f107c75cd47da12c1d3b4c55188c718778465dfb07c77"
-    sha256 monterey:       "bf805f500f2200dcc8ed4fd9af36226f24919809f085ceec2fd583b4839888f4"
-    sha256 x86_64_linux:   "0aaec6fe765c9c4141acb901205cfb2f6b80a22d3101cfec1b54852860861923"
+    sha256               arm64_tahoe:   "4a36aae44f8d7241586755bf287e97d22d9c25a7063a829a4c27acf0f334e6ab"
+    sha256               arm64_sequoia: "f1ccdafb2925637af27c5823319c1e35b328d1376e78f10352b51c7dc14c80b8"
+    sha256               arm64_sonoma:  "c5f9832aa81c9273df5cd6e9ed889e232ba4b2b404959159b83d65d70b8749d7"
+    sha256 cellar: :any, sonoma:        "a3b4dd087d6c1a9ebc3bd49d738bba4934e67120aae88c9ca48a78b92145e9f9"
+    sha256               arm64_linux:   "78ece6016f523525d749e367e4bbef4de709ac426add7c8ff7fb6db45480aedb"
+    sha256               x86_64_linux:  "27a2d5d98345001280889ceaf575f39c65519dacd8a6f45b197c0d24714ac1fc"
   end
 
   depends_on "boost"
@@ -28,7 +27,7 @@ class Bastet < Formula
   def install
     inreplace %w[Config.cpp bastet.6], "/var", var
 
-    ENV.append "CXXFLAGS", "-std=c++14"
+    ENV.append "CXX", "-std=c++14"
 
     system "make", "all"
 
@@ -41,12 +40,9 @@ class Bastet < Formula
   end
 
   test do
-    pid = fork do
-      exec bin/"bastet"
-    end
+    pid = spawn bin/"bastet"
     sleep 3
-
-    assert_predicate bin/"bastet", :exist?
+    assert_path_exists bin/"bastet"
     assert_predicate bin/"bastet", :executable?
   ensure
     Process.kill("TERM", pid)

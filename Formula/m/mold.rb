@@ -1,37 +1,45 @@
 class Mold < Formula
   desc "Modern Linker"
   homepage "https://github.com/rui314/mold"
-  url "https://github.com/rui314/mold/archive/refs/tags/v2.33.0.tar.gz"
-  sha256 "37b3aacbd9b6accf581b92ba1a98ca418672ae330b78fe56ae542c2dcb10a155"
+  url "https://github.com/rui314/mold/archive/refs/tags/v2.40.4.tar.gz"
+  sha256 "69414c702ec1084e1fa8ca16da24f167f549e5e11e9ecd5d70a8dcda6f08c249"
   license "MIT"
   head "https://github.com/rui314/mold.git", branch: "main"
 
+  # There can be a notable gap between when a version is tagged and a
+  # corresponding release is created, so we check the "latest" release instead
+  # of the Git tags.
+  livecheck do
+    url :stable
+    strategy :github_latest
+  end
+
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "b31ee1034a1cb33149c1b5ffcddb7559d361bedebf37ec456f052730546f0aec"
-    sha256 cellar: :any,                 arm64_ventura:  "9fd7bb5e5b3b8958476b0273ffa33b31741803cd019b3ebb66cdca8c7c30c26f"
-    sha256 cellar: :any,                 arm64_monterey: "e167492e6bb3aff5418ac8b8989d3b0de57d75768e7c114f03cc39919cc1337c"
-    sha256 cellar: :any,                 sonoma:         "9c742d7143354c9c9ced99e03863e3c43b8ffba04a1b4c8b9b358a358cfa10d7"
-    sha256 cellar: :any,                 ventura:        "6f3aa4a4f6ab1a246e7524a2e268316e9e4a0006794b38503b134d840b5ff120"
-    sha256 cellar: :any,                 monterey:       "70c631ffc66d77cf46c675452390ee59aa25f19efa9b5015d2969bb88440543b"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "d72002bc31163c1e91f0257ce3415d7ac23b746513befebafab0b4bf4b311ea8"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "5733b66bbcb80581733ce9c5b890d920ece84dd8fbf19416ca3565f6ea6de0be"
+    sha256 cellar: :any,                 arm64_sequoia: "2ebfecf9ccf2c38f4f4ef592f0c3e7c0a2823732c0832f9b52916e3a57453005"
+    sha256 cellar: :any,                 arm64_sonoma:  "cb22350cbe464777f397ee4ea99aa05c52b506b11ae6271ebbb11b72d22ed0c3"
+    sha256 cellar: :any,                 sonoma:        "d68d8c192b9d685abb2260d42ad117cc2aa0aa35ede04b6a33435e5c18af899a"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "a0e5fe128a94e3665ae2423743f9fc0cdcf775cb21b021c1ca4379910a645eed"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "d0a3edd10d03ae3340bcb0e13cff3a55e2a59e0d0f4c2c6ecf7eeec41ce2e3c3"
   end
 
   depends_on "cmake" => :build
   depends_on "blake3"
   depends_on "tbb"
   depends_on "zstd"
-  uses_from_macos "zlib"
 
   on_macos do
-    depends_on "llvm" => :build if DevelopmentTools.clang_build_version <= 1200
+    depends_on "llvm" => :build if DevelopmentTools.clang_build_version <= 1500
   end
 
   on_linux do
     depends_on "mimalloc"
+    depends_on "zlib-ng-compat"
   end
 
   fails_with :clang do
-    build 1200
+    build 1500
     cause "Requires C++20"
   end
 
@@ -41,11 +49,9 @@ class Mold < Formula
   end
 
   def install
-    ENV.llvm_clang if OS.mac? && (DevelopmentTools.clang_build_version <= 1200)
-
     # Avoid embedding libdir in the binary.
     # This helps make the bottle relocatable.
-    inreplace "common/config.h.in", "@CMAKE_INSTALL_FULL_LIBDIR@", ""
+    inreplace "lib/config.h.in", "@CMAKE_INSTALL_FULL_LIBDIR@", ""
     # Ensure we're using Homebrew-provided versions of these dependencies.
     %w[blake3 mimalloc tbb zlib zstd].each { |dir| rm_r(buildpath/"third-party"/dir) }
     args = %w[
@@ -64,16 +70,13 @@ class Mold < Formula
   end
 
   def caveats
-    <<~EOS
-      Support for Mach-O targets has been removed.
-      See https://github.com/bluewhalesystems/sold for macOS/iOS support.
-    EOS
+    "Support for Mach-O targets has been removed."
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       int main(void) { return 0; }
-    EOS
+    C
 
     linker_flag = case ENV.compiler
     when /^gcc(-(\d|10|11))?$/ then "-B#{libexec}/mold"
@@ -96,12 +99,13 @@ class Mold < Formula
     cp_r pkgshare/"test", testpath
 
     # Remove non-native tests.
-    arch = Hardware::CPU.arm? ? "aarch64" : Hardware::CPU.arch.to_s
-    testpath.glob("test/elf/*.sh")
-            .reject { |f| f.basename(".sh").to_s.match?(/^(#{arch}_)?[^_]+$/) }
+    arch = Hardware::CPU.arch.to_s
+    arch = "aarch64" if arch == "arm64"
+    testpath.glob("test/arch-*.sh")
+            .reject { |f| f.basename(".sh").to_s.match?(/^arch-#{arch}-/) }
             .each(&:unlink)
 
-    inreplace testpath.glob("test/elf/*.sh") do |s|
+    inreplace testpath.glob("test/*.sh") do |s|
       s.gsub!(%r{(\./|`pwd`/)?mold-wrapper}, lib/"mold/mold-wrapper", audit_result: false)
       s.gsub!(%r{(\.|`pwd`)/mold}, bin/"mold", audit_result: false)
       s.gsub!(/-B(\.|`pwd`)/, "-B#{libexec}/mold", audit_result: false)
@@ -110,11 +114,11 @@ class Mold < Formula
     # The `inreplace` rules above do not work well on this test. To avoid adding
     # too much complexity to the regex rules, it is manually tested below
     # instead.
-    (testpath/"test/elf/mold-wrapper2.sh").unlink
+    (testpath/"test/mold-wrapper2.sh").unlink
     assert_match "mold-wrapper.so",
       shell_output("#{bin}/mold -run bash -c 'echo $LD_PRELOAD'")
 
     # Run the remaining tests.
-    testpath.glob("test/elf/*.sh").each { |t| system "bash", t }
+    testpath.glob("test/*.sh").each { |t| system "bash", t }
   end
 end

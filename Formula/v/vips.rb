@@ -1,9 +1,11 @@
 class Vips < Formula
   desc "Image processing library"
   homepage "https://github.com/libvips/libvips"
-  url "https://github.com/libvips/libvips/releases/download/v8.15.3/vips-8.15.3.tar.xz"
-  sha256 "3e27d9f536eafad64013958fe9e8a1964c90b564c731d49db7c1a1c11b1052a0"
+  url "https://github.com/libvips/libvips/releases/download/v8.18.2/vips-8.18.2.tar.xz"
+  sha256 "a30d4aede16f1c2899c1a2241870f8a7409feafa38484bcdcdac113d6d6f8ff5"
   license "LGPL-2.1-or-later"
+  revision 1
+  compatibility_version 1
 
   livecheck do
     url :stable
@@ -11,19 +13,18 @@ class Vips < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "26c573f93334362a2014fdae473da7af8b867f31b8d8f2b0763873a87e5b7ac1"
-    sha256 arm64_ventura:  "fb4dce4c8b0fb76319214da43e82367ed2b75e748908cb14da5288f0bd3b0206"
-    sha256 arm64_monterey: "08bfcda00a28eac3df579be941dcc04330ddaff08230ada26d5fa53489f56dd3"
-    sha256 sonoma:         "94a511a6a00259a376eb76fd288683a26fdf757729143070d46a3a2620d28c5a"
-    sha256 ventura:        "601d0295a11f9d40001832bf786a8eb2e58ad5202773e0d9675c42e3f28cacb0"
-    sha256 monterey:       "96432c88dcdb4cc6fc37b1f854f22814f37f0f8ce6eeca02ad7a996eb6618449"
-    sha256 x86_64_linux:   "07568eb2e6fffd0059fbc34f678825feb5815a2b2a29fed738865e91ba36e6cb"
+    sha256 arm64_tahoe:   "e009b71e1fcc9309ba0346a9b1f2dcb6b06b50a0486a61f44d67c2aeef9a806f"
+    sha256 arm64_sequoia: "7016e9d5a9a274b198898375de1075449f71a424f57dcddd985e111c8cdbc3c4"
+    sha256 arm64_sonoma:  "36c641f678f1224e0aab11c427565b7a420d5ff1307146e4afdd607c887194ee"
+    sha256 sonoma:        "4f97f1cf8737230dc933aff2217ac9f29a77ced703735d778fe84e608cded4ce"
+    sha256 arm64_linux:   "7b4a29d60a0c343e352a54829a7fc4ab1cb0d02bd2f5fbea7334ff3b876774a5"
+    sha256 x86_64_linux:  "75dfe5c6c9191ddeb732f47b6f8f15eb9d38cdf0aaa2b2e1f772e94c70270fee"
   end
 
   depends_on "gobject-introspection" => :build
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => [:build, :test]
+  depends_on "pkgconf" => [:build, :test]
   depends_on "cairo"
   depends_on "cfitsio"
   depends_on "cgif"
@@ -39,9 +40,11 @@ class Vips < Formula
   depends_on "libheif"
   depends_on "libimagequant"
   depends_on "libmatio"
+  depends_on "libpng"
+  depends_on "libraw"
   depends_on "librsvg"
-  depends_on "libspng"
   depends_on "libtiff"
+  depends_on "libultrahdr"
   depends_on "little-cms2"
   depends_on "mozjpeg"
   depends_on "openexr"
@@ -53,9 +56,10 @@ class Vips < Formula
 
   uses_from_macos "python" => :build
   uses_from_macos "expat"
-  uses_from_macos "zlib"
 
-  fails_with gcc: "5"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     # mozjpeg needs to appear before libjpeg, otherwise it's not used
@@ -84,14 +88,14 @@ class Vips < Formula
 
     # --trellis-quant requires mozjpeg, vips warns if it's not present
     cmd = "#{bin}/vips jpegsave #{test_fixtures("test.png")} #{testpath}/test.jpg --trellis-quant 2>&1"
-    assert_equal "", shell_output(cmd)
+    assert_empty shell_output(cmd)
 
     # [palette] requires libimagequant, vips warns if it's not present
     cmd = "#{bin}/vips copy #{test_fixtures("test.png")} #{testpath}/test.png[palette] 2>&1"
-    assert_equal "", shell_output(cmd)
+    assert_empty shell_output(cmd)
 
     # Make sure `pkg-config` can parse `vips.pc` and `vips-cpp.pc` after the `inreplace`.
-    system "pkg-config", "vips"
-    system "pkg-config", "vips-cpp"
+    system "pkgconf", "--print-errors", "vips"
+    system "pkgconf", "--print-errors", "vips-cpp"
   end
 end

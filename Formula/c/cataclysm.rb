@@ -1,32 +1,36 @@
 class Cataclysm < Formula
   desc "Fork/variant of Cataclysm Roguelike"
   homepage "https://github.com/CleverRaven/Cataclysm-DDA"
-  url "https://github.com/CleverRaven/Cataclysm-DDA/archive/refs/tags/0.G.tar.gz"
-  version "0.G"
-  sha256 "e559d0d495b314ed39890920b222b4ae5067db183b5d39d4263700bfd66f36fb"
+  url "https://github.com/CleverRaven/Cataclysm-DDA/archive/refs/tags/0.H-RELEASE.tar.gz"
+  version "0.H"
+  sha256 "9fbd80d13321321d6ed1f5a736ab874e06d335429f2a51a39eefd2fa51feae68"
   license "CC-BY-SA-3.0"
-  head "https://github.com/CleverRaven/Cataclysm-DDA.git", branch: "master"
 
   livecheck do
     url :stable
-    regex(/([^"' >]+)/i)
+    regex(/^v?(\d+(?:\.(?:\d+|\w))+(?:[_-]\d+)?)/i)
     strategy :github_latest
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "1f0baa0478cd23de28c5ad1d2b10b90979b0c627a6445f15b287193d760c8493"
-    sha256 cellar: :any,                 arm64_ventura:  "99558da9dc0aff5d3e520504578ba4112a1ccd25be503414c8b35473b9b4e298"
-    sha256 cellar: :any,                 arm64_monterey: "9e83a6fc0c9ae9ae1364fe3dcaa56192b9324f7d2423b8e4df309f1044a717b4"
-    sha256 cellar: :any,                 arm64_big_sur:  "655e4c659d55a1844ef8ebb910f297bbb27ff8b10905c6e9e95232b76cdf1d1b"
-    sha256 cellar: :any,                 sonoma:         "3355476707fda486bb180c4320063c03cf3cb16f6e084d835597089c08d55865"
-    sha256 cellar: :any,                 ventura:        "6f54c0f3258b4231e38dd38d9e094cdd24389ebb1cdb423c3fda60396d588fc9"
-    sha256 cellar: :any,                 monterey:       "062842315c06a4e816fc9885e4b670a306521dbc3b78537e83a6fb304790854d"
-    sha256 cellar: :any,                 big_sur:        "a395f1cc45907a5f83ddd9499fe7178c0220f1af20b6910901a4b434cc95b82c"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "14498eae0539dcfee7034f2975d7889b62c50c0684082954c0695fa4293db7dd"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "492b7c7f2a66af205374ca334b4424cfe0beed549aacaac6e9380e1132cb366e"
+    sha256 cellar: :any,                 arm64_sequoia: "c7262395e501e9f37bddc7a552c4b4e0f3b920f0aabef1eab3b26de586a43dd3"
+    sha256 cellar: :any,                 arm64_sonoma:  "4f34105d17b58a4c9f6a807d524107d38f29d47fbb09eea1134708a1fab2ee8d"
+    sha256 cellar: :any,                 sonoma:        "a7b35b49b7b630c8e30748a52cd20e9224a9bdb3b44ec0019124f6c5a6d9f416"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "11de987a3cc2dea85f666402020210db6c9af56ba5c9f3594c3bb6169c58ef9a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "60f13c7d80e9b622b4153053872837e318be0aa3116535deaa138f49fc0a7a3b"
   end
 
-  depends_on "pkg-config" => :build
+  head do
+    url "https://github.com/CleverRaven/Cataclysm-DDA.git", branch: "master"
+    on_macos do
+      depends_on "freetype"
+    end
+  end
 
+  depends_on "gettext" => :build # for msgfmt
+  depends_on "pkgconf" => :build
   depends_on "libogg"
   depends_on "libvorbis"
   depends_on "sdl2"
@@ -34,10 +38,12 @@ class Cataclysm < Formula
   depends_on "sdl2_mixer"
   depends_on "sdl2_ttf"
 
-  uses_from_macos "zlib"
-
   on_macos do
     depends_on "gettext"
+  end
+
+  on_linux do
+    depends_on "zlib-ng-compat"
   end
 
   def install
@@ -68,24 +74,22 @@ class Cataclysm < Formula
   end
 
   test do
-    # Disable test on Linux because it fails with this error:
-    # Error while initializing the interface: SDL_Init failed: No available video device
-    return if OS.linux? && ENV["HOMEBREW_GITHUB_ACTIONS"]
-
     # make user config directory
-    user_config_dir = testpath/"Library/Application Support/Cataclysm/"
+    user_config_dir = if OS.mac?
+      testpath/"Library/Application Support/Cataclysm"
+    else
+      testpath/".cataclysm-dda"
+    end
     user_config_dir.mkpath
 
     # run cataclysm for 30 seconds
-    pid = fork do
-      exec bin/"cataclysm"
-    end
+    pid = spawn bin/"cataclysm"
     begin
-      sleep 30
-      assert_predicate user_config_dir/"config",
-                       :exist?, "User config directory should exist"
+      sleep 50
+      assert_path_exists user_config_dir/"config", "User config directory should exist"
     ensure
       Process.kill("TERM", pid)
+      Process.wait(pid)
     end
   end
 end

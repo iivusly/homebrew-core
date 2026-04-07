@@ -1,19 +1,18 @@
 class Cpm < Formula
   desc "Fast CPAN module installer"
   homepage "https://metacpan.org/pod/cpm"
-  url "https://cpan.metacpan.org/authors/id/S/SK/SKAJI/App-cpm-0.997017.tar.gz"
-  sha256 "3998ac451276113f4ff2e33fd20bc7cdbccab069ee20a7b35d980d845b467297"
+  url "https://cpan.metacpan.org/authors/id/S/SK/SKAJI/App-cpm-0.998003.tar.gz"
+  sha256 "d15b17241a07fed11ed4a917bbe00d2317e94ac52ac38ee92a9cacbb346adb16"
   license any_of: ["Artistic-1.0-Perl", "GPL-1.0-or-later"]
-  head "https://github.com/skaji/cpm.git", branch: "master"
+  head "https://github.com/skaji/cpm.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "ba102116dc8eee9cbd730b27c2e181e3e5313f1652eba48ff6bdf931236a2f8f"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "ba102116dc8eee9cbd730b27c2e181e3e5313f1652eba48ff6bdf931236a2f8f"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "ba102116dc8eee9cbd730b27c2e181e3e5313f1652eba48ff6bdf931236a2f8f"
-    sha256 cellar: :any_skip_relocation, sonoma:         "c02a32046c2907e627f5a83634be89afe5813f77de19552330f6b086d7593919"
-    sha256 cellar: :any_skip_relocation, ventura:        "c02a32046c2907e627f5a83634be89afe5813f77de19552330f6b086d7593919"
-    sha256 cellar: :any_skip_relocation, monterey:       "c02a32046c2907e627f5a83634be89afe5813f77de19552330f6b086d7593919"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "5d8cb8c4f0230194e57742426ac7d3c884fd89bc0b83b96a5554ae9d2007135c"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "39943392bb01834017a1cbf3b14b49753efee9370520b5e8c1b5009827b22c8c"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "39943392bb01834017a1cbf3b14b49753efee9370520b5e8c1b5009827b22c8c"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "39943392bb01834017a1cbf3b14b49753efee9370520b5e8c1b5009827b22c8c"
+    sha256 cellar: :any_skip_relocation, sonoma:        "e2943684a18400c6e4e7c55a667d3a7c5a555baa350832ba9c88de079ea935f3"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "02275f43215e7cc133f9d83dc6c4de46cced54494ce068aaf833b84677cf8ee0"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "9a7df99cd6d078553861bff91a306e163ee0ccd723b261414f80c0764d996d1e"
   end
 
   depends_on "perl"
@@ -21,8 +20,8 @@ class Cpm < Formula
   conflicts_with "yaze-ag", because: "both install `cpm` binaries"
 
   resource "Module::Build::Tiny" do
-    url "https://cpan.metacpan.org/authors/id/L/LE/LEONT/Module-Build-Tiny-0.048.tar.gz"
-    sha256 "79a73e506fb7badabdf79137a45c6c5027daaf6f9ac3dcfb9d4ffcce92eb36bd"
+    url "https://cpan.metacpan.org/authors/id/L/LE/LEONT/Module-Build-Tiny-0.052.tar.gz"
+    sha256 "bd10452c9f24d4b4fe594126e3ad231bab6cebf16acda40a4e8dc784907eb87f"
   end
 
   resource "CPAN::Common::Index" do
@@ -41,8 +40,8 @@ class Cpm < Formula
   end
 
   resource "Capture::Tiny" do
-    url "https://cpan.metacpan.org/authors/id/D/DA/DAGOLDEN/Capture-Tiny-0.48.tar.gz"
-    sha256 "6c23113e87bad393308c90a207013e505f659274736638d8c79bac9c67cc3e19"
+    url "https://cpan.metacpan.org/authors/id/D/DA/DAGOLDEN/Capture-Tiny-0.50.tar.gz"
+    sha256 "ca6e8d7ce7471c2be54e1009f64c367d7ee233a2894cacf52ebe6f53b04e81e5"
   end
 
   resource "Class::Tiny" do
@@ -51,23 +50,28 @@ class Cpm < Formula
   end
 
   resource "Command::Runner" do
-    url "https://cpan.metacpan.org/authors/id/S/SK/SKAJI/Command-Runner-0.200.tar.gz"
-    sha256 "5ad26d06111bfecd53c8f5bb5dea94bf2025f6c78e95f6d8012e4cfa89e29f26"
+    url "https://cpan.metacpan.org/authors/id/S/SK/SKAJI/Command-Runner-0.201.tar.gz"
+    sha256 "38e3294ae9ffd015625d7746a0803cc329de92fb0f0edae9a29cd8232cf458d3"
+  end
+
+  resource "Darwin::InitObjC" do
+    url "https://cpan.metacpan.org/authors/id/S/SK/SKAJI/Darwin-InitObjC-0.001.tar.gz"
+    sha256 "9a5f2887cb2fd427d64937743ffe3e748eab38b5b64906185fc243861e189f91"
   end
 
   resource "ExtUtils::Config" do
-    url "https://cpan.metacpan.org/authors/id/L/LE/LEONT/ExtUtils-Config-0.009.tar.gz"
-    sha256 "4ef84e73aad50a3be332885d2a3b12f3cab1b1e0bad24e88297a123b4f39f3ce"
+    url "https://cpan.metacpan.org/authors/id/L/LE/LEONT/ExtUtils-Config-0.010.tar.gz"
+    sha256 "82e7e4e90cbe380e152f5de6e3e403746982d502dd30197a123652e46610c66d"
   end
 
   resource "ExtUtils::Helpers" do
-    url "https://cpan.metacpan.org/authors/id/L/LE/LEONT/ExtUtils-Helpers-0.026.tar.gz"
-    sha256 "de901b6790a4557cf4ec908149e035783b125bf115eb9640feb1bc1c24c33416"
+    url "https://cpan.metacpan.org/authors/id/L/LE/LEONT/ExtUtils-Helpers-0.028.tar.gz"
+    sha256 "c8574875cce073e7dc5345a7b06d502e52044d68894f9160203fcaab379514fe"
   end
 
   resource "ExtUtils::InstallPaths" do
-    url "https://cpan.metacpan.org/authors/id/L/LE/LEONT/ExtUtils-InstallPaths-0.013.tar.gz"
-    sha256 "65969d3ad8a3a2ea8ef5b4213ed5c2c83961bb5bd12f7ad35128f6bd5b684aa0"
+    url "https://cpan.metacpan.org/authors/id/L/LE/LEONT/ExtUtils-InstallPaths-0.015.tar.gz"
+    sha256 "7d64eb2dfa87ead010cdf55c8a1bdfde50b7b5852d7cb8cf2304f55bea2eb007"
   end
 
   resource "ExtUtils::MakeMaker::CPANfile" do
@@ -121,8 +125,13 @@ class Cpm < Formula
   end
 
   resource "Parallel::Pipes" do
-    url "https://cpan.metacpan.org/authors/id/S/SK/SKAJI/Parallel-Pipes-0.200.tar.gz"
-    sha256 "88b9850eacc9d618f3e91a51caa386c4a64e82cc187350335244e349b8111106"
+    url "https://cpan.metacpan.org/authors/id/S/SK/SKAJI/Parallel-Pipes-0.201.tar.gz"
+    sha256 "b73cbdd4202b29eab97e0c08dcd59d9273633610e8721cf449078656bd591a7c"
+  end
+
+  resource "Parse::LocalDistribution" do
+    url "https://cpan.metacpan.org/authors/id/I/IS/ISHIGAKI/Parse-LocalDistribution-0.20.tar.gz"
+    sha256 "664f4351e55ee9473c9b012af87d2832f652979cb89ade7954e6f38cd126a859"
   end
 
   resource "Parse::PMFile" do
@@ -141,8 +150,8 @@ class Cpm < Formula
   end
 
   resource "URI" do
-    url "https://cpan.metacpan.org/authors/id/O/OA/OALDERS/URI-5.28.tar.gz"
-    sha256 "e7985da359b15efd00917fa720292b711c396f2f9f9a7349e4e7dec74aa79765"
+    url "https://cpan.metacpan.org/authors/id/O/OA/OALDERS/URI-5.34.tar.gz"
+    sha256 "de64c779a212ff1821896c5ca2bb69e74767d2674cee411e777deea7a22604a8"
   end
 
   resource "Win32::ShellQuote" do
@@ -151,8 +160,8 @@ class Cpm < Formula
   end
 
   resource "YAML::PP" do
-    url "https://cpan.metacpan.org/authors/id/T/TI/TINITA/YAML-PP-v0.38.0.tar.gz"
-    sha256 "a819465c52f6a341049a3942742c08e04f2894b2a66482e43a7f407ce10b4ea0"
+    url "https://cpan.metacpan.org/authors/id/T/TI/TINITA/YAML-PP-v0.39.0.tar.gz"
+    sha256 "32f53c65781277dcbe50827b4cbf217eceeff264779e3a6c98c94229eb149f58"
   end
 
   resource "local::lib" do
@@ -167,6 +176,7 @@ class Cpm < Formula
       "Module::Build::Tiny",
       "Module::cpmfile",
       "Command::Runner",
+      "Darwin::InitObjC",
       "Parallel::Pipes",
     ]
 

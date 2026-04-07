@@ -62,29 +62,34 @@ end
 class GlibcAT213 < Formula
   desc "GNU C Library"
   homepage "https://www.gnu.org/software/libc/"
-  url "https://ftp.gnu.org/gnu/glibc/glibc-2.13.tar.gz"
-  mirror "https://ftpmirror.gnu.org/gnu/glibc/glibc-2.13.tar.gz"
+  url "https://ftpmirror.gnu.org/gnu/glibc/glibc-2.13.tar.gz"
+  mirror "https://ftp.gnu.org/gnu/glibc/glibc-2.13.tar.gz"
   sha256 "bd90d6119bcc2898befd6e1bbb2cb1ed3bb1c2997d5eaa6fdbca4ee16191a906"
   license all_of: ["GPL-2.0-or-later", "LGPL-2.1-or-later"]
   revision 1
+
+  livecheck do
+    skip "versioned formula is pinned to specific version"
+  end
 
   bottle do
     sha256 x86_64_linux: "fcfd8511ae57b126f377789db1294e74bd48c2be941badd8e33a378dbdef9e16"
   end
 
-  keg_only :versioned_formula
+  keg_only "it can shadow system glibc if linked"
 
   depends_on GawkRequirement => :build
   depends_on "linux-headers@4.4" => :build
   depends_on MakeRequirement => :build
   depends_on SedRequirement => :build
+  depends_on arch: :x86_64
   depends_on :linux
   depends_on LinuxKernelRequirement
 
   # Fix getconf files having random bytes at the end of their names.
   # Backport of patch included in 2.16.
   patch do
-    url "https://raw.githubusercontent.com/Homebrew/formula-patches/d87dbbdadb5aa4899fd293be70f8087a412d6a59/glibc/2.13-getconf.diff"
+    url "https://raw.githubusercontent.com/Homebrew/homebrew-core/1cf441a0/Patches/glibc/2.13-getconf.diff"
     sha256 "e945c11c76655cba6f3e1c13d847e57d6e591a5af3fd7d3eb2c200475bfcdaed"
   end
 
@@ -126,7 +131,6 @@ class GlibcAT213 < Formula
         "--disable-dependency-tracking",
         "--disable-silent-rules",
         "--prefix=#{prefix}",
-        "--enable-obsolete-rpc",
         "--without-selinux",
         "--with-headers=#{Formula["linux-headers@4.4"].include}",
       ]

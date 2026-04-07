@@ -3,40 +3,38 @@ class PyqtBuilder < Formula
 
   desc "Tool to build PyQt"
   homepage "https://pyqt-builder.readthedocs.io/"
-  url "https://files.pythonhosted.org/packages/e6/f5/daead7fd8ef3675ce55f4ef66dbe3287b0bdd74315f6b5a57718a020570b/pyqt_builder-1.16.4.tar.gz"
-  sha256 "4515e41ae379be2e54f88a89ecf47cd6e4cac43e862c4abfde18389c2666afdf"
+  url "https://files.pythonhosted.org/packages/61/f6/f3b504b4d55a7c4d3393cb90378501f1f5fc7f233bd85c0375674f84d2af/pyqt_builder-1.19.1.tar.gz"
+  sha256 "6af6646ba29668751b039bfdced51642cb510e300796b58a4d68b7f956a024d8"
   license "BSD-2-Clause"
   head "https://github.com/Python-PyQt/PyQt-builder.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "a061675692c46691e65d34a29710cb64d5e6e9d50cb028cea6338ff9f258c011"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "a061675692c46691e65d34a29710cb64d5e6e9d50cb028cea6338ff9f258c011"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "a061675692c46691e65d34a29710cb64d5e6e9d50cb028cea6338ff9f258c011"
-    sha256 cellar: :any_skip_relocation, sonoma:         "32114b67ed9ac121368a6c251b757c15eb5fef6bbc0df59f2d242fce12e6befe"
-    sha256 cellar: :any_skip_relocation, ventura:        "32114b67ed9ac121368a6c251b757c15eb5fef6bbc0df59f2d242fce12e6befe"
-    sha256 cellar: :any_skip_relocation, monterey:       "844537780bbb59836b71220ab4738f8acfecf1c159b6257005eef4a1b74a9485"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "1d9c9bf09d3044caf12c5f52625afb83ef1f58ce997d0de9c81ede1eb2f6e9eb"
+    rebuild 3
+    sha256 cellar: :any_skip_relocation, all: "8f4c0bd1e4b26ea418de6e45ccdf8c71e80d95f357c73bcce0b48a3d6519976b"
   end
 
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   resource "packaging" do
-    url "https://files.pythonhosted.org/packages/51/65/50db4dda066951078f0a96cf12f4b9ada6e4b811516bf0262c0f4f7064d4/packaging-24.1.tar.gz"
-    sha256 "026ed72c8ed3fcce5bf8950572258698927fd1dbda10a5e981cdf0ac37f4f002"
+    url "https://files.pythonhosted.org/packages/65/ee/299d360cdc32edc7d2cf530f3accf79c4fca01e96ffc950d8a52213bd8e4/packaging-26.0.tar.gz"
+    sha256 "00243ae351a257117b6a241061796684b084ed1c516a08c48a3f7e147a9d80b4"
   end
 
   resource "setuptools" do
-    url "https://files.pythonhosted.org/packages/65/d8/10a70e86f6c28ae59f101a9de6d77bf70f147180fbf40c3af0f64080adc3/setuptools-70.3.0.tar.gz"
-    sha256 "f171bab1dfbc86b132997f26a119f6056a57950d058587841a0082e8830f9dc5"
+    url "https://files.pythonhosted.org/packages/82/f3/748f4d6f65d1756b9ae577f329c951cda23fb900e4de9f70900ced962085/setuptools-82.0.0.tar.gz"
+    sha256 "22e0a2d69474c6ae4feb01951cb69d515ed23728cf96d05513d36e42b62b37cb"
   end
 
   resource "sip" do
-    url "https://files.pythonhosted.org/packages/6e/52/36987b182711104d5e9f8831dd989085b1241fc627829c36ddf81640c372/sip-6.8.6.tar.gz"
-    sha256 "7fc959e48e6ec5d5af8bd026f69f5e24d08b3cb8abb342176f5ab8030cc07d7a"
+    url "https://files.pythonhosted.org/packages/8e/3d/4245885c0480230d4bc389c6165c841546bf43c1e780fd77995caf5ad7b8/sip-6.15.1.tar.gz"
+    sha256 "dc2e58c1798a74e1b31c28e837339822fe8fa55288ae30e8986eb28100ebca5a"
+  end
+
+  def python3
+    "python3.14"
   end
 
   def install
-    python3 = "python3.12"
     venv = virtualenv_install_with_resources
 
     # Modify the path sip-install writes in scripts as we install into a

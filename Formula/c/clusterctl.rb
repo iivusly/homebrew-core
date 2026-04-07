@@ -1,8 +1,8 @@
 class Clusterctl < Formula
   desc "Home for the Cluster Management API work, a subproject of sig-cluster-lifecycle"
   homepage "https://cluster-api.sigs.k8s.io"
-  url "https://github.com/kubernetes-sigs/cluster-api/archive/refs/tags/v1.8.1.tar.gz"
-  sha256 "c2fe9d352b8076b752c09d6433743fe18b7f3e2e05ca7741d793c955d6e6d55b"
+  url "https://github.com/kubernetes-sigs/cluster-api/archive/refs/tags/v1.12.4.tar.gz"
+  sha256 "1860e13d6def424076d2be928f8a770a037dbb6f02ab589565b11b71224f943b"
   license "Apache-2.0"
   head "https://github.com/kubernetes-sigs/cluster-api.git", branch: "main"
 
@@ -17,13 +17,12 @@ class Clusterctl < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "cd9019a19ee20346546455d05b841df116608a25b5c65f9503cc618136364c3b"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "7391c91853ea01fabb448896723a086217d8a341e7f815833fb2c5f2ce9cdeb9"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "067226482aa12dbec5b70d2120a0620d3a2d900875730fc54ea677643040f606"
-    sha256 cellar: :any_skip_relocation, sonoma:         "8c36f59f454ba60423a401c75ce9965a2117a9895c99c6d69635194a594c0593"
-    sha256 cellar: :any_skip_relocation, ventura:        "5ba6c7344f23541f1488faf74ba636224a46b668a6bcc797a165cd00b955984c"
-    sha256 cellar: :any_skip_relocation, monterey:       "98f1e42344f06d30ee9a29d9ba5ed4771f412025a1c8cfef8ce570d0228c7dfc"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "f15be6983e7468d91e06654225238b0c06d4d1818a14da15dd16459c979d8d06"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "38463122f3aff80444de75c667472862295ea21a4c2a3bab0fc3a2419efb1283"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "497b87805313ab632291ae1ee90fde5b167a9ffc8e0b0107536d5414a5a94ecc"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "54133b93e75909415ad2cd4905d36169fddfaef8fc2a61ab641eebcf259e4263"
+    sha256 cellar: :any_skip_relocation, sonoma:        "43def13bbeb9c4626b86cced4f49dd1e27b2eb5f282b5c2dd27e375e75ff0d43"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "1bca2c319ca4c570d1ca5a8c3b6af53730157f44b44bfc833a5308d0817e425a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "b779b019a0372d4ab9c6e0925aff405c76c2d8c5066a08b21fd04623a4772290"
   end
 
   depends_on "go" => :build
@@ -31,14 +30,16 @@ class Clusterctl < Formula
   def install
     ldflags = %W[
       -s -w
-      -X sigs.k8s.io/cluster-api/version.gitVersion=#{version}
-      -X sigs.k8s.io/cluster-api/version.gitCommit=brew
+      -X sigs.k8s.io/cluster-api/version.gitMajor=#{version.major}
+      -X sigs.k8s.io/cluster-api/version.gitMinor=#{version.minor}
+      -X sigs.k8s.io/cluster-api/version.gitVersion=v#{version}
+      -X sigs.k8s.io/cluster-api/version.gitCommit=#{tap.user}
       -X sigs.k8s.io/cluster-api/version.gitTreeState=clean
       -X sigs.k8s.io/cluster-api/version.buildDate=#{time.iso8601}
     ]
     system "go", "build", *std_go_args(ldflags:), "./cmd/clusterctl"
 
-    generate_completions_from_executable(bin/"clusterctl", "completion", shells: [:bash, :zsh, :fish])
+    generate_completions_from_executable(bin/"clusterctl", "completion")
   end
 
   test do

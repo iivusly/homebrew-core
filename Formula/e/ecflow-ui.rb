@@ -1,8 +1,8 @@
 class EcflowUi < Formula
   desc "User interface for client/server workflow package"
-  homepage "https://confluence.ecmwf.int/display/ECFLOW"
-  url "https://confluence.ecmwf.int/download/attachments/8650755/ecFlow-5.13.4-Source.tar.gz"
-  sha256 "b26465cefb3f08228d14955b3cff82e2b4c6b62062a33e6d9788e8b5be20b9a6"
+  homepage "https://ecflow.readthedocs.io"
+  url "https://confluence.ecmwf.int/download/attachments/8650755/ecFlow-5.16.0-Source.tar.gz"
+  sha256 "666f804473e0bdc63f51e0b74531217c74f6e6ed40a33c11f7d2916918489741"
   license "Apache-2.0"
 
   livecheck do
@@ -11,24 +11,27 @@ class EcflowUi < Formula
   end
 
   bottle do
-    sha256                               arm64_sonoma:   "f311d712cc314cd41305eb141cf2eb2cf94d32bdc471733238b73e23b3a1313e"
-    sha256                               arm64_ventura:  "d1fb8a666bff6d67c365a8dd8dbf044ddf6a5de971ab698baf5980992143eb2c"
-    sha256                               arm64_monterey: "29edc22c1f224a681ae365f2b2c9c6e5539ee49ab246b4e64b2b6c0994c1a89d"
-    sha256                               sonoma:         "11101528a682eaa3771051b308e3d040b4a6bd1602b707a0f35504e002ed2817"
-    sha256                               ventura:        "5e5d0d8325918a5ca8c8c73f82c9bdf02582ec83451c4d8861ce6c220ef5f46e"
-    sha256                               monterey:       "2a78e391b2c02ec18f7767921134f3fc71d0cb58636db3a97077ace11a1464c9"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "442280672185cda687b25959de7f5026fc5db020a164efe236074a3936c39228"
+    sha256 arm64_tahoe:   "79bce7cc72cf7eb4bf1c8e2089fdd3cd97c6c4b0780b7ba01f0a2644e73d1048"
+    sha256 arm64_sequoia: "6ba32325148149edd2ad15df2d7ae281d44495391c743cbb79e70d6f8548e165"
+    sha256 arm64_sonoma:  "3e9f65e669f805447fc5b3f57b906460b7fcdc36ec515658df27f866936ebfee"
+    sha256 sonoma:        "7d261ea2a63aa5fe4bf190334310055b1a0b579bb87967df6dab493a3961703d"
+    sha256 arm64_linux:   "603a380e3bd9cbdb07a224f36ab72b0edb1f545f94870b0f58a7544e4059d5ac"
+    sha256 x86_64_linux:  "a9d1f88ce53b5ac82283ed7632eab85d1571b2d4becaa0bffd010137288b081f"
   end
 
   depends_on "boost" => :build
   depends_on "cmake" => :build
   depends_on "openssl@3"
-  depends_on "qt"
+  depends_on "qt5compat"
+  depends_on "qtbase"
+  depends_on "qtcharts"
+  depends_on "qtsvg"
 
   uses_from_macos "libxcrypt"
 
-  # requires C++17 compiler to build with Qt
-  fails_with gcc: "5"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     args = %w[

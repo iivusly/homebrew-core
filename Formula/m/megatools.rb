@@ -1,30 +1,29 @@
 class Megatools < Formula
   desc "Command-line client for Mega.co.nz"
-  homepage "https://megatools.megous.com/"
-  url "https://megatools.megous.com/builds/megatools-1.11.1.20230212.tar.gz"
-  sha256 "ecfa2ee4b277c601ebae648287311030aa4ca73ea61ee730bc66bef24ef19a34"
+  homepage "https://xff.cz/megatools/"
+  url "https://xff.cz/megatools/builds/megatools-1.11.5.20250706.tar.gz"
+  sha256 "51f78a03748a64b1066ce28a2ca75d98dbef5f00fe9789dc894827f9a913b362"
   license "GPL-2.0-or-later" => { with: "openvpn-openssl-exception" }
-  revision 1
 
   livecheck do
-    url "https://megatools.megous.com/builds/"
+    url "https://xff.cz/megatools/builds/"
     regex(/href=.*?megatools[._-]v?(\d+(?:\.\d+)+)\.t/i)
   end
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any, arm64_sonoma:   "b3845c4b42f560ffa78ece64807be6ac5e829b2e2841ce5fee149052d24e5efd"
-    sha256 cellar: :any, arm64_ventura:  "2eb61f7ef9e0c71c3eb0d1b6520e2b99b2f0aa223e2f0bb0a53a3608581718a6"
-    sha256 cellar: :any, arm64_monterey: "c6812e8db8d5fde82501424bcd6df3483965f10c70a71149f037152f5f36f705"
-    sha256 cellar: :any, sonoma:         "e7a64a9b5e2b99b3b77a0cdab91b485b1d0cdacc57930cf5d705219f22b4de5f"
-    sha256 cellar: :any, ventura:        "7b3b7420ba80bb643a085c7499dacd677f3dc56e307a3c4d1d55f45f83825940"
-    sha256 cellar: :any, monterey:       "26e2e1584ae817ded14bda61288acfb220c4ec49026c522475ee8612a7ab7a45"
-    sha256               x86_64_linux:   "107566f078fc8ea1b7c586e8a7ed5a217afbe28c830b6d55e676cd639df62913"
+    sha256 cellar: :any, arm64_tahoe:   "7217cae7f353389333d5f34a1dfbf0d5327372d0a869641a6f38a305a0e2fa42"
+    sha256 cellar: :any, arm64_sequoia: "cbdaf47635fdec1fc36736de8b84d3a96d9eb83da463f0db512d138464009e2f"
+    sha256 cellar: :any, arm64_sonoma:  "b6f04ece0c4f9db9b77383d8bbf83497f83108f64c94db171a7841c7311c7cf0"
+    sha256 cellar: :any, arm64_ventura: "ece0dd5f77f6c087e65c8ea1a78a770a1d1fbeb4fda0f0271cc89b107fce63f7"
+    sha256 cellar: :any, sonoma:        "c95b1c27bf14bccfb31ea2ea00540910a81b00861176b2facc32ae1d392628ca"
+    sha256 cellar: :any, ventura:       "134758d6274b2aba59587c780f34b60b7ad7efa36e54c9ddb5a558f3e8ad43a7"
+    sha256               arm64_linux:   "3cf9bf34c4d780c22dcd0aed0d34d5d9f3ee3f1df79fd96c2db62f07f2054147"
+    sha256               x86_64_linux:  "bb702e9c4d883d99115f1003bac6dc09f0717ee64c9b52ca50b5e91a36d4cbe0"
   end
 
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
 
   depends_on "glib"
   depends_on "openssl@3"

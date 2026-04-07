@@ -1,27 +1,27 @@
 class Austin < Formula
   desc "Python frame stack sampler for CPython"
   homepage "https://github.com/P403n1x87/austin"
-  url "https://github.com/P403n1x87/austin/archive/refs/tags/v3.6.0.tar.gz"
-  sha256 "c29bcd84ff0060efbb282c3f36666de9049dcdb4ae57e26a844d8f4219f3b6f4"
+  url "https://github.com/P403n1x87/austin/archive/refs/tags/v4.0.0.tar.gz"
+  sha256 "1a857d4590092cd8f7fc110cd83c31311dde03113a5dc4cb93c4eb31e5c8f884"
   license "GPL-3.0-or-later"
   head "https://github.com/P403n1x87/austin.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "90c711e04cdaa07e84e9c171dfa2a0726ba65b9d35823afbaaaff3e82302c56f"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "25e17337744671b82d76d5945f7509609438fe5960032dc79253ded8abfcff75"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "e71cac7c434c0a77d2076de01a3d0d942c4b1a70af21e44dc32b375e9df5aaf4"
-    sha256 cellar: :any_skip_relocation, sonoma:         "6f1b3411a7ae8e977acc9fe299fa4f27b04feafcf0bd2c04e128c10928d69ec7"
-    sha256 cellar: :any_skip_relocation, ventura:        "42d5a8b61c806b1b093767c02589358f7e16b6ee81264345006b1055f00fc9f8"
-    sha256 cellar: :any_skip_relocation, monterey:       "1113604e46f3d270d4d87ef5d1e20b945d824c341f03a1c251c10577a94fd679"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "f5261862f6e454451f829c908c7320125d170c5a4619dbe66ffbdadbf82b379a"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "da1ec3babb470a9b8e4f12b70ece43a4d0d00b5de8663477bfb88d5a10544b14"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "d44ca3dd16c310c1aa9b06039ce4a3e660e9f6599d8f21ddfcc1ef0f0d93a3b6"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "2bb32d8e6f61cbb427fa68b9ba33e3028581dff7cba144686522f3fae9f6a429"
+    sha256 cellar: :any_skip_relocation, sonoma:        "ff93fdbf6c416993ffc4e25f03c56ccc9a832d8d06fb6bda5a4142ff41083b0f"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "29c1aee7c3027fa88156dfbe09656e9a577f0c38f145ce3b40fe1daafc93a474"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "8881075b254897ac5c175df033cf18c4e3c9be2c8f7da9c089ff51f829121833"
   end
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
-  depends_on "python@3.12" => :test
+
+  uses_from_macos "python" => :test
 
   def install
-    system "autoreconf", "--install"
+    system "autoreconf", "--force", "--install", "--verbose"
     system "./configure", *std_configure_args, "--disable-silent-rules"
     system "make"
     system "make", "install"
@@ -29,13 +29,12 @@ class Austin < Formula
   end
 
   test do
+    command = "#{bin}/austin -o samples.mojo -i 1ms python3 -c 'from time import sleep; sleep(1)' 2>&1"
     if OS.mac?
-      assert_match "Insufficient permissions. Austin requires the use of sudo",
-        shell_output(bin/"austin --gc 2>&1", 37)
+      assert_match "Insufficient permissions. Austin requires the use of sudo", shell_output(command, 2)
     else
-      assert_match "need either a command to run or a PID to attach to",
-        shell_output(bin/"austin --gc 2>&1", 255)
+      assert_match "Sampling Statistics", shell_output(command)
     end
-    assert_equal "austin #{version}", shell_output(bin/"austin --version").chomp
+    assert_equal "austin #{version}", shell_output("#{bin}/austin --version").chomp
   end
 end

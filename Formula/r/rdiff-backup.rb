@@ -9,22 +9,29 @@ class RdiffBackup < Formula
   revision 2
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "62fd587d8c28af3c9d77efb118598de7c403bbb2c009b09460e8b9bddd79a70d"
-    sha256 cellar: :any,                 arm64_ventura:  "be41d5549775c6739fed4c65fcc7fa752e73b3fe63dfbebf3efbfff85ba04146"
-    sha256 cellar: :any,                 arm64_monterey: "d2dacadf8f82a72150eae57c64d25524fa955621c625a558d93355545a4bbfd1"
-    sha256 cellar: :any,                 sonoma:         "bb40dc033e4d8992cfa59505076e02abd3d402f23f7208a9bb5570e030ef13bd"
-    sha256 cellar: :any,                 ventura:        "0770ec28406a904435d3b1b6a930dd166825e2525463a2eaa4a5007ba6adbaa3"
-    sha256 cellar: :any,                 monterey:       "c84f174a0733cb509939b690c7e53330ac9964c745c7462dd78d9a66dfbf455f"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "3dc6afbc870dc89ba65d8384947391fbff6781ee4bd9a174f2987463dd2ddf12"
+    rebuild 3
+    sha256 cellar: :any,                 arm64_tahoe:   "ebea57ecc6915c0b154d732cc9694f360c77815e98d8b81948e6e52b3bb881b9"
+    sha256 cellar: :any,                 arm64_sequoia: "2f5ac3490d900871fae7157a93425498112962b41824c0b725dc3a0acd466673"
+    sha256 cellar: :any,                 arm64_sonoma:  "bccc1b81a71c6c37e91412f2083c8922045b07f5a5cf1c11a37924a480f58871"
+    sha256 cellar: :any,                 sonoma:        "9136e68895a67828a273cd4930fcbc2dbf8dbf4598c5ba938d4c2825d1f25c2f"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "baba91a650c1813d89435bfe1bcc41463e9fa64ff81d79592c70a7219147216b"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "384758ed7f5ab60a60993d6c73f2a835a878c00cd6066ede4e054334aafc7731"
   end
 
   depends_on "librsync"
   depends_on "libyaml"
-  depends_on "python@3.12"
+  depends_on "python@3.14"
+
+  pypi_packages extra_packages: "pyxattr"
+
+  resource "pyxattr" do
+    url "https://files.pythonhosted.org/packages/97/d1/7b85f2712168dfa26df6471082403013f3f815f3239aee3def17b6fd69ee/pyxattr-0.8.1.tar.gz"
+    sha256 "48c578ecf8ea0bd4351b1752470e301a90a3761c7c21f00f953dcf6d6fa6ee5a"
+  end
 
   resource "pyyaml" do
-    url "https://files.pythonhosted.org/packages/cd/e5/af35f7ea75cf72f2cd079c95ee16797de7cd71f29ea7c68ae5ce7be1eda0/PyYAML-6.0.1.tar.gz"
-    sha256 "bfdf460b1736c775f2ba9f6a92bca30bc2095067b8a9d77876d1fad6cc3b4a43"
+    url "https://files.pythonhosted.org/packages/05/8e/961c0007c59b8dd7729d542c61a4d537767a59645b82a0b521206e1e25c2/pyyaml-6.0.3.tar.gz"
+    sha256 "d76623373421df22fb4cf8817020cbb7ef15c725b9d5e45f17e189bfc384190f"
   end
 
   def install

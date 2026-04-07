@@ -6,6 +6,8 @@ class Aoeui < Formula
   license "GPL-2.0-only"
 
   bottle do
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:    "5db4e6bc86d61cb543bba6cfc8f46bb1db2dd51314701866c881c50b09e4aab8"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia:  "d884318d049fd6851389c8c37f7c0eb1042fbeb00c7cf7d0829ce6ab3d45d81d"
     sha256 cellar: :any_skip_relocation, arm64_sonoma:   "7a151b75fa791fe09b9b8e76783aeb89afdaafef9cd14e70208bde09334dfd84"
     sha256 cellar: :any_skip_relocation, arm64_ventura:  "f595bfa77ba8b7c03b12866673e1104b82d2d9e269c781279010a149ee49597a"
     sha256 cellar: :any_skip_relocation, arm64_monterey: "1591ca7ff3b44a5947dbe9502987b9eb5566d2670048f3317cdf96d8af28fd77"
@@ -15,10 +17,7 @@ class Aoeui < Formula
     sha256 cellar: :any_skip_relocation, monterey:       "929a533158d7b0113cefcdfefd36b982eb68da53268a15a37733f737bef2ef79"
     sha256 cellar: :any_skip_relocation, big_sur:        "80411e75607878170abd4516b4ff368d8b4a8d1da0855c540d069d5b4cb88464"
     sha256 cellar: :any_skip_relocation, catalina:       "79a6d037053bc2b3fcd21870ccc274ad02f8e47bde5c9755b8665c25609ddd3a"
-    sha256 cellar: :any_skip_relocation, mojave:         "c1e5c83add4ecaae6e45f5bed048045a0b2e81794244daf93028161bdd71e031"
-    sha256 cellar: :any_skip_relocation, high_sierra:    "946acae5b1b88cb67bf805e6b8a8d591e3267d799c9d1a924e60217218166e78"
-    sha256 cellar: :any_skip_relocation, sierra:         "1b04b93c490895121fed315f685d60cb96551b971ca1433a5240425cfa31dfcd"
-    sha256 cellar: :any_skip_relocation, el_capitan:     "62a04ac0fd27e76f4f77da95e7d5aaf75488765f98b02574ae7dff0508cd9f13"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "bc5fc0e63ce3c46a6384f860fb44a6ebb0761f9fa4ffdcbe18eb27c27d72180a"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "b130912a9d91e2462433ad80f02827461c3c6aa8fef646b84cfa0249b9929815"
   end
 
@@ -26,5 +25,23 @@ class Aoeui < Formula
 
   def install
     system "make", "INST_DIR=#{prefix}", "install"
+  end
+
+  test do
+    require "pty"
+    PTY.spawn(bin/"aoeui", "test.txt") do |r, w, _pid|
+      r.winsize = [80, 43]
+      sleep 1
+      w.write "brew"
+      sleep 1
+      w.write "\x00\x11"
+      begin
+        r.read
+      rescue Errno::EIO
+        # GNU/Linux raises EIO when read is done on closed pty
+      end
+    end
+    assert_path_exists testpath/"test.txt"
+    assert_match "brew", File.read("test.txt")
   end
 end

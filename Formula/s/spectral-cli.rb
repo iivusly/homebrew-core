@@ -1,26 +1,20 @@
 class SpectralCli < Formula
   desc "JSON/YAML linter and support OpenAPI v3.1/v3.0/v2.0, and AsyncAPI v2.x"
   homepage "https://stoplight.io/open-source/spectral"
-  url "https://registry.npmjs.org/@stoplight/spectral-cli/-/spectral-cli-6.11.1.tgz"
-  sha256 "def3583f144cb7ba6d03d6814167ab3d6a8a27fff7f575b2c2ec72f0b133cc0e"
+  url "https://registry.npmjs.org/@stoplight/spectral-cli/-/spectral-cli-6.15.0.tgz"
+  sha256 "d4e7bd215586ba1619bb495b6d7ecc336431eab9ab0214f0b16ab56a9c145072"
   license "MIT"
 
   bottle do
     rebuild 1
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "2379f68ab9b0579b2c12a53615ab57cdc0b0e67d4e2217639db8bfb79db86f85"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "2379f68ab9b0579b2c12a53615ab57cdc0b0e67d4e2217639db8bfb79db86f85"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "2379f68ab9b0579b2c12a53615ab57cdc0b0e67d4e2217639db8bfb79db86f85"
-    sha256 cellar: :any_skip_relocation, sonoma:         "3f053496819d743631ea9c148461a7893d739c53c5230a42e01adc2f78178596"
-    sha256 cellar: :any_skip_relocation, ventura:        "3f053496819d743631ea9c148461a7893d739c53c5230a42e01adc2f78178596"
-    sha256 cellar: :any_skip_relocation, monterey:       "3f053496819d743631ea9c148461a7893d739c53c5230a42e01adc2f78178596"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "cf2121c4406a8558364f34a6b9ee383df6414ebf8b933188b5920b030b24e684"
+    sha256 cellar: :any_skip_relocation, all: "8d483aa6a52f0b33cd3ee23697fa23e00eb7db9668b500ee04ac6c0ed2d88eec"
   end
 
   depends_on "node"
 
   def install
     system "npm", "install", *std_npm_args
-    bin.install_symlink Dir["#{libexec}/bin/*"]
+    bin.install_symlink libexec.glob("bin/*")
   end
 
   test do
@@ -43,7 +37,7 @@ class SpectralCli < Formula
 
     testpath.install resource("homebrew-streetlights-mqtt.yml")
     output = shell_output("#{bin}/spectral lint -r #{test_config} #{testpath}/streetlights-mqtt.yml")
-    assert_match "6 problems (0 errors, 6 warnings, 0 infos, 0 hints)", output
+    assert_match "7 problems (0 errors, 6 warnings, 1 info, 0 hints)", output
 
     assert_match version.to_s, shell_output("#{bin}/spectral --version")
   end

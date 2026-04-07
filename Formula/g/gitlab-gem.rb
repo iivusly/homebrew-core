@@ -1,32 +1,48 @@
 class GitlabGem < Formula
   desc "Ruby client and CLI for GitLab API"
   homepage "https://narkoz.github.io/gitlab/"
-  url "https://github.com/NARKOZ/gitlab/archive/refs/tags/v5.0.0.tar.gz"
-  sha256 "c08305b376275be73b6da01c14d3e004d49860925770e8e2f760afc3abedd629"
+  url "https://github.com/NARKOZ/gitlab/archive/refs/tags/v6.1.0.tar.gz"
+  sha256 "a1a0d2885994d15ef432818bdcaf1421c98a95c364d66284d46be432e115569d"
   license "BSD-2-Clause"
+  revision 1
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "febf8cba6b5ae71c41b70021c74e77a73c8bd847f802cdbdae2e566bf77b7543"
-    sha256 cellar: :any,                 arm64_ventura:  "931cefa46d0818baa052c7e7a5917ed19d326fb86102e992a96a4a7ae93f9b2a"
-    sha256 cellar: :any,                 arm64_monterey: "4ccf47ef97c42469e4cb87bcf7d503272be1094a28b6bdff085fbe9c4cc9e7ab"
-    sha256 cellar: :any,                 sonoma:         "15a26b3093df8a0515358081e6f8094266cac0a9c4b08ef602d2d7f65d686e1a"
-    sha256 cellar: :any,                 ventura:        "b4a8f2e1308a8f33fac73aaf6b8beb9990e81db11f636bc065e3f5366a0a4918"
-    sha256 cellar: :any,                 monterey:       "9c4df067b814a648b95734bd9cc1daec717d96fff81098436cd97d924198da39"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "47c3f066efa9e4efd26169ee94ecae0cdd4059dd7593795210e387e636e44aff"
+    sha256 cellar: :any,                 arm64_tahoe:   "28a634a10d64dd6205d560f27a925cf90f44a9dc65df22e4a3459f73a3f2a2a9"
+    sha256 cellar: :any,                 arm64_sequoia: "e1a7e8d12754a76599ab213a19a4b493d129a5b789f6a6f0e148c46deee4c893"
+    sha256 cellar: :any,                 arm64_sonoma:  "f9e0340a1aee2683d9f00299793417315ca61a41f022e8f0a3efc88fab1cbba6"
+    sha256 cellar: :any,                 sonoma:        "9bbddff38c9c1ba7e7c93a2a5ae77193074cd7155bac3f7ec79662656eeece6f"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "3e20a0f8c40e295b45801ddb73894a99f30a3bee85b0838444047f15a0aae3bb"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "213d74835f53b03be09a324f70c292a457df7eb83c89d4aec419a37bf428805d"
   end
 
   depends_on "ruby"
 
-  # list with `gem install --explain httparty terminal-table`
+  # List with `gem install --explain gitlab -v #{version}`
+  # https://rubygems.org/gems/gitlab/versions/#{version}/dependencies
+
+  resource "unicode-emoji" do
+    url "https://rubygems.org/gems/unicode-emoji-4.2.0.gem"
+    sha256 "519e69150f75652e40bf736106cfbc8f0f73aa3fb6a65afe62fefa7f80b0f80f"
+  end
+
+  resource "unicode-display_width" do
+    url "https://rubygems.org/gems/unicode-display_width-3.2.0.gem"
+    sha256 "0cdd96b5681a5949cdbc2c55e7b420facae74c4aaf9a9815eee1087cb1853c42"
+  end
+
+  resource "terminal-table" do
+    url "https://rubygems.org/gems/terminal-table-4.0.0.gem"
+    sha256 "f504793203f8251b2ea7c7068333053f0beeea26093ec9962e62ea79f94301d2"
+  end
 
   resource "bigdecimal" do
-    url "https://rubygems.org/gems/bigdecimal-3.1.8.gem"
-    sha256 "a89467ed5a44f8ae01824af49cbc575871fa078332e8f77ea425725c1ffe27be"
+    url "https://rubygems.org/gems/bigdecimal-4.0.1.gem"
+    sha256 "8b07d3d065a9f921c80ceaea7c9d4ae596697295b584c296fe599dd0ad01c4a7"
   end
 
   resource "multi_xml" do
-    url "https://rubygems.org/gems/multi_xml-0.7.1.gem"
-    sha256 "4fce100c68af588ff91b8ba90a0bb3f0466f06c909f21a32f4962059140ba61b"
+    url "https://rubygems.org/gems/multi_xml-0.8.0.gem"
+    sha256 "8d4adcd092f8e354db496109829ffd36969fdc8392cb5fde398ca800d9e6df73"
   end
 
   resource "mini_mime" do
@@ -35,23 +51,18 @@ class GitlabGem < Formula
   end
 
   resource "csv" do
-    url "https://rubygems.org/gems/csv-3.3.0.gem"
-    sha256 "0bbd1defdc31134abefed027a639b3723c2753862150f4c3ee61cab71b20d67d"
+    url "https://rubygems.org/gems/csv-3.3.5.gem"
+    sha256 "6e5134ac3383ef728b7f02725d9872934f523cb40b961479f69cf3afa6c8e73f"
   end
 
   resource "httparty" do
-    url "https://rubygems.org/gems/httparty-0.22.0.gem"
-    sha256 "78652a5c9471cf0093d3b2083c2295c9c8f12b44c65112f1846af2b71430fa6c"
+    url "https://rubygems.org/gems/httparty-0.23.2.gem"
+    sha256 "72d52830ab5862115a3c9a4b16738dd67d9a691ffd796cf86bad8abaa8f1febb"
   end
 
-  resource "unicode-display_width" do
-    url "https://rubygems.org/gems/unicode-display_width-2.5.0.gem"
-    sha256 "7e7681dcade1add70cb9fda20dd77f300b8587c81ebbd165d14fd93144ff0ab4"
-  end
-
-  resource "terminal-table" do
-    url "https://rubygems.org/gems/terminal-table-3.0.2.gem"
-    sha256 "f951b6af5f3e00203fb290a669e0a85c5dd5b051b3b023392ccfd67ba5abae91"
+  resource "base64" do
+    url "https://rubygems.org/gems/base64-0.3.0.gem"
+    sha256 "27337aeabad6ffae05c265c450490628ef3ebd4b67be58257393227588f5a97b"
   end
 
   def install
@@ -70,7 +81,7 @@ class GitlabGem < Formula
     ENV["GITLAB_API_ENDPOINT"] = "https://example.com/"
     ENV["GITLAB_API_PRIVATE_TOKEN"] = "token"
     output = shell_output("#{bin}/gitlab user 2>&1", 1)
-    assert_match "404 - Not Found", output
+    assert_match "Server responded with code 404, message", output
 
     assert_match version.to_s, shell_output("#{bin}/gitlab --version")
   end

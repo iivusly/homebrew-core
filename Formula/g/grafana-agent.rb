@@ -1,22 +1,24 @@
 class GrafanaAgent < Formula
   desc "Exporter for Prometheus Metrics, Loki Logs, and Tempo Traces"
-  homepage "https://grafana.com/docs/agent/"
-  url "https://github.com/grafana/agent/archive/refs/tags/v0.42.0.tar.gz"
-  sha256 "435e4e08ac416a5c9ff87f674b495b218e4adfffa2846799a5ec96053271a85a"
+  homepage "https://grafana.com/docs/agent/latest/"
+  url "https://github.com/grafana/agent/archive/refs/tags/v0.44.4.tar.gz"
+  sha256 "ce86302982702912cfe5df98237fd0a3c14b14b1205386b1f5a4b6d3b64cf414"
   license "Apache-2.0"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "a7269feef7af6ed5855813d40bc43b379dabaf75c2a6a270adf3b7fd39858eb3"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "be954c277f2f774b8c137e3febb7747e3dd14a43112fd686f65e2ec3dfd30cb0"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "86211f2be8cb5ed9e2445722236401cb32ec60fcbf8bf79df73384a424ec64cb"
-    sha256 cellar: :any_skip_relocation, sonoma:         "b07bcafaa9a49f7e2fa78ea012c0e4e56837a8ca20e9ecb389788dbfb6ab5c9c"
-    sha256 cellar: :any_skip_relocation, ventura:        "12a9b9db4ede2bbc1aa9dec903e153e71bfb881573d013cc7a5edf5d623de86b"
-    sha256 cellar: :any_skip_relocation, monterey:       "4965e850052d847a520a6271072c16545a02747d2f3adcd51ccb1e099b1dc700"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "e9b0c57bcaecc6b5479c42c25a2a183017ed89e6d67f91305517f3a7c180941d"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "a073781d8d5c01bb3f630038e0e02aa197d63d5c364924067f15f71b9477d999"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "fdceb11b537cf0ba0f9f25c13c2dd9807ef4e36e5bedf1cb5901cca082155c16"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "2c787b87e2bddf06935d599e13ec9883fbaaa96ef2a79d525e20139b005e866c"
+    sha256 cellar: :any_skip_relocation, sonoma:        "45513ece0e70cc06796d9e6f7b13464f0638a0665d88d335d686e03b8c9ce8d1"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "294916865ca4acdf865f4e80f78e821e9defd5c69d2a38afd6433eb51c89f17b"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "be67266b8d9a09438ab69a89cf9719038f9ad63dda94d9f7b0e84b23eb984626"
   end
 
-  # use "go" again when https://github.com/grafana/agent/issues/6972 is resolved and released
-  depends_on "go@1.22" => :build
+  # Deprecated upstream though will get security fixes until 2025-10-31.
+  # Disable date set 3 months after planned EOL date of 2025-11-01.
+  disable! date: "2026-02-01", because: :deprecated_upstream, replacement_formula: "grafana-alloy"
+
+  depends_on "go" => :build
   depends_on "node" => :build
   depends_on "yarn" => :build
 
@@ -71,12 +73,12 @@ class GrafanaAgent < Formula
 
     (testpath/"wal").mkpath
 
-    (testpath/"grafana-agent.yaml").write <<~EOS
+    (testpath/"grafana-agent.yaml").write <<~YAML
       server:
         log_level: info
-    EOS
+    YAML
 
-    system bin/"grafana-agentctl", "config-check", "#{testpath}/grafana-agent.yaml"
+    system bin/"grafana-agentctl", "config-check", testpath/"grafana-agent.yaml"
 
     fork do
       exec bin/"grafana-agent", "-config.file=#{testpath}/grafana-agent.yaml",

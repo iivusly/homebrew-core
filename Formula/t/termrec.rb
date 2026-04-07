@@ -12,18 +12,13 @@ class Termrec < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "cf7f8a53b45b1dac0ed84086e17c2374a27ebcd43e729e9d6be631816e795b6d"
-    sha256 cellar: :any,                 arm64_ventura:  "2b08f0b04c98a5152357e074c14027a63b64ccbd4814f4c04235eef9d2862942"
-    sha256 cellar: :any,                 arm64_monterey: "3c45928def623126f5999ab77cd48cc6711731a44cfa28c5746841ee19f313c3"
-    sha256 cellar: :any,                 arm64_big_sur:  "a03a052b7ee89450b145a866724f6f97727c56bbf0220a14a089c84951aeed35"
-    sha256 cellar: :any,                 sonoma:         "1cd6ec28ec3e040f28575428641bcf0e350240f24fe1d6eea9b3e09646d9d9ed"
-    sha256 cellar: :any,                 ventura:        "df2afb4aa2443fdb4ff692e87b076edc753effa283ffc3a7ade6b6957a7702b1"
-    sha256 cellar: :any,                 monterey:       "634617e61f1492c473f62bfa37cf742e5fc4e7b0e36339ddc1f6b8574ed90272"
-    sha256 cellar: :any,                 big_sur:        "81060090e19bbb56f0b991dfa987eb890c00b116b656be2d2bd29ea027f9496a"
-    sha256 cellar: :any,                 catalina:       "1d93149ec34c0bf531da76b0137390ed1f05bf2e35e806f1fe875fe6648c4c2b"
-    sha256 cellar: :any,                 mojave:         "e3f9f241763a05de367da2ee91727674e18a126a99480a750b901a21bdad0ffb"
-    sha256 cellar: :any,                 high_sierra:    "d6cb43ed14ec0531824bd4eb55ddc625b5711c28b274ce78eb815501e5f3ebf2"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "367ae28f9b68565c985f0762a0781ac1df02267fa34b47806477456dc0d22e5f"
+    rebuild 2
+    sha256 cellar: :any,                 arm64_tahoe:   "83130b80ca5853bcb36c51451cf600c22c5fa8138cd525723cd8e9b960ff9791"
+    sha256 cellar: :any,                 arm64_sequoia: "9a3d784e024e949a5fe44cb29e1edfbe6021bc07f9aba114337c49aa9e94f755"
+    sha256 cellar: :any,                 arm64_sonoma:  "3967ae0f38e3f4232a886c6b96d51db474588e950dcc3c3acf6c4b2b02425a1a"
+    sha256 cellar: :any,                 sonoma:        "6b37974b1c45960c3572d2a030dc45a1c3d10e4e8165e158167a5949625e1f72"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "adc70be44639d06db0b15cbd211ded8e4e84826389152de96dc9e089a9d78a0f"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "fd26bd9def49e75e6030be96b864fa6cb0ddca5660f06b858d9176edecf6883b"
   end
 
   depends_on "autoconf" => :build
@@ -31,7 +26,9 @@ class Termrec < Formula
   depends_on "libtool" => :build
   depends_on "xz"
 
-  uses_from_macos "zlib"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     # Work around build error: call to undeclared function 'forkpty'

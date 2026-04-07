@@ -3,36 +3,37 @@ class Graphviz2drawio < Formula
 
   desc "Convert graphviz (dot) files into draw.io / lucid (mxGraph) format"
   homepage "https://github.com/hbmartin/graphviz2drawio/"
-  url "https://files.pythonhosted.org/packages/2d/c5/bb43966bc97368fc7eed9d8a79f0bc7eba8484cf6066f687720b616e957a/graphviz2drawio-1.0.0.tar.gz"
-  sha256 "5409f11cd080b28d77408817559b6481250b3053cec757ab933b92b3075606a5"
+  url "https://files.pythonhosted.org/packages/fb/e9/2ba4114579f8e708b6b5d671afe355c9b8cdd52b15a9d126ec188a2bcad6/graphviz2drawio-1.1.0.tar.gz"
+  sha256 "8758b9eefbac5d8c03a0358c0158845235c9c3caa99887f0f6026cfecc2895f2"
   license "GPL-3.0-or-later"
+  revision 2
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "5be0cfb80e3ba10801c328115be6cc68ba167f0e65af863feb6c7d7228dbae24"
-    sha256 cellar: :any,                 arm64_ventura:  "55ec467fafe0fdc74bc3177226b0268940bfc4e51475d102d9a45ccd9cd3cf15"
-    sha256 cellar: :any,                 arm64_monterey: "3a3aa4cdea5cac6cc4f735d080e0c67d3ba6fbbde1f118187a84463c49a93078"
-    sha256 cellar: :any,                 sonoma:         "46b1350fb6685333d1c9f9ad56666da9d1f4a323ec51c1055d41b96b40d08df1"
-    sha256 cellar: :any,                 ventura:        "712e05e48a3ff58e9ab71ba389c14e4a403bcfb9470d96eff7cc224d32698619"
-    sha256 cellar: :any,                 monterey:       "74c883818508f4f771b8b691c2f8c61faab698c5439954154e09e5985256a656"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "b10ceff4b739cb1c69408865b485d5a0e0b456cc41473e9e8a9ac90626e6df85"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "954e1640d40392d3125956c08981e7899624b6e24b114bfc704b8fc4a5e0191a"
+    sha256 cellar: :any,                 arm64_sequoia: "499ba9aeb4254b8717dfbbb9fd64517cba80755f448e013e18311d55b636f683"
+    sha256 cellar: :any,                 arm64_sonoma:  "bf32769540b693e9d425c30c065b88b30d3e1169d18c6270a7fd17e1ba6169d0"
+    sha256 cellar: :any,                 sonoma:        "50ffcd094a34c8ed5b05038c3bc068f0b14c01e7d2c82e28fc7f48bacf04bf9a"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "ff8bbabc5e86b17bf857aaa590244513757a9888a65da4186a29e7b00d74b4c3"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "680c4fc4b3f8c9ee6fa2fcb74236d86a4bff8d69098bd68fa34d41c7bf9c5704"
   end
 
   depends_on "graphviz"
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   resource "puremagic" do
-    url "https://files.pythonhosted.org/packages/d5/ce/dc3a664654f1abed89d4e8a95ac3af02a2a0449c776ccea5ef9f48bde267/puremagic-1.27.tar.gz"
-    sha256 "7cb316f40912f56f34149f8ebdd77a91d099212d2ed936feb2feacfc7cbce2c1"
+    url "https://files.pythonhosted.org/packages/dd/7f/9998706bc516bdd664ccf929a1da6c6e5ee06e48f723ce45aae7cf3ff36e/puremagic-1.30.tar.gz"
+    sha256 "f9ff7ac157d54e9cf3bff1addfd97233548e75e685282d84ae11e7ffee1614c9"
   end
 
   resource "pygraphviz" do
-    url "https://files.pythonhosted.org/packages/8c/41/7b9a22df38bb7884012b34f2986d765691dbe41bf5e7af881dfd09f8145f/pygraphviz-1.13.tar.gz"
-    sha256 "6ad8aa2f26768830a5a1cfc8a14f022d13df170a8f6fdfd68fd1aa1267000964"
+    url "https://files.pythonhosted.org/packages/66/ca/823d5c74a73d6b8b08e1f5aea12468ef334f0732c65cbb18df2a7f285c87/pygraphviz-1.14.tar.gz"
+    sha256 "c10df02377f4e39b00ae17c862f4ee7e5767317f1c6b2dfd04cea6acc7fc2bea"
   end
 
   resource "svg-path" do
-    url "https://files.pythonhosted.org/packages/33/a0/4983cdedf62c3a1dd42b698813312fc51dd159983333fce9ec4189cd83a9/svg.path-6.3.tar.gz"
-    sha256 "e937740a316a7fec86acd217ab6226e112f51328078524126bb7ea9dbe7b1ade"
+    url "https://files.pythonhosted.org/packages/66/b9/649abbe870842c185b12920e937e9b95d4c2b18de50af98d2c140df3e179/svg_path-7.0.tar.gz"
+    sha256 "9037486957cb1dcf4375ef42206499a47c111b8ffcbac6e3e55f9d079d875bb0"
   end
 
   def install

@@ -1,23 +1,23 @@
 class Lwtools < Formula
   desc "Cross-development tools for Motorola 6809 and Hitachi 6309"
-  homepage "http://www.lwtools.ca/"
-  url "http://www.lwtools.ca/releases/lwtools/lwtools-4.23.tar.gz"
-  sha256 "f05255516783ea5b118e7e32e8e4d420b6835864c2833ecde3477b4be19db038"
+  homepage "https://www.lwtools.ca/"
+  url "https://www.lwtools.ca/releases/lwtools/lwtools-4.24.tar.gz"
+  sha256 "b38a2baad15c017bb7cd8144218e7af61abccf21fd25f7b1a35e6529acd7b3dd"
   license "GPL-3.0-only"
 
   livecheck do
-    url "http://www.lwtools.ca/releases/lwtools/"
+    url "https://www.lwtools.ca/releases/lwtools/"
     regex(/href=.*?lwtools[._-]v?(\d+(?:\.\d+)+)\.t/i)
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "006c60eee04ec235ed358e0395e992d9158610fecba2f5b668af81b5c3e6ab74"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "182534ce1b37a6230553cee3d3e794629a0e885ab762c621eb47b59bc055e8ef"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "fa3093f31f2365fd394d4f5785c12cc8fe38b8e7e99b53d422ac5b1dade6fa82"
-    sha256 cellar: :any_skip_relocation, sonoma:         "f0285e0f21559766bc595222d32c1e5a49495d0eb0bc13596152fd16e2112d2e"
-    sha256 cellar: :any_skip_relocation, ventura:        "e3a03360ee1f0c8a452f8b070724401adeadd46730174ba53786b4d645f1bea9"
-    sha256 cellar: :any_skip_relocation, monterey:       "cee52e52672b605b4a38d6596cc2fa7a0613bea352a47f86ec27e2123bb73a3d"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "7fdd3cffd56bce4bb757bcfc522d20df58e10abf0148960f5db0d3c3f8ae6adc"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "3f904db8779abd74708ebadd543361ae5f9ffee9a764cfe8ce3ff0e5db32d1f2"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "bf4cd6f23617d013f4089741a4ff693a2d0c22b92b0d978a3a7c2b715382a0ce"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "433acd7c0e10e9a77f57dc2a96db7c0b90e0714c1537206d98dadf36bbcf7869"
+    sha256 cellar: :any_skip_relocation, sonoma:        "13ff219d341591d4612e649fff1f87e4978d91ca440f096d7189a9382abacfc2"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "d8140c9ed5b53b94b1abe2a57951fc16e57d01a962a554c9b3e69fbf4c4cc882"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "209fcd523569b4579aca0fffe15766ec01190f2e7e0426af08107ccf7971e166"
   end
 
   def install
@@ -36,14 +36,10 @@ class Lwtools < Formula
     assert_equal [0xe7, 0x89, 0x12, 0x34], code
 
     # lwobjdump
-    dump = `#{bin}/lwobjdump foo.obj`
-    assert_equal 0, $CHILD_STATUS.exitstatus
-    assert dump.start_with?("SECTION foo")
+    assert_match(/^SECTION foo/, shell_output("#{bin}/lwobjdump foo.obj"))
 
     # lwar
     system bin/"lwar", "--create", "foo.lwa", "foo.obj"
-    list = `#{bin}/lwar --list foo.lwa`
-    assert_equal 0, $CHILD_STATUS.exitstatus
-    assert list.start_with?("foo.obj")
+    assert_match(/^foo.obj/, shell_output("#{bin}/lwar --list foo.lwa"))
   end
 end

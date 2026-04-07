@@ -1,14 +1,16 @@
 class Dirt < Formula
   desc "Experimental sample playback"
-  homepage "https://github.com/tidalcycles/Dirt"
-  url "https://github.com/tidalcycles/Dirt/archive/refs/tags/1.1.tar.gz"
-  sha256 "bb1ae52311813d0ea3089bf3837592b885562518b4b44967ce88a24bc10802b6"
+  homepage "https://codeberg.org/uzu/dirt"
+  url "https://codeberg.org/uzu/dirt/archive/1.1.tar.gz"
+  sha256 "5739be152a527352a8fe4c8b7caf0f56add9eb752bef74ab0d815510f6076a1e"
   license "GPL-3.0-or-later"
   revision 1
-  head "https://github.com/tidalcycles/Dirt.git", branch: "master"
+  head "https://codeberg.org/uzu/dirt.git", branch: "main"
 
   bottle do
     rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:    "298bd387a65d1a91e835350f47a97b76af44b9466b32b8c2c3a7b67e03736b8c"
+    sha256 cellar: :any,                 arm64_sequoia:  "dc07b263a5ea080c3ae14aaaabe185d07c84189e6708cc2206ac74d62e67ec3f"
     sha256 cellar: :any,                 arm64_sonoma:   "dc0671b289e79190e0d962b995c11ba8d0f828fb9a9903c5981e8a7fddca28c0"
     sha256 cellar: :any,                 arm64_ventura:  "7b0e123381c73cf489c38368999dcf0886843f8223562f83db6b6a5fde4dcaf7"
     sha256 cellar: :any,                 arm64_monterey: "6ac9e97def1a071fda1e4fc145450cdafed11444358537d2824cea8d77e73155"
@@ -17,6 +19,7 @@ class Dirt < Formula
     sha256 cellar: :any,                 ventura:        "5ff0f05492f68f79315dd99ce136a09cfb3455b030bf1a12d9164f4dee70b43c"
     sha256 cellar: :any,                 monterey:       "f4c8eaef7bd081e9c346af24400410671665836820077afdcc13e68c676903bd"
     sha256 cellar: :any,                 big_sur:        "bb32869ee985043d05056f89254e369dcc8be8cfaaedaa1427787fc5e04fa62c"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "1ed29d734b4fb03efa5e07a439a7f12b61df0904f8cf4073354ecb2a879eec7b"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "8ea04b1e39b56f30179c50763b52314bb909285924d3229a68c35905e6b9b0f6"
   end
 

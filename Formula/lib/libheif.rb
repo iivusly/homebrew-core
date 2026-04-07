@@ -1,22 +1,22 @@
 class Libheif < Formula
   desc "ISO/IEC 23008-12:2017 HEIF file format decoder and encoder"
   homepage "https://www.libde265.org/"
-  url "https://github.com/strukturag/libheif/releases/download/v1.18.2/libheif-1.18.2.tar.gz"
-  sha256 "c4002a622bec9f519f29d84bfdc6024e33fd67953a5fb4dc2c2f11f67d5e45bf"
+  url "https://github.com/strukturag/libheif/releases/download/v1.21.2/libheif-1.21.2.tar.gz"
+  sha256 "75f530b7154bc93e7ecf846edfc0416bf5f490612de8c45983c36385aa742b42"
   license "LGPL-3.0-only"
+  compatibility_version 1
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "3ac03a6aa83b0c636c640cd953082d5e06f06d2fa74d7a50914812bf6bd73203"
-    sha256 cellar: :any,                 arm64_ventura:  "392d7fd61637d1912c95ad3f1629dac3da032f49d01d966c9813d0f65e36d994"
-    sha256 cellar: :any,                 arm64_monterey: "c43506ecb80ccd6f46951d459579e4af1ebeb4a91ae800681f26f28457b17ec4"
-    sha256 cellar: :any,                 sonoma:         "8243388a035f0666bb9cbb1950b0c2cb3d0ffd06640e8eb8baae9f82b1f1e64e"
-    sha256 cellar: :any,                 ventura:        "352eeaa2087cf976407e06b883825374c033299c339e507b8525fad82bef3613"
-    sha256 cellar: :any,                 monterey:       "9aa1dbd3f239169fc2de33fdf18a2b4ffadcca81d9121264ccbb4054ce8374ef"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "054df00dc283e020bd17612943df5e0c5143fe3d89122d87c8c97cd14eb534fa"
+    sha256 cellar: :any,                 arm64_tahoe:   "74409afd4371c441de5349908173d75a5d04525c41a4f145cb6f669b1a98ed4f"
+    sha256 cellar: :any,                 arm64_sequoia: "2158b5706d063ab6b40415990d257334f294159391184e07a6412db25ab7de05"
+    sha256 cellar: :any,                 arm64_sonoma:  "580ffc4cf73852d0f1f7e96aa7deccea4685c1a00b6669707f01c96d3a8dcc80"
+    sha256 cellar: :any,                 sonoma:        "3a6428ddc1440471e8b92203faff7a3047b6a52f7243ea7ce240982df5c7aee2"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "6a6a3852712f9beba084f87ccc72f42300083525c7ee5a023f16f4ba0987755c"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "f4b94da88750ba94317be8a3123ecafd7c635ca33e23c3381e28d57982a28baf"
   end
 
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
 
   depends_on "aom"
   depends_on "jpeg-turbo"
@@ -35,14 +35,19 @@ class Libheif < Formula
       -DWITH_RAV1E=OFF
       -DWITH_SvtEnc=OFF
     ]
+
     system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
     pkgshare.install "examples/example.heic"
     pkgshare.install "examples/example.avif"
+
     system "cmake", "-S", ".", "-B", "static", *args, *std_cmake_args, "-DBUILD_SHARED_LIBS=OFF"
     system "cmake", "--build", "static"
     lib.install "static/libheif/libheif.a"
+
+    # Avoid rebuilding dependents that hard-code the prefix.
+    inreplace lib/"pkgconfig/libheif.pc", prefix, opt_prefix
   end
 
   def post_install
@@ -55,14 +60,14 @@ class Libheif < Formula
     exout = testpath/"exampleheic.jpg"
 
     assert_match output, shell_output("#{bin}/heif-convert #{example} #{exout}")
-    assert_predicate testpath/"exampleheic-1.jpg", :exist?
-    assert_predicate testpath/"exampleheic-2.jpg", :exist?
+    assert_path_exists testpath/"exampleheic-1.jpg"
+    assert_path_exists testpath/"exampleheic-2.jpg"
 
     output = "File contains 1 image"
     example = pkgshare/"example.avif"
     exout = testpath/"exampleavif.jpg"
 
     assert_match output, shell_output("#{bin}/heif-convert #{example} #{exout}")
-    assert_predicate testpath/"exampleavif.jpg", :exist?
+    assert_path_exists testpath/"exampleavif.jpg"
   end
 end

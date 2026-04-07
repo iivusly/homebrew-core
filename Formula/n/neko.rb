@@ -1,42 +1,45 @@
 class Neko < Formula
   desc "High-level, dynamically typed programming language"
   homepage "https://nekovm.org/"
-  url "https://github.com/HaxeFoundation/neko/archive/refs/tags/v2-4-0.tar.gz"
-  version "2.4.0"
-  sha256 "232d030ce27ce648f3b3dd11e39dca0a609347336b439a4a59e9a5c0a465ce15"
+  url "https://github.com/HaxeFoundation/neko/archive/refs/tags/v2-4-1.tar.gz"
+  version "2.4.1"
+  sha256 "702282028190dffa2078b00cca515b8e2ba889186a221df2226d2b6deb3ffaca"
   license "MIT"
   revision 1
   head "https://github.com/HaxeFoundation/neko.git", branch: "master"
 
+  no_autobump! because: :incompatible_version_format
+
   bottle do
-    sha256 arm64_sonoma:   "fdad9a6dc773dffe3b1e55971758cfda775e8b473c7d135319c9c65528167b22"
-    sha256 arm64_ventura:  "9b40ecbae0b6a62cd9d32d19fecfb3a429e90660e194a0b2cc12ea5052f50976"
-    sha256 arm64_monterey: "71589dcf0a4ec18650f32439cff9caefdfdae7179b666d883acb9fa96b38cee7"
-    sha256 sonoma:         "15e070b6148e6bc15387ee1958c6f815d3bbacbf67438e073e8fd21f6b9deb3f"
-    sha256 ventura:        "4f19f161bbf2c088fe1e06b08082ac555999f4102d3c6f6a281aeda79e318572"
-    sha256 monterey:       "9615b73250454cf485ffc61a3190f0e5cd8a9769847d3ba914322266d3463d15"
-    sha256 x86_64_linux:   "50db5d00af036fd2803c42b1739c3038382a7f68cc3f75f785444564f6764f9b"
+    rebuild 1
+    sha256 arm64_tahoe:   "89c971ad4c60726ebc84ce4a6b5ebb675cd65a5dc400d4cc152cba7b40e52f07"
+    sha256 arm64_sequoia: "45b778978d5a73833248131a9a9bb7019347237547e679aa529622b50054843d"
+    sha256 arm64_sonoma:  "38ef0f1be7bf24efca084864babb69f3ef19ceaf97e473a686a61fda7f06e32a"
+    sha256 sonoma:        "37b217ca868281d49936bb213ac8e27838254a04931b7f9f93493a6f40bc2f0a"
+    sha256 arm64_linux:   "5c036ca3b850ae905d89e474af893486017fdbfc9aa7a8e696c62c4bfd59fddb"
+    sha256 x86_64_linux:  "452562632f23c92792771f4df762168e34f51f1143ff7dc467e755c34594982c"
   end
 
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "bdw-gc"
-  depends_on "mbedtls"
-  depends_on "mysql-client"
+  depends_on "mariadb-connector-c"
+  depends_on "mbedtls@3"
   depends_on "pcre2"
-  depends_on "zlib" # due to `mysql-client`
 
+  uses_from_macos "apr"
   uses_from_macos "sqlite"
 
   on_linux do
-    depends_on "apr"
     depends_on "apr-util"
     depends_on "gtk+3" # On mac, neko uses carbon. On Linux it uses gtk3
     depends_on "httpd"
+    depends_on "zlib-ng-compat"
   end
 
   def install
-    args = %w[
+    args = %W[
+      -DMARIADB_CONNECTOR_LIBRARIES=#{Formula["mariadb-connector-c"].opt_lib/"mariadb"/shared_library("libmariadb")}
       -DRELOCATABLE=OFF
       -DRUN_LDCONFIG=OFF
     ]
@@ -48,19 +51,15 @@ class Neko < Formula
     end
 
     system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
-    system "cmake", "--build", "build"
+    ENV.deparallelize { system "cmake", "--build", "build" }
     system "cmake", "--install", "build"
   end
 
   def caveats
-    s = ""
-    if HOMEBREW_PREFIX.to_s != "/usr/local"
-      s << <<~EOS
-        You must add the following line to your .bashrc or equivalent:
-          export NEKOPATH="#{HOMEBREW_PREFIX}/lib/neko"
-      EOS
-    end
-    s
+    <<~EOS
+      You must add the following line to your .bashrc or equivalent:
+        export NEKOPATH="#{HOMEBREW_PREFIX}/lib/neko"
+    EOS
   end
 
   test do

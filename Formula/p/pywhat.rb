@@ -6,15 +6,14 @@ class Pywhat < Formula
   url "https://files.pythonhosted.org/packages/ae/31/57bb23df3d3474c1e0a0ae207f8571e763018fa064823310a76758eaef81/pywhat-5.1.0.tar.gz"
   sha256 "8a6f2b3060f5ce9808802b9ca3eaf91e19c932e4eaa03a4c2e5255d0baad85c4"
   license "MIT"
-  revision 1
+  revision 2
   head "https://github.com/bee-san/pyWhat.git", branch: "main"
 
   bottle do
-    rebuild 6
-    sha256 cellar: :any_skip_relocation, all: "f2c7083cf29a632765ecbe084712e3fd034f9b5bf3d529ad936091117e6f7bd3"
+    sha256 cellar: :any_skip_relocation, all: "7aaff8132b35d066b04360c56e282ce4546b87e0a2e020752d3658778aa5a95b"
   end
 
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   resource "click" do
     url "https://files.pythonhosted.org/packages/27/6f/be940c8b1f1d69daceeb0032fee6c34d7bd70e3e649ccac0951500b4720e/click-7.1.2.tar.gz"
@@ -32,8 +31,8 @@ class Pywhat < Formula
   end
 
   resource "pygments" do
-    url "https://files.pythonhosted.org/packages/8e/62/8336eff65bcbc8e4cb5d05b55faf041285951b6e80f33e2bff2024788f31/pygments-2.18.0.tar.gz"
-    sha256 "786ff802f32e91311bff3889f6e9a86e81505fe99f2735bb6d60ae0c5004f199"
+    url "https://files.pythonhosted.org/packages/c3/b2/bc9c9196916376152d655522fdcebac55e66de6603a76a02bca1b6414f6c/pygments-2.20.0.tar.gz"
+    sha256 "6757cd03768053ff99f3039c1a36d6c0aa0b263438fcab17520b30a303a82b5f"
   end
 
   resource "rich" do

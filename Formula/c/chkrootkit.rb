@@ -1,26 +1,23 @@
 class Chkrootkit < Formula
   desc "Rootkit detector"
   homepage "https://www.chkrootkit.org/"
-  url "ftp://ftp.chkrootkit.org/pub/seg/pac/chkrootkit-0.58.tar.gz"
-  mirror "https://fossies.org/linux/misc/chkrootkit-0.58.tar.gz"
-  sha256 "0325cd19ace8928ca036aa956ec8cd9a3d9fe02965e30a4720e9baf34ed56a42"
+  url "ftp://ftp.chkrootkit.org/pub/seg/pac/chkrootkit-0.59.tar.gz"
+  mirror "https://fossies.org/linux/misc/chkrootkit-0.59.tar.gz"
+  sha256 "bd38f1d7f543a2aa6dd8c7ad6bb88df7c0d7dc101df57377dac24415cbc8c5ee"
   license "GPL-2.0-or-later"
 
   livecheck do
     url :homepage
-    regex(/href=.*?download[^>]*>chkrootkit v?(\d+(?:\.\d+)+)/i)
+    regex(/href=.*?download[^>]*>chkrootkit v?(\d+(?:\.\d+)+[a-z]?)/i)
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "7c24f28d8f90e8f0aa3eea0978e1f518dce8a288919927b24ebb5d77a6aa9121"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "bbd2dd4ac20e747293eedd01d9ccc8c9bfbd56d75b4cc269f33c9e3cd793ceda"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "d7d9ddf16ed810c46ebc3aa73063bb35887722d115a317b5c4ab9d099c12bb82"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "7cc2ca082dcb083a06732f58d51ce7ed9f3a4ee3eccd2aea4e3b7d8fd14861c7"
-    sha256 cellar: :any_skip_relocation, sonoma:         "9e8632f9ef69b72066519be738516b81e15485b41d03d5cc6c89ac40b0b59089"
-    sha256 cellar: :any_skip_relocation, ventura:        "d4fb446dedba887717246dabc02a955b435fddb76d3d24f227e3048b02cc5d03"
-    sha256 cellar: :any_skip_relocation, monterey:       "792f77c1f50ff0cd9c93974d1729e65cccceb9c89acb102ad3d86d8a6ffe8241"
-    sha256 cellar: :any_skip_relocation, big_sur:        "7c891dc0f3d653c9e072cef412a9ffe697dccc170a2c28fbc5710a6b61249072"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "69c27f598f7f53881f961c3b9db7b9f637cbe05c83f0264b678dee6911d01e0b"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "f7dfbdc5f745b2a66bbd345dc028c0d57a08dc2aa9b4067a35d7567692d17246"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "fa5e193ab4b1a2bb28299ae2d89b96b22eeec68a2f63f312108fd2074461a779"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "34657f62987ff4a1fa3097a336fd102c095d0a911ac9854d39e9afe62b4971e8"
+    sha256 cellar: :any_skip_relocation, sonoma:        "0b9645b0781169092d043005462f7b2e181b897df6815a11ddeaceb1aa139a58"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "5f5f417e6d16ded63588606860a06f97d548cd331b0f5528f985a12df76a2363"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "6414b28b97256b17b3c61214abc02f07d5613e42efbc26cb881620a12f33f29d"
   end
 
   def install

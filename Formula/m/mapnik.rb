@@ -1,10 +1,8 @@
 class Mapnik < Formula
   desc "Toolkit for developing mapping applications"
   homepage "https://mapnik.org/"
-  # needs submodules
-  url "https://github.com/mapnik/mapnik.git",
-      tag:      "v4.0.2",
-      revision: "5f327ff3c88d8acca7c5db15b598258eea363aa7"
+  url "https://github.com/mapnik/mapnik/releases/download/v4.2.2/mapnik-v4.2.2.tar.bz2"
+  sha256 "a530f03c2bcf1ea8f9e500a0dab7f8387f1a1eae3040a886c1547b3af86f5911"
   license "LGPL-2.1-or-later"
   head "https://github.com/mapnik/mapnik.git", branch: "master"
 
@@ -14,52 +12,57 @@ class Mapnik < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "a08567fab792639725b4e49a52bdadd453663dd6382e425e2543dc488dfa6ffc"
-    sha256 cellar: :any,                 arm64_ventura:  "4a63b043bf14cfd50a5542e8675241c6688914fe04e36fe8b07404f2844bbb42"
-    sha256 cellar: :any,                 arm64_monterey: "4f6dce463d60991c23de3f2671167a17b00b14293a431506211b5e4afd804803"
-    sha256 cellar: :any,                 sonoma:         "5f94034082640323ab30dd80bc312e15f1bbec7478b0bd4a4581c0a62b50eec1"
-    sha256 cellar: :any,                 ventura:        "2b99f0190fb783e7ebaa4a447c476dacb0d33ae331e22160009e2b44f7997cf4"
-    sha256 cellar: :any,                 monterey:       "52f154e3437dc9ab1970833bd7fe3ef62bb8cf8015d5c7f234c65d248714a8cd"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "7fecb83093c9547b2ead8be587b08d124fd7f98db62971d972f550edcef96dd6"
+    sha256                               arm64_tahoe:   "17461daa16a83cc1b68d83bddec019fe70f5ae3b2025dc96e6c452b609150856"
+    sha256                               arm64_sequoia: "7eab01ac99e1e4d5033fe6b0820c765f4116abfcbf8dcf60629eaa83020533cf"
+    sha256                               arm64_sonoma:  "d43b7a22d394246775470e7f7e1c04595950b398aa888733cc466bc578554b57"
+    sha256 cellar: :any,                 sonoma:        "2d758a5fbfa96cab450ad2f598a7911c9ffd5d675f9a1021545e4c8d89ddd7a8"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "578349d989d343e7334d1d816620cadf19364e359143034064444b4a50410c73"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "773d9545c7adf7b00cddba30fc78af1ff692debb8e4388fb22f0742cc8e107b0"
   end
 
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "boost"
   depends_on "cairo"
   depends_on "freetype"
   depends_on "gdal"
   depends_on "harfbuzz"
-  depends_on "icu4c"
+  depends_on "icu4c@78"
   depends_on "jpeg-turbo"
+  depends_on "libavif"
   depends_on "libpng"
   depends_on "libpq"
   depends_on "libtiff"
   depends_on "libxml2"
+  depends_on "openssl@3"
   depends_on "proj"
+  depends_on "protozero"
   depends_on "sqlite"
   depends_on "webp"
 
-  uses_from_macos "zlib"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
-  conflicts_with "osrm-backend", because: "both install Mapbox Variant headers"
   conflicts_with "svg2png", because: "both install `svg2png` binaries"
 
   def install
-    cmake_args = std_cmake_args
-    cmake_args << "-DBUILD_BENCHMARK:BOOL=OFF"
-    cmake_args << "-DBUILD_DEMO_CPP:BOOL=OFF"
-    cmake_args << "-DBUILD_DEMO_VIEWER:BOOL=OFF"
-    cmake_args << "-DCMAKE_INSTALL_RPATH:PATH=#{rpath}"
+    cmake_args = %W[
+      -DBUILD_BENCHMARK:BOOL=OFF
+      -DBUILD_DEMO_CPP:BOOL=OFF
+      -DBUILD_DEMO_VIEWER:BOOL=OFF
+      -DCMAKE_INSTALL_RPATH:PATH=#{rpath};#{rpath(source: lib/"mapnik/input")}
+      -DUSE_EXTERNAL_MAPBOX_PROTOZERO=ON
+    ]
 
-    system "cmake", "-S", ".", "-B", "build", *cmake_args
+    system "cmake", "-S", ".", "-B", "build", *cmake_args, *std_cmake_args
     system "cmake", "--build", "build"
     system "ctest", "--verbose", "--parallel", ENV.make_jobs, "--test-dir", "build"
     system "cmake", "--install", "build"
   end
 
   test do
-    output = shell_output("#{Formula["pkg-config"].bin}/pkg-config libmapnik --variable prefix").chomp
+    output = shell_output("#{Formula["pkgconf"].bin}/pkgconf libmapnik --variable prefix").chomp
     assert_equal prefix.to_s, output
 
     output = shell_output("#{bin}/mapnik-index --version 2>&1", 1).chomp

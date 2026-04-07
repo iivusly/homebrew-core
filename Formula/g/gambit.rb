@@ -1,8 +1,8 @@
 class Gambit < Formula
   desc "Software tools for game theory"
-  homepage "http://www.gambit-project.org"
-  url "https://github.com/gambitproject/gambit/archive/refs/tags/v16.2.0.tar.gz"
-  sha256 "cf8f36c7031834287a5fdde01af0845065706b11e6388087ef4303b6025221ec"
+  homepage "https://www.gambit-project.org/"
+  url "https://github.com/gambitproject/gambit/archive/refs/tags/v16.6.0.tar.gz"
+  sha256 "5d0ac6809841b02347b31accfb6ee31d6ae0593f33dcf58b71b9ca543b465fd9"
   license all_of: ["GPL-2.0-or-later", "Zlib"]
 
   livecheck do
@@ -11,13 +11,12 @@ class Gambit < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "985873c30cbbd722dff28874ebbdeb3e9922eecd232e7290b75e94c208a493c4"
-    sha256 cellar: :any,                 arm64_ventura:  "5d6a7d78addc7083d7b5f15484150750779e2ce484f21e4f7f5d6c0ccb838bd8"
-    sha256 cellar: :any,                 arm64_monterey: "e6f5a8bd927aa99ead958ca5869a2bcf7baaf5b196942cdfbdf4a132da4299c2"
-    sha256 cellar: :any,                 sonoma:         "93075f364cfda3bd6b6fae4712017bda5ece8970c7310c6ffeb946eebe6db6f8"
-    sha256 cellar: :any,                 ventura:        "acbdb8f054368360219bd7bcb33fbbdae6f07f88a30dbe9820f842e6c5ae6c75"
-    sha256 cellar: :any,                 monterey:       "dbc4830a4a97d6836ea77d7152abf3e7ebc20a67f73d1fe1329c64b0d99f168a"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "c5ed956661c53f5a426261ec29f9b8aa06ec7c9c370d1265348a22733382d7b2"
+    sha256 cellar: :any,                 arm64_tahoe:   "1981b508d7ec1e7f9bd9abd0f9cc604e1f0953b1261b9ad5478ab74dc13aff3c"
+    sha256 cellar: :any,                 arm64_sequoia: "ca7a9c1c14a39a81072f117e3f4ccc89a41f1502d5be242c3aaea9574982eceb"
+    sha256 cellar: :any,                 arm64_sonoma:  "917c3966b4a0b41a0e4dc605430eb816da5d48bc5bd585c45b96925e1c9f88da"
+    sha256 cellar: :any,                 sonoma:        "04f5090eea9d0a69cf46f6e6c0f868394ab5470032b426b387accfb13d876b4b"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "8bdcb2fd44695f5fe0ede13b74a9fb25bf400b5785de2c01eac50d9e6d98ecbe"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "0e73a3408e96fa4501a02949808f405324017d2acb50415cc11c77c252a2cb33"
   end
 
   depends_on "autoconf" => :build
@@ -26,11 +25,12 @@ class Gambit < Formula
   depends_on "wxwidgets"
 
   def install
+    wxwidgets = deps.find { |dep| dep.name.match?(/^wxwidgets(@\d+(\.\d+)*)?$/) }.to_formula
+    wx_config = wxwidgets.opt_bin/"wx-config-#{wxwidgets.version.major_minor}"
     system "autoreconf", "--force", "--install", "--verbose"
-    system "./configure", "--disable-dependency-tracking",
-                          "--disable-silent-rules",
-                          "--prefix=#{prefix}",
-                          "--with-wx-prefix=#{Formula["wxwidgets"].opt_prefix}"
+    system "./configure", "--disable-silent-rules",
+                          "--with-wx-config=#{wx_config}",
+                          *std_configure_args
     system "make", "install"
 
     # Sanitise references to Homebrew shims
@@ -39,15 +39,15 @@ class Gambit < Formula
   end
 
   test do
-    system bin/"gambit-enumpure", pkgshare/"contrib/games/e02.efg"
-    system bin/"gambit-enummixed", pkgshare/"contrib/games/e02.nfg"
-    system bin/"gambit-gnm", pkgshare/"contrib/games/e02.nfg"
-    system bin/"gambit-ipa", pkgshare/"contrib/games/e02.nfg"
-    system bin/"gambit-lcp", pkgshare/"contrib/games/e02.efg"
+    system bin/"gambit-enumpure", pkgshare/"contrib/games/e04.efg"
+    system bin/"gambit-enummixed", pkgshare/"contrib/games/e04.nfg"
+    system bin/"gambit-gnm", pkgshare/"contrib/games/e04.nfg"
+    system bin/"gambit-ipa", pkgshare/"contrib/games/e04.nfg"
+    system bin/"gambit-lcp", pkgshare/"contrib/games/e04.efg"
     system bin/"gambit-lp", pkgshare/"contrib/games/2x2const.nfg"
-    system bin/"gambit-liap", pkgshare/"contrib/games/e02.nfg"
-    system bin/"gambit-simpdiv", pkgshare/"contrib/games/e02.nfg"
-    system bin/"gambit-logit", pkgshare/"contrib/games/e02.efg"
+    system bin/"gambit-liap", pkgshare/"contrib/games/e04.nfg"
+    system bin/"gambit-simpdiv", pkgshare/"contrib/games/e04.nfg"
+    system bin/"gambit-logit", pkgshare/"contrib/games/e04.efg"
     system bin/"gambit-convert", "-O", "html", pkgshare/"contrib/games/2x2.nfg"
   end
 end

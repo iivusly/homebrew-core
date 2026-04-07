@@ -3,31 +3,40 @@ class Fonttools < Formula
 
   desc "Library for manipulating fonts"
   homepage "https://github.com/fonttools/fonttools"
-  url "https://files.pythonhosted.org/packages/c6/cb/cd80a0da995adde8ade6044a8744aee0da5efea01301cadf770f7fbe7dcc/fonttools-4.53.1.tar.gz"
-  sha256 "e128778a8e9bc11159ce5447f76766cefbd876f44bd79aff030287254e4752c4"
+  url "https://files.pythonhosted.org/packages/9a/08/7012b00a9a5874311b639c3920270c36ee0c445b69d9989a85e5c92ebcb0/fonttools-4.62.1.tar.gz"
+  sha256 "e54c75fd6041f1122476776880f7c3c3295ffa31962dc6ebe2543c00dca58b5d"
   license "MIT"
   head "https://github.com/fonttools/fonttools.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "70398639ade205d56fa1aa2f9414c6438acc42b272afdbef4e616673b8659226"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "6c8c8525646be9bdde781407c258a52a486b890c185769d5f29154ec3f4ee768"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "3447c5dee8bcacc8f810ca18d107cabfd6b354911c73b85fc33ef970d87f77e6"
-    sha256 cellar: :any_skip_relocation, sonoma:         "918143a0ba840fcb05535c4a69f93f73b38a0bccc25883008cabecf2a2f7a444"
-    sha256 cellar: :any_skip_relocation, ventura:        "8c22df7ab78cde9df3ed4a370e94337461b75161349380a3b934dab411b7653d"
-    sha256 cellar: :any_skip_relocation, monterey:       "69afab1869d663af5414e47254e1862ddaf656d6ad748df8fabd8ff8bddacd63"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "4c2539a85db47a3153a12df441761c7e58ce79081aa9d16715467525cf485077"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "0001eade086c988cc672a9af2c8d2038f960dab53e142be6cc36c0a27528f503"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "4bfca89bd45e458aaeb6f4eb1cc6d51537e3512f50c166f13bc48062c5e21f1f"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "9fffee9a93cbd3c1fbaf9da2df0962dde4a0f9c7c219770e519913944473f14f"
+    sha256 cellar: :any_skip_relocation, sonoma:        "d8a3eca0b7071caedcd3df47db52c9f9eb75f557a25f1121120dddb33fd33a01"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "b96504a66b7fa25e346f7eb239e035469bacb53517373d52f7395b6326da04d2"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "9e40c0be7be38a9772da15b050a7ee38a350f055141889a985646b569cff30e0"
   end
 
-  depends_on "python@3.12"
+  depends_on "python@3.14"
+
+  uses_from_macos "libxml2"
+  uses_from_macos "libxslt"
+
+  pypi_packages package_name: "fonttools[lxml,woff]"
 
   resource "brotli" do
-    url "https://files.pythonhosted.org/packages/2f/c2/f9e977608bdf958650638c3f1e28f85a1b075f075ebbe77db8555463787b/Brotli-1.1.0.tar.gz"
-    sha256 "81de08ac11bcb85841e440c13611c00b67d3bf82698314928d0b676362546724"
+    url "https://files.pythonhosted.org/packages/f7/16/c92ca344d646e71a43b8bb353f0a6490d7f6e06210f8554c8f874e454285/brotli-1.2.0.tar.gz"
+    sha256 "e310f77e41941c13340a95976fe66a8a95b01e783d430eeaf7a2f87e0a57dd0a"
+  end
+
+  resource "lxml" do
+    url "https://files.pythonhosted.org/packages/aa/88/262177de60548e5a2bfc46ad28232c9e9cbde697bd94132aeb80364675cb/lxml-6.0.2.tar.gz"
+    sha256 "cd79f3367bd74b317dda655dc8fcfa304d9eb6e4fb06b7168c5cf27f96e0cd62"
   end
 
   resource "zopfli" do
-    url "https://files.pythonhosted.org/packages/92/d8/71230eb25ede499401a9a39ddf66fab4e4dab149bf75ed2ecea51a662d9e/zopfli-0.2.3.zip"
-    sha256 "dbc9841bedd736041eb5e6982cd92da93bee145745f5422f3795f6f258cdc6ef"
+    url "https://files.pythonhosted.org/packages/0a/4d/a8cc1768b2eda3c0c7470bf8059dcb94ef96d45dd91fc6edd29430d44072/zopfli-0.4.1.tar.gz"
+    sha256 "07a5cdc5d1aaa6c288c5d9f5a5383042ba743641abf8e2fd898dcad622d8a38e"
   end
 
   def install
@@ -39,9 +48,9 @@ class Fonttools < Formula
       cp "/System/Library/Fonts/ZapfDingbats.ttf", testpath
 
       system bin/"ttx", "ZapfDingbats.ttf"
-      assert_predicate testpath/"ZapfDingbats.ttx", :exist?
+      assert_path_exists testpath/"ZapfDingbats.ttx"
       system bin/"fonttools", "ttLib.woff2", "compress", "ZapfDingbats.ttf"
-      assert_predicate testpath/"ZapfDingbats.woff2", :exist?
+      assert_path_exists testpath/"ZapfDingbats.woff2"
     else
       assert_match "usage", shell_output("#{bin}/ttx -h")
     end

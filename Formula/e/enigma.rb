@@ -4,6 +4,7 @@ class Enigma < Formula
   url "https://github.com/Enigma-Game/Enigma/releases/download/1.30/Enigma-1.30-src.tar.gz"
   sha256 "ae64b91fbc2b10970071d0d78ed5b4ede9ee3868de2e6e9569546fc58437f8af"
   license "GPL-2.0-or-later"
+  revision 1
 
   livecheck do
     url :stable
@@ -11,17 +12,13 @@ class Enigma < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "d3eae767601812b3250106ccaaccdfb1106e94e9e1242ef0537fbb09e47936c3"
-    sha256 arm64_ventura:  "29d4ab1fe62d50bf1ff571784ce4f58bfc52bfdf1dc5c745566a59220ec0dda4"
-    sha256 arm64_monterey: "d03595cec1ddb59025fcecbf6888f4aa111ea3109248dad844afff91da8589cc"
-    sha256 arm64_big_sur:  "5b867b942c96de07f01505e2208cf578f744425346ba180e96ba3d569c4cc15c"
-    sha256 sonoma:         "0e2508b3e178cfbf3e76348f3bd9626df9dfa031d11f24350876f16324a580f8"
-    sha256 ventura:        "e5e1f7aa32037bc31bd4288b93039efb05f70da1558890f413dd6fa2d0a07c83"
-    sha256 monterey:       "61e64a23581e2e4771fa7a28e7a1da9f70f6d35ffe7f7585a4a40758466e3753"
-    sha256 big_sur:        "679839e6002ae198d8f62c1c1379982630fa2173f41b8cf63b7b48b91c606dac"
-    sha256 catalina:       "78472e57abc53c73a637928f6d58b075f387c7e15e140858e4a3b0c59fa1e2ae"
-    sha256 mojave:         "fab7be7e356416ceeb52dd5a078349ef0a40c7f0a2f703ef43c9c7aeeaa1e239"
-    sha256 x86_64_linux:   "7d28c5a21e674b2cbc1627a807370916695ff7feba86230fd4fce2e6cc3cb939"
+    rebuild 1
+    sha256 arm64_tahoe:   "10b0cd3364cfc8994f9a702a205e87968c36000fd23bf18c10bf0c8974e905dd"
+    sha256 arm64_sequoia: "fc97d79fdc16bd8a249d43dca89623fe82aaa04b37deea691bc9b64d6ecffe71"
+    sha256 arm64_sonoma:  "e828d5f71b45bd8d245e19585a681f4f8fc580a5774b577ee02255192b4eddbd"
+    sha256 sonoma:        "37bc631fd1d8ec80a8a17a6634f9cfe0f089eb94cdf4128940bfe1f79e2cb830"
+    sha256 arm64_linux:   "5b08fcc7d57a457dd3fb211db55f2e187daadafe6699891f818b644281adb44f"
+    sha256 x86_64_linux:  "ca6b0609a467268d92dfe296d79b9dc31fd1dc126d4a9e3ed7d2af6c79f8fbc8"
   end
 
   head do
@@ -32,7 +29,7 @@ class Enigma < Formula
   end
 
   depends_on "imagemagick" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
 
   depends_on "enet"
   depends_on "freetype"
@@ -44,10 +41,13 @@ class Enigma < Formula
   depends_on "xerces-c"
 
   uses_from_macos "curl"
-  uses_from_macos "zlib"
 
   on_macos do
     depends_on "gettext"
+  end
+
+  on_linux do
+    depends_on "zlib-ng-compat"
   end
 
   def install

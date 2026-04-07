@@ -1,26 +1,24 @@
 class Basti < Formula
   desc "Securely connect to RDS, Elasticache, and other AWS resources in VPCs"
   homepage "https://github.com/basti-app/basti"
-  url "https://registry.npmjs.org/basti/-/basti-1.6.2.tgz"
-  sha256 "8d813c1f4e3b8195655d40e670aa8a2eb7dce2cd21d996564c56a3296163f1d7"
+  url "https://registry.npmjs.org/basti/-/basti-1.7.2.tgz"
+  sha256 "92937b3bf012ea34a0435b21dce634ecff724c9a1580ecf0a3850f1365ce5e7e"
   license "MIT"
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "e19564aeece7fc2749628f1b327717f0ed1aa365f52b40721aaa374aa3058074"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "e19564aeece7fc2749628f1b327717f0ed1aa365f52b40721aaa374aa3058074"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "e19564aeece7fc2749628f1b327717f0ed1aa365f52b40721aaa374aa3058074"
-    sha256 cellar: :any_skip_relocation, sonoma:         "1e632db83fe49e15bf89f32d16d71a378b3a35107b4763a185a5f84636413c22"
-    sha256 cellar: :any_skip_relocation, ventura:        "1e632db83fe49e15bf89f32d16d71a378b3a35107b4763a185a5f84636413c22"
-    sha256 cellar: :any_skip_relocation, monterey:       "1e632db83fe49e15bf89f32d16d71a378b3a35107b4763a185a5f84636413c22"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "907d5b4c78c66add943f6a57e448c559dcf182138ba6133d098b841093157f35"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "c93ea7546c6c4ed6f890169f332f28810658e4b68d864f965f2e77214e7b445b"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "c93ea7546c6c4ed6f890169f332f28810658e4b68d864f965f2e77214e7b445b"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "c93ea7546c6c4ed6f890169f332f28810658e4b68d864f965f2e77214e7b445b"
+    sha256 cellar: :any_skip_relocation, sonoma:        "5a5cc4bd8ada263464e590c898b0dd980e35b8d53fa68a5fce9fde2897e5d6ce"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "04d05f5fab473c324a8e001be4b880ba1c129e0e3b15e766c71179787352b784"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ebb576e2bda22c4bf10be9e06b9f2d5ba2ddd906cb53580ca2113865f6b6539f"
   end
 
   depends_on "node"
 
   def install
     system "npm", "install", *std_npm_args
-    bin.install_symlink Dir["#{libexec}/bin/*"]
+    bin.install_symlink libexec.glob("bin/*")
 
     # Remove incompatible pre-built binary, session-manager-plugin
     node_modules = libexec/"lib/node_modules/basti/node_modules"

@@ -1,8 +1,8 @@
 class Xpdf < Formula
   desc "PDF viewer"
   homepage "https://www.xpdfreader.com/"
-  url "https://dl.xpdfreader.com/xpdf-4.05.tar.gz"
-  sha256 "92707ed5acb6584fbd73f34091fda91365654ded1f31ba72f0970022cf2a5cea"
+  url "https://dl.xpdfreader.com/xpdf-4.06.tar.gz"
+  sha256 "1c38f527c46caee0f712386d42a885b96a31ed9ce11904e872559859894d137e"
   license any_of: ["GPL-2.0-only", "GPL-3.0-only"]
 
   livecheck do
@@ -11,13 +11,12 @@ class Xpdf < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "fa1671618f3f9efa35959abd97e504bf6e08dd435e2bbf000cf195dcfee6d01c"
-    sha256 cellar: :any,                 arm64_ventura:  "e5774761d4a6a79893e0d2af59ddbf9ac178662bcc31f4144f0eab744269f53b"
-    sha256 cellar: :any,                 arm64_monterey: "61ac5eba04cc8ab73c4f588979d0e02a76b0b5b5475a4e9e03486e980018bdf9"
-    sha256 cellar: :any,                 sonoma:         "7da20a5e9e850794d98b08ef544a69d4f856683533345bb9dfe3b1fcc421b765"
-    sha256 cellar: :any,                 ventura:        "b9003b9879cfeb6e6979859a121b59dd899e2b490a87c8e01aa4fa8ce0defcc1"
-    sha256 cellar: :any,                 monterey:       "e82e5ccffe6c04337eea25d975a84777747c190d1c1b458b9cc2cf1bb0c6f443"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "3951386ab869791ccd7da42c52c7298137abd308e5ba10a3ab7c4426b330e552"
+    sha256 cellar: :any,                 arm64_tahoe:   "4dd0eb582bdc7b4379aa8e77644af37c4e8e096a8696d4a0fbdc23ccc4cba193"
+    sha256 cellar: :any,                 arm64_sequoia: "60cc7f994a18afe6a5ae628ab060f6c6c5413d83f01df8b06c1a25bc63c91cb0"
+    sha256 cellar: :any,                 arm64_sonoma:  "6cfb145e1263312e350bd59bb67cbcc92f5e30fce85b66868ca2cc2e052c008d"
+    sha256 cellar: :any,                 sonoma:        "6189984381ed79a12c107361576d6d2dc387e9c7f96a95b29214b490344559aa"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "54e5a8dfab3cc64ed798baed055e7ebc46ce23990c3af9f10cc3df4a43732456"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "19ebbcae1282fab3ebb7f695353528f51bd149bdf426d36d889b6c88fc85551a"
   end
 
   depends_on "cmake" => :build
@@ -25,16 +24,19 @@ class Xpdf < Formula
   depends_on "fontconfig"
   depends_on "freetype"
   depends_on "libpng"
-  depends_on "qt@5"
+  depends_on "qtbase"
+  depends_on "qtsvg" => :no_linkage # for svg icons
+
+  uses_from_macos "cups"
 
   conflicts_with "pdf2image", "pdftohtml", "poppler",
     because: "poppler, pdftohtml, pdf2image, and xpdf install conflicting executables"
 
-  fails_with gcc: "5"
-
   def install
-    system "cmake", ".", *std_cmake_args
-    system "make", "install"
+    args = %W[-DSYSTEM_XPDFRC=#{etc}/xpdfrc]
+    system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
+    system "cmake", "--build", "build"
+    system "cmake", "--install", "build"
   end
 
   test do

@@ -3,10 +3,11 @@ class LittleCms2 < Formula
   homepage "https://www.littlecms.com/"
   # Ensure release is announced at https://www.littlecms.com/categories/releases/
   # (or https://www.littlecms.com/blog/)
-  url "https://downloads.sourceforge.net/project/lcms/lcms/2.16/lcms2-2.16.tar.gz"
-  sha256 "d873d34ad8b9b4cea010631f1a6228d2087475e4dc5e763eb81acc23d9d45a51"
+  url "https://downloads.sourceforge.net/project/lcms/lcms/2.18/lcms2-2.18.tar.gz"
+  sha256 "ee67be3566f459362c1ee094fde2c159d33fa0390aa4ed5f5af676f9e5004347"
   license "MIT"
   version_scheme 1
+  compatibility_version 1
 
   # The Little CMS website has been redesigned and there's no longer a
   # "Download" page we can check for releases. As of writing this, checking the
@@ -18,13 +19,12 @@ class LittleCms2 < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "d1ed5796de3f00d4b1301e9062cb54b2337c8e8dcf2ae9be8e03f3ed7af791e0"
-    sha256 cellar: :any,                 arm64_ventura:  "c7eee75a83a2be3f19aa53ad043da4a316af7bc7f57e6aaf8f311f9e6e354be8"
-    sha256 cellar: :any,                 arm64_monterey: "2f155dd797f8d008616c61677d7b7ebc49b349feb06a1c86239d49e1b9a5118d"
-    sha256 cellar: :any,                 sonoma:         "46dd0d6ba9293999feaeb701a4c614440250a51daf0949478fbd486650a637bc"
-    sha256 cellar: :any,                 ventura:        "1c2e7ed787c6ff05b52bf3d1f6e27047e390f609af8a2dcfbb5904cdee8a0fff"
-    sha256 cellar: :any,                 monterey:       "c3add26aa2b85ad6bda455cb9ad2f14a3e0055f458722757162dcfe91a992044"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "79268ac2afeaaa7bce8af516f329f808443c3bbad64e705f8a39e4f0ccc112e2"
+    sha256 cellar: :any,                 arm64_tahoe:   "ea51fe72839acbeb85a14cbc5f758fcfd6c10704bf301511b67b80d1eb437e25"
+    sha256 cellar: :any,                 arm64_sequoia: "ef0bc9dde8d758c481c8ef9f7ac032776f0c67de87b2bc453e0bdbb037914cba"
+    sha256 cellar: :any,                 arm64_sonoma:  "a3b6b7e04b11587086a64a17b6c8880cf20bab9d92d00cad8f6d71cc0d347289"
+    sha256 cellar: :any,                 sonoma:        "b4c863e6eb564449490359a59c6fbfa8b72e305f6f81bb81c17eb24c21388a19"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "58e39623413e57b7ae9a3a34aad0aebce5564264f3af4b3388570860d04b54be"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "f004716c38223986c27a7f6b545f169616d6ee060d3b652b5f936a28d9725ae6"
   end
 
   depends_on "jpeg-turbo"
@@ -33,10 +33,13 @@ class LittleCms2 < Formula
   def install
     system "./configure", *std_configure_args
     system "make", "install"
+
+    # Avoid rebuilding dependents that hard-code the prefix.
+    inreplace lib/"pkgconfig/lcms2.pc", prefix, opt_prefix
   end
 
   test do
     system bin/"jpgicc", test_fixtures("test.jpg"), "out.jpg"
-    assert_predicate testpath/"out.jpg", :exist?
+    assert_path_exists testpath/"out.jpg"
   end
 end

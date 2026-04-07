@@ -7,12 +7,15 @@ class Apophenia < Formula
   revision 1
 
   bottle do
+    sha256 cellar: :any,                 arm64_tahoe:    "44c30149c9a30ba1c3eabfde55df2aa654127cd2788bddef59c67dc61b79531d"
+    sha256 cellar: :any,                 arm64_sequoia:  "45407a002d3d36f5c0e0e1b286a7097074d389691e119c42b17681e086b48473"
     sha256 cellar: :any,                 arm64_sonoma:   "46a4119ca0d9f934fad32688b6a85ae8206a5f86f8e64b9d3680201398c1bee2"
     sha256 cellar: :any,                 arm64_ventura:  "4cfac020f8c94bf825b0b21b2c56eb77d815d8eff4b935eecc7f69825ac7f69d"
     sha256 cellar: :any,                 arm64_monterey: "dad0483f7c96479a293715d97dab14df9cc1fbec0378f2bf97fc17b64aa2c2e5"
     sha256 cellar: :any,                 sonoma:         "cde422f8be856275c3fb3d2092929101bafcbbee62cb9486d1b59378b02b004a"
     sha256 cellar: :any,                 ventura:        "104c954cb700c12c225829809d209c7c5861c57ef05a0ada3f9cb0e6e8a61935"
     sha256 cellar: :any,                 monterey:       "a449794eaa411f25d9df192964a641bb773cbe80b0f873cd158a1dbd1e1d45c1"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "d28856a30a244da835dc65df83285e22c654e7e449e56d0cf2a7748bc9ede283"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "2980951404674b5fc9a6957d6fe7ebb8ae0ded37f3c0c444c732115f5b3f6638"
   end
 
@@ -29,7 +32,7 @@ class Apophenia < Formula
   # Fix compilation with POSIX basename(3)
   # Patches already accepted upstream, remove on next release
   patch do
-    url "https://raw.githubusercontent.com/Homebrew/formula-patches/9aaa7da2cc8dab92f16744724797739088742a29/apophenia/posix-basename.diff"
+    url "https://raw.githubusercontent.com/Homebrew/homebrew-core/1cf441a0/Patches/apophenia/posix-basename.diff"
     sha256 "9d8d92c850cdb671032679e3ef46dafda96ffa6daf39769573392605cea41af3"
   end
 
@@ -43,13 +46,13 @@ class Apophenia < Formula
   end
 
   test do
-    (testpath/"foo.csv").write <<~EOS
+    (testpath/"foo.csv").write <<~CSV
       thud,bump
       1,2
       3,4
       5,6
       7,8
-    EOS
+    CSV
 
     expected_gnuplot_output = <<~EOS
       plot '-' with lines

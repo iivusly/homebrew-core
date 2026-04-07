@@ -11,6 +11,8 @@ class Hyperestraier < Formula
   end
 
   bottle do
+    sha256 cellar: :any,                 arm64_tahoe:    "fddfdaa28011b5308a0195b816212d061a3b707dce5275ff26bb47ab09e22841"
+    sha256 cellar: :any,                 arm64_sequoia:  "18f652254c3b115ffe6fad67be39dee791ef6b8f456122618762417eef74f4cb"
     sha256 cellar: :any,                 arm64_sonoma:   "5ac8a21fdb6d25f1855c3ab56253357c1938d3fe45d35f449e23dc28dd997a38"
     sha256 cellar: :any,                 arm64_ventura:  "381f8cb7f35472802af7f859b9b5369427a9260cf2470917f74f0e43d78915ec"
     sha256 cellar: :any,                 arm64_monterey: "4c7b331c57a8dc648150b89336b93cd18c172bce495a2fe5f7e351037d640305"
@@ -20,14 +22,11 @@ class Hyperestraier < Formula
     sha256 cellar: :any,                 monterey:       "e97a30177dd2112ae7ef36b2165213874faa7a4ef1e40dd6433ccfdd3eae7ac2"
     sha256 cellar: :any,                 big_sur:        "98338e8f67c7cba1df436607f09415415e39a38f695805ddd94720326eae9212"
     sha256 cellar: :any,                 catalina:       "0304cb2db3ed4e35c12ccaac0251ea19f7fd4c0f2a5b9f3ffad0f201f7f4357c"
-    sha256 cellar: :any,                 mojave:         "4275d3ad552f225c5b686532d6cc2703481284fa73eaf3c5b35bc5551dc95761"
-    sha256 cellar: :any,                 high_sierra:    "f0eeb8e60dc0639fdbf5c15fc22c954a627b5136525021706876972b5bfdd816"
-    sha256 cellar: :any,                 sierra:         "c6018d888e9a4f03546f1727d9ec7b6d7eb6a87fc4f6755667bdafa71929aca7"
-    sha256 cellar: :any,                 el_capitan:     "c90ef2d3ccac1af3247726697be33748ec53df85a98af4611b6dbfc9a8dca0c7"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "82e4346da884ac2a0ef08c094839ff64c4f689a2d036dc4be0db5f7d86af69ff"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "67da1265df5336838e42f563b8b90041d83d848739bf7972950de444cef78650"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "qdbm"
 
   def install

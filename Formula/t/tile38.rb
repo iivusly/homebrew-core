@@ -2,47 +2,34 @@ class Tile38 < Formula
   desc "In-memory geolocation data store, spatial index, and realtime geofence"
   homepage "https://tile38.com/"
   url "https://github.com/tidwall/tile38.git",
-      tag:      "1.33.2",
-      revision: "a953466318ce1d65a16259099a5b023650bfdf11"
+      tag:      "1.37.0",
+      revision: "48aa3d2f303447513bbc9dc06dedac42269f4ad2"
   license "MIT"
   head "https://github.com/tidwall/tile38.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "66ff72e4032aa211be1173a923ac68f9daa367d1cefc9df4e745c02635603c6a"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "8f6a68f961b3f7030636d733e044b0833ec28bd4236bb4421ca0e4b81ed96183"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "fdd1f437cc9ecafe562d8f0d07cb519542c6f02ea760ad34b83bbd8a2540009c"
-    sha256 cellar: :any_skip_relocation, sonoma:         "ed920ec06fa86a0e159d29c2d13d5bfa54e9843b1b945d322a741aa06900f431"
-    sha256 cellar: :any_skip_relocation, ventura:        "7735304e07eccf955a7ccdd32c179cec282eb26be81301a833f193a844b0beca"
-    sha256 cellar: :any_skip_relocation, monterey:       "879b3c32fab2f0f954362ef46d6bb9ee0ed933bcd380825fefbc60556996f2b3"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "0f3bc0698ba7e4b3a66cac5a6c7b6a640f6ab1a19923e6ebaab90bc80a9fb699"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "cdfe9e42cb4b5cdee808dfca100d20e9f04cf737d63aab45a2e9dc349647a73d"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "461aeac2ab719a07e5764dd88bc99352d36def813fe30c295e00c947deb5d2e2"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "bddb54ad65fd35534c8d593a6ede162d91a3dfb924a71e0201928d25083622d8"
+    sha256 cellar: :any_skip_relocation, sonoma:        "9ce1a1638aa31d0f28e1e031937ac48f6e7588cd6542cb3bea43bf8ffbc18d79"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "d4a22c1843a3dbca44783a1443386bc513efef0632ff31e2f2368c888c678aea"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "a9af0c425459875d1402d52e8c4b3ba93d69c1b733c1554791e9640ca6b012d3"
   end
 
   depends_on "go" => :build
-
-  def datadir
-    var/"tile38/data"
-  end
 
   def install
     ldflags = %W[
       -s -w
       -X github.com/tidwall/tile38/core.Version=#{version}
       -X github.com/tidwall/tile38/core.GitSHA=#{Utils.git_short_head}
-    ].join(" ")
+    ]
 
-    system "go", "build", *std_go_args(ldflags:), "-o", bin/"tile38-server", "./cmd/tile38-server"
-    system "go", "build", *std_go_args(ldflags:), "-o", bin/"tile38-cli", "./cmd/tile38-cli"
-  end
+    system "go", "build", *std_go_args(ldflags:, output: bin/"tile38-server"), "./cmd/tile38-server"
+    system "go", "build", *std_go_args(ldflags:, output: bin/"tile38-cli"), "./cmd/tile38-cli"
 
-  def post_install
     # Make sure the data directory exists
-    datadir.mkpath
-  end
-
-  def caveats
-    <<~EOS
-      To connect: tile38-cli
-    EOS
+    (var/"tile38/data").mkpath
   end
 
   service do
@@ -55,16 +42,14 @@ class Tile38 < Formula
 
   test do
     port = free_port
-    pid = fork do
-      exec bin/"tile38-server", "-q", "-p", port.to_s
-    end
+    pid = spawn bin/"tile38-server", "-q", "-p", port.to_s
     sleep 2
     # remove `$408` in the first line output
     json_output = shell_output("#{bin}/tile38-cli -p #{port} server")
     tile38_server = JSON.parse(json_output)
 
     assert_equal tile38_server["ok"], true
-    assert_predicate testpath/"data", :exist?
+    assert_path_exists testpath/"data"
   ensure
     Process.kill("HUP", pid)
   end

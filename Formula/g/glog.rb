@@ -1,48 +1,60 @@
 class Glog < Formula
   desc "Application-level logging library"
-  homepage "https://github.com/google/glog"
-  url "https://github.com/google/glog/archive/refs/tags/v0.6.0.tar.gz"
-  sha256 "8a83bf982f37bb70825df71a9709fa90ea9f4447fb3c099e1d720a439d88bad6"
+  homepage "https://google.github.io/glog/stable/"
+  url "https://github.com/google/glog/archive/refs/tags/v0.7.1.tar.gz"
+  sha256 "00e4a87e87b7e7612f519a41e491f16623b12423620006f59f5688bfd8d13b08"
   license "BSD-3-Clause"
+  compatibility_version 1
   head "https://github.com/google/glog.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "c6eb9b8ce678f03a87a9864ea498434b44a206cd331322ed771824a71320a97a"
-    sha256 cellar: :any,                 arm64_ventura:  "7f027456418cf100e83da0cab5dd2f01b03650d25727fc129ae8bfc80031469f"
-    sha256 cellar: :any,                 arm64_monterey: "875364220b0fae1b16b63ff9811aa675d1fc55e47fd5ea64ecfb15ce063965b2"
-    sha256 cellar: :any,                 arm64_big_sur:  "8a33b84bd59fa19c00401e5540a41207f2364867783b85289a2153cc4da2b861"
-    sha256 cellar: :any,                 sonoma:         "e227a7700929d4f5a91d8338a487d0b52db132a1613d51a965bede4428e804b0"
-    sha256 cellar: :any,                 ventura:        "1bf4cd6c05c5b63c05bf91c854902bec0a3f2c0058d26d7277df53c4791d7aef"
-    sha256 cellar: :any,                 monterey:       "04b418eda3d8089e64ab902d265dd935245c815b19933173f670a28d8abbca81"
-    sha256 cellar: :any,                 big_sur:        "54cac16cc76e3594f3b61afa071ebb7890a1cc22122cab767ae540ced1f1a24b"
-    sha256 cellar: :any,                 catalina:       "53e6963a265a0af5d6982b91e423f432f0a130995cc7e2e2021a04edbbc8a88d"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "04695a6df86ea26cadda86975bc9ad9c1ec112e8325e2bbc5f25939b42698463"
+    sha256 cellar: :any,                 arm64_tahoe:   "15bf109a841f9381cd9086d7aecefc7d782670c90a5142bbf9f281604deff968"
+    sha256 cellar: :any,                 arm64_sequoia: "c42e96a87cd7e7342ac3bf3e9c219945f116ae344b0602e9ae3274d566aa08b2"
+    sha256 cellar: :any,                 arm64_sonoma:  "c4881acd951f5282803c8674b756391cac911262d4ea247daeb448457281f5a5"
+    sha256 cellar: :any,                 sonoma:        "9e1493169d73ac812775f431b0f227f45d21504d0eeed8f296f7f2fcb071b919"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "55330f966af37454c000fe47f329a6eba4504393bf0752d35f0c3690bd2155fc"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "2c624a10ebd6da940a6f6d1c3ddb4cfe5a025bc588ece4de923aeeebadfeb8a2"
   end
 
-  depends_on "cmake" => :build
+  # deprecate! date: "2025-12-10", because: :repo_archived, replacement_formula: "abseil"
+
+  depends_on "cmake" => [:build, :test]
   depends_on "gflags"
 
   def install
-    system "cmake", "-S", ".", "-B", "build", "-DBUILD_SHARED_LIBS=ON", *std_cmake_args
+    args = %w[
+      -DBUILD_SHARED_LIBS=ON
+      -DWITH_PKGCONFIG=ON
+    ]
+    system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
     system "cmake", "--build", "build"
-    system "cmake", "--build", "build", "--target", "install"
+    system "cmake", "--install", "build"
   end
 
   test do
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include <glog/logging.h>
-      #include <iostream>
-      #include <memory>
-      int main(int argc, char* argv[])
-      {
+
+      int main(int argc, char* argv[]) {
         google::InitGoogleLogging(argv[0]);
         LOG(INFO) << "test";
       }
-    EOS
-    system ENV.cxx, "-std=c++11", "test.cpp", "-I#{include}", "-L#{lib}",
-                    "-lglog", "-I#{Formula["gflags"].opt_lib}",
-                    "-L#{Formula["gflags"].opt_lib}", "-lgflags",
-                    "-o", "test"
-    system "./test"
+    CPP
+
+    (testpath/"CMakeLists.txt").write <<~CMAKE
+      cmake_minimum_required(VERSION 4.0)
+      project(test VERSION 1.0)
+      find_package(glog CONFIG REQUIRED)
+      add_executable(test test.cpp)
+      target_link_libraries(test glog::glog)
+    CMAKE
+
+    ENV["TMPDIR"] = testpath
+    system "cmake", "-S", ".", "-B", "build"
+    system "cmake", "--build", "build"
+    system "./build/test"
+
+    assert_path_exists testpath/"test.INFO"
+    assert_match "test.cpp:5] test", File.read("test.INFO")
   end
 end

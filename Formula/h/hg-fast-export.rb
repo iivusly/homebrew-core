@@ -3,40 +3,25 @@ class HgFastExport < Formula
 
   desc "Fast Mercurial to Git converter"
   homepage "https://repo.or.cz/fast-export.git"
-  url "https://github.com/frej/fast-export/archive/refs/tags/v231118.tar.gz"
-  sha256 "2173c8cb2649c05affe6ef1137bc6a06913f06e285bcd710277478a04a3a937f"
+  url "https://github.com/frej/fast-export/archive/refs/tags/v260405.tar.gz"
+  sha256 "23af10aed62096a25f54012e37a16f5137d221f7e862dd559eba1ecf56ff1dbe"
   license "GPL-2.0-or-later"
+  head "https://github.com/frej/fast-export.git", branch: "master"
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, all: "6a644292119def3bf821f4426f610d0c489caa77dc269a0d2160c642c3c22347"
+    sha256 cellar: :any_skip_relocation, all: "d63cc3af8e41294758be1e5b4b50e4a4fa117f7d9ce782afb62ad2629db42cdc"
   end
 
   depends_on "mercurial"
-  depends_on "python@3.12"
-
-  # Fix compatibility with Python 3.12 using open PR.
-  # PR ref: https://github.com/frej/fast-export/pull/311
-  patch do
-    url "https://github.com/frej/fast-export/commit/a3d0562737e1e711659e03264e45cb47a5a2f46d.patch?full_index=1"
-    sha256 "8d9d5a41939506110204ae00607061f85362467affd376387230e074bcae2667"
-  end
+  depends_on "python@3.14"
 
   def install
-    # The Python executable is tested from PATH
-    # Prepend ours Python to the executable candidate list (python2 python python3)
-    # See https://github.com/Homebrew/homebrew-core/pull/90709#issuecomment-988548657
-    %w[hg-fast-export.sh hg-reset.sh].each do |f|
-      inreplace f, "for python_cmd in ",
-                   "for python_cmd in '#{which("python3.12")}' "
-    end
+    python3 = which("python3.14")
+    libexec.install "plugins", "pluginloader"
+    bin.install buildpath.glob("hg*.{sh,py}")
 
-    libexec.install Dir["*"]
-
-    %w[hg-fast-export.py hg-fast-export.sh hg-reset.py hg-reset.sh hg2git.py].each do |f|
-      rewrite_shebang detected_python_shebang, libexec/f
-      bin.install_symlink libexec/f
-    end
+    rewrite_shebang detected_python_shebang, *bin.children
+    bin.env_script_all_files libexec/"bin", PYTHON: python3, PYTHONPATH: libexec
   end
 
   test do
@@ -51,11 +36,11 @@ class HgFastExport < Formula
       system "git", "config", "--global", "init.defaultBranch", "master"
       system "git", "init"
       system "git", "config", "core.ignoreCase", "false"
-      system bin/"hg-fast-export.sh", "-r", "#{testpath}/hg-repo"
+      system bin/"hg-fast-export.sh", "-r", testpath/"hg-repo"
       system "git", "checkout", "HEAD"
     end
 
-    assert_predicate testpath/"git-repo/test.txt", :exist?
+    assert_path_exists testpath/"git-repo/test.txt"
     assert_equal "Hello", (testpath/"git-repo/test.txt").read
   end
 end

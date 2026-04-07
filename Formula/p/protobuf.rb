@@ -1,10 +1,10 @@
 class Protobuf < Formula
   desc "Protocol buffers (Google's data interchange format)"
   homepage "https://protobuf.dev/"
-  url "https://github.com/protocolbuffers/protobuf/releases/download/v27.3/protobuf-27.3.tar.gz"
-  sha256 "1535151efbc7893f38b0578e83cac584f2819974f065698976989ec71c1af84a"
+  url "https://github.com/protocolbuffers/protobuf/releases/download/v34.1/protobuf-34.1.tar.gz"
+  sha256 "e4e6ff10760cf747a2decd1867741f561b216bd60cc4038c87564713a6da1848"
   license "BSD-3-Clause"
-  revision 1
+  compatibility_version 2
 
   livecheck do
     url :stable
@@ -12,48 +12,55 @@ class Protobuf < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "5b1a2146d54650db79fa06d4f412d27234b6c2cefb2a9732e082e72a962d7321"
-    sha256 cellar: :any,                 arm64_ventura:  "75e04018736e21d729817cc9b008a8088548566d959f675b9c28939a05da5868"
-    sha256 cellar: :any,                 arm64_monterey: "a823df91e5e83440abf17d57fea72f0c234e4d6e04ac2b0de9303c2477f07625"
-    sha256 cellar: :any,                 sonoma:         "d4d402e7c17fd7f5c383058c60ab564647532ad3b26525b9f7a8f69cb0f0eb16"
-    sha256 cellar: :any,                 ventura:        "3597daa5939a38c4b68df3067762f9227952e1a456f3e17a5764c89b825a767a"
-    sha256 cellar: :any,                 monterey:       "79d9cbad2a7a907e73605a803bb6cb88535ec50cf3a9a1e8b4547f6cccaa437c"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "9b4d12f9f02438f92cd3eb4e44b914fc1ef54737285f324d5e4f89307b6dcff5"
+    sha256 cellar: :any, arm64_tahoe:   "052999e2596cd873392cfc3e9b351892d5dc839776dfb8a115eddf638c6baf04"
+    sha256 cellar: :any, arm64_sequoia: "a6779ffa7ee2bc25076bc0338b558387ac18136d455ee822a6123c4bb76b8d3b"
+    sha256 cellar: :any, arm64_sonoma:  "ba01f35bd0814496dc1d8b92aa519984da76decd084ef7dcfa145f6e952fa5e9"
+    sha256 cellar: :any, sonoma:        "06892ef0f54c26fbbca4a01e8620079b1b83bcce53a82ffe04f19290f7df35a2"
+    sha256               arm64_linux:   "ed890928c4ce477d2ea2ac38e44a253d161882ac2545eab91b974fde89592336"
+    sha256               x86_64_linux:  "c439d6602fb48906ddd0f1adc80a49b51f71c23b03815de740fdf8b7e13934d4"
   end
 
   depends_on "cmake" => :build
   depends_on "abseil"
-  uses_from_macos "zlib"
 
   on_macos do
-    # We currently only run tests on macOS.
-    # Running them on Linux requires rebuilding googletest with `-fPIC`.
+    # TODO: Try restoring tests on Linux in a future release. Currently they
+    # fail to build as Clang causes an ABI difference in Abseil that impacts
+    # a testcase. Also GCC 13 failed to compile UPB tests in Protobuf 34.0
     depends_on "googletest" => :build
   end
 
-  patch do
-    url "https://github.com/protocolbuffers/protobuf/commit/e490bff517916495ed3a900aa85791be01f674f5.patch?full_index=1"
-    sha256 "7e89d0c379d89b24cb6fe795cd9d68e72f0b83fcc95dd91af721d670ad466022"
+  on_linux do
+    depends_on "llvm" => :build if DevelopmentTools.gcc_version < 13
+    depends_on "zlib-ng-compat"
+  end
+
+  fails_with :gcc do
+    version "12"
+    cause "fails handling ABSL_ATTRIBUTE_WARN_UNUSED"
   end
 
   def install
+    # TODO: Remove after moving CI to Ubuntu 24.04. Cannot use newer GCC as it
+    # will increase minimum GLIBCXX in bottle resulting in a runtime dependency.
+    ENV.llvm_clang if OS.linux? && deps.map(&:name).any?("llvm")
+
     # Keep `CMAKE_CXX_STANDARD` in sync with the same variable in `abseil.rb`.
     abseil_cxx_standard = 17
     cmake_args = %W[
+      -DCMAKE_CXX_STANDARD=#{abseil_cxx_standard}
       -DBUILD_SHARED_LIBS=ON
       -Dprotobuf_BUILD_LIBPROTOC=ON
       -Dprotobuf_BUILD_SHARED_LIBS=ON
       -Dprotobuf_INSTALL_EXAMPLES=ON
       -Dprotobuf_BUILD_TESTS=#{OS.mac? ? "ON" : "OFF"}
-      -Dprotobuf_USE_EXTERNAL_GTEST=ON
-      -Dprotobuf_ABSL_PROVIDER=package
-      -Dprotobuf_JSONCPP_PROVIDER=package
+      -Dprotobuf_FORCE_FETCH_DEPENDENCIES=OFF
+      -Dprotobuf_LOCAL_DEPENDENCIES_ONLY=ON
     ]
-    cmake_args << "-DCMAKE_CXX_STANDARD=#{abseil_cxx_standard}"
 
     system "cmake", "-S", ".", "-B", "build", *cmake_args, *std_cmake_args
     system "cmake", "--build", "build"
-    system "ctest", "--test-dir", "build", "--verbose" if OS.mac?
+    system "ctest", "--test-dir", "build", "--verbose"
     system "cmake", "--install", "build"
 
     (share/"vim/vimfiles/syntax").install "editors/proto.vim"
@@ -61,7 +68,7 @@ class Protobuf < Formula
   end
 
   test do
-    testdata = <<~EOS
+    (testpath/"test.proto").write <<~PROTO
       syntax = "proto3";
       package test;
       message TestCase {
@@ -70,8 +77,7 @@ class Protobuf < Formula
       message Test {
         repeated TestCase case = 1;
       }
-    EOS
-    (testpath/"test.proto").write testdata
+    PROTO
     system bin/"protoc", "test.proto", "--cpp_out=."
   end
 end

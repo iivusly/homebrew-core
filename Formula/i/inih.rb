@@ -1,18 +1,20 @@
 class Inih < Formula
   desc "Simple .INI file parser in C"
   homepage "https://github.com/benhoyt/inih"
-  url "https://github.com/benhoyt/inih/archive/refs/tags/r58.tar.gz"
-  sha256 "e79216260d5dffe809bda840be48ab0eec7737b2bb9f02d2275c1b46344ea7b7"
+  url "https://github.com/benhoyt/inih/archive/refs/tags/r62.tar.gz"
+  sha256 "9c15fa751bb8093d042dae1b9f125eb45198c32c6704cd5481ccde460d4f8151"
   license "BSD-3-Clause"
+  compatibility_version 1
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "5e3feca2ad82149be23f8b8197dc4def4b6f875f913bc20e6a63d0fca2f950e5"
-    sha256 cellar: :any,                 arm64_ventura:  "cda39a0bf974dc4a44f1ae643e5d6f68c36625927b40284d923b3b405bdaae67"
-    sha256 cellar: :any,                 arm64_monterey: "8c4076b74b74305a3bcb8fed1e48cf12afed174fa133ac270ebea088821479ac"
-    sha256 cellar: :any,                 sonoma:         "3a840e0886567281f23a8567e9b89fa47c1bb3512ba19daac9867bc97220ee44"
-    sha256 cellar: :any,                 ventura:        "62e0def050a8c72d642df4e74c2d6e0f8eaa690992a3ce42a9d9f6a584bc23d0"
-    sha256 cellar: :any,                 monterey:       "9fbfa45ba702cd0a6a165be73bc5d69f87223683265ce4f6b0f8fe13041cbd5c"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "3ac3bfd4c526d7ebe707ad4d3969c840a837ab01555055c6b88a5558d1933fa4"
+    sha256 cellar: :any,                 arm64_tahoe:   "2da037de9e1fcd435b7f6ce72ad3f4d68daba4309177706b4985cb1a8b177410"
+    sha256 cellar: :any,                 arm64_sequoia: "091fb8df3a4b359eb9901ca5cbbb3c933884eb7c5ae8f3501cfbe42bf45c9310"
+    sha256 cellar: :any,                 arm64_sonoma:  "2e705b5f3bfd341b9d6f482bbaeee593d2471e89b39b676f8c2a343121fe0c96"
+    sha256 cellar: :any,                 arm64_ventura: "1275d4633d996f2ebeb3ef1caaccf602fa379f8fae6bc5de7c5861734eeb4add"
+    sha256 cellar: :any,                 sonoma:        "e0b9bac4889b98ae4d76744dad465896324f24d3c6cf153da61dc4ab7c47bdc6"
+    sha256 cellar: :any,                 ventura:       "ca38d47aaad57936c7f35f0717c88f137ebecfc736eb77420451cc00b884d73d"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "367d03ca8de872326f20c9fdc0e51c1f067c2ad3a7c6f256e808a8290402270b"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "009e69d397acb943997e1a240c2f7836343aa8ddbec03fc9eda1f4192b211205"
   end
 
   depends_on "meson" => :build
@@ -25,7 +27,7 @@ class Inih < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <stdio.h>
       #include <string.h>
       #include <ini.h>
@@ -56,7 +58,7 @@ class Inih < Formula
           }
           return 0;
       }
-    EOS
+    C
 
     (testpath/"test.ini").write <<~EOS
       [protocol]             ; Protocol configuration

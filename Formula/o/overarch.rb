@@ -1,12 +1,12 @@
 class Overarch < Formula
   desc "Data driven description of software architecture"
   homepage "https://github.com/soulspace-org/overarch"
-  url "https://github.com/soulspace-org/overarch/releases/download/v0.30.0/overarch.jar"
-  sha256 "adb2328ce0e28cf36ce665cdfdb25b8be9902f475d8153d5c9c5b0a914856c5c"
+  url "https://github.com/soulspace-org/overarch/releases/download/v0.40.0/overarch.jar"
+  sha256 "368b865b4909143f3bf3da711709a4d1d39c04fac9b8585e90c35df540b4fb18"
   license "EPL-1.0"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, all: "59eb0159f6afab4914a8dd8319e516170041b9d1ea2b444b9e95fb832f5d190c"
+    sha256 cellar: :any_skip_relocation, all: "019d9f6fdec57aa21267fa20a873af588bb5ada1c60751ff4943f4aa090a1393"
   end
 
   head do
@@ -54,7 +54,9 @@ class Overarch < Formula
     EOS
     expected = <<~EOS.chomp
       Model Warnings:
-      {:unresolved-refs-in-views (), :unresolved-refs-in-relations ()}
+      {:build-problems (),
+       :unresolved-refs-in-views (),
+       :unresolved-refs-in-relations ()}
       Model Information:
       {:nodes-by-type-count {:person 1, :system 1},
        :nodes-count 2,

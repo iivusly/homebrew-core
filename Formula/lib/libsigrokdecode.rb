@@ -7,20 +7,22 @@ class Libsigrokdecode < Formula
   revision 1
   head "git://sigrok.org/libsigrokdecode", branch: "master"
 
+  # The upstream website has gone down due to a server failure and the previous
+  # download page is not available, so this checks the directory listing page
+  # where the `stable` archive is found until the download page returns.
   livecheck do
-    url "https://sigrok.org/wiki/Downloads"
+    url "https://sigrok.org/download/source/libsigrokdecode/"
     regex(/href=.*?libsigrokdecode[._-]v?(\d+(?:\.\d+)+)\.t/i)
   end
 
   bottle do
-    rebuild 2
-    sha256 arm64_sonoma:   "7c1edc6950ff24f926767a8de0721445d5f3c1ea7a103cc17b9313043f396e5b"
-    sha256 arm64_ventura:  "fbf08d6b2fde951731f3dac27737defa3680dae8f865accdb40c554eef0302f5"
-    sha256 arm64_monterey: "afbc25b9237db3cbfa5d9fe544b9f6f8e6ddf19e93164f4126da0697e1fce0f2"
-    sha256 sonoma:         "599ac7858a52cd88934c3f9e38353c655fd83aa957918eac5da7eb233b731daf"
-    sha256 ventura:        "f8e69d8cb58936a43c5d9ede4e6c62a4b5e33337881b5aebe51f3745c0a4863c"
-    sha256 monterey:       "979c6bdad107fd9fdd5383fe921e65f2abac06ce1495c455ceb283564e048b21"
-    sha256 x86_64_linux:   "7d571869e94632f7db6a2ff8db2a08ad09aab49909b1f89f4aba0e0bb14fdef9"
+    rebuild 4
+    sha256 arm64_tahoe:   "23396e67a66de629ac081dc782c68f9fcd38617f0b6f9127f2f46dbd245f2d37"
+    sha256 arm64_sequoia: "d117a9548cd69c1e115b85c7ef62a277b69aa14af761de1748c3bf1811fdd5b1"
+    sha256 arm64_sonoma:  "4d85c0c5d5623c0e3714d75c4e4d4fdf00f4c31b760cc1ce43da3ba47ee06521"
+    sha256 sonoma:        "3d88591dccf61eaa1381eabf2b0dcff873d72238cf4268f9e2820a9ad4c2648d"
+    sha256 arm64_linux:   "d642fc4f3665d70301ea2195b43926e5bf9deefdee64dab83717b90476c68a6a"
+    sha256 x86_64_linux:  "4ff7dc34d6405ca194b26dc6cf68637aa81f8161786d7ceb4dd49d2abe1f7b5e"
   end
 
   depends_on "autoconf" => :build
@@ -28,24 +30,27 @@ class Libsigrokdecode < Formula
   depends_on "doxygen" => :build
   depends_on "graphviz" => :build
   depends_on "libtool" => :build
-  depends_on "pkg-config" => [:build, :test]
+  depends_on "pkgconf" => [:build, :test]
+
   depends_on "glib"
-  depends_on "python@3.12"
+  depends_on "python@3.14"
+
+  on_macos do
+    depends_on "gettext"
+  end
 
   def install
-    # While this doesn't appear much better than hardcoding `3.10`, this allows
+    # While this doesn't appear much better than hardcoding `3.xy`, this allows
     # `brew audit` to catch mismatches between this line and the dependencies.
-    python = "python3.12"
+    python = "python3.14"
     py_version = Language::Python.major_minor_version(python)
 
-    inreplace "configure.ac" do |s|
-      # Force the build system to pick up the right Python 3
-      # library. It'll normally scan for a Python library using a list
-      # of major.minor versions which means that it might pick up a
-      # version that is different from the one specified in the
-      # formula.
-      s.sub!(/^(SR_PKG_CHECK\(\[python3\], \[SRD_PKGLIBS\],)\n.*$/, "\\1 [python-#{py_version}-embed])")
-    end
+    # We should be able to remove this in libsigrokdecode >0.5.3, who will
+    # check for a version-independent `python3-embed` pkg-config file, and
+    # correctly detect the python3 version from our formula dependencies.
+    inreplace "configure.ac",
+              "SR_PKG_CHECK([python3], [SRD_PKGLIBS],",
+              "SR_PKG_CHECK([python3], [SRD_PKGLIBS], [python-#{py_version}-embed],"
 
     if build.head?
       system "./autogen.sh"
@@ -60,7 +65,7 @@ class Libsigrokdecode < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <libsigrokdecode/libsigrokdecode.h>
 
       int main() {
@@ -72,8 +77,8 @@ class Libsigrokdecode < Formula
         }
         return 0;
       }
-    EOS
-    flags = shell_output("#{Formula["pkg-config"].opt_bin}/pkg-config --cflags --libs libsigrokdecode").strip.split
+    C
+    flags = shell_output("#{Formula["pkgconf"].opt_bin}/pkgconf --cflags --libs libsigrokdecode").strip.split
     system ENV.cc, "test.c", "-o", "test", *flags
     system "./test"
   end

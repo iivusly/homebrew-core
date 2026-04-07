@@ -1,27 +1,29 @@
 class Opencc < Formula
   desc "Simplified-traditional Chinese conversion tool"
   homepage "https://github.com/BYVoid/OpenCC"
-  url "https://github.com/BYVoid/OpenCC/archive/refs/tags/ver.1.1.9.tar.gz"
-  sha256 "ad4bcd8d87219a240a236d4a55c9decd2132a9436697d2882ead85c8939b0a99"
+  url "https://github.com/BYVoid/OpenCC/archive/refs/tags/ver.1.2.0.tar.gz"
+  sha256 "f4f86eb25e239450d075081e08594801aa063c298d21d9f6c6aa85cd55241962"
   license "Apache-2.0"
+  head "https://github.com/BYVoid/OpenCC.git", branch: "master"
 
   bottle do
-    sha256 arm64_sonoma:   "40bbcc0ea4cceadf579f5bcefded29585f45a18e42bba6ee2a0f0f8b9093f30c"
-    sha256 arm64_ventura:  "517a8dfe20b621aad9d4f8fd9118794b53318f07007ee1ec1fb7081065921184"
-    sha256 arm64_monterey: "addb0ef3712437c10de21dfe670291144d1fa36d6c2661016cfbdba0d6a0e9f1"
-    sha256 sonoma:         "125d0aa542c79a1c64ff50d6bb65f37b8a1df08842d2aadea4de148ad4fd7834"
-    sha256 ventura:        "a6da927e23614ddef3ff4199a162a5ddb81ad3d0414e3943adc1622d5a0eebed"
-    sha256 monterey:       "86fab72d30ba153353798d51f6f1e0ef3136b9edd23d69497fb3b8303cebfb72"
-    sha256 x86_64_linux:   "127925772f41d4145e6f4ee5f74f08cea701fdce389b743174b960dc1e80629d"
+    sha256 arm64_tahoe:   "f4f32d831b4c4efcce4985889f1b97c2d72cf0fa70072a1510c364abbf4d41a8"
+    sha256 arm64_sequoia: "5578577376fe775dc84f81c713f24f437acfee1a44a26ac2ad437e556bf14448"
+    sha256 arm64_sonoma:  "5cc429e1b9d04539158ad25800c46a89a9aa86bff75abcf745f51818b67551c9"
+    sha256 sonoma:        "c9dfebbc8c0a1ade2338055f3304f1099c7ac6c6ab8eaf99b26bef6af61a299d"
+    sha256 arm64_linux:   "a3c0b445c400a2d6f520b0747058b770cfc798a8095f8331b501ad325dfb2b81"
+    sha256 x86_64_linux:  "d8e0a358a41f411513b78d9d4a4ec5fc978d4c832474f4824e10d58a9fab187a"
   end
 
   depends_on "cmake" => :build
+  depends_on "marisa"
   uses_from_macos "python" => :build
 
   def install
     args = %W[
       -DCMAKE_INSTALL_RPATH=#{rpath}
       -DPYTHON_EXECUTABLE=#{which("python3")}
+      -DUSE_SYSTEM_MARISA=ON
     ]
 
     system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args

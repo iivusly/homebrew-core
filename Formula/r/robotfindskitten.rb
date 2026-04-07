@@ -8,6 +8,8 @@ class Robotfindskitten < Formula
   head "https://github.com/robotfindskitten/robotfindskitten.git", branch: "main"
 
   bottle do
+    sha256 arm64_tahoe:    "f70167f4ada3ff8ec73fe948560bc08e582be51e57806612ed9d269ce0a1ed7e"
+    sha256 arm64_sequoia:  "ea748b3acc46a3b17408ae1f7989c8d37389eb92e9d0d325e66b134136b51904"
     sha256 arm64_sonoma:   "94751d896df7daed821dfd5ba1a5c89c05b9e014f9e44c3d9f5e0f09a9f512be"
     sha256 arm64_ventura:  "594de510a65fdc1d5e49721661badf9d65c66ffcd6948de794e3aa1ad7de0f90"
     sha256 arm64_monterey: "4b05b5753ba51c24aa690eb643d8abd4b471a4a417e061f3197e9f5ac9fe9b9a"
@@ -17,8 +19,7 @@ class Robotfindskitten < Formula
     sha256 monterey:       "eccc3189c1083ea09ac7a52b2cac91fc2f5a7251523c4a07ddf4bcf9653572e3"
     sha256 big_sur:        "6e95713a4c9a5ace4ece0bcf430b08caaa09876a002964f9ef01ee6fc982d302"
     sha256 catalina:       "fa1f963cf39fb320c4b8e0867a05c9e96944d59d6c18222a9d6b33acb4384622"
-    sha256 mojave:         "8b25c148f43ad7c70d43810639b7c812cbd612b347386be3f7e913b4d0cc14b5"
-    sha256 high_sierra:    "9c6b045c69a6ff5e74f4f184ec109d3bfd293c7dab223e87ba80e7bb150e8dae"
+    sha256 arm64_linux:    "0d65f446d480696e567673ca1261f700413841a6196dac6bef7535f95727b167"
     sha256 x86_64_linux:   "7d44526e0b657e25b0bec3f36112f6bc9196f8a9a0b74ae2dec9e7b86801abe4"
   end
 
@@ -29,9 +30,8 @@ class Robotfindskitten < Formula
   uses_from_macos "ncurses"
 
   def install
-    system "autoreconf", "-ivf"
-    system "./configure", "--disable-dependency-tracking",
-                          "--prefix=#{prefix}"
+    system "autoreconf", "--force", "--install", "--verbose"
+    system "./configure", *std_configure_args
     system "make", "install", "execgamesdir=#{bin}"
   end
 

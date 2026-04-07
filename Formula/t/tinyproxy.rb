@@ -1,18 +1,17 @@
 class Tinyproxy < Formula
   desc "HTTP/HTTPS proxy for POSIX systems"
   homepage "https://tinyproxy.github.io/"
-  url "https://github.com/tinyproxy/tinyproxy/releases/download/1.11.2/tinyproxy-1.11.2.tar.xz"
-  sha256 "6a126880706691c987e2957b1c99b522efb1964a75eb767af4b30aac0b88a26a"
+  url "https://github.com/tinyproxy/tinyproxy/releases/download/1.11.3/tinyproxy-1.11.3.tar.xz"
+  sha256 "f05644fdf1211ba13754a354bebed909b5b39371b12cce8563c46929a75bedf6"
   license "GPL-2.0-or-later"
 
   bottle do
-    sha256 arm64_sonoma:   "54a2231b4ad6b362db15d5709eb7ae1f171584e64725546b4ef5d5c384ca6b4c"
-    sha256 arm64_ventura:  "38dd9771beb51039ef32c6f96e110726598387867c3bb22215298310e735aaeb"
-    sha256 arm64_monterey: "77833ca6e2e9f3926d7f7a69c63aec9bb83da5241ba8ce6ed8c8ed1eaf2d1a6a"
-    sha256 sonoma:         "e7f5a728df755d3fcb83b2639e924354c7bc479152bf766b819660b3caf1c302"
-    sha256 ventura:        "11689d10c680a3c1e7b5fe372fe7ed44507e3e6415ab4dbf2b093a04f433bc2b"
-    sha256 monterey:       "c581f25dbd95d8248cd632a11993c35ea42798ede63e2f27a59aa2bb875ff778"
-    sha256 x86_64_linux:   "f63df2e51f811d5d80b7a2ce3f3e4bd0f170186061e937a39f1d06b787db793d"
+    sha256 arm64_tahoe:   "ac4cbc5308a528478d5972dbc951c2420abc1049d7061823735b648f9d864fd7"
+    sha256 arm64_sequoia: "e0c3141a074ebc5b4f27ab91d20b6b447133a55fcca98d3cdd95dbcec14e1b58"
+    sha256 arm64_sonoma:  "470a9ac084a05572a106d0d2a439f1e55ee430e4c64d18b733fa602c1e75da2f"
+    sha256 sonoma:        "6173900c0a425c4ed48996d324e1b6ee832e3ef0d5155efc59dd652ffa8907f6"
+    sha256 arm64_linux:   "b1f3a4f99b21d044c93a0101dfbf11cd1a1c6ce86f3a0189c95337b95778a38d"
+    sha256 x86_64_linux:  "cf643817026c5ef4e5a55611b4e097b258c15899ba1bf62d5a58461bdc9ef60d"
   end
 
   depends_on "asciidoc" => :build
@@ -22,10 +21,7 @@ class Tinyproxy < Formula
     ENV["XML_CATALOG_FILES"] = "#{etc}/xml/catalog"
 
     args = %W[
-      --disable-debug
-      --disable-dependency-tracking
       --disable-silent-rules
-      --prefix=#{prefix}
       --localstatedir=#{var}
       --sysconfdir=#{etc}
       --disable-regexcheck
@@ -34,11 +30,9 @@ class Tinyproxy < Formula
       --enable-transparent
     ]
 
-    system "./configure", *args
+    system "./configure", *args, *std_configure_args
     system "make", "install"
-  end
 
-  def post_install
     (var/"log/tinyproxy").mkpath
     (var/"run/tinyproxy").mkpath
   end
@@ -54,12 +48,9 @@ class Tinyproxy < Formula
     cp etc/"tinyproxy/tinyproxy.conf", testpath/"tinyproxy.conf"
     inreplace testpath/"tinyproxy.conf", "Port 8888", "Port #{port}"
 
-    pid = fork do
-      exec bin/"tinyproxy", "-c", testpath/"tinyproxy.conf"
-    end
-    sleep 2
-
+    pid = spawn bin/"tinyproxy", "-c", testpath/"tinyproxy.conf"
     begin
+      sleep 2
       assert_match "tinyproxy", shell_output("curl localhost:#{port}")
     ensure
       Process.kill("SIGINT", pid)

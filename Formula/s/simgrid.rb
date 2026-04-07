@@ -3,10 +3,10 @@ class Simgrid < Formula
 
   desc "Studies behavior of large-scale distributed systems"
   homepage "https://simgrid.org/"
-  url "https://gitlab.inria.fr/simgrid/simgrid/-/archive/v3.35/simgrid-v3.35.tar.bz2"
-  sha256 "de4c34ea424d99702419736e51cb5ad425dc01502a39f303128483a70405c473"
+  url "https://gitlab.inria.fr/simgrid/simgrid/-/archive/v4.1/simgrid-v4.1.tar.bz2"
+  sha256 "a3d02f52cfb9c2e341c380cd8e3b43da4b4885161d8e96f4b033e0d3cc8af611"
   license "LGPL-2.1-only"
-  revision 3
+  revision 1
 
   livecheck do
     url :homepage
@@ -14,13 +14,12 @@ class Simgrid < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "618319ea06ebaa3ea149ba68afd842c2c009c440fff703d824701882fd84412e"
-    sha256 arm64_ventura:  "76846ebe4e53d4553222a5c5150de159d90d4389c299a899abedf5ed24e8d7f5"
-    sha256 arm64_monterey: "ae604f6395651a8d551cd68308e1da0cf9539bbf75c80a57b7f67e274acc464c"
-    sha256 sonoma:         "646c24589419875f137ec500c4adb4a1c9c0edda817344d6074cb21a073eb3f2"
-    sha256 ventura:        "a98aa664b98d72e312804ba5556550096ae40a4cef6dca33385444068b80d09b"
-    sha256 monterey:       "518d0b3f434601c86e833a67790070810d3b8201344e2df37ba4edb22a7300e2"
-    sha256 x86_64_linux:   "16fdd292dc9e9c9a1e1ade21232cdec26bb60f40a19932789a572787dcef824d"
+    sha256 arm64_tahoe:   "034c76ebb8ad1d5afe856a54ff4cdd3fdeb60dba91ba0273d6008a20b360ca2b"
+    sha256 arm64_sequoia: "375e79079d89dc581c9530f1588564ba5ce0db257be5b79985c99aa08a4100da"
+    sha256 arm64_sonoma:  "c0ffdf86b7c64b721333f7580ba02c9c794056e0e12e69962b10bc6cd21fe0ee"
+    sha256 sonoma:        "13c3d84855a6e9788c77ba476525669d4873291eca0b5b8cd93866782879dee3"
+    sha256 arm64_linux:   "dcea28cc28e8c118a7f2ae3c49ffa92a82df38b0feebbd4b9176d2915f6ebe5b"
+    sha256 x86_64_linux:  "20872441e0def64e91fe941260e2a627af91e1ac4e8808bb6ebd50a59a852093"
   end
 
   depends_on "cmake" => :build
@@ -28,9 +27,7 @@ class Simgrid < Formula
   depends_on "boost"
   depends_on "graphviz"
 
-  uses_from_macos "python", since: :catalina
-
-  fails_with gcc: "5"
+  uses_from_macos "python"
 
   def install
     # Avoid superenv shim references
@@ -53,7 +50,7 @@ class Simgrid < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <stdio.h>
       #include <stdlib.h>
       #include <simgrid/engine.h>
@@ -62,7 +59,7 @@ class Simgrid < Formula
         printf("%f", simgrid_get_clock());
         return 0;
       }
-    EOS
+    C
 
     system ENV.cc, "test.c", "-I#{include}", "-L#{lib}", "-lsimgrid",
                    "-o", "test"

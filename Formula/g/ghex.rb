@@ -1,18 +1,17 @@
 class Ghex < Formula
   desc "GNOME hex editor"
   homepage "https://wiki.gnome.org/Apps/Ghex"
-  url "https://download.gnome.org/sources/ghex/46/ghex-46.0.tar.xz"
-  sha256 "a1c46f3020cb358b8323025db3a539c97d994a4c46f701f48edc6357f7fbcbd1"
+  url "https://download.gnome.org/sources/ghex/50/ghex-50.0.tar.xz"
+  sha256 "8325ca4b1fa75375cf8951e62f867fa6a842822c2dd5a46a9877360818b30212"
   license "GPL-2.0-or-later"
 
   bottle do
-    sha256 arm64_sonoma:   "9f4e0ef2491956e6ab73d699d2eb62c8e1e99fd0ba8559670d1effa005c901c4"
-    sha256 arm64_ventura:  "377d24393d5492f132cef436b302b43d6ec8d88324934fe8da2e3f3bbf0fdefa"
-    sha256 arm64_monterey: "50861d574cbbfee6159eb9727fd85491c68220876d5fad8657838a2bc09e15ee"
-    sha256 sonoma:         "3f646f8e3d4c910ca0bfcf9378e4714b83305a0240cb5c94ee9042a970e986b9"
-    sha256 ventura:        "df165bcd79ab7c61eb9d9309d5ac1f4210defbeb9366a5446ccd8cd77b956f3a"
-    sha256 monterey:       "bd928e90b41850305eada276227355bd89257e9c401dbff564dcb865e587fecc"
-    sha256 x86_64_linux:   "7634934203285fc6da5e3c7f08957c9d7c7c6cee162178dcdca920de417ae2bd"
+    sha256 arm64_tahoe:   "9025288811efc627d6a16727f16310bd7c724b3f6f4e630434ae3f68444e4ab2"
+    sha256 arm64_sequoia: "f486dac7dced3452a419339eb788f0c90cc95962cecc9571ce7122e10fbe013a"
+    sha256 arm64_sonoma:  "3dbb99e3e6a2ed28e6a87f91d845e20dc0ec7a0a4c47e7e0f176a1ce1d9e3e32"
+    sha256 sonoma:        "328b3b8e8b031e335ce2b45e8fc75aa9d3aa9c96c7b407e74017baa27942737a"
+    sha256 arm64_linux:   "f00a8f47a02134fb42104eee47a1ea5314bc9fb67407a88bc0e767e580f1de8c"
+    sha256 x86_64_linux:  "058054534869bc6abf483a87d82bb6b1fd210d5e4d2432307f11040d3a57e1bb"
   end
 
   depends_on "desktop-file-utils" => :build
@@ -20,7 +19,7 @@ class Ghex < Formula
   depends_on "itstool" => :build
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
 
   depends_on "cairo"
   depends_on "glib"
@@ -53,9 +52,6 @@ class Ghex < Formula
   end
 
   test do
-    # (process:30744): Gtk-WARNING **: 06:38:39.728: cannot open display
-    return if OS.linux? && ENV["HOMEBREW_GITHUB_ACTIONS"]
-
     system bin/"ghex", "--help"
   end
 end

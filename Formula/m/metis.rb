@@ -1,17 +1,19 @@
 class Metis < Formula
   desc "Programs that partition graphs and order matrices"
-  homepage "http://glaros.dtc.umn.edu/gkhome/views/metis"
-  url "http://glaros.dtc.umn.edu/gkhome/fetch/sw/metis/metis-5.1.0.tar.gz"
+  homepage "https://karypis.github.io/glaros/software/metis/overview.html"
+  url "https://karypis.github.io/glaros/files/sw/metis/metis-5.1.0.tar.gz"
   mirror "https://ftp.mcs.anl.gov/pub/pdetools/spack-pkgs/metis-5.1.0.tar.gz"
   sha256 "76faebe03f6c963127dbb73c13eab58c9a3faeae48779f049066a21c087c5db2"
   license "Apache-2.0"
 
   livecheck do
-    url "http://glaros.dtc.umn.edu/gkhome/metis/metis/download"
+    url :homepage
     regex(%r{href=.*?/metis[._-]v?(\d+(?:\.\d+)+)\.t}i)
   end
 
   bottle do
+    sha256 cellar: :any,                 arm64_tahoe:    "dbb37a32bc124a76fd9496b0e95f49b1bb48b1dfe72dc398991569156193d07e"
+    sha256 cellar: :any,                 arm64_sequoia:  "60ef633238eb902353465719c36fb64c5a325f823a203c1079c3e0358f72fd79"
     sha256 cellar: :any,                 arm64_sonoma:   "d1b85dedb77b4a578a06ba705e759768f3ad832fb744669e06f97bd233bf82ff"
     sha256 cellar: :any,                 arm64_ventura:  "5bea2beeae9e3394cc675df14dc30e078b6ed575f0bad4c05717ee3f75ed4aee"
     sha256 cellar: :any,                 arm64_monterey: "9924dff9c2995788c3e69a1affb9931035b66af7b2fef57fedbb0b2f14071d9f"
@@ -21,16 +23,19 @@ class Metis < Formula
     sha256 cellar: :any,                 monterey:       "53ceaf6862363106724577ff6568285ba22ff97ef8849eeb7ec0a8e589ef7ff2"
     sha256 cellar: :any,                 big_sur:        "bca0197271b673ba235c37334494b47250c9732e9a0164d8ee79948fc3cd4308"
     sha256 cellar: :any,                 catalina:       "b410b124973bf31beb58806d4050b8dda1fb3dca679fc3443514025200fd4a37"
-    sha256 cellar: :any,                 mojave:         "f3cdcf0cc5af4ddd27a4550d4a73cffcb34058fe34604b09d453610460d24465"
-    sha256 cellar: :any,                 high_sierra:    "88b6965d941a87044150238387971c4bb94ed2ffca327affccaf311d666a2b4b"
-    sha256 cellar: :any,                 sierra:         "9c8deed80ece8c24e7ebccbce8410557b27afe711d3f59fccb7d781254d0cc34"
-    sha256 cellar: :any,                 el_capitan:     "54f75262475744bc6ad3ba66ac801e03c18bbac00a9bcf0ca9d05853f2022498"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "8703574aca9ad47530cd56fdb31ec1e24b16643390a0cda290e19271a9a47690"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "d8daac6acbeaad9583ff26d72a8ad440ac41efb8656973213902bdfe66cd61e6"
   end
 
   depends_on "cmake" => :build
 
   def install
+    # Fix build with CMake 4.0+.
+    inreplace "CMakeLists.txt",
+              "cmake_minimum_required(VERSION 2.8)",
+              "cmake_minimum_required(VERSION 3.10)"
+    ENV.append "LDFLAGS", "-Wl,-rpath,#{rpath}"
+
     system "make", "config", "prefix=#{prefix}", "shared=1"
     system "make", "install"
 

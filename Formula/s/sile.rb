@@ -1,52 +1,56 @@
 class Sile < Formula
   desc "Modern typesetting system inspired by TeX"
   homepage "https://sile-typesetter.org"
-  url "https://github.com/sile-typesetter/sile/releases/download/v0.15.5/sile-0.15.5.tar.zst"
-  sha256 "d20137b02d16302d287670fd285ad28ac3b8d3af916460aa6bc8cbff9321b9f9"
+  url "https://github.com/sile-typesetter/sile/releases/download/v0.15.13/sile-0.15.13.tar.zst"
+  sha256 "5e97c19651aff710687b93292d5361cb411652094bcc8c62c811c19f7a81464b"
   license "MIT"
+  revision 1
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "a1801ebce21ef8b73214424bb9b2c8c8bcc4e28cee8493af697094a7363a8c40"
-    sha256 cellar: :any,                 arm64_ventura:  "2d9fcfe4e250baec177f8db23c8d58e053a35f6a105d2c16ddcd4324afd8f0bb"
-    sha256 cellar: :any,                 arm64_monterey: "f44480f15c1d1248b2c22fb9c5cb72ae6b69b3df4da6d949ffa682b8975968d5"
-    sha256 cellar: :any,                 sonoma:         "fa60e5df2d736decd381ff4f461d833d00954358567bab80a0dfd794d2020e83"
-    sha256 cellar: :any,                 ventura:        "1616bcc807d1757f2a68486c6cb20636e832da9854e2eec55850685753d376e7"
-    sha256 cellar: :any,                 monterey:       "417bb4b5ee1b3783d91e4d2821dd0d7c6fedc5ed47a3c192e27d0e5ffce3ca99"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "def682f18f0f928c68f5eefdd9a2fbfff89faae4f46ccafe0989f5403dd0b089"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "84311a8e0777cad0808ef2e936df25589c908410fdf80f8e59a336c07530eb0d"
+    sha256 cellar: :any,                 arm64_sequoia: "758458193f72b63e0404eb5475aeb44bdd6819942918e758e97dcb32bdc05090"
+    sha256 cellar: :any,                 arm64_sonoma:  "ad308a0c985244934ca559aab8ba718e217e72e4ad805504e6c8dc8c1037e458"
+    sha256 cellar: :any,                 sonoma:        "1fbd167ab091deeb57811129b2c31446acef25597accf72de9a1bf9efe8c55e6"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "4f05214a3fe6b2a84909859ab5484935dcba0045e3aff5bc5104e2a39f56eb4a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "6074cb5bbd1485cbcda34b290269ed29990895d800d9458e7d8c814904b8ad11"
   end
 
   head do
-    url "https://github.com/sile-typesetter/sile.git"
+    url "https://github.com/sile-typesetter/sile.git", branch: "master"
 
     depends_on "autoconf" => :build
     depends_on "automake" => :build
     depends_on "libtool" => :build
   end
 
-  depends_on "jq" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "poppler" => :build
   depends_on "rust" => :build
 
   depends_on "fontconfig"
   depends_on "harfbuzz"
-  depends_on "icu4c"
+  depends_on "icu4c@78"
   depends_on "libpng"
   depends_on "luajit"
   depends_on "luarocks"
   depends_on "openssl@3"
 
+  uses_from_macos "jq" => :build, since: :sequoia
   uses_from_macos "unzip" => :build
   uses_from_macos "expat"
-  uses_from_macos "zlib"
 
   on_macos do
     depends_on "freetype"
   end
 
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
+
   resource "compat53" do
-    url "https://luarocks.org/manifests/lunarmodules/compat53-0.12-1.rockspec"
-    sha256 "880cdad8d1789a0756f2023d2c98f36d94e6d2c1cc507190b4f9883420435746"
+    url "https://luarocks.org/manifests/lunarmodules/compat53-0.14.4-1.rockspec"
+    sha256 "80b4929c84eae8c00b4bca49a7d049d27d7e89cf3aefeb37cd7dc5f3cc725005"
   end
 
   resource "linenoise" do
@@ -55,8 +59,8 @@ class Sile < Formula
   end
 
   resource "lpeg" do
-    url "https://luarocks.org/manifests/gvvaughan/lpeg-1.1.0-1.src.rock"
-    sha256 "6637fcf4d3ddef7be490a2f0155bd2dcd053272d1bb78c015498709ef9fa75dd"
+    url "https://luarocks.org/manifests/gvvaughan/lpeg-1.1.0-2.src.rock"
+    sha256 "836d315b920a5cdd62e21786c6c9fad547c4faa131d5583ebca64f0b6595ee76"
   end
 
   resource "loadkit" do
@@ -70,8 +74,8 @@ class Sile < Formula
   end
 
   resource "lua-zlib" do
-    url "https://luarocks.org/manifests/brimworks/lua-zlib-1.2-2.rockspec"
-    sha256 "adc3e279ce67fb477ce7bf88cfb87607491d1c50d9c785b1567066c353f192f9"
+    url "https://luarocks.org/manifests/brimworks/lua-zlib-1.3-0.rockspec"
+    sha256 "8806be122f5621a657078e8038c7c4ff58720aedcb21da8fdd2b01304981b31a"
   end
 
   # This resource cannot be updated
@@ -110,8 +114,8 @@ class Sile < Formula
 
   # depends on luafilesystem
   resource "penlight" do
-    url "https://luarocks.org/manifests/tieske/penlight-1.13.1-1.src.rock"
-    sha256 "fa028f7057cad49cdb84acdd9fe362f090734329ceca8cc6abb2d95d43b91835"
+    url "https://luarocks.org/manifests/tieske/penlight-1.14.0-3.src.rock"
+    sha256 "84e4d23126694a57997d5499490023468190a4b14a64931da61de627ce4fe0c2"
   end
 
   # depends on penlight
@@ -133,8 +137,8 @@ class Sile < Formula
   end
 
   resource "luautf8" do
-    url "https://luarocks.org/manifests/xavier-wang/luautf8-0.1.5-2.src.rock"
-    sha256 "68bd8e3c3e20f98fceb9e20d5a7a50168202c22eb45b87eff3247a0608f465ae"
+    url "https://luarocks.org/manifests/xavier-wang/luautf8-0.1.6-1.src.rock"
+    sha256 "37901bc127c4afe9f611bba58af7b12eda6599fc270e1706e2f767807dfacd82"
   end
 
   resource "vstruct" do
@@ -153,8 +157,8 @@ class Sile < Formula
       #{luapath}/share/lua/#{luaversion}/lxp/?.lua
     ]
 
-    ENV["LUA_PATH"] = paths.join(";")
-    ENV["LUA_CPATH"] = "#{luapath}/lib/lua/#{luaversion}/?.so"
+    ENV["LUA_PATH"] = "#{paths.join(";")};;"
+    ENV["LUA_CPATH"] = "#{luapath}/lib/lua/#{luaversion}/?.so;;"
 
     ENV.prepend "CPPFLAGS", "-I#{lua.opt_include}/luajit-2.1"
     ENV.prepend "LDFLAGS", "-L#{lua.opt_lib}"
@@ -162,7 +166,7 @@ class Sile < Formula
     if OS.mac?
       zlib_dir = expat_dir = "#{MacOS.sdk_path_if_needed}/usr"
     else
-      zlib_dir = Formula["zlib"].opt_prefix
+      zlib_dir = Formula["zlib-ng-compat"].opt_prefix
       expat_dir = Formula["expat"].opt_prefix
     end
 
@@ -178,7 +182,6 @@ class Sile < Formula
       r.stage do
         rock = Pathname.pwd.children(false).first
         unpack_dir = Utils.safe_popen_read("luarocks", "unpack", rock).split("\n")[-2]
-
         spec = "#{r.name}-#{r.version}.rockspec"
         cd(unpack_dir) { system "luarocks", "make", *luarocks_args, spec }
       end
@@ -187,37 +190,24 @@ class Sile < Formula
     configure_args = %w[
       FCMATCH=true
       --disable-silent-rules
-      --with-system-luarocks
-      --with-system-lua-sources
+      --disable-static
       --disable-embeded-resources
+      --with-system-lua-sources
+      --with-system-luarocks
+      --with-vendored-luarocks-dir=#{luapath}
     ]
-
-    # Upstream bug https://github.com/sile-typesetter/sile/issues/2078 triggers
-    # a useless automake cycle when building from the source tarball. This
-    # argument avoids needing the dependency by just making it a noop. Remove
-    # on the next release.
-    configure_args += %w[AUTOMAKE=:]
 
     system "./bootstrap.sh" if build.head?
     system "./configure", *configure_args, *std_configure_args
     system "make"
     system "make", "install"
-
-    env = {
-      LUA_PATH:  "#{ENV["LUA_PATH"]};;",
-      LUA_CPATH: "#{ENV["LUA_CPATH"]};;",
-    }
-
-    (libexec/"bin").install bin/"sile"
-    (bin/"sile").write_env_script libexec/"bin/sile", env
   end
 
   def caveats
     <<~EOS
       By default SILE uses the font Gentium Plus to render all documents that do not specifically call for something else. If this font is not available on your system you may encounter errors. Of lower priority depending on your use case, the math typesetting package defaults to using Libertinus Math and the default monospace font is Hack.
 
-      Homebrew does not supply any of these font dependencies in default casks, but they can be added by tapping cask-fonts:
-        brew tap homebrew/cask-fonts
+      These fonts can be installed via Homebrew:
         brew install --cask font-gentium-plus
         brew install --cask font-libertinus
         brew install --cask font-hack

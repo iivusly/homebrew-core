@@ -6,6 +6,8 @@ class XcbUtilRenderutil < Formula
   license all_of: ["X11", "HPND-sell-variant"]
 
   bottle do
+    sha256 cellar: :any,                 arm64_tahoe:    "4f0545144b6e7c459497ebb586c522a1d3b3b5eef1160987fbe5b45e275a026c"
+    sha256 cellar: :any,                 arm64_sequoia:  "098b22877ee1d5c2c16b1827117f13f95566c1bf06d042943170c6590a06e379"
     sha256 cellar: :any,                 arm64_sonoma:   "f2533358b260aa2fb9f819e75a259123791bb4838b2bd1a2986f756e248c3109"
     sha256 cellar: :any,                 arm64_ventura:  "2ed461a699bf32016f2a95f313ed16c492dfedd98249dd86b2b6e558374fb0ae"
     sha256 cellar: :any,                 arm64_monterey: "295e5e58b68d75ee1938c78dda67904e0ba42ed6173357ea357f22140069b7dd"
@@ -15,27 +17,27 @@ class XcbUtilRenderutil < Formula
     sha256 cellar: :any,                 monterey:       "2f416f529c5764d88b98ea0c29d1afad765affb466aa69e465d998b7bd042fba"
     sha256 cellar: :any,                 big_sur:        "3a61dcebbe56e1dcff526e7ea2fe39007bf8bc1b40900f230ab4d3d318e40211"
     sha256 cellar: :any,                 catalina:       "444c4008a4d37a2a687b13316302e1fc67a1794f9bcb83f91d23e9e4ba532ad8"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "4e290a280c48d596dd1946a5d3d8670ce85b6d24ecdd565d2c46106fdaa8128f"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "9de153c6d1351a146e6cd98c7b8b0b5dddc413dbbc5baa739d3310813186839d"
   end
 
   head do
-    url "https://gitlab.freedesktop.org/xorg/lib/libxcb-render-util.git"
+    url "https://gitlab.freedesktop.org/xorg/lib/libxcb-render-util.git", branch: "master"
 
     depends_on "autoconf" => :build
     depends_on "automake" => :build
     depends_on "libtool" => :build
   end
 
-  depends_on "pkg-config" => [:build, :test]
+  depends_on "pkgconf" => [:build, :test]
   depends_on "libxcb"
 
   def install
     system "./autogen.sh" if build.head?
-    system "./configure", "--prefix=#{prefix}",
-                          "--sysconfdir=#{etc}",
+    system "./configure", "--disable-silent-rules",
                           "--localstatedir=#{var}",
-                          "--disable-dependency-tracking",
-                          "--disable-silent-rules"
+                          "--sysconfdir=#{etc}",
+                          *std_configure_args
     system "make"
     system "make", "install"
   end

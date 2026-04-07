@@ -24,6 +24,8 @@ class LlvmAT12 < Formula
 
   keg_only :versioned_formula
 
+  disable! date: "2025-07-01", because: :versioned_formula
+
   # https://llvm.org/docs/GettingStarted.html#requirement
   # We intentionally use Make instead of Ninja.
   # See: Homebrew/homebrew-core/issues/35513
@@ -37,12 +39,12 @@ class LlvmAT12 < Formula
   depends_on "swig" => :build
 
   uses_from_macos "libedit"
-  uses_from_macos "libffi", since: :catalina
+  uses_from_macos "libffi"
   uses_from_macos "ncurses"
   uses_from_macos "zlib"
 
   on_linux do
-    depends_on "pkg-config" => :build
+    depends_on "pkgconf" => :build
     depends_on "binutils" # needed for gold
     depends_on "elfutils" # openmp requires <gelf.h>
     depends_on "glibc" if Formula["glibc"].any_version_installed?
@@ -51,7 +53,7 @@ class LlvmAT12 < Formula
     # to allow building with GCC 5 and 6. Upstream bug:
     # https://bugs.llvm.org/show_bug.cgi?id=50732
     patch do
-      url "https://raw.githubusercontent.com/Homebrew/formula-patches/f0b8ff8b7ad4c2e1d474b214cd615a98e0caa796/llvm/llvm.patch"
+      url "https://raw.githubusercontent.com/Homebrew/homebrew-core/1cf441a0/Patches/llvm/llvm.patch"
       sha256 "084adce7711b07d94197a75fb2162b253186b38d612996eeb6e2bc9ce5b1e6e2"
     end
   end
@@ -138,10 +140,8 @@ class LlvmAT12 < Formula
     # build on Linux when we switch to Ubuntu 18.04.
     if OS.mac?
       macos_sdk = MacOS.sdk_path_if_needed
-      if MacOS.version >= :catalina
-        args << "-DFFI_INCLUDE_DIR=#{macos_sdk}/usr/include/ffi"
-        args << "-DFFI_LIBRARY_DIR=#{macos_sdk}/usr/lib"
-      end
+      args << "-DFFI_INCLUDE_DIR=#{macos_sdk}/usr/include/ffi"
+      args << "-DFFI_LIBRARY_DIR=#{macos_sdk}/usr/lib"
 
       args << "-DLLVM_BUILD_LLVM_C_DYLIB=ON"
       args << "-DLLVM_ENABLE_LIBCXX=ON"
@@ -219,7 +219,7 @@ class LlvmAT12 < Formula
     assert_equal (lib/shared_library("libLLVM-#{version.major}")).to_s,
                  shell_output("#{bin}/llvm-config --libfiles").chomp
 
-    (testpath/"omptest.c").write <<~EOS
+    (testpath/"omptest.c").write <<~C
       #include <stdlib.h>
       #include <stdio.h>
       #include <omp.h>
@@ -230,7 +230,7 @@ class LlvmAT12 < Formula
           }
           return EXIT_SUCCESS;
       }
-    EOS
+    C
 
     clean_version = version.to_s[/(\d+\.?)+/]
 
@@ -248,23 +248,23 @@ class LlvmAT12 < Formula
     EOS
     assert_equal expected_result.strip, sorted_testresult.strip
 
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <stdio.h>
       int main()
       {
         printf("Hello World!\\n");
         return 0;
       }
-    EOS
+    C
 
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include <iostream>
       int main()
       {
         std::cout << "Hello World!" << std::endl;
         return 0;
       }
-    EOS
+    CPP
 
     # Testing default toolchain and SDK location.
     system bin/"clang++", "-v",
@@ -349,19 +349,19 @@ class LlvmAT12 < Formula
         refute_match(/libunwind/, lib)
       end
 
-      (testpath/"test_plugin.cpp").write <<~EOS
+      (testpath/"test_plugin.cpp").write <<~CPP
         #include <iostream>
         __attribute__((visibility("default")))
         extern "C" void run_plugin() {
           std::cout << "Hello Plugin World!" << std::endl;
         }
-      EOS
-      (testpath/"test_plugin_main.c").write <<~EOS
+      CPP
+      (testpath/"test_plugin_main.c").write <<~C
         extern void run_plugin();
         int main() {
           run_plugin();
         }
-      EOS
+      C
       system bin/"clang++", "-v", "-o", "test_plugin.so",
              "-shared", "-fPIC", "test_plugin.cpp", "-L#{opt_lib}",
              "-stdlib=libc++", "-rtlib=compiler-rt",
@@ -379,14 +379,14 @@ class LlvmAT12 < Formula
     end
 
     # Testing mlir
-    (testpath/"test.mlir").write <<~EOS
+    (testpath/"test.mlir").write <<~MLIR
       func @bad_branch() {
         br ^missing  // expected-error {{reference to an undefined block}}
       }
-    EOS
+    MLIR
     system bin/"mlir-opt", "--verify-diagnostics", "test.mlir"
 
-    (testpath/"scanbuildtest.cpp").write <<~EOS
+    (testpath/"scanbuildtest.cpp").write <<~CPP
       #include <iostream>
       int main() {
         int *i = new int;
@@ -395,14 +395,14 @@ class LlvmAT12 < Formula
         std::cout << *i << std::endl;
         return 0;
       }
-    EOS
+    CPP
     assert_includes shell_output("#{bin}/scan-build #{bin}/clang++ scanbuildtest.cpp 2>&1"),
       "warning: Use of memory after it is freed"
 
-    (testpath/"clangformattest.c").write <<~EOS
+    (testpath/"clangformattest.c").write <<~C
       int    main() {
           printf("Hello world!"); }
-    EOS
+    C
     assert_equal "int main() { printf(\"Hello world!\"); }\n",
       shell_output("#{bin}/clang-format -style=google clangformattest.c")
 
@@ -410,13 +410,14 @@ class LlvmAT12 < Formula
     # was known to output incorrect linker flags; e.g., `-llibxml2.tbd` instead of `-lxml2`.
     # On the other hand, note that a fully qualified path to `dylib` or `tbd` is OK, e.g.,
     # `/usr/local/lib/libxml2.tbd` or `/usr/local/lib/libxml2.dylib`.
+    abs_path_exts = [".tbd", ".dylib"]
     shell_output("#{bin}/llvm-config --system-libs").chomp.strip.split.each do |lib|
       if lib.start_with?("-l")
         assert !lib.end_with?(".tbd"), "expected abs path when lib reported as .tbd"
         assert !lib.end_with?(".dylib"), "expected abs path when lib reported as .dylib"
       else
         p = Pathname.new(lib)
-        if p.extname == ".tbd" || p.extname == ".dylib"
+        if abs_path_exts.include?(p.extname)
           assert p.absolute?, "expected abs path when lib reported as .tbd or .dylib"
         end
       end

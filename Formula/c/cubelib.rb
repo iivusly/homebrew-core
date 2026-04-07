@@ -1,8 +1,8 @@
 class Cubelib < Formula
-  desc "Cube, is a performance report explorer for Scalasca and Score-P"
+  desc "Performance report explorer for Scalasca and Score-P"
   homepage "https://scalasca.org/software/cube-4.x/download.html"
-  url "https://apps.fz-juelich.de/scalasca/releases/cube/4.8/dist/cubelib-4.8.2.tar.gz", using: :homebrew_curl
-  sha256 "d6fdef57b1bc9594f1450ba46cf08f431dd0d4ae595c47e2f3454e17e4ae74f4"
+  url "https://apps.fz-juelich.de/scalasca/releases/cube/4.9/dist/cubelib-4.9.1.tar.gz"
+  sha256 "d82a899af07ec6c34c88665a0dfddbbc33a760031b1a79f12d168301e8ea1e46"
   license "BSD-3-Clause"
 
   livecheck do
@@ -11,26 +11,24 @@ class Cubelib < Formula
   end
 
   bottle do
-    sha256                               arm64_sonoma:   "2b11087f52488b50b2828f240d8ab658c30c92aa29512b59d8b18dfe3366df43"
-    sha256                               arm64_ventura:  "1d811d0574291b83062360b03a449d381dac2b229296bea739f33aeb1a17edfb"
-    sha256                               arm64_monterey: "aadd710f61fc65f005f5e07ba91eebd5b4d7c91d47779b0fde316b9eeeb36992"
-    sha256                               arm64_big_sur:  "323e03f8439b4fb0250fbb0016bf7950ab3816a7a9cf8b47c1ab29a5c2d42c86"
-    sha256                               sonoma:         "44e70a9911bebf2ecac7827c87c1107d497fd2d791cf61e65f30d310dc741da3"
-    sha256                               ventura:        "fe41d2cf6093309fc12bb5564e7cbb6b641451aec92956f3d89920e5cd6bc441"
-    sha256                               monterey:       "9dc98f1eaa021114b31615d0c9b804cea0755d7c839f1dd7a0df2889ca2d2131"
-    sha256                               big_sur:        "d66981b620159dd57d48bb0c45240dc6cf37085acdf288d9c5500ff07bc828ba"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "305d53e0974ea15cf0e27a487bf1383eec50e7e2bf03f54e82c2d2c1654f57e0"
+    rebuild 1
+    sha256 arm64_tahoe:   "af8563eab21f130a1c32ffebcbc1808975d166316d8ec5576a83dc2ebbc437c9"
+    sha256 arm64_sequoia: "1ccf40f98502d79ffbd32bcff4ae6212b8b96aa525e60db0665848183139da9f"
+    sha256 arm64_sonoma:  "09ebd4777ba76e31a2f4c41ee65144b9a797ee0d556278da43962164048fcfc9"
+    sha256 sonoma:        "d4013dbc7bb8da8188a0d17d09c52ebc14f36db09df5516150fe2a39ee2599bd"
+    sha256 arm64_linux:   "d9915686606c3dfa397292fdf87fec0a16af4407344ccacdadd10792a2542e45"
+    sha256 x86_64_linux:  "09faef23e866883d28efac0afb0d96a72cb574c558ff16ffe1b047b842b50fa5"
   end
 
-  uses_from_macos "zlib"
+  depends_on "pkgconf" => :build
 
   on_linux do
-    depends_on "pkg-config" => :build
+    depends_on "zlib-ng-compat"
   end
 
   # Fix -flat_namespace being used on Big Sur and later.
   patch do
-    url "https://raw.githubusercontent.com/Homebrew/formula-patches/03cf8088210822aa2c1ab544ed58ea04c897d9c4/libtool/configure-big_sur.diff"
+    url "https://raw.githubusercontent.com/Homebrew/homebrew-core/1cf441a0/Patches/libtool/configure-big_sur.diff"
     sha256 "35acd6aebc19843f1a2b3a63e880baceb0f5278ab1ace661e57a502d9d78c93c"
     directory "build-frontend"
   end
@@ -45,7 +43,7 @@ class Cubelib < Formula
       args << "LDFLAGS=-stdlib=libc++"
     end
 
-    system "./configure", *std_configure_args, *args
+    system "./configure", *args, *std_configure_args
     system "make"
     system "make", "install"
 

@@ -7,6 +7,8 @@ class GeocodeGlib < Formula
   revision 1
 
   bottle do
+    sha256 cellar: :any, arm64_tahoe:    "cb308eeeb5e4c4dd85bee423f170436edced9bbb7501419fa1f7634813bd120d"
+    sha256 cellar: :any, arm64_sequoia:  "1afc937edacc9e447525801a51fb59580cbee67a30f995999cd8a9be08a39eff"
     sha256 cellar: :any, arm64_sonoma:   "8708a046c31e0b0695c6f3624f890ae37ae17ce0c6a41e9dce8c60da9b9069c0"
     sha256 cellar: :any, arm64_ventura:  "810645cd7021c31a2b79a367a46341a119235b6edd9762d520f2e4742d85a152"
     sha256 cellar: :any, arm64_monterey: "cd7f32a773538d43539177540e21bee914a32fab1ac0497e9867cf49bc7926fe"
@@ -16,13 +18,14 @@ class GeocodeGlib < Formula
     sha256 cellar: :any, monterey:       "657fcab9602371c260494510436cecf83e37f7526e2d96fd9ee87b133fd73547"
     sha256 cellar: :any, big_sur:        "46f8b7fb5ae054a58b11bf54b7869335fa7b29b82875dbe4f14b9aa50b43c7cb"
     sha256 cellar: :any, catalina:       "f4715dbb2ed9bb363a61f0e40c885f3218262d87bf1a22a1f341c6acdab3cf56"
+    sha256               arm64_linux:    "e1d35bca6f2c7072afbee67dc0d23ebcc57df3a103fba2e54c4a0cbcee6ff49e"
     sha256               x86_64_linux:   "705672b2c649c9dad5061d9d010d6faa106f67a278e90eab7c6b6a7a8f66e9ca"
   end
 
   depends_on "gobject-introspection" => :build
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => [:build, :test]
+  depends_on "pkgconf" => [:build, :test]
 
   depends_on "glib"
   depends_on "gtk+3"
@@ -51,16 +54,16 @@ class GeocodeGlib < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <geocode-glib/geocode-glib.h>
 
       int main(int argc, char *argv[]) {
         GeocodeLocation *loc = geocode_location_new(1.0, 1.0, 1.0);
         return 0;
       }
-    EOS
-    pkg_config_flags = shell_output("pkg-config --cflags --libs geocode-glib-2.0").chomp.split
-    system ENV.cc, "test.c", "-o", "test", *pkg_config_flags
+    C
+    pkgconf_flags = shell_output("pkgconf --cflags --libs geocode-glib-2.0").chomp.split
+    system ENV.cc, "test.c", "-o", "test", *pkgconf_flags
     system "./test"
   end
 end

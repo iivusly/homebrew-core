@@ -3,60 +3,61 @@ class Snakefmt < Formula
 
   desc "Snakemake code formatter"
   homepage "https://github.com/snakemake/snakefmt/"
-  url "https://files.pythonhosted.org/packages/b4/61/0228586a10b76064431e1d0c965f030b4c7dfbea6d1cfcb4d3f0cb0e6726/snakefmt-0.10.2.tar.gz"
-  sha256 "4286a5903b66da7e52763c5e8184da4edc95113b758f4448528804fb54f9b75a"
+  url "https://files.pythonhosted.org/packages/82/d9/4b680f15c240437bae53cd9d1466187aa1440294bf2e88b46bce24a01356/snakefmt-1.0.0.tar.gz"
+  sha256 "4ba7af112692d482776059f78e385c70d8739014c538bf57b77ec3b8b70329e2"
   license "MIT"
   head "https://github.com/snakemake/snakefmt.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "c8fd280ae822515f5b14f7effad93e2f0df080d991903db385e1ea655e1b6f53"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "1828c0bb7690ba94ccf9eacc96668a16310aca77cbb6fdfb290f1d8ceef2162f"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "e3f32132484530b6322291005c4a3847d719e6d7cec79993da139b8f463432ab"
-    sha256 cellar: :any_skip_relocation, sonoma:         "16d9aa32e9501e241a408a31a5a3ee69372d0a60e44d68217e702966d5dcb61e"
-    sha256 cellar: :any_skip_relocation, ventura:        "e446de4b895a0b7215a441501ee9dc7deffc0a3f68fa9d78bc643155209d60fd"
-    sha256 cellar: :any_skip_relocation, monterey:       "b2bb2882075c72ddc84d5c5b8b76c9b0c2a876ac25cad77f557268d705cf0d46"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "99e31caf6a3286d9d105fc81902efa3fce86c9bc41b002b8e08f162c333aa763"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "4548bf6a04d4c03d1e464e9ff5d193bba550834c52007a153a78da6cbea6c97f"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "7743b7e02bc16633227d1a91db6cdb3ed2923df4287bb1e2e53d253fdd67acc3"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "b27f73b2441735167874131bc2ae774758d3ba8a43a183479e02ec00bf1cce77"
+    sha256 cellar: :any_skip_relocation, sonoma:        "4f63c2bb28d23b31b76aedf9103d6873fcf31735b60fce904ebb083a9aa1f05c"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "8462c8a02dd4b586a9a5e494cb9e9f338ec9ab103b293103dca8bfd1cc38bc68"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "0d96ea970c7d8e7149272b97794f15cf1c943b9d117e647b68b124a94a4c009d"
   end
 
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   resource "black" do
-    url "https://files.pythonhosted.org/packages/a2/47/c9997eb470a7f48f7aaddd3d9a828244a2e4199569e38128715c48059ac1/black-24.4.2.tar.gz"
-    sha256 "c872b53057f000085da66a19c55d68f6f8ddcac2642392ad3a355878406fbd4d"
+    url "https://files.pythonhosted.org/packages/e1/c5/61175d618685d42b005847464b8fb4743a67b1b8fdb75e50e5a96c31a27a/black-26.3.1.tar.gz"
+    sha256 "2c50f5063a9641c7eed7795014ba37b0f5fa227f3d408b968936e24bc0566b07"
   end
 
   resource "click" do
-    url "https://files.pythonhosted.org/packages/96/d3/f04c7bfcf5c1862a2a5b845c6b2b360488cf47af55dfa79c98f6a6bf98b5/click-8.1.7.tar.gz"
-    sha256 "ca9853ad459e787e2192211578cc907e7594e294c7ccc834310722b41b9ca6de"
+    url "https://files.pythonhosted.org/packages/3d/fa/656b739db8587d7b5dfa22e22ed02566950fbfbcdc20311993483657a5c0/click-8.3.1.tar.gz"
+    sha256 "12ff4785d337a1bb490bb7e9c2b1ee5da3112e94a8622f26a6c77f5d2fc6842a"
   end
 
   resource "mypy-extensions" do
-    url "https://files.pythonhosted.org/packages/98/a4/1ab47638b92648243faf97a5aeb6ea83059cc3624972ab6b8d2316078d3f/mypy_extensions-1.0.0.tar.gz"
-    sha256 "75dbf8955dc00442a438fc4d0666508a9a97b6bd41aa2f0ffe9d2f2725af0782"
+    url "https://files.pythonhosted.org/packages/a2/6e/371856a3fb9d31ca8dac321cda606860fa4548858c0cc45d9d1d4ca2628b/mypy_extensions-1.1.0.tar.gz"
+    sha256 "52e68efc3284861e772bbcd66823fde5ae21fd2fdb51c62a211403730b916558"
   end
 
   resource "packaging" do
-    url "https://files.pythonhosted.org/packages/ee/b5/b43a27ac7472e1818c4bafd44430e69605baefe1f34440593e0332ec8b4d/packaging-24.0.tar.gz"
-    sha256 "eb82c5e3e56209074766e6885bb04b8c38a0c015d0a30036ebe7ece34c9989e9"
+    url "https://files.pythonhosted.org/packages/65/ee/299d360cdc32edc7d2cf530f3accf79c4fca01e96ffc950d8a52213bd8e4/packaging-26.0.tar.gz"
+    sha256 "00243ae351a257117b6a241061796684b084ed1c516a08c48a3f7e147a9d80b4"
   end
 
   resource "pathspec" do
-    url "https://files.pythonhosted.org/packages/ca/bc/f35b8446f4531a7cb215605d100cd88b7ac6f44ab3fc94870c120ab3adbf/pathspec-0.12.1.tar.gz"
-    sha256 "a482d51503a1ab33b1c67a6c3813a26953dbdc71c31dacaef9a838c4e29f5712"
+    url "https://files.pythonhosted.org/packages/fa/36/e27608899f9b8d4dff0617b2d9ab17ca5608956ca44461ac14ac48b44015/pathspec-1.0.4.tar.gz"
+    sha256 "0210e2ae8a21a9137c0d470578cb0e595af87edaa6ebf12ff176f14a02e0e645"
   end
 
   resource "platformdirs" do
-    url "https://files.pythonhosted.org/packages/b2/e4/2856bf61e54d7e3a03dd00d0c1b5fa86e6081e8f262eb91befbe64d20937/platformdirs-4.2.1.tar.gz"
-    sha256 "031cd18d4ec63ec53e82dceaac0417d218a6863f7745dfcc9efe7793b7039bdf"
+    url "https://files.pythonhosted.org/packages/19/56/8d4c30c8a1d07013911a8fdbd8f89440ef9f08d07a1b50ab8ca8be5a20f9/platformdirs-4.9.4.tar.gz"
+    sha256 "1ec356301b7dc906d83f371c8f487070e99d3ccf9e501686456394622a01a934"
   end
 
-  resource "toml" do
-    url "https://files.pythonhosted.org/packages/be/ba/1f744cdc819428fc6b5084ec34d9b30660f6f9daaf70eead706e3203ec3c/toml-0.10.2.tar.gz"
-    sha256 "b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f"
+  resource "pytokens" do
+    url "https://files.pythonhosted.org/packages/b6/34/b4e015b99031667a7b960f888889c5bd34ef585c85e1cb56a594b92836ac/pytokens-0.4.1.tar.gz"
+    sha256 "292052fe80923aae2260c073f822ceba21f3872ced9a68bb7953b348e561179a"
   end
 
   def install
     virtualenv_install_with_resources
+
+    generate_completions_from_executable(bin/"snakefmt", shell_parameter_format: :click)
   end
 
   test do

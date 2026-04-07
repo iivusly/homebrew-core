@@ -1,29 +1,43 @@
 class Abcm2ps < Formula
   desc "ABC music notation software"
   homepage "http://moinejf.free.fr"
-  url "https://github.com/leesavide/abcm2ps/archive/refs/tags/v8.14.15.tar.gz"
-  sha256 "5f02ac6203c4226cfbc6206935dca715ed7c45328535ee23e776c9da0219c822"
+  url "https://chiselapp.com/user/moinejf/repository/abcm2ps/tarball/v8.14.18/download.tar.gz"
+  sha256 "d1f1100b525f0f0ae00d706d0b4ebc01df279312b3b32cf20f355f1430f36c0a"
   license "GPL-3.0-or-later"
 
-  bottle do
-    sha256 arm64_sonoma:   "651079e5e1701bf7562d25ea288f60919cc4bc5389472bce8174a11460541dc7"
-    sha256 arm64_ventura:  "737514da3b1e0c0ac7a2f7f1b0fb83707a6abcc167728bb5bbb812578595f86f"
-    sha256 arm64_monterey: "e297a6005d7af043cd13bf9688e57c282a56ad9faede8f59c05adfddece2e6e7"
-    sha256 sonoma:         "b8e39b5f623d4fbe99ebaa17b1b0100489fd05488df720889e08ac70e8090b2f"
-    sha256 ventura:        "7d20976e8b6877400b712a6f341944c03920f498d781abfb009ad3d7cefba6f0"
-    sha256 monterey:       "faaf0e3188a69245c09d790d31241ef2f057dffd94ff48b33463e2860fa0072f"
-    sha256 x86_64_linux:   "cb486f3afb52ba110aa20878c5ac7b14bca9a1e4acd6b1a30fc4fd7741a55b93"
+  livecheck do
+    url "https://chiselapp.com/user/moinejf/repository/abcm2ps/taglist"
+    regex(%r{"tagDsp">v?(\d+(?:\.\d+)+)</span>}i)
   end
 
-  depends_on "pkg-config" => :build
+  bottle do
+    sha256 arm64_tahoe:   "ad72e488f58816b605a868a4b62886e7da304c35c0147cc5d56d0903a8d950fd"
+    sha256 arm64_sequoia: "218e1a99f51365c6127247efd11381714550ffbd3f28c142f59fc8aa52c76177"
+    sha256 arm64_sonoma:  "9fd6fa884bb60b2ba984fff532d76ab6781b67bf85146a1800303a3cfdaf46fb"
+    sha256 sonoma:        "616ecb66446b00f4eb9f0141663041a192f3c99c802f794a5b73751926d358c4"
+    sha256 arm64_linux:   "2c295fe0316d1f77957df93a0f99c70ba2da1a1176f51b9e1901be03947d1063"
+    sha256 x86_64_linux:  "cf383769496265b65b8cbf4f4f574f9db53f43b5946f246b6d6c2500dfc0fa78"
+  end
+
+  depends_on "pkgconf" => :build
+
+  on_macos do
+    depends_on "coreutils" => :build
+    depends_on "gnu-sed" => :build
+  end
 
   def install
+    if OS.mac?
+      ENV.prepend_path "PATH", Formula["gnu-sed"].libexec/"gnubin"
+      ENV.prepend_path "PATH", Formula["coreutils"].libexec/"gnubin"
+    end
+
     system "./configure", "--prefix=#{prefix}"
     system "make", "install"
   end
 
   test do
-    (testpath/"voices.abc").write <<~EOS
+    (testpath/"voices.abc").write <<~ABC
       X:7
       T:Qui Tolis (Trio)
       C:Andre Raison
@@ -42,9 +56,9 @@ class Abcm2ps < Formula
       V:Trompette
       %%MIDI program 56
       "Trompette"z3|z3 |z3 |z3 |:Mc>BA|PGA/G/F|PE>EF|PEF/E/D|C>CPB,|A,G,F,-|
-    EOS
+    ABC
 
     system bin/"abcm2ps", testpath/"voices"
-    assert_predicate testpath/"Out.ps", :exist?
+    assert_path_exists testpath/"Out.ps"
   end
 end

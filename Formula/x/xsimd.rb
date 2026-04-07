@@ -1,12 +1,13 @@
 class Xsimd < Formula
   desc "Modern, portable C++ wrappers for SIMD intrinsics"
   homepage "https://xsimd.readthedocs.io/en/latest/"
-  url "https://github.com/xtensor-stack/xsimd/archive/refs/tags/13.0.0.tar.gz"
-  sha256 "8bdbbad0c3e7afa38d88d0d484d70a1671a1d8aefff03f4223ab2eb6a41110a3"
+  url "https://github.com/xtensor-stack/xsimd/archive/refs/tags/14.1.0.tar.gz"
+  sha256 "8da77b66214e73565f6111ba494322c853552b7b40cff69779b42e2100eed16f"
   license "BSD-3-Clause"
+  compatibility_version 1
 
   bottle do
-    sha256 cellar: :any_skip_relocation, all: "666ef7e22bd2235b3d5b614df919714723deaac35850a5fc7a1b5cb8f4b8ade0"
+    sha256 cellar: :any_skip_relocation, all: "fc68cc93b73e54bedb85dd372f18b7f68de97f8bbdcbbd0db8d36b2a3fb3dc9a"
   end
 
   depends_on "cmake" => :build
@@ -18,7 +19,7 @@ class Xsimd < Formula
   end
 
   test do
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include <vector>
       #include <type_traits>
 
@@ -42,7 +43,7 @@ class Xsimd < Formula
         if(!std::is_same<mock_align, unaligned_mode>::value) abort();
         return 0;
       }
-    EOS
+    CPP
 
     system ENV.cxx, "test.cpp", "-std=c++14", "-I#{include}", "-o", "test"
     system "./test"

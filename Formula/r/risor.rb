@@ -1,24 +1,23 @@
 class Risor < Formula
   desc "Fast and flexible scripting for Go developers and DevOps"
   homepage "https://risor.io/"
-  url "https://github.com/risor-io/risor/archive/refs/tags/v1.6.0.tar.gz"
-  sha256 "4b2821214bba5830f6010c017c647f28bb1a50f0c83f9305476bd6416d2fc28c"
+  url "https://github.com/deepnoodle-ai/risor/archive/refs/tags/v2.1.0.tar.gz"
+  sha256 "68aea48e715636482a24b1f5aa6505152c89f339374a4e8225cd1d83edc14ec7"
   license "Apache-2.0"
-  head "https://github.com/risor-io/risor.git", branch: "main"
+  head "https://github.com/deepnoodle-ai/risor.git", branch: "main"
 
   livecheck do
     url :stable
-    regex(/^v?(\d+(?:\.\d+)+)$/i)
+    strategy :github_latest
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "902e0aa5af667a8168253190337eda7f35edf469418391556e2e2a3ccb654c00"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "52a2c1333fbeef4f932e0407443d0b8087956949552166fbad3a7cec131c2b8b"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "7fa2965570bde6073d421f93d671f25ae4cf49d9c715bc89495d3260af804159"
-    sha256 cellar: :any_skip_relocation, sonoma:         "f5c1d3ae4f3643277fa3b4d4fb49ba97e8a6ee685fdcd5ef458b5333e60f73bb"
-    sha256 cellar: :any_skip_relocation, ventura:        "3ce4466b940227ac5d4896e3e7bab320f2d90a26ca373125dffe6a0344d506c0"
-    sha256 cellar: :any_skip_relocation, monterey:       "2b58d923661a7764f1b524a410b13400f035fc55f614521b62e79a43e637bb53"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "bde90cf3b368d3538f2b805cec9a2e1029154671c753177f0c460ae24cb36cf3"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "408a5f4219a77976b126cbe0646aaa9827d252fb01934d2d6d53f2e97bbac270"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "3f7bef7deebd4731e5d35247bf11634995fe6f8143ac1ce8bb6272587b9ec734"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "f1916fd748d446b003dc941675879f94dd6016f29f56e086dddca7faf3a6c3ed"
+    sha256 cellar: :any_skip_relocation, sonoma:        "64993ffcab950ef5a0bf2794ddb69ceddb5334536d0cf9c55159b68bb0b1da73"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "ef43e3c3c8efc1d84e2982b7edc30b50e0955af1aec6f2fd0452c6df69842ea9"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "d4aaaf7d78b1f909ebd7e17e3beb011b07fac18df4d4238b77ad8d477feaf16b"
   end
 
   depends_on "go" => :build
@@ -26,17 +25,20 @@ class Risor < Formula
   def install
     chdir "cmd/risor" do
       ldflags = "-s -w -X 'main.version=#{version}' -X 'main.date=#{time.iso8601}'"
-      system "go", "build", "-tags", "aws,k8s,vault", *std_go_args(ldflags:), "."
-      generate_completions_from_executable(bin/"risor", "completion")
+      tags = "aws,k8s,vault"
+      system "go", "build", *std_go_args(ldflags:, tags:)
+      generate_completions_from_executable(bin/"risor", shell_parameter_format: :cobra,
+                                                        shells:                 [:bash, :zsh, :fish])
     end
   end
 
   test do
-    output = shell_output("#{bin}/risor -c \"time.now()\"")
-    assert_match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/, output)
+    output = shell_output("#{bin}/risor -c \"len([1, 2, 3])\"")
+    assert_equal "3\n", output
     assert_match version.to_s, shell_output("#{bin}/risor version")
-    assert_match "module(aws)", shell_output("#{bin}/risor -c aws")
-    assert_match "module(k8s)", shell_output("#{bin}/risor -c k8s")
-    assert_match "module(vault)", shell_output("#{bin}/risor -c vault")
+
+    assert_match "_risor_completion", shell_output("#{bin}/risor completion bash")
+    assert_match "unsupported shell: powershell",
+                 shell_output("#{bin}/risor completion powershell 2>&1", 1)
   end
 end

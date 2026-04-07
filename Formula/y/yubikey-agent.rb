@@ -1,37 +1,33 @@
 class YubikeyAgent < Formula
   desc "Seamless ssh-agent for YubiKeys and other PIV tokens"
-  homepage "https://filippo.io/yubikey-agent"
+  homepage "https://github.com/FiloSottile/yubikey-agent"
   url "https://github.com/FiloSottile/yubikey-agent/archive/refs/tags/v0.1.6.tar.gz"
   sha256 "f156d089376772a34d2995f8261d821369a96a248ab586d27e3be0d9b72d7426"
   license "BSD-3-Clause"
   head "https://github.com/FiloSottile/yubikey-agent.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "68bef9f91a8d57edc11813ae0261a1a7c18a9a37afd7b376cb29c5e0b836bd69"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "16fbb36f3bab79726c96cfc94dfda3aaabe290a8c72f5a73dba3d76cee916ee1"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "028f45f8152045bbb98ddcac5ad41a554ee3a809e6e89cf76519b7b61e049243"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "408049a241d52174c985883c037422d9deac1596072a8aa6afdc59a1e4e8e437"
-    sha256 cellar: :any_skip_relocation, sonoma:         "366ed6e74c186624edfb5fc808071b025c4e89d0b4d56dfea2fc3781b4daf865"
-    sha256 cellar: :any_skip_relocation, ventura:        "9f4df13a79a921345e33da19009cd6a15c0371cfbec2a69875072ecc14ad116a"
-    sha256 cellar: :any_skip_relocation, monterey:       "0908727c1be05e84776c37cbabdc38519882a1ddc9fe5faddfe60ecf9442bdc2"
-    sha256 cellar: :any_skip_relocation, big_sur:        "16270ab84fc500f9ca17817fd35f783c5b272266e4abfaba79c8bc40e0a36cee"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "ee44c531db48e87a1f5fdd6f06159d37b4ae2877d80440ca3e437fdb4ec80e58"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "13a582964b590f21b2fdd7c29ae6f76c2d598fc9a9e50e3f7e0086f6bb50fda1"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "bae16f841b3847ab59cbc42ef0a9c8944100b4817f0d20b7c0eb8c721a38dfe4"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "d18f07e88226c171546f67e9d598a6a91f0b2f6749c7359ff6d0b94951bb37ae"
+    sha256 cellar: :any_skip_relocation, sonoma:        "554a94f134c4d2440a678a7a99d3cab10fa1956d1f07d9f3165572d907c6a6ea"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "5151c4f4e1453cc1caca9fe4dd45361a6ffd88a0e5eb6005c248d5d8f1ae97a8"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "950ac75f5a78e63b0f9797db9f239f80269c785ad5bef591d470521bd7eddc28"
   end
 
   depends_on "go" => :build
+  depends_on "pkgconf" => :build
 
   uses_from_macos "pcsc-lite"
 
   on_linux do
-    depends_on "pkg-config" => :build
     depends_on "pinentry"
   end
 
   def install
+    ENV["CGO_ENABLED"] = "1" if OS.linux? && Hardware::CPU.arm?
     system "go", "build", *std_go_args(ldflags: "-s -w -X main.Version=v#{version}")
-  end
-
-  def post_install
     (var/"run").mkpath
     (var/"log").mkpath
   end
@@ -52,8 +48,8 @@ class YubikeyAgent < Formula
 
   test do
     socket = testpath/"yubikey-agent.sock"
-    fork { exec bin/"yubikey-agent", "-l", socket }
+    spawn bin/"yubikey-agent", "-l", socket
     sleep 1
-    assert_predicate socket, :exist?
+    assert_path_exists socket
   end
 end

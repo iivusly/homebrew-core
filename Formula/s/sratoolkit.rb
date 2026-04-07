@@ -4,12 +4,16 @@ class Sratoolkit < Formula
   license all_of: [:public_domain, "GPL-3.0-or-later", "MIT"]
 
   stable do
-    url "https://github.com/ncbi/sra-tools/archive/refs/tags/3.1.1.tar.gz"
-    sha256 "96b110bd5a30ad312e2f02552062b48a77d40c763e6aba5bb84e83662a505cf1"
+    url "https://github.com/ncbi/sra-tools/archive/refs/tags/3.4.1.tar.gz"
+    sha256 "874dcbb28b7ebffb5554839254e777b1137b0f0430815bab175068decfe96e98"
 
     resource "ncbi-vdb" do
-      url "https://github.com/ncbi/ncbi-vdb/archive/refs/tags/3.1.1.tar.gz"
-      sha256 "e9766f259853c696be48e289b08cb5ae6e198d82d7ffee79f09ce7f720487991"
+      url "https://github.com/ncbi/ncbi-vdb/archive/refs/tags/3.4.1.tar.gz"
+      sha256 "2fa0919b2842641ead93eeeb45047e87ca480a543b6e4eda15f94d5187e91c85"
+
+      livecheck do
+        formula :parent
+      end
     end
   end
 
@@ -19,13 +23,12 @@ class Sratoolkit < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "8b6581068ebb4d42908bed8f9be8fe44f896483d7f19cb15107ab315294513ef"
-    sha256 cellar: :any,                 arm64_ventura:  "edf975289e9caef050ae49d59b2b677d44483b49583977175514422135eae15d"
-    sha256 cellar: :any,                 arm64_monterey: "7dcf55c2e3ac299e2cecb44d71dcb1f0c50badeac8169076288217d4ce19187f"
-    sha256 cellar: :any,                 sonoma:         "9e2e37314105274979ba40b006398cff75639fc0cbda5508d50f7b9f69ac10bf"
-    sha256 cellar: :any,                 ventura:        "d2b5f395687e8546a3a85409aa307f15c7ae4c72d5aca87c6b98b4ca3c27193a"
-    sha256 cellar: :any,                 monterey:       "466af9c6aa160bb2be60fa1b4e57de7a00a7104cf70cce89eaa5a3705c7169e3"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "d4562ca1d63b5f4638dd94c2d99e8254cb7b8703e32d754f30ce4f23e1e96492"
+    sha256 cellar: :any,                 arm64_tahoe:   "ea15253c72d8bfbac1caaefac0cf90bc48d6a215af38d5d0b8af0cae50be524d"
+    sha256 cellar: :any,                 arm64_sequoia: "2eb1898cc5afb9fb2e81c1f56a25cdea78385d8a1236721723f36a2223a59c66"
+    sha256 cellar: :any,                 arm64_sonoma:  "a00bdef100d52e2bc4729002a8d2c30d343459fd07890218e207f62e170b47f0"
+    sha256 cellar: :any,                 sonoma:        "df6fe9a10e35c77e8b86c2c27a84e9e05c671b3b3b6e55860c3c65724960715c"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "7dc648d79584227003885181424d9b4abd21ffdbce665db892be297b1ef56b4e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "4c32d0758c0d31c4e0af88ec49ef06be34745391f6ad804325c1fd40967e6c7a"
   end
 
   head do
@@ -38,7 +41,6 @@ class Sratoolkit < Formula
 
   depends_on "cmake" => :build
   depends_on "hdf5"
-  depends_on macos: :catalina
 
   uses_from_macos "libxml2"
 

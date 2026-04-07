@@ -1,35 +1,33 @@
 class Lynx < Formula
   desc "Text-based web browser"
   homepage "https://invisible-island.net/lynx/"
-  url "https://invisible-mirror.net/archives/lynx/tarballs/lynx2.8.9rel.1.tar.bz2"
-  mirror "https://fossies.org/linux/www/lynx2.8.9rel.1.tar.bz2"
-  version "2.8.9rel.1"
-  sha256 "387f193d7792f9cfada14c60b0e5c0bff18f227d9257a39483e14fa1aaf79595"
+  url "https://invisible-mirror.net/archives/lynx/tarballs/lynx2.9.2.tar.bz2"
+  mirror "https://fossies.org/linux/www/lynx2.9.2.tar.bz2"
+  sha256 "7374b89936d991669e101f4e97f2c9592036e1e8cdaa7bafc259a77ab6fb07ce"
   license "GPL-2.0-only"
-  revision 2
 
   livecheck do
     url "https://invisible-mirror.net/archives/lynx/tarballs/?C=M&O=D"
-    regex(/href=.*?lynx[._-]?v?(\d+(?:\.\d+)+(?:rel\.?\d+))\.t/i)
+    regex(/href=.*?lynx[._-]?v?(\d+(?:\.\d+)+(?:rel\.?\d+)?)\.t/i)
   end
 
   bottle do
-    sha256 arm64_sonoma:   "1c1ef4b6949b00b43d737ba5e8ccf3e124fed1b494a0cfc65734d5e17612cebf"
-    sha256 arm64_ventura:  "9ad07e45267b2d2a0fa26be01b173f83215d032e0bf8b69433088c7d417125a0"
-    sha256 arm64_monterey: "76e51e0b9ba892fbb5878889350ea77fe937bd2e0c9818b9ae362725f401526d"
-    sha256 arm64_big_sur:  "107f756e65f4e6951f09c2350e0d7f32d834f9b7bb4dd4b7a958da83031effae"
-    sha256 sonoma:         "b436864802c7742341ad002bf0417bbcd3197c7f41ba06ebdc4299f562c209d6"
-    sha256 ventura:        "17f1561b38270a60458f803772cae95dc8ec462f2e3635ac6a35281055c32e51"
-    sha256 monterey:       "77c3625b281264e341610e3e10d1c90cf6227463283d905d42d812d1a4b02c71"
-    sha256 big_sur:        "d2130d2129d4782859cb3f4a6eee800f3be0973be0c1db5b3292c84363eae807"
-    sha256 x86_64_linux:   "e3c88be4b4e635db98f6b286f73e30858cd17e89e260ccd3aa2d892ccc9e5476"
+    rebuild 1
+    sha256 arm64_tahoe:   "f018c40ffe24220383f1e020875f64a62552bedc10e4948321992a4ceac5e83e"
+    sha256 arm64_sequoia: "3a912438a909ec79166e61ea5b9dea7376b0d3e0bf566d5de723697c2427b807"
+    sha256 arm64_sonoma:  "174ecc0b2aebe7c14294bdc63f7052d93405ac48021c9b81eea4e4a668830fae"
+    sha256 sonoma:        "5a3157c1ed95544f85968690b9d51c36975d1cc52c75069328d9ea6de28c4ae5"
+    sha256 arm64_linux:   "fceb7120d16369c1cd5350ff34a39f3d8276061a5119a64eec00be26ffc6e5f5"
+    sha256 x86_64_linux:  "6267a025209071f6109d8b8cfcb81de136bac11ead8b19ae2aa644ab74fee8fb"
   end
 
   # Move to brew ncurses to fix screen related bugs
   depends_on "ncurses"
   depends_on "openssl@3"
 
-  uses_from_macos "zlib"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     # Fix compile with newer Clang

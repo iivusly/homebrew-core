@@ -1,19 +1,18 @@
 class Minizinc < Formula
   desc "Medium-level constraint modeling language"
   homepage "https://www.minizinc.org/"
-  url "https://github.com/MiniZinc/libminizinc/archive/refs/tags/2.8.5.tar.gz"
-  sha256 "cd8aa35532191864ba5a79f8755e0e24c329b1b887305f89d5f7b33eca9f96db"
+  url "https://github.com/MiniZinc/libminizinc/archive/refs/tags/2.9.5.tar.gz"
+  sha256 "7011b512dad0967c5a7ba880152f4cecdcbe2b96abf5cb078dd676893c1065b3"
   license "MPL-2.0"
-  head "https://github.com/MiniZinc/libminizinc.git", branch: "develop"
+  head "https://github.com/MiniZinc/libminizinc.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "b5d23958246702a4b6d4621322a3a92b287f435ad16f666225f948969bbcb5dc"
-    sha256 cellar: :any,                 arm64_ventura:  "fb65c85fedf0ab231c8c1e2d849769afaf14c90e2a072743999a00d045a0556d"
-    sha256 cellar: :any,                 arm64_monterey: "5d5c51f5e78ee858602b1773ee83f1bb4c05973b8803ac290a2e17a5c4551717"
-    sha256 cellar: :any,                 sonoma:         "10b89259070a771488b6fc5ec478cf824df9ef07f5b47a7987596cd0abd63c93"
-    sha256 cellar: :any,                 ventura:        "e49cf5f2558871eb9fcda377c07a4b3edc703b8c0bec2ba848c933fab34b4899"
-    sha256 cellar: :any,                 monterey:       "bfafad8ee9e5364fbd78e8b6ba0e41716746c2d18cd05dd2c2587dc0835ff0cc"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "a65759339ef50d18651b5d4f28d8da0be13d11f543d5f892c1bfa80667c1f5a2"
+    sha256 arm64_tahoe:   "b20d88d4fbe436a6438e796a9d0ee37e9b2aab540693516df2d9f29c7966b266"
+    sha256 arm64_sequoia: "24137b35c5ae38d1412564b5deea74e56c1e5a9e77502410a98d53cad0660231"
+    sha256 arm64_sonoma:  "785ece906ed28c3b6ac6980dc5cde640a109a48fdab7340cbb0f7598e1f57fb8"
+    sha256 sonoma:        "9d7b55fe7b667e34a595393ad4b1382158f64c20b564b6fa0179ac9de7c07587"
+    sha256 arm64_linux:   "a4e9507690829a4045d363b26d681760fbcc8f92c0e848a87ae31dcd0a3021dc"
+    sha256 x86_64_linux:  "a33e2a3115c58200db5d825ad5cb3e931614671d8ee82fca01543cade180ccce"
   end
 
   depends_on "cmake" => :build
@@ -25,7 +24,7 @@ class Minizinc < Formula
   depends_on "gecode"
   depends_on "osi"
 
-  fails_with gcc: "5"
+  conflicts_with cask: "minizincide", because: "both install `minizinc` binaries"
 
   def install
     system "cmake", "-S", ".", "-B", "build", *std_cmake_args

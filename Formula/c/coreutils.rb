@@ -1,24 +1,23 @@
 class Coreutils < Formula
   desc "GNU File, Shell, and Text utilities"
   homepage "https://www.gnu.org/software/coreutils/"
-  url "https://ftp.gnu.org/gnu/coreutils/coreutils-9.5.tar.xz"
-  mirror "https://ftpmirror.gnu.org/coreutils/coreutils-9.5.tar.xz"
-  sha256 "cd328edeac92f6a665de9f323c93b712af1858bc2e0d88f3f7100469470a1b8a"
+  url "https://ftpmirror.gnu.org/gnu/coreutils/coreutils-9.10.tar.xz"
+  mirror "https://ftp.gnu.org/gnu/coreutils/coreutils-9.10.tar.xz"
+  sha256 "16535a9adf0b10037364e2d612aad3d9f4eca3a344949ced74d12faf4bd51d25"
   license "GPL-3.0-or-later"
+  compatibility_version 1
 
   bottle do
-    rebuild 1
-    sha256 arm64_sonoma:   "4b8602d2400cc9b70d4ce3deefc551fc590c57d6fd4260a212fb0e6469faad36"
-    sha256 arm64_ventura:  "b9fb235fc83dcbe57b25d3a053da0865265fe1d33cd9a7e809fe9b2dedab913d"
-    sha256 arm64_monterey: "90d7e3a73c196e1c96f740fc566bf0aa331444eb83b39c85c84d78b491057724"
-    sha256 sonoma:         "a5fee7f3a08317464bd61051a5186ffa6cc7e81fb8de6b6ecee65cbc612a6b6b"
-    sha256 ventura:        "04d794bfbff9ca92eca0a1df6e863120e6bb280b62b0caffdaabb56c7fbbb6f9"
-    sha256 monterey:       "0177633e7a1b426030d1172b7237c765f96be4ef54c4e455f99fc65ff3d60119"
-    sha256 x86_64_linux:   "dffb61fa6e84acde47409b8bec1d9a8fb80bee41370901d7b36049f846a2d49f"
+    sha256 arm64_tahoe:   "dfb88b3ff6dd4c8aed52209d470dc8f2119d394f883411f4d17ba21972b602e4"
+    sha256 arm64_sequoia: "7e164c99394abd94a887c0e7e1ad207b5e04716cdef5aed549decee745f3f6d9"
+    sha256 arm64_sonoma:  "b82a04fafcf46095b3d051e8ec14c99a3899bb207bdf74326c7434b2d4329256"
+    sha256 sonoma:        "0c7b94b89fa6d8b9e38af1e8cc05bd3d4829a206bb75a9242fd69113b65a36b3"
+    sha256 arm64_linux:   "2b0acf715c4d544303c35d568d9a62bb4765f971fe9fd1e843db74df281db6d8"
+    sha256 x86_64_linux:  "292f082b0ec4adf5342fab822dd7c192fe5bce8160f0272965a38bb26a4f66ac"
   end
 
   head do
-    url "https://git.savannah.gnu.org/git/coreutils.git"
+    url "https://git.savannah.gnu.org/git/coreutils.git", branch: "master"
 
     depends_on "autoconf" => :build
     depends_on "automake" => :build
@@ -32,20 +31,18 @@ class Coreutils < Formula
   depends_on "gmp"
   uses_from_macos "gperf" => :build
 
-  on_macos do
-    conflicts_with "uutils-coreutils", because: "coreutils and uutils-coreutils install the same binaries"
+  on_sonoma :or_older do
+    conflicts_with "md5sha1sum", because: "both install `md5sum` and `sha1sum` binaries"
   end
 
   on_linux do
+    depends_on "acl"
     depends_on "attr"
   end
 
-  conflicts_with "aardvark_shell_utils", because: "both install `realpath` binaries"
   conflicts_with "b2sum", because: "both install `b2sum` binaries"
-  conflicts_with "ganglia", because: "both install `gstat` binaries"
   conflicts_with "gfold", because: "both install `gfold` binaries"
   conflicts_with "idutils", because: "both install `gid` and `gid.1`"
-  conflicts_with "md5sha1sum", because: "both install `md5sum` and `sha1sum` binaries"
 
   # https://github.com/Homebrew/homebrew-core/pull/36494
   def breaks_macos_users
@@ -53,6 +50,7 @@ class Coreutils < Formula
   end
 
   def install
+    ENV.runtime_cpu_detection
     system "./bootstrap" if build.head?
 
     args = %W[
@@ -84,7 +82,7 @@ class Coreutils < Formula
     end
     # Symlink all man(1) pages into libexec/gnuman without the 'g' prefix
     coreutils_filenames(man1).each do |cmd|
-      (libexec/"gnuman"/"man1").install_symlink man1/"g#{cmd}" => cmd
+      (libexec/"gnuman/man1").install_symlink man1/"g#{cmd}" => cmd
     end
     (libexec/"gnubin").install_symlink "../gnuman" => "man"
 

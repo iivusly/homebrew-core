@@ -4,21 +4,26 @@ class Pokerstove < Formula
   url "https://github.com/andrewprock/pokerstove/archive/refs/tags/v1.1.tar.gz"
   sha256 "ee263f579846b95df51cf3a4b6beeb2ea5ea0450ce7f1c8d87ed6dd77b377220"
   license "BSD-3-Clause"
-  revision 3
+  revision 7
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "7a4ec7d32579b6a7f9febfc03b36d85647af76998c400153e34e101f98a22c7d"
-    sha256 cellar: :any,                 arm64_ventura:  "1091061709489217ae3bb88a361d6b2e70141d120a7dcf82ccd5eb82c63449df"
-    sha256 cellar: :any,                 arm64_monterey: "1fbf1d2e7d89dd9933bac8216ab6550387d1550c30d0f8784a5d325250c8658c"
-    sha256 cellar: :any,                 sonoma:         "3f49ed160e7deae494a3c3c73909c858ce92770ca8d9ecb78cd2f733bc108aec"
-    sha256 cellar: :any,                 ventura:        "9731a5df77144471ef6b063136fcc54707659344ccfba96f04431b71663cb7f2"
-    sha256 cellar: :any,                 monterey:       "388c8b1b5fc8a8ba4772b273041bae462c65f7120a35afab82dcfd57ac7ca362"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "25d70572e182ec74f00d572fa4ee7fae921c1f9df6bb15d369e25996c8f075ab"
+    sha256 cellar: :any,                 arm64_tahoe:   "281850608e647a17bb2b36e1ec2bb048a939687cf6fead379293d7ae54f9d602"
+    sha256 cellar: :any,                 arm64_sequoia: "1c122bdfdbbebabf98e2a3f9550239c0813deabb18443a365906c95821659759"
+    sha256 cellar: :any,                 arm64_sonoma:  "acd2db1e2142cde60afd927f6dfa11df1e9d9876e8a771ebd3626c0847f822f8"
+    sha256 cellar: :any,                 sonoma:        "ac9b605f3ae5dcd1fa51f1654ee40f884a19bf0158269513962c64c5ea912ee0"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "ce7fe6adf71766c05a0cad8c86b3ded6903b8f5733387840dc0e6f37f905f350"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "c5ff08553bb991b7c07f03059117deca775f910cf782c6cbc28642ff9d7cd1f5"
   end
 
   depends_on "cmake" => :build
   depends_on "googletest" => :build
   depends_on "boost"
+
+  # Backport commit to build with CMake 4
+  patch do
+    url "https://github.com/andrewprock/pokerstove/commit/8ca71960b3ee68bf7cbc419d5aee2065276054bb.patch?full_index=1"
+    sha256 "379461a6e3258ebf9803ff4a52020d027a745e1676d7aee865f5dd035c51c6e9"
+  end
 
   def install
     system "cmake", "-S", ".", "-B", "build", "-DCMAKE_CXX_STANDARD=14", *std_cmake_args

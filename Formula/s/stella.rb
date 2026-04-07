@@ -1,36 +1,44 @@
 class Stella < Formula
   desc "Atari 2600 VCS emulator"
   homepage "https://stella-emu.github.io/"
-  url "https://github.com/stella-emu/stella/archive/refs/tags/6.7.1.tar.gz"
-  sha256 "c65067ea0cd99c56a4b6a7e7fbb0e0912ec1f6963eccba383aece69114d5f50b"
+  url "https://github.com/stella-emu/stella/archive/refs/tags/7.0c.tar.gz"
+  version "7.0c"
+  sha256 "b9309198aa5746cd568e91caaea10bbeab4ca8155493d0243694b41bdb39d7ca"
   license "GPL-2.0-or-later"
   head "https://github.com/stella-emu/stella.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "cfac144680c89c52742d8a596eec4918feebdb7a3e875a6c526084c8bc08ae80"
-    sha256 cellar: :any,                 arm64_ventura:  "6b5af4f6e25d26c7b4706601f88c4949137d4c3a821c8bc3401cd8c0ecf53ae8"
-    sha256 cellar: :any,                 arm64_monterey: "8ec8e1b06fc15774fe03b7892ab6144e76b98762a0c697c359501678634d02de"
-    sha256 cellar: :any,                 sonoma:         "d2019fbdb33bad5b55f175758ecce99d9ca866d489c04a35560327b7a230b9c3"
-    sha256 cellar: :any,                 ventura:        "dc8d24e22aefe188c62ee96e42ba3a7f2816d5300af6926ad9ac678135ed607f"
-    sha256 cellar: :any,                 monterey:       "6e29af042b7e50bf1e8992341bf53dc65caa6cf62247abb0330f5520ca0f4cb6"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "7689d9dae573a6288fe3be94adabad8791c2075d210faa27c82e624c4c6c6689"
+    rebuild 2
+    sha256 cellar: :any,                 arm64_tahoe:   "41e3a16e64aaf77fe123ddbd981aeeba3e994390c7d89c0c65f1c2925e7b7e9a"
+    sha256 cellar: :any,                 arm64_sequoia: "91cbc6e702faf484f0f8155e09bc0c58b554d8ad83806f6fbccc175a5a2ee029"
+    sha256 cellar: :any,                 arm64_sonoma:  "0b918bf3b40909f05f9efb55ffd1ea30edc2c5559f4bdbe005be7701e2d78364"
+    sha256 cellar: :any,                 sonoma:        "bdf6adb03cc6b6c704ef07ba259ed76dd8079c8188ec6bffa533143da369f42e"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "ecb978e4c694527a4ff05657d3eeee7afada54f357e13c145e1f49a61dec59cc"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "217c38a50c75643714b44317e94b3eef8118cd15ec1327277641a5cdaf76f78a"
   end
 
-  depends_on "pkg-config" => :build
-  depends_on xcode: :build
+  depends_on "pkgconf" => :build
+  depends_on xcode: :build # for xcodebuild
   depends_on "libpng"
   depends_on "sdl2"
 
   uses_from_macos "sqlite"
-  uses_from_macos "zlib"
 
-  fails_with gcc: "5"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
+
+  # ventura build patch, upstream pr ref, https://github.com/stella-emu/stella/pull/1064
+  patch do
+    url "https://raw.githubusercontent.com/Homebrew/homebrew-core/1cf441a0/Patches/stella/7.0c-ventura.patch"
+    sha256 "6295953eced4509376f4deb7b1ab511df5fed10cff4fab40feaa4ca8c53922ad"
+  end
 
   def install
     sdl2 = Formula["sdl2"]
     libpng = Formula["libpng"]
     if OS.mac?
-      cd "src/macos" do
+      cd "src/os/macos" do
         inreplace "stella.xcodeproj/project.pbxproj" do |s|
           s.gsub! %r{(\w{24} /\* SDL2\.framework)}, '//\1'
           s.gsub! %r{(\w{24} /\* png)}, '//\1'
@@ -50,7 +58,7 @@ class Stella < Formula
                             "--enable-release",
                             "--with-sdl-prefix=#{sdl2.prefix}",
                             "--with-libpng-prefix=#{libpng.prefix}",
-                            "--with-zlib-prefix=#{Formula["zlib"].prefix}"
+                            "--with-zlib-prefix=#{Formula["zlib-ng-compat"].prefix}"
       system "make", "install"
     end
   end

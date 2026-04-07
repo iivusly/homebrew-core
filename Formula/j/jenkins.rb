@@ -1,8 +1,8 @@
 class Jenkins < Formula
   desc "Extendable open source continuous integration server"
   homepage "https://www.jenkins.io/"
-  url "https://get.jenkins.io/war/2.474/jenkins.war"
-  sha256 "fe85dcdd495302c2b2b31b41b2c9899090fdf672fff4d092dcd5f77294ca6004"
+  url "https://get.jenkins.io/war/2.557/jenkins.war"
+  sha256 "200ab3bf31f5868f94928a13d53fb087d23a6ae2baca05decbc3dd218d787c11"
   license "MIT"
 
   livecheck do
@@ -11,7 +11,7 @@ class Jenkins < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, all: "cdfccc05f792cc8cfb1cb9f9ec20a2414bcd7e26f1bd83a92c006f583faaf539"
+    sha256 cellar: :any_skip_relocation, all: "53a305b684e0b811053dd12252a032e35585b8ca54a84c526296028207b73341"
   end
 
   head do
@@ -52,12 +52,9 @@ class Jenkins < Formula
     ENV.prepend "_JAVA_OPTIONS", "-Djava.io.tmpdir=#{testpath}"
 
     port = free_port
-    fork do
-      exec "#{bin}/jenkins --httpPort=#{port}"
-    end
-    sleep 60
+    spawn bin/"jenkins", "--httpPort=#{port}"
 
-    output = shell_output("curl localhost:#{port}/")
+    output = shell_output("curl --silent --retry 5 --retry-connrefused localhost:#{port}/")
     assert_match(/Welcome to Jenkins!|Unlock Jenkins|Authentication required/, output)
   end
 end

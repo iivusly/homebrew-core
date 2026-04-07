@@ -1,18 +1,17 @@
 class Liblouis < Formula
   desc "Open-source braille translator and back-translator"
   homepage "https://liblouis.io"
-  url "https://github.com/liblouis/liblouis/releases/download/v3.31.0/liblouis-3.31.0.tar.gz"
-  sha256 "29286fe9edc9c7119941b0c847aa9587021f0e53f5623aa03ddfd5e285783af5"
+  url "https://github.com/liblouis/liblouis/releases/download/v3.37.0/liblouis-3.37.0.tar.gz"
+  sha256 "6c3bd3ea73e0cf39d8bf0d724a0ac5ebcb5a24a70f21420de50c8e9f8d009a61"
   license all_of: ["GPL-3.0-or-later", "LGPL-2.1-or-later"]
 
   bottle do
-    sha256 arm64_sonoma:   "b65a856cdf1f7c2071038f2f547f89ab3b10fc40204045973dbe76bfc9014357"
-    sha256 arm64_ventura:  "f7bb5f9884597f1be64eb95141077d8422a8f1823ddb3df7cacb53c6e6567958"
-    sha256 arm64_monterey: "7e48ca6c4737e17b301eb022307bfc8e0806402ef80b79fa02edc1b391bd8d22"
-    sha256 sonoma:         "918a89c8c736f631714aa77d84542dec7d34e2fbf143454ead3800fcf44d5e60"
-    sha256 ventura:        "80d938120d66f08644ca9cf5fdc09a4cabe21aca8890e9fabce4c68aac59d0ad"
-    sha256 monterey:       "da8ed9e6c6a91d4738d7942cce5de956efebd8e13395101cace9259279352d40"
-    sha256 x86_64_linux:   "5cd328ee88eb01fd3a493908aacc943b438cbf823bfe8d4d815ad82031911fef"
+    sha256 arm64_tahoe:   "a2768d123f8751d609e989c435483f8fa709540b9a633742544e7f96064ddb9c"
+    sha256 arm64_sequoia: "5daba9400a4cc94878caa3e56f5b0bc623451dcf9a3ecbc2c775bc58ef29ad28"
+    sha256 arm64_sonoma:  "56c20e672f7da2e92b090468932d197cbb8ee7dce9564322ac4015282ca3400f"
+    sha256 sonoma:        "745ca9bc434c642dc0fcbd0c8c2053bfe74e1553d002f6ae2351ebd13aa43e0c"
+    sha256 arm64_linux:   "c51538eb5f9f13cce80edc288d33d700bf3250808f2d9c3d9b94003c61d79f28"
+    sha256 x86_64_linux:  "c763b2bac538c38ccc11e3c0eef7d63634020d6c8037f1d7c0683cf36c254138"
   end
 
   head do
@@ -24,18 +23,18 @@ class Liblouis < Formula
   end
 
   depends_on "help2man" => :build
-  depends_on "pkg-config" => :build
-  depends_on "python@3.12"
+  depends_on "pkgconf" => :build
+  depends_on "python@3.14"
 
   uses_from_macos "m4"
 
   def python3
-    "python3.12"
+    "python3.14"
   end
 
   def install
     system "./autogen.sh" if build.head?
-    system "./configure", *std_configure_args, "--disable-silent-rules"
+    system "./configure", "--disable-silent-rules", *std_configure_args
     system "make"
     system "make", "check"
     system "make", "install"
@@ -46,10 +45,10 @@ class Liblouis < Formula
   test do
     assert_equal "⠼⠙⠃", pipe_output("#{bin}/lou_translate unicode.dis,en-us-g2.ctb", "42")
 
-    (testpath/"test.py").write <<~EOS
+    (testpath/"test.py").write <<~PYTHON
       import louis
       print(louis.translateString(["unicode.dis", "en-us-g2.ctb"], "42"))
-    EOS
+    PYTHON
     assert_equal "⠼⠙⠃", shell_output("#{python3} test.py").chomp
   end
 end

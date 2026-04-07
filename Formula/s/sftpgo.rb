@@ -1,31 +1,36 @@
 class Sftpgo < Formula
   desc "Fully featured SFTP server with optional HTTP/S, FTP/S and WebDAV support"
-  homepage "https://github.com/drakkan/sftpgo"
-  url "https://github.com/drakkan/sftpgo/releases/download/v2.6.2/sftpgo_v2.6.2_src_with_deps.tar.xz"
-  sha256 "c90260b7b2901438bbd476eee9fd389af5af24113088a50284b2d170631b52ee"
+  homepage "https://sftpgo.com/"
+  url "https://github.com/drakkan/sftpgo/releases/download/v2.7.1/sftpgo_v2.7.1_src_with_deps.tar.xz"
+  sha256 "64b2826af512eb8ce8cd880ce4b9a23897b45515130ea8cc4490fd70a80c812a"
   license "AGPL-3.0-only"
 
   bottle do
-    sha256 arm64_sonoma:   "ccf55eb1dc3f3fc0cff3eec784367dae7f43637c2afd8d93eb595fa3ceb37bd9"
-    sha256 arm64_ventura:  "348636fa1e3f7ccbb067c36bf8fc666b0c1dca2f78480a1fa6f4452d622abb26"
-    sha256 arm64_monterey: "daac16c36497a50b27b11a3f1051d460852a7e801349eca53770e6483c5f3f63"
-    sha256 sonoma:         "ac68526787858a734993736e7a7ec14ad1917e013fb91b6a09210a919628232e"
-    sha256 ventura:        "dd3d8bcc33b6137d0d3b8790da3bddbf03b5491808bcc0ca28b161c29881e9bf"
-    sha256 monterey:       "a5e96caf5cacd56399c15b2f331a77fdf6e7de263b676528eeb7df5b3b107057"
-    sha256 x86_64_linux:   "bf3f1ff033fa8807ccfd4cda40c4d5f1b726f84c3b5fad6f3ddc6786a6f43053"
+    sha256 arm64_tahoe:   "8d98f362b37df0acbc523923af4320a1136d57ca77aa2d2526b6a7d178a0924d"
+    sha256 arm64_sequoia: "f3005d2c28d349a00f91f615faec71913878e7f8dfc9aaf97011ce289f72b517"
+    sha256 arm64_sonoma:  "ce185af9a987c655ba3e0f8daf67eb4dad9a05ad02c65a7897453a60ca923163"
+    sha256 sonoma:        "05a3572d8e94c070455946552f955ead37d9467df9cf750763f7a6504b1b417b"
+    sha256 arm64_linux:   "85f878fb4ecf7de332ca588309015ced3dd1bf582a6631aecaaf5ebf9c7cf15d"
+    sha256 x86_64_linux:  "c1e16106a7dd7e094b43a4974faa49f481a3efb88701e801e973d8951bd5b489"
   end
 
   depends_on "go" => :build
 
   def install
+    ENV["CGO_ENABLED"] = "1" if OS.linux? && Hardware::CPU.arm?
+
     git_sha = (buildpath/"VERSION.txt").read.lines.second.strip
     ldflags = %W[
       -s -w
       -X github.com/drakkan/sftpgo/v2/internal/util.additionalSharedDataSearchPath=#{opt_pkgshare}
       -X github.com/drakkan/sftpgo/v2/internal/version.commit=#{git_sha}
       -X github.com/drakkan/sftpgo/v2/internal/version.date=#{time.iso8601}
-    ].join(" ")
-    system "go", "build", *std_go_args(ldflags:), "-tags", "nopgxregisterdefaulttypes"
+    ]
+    tags = %w[
+      nopgxregisterdefaulttypes
+      disable_grpc_modules
+    ]
+    system "go", "build", *std_go_args(ldflags:, tags:)
     system bin/"sftpgo", "gen", "man", "-d", man1
 
     generate_completions_from_executable(bin/"sftpgo", "gen", "completion")
@@ -70,9 +75,7 @@ class Sftpgo < Formula
     ENV["SFTPGO_SFTPD__BINDINGS__0__ADDRESS"] = "127.0.0.1"
     ENV["SFTPGO_SFTPD__HOST_KEYS"] = "#{testpath}/id_ecdsa,#{testpath}/id_ed25519"
     ENV["SFTPGO_LOG_FILE_PATH"] = ""
-    pid = fork do
-      exec bin/"sftpgo", "serve", "--config-file", "#{pkgetc}/sftpgo.json"
-    end
+    pid = spawn bin/"sftpgo", "serve", "--config-file", "#{pkgetc}/sftpgo.json"
 
     sleep 5
     assert_match expected_output, shell_output("curl -s 127.0.0.1:#{http_port}/healthz")

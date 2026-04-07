@@ -1,49 +1,52 @@
 class NetsurfBuildsystem < Formula
   desc "Makefiles shared by NetSurf projects"
-  homepage "https://source.netsurf-browser.org/buildsystem.git"
+  homepage "https://www.netsurf-browser.org/"
   url "https://download.netsurf-browser.org/libs/releases/buildsystem-1.10.tar.gz"
   sha256 "3d3e39d569e44677c4b179129bde614c65798e2b3e6253160239d1fd6eae4d79"
   license "MIT"
-  head "https://git.netsurf-browser.org/buildsystem.git", branch: "master"
+  head "git://git.netsurf-browser.org/buildsystem.git", branch: "master"
+
+  livecheck do
+    url "https://download.netsurf-browser.org/libs/releases/"
+    regex(/href=.*?buildsystem[._-]v?(\d+(?:\.\d+)+)\.t/i)
+  end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "940a502f39ef0cda291801f35221b65d3d21aeee215322ad935d2b829b687e6d"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "940a502f39ef0cda291801f35221b65d3d21aeee215322ad935d2b829b687e6d"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "940a502f39ef0cda291801f35221b65d3d21aeee215322ad935d2b829b687e6d"
-    sha256 cellar: :any_skip_relocation, sonoma:         "7594be02107747afd03a214ad6baeb160ef751b62727ff94c8379cb9c7154277"
-    sha256 cellar: :any_skip_relocation, ventura:        "7594be02107747afd03a214ad6baeb160ef751b62727ff94c8379cb9c7154277"
-    sha256 cellar: :any_skip_relocation, monterey:       "7594be02107747afd03a214ad6baeb160ef751b62727ff94c8379cb9c7154277"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "940a502f39ef0cda291801f35221b65d3d21aeee215322ad935d2b829b687e6d"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, all: "7698443194711b12a21395fe67c378a2d9cb323ace8f590cfeb79ff730c2ed98"
   end
 
   def install
     system "make", "install", "PREFIX=#{prefix}"
+
+    # Consistently replace /usr/local with HOMEBREW_PREFIX for reproducible bottles
+    inreplace pkgshare/"makefiles/Makefile.tools", "/usr/local", HOMEBREW_PREFIX
   end
 
   test do
     (testpath/"src").mkpath
 
-    (testpath/"Makefile").write <<~EOS
+    (testpath/"Makefile").write <<~MAKE
       COMPONENT := hello
       COMPONENT_VERSION := 0.1.0
       COMPONENT_TYPE ?= binary
       include $(NSSHARED)/makefiles/Makefile.tools
       include $(NSBUILD)/Makefile.top
       INSTALL_ITEMS := $(INSTALL_ITEMS) /bin:$(BUILDDIR)/$(COMPONENT)
-    EOS
+    MAKE
 
-    (testpath/"src/Makefile").write <<~EOS
+    (testpath/"src/Makefile").write <<~MAKE
       DIR_SOURCES := main.c
       include $(NSBUILD)/Makefile.subdir
-    EOS
+    MAKE
 
-    (testpath/"src/main.c").write <<~EOS
+    (testpath/"src/main.c").write <<~C
       #include <stdio.h>
       int main() {
         printf("Hello, world!");
         return 0;
       }
-    EOS
+    C
 
     args = %W[
       NSSHARED=#{pkgshare}

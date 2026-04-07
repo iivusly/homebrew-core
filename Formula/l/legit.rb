@@ -10,17 +10,11 @@ class Legit < Formula
   head "https://github.com/frostming/legit.git", branch: "master"
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "3a694b62cae123be0074315a42a4d6aac727c0e4f7fc8e1dd035a132a68f877e"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "5863ed078e9520d479ef59f271b8ccef53ea958df0e3d29a3fb9195b80bb21d9"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "1a7c8d69febea84183c6ac0c1192c6c56ef1e64c0302caef48a856f6ac34ee55"
-    sha256 cellar: :any_skip_relocation, sonoma:         "964aae9af610c78e8b67f583f706423d728a1e43cf445f2ac47197139a041850"
-    sha256 cellar: :any_skip_relocation, ventura:        "d90b973337c000dd1c0ea97a3674e7b4f1c78a37db7c1c0379723502349c5849"
-    sha256 cellar: :any_skip_relocation, monterey:       "15db44657ad3300a55807e9eaae574c7cf9867f27a5f4fe45f404e4b14fad637"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "d93a2cc40905da123326fa7550996bc88a9e2bc08f04d074c574896242cf20fc"
+    rebuild 4
+    sha256 cellar: :any_skip_relocation, all: "86512ca91409a1376ea6ca826d9ef0fbdd4212232a28a355da9f435140666518"
   end
 
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   resource "args" do
     url "https://files.pythonhosted.org/packages/e5/1c/b701b3f4bd8d3667df8342f311b3efaeab86078a840fb826bd204118cc6b/args-0.1.0.tar.gz"
@@ -28,8 +22,8 @@ class Legit < Formula
   end
 
   resource "click" do
-    url "https://files.pythonhosted.org/packages/96/d3/f04c7bfcf5c1862a2a5b845c6b2b360488cf47af55dfa79c98f6a6bf98b5/click-8.1.7.tar.gz"
-    sha256 "ca9853ad459e787e2192211578cc907e7594e294c7ccc834310722b41b9ca6de"
+    url "https://files.pythonhosted.org/packages/46/61/de6cd827efad202d7057d93e0fed9294b96952e188f7384832791c7b2254/click-8.3.0.tar.gz"
+    sha256 "e7b8232224eba16f4ebe410c25ced9f7875cb5f3263ffc93cc3e8da705e229c4"
   end
 
   resource "clint" do
@@ -48,29 +42,29 @@ class Legit < Formula
   end
 
   resource "gitdb" do
-    url "https://files.pythonhosted.org/packages/19/0d/bbb5b5ee188dec84647a4664f3e11b06ade2bde568dbd489d9d64adef8ed/gitdb-4.0.11.tar.gz"
-    sha256 "bf5421126136d6d0af55bc1e7c1af1c397a34f5b7bd79e776cd3e89785c2b04b"
+    url "https://files.pythonhosted.org/packages/72/94/63b0fc47eb32792c7ba1fe1b694daec9a63620db1e313033d18140c2320a/gitdb-4.0.12.tar.gz"
+    sha256 "5ef71f855d191a3326fcfbc0d5da835f26b13fbcba60c32c21091c349ffdb571"
   end
 
   resource "gitpython" do
-    url "https://files.pythonhosted.org/packages/8f/12/71a40ffce4aae431c69c45a191e5f03aca2304639264faf5666c2767acc4/GitPython-3.1.42.tar.gz"
-    sha256 "2d99869e0fef71a73cbd242528105af1d6c1b108c60dfabd994bf292f76c3ceb"
+    url "https://files.pythonhosted.org/packages/9a/c8/dd58967d119baab745caec2f9d853297cec1989ec1d63f677d3880632b88/gitpython-3.1.45.tar.gz"
+    sha256 "85b0ee964ceddf211c41b9f27a49086010a190fd8132a24e21f362a4b36a791c"
   end
 
   resource "six" do
-    url "https://files.pythonhosted.org/packages/71/39/171f1c67cd00715f190ba0b100d606d440a28c93c7714febeca8b79af85e/six-1.16.0.tar.gz"
-    sha256 "1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"
+    url "https://files.pythonhosted.org/packages/94/e7/b2c673351809dca68a0e064b6af791aa332cf192da575fd474ed7d6f16a2/six-1.17.0.tar.gz"
+    sha256 "ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81"
   end
 
   resource "smmap" do
-    url "https://files.pythonhosted.org/packages/88/04/b5bf6d21dc4041000ccba7eb17dd3055feb237e7ffc2c20d3fae3af62baa/smmap-5.0.1.tar.gz"
-    sha256 "dceeb6c0028fdb6734471eb07c0cd2aae706ccaecab45965ee83f11c8d3b1f62"
+    url "https://files.pythonhosted.org/packages/44/cd/a040c4b3119bbe532e5b0732286f805445375489fceaec1f48306068ee3b/smmap-5.0.2.tar.gz"
+    sha256 "26ea65a03958fa0c8a1c7e8c7a58fdc77221b8910f6be2131affade476898ad5"
   end
 
   def install
     virtualenv_install_with_resources
-    bash_completion.install "extra/bash-completion/legit"
-    zsh_completion.install "extra/zsh-completion/_legit"
+
+    generate_completions_from_executable(bin/"legit", shell_parameter_format: :click)
     man1.install "extra/man/legit.1"
   end
 

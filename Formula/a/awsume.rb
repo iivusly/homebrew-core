@@ -3,35 +3,39 @@ class Awsume < Formula
 
   desc "Utility for easily assuming AWS IAM roles from the command-line"
   homepage "https://awsu.me"
-  url "https://files.pythonhosted.org/packages/d7/08/264d5c0b1a2618c95f3a391e038830c18bcccce5f202b293acdb14b7ac63/awsume-4.5.4.tar.gz"
-  sha256 "4c1f6336e1f9e36b2144761345967f50f43128363892cc62325577201e133b1b"
+  # Restore PyPI URL and remove livecheck after https://github.com/trek10inc/awsume/issues/289
+  url "https://github.com/trek10inc/awsume/archive/refs/tags/4.5.5.tar.gz"
+  sha256 "33946d1dbd62394024b1d11c09aeb1eb566981b99e0d8eed5255b948e74ccebc"
   license "MIT"
-  revision 1
   head "https://github.com/trek10inc/awsume.git", branch: "master"
 
+  livecheck do
+    url :stable
+    regex(/^v?(\d+(?:\.\d+)+)$/i)
+  end
+
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "bf1c09476afcefa10ffd9f487866c01965279b8fed1277620c686ed9906ffda4"
-    sha256 cellar: :any,                 arm64_ventura:  "fa3239200e3c06fbb230c809cb47a2a0c2b2e513d26a176d2b70335abbe19e81"
-    sha256 cellar: :any,                 arm64_monterey: "ebbccc5dffa803dbdbcaec602993f322ad93d5a42f860a04cef83ccc31fef899"
-    sha256 cellar: :any,                 sonoma:         "9ca5bfb726ccc2b3d6632fe394c7c41e6434e6bd6912d0893598e5374a7d6128"
-    sha256 cellar: :any,                 ventura:        "6090ad2749b405b5ab87e0140068fb4df930b531820ca9d03eca21f4f2c94629"
-    sha256 cellar: :any,                 monterey:       "c741fe1a847188fb5e0957c35defbcb40074b9acbc6e658a2b9a4b2be48e13a4"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "daa3531364ff676d9c0008d84477c6758e672e3427a33634351ae0b6dda838df"
+    sha256 cellar: :any,                 arm64_tahoe:   "976bf1db3acba0316e4b91cb969a43f91ee6d97d59fd4b80e2678dde6a3f1b94"
+    sha256 cellar: :any,                 arm64_sequoia: "9e2c00c7eb4ed65385a540db0a602839b9671d84b70b80f2c3b03f62c54858fc"
+    sha256 cellar: :any,                 arm64_sonoma:  "5529de9a81df8487da268896213867e7cf9a7c38d3f1569035ec3c02fd2dbdb9"
+    sha256 cellar: :any,                 sonoma:        "b3e6d65c0cb235b6c26ca9e18db41cd8d327868540d9afa69f33ac7482a3de27"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "5764c35d4ca67bebd15db99ad96b47f0258913edf35fb27deff7b7bf8aac2c72"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "9f8fdaa0cab57c9d58823ac01c345c4e2d4703c7ebafb0abed215c3202d8b09b"
   end
 
   depends_on "libyaml"
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   uses_from_macos "sqlite"
 
   resource "boto3" do
-    url "https://files.pythonhosted.org/packages/81/f5/0c7d1b745462d9fe0c2b4709dc6a4b1cbe399c02ad60b26ae2837714d455/boto3-1.34.128.tar.gz"
-    sha256 "43a6e99f53a8d34b3b4dbe424dbcc6b894350dc41a85b0af7c7bc24a7ec2cead"
+    url "https://files.pythonhosted.org/packages/d0/69/c0d4cc77add3cdf66f8573555d71dc23ba32dfe77df40e1c91385f7a9bdc/boto3-1.42.34.tar.gz"
+    sha256 "75d7443c81a029283442fad138629be1eefaa3e6d430c28118a0f4cdbd57855d"
   end
 
   resource "botocore" do
-    url "https://files.pythonhosted.org/packages/9e/c9/844ad5680d847d94adb97b22c30b938ddda86f8a815d439503d4ee545484/botocore-1.34.128.tar.gz"
-    sha256 "8d8e03f7c8c080ecafda72036eb3b482d649f8417c90b5dca33b7c2c47adb0c9"
+    url "https://files.pythonhosted.org/packages/fd/f0/5702b704844e8920e01ce865cde0da574827163fbd7c0207d351ff6eea2c/botocore-1.42.34.tar.gz"
+    sha256 "92e44747da7890270d8dcc494ecc61fc315438440c55e00dc37a57d402b1bb66"
   end
 
   resource "colorama" do
@@ -40,18 +44,18 @@ class Awsume < Formula
   end
 
   resource "jmespath" do
-    url "https://files.pythonhosted.org/packages/00/2a/e867e8531cf3e36b41201936b7fa7ba7b5702dbef42922193f05c8976cd6/jmespath-1.0.1.tar.gz"
-    sha256 "90261b206d6defd58fdd5e85f478bf633a2901798906be2ad389150c5c60edbe"
+    url "https://files.pythonhosted.org/packages/d3/59/322338183ecda247fb5d1763a6cbe46eff7222eaeebafd9fa65d4bf5cb11/jmespath-1.1.0.tar.gz"
+    sha256 "472c87d80f36026ae83c6ddd0f1d05d4e510134ed462851fd5f754c8c3cbb88d"
   end
 
   resource "pluggy" do
-    url "https://files.pythonhosted.org/packages/96/2d/02d4312c973c6050a18b314a5ad0b3210edb65a906f868e31c111dede4a6/pluggy-1.5.0.tar.gz"
-    sha256 "2cffa88e94fdc978c4c574f15f9e59b7f4201d439195c3715ca9e2486f1d0cf1"
+    url "https://files.pythonhosted.org/packages/f9/e2/3e91f31a7d2b083fe6ef3fa267035b518369d9511ffab804f839851d2779/pluggy-1.6.0.tar.gz"
+    sha256 "7dcc130b76258d33b90f61b658791dede3486c3e6bfb003ee5c9bfb396dd22f3"
   end
 
   resource "psutil" do
-    url "https://files.pythonhosted.org/packages/90/c7/6dc0a455d111f68ee43f27793971cf03fe29b6ef972042549db29eec39a2/psutil-5.9.8.tar.gz"
-    sha256 "6be126e3225486dff286a8fb9a06246a5253f4c7c53b475ea5f5ac934e64194c"
+    url "https://files.pythonhosted.org/packages/73/cb/09e5184fb5fc0358d110fc3ca7f6b1d033800734d34cac10f4136cfac10e/psutil-7.2.1.tar.gz"
+    sha256 "f7583aec590485b43ca601dd9cea0dcd65bd7bb21d30ef4ddbf4ea6b5ed1bdd3"
   end
 
   resource "python-dateutil" do
@@ -60,23 +64,23 @@ class Awsume < Formula
   end
 
   resource "pyyaml" do
-    url "https://files.pythonhosted.org/packages/cd/e5/af35f7ea75cf72f2cd079c95ee16797de7cd71f29ea7c68ae5ce7be1eda0/PyYAML-6.0.1.tar.gz"
-    sha256 "bfdf460b1736c775f2ba9f6a92bca30bc2095067b8a9d77876d1fad6cc3b4a43"
+    url "https://files.pythonhosted.org/packages/05/8e/961c0007c59b8dd7729d542c61a4d537767a59645b82a0b521206e1e25c2/pyyaml-6.0.3.tar.gz"
+    sha256 "d76623373421df22fb4cf8817020cbb7ef15c725b9d5e45f17e189bfc384190f"
   end
 
   resource "s3transfer" do
-    url "https://files.pythonhosted.org/packages/83/bc/fb0c1f76517e3380eb142af8a9d6b969c150cfca1324cea7d965d8c66571/s3transfer-0.10.1.tar.gz"
-    sha256 "5683916b4c724f799e600f41dd9e10a9ff19871bf87623cc8f491cb4f5fa0a19"
+    url "https://files.pythonhosted.org/packages/05/04/74127fc843314818edfa81b5540e26dd537353b123a4edc563109d8f17dd/s3transfer-0.16.0.tar.gz"
+    sha256 "8e990f13268025792229cd52fa10cb7163744bf56e719e0b9cb925ab79abf920"
   end
 
   resource "six" do
-    url "https://files.pythonhosted.org/packages/71/39/171f1c67cd00715f190ba0b100d606d440a28c93c7714febeca8b79af85e/six-1.16.0.tar.gz"
-    sha256 "1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"
+    url "https://files.pythonhosted.org/packages/94/e7/b2c673351809dca68a0e064b6af791aa332cf192da575fd474ed7d6f16a2/six-1.17.0.tar.gz"
+    sha256 "ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81"
   end
 
   resource "urllib3" do
-    url "https://files.pythonhosted.org/packages/43/6d/fa469ae21497ddc8bc93e5877702dca7cb8f911e337aca7452b5724f1bb6/urllib3-2.2.2.tar.gz"
-    sha256 "dd505485549a7a552833da5e6063639d0d177c04f23bc3864e41e5dc5f612168"
+    url "https://files.pythonhosted.org/packages/c7/24/5f1b3bdffd70275f6661c76461e25f024d5a38a46f04aaca912426a2b1d3/urllib3-2.6.3.tar.gz"
+    sha256 "1b62b6884944a57dbe321509ab94fd4d3b307075e0c2eae991ac71ee15ad38ed"
   end
 
   def install
@@ -85,11 +89,11 @@ class Awsume < Formula
 
   test do
     assert_match version.to_s, shell_output("bash -c '. #{bin}/awsume -v 2>&1'")
-    assert_match <<~EOS, (testpath/".awsume/config.yaml").read
+    assert_match <<~YAML, (testpath/".awsume/config.yaml").read
       colors: true
       fuzzy-match: false
       role-duration: 0
-    EOS
+    YAML
     assert_match "PROFILE  TYPE  SOURCE  MFA?  REGION  PARTITION  ACCOUNT",
                  shell_output("bash -c '. #{bin}/awsume --list-profiles 2>&1'")
   end

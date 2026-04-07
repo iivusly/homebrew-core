@@ -1,19 +1,18 @@
 class Nlopt < Formula
   desc "Free/open-source library for nonlinear optimization"
   homepage "https://nlopt.readthedocs.io/"
-  url "https://github.com/stevengj/nlopt/archive/refs/tags/v2.8.0.tar.gz"
-  sha256 "e02a4956a69d323775d79fdaec7ba7a23ed912c7d45e439bc933d991ea3193fd"
+  url "https://github.com/stevengj/nlopt/archive/refs/tags/v2.10.1.tar.gz"
+  sha256 "30d13ce16da119db3e987784f7864e35a562ec62c186352fae55cd003e6c58ff"
   license "MIT"
   head "https://github.com/stevengj/nlopt.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "20f0cac5105fa0ddc82842091aeb29a1efa7ad3f3a6ef6141f6fb733d0a51175"
-    sha256 cellar: :any,                 arm64_ventura:  "c1d084e9e02aeea9590837a4f589c5366809bb0b2a8ffa89db52a547fb587b81"
-    sha256 cellar: :any,                 arm64_monterey: "bc0304fa0a34d1331a3114d06cbeae705625ca482f3412bd89880b7d7ca4a061"
-    sha256 cellar: :any,                 sonoma:         "79efb55e1183b61a70e6ae3a976fadb8c2f63da6af7ed84bc4e88ad43ced3b4c"
-    sha256 cellar: :any,                 ventura:        "1cacc860d735502e1557cbfce2822acf99b2c54f256717801bb87af4bb2c87d9"
-    sha256 cellar: :any,                 monterey:       "748a39a74580c9985953d94b6fccfaf79f7070a27835cc8225c848987dd79576"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "3f51af4ef62578c001a8967c868d2206e54e35f0226d2296c2aa13a86fee4d82"
+    sha256 cellar: :any,                 arm64_tahoe:   "895d8e1a5b7257380f335c5992c674660a122c64ee1d67eea566e65cdb1e0b84"
+    sha256 cellar: :any,                 arm64_sequoia: "9773396412cfffe1c6dc4a3c2f1f82d32c8da396ac44733b7e117d20a15166ef"
+    sha256 cellar: :any,                 arm64_sonoma:  "97e616890c809b51cbe8a8efffa8fe3ef6d69a319d7fbd7253d9738064c919f8"
+    sha256 cellar: :any,                 sonoma:        "c468957d29935740a3e7bf6248709d088b7876f944379c3f33bf65c38b7fba47"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "ce2cfb1d74dfb5f66022516311d416acacf8beb7186dcc89fbe0f975c1eb6a2a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ca3f9218108faa8cf151c88d784b7af7a090162f2efea0085d358eeb4164b5df"
   end
 
   depends_on "cmake" => [:build, :test]
@@ -33,18 +32,22 @@ class Nlopt < Formula
     system "cmake", "--install", "build"
 
     pkgshare.install "test/box.c"
+
+    # Avoid rebuilding dependents that hard-code the prefix.
+    inreplace lib/"pkgconfig/nlopt.pc", prefix, opt_prefix
   end
 
   test do
-    (testpath/"CMakeLists.txt").write <<~EOS
-      cmake_minimum_required(VERSION 3.0)
+    (testpath/"CMakeLists.txt").write <<~CMAKE
+      cmake_minimum_required(VERSION 4.0)
       project(box C)
       find_package(NLopt REQUIRED)
       add_executable(box "#{pkgshare}/box.c")
       target_link_libraries(box NLopt::nlopt)
-    EOS
-    system "cmake", "."
-    system "make"
-    assert_match "found", shell_output("./box")
+    CMAKE
+
+    system "cmake", "-S", ".", "-B", "build"
+    system "cmake", "--build", "build"
+    assert_match "found", shell_output("./build/box")
   end
 end

@@ -1,43 +1,41 @@
 class CvsFastExport < Formula
+  include Language::Python::Shebang
+
   desc "Export an RCS or CVS history as a fast-import stream"
   homepage "http://www.catb.org/~esr/cvs-fast-export/"
-  url "http://www.catb.org/~esr/cvs-fast-export/cvs-fast-export-1.68.tar.gz"
-  sha256 "841c60d9af70ca260fec572f2ef08ed523314f6cacfda40bb44dacb9dbcda841"
+  url "https://gitlab.com/esr/cvs-fast-export/-/archive/2.0/cvs-fast-export-2.0.tar.bz2"
+  sha256 "9eb3d54d4631c5447b6f8c12ca8c08a32ee4255768c90dea66dbfef5b8a6a624"
   license "GPL-2.0-or-later"
+  head "https://gitlab.com/esr/cvs-fast-export.git", branch: "master"
 
+  # The homepage links to the `stable` tarball but it can take longer than the
+  # ten second livecheck timeout, so we check the Git tags as a workaround.
   livecheck do
-    url :homepage
-    regex(/href=.*?cvs-fast-export[._-]v?(\d+(?:\.\d+)+)\.t/i)
+    url :head
+    regex(/^v?(\d+(?:\.\d+)+)$/i)
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "9dba6bf27f82465c252bd146ea828f2e93849c7886015a66a3359957be1a32ad"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "c5e0e6010700405c1ef04acc75e09e45b2e513dd884e85145cc0876de50b6f10"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "034da199bcd8f5bef619c446d548727e6657dccdcda38933a23247c5cd476d0c"
-    sha256 cellar: :any_skip_relocation, sonoma:         "f6aca690bf14add0b2daa03afc21b4efdfe093770c8547eb17ee271aea9a32bc"
-    sha256 cellar: :any_skip_relocation, ventura:        "b70d7f541af12e97ee607b9d7fa1665af6bbfd6051e31bb6b93b71c220fa115d"
-    sha256 cellar: :any_skip_relocation, monterey:       "3dde4030da24cab974a110ff6954b9d5b01091f33f16d936cad581e8db55067b"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "a9a04b0289478952e4f7991b95d9f0ced10fedc353c263e28924195dc60a1727"
-  end
-
-  head do
-    url "https://gitlab.com/esr/cvs-fast-export.git", branch: "master"
-    depends_on "bison" => :build
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "8f402cec3473616edec6bee65fb940a45e06e76151bce1856927c3f37787c795"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "8f402cec3473616edec6bee65fb940a45e06e76151bce1856927c3f37787c795"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "8f402cec3473616edec6bee65fb940a45e06e76151bce1856927c3f37787c795"
+    sha256 cellar: :any_skip_relocation, sonoma:        "fe8f9e74e688482a9cf911a0b211a194c9e2498db827dedd4e714903f7235056"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "c304514ded6cd90284d11f0d5c7f6a0823a3996096bafaddc3800ece3c0a0638"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "e1f89215bad4fdb70df12de12150ee211910ab6ccc931c09d74ce35f22d4043a"
   end
 
   depends_on "asciidoctor" => :build
+  depends_on "go" => :build
   depends_on "cvs" => :test
 
-  uses_from_macos "libxml2"
-  uses_from_macos "libxslt"
+  uses_from_macos "python"
 
   def install
-    ENV["XML_CATALOG_FILES"] = "#{etc}/xml/catalog"
-
-    # Fix compile with newer Clang
-    ENV.append_to_cflags "-Wno-implicit-function-declaration" if DevelopmentTools.clang_build_version >= 1403
-
-    system "make", "install", "prefix=#{prefix}"
+    system "make", "man"
+    system "go", "build", *std_go_args(ldflags: "-s -w -X main.version=#{version}")
+    man1.install buildpath.glob("*.1")
+    bin.install "cvsconvert", "cvssync"
+    rewrite_shebang detected_python_shebang(use_python_from_path: true), *bin.children
   end
 
   test do

@@ -1,77 +1,68 @@
 class Ortp < Formula
   desc "Real-time transport protocol (RTP, RFC3550) library"
   homepage "https://linphone.org/"
-  license "GPL-3.0-or-later"
-
-  stable do
-    url "https://gitlab.linphone.org/BC/public/ortp/-/archive/5.3.79/ortp-5.3.79.tar.bz2"
-    sha256 "73334bef5fd6d6c9d6c74f6e45c0cb7d895eeb5f703be710a48dc12ebd4b93cc"
-
-    # bctoolbox appears to follow ortp's version. This can be verified at the GitHub mirror:
-    # https://github.com/BelledonneCommunications/bctoolbox
-    resource "bctoolbox" do
-      url "https://gitlab.linphone.org/BC/public/bctoolbox/-/archive/5.3.79/bctoolbox-5.3.79.tar.bz2"
-      sha256 "4d1e0e10d91c7221cc9170429081ce5ebadc2c37aadaea1ecc9a4a9f574e8159"
-    end
-  end
+  # TODO: Switch to monorepo in 5.5.x
+  url "https://gitlab.linphone.org/BC/public/ortp/-/archive/5.4.104/ortp-5.4.104.tar.bz2"
+  sha256 "43bce7e0d13e528e99a8937d26b4d321c8a37b05a949e412dcfb526dab3a3ada"
+  license all_of: ["AGPL-3.0-or-later", "GPL-3.0-or-later"]
+  head "https://gitlab.linphone.org/BC/public/linphone-sdk.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "6ca892914239b1f1eb5f2c7d14b10e09547f69f2fb793d701dce5282326ea00d"
-    sha256 cellar: :any,                 arm64_ventura:  "c19d2ffa4ebd74de51278f02cb0fdc0cd660fb56721395388ab78970347a476c"
-    sha256 cellar: :any,                 arm64_monterey: "8a5505f8525ff4c036c86ec3639fd603d77601e81ac0eb3c68db79ab280ef3e6"
-    sha256 cellar: :any,                 sonoma:         "ce277108bfe59752070e24b75045782eb6fc9fa9238cf5bb5f5d9757970be629"
-    sha256 cellar: :any,                 ventura:        "9a79db30c98de473f07e7dd367781a3c93ff40a37bc23a11ec817957d11c3fc6"
-    sha256 cellar: :any,                 monterey:       "e1ec1945d87f3e4c2f660501eced9d779febf6c168a86908ec0d9d32c3ddc0ff"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "17f07a92a8034fa84efb6a4d245b5d9df6557bbf002a9c99562f480335b0ff10"
-  end
-
-  head do
-    url "https://gitlab.linphone.org/BC/public/ortp.git", branch: "master"
-
-    resource "bctoolbox" do
-      url "https://gitlab.linphone.org/BC/public/bctoolbox.git", branch: "master"
-    end
+    sha256 cellar: :any,                 arm64_tahoe:   "c5cd5bee870100b0f705a0021361c502935ba88fa8ee411cba700dfd8e9e5385"
+    sha256 cellar: :any,                 arm64_sequoia: "0b257cb88cbd1a66c8ddddf98459a14ff7cbda779e4bab0904026cabafcb3a8c"
+    sha256 cellar: :any,                 arm64_sonoma:  "4199888921225fd1a9c499a26b428da0563e8ac7a731036238fa0ac58e4e2847"
+    sha256 cellar: :any,                 sonoma:        "bdd59188f15332178bbcfc12b00816260cb9cd5832dde9ebeb8616bd00814ffe"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "26f6447796ecedca837b8f3e848436c49e3bdf4e7f844fe13156aec20958df30"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "4027b0c012849ae05fbf1bbaa27af4be7be8c559207c6ad1f19d1d78a35f7e3b"
   end
 
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
-  depends_on "mbedtls"
+  depends_on "pkgconf" => :build
+  depends_on "openssl@3"
+
+  resource "bctoolbox" do
+    url "https://gitlab.linphone.org/BC/public/bctoolbox/-/archive/5.4.104/bctoolbox-5.4.104.tar.bz2"
+    sha256 "a8954e10fe8dd5e91dd953dda8c1e2b34284454c6bedb9cb13c056f33dda5623"
+
+    livecheck do
+      formula :parent
+    end
+  end
 
   def install
-    odie "bctoolbox resource needs to be updated" if build.stable? && version != resource("bctoolbox").version
-
-    resource("bctoolbox").stage do
-      args = ["-DENABLE_TESTS_COMPONENT=OFF", "-DBUILD_SHARED_LIBS=ON"]
-      args << "-DCMAKE_C_FLAGS=-Wno-error=unused-parameter" if OS.linux?
-      system "cmake", "-S", ".", "-B", "build",
-                      *args,
-                      *std_cmake_args(install_prefix: libexec)
-      system "cmake", "--build", "build"
-      system "cmake", "--install", "build"
+    if build.stable?
+      odie "bctoolbox resource needs to be updated" if version != resource("bctoolbox").version
+      (buildpath/"bctoolbox").install resource("bctoolbox")
+    else
+      rm_r("external")
     end
 
-    ENV.prepend_path "PKG_CONFIG_PATH", libexec/"lib/pkgconfig"
-    ENV.append "LDFLAGS", "-Wl,-rpath,#{libexec}/lib" if OS.linux?
-    cflags = ["-I#{libexec}/include"]
-    cflags << "-Wno-error=maybe-uninitialized" if OS.linux?
-
-    args = %W[
-      -DCMAKE_PREFIX_PATH=#{libexec}
-      -DCMAKE_C_FLAGS=#{cflags.join(" ")}
-      -DCMAKE_CXX_FLAGS=-I#{libexec}/include
+    args = %w[
       -DBUILD_SHARED_LIBS=ON
-      -DENABLE_DOC=NO
-      -DENABLE_UNIT_TESTS=NO
+      -DENABLE_MBEDTLS=OFF
+      -DENABLE_OPENSSL=ON
+      -DENABLE_TESTS_COMPONENT=OFF
     ]
-    args << "-DCMAKE_INSTALL_RPATH=#{libexec}/Frameworks" if OS.mac?
 
-    system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
-    system "cmake", "--build", "build"
-    system "cmake", "--install", "build"
+    system "cmake", "-S", "bctoolbox", "-B", "build_bctoolbox", *args, *std_cmake_args
+    system "cmake", "--build", "build_bctoolbox"
+    system "cmake", "--install", "build_bctoolbox"
+    prefix.install "bctoolbox/LICENSE.txt" => "LICENSE-bctoolbox.txt"
+
+    args = %w[
+      -DBUILD_SHARED_LIBS=ON
+      -DENABLE_DOC=OFF
+      -DENABLE_UNIT_TESTS=OFF
+    ]
+    args << "-DCMAKE_INSTALL_RPATH=#{frameworks}" if OS.mac?
+
+    system "cmake", "-S", (build.head? ? "ortp" : "."), "-B", "build_ortp", *args, *std_cmake_args
+    system "cmake", "--build", "build_ortp"
+    system "cmake", "--install", "build_ortp"
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include "ortp/logging.h"
       #include "ortp/rtpsession.h"
       #include "ortp/sessionset.h"
@@ -80,9 +71,9 @@ class Ortp < Formula
         ORTP_PUBLIC void ortp_init(void);
         return 0;
       }
-    EOS
+    C
     linker_flags = OS.mac? ? %W[-F#{frameworks} -framework ortp] : %W[-L#{lib} -lortp]
-    system ENV.cc, "test.c", "-o", "test", "-I#{include}", "-I#{libexec}/include", *linker_flags
+    system ENV.cc, "test.c", "-o", "test", "-I#{include}", *linker_flags
     system "./test"
   end
 end

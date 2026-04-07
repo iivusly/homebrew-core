@@ -1,34 +1,33 @@
 class Goctl < Formula
   desc "Generates server-side and client-side code for web and RPC services"
   homepage "https://go-zero.dev"
-  url "https://github.com/zeromicro/go-zero/archive/refs/tags/tools/goctl/v1.7.2.tar.gz"
-  sha256 "d97deb914f62baff8bb445af0d97017ce7a393d2cb01062ec419c46b6b03f8e0"
+  url "https://github.com/zeromicro/go-zero/archive/refs/tags/tools/goctl/v1.10.1.tar.gz"
+  sha256 "b8889573a26b24306dccc4d7e991e0321780e19ad4d247f814a4f65e11f07c69"
   license "MIT"
+  head "https://github.com/zeromicro/go-zero.git", branch: "master"
+
+  livecheck do
+    url :stable
+    regex(%r{^tools/goctl/v?(\d+(?:\.\d+)+)$}i)
+  end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "7abf93331fdbf9819a61dfb3b2534ec5f3b1cfdc0d161cd6bdea442c64650bee"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "7abf93331fdbf9819a61dfb3b2534ec5f3b1cfdc0d161cd6bdea442c64650bee"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "7abf93331fdbf9819a61dfb3b2534ec5f3b1cfdc0d161cd6bdea442c64650bee"
-    sha256 cellar: :any_skip_relocation, sonoma:         "a1e8edf1c55022d6626e71acdb0abc803e2dc5450da1ffcde22531c1b4aebdb3"
-    sha256 cellar: :any_skip_relocation, ventura:        "a1e8edf1c55022d6626e71acdb0abc803e2dc5450da1ffcde22531c1b4aebdb3"
-    sha256 cellar: :any_skip_relocation, monterey:       "a1e8edf1c55022d6626e71acdb0abc803e2dc5450da1ffcde22531c1b4aebdb3"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "44a35877c7f645b271710cef0c8ebbc163c72ea5ff9d930a7d1c011f9a37c5f2"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "559dc79f895ef231894d6ad061ffded217c784eda9598e497756b3427e756cfc"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "eb712c36fad7e43668ce9f367dbc9d517e1f7bca07df0a1b5afe074997916dbe"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "b12bd097a7940f2606023d2631b4b60a7e92d3b2f8025fc4646a3e5f9fe808b6"
+    sha256 cellar: :any_skip_relocation, sonoma:        "0976ece45058588058d5f00d0b8007c999f7e8cba9605f696916e13c0476a8e5"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "fa77776ac70c099fff460ccc6d99f5dc1f2a294bd31df0948cf6897c45672dae"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "9a69a66e3f9081d4cb410e11d55f89f24f193957ad26afc6b8a0321fd4f26847"
   end
 
   depends_on "go" => :build
-
-  # bump to use go1.23, upstream patch PR, https://github.com/zeromicro/go-zero/pull/4279
-  patch do
-    url "https://github.com/zeromicro/go-zero/commit/19c5fc3c29335df2f452d0947b6740337abb94ce.patch?full_index=1"
-    sha256 "0cc51959505721b4978d90f2990c93dfb3c00dda2ffbb8416c589c277e3971fb"
-  end
 
   def install
     chdir "tools/goctl" do
       system "go", "build", *std_go_args(ldflags: "-s -w"), "goctl.go"
     end
 
-    generate_completions_from_executable(bin/"goctl", "completion")
+    generate_completions_from_executable(bin/"goctl", shell_parameter_format: :cobra)
   end
 
   test do
@@ -38,6 +37,6 @@ class Goctl < Formula
       mkdir_p testpath/"#{version}/#{f}"
     end
     system bin/"goctl", "template", "init", "--home=#{testpath}"
-    assert_predicate testpath/"api/main.tpl", :exist?, "goctl install fail"
+    assert_path_exists testpath/"api/main.tpl", "goctl install fail"
   end
 end

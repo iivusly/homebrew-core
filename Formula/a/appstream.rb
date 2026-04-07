@@ -1,18 +1,18 @@
 class Appstream < Formula
   desc "Tools and libraries to work with AppStream metadata"
   homepage "https://www.freedesktop.org/wiki/Distributions/AppStream/"
-  url "https://github.com/ximion/appstream/archive/refs/tags/v1.0.3.tar.gz"
-  sha256 "dd7222519b5d855124fa803ce82a7cbf090ac6b2e44a5bc515e729b1f20a63ae"
+  url "https://github.com/ximion/appstream/archive/refs/tags/v1.1.2.tar.gz"
+  sha256 "564ec87b16e9e4ee81fb021e612250fd27f3a3ecd31c209a5dd1ff59def3022d"
   license "LGPL-2.1-or-later"
+  compatibility_version 1
 
   bottle do
-    sha256 arm64_sonoma:   "1216f3383a370abd9d48a4fd093d49f3b72bc552f7c4e680cdc093473da22a44"
-    sha256 arm64_ventura:  "5ff6cd337a86f14fb4aee3c30bb73cd5c697730dbb1465d52c49e9f1783ff12f"
-    sha256 arm64_monterey: "a7dac1620d0dd18128b5a2404aef78b76577ef75937a9f35c6645a05fb17870d"
-    sha256 sonoma:         "246da0463c09a29db3b7c90f3fe1727d9d533e1d8a1cb5483fd1868100eae6cb"
-    sha256 ventura:        "96edae4d536442fc486fba42b6083f124fe26fa172082845fb74ae5d2244f282"
-    sha256 monterey:       "f3c697a57914dde1489b1328fb653d46c46cf4a8d6f437d28d90c80632aa200f"
-    sha256 x86_64_linux:   "8a7343939bd883cc71503d5f47a738480e4aad4e0ffc75d37288033e167b6bc3"
+    sha256 arm64_tahoe:   "f2c581be46ed6b1247e389b64e1ad6362873ab8c03302cbf0dedc0120ab92299"
+    sha256 arm64_sequoia: "796493bf50d9d0074104f9d531db5743535efd8331ca63e4f70cb1c5d4d37c91"
+    sha256 arm64_sonoma:  "cfa7613cb47ceeb7db8eddddc3a53e390aa765a2b94d8122bbfb4f9cfe7e7e0b"
+    sha256 sonoma:        "92b9ee15d004bc825753ae940b52a5ee6af25ff76baab576d7aacc5314515013"
+    sha256 arm64_linux:   "4570742f348cdfc3f3308550fdd3a87997f7b32a5f1cce32bf514989bcae08b6"
+    sha256 x86_64_linux:  "9739adf95825abbf49377ad78790e4878f40e871ead0f2f38dd547f021b97b9e"
   end
 
   depends_on "gobject-introspection" => :build
@@ -20,12 +20,12 @@ class Appstream < Formula
   depends_on "itstool" => :build
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => [:build, :test]
+  depends_on "pkgconf" => [:build, :test]
   depends_on "vala" => :build
 
   depends_on "glib"
+  depends_on "libfyaml"
   depends_on "libxmlb"
-  depends_on "libyaml"
   depends_on "zstd"
 
   uses_from_macos "libxslt" => :build # for xsltproc
@@ -61,6 +61,7 @@ class Appstream < Formula
       -Ddocs=false
       -Dapidocs=false
       -Dinstall-docs=false
+      -Dbash-completion=false
     ]
 
     args << "-Dsystemd=false" if OS.mac?
@@ -71,14 +72,14 @@ class Appstream < Formula
   end
 
   test do
-    (testpath/"appdata.xml").write <<~EOS
+    (testpath/"appdata.xml").write <<~XML
       <?xml version="1.0" encoding="UTF-8"?>
       <component type="desktop-application">
         <id>org.test.test-app</id>
         <name>Test App</name>
       </component>
-    EOS
-    (testpath/"test.c").write <<~EOS
+    XML
+    (testpath/"test.c").write <<~C
       #include "appstream.h"
 
       int main(int argc, char *argv[]) {
@@ -94,7 +95,7 @@ class Appstream < Formula
           g_clear_error (&error);
         }
       }
-    EOS
+    C
     flags = shell_output("pkg-config --cflags --libs appstream").strip.split
     system ENV.cc, "test.c", "-o", "test", *flags
     system "./test"

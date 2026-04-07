@@ -1,19 +1,23 @@
 class Elvis < Formula
   desc "Erlang Style Reviewer"
   homepage "https://github.com/inaka/elvis"
-  url "https://github.com/inaka/elvis/archive/refs/tags/3.2.5.tar.gz"
-  sha256 "d5e606009bb2d5e535a97c0ed9242f95910163447381d90a3b2ea92669694672"
+  url "https://github.com/inaka/elvis/archive/refs/tags/5.0.2.tar.gz"
+  sha256 "a8dd3aa92da9f7a12314d3bde9241383b583f2fe5eca77c2bae477f725d2277a"
   license "Apache-2.0"
   head "https://github.com/inaka/elvis.git", branch: "master"
 
+  livecheck do
+    url :stable
+    regex(/^v?(\d+(?:\.\d+)+)$/i)
+  end
+
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "b7f9111c73fa741d40c21d07f0c5cb7411f74456200d565b566eb7b4b5d639a6"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "d9db2d9c74d6a759d7d186aaa2ddbf6d0ed800bbce3446a48bff8b5c9198e0af"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "5d13803656fed62a3464ff0d5a62d887322c6ef7e655d13d9c0ee80fad350864"
-    sha256 cellar: :any_skip_relocation, sonoma:         "245955f0758d89d1b3fcd9c77c8468951a95a46f794488da1f4470b4dd4366be"
-    sha256 cellar: :any_skip_relocation, ventura:        "9525c2aedc0b0ea4a95bff2d36cd30f779d0f6581edc40bbb7514b5db94dcd38"
-    sha256 cellar: :any_skip_relocation, monterey:       "d71510d9b011e7c6266264fe34b4a86faf4f5b57065cf95b3f38d1c11662f53c"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "427f6c74dd17899542862787c271e61486513f1817ff049fa62385c042f40dc4"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "1cf87c68bb955d1b9d65bbb1b2732053486e7148ae8a3908ba28831da6efbfba"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "13bf8e6b24e90e901a6e41afd5df15218f4957fd0bb343dabfc09cd563ffc527"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "db41f1ab4748593ea1737c6ea31ee51f626d17efc0f3ce610fc6b583b02ea143"
+    sha256 cellar: :any_skip_relocation, sonoma:        "d02766dbc8b1f777fd2301ce80a3ead1fa54885863ed955993109b6a47db15f3"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "f621b6628aac44d90e702ac097f6762f4f7a424bfcde477ef13209d076adcc99"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "dafc70374b5bd621925cd7cb28e51b8398cfdbcfcdeae6339a38cf6c6da16c2e"
   end
 
   depends_on "rebar3" => :build
@@ -23,26 +27,32 @@ class Elvis < Formula
     system "rebar3", "escriptize"
 
     bin.install "_build/default/bin/elvis"
+
+    bash_completion.install "priv/bash_completion/elvis"
+    zsh_completion.install "priv/zsh_completion/_elvis"
   end
 
   test do
-    (testpath/"src/example.erl").write <<~EOS
+    (testpath/"src/example.erl").write <<~ERLANG
       -module(example).
 
       -define(bad_macro_name, "should be upper case").
-    EOS
+    ERLANG
 
-    (testpath/"elvis.config").write <<~EOS
-      [{elvis, [
+    (testpath/"elvis.config").write <<~CONFIG
+      [
         {config, [
-          \#{ dirs => ["src"], filter => "*.erl", ruleset => erl_files }
+          \#{
+            files => ["src/*.erl"],
+            ruleset => erl_files
+          }
         ]},
         {output_format, parsable}
-      ]}].
-    EOS
+      ].
+    CONFIG
 
     expected = <<~EOS.chomp
-      The macro named "bad_macro_name" on line 3 does not respect the format defined by the regular expression
+      At line 3, column 2, the name of macro "bad_macro_name" is not acceptable by regular expression
     EOS
 
     assert_match expected, shell_output("#{bin}/elvis rock", 1)

@@ -1,9 +1,10 @@
 class Libdrm < Formula
   desc "Library for accessing the direct rendering manager"
   homepage "https://dri.freedesktop.org"
-  url "https://dri.freedesktop.org/libdrm/libdrm-2.4.123.tar.xz"
-  sha256 "a2b98567a149a74b0f50e91e825f9c0315d86e7be9b74394dae8b298caadb79e"
+  url "https://dri.freedesktop.org/libdrm/libdrm-2.4.131.tar.xz"
+  sha256 "45ba9983b51c896406a3d654de81d313b953b76e6391e2797073d543c5f617d5"
   license "MIT"
+  compatibility_version 1
 
   livecheck do
     url "https://dri.freedesktop.org/libdrm/"
@@ -11,13 +12,14 @@ class Libdrm < Formula
   end
 
   bottle do
-    sha256 x86_64_linux: "e36b7a4f22e082d69516be926064e80db5c805700560da48f9d33292f1f7a59e"
+    sha256 arm64_linux:  "ce4692f32807a92ce51344eca2f4a6458ff21efebe59aeb8234feadf034b0606"
+    sha256 x86_64_linux: "e6e163f4d2c2ee0b301eb97d5c4e3f80c5c1b57d2ee1d0c101d2acd8627b5f34"
   end
 
   depends_on "docutils" => :build
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "libpciaccess"
   depends_on :linux
 
@@ -28,13 +30,13 @@ class Libdrm < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <libdrm/drm.h>
       int main(int argc, char* argv[]) {
         struct drm_gem_open open;
         return 0;
       }
-    EOS
+    C
     system ENV.cc, "test.c", "-I#{include}", "-L#{lib}", "-ldrm"
   end
 end

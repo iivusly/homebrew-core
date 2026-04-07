@@ -1,26 +1,27 @@
 class Mjml < Formula
   desc "JavaScript framework that makes responsive-email easy"
   homepage "https://mjml.io"
-  url "https://registry.npmjs.org/mjml/-/mjml-4.15.3.tgz"
-  sha256 "1918171314f07c1283a84f24bbf6e9cd1325906d48722b26a4b901f0eea00176"
+  url "https://registry.npmjs.org/mjml/-/mjml-4.18.0.tgz"
+  sha256 "c779ff8fd044f4f5f180d888aaacdf43e0a89694fc99ecfc89bb495d0715941a"
   license "MIT"
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "1a681f3fa1b9bfc3159325c2faa63b1cbe148e94d4cfd1a2b2c94587c30b25de"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "1a681f3fa1b9bfc3159325c2faa63b1cbe148e94d4cfd1a2b2c94587c30b25de"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "1a681f3fa1b9bfc3159325c2faa63b1cbe148e94d4cfd1a2b2c94587c30b25de"
-    sha256 cellar: :any_skip_relocation, sonoma:         "464b8c2813c2c1a80ac3f4b91fbb5fc3e2a9e189191ee6858c210d0674e00868"
-    sha256 cellar: :any_skip_relocation, ventura:        "464b8c2813c2c1a80ac3f4b91fbb5fc3e2a9e189191ee6858c210d0674e00868"
-    sha256 cellar: :any_skip_relocation, monterey:       "464b8c2813c2c1a80ac3f4b91fbb5fc3e2a9e189191ee6858c210d0674e00868"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "b7056b342d8ea37e7da098cc2b2cc3764d3a418e5d36d3d2f07058f634fe12b2"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "87902fd3938393e70e7e78677fed61904738082fffb18a8818205c177290a75f"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "eb7122a5543037147de096a1b87ee0026183bc6489d54b166f7c0c20d8a059dc"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "eb7122a5543037147de096a1b87ee0026183bc6489d54b166f7c0c20d8a059dc"
+    sha256 cellar: :any_skip_relocation, sonoma:        "5fe47603ac640bf64d7de52bc4a380e88f11d50f508ca9feb4edb3fd5f7490f7"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "b14ad0fb196104b141a64e28b4583463f2a3d5e92e38c1632515d15b854ee462"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "b14ad0fb196104b141a64e28b4583463f2a3d5e92e38c1632515d15b854ee462"
   end
 
   depends_on "node"
 
   def install
     system "npm", "install", *std_npm_args
-    bin.install_symlink Dir["#{libexec}/bin/*"]
+    bin.install_symlink libexec.glob("bin/*")
+
+    node_modules = libexec/"lib/node_modules/mjml/node_modules"
+    deuniversalize_machos node_modules/"fsevents/fsevents.node" if OS.mac?
   end
 
   test do

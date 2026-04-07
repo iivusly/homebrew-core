@@ -22,12 +22,9 @@ class Parrot < Formula
     end
   end
 
-  livecheck do
-    url "http://ftp.parrot.org/releases/supported/"
-    regex(%r{href=["']?v?(\d+(?:\.\d+)+)/?["' >]}i)
-  end
-
   bottle do
+    sha256 arm64_tahoe:    "df2fd855932ffb8d6ca5866f4e38864989636aa69133bc8108987f1bf52c02ca"
+    sha256 arm64_sequoia:  "a51d427d1063c4e9a7bf13f9039a29fb6f9f690cfc751e6d100376435cd3c3ad"
     sha256 arm64_sonoma:   "33247f7453684d5af68220cb3aa6590adaeadeb6f4f45fe51e3e4584502e9b33"
     sha256 arm64_ventura:  "8d4542d74d3269cd5f1f8a096a8a6efb53b2300a22c1e0604c379da3499216b2"
     sha256 arm64_monterey: "91f7d2f17e362ea66be0f7706414a1241d5af6f8bce0c7054c1e0ef1ba39bad5"
@@ -37,18 +34,35 @@ class Parrot < Formula
     sha256 monterey:       "3790147bc1c0b294ef50417051b83abfe745149f4a102b8f0ba0ae25b8dea99f"
     sha256 big_sur:        "6953bdfac9ada389705bb8368d2223bb2e22640802a6e643446e018c16024e06"
     sha256 catalina:       "5ffc3252e0454d3d69689e8fa260011079d5684d568f5bb4a5d7d3f60368414f"
-    sha256 mojave:         "91a463baca8872dbd12183a61326c78c8ac0e05a01bd1a0421578cb0f6e58427"
-    sha256 high_sierra:    "c3ce1d1fe24e6f5172629cd092cc03db16b957649865af052ee6a72d75fa10e6"
-    sha256 sierra:         "e8c50fee6a2111412b5f6ac31292f3ff7d3e4dd2be9a02cc94a890026588ae63"
-    sha256 el_capitan:     "3b78be029276ca642cb2bc705888ed0cd7745c0398cf90bf67031190191c76a8"
+    sha256 arm64_linux:    "840cf36f41c1737e76b81b2964b844ea15554ce31d6e7513750facd69eff5d6b"
     sha256 x86_64_linux:   "26b301714008aa6c10ecd25b10d01bf361ed4772b90af0a9d50936d2108f9013"
   end
 
+  # https://github.com/parrot/parrot/commit/f89a111c06ad0367817c52fda6ff5c24165c005b
+  deprecate! date: "2025-01-09", because: :unmaintained
+  disable! date: "2026-01-09", because: :unmaintained
+
+  uses_from_macos "perl" => :build
   uses_from_macos "zlib"
 
   conflicts_with "rakudo-star"
 
+  resource "Pod::Parser" do
+    on_system :linux, macos: :sonoma_or_newer do
+      url "https://cpan.metacpan.org/authors/id/M/MA/MAREKR/Pod-Parser-1.67.tar.gz"
+      sha256 "5deccbf55d750ce65588cd211c1a03fa1ef3aaa15d1ac2b8d85383a42c1427ea"
+    end
+  end
+
   def install
+    if OS.linux? || MacOS.version >= :sonoma
+      ENV.prepend_create_path "PERL5LIB", buildpath/"build_deps/lib/perl5"
+      resource("Pod::Parser").stage do
+        system "perl", "Makefile.PL", "INSTALL_BASE=#{buildpath}/build_deps"
+        system "make", "install"
+      end
+    end
+
     system "perl", "Configure.pl", "--prefix=#{prefix}",
                                    "--mandir=#{man}",
                                    "--debugging=0",
@@ -62,7 +76,7 @@ class Parrot < Formula
 
   test do
     path = testpath/"test.pir"
-    path.write <<~EOS
+    path.write <<~PARROT
       .sub _main
         .local int i
         i = 0
@@ -71,10 +85,8 @@ class Parrot < Formula
         inc i
         if i < 10 goto loop
       .end
-    EOS
+    PARROT
 
-    out = `#{bin}/parrot #{path}`
-    assert_equal "0123456789", out
-    assert_equal 0, $CHILD_STATUS.exitstatus
+    assert_equal "0123456789", shell_output("#{bin}/parrot #{path}")
   end
 end

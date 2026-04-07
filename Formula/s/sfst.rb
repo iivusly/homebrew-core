@@ -3,7 +3,7 @@ class Sfst < Formula
   homepage "https://www.cis.uni-muenchen.de/~schmid/tools/SFST/"
   url "https://www.cis.uni-muenchen.de/~schmid/tools/SFST/data/SFST-1.4.7g.zip"
   sha256 "5f3ab2d8190dc931813b5ba3cf94c72013cce7bf03e16d7fb2eda86bd99ce944"
-  license "GPL-2.0-only"
+  license "GPL-2.0-or-later"
 
   livecheck do
     url :homepage
@@ -11,6 +11,8 @@ class Sfst < Formula
   end
 
   bottle do
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:    "7913420b0fd31f8a5a18276ea10f09781ad69727558f05ab053bd2a83ac1d11c"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia:  "cb6e8457e5e8fabb6149537221ed7e08cbba522464b29b41fe26c59b730ed34c"
     sha256 cellar: :any_skip_relocation, arm64_sonoma:   "fd33725d7517fc287408916639bafd47f925e58e979464ac214f6eb66d9a927d"
     sha256 cellar: :any_skip_relocation, arm64_ventura:  "106a7c45224fb209f3f3edffe1a31e82076469489a757ee2dd5cda9c3a8923c7"
     sha256 cellar: :any_skip_relocation, arm64_monterey: "0926f2435695386b9c21b31c1d4c3feaea5468095c6138e73761e8f350a3226a"
@@ -20,6 +22,7 @@ class Sfst < Formula
     sha256 cellar: :any_skip_relocation, monterey:       "68080e57fb6a26f0ce7d9bf5bde2e5d4eee3a14c311d93b9b78061e3694c7777"
     sha256 cellar: :any_skip_relocation, big_sur:        "9a14fa009ece100cb685321c3c253c9f41c9ce18104babbba7eeeca18f6b28df"
     sha256 cellar: :any_skip_relocation, catalina:       "5f9fe1fcd1a100397fa12bb046f5e7384862c168956a4a0d415bc81c58bad68a"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "fc3eccf5f7d5e8d6c4898f86915cc6424f40dd64c41905dafbf24bb667f71b0d"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "990e2d47e4f9b5b5cefcf2fb08f30f32906895f147d2d82100e46ba354df36c4"
   end
 
@@ -42,7 +45,7 @@ class Sfst < Formula
 
     (testpath/"foo.fst").write "Hello"
     system bin/"fst-compiler", "foo.fst", "foo.a"
-    assert_predicate testpath/"foo.a", :exist?, "Foo.a should exist but does not!"
+    assert_path_exists testpath/"foo.a", "Foo.a should exist but does not!"
 
     Open3.popen3("#{bin}/fst-mor", "foo.a") do |stdin, stdout, _|
       stdin.write("Hello")

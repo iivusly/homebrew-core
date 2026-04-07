@@ -1,23 +1,25 @@
 class SaneBackends < Formula
   desc "Backends for scanner access"
   homepage "http://www.sane-project.org/"
-  url "https://gitlab.com/sane-project/backends/uploads/83bdbb6c9a115184c2d48f1fdc6847db/sane-backends-1.3.1.tar.gz"
-  sha256 "aa82f76f409b88f8ea9793d4771fce01254d9b6549ec84d6295b8f59a3879a0c"
+  url "https://gitlab.com/-/project/429008/uploads/843c156420e211859e974f78f64c3ea3/sane-backends-1.4.0.tar.gz"
+  sha256 "f99205c903dfe2fb8990f0c531232c9a00ec9c2c66ac7cb0ce50b4af9f407a72"
   license "GPL-2.0-or-later"
+  revision 2
 
   livecheck do
     url :head
     regex(/^v?(\d+(?:\.\d+)+)$/i)
   end
 
+  no_autobump! because: :incompatible_version_format
+
   bottle do
-    sha256 arm64_sonoma:   "97de2c6a250cb1b8111547467d266161b842e2592c742276fc35b09193833b5a"
-    sha256 arm64_ventura:  "8c8de024315a21d793327cb837dde29fd42c5adf74588be71d4fb0b3a0c638dd"
-    sha256 arm64_monterey: "9306dcf8e0d171fad08538e45f4006528bc0a30e8c8317f6ae48c19eabc56890"
-    sha256 sonoma:         "ebfb6563c7dd81bcf3e64458e300b3bf796a655745dff4dfda9827217f98b05c"
-    sha256 ventura:        "fbacaf2ea55d47657fcd54e4f888ee3b8c9082ac5a5a3caa468b039f1e74a803"
-    sha256 monterey:       "52b9c4bc5ecc9612cd8a3a02ee0e6968ce3df07658ff14849547611205f022bc"
-    sha256 x86_64_linux:   "5958543bd7bd0b1d3f542bf8b98bcbd863e682a2ddda08ec2b4c1f55b4cb572b"
+    sha256 arm64_tahoe:   "27298da0362d4c23dfeea65ba2e3a3d0b4852299cb80d94d806309776abb7adc"
+    sha256 arm64_sequoia: "3fe51ef811ef943b28aa0a7d02e2b1c4eea7b4697a955ef0f82c2e83645f146d"
+    sha256 arm64_sonoma:  "db367d04d3578258dce97d066bb138f7bed577a56b03245e70bc31743e636017"
+    sha256 sonoma:        "50c480c2b051b99a6f31de7ec827db4e041163d888ac622dcf72b2c4191c5403"
+    sha256 arm64_linux:   "d0d46eb5a83650c66567911610413d9623c356483ba39586f8f8cb5d7b89a676"
+    sha256 x86_64_linux:  "7ecde9d4c8c9aeafdeacc8ed886c18ea91ee747c83e5d9ca1d1ecad894876903"
   end
 
   head do
@@ -30,7 +32,7 @@ class SaneBackends < Formula
     depends_on "libtool" => :build
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "jpeg-turbo"
   depends_on "libpng"
   depends_on "libtiff"
@@ -46,15 +48,13 @@ class SaneBackends < Formula
 
   def install
     system "./autogen.sh" if build.head?
-    system "./configure", *std_configure_args,
+    system "./configure", "--enable-local-backends",
                           "--localstatedir=#{var}",
                           "--without-gphoto2",
-                          "--enable-local-backends",
-                          "--with-usb=yes"
+                          "--with-usb=yes",
+                          *std_configure_args
     system "make", "install"
-  end
 
-  def post_install
     # Some drivers require a lockfile
     (var/"lock/sane").mkpath
   end

@@ -1,37 +1,56 @@
 class Cyme < Formula
   desc "List system USB buses and devices"
   homepage "https://github.com/tuna-f1sh/cyme"
-  url "https://github.com/tuna-f1sh/cyme/archive/refs/tags/v1.8.2.tar.gz"
-  sha256 "5313770f54f4acf16e44d8e159d0608cf6fdf534d504ee4a545fb81f68883879"
+  url "https://github.com/tuna-f1sh/cyme/archive/refs/tags/v2.3.0.tar.gz"
+  sha256 "f4aefd2ac447f6ca6040f9d22376a8fdd96d30f1612fca3cfacf5399aef68db0"
   license "GPL-3.0-or-later"
   head "https://github.com/tuna-f1sh/cyme.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "f03c742b585e910c22854123a6480a7065e49bc963eda2035044f437cc3d92ed"
-    sha256 cellar: :any,                 arm64_ventura:  "b128d3a36f0883b5411b064804b6a3f408bf9a2e94214e65b97a4640b77cc5fc"
-    sha256 cellar: :any,                 arm64_monterey: "8f662d1b53801dd8128ffc82071c33f60ee1d6f402c51e8bef6ee29637c1f5b4"
-    sha256 cellar: :any,                 sonoma:         "fade2e9a5616805b667973bb23c80a2c356eb4ffd75e0e21014c95f359e30c89"
-    sha256 cellar: :any,                 ventura:        "d7cc9f70d43e14bdfa8ca970f63e9cf559ea3a11717727a7f0eec3b42aaf4e09"
-    sha256 cellar: :any,                 monterey:       "90cfc106c8ed5710952ac6aa7f0cbc06f7254b9d6986d9efcc60ef4caf4aa48b"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "cb3f8ef945ac11a30208b238187c08aa945d0d09bce2e249af2b1d64e33922d3"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "3dd218e60b8dbd014b0a07bab1cae84200e8b1ce98a5851cc07fe81365d7acc8"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "cca3443bf4cca0e9808a2f1e6de7478e540938c367297f2115b2d46583701586"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "0c0ae87adaa7b859ccb7c2aaba7d6c6b85ae45d54a328a851ba5d6d0a486d357"
+    sha256 cellar: :any_skip_relocation, sonoma:        "a48aaae0daddad9008792ae91b2ccac2bb6df1842384074afa872342690fb83a"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "61758f7cf306a011e3367aaedd528b17aa0732f70b2477b910002746a4ba436f"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "7deba41de02fb89fa5f97a2e667a3af6c851971b105ea493bdee7e014f54e217"
   end
 
   depends_on "rust" => :build
-  depends_on "libusb"
+
+  on_linux do
+    depends_on "umockdev" => :test
+  end
 
   def install
     system "cargo", "install", *std_cargo_args
     man1.install "doc/cyme.1"
-    bash_completion.install "doc/cyme.bash"
+    bash_completion.install "doc/cyme.bash" => "cyme"
     zsh_completion.install "doc/_cyme"
     fish_completion.install "doc/cyme.fish"
   end
 
   test do
-    # Test fails on headless CI
-    return if OS.linux? && ENV["HOMEBREW_GITHUB_ACTIONS"]
-
     output = JSON.parse(shell_output("#{bin}/cyme --tree --json"))
-    assert_predicate output["buses"], :present?
+    assert_includes output, "buses"
+
+    if OS.linux?
+      # Mock USB devices using example from umockdev
+      resource "usbkbd.umockdev" do
+        url "https://raw.githubusercontent.com/martinpitt/umockdev/1b58d24fb78e8297f2b0e96abb99fcbee7f37784/devices/input/usbkbd.umockdev"
+        sha256 "cc7d5b277531630dbe7d93a74d24ff13f7740c5f96f6933b3ba8d1db54e25b7a"
+      end
+      resource("usbkbd.umockdev").stage(testpath)
+
+      umockdev_run = "#{Formula["umockdev"].bin}/umockdev-run --device usbkbd.umockdev"
+      assert_equal <<~EOS, shell_output("#{umockdev_run} -- #{bin}/cyme --no-padding --tree")
+        ● 1-0 EHCI Host Controller Linux 3.10.0-2-generic ehci_hcd -
+        └──○    1   2 0x8087 0x0020 Integrated Rate Matching Hub - usb
+           └──○    5   4 0x17ef 0x1005 ThinkPad X200 Ultrabase (42X4963 ) - usb
+              └──○    4   7 0x05f3 0x0081 Kinesis Keyboard Hub - usb
+                 └──○    2   9 0x05f3 0x0007 Kinesis Advantage PRO MPC/USB Keyboard - usb
+      EOS
+    else
+      assert_predicate output["buses"], :present?
+    end
   end
 end

@@ -7,19 +7,19 @@ class Bpytop < Formula
   url "https://github.com/aristocratos/bpytop/archive/refs/tags/v1.0.68.tar.gz"
   sha256 "3a936f8899efb66246e82bbcab33249bf94aabcefbe410e56f045a1ce3c9949f"
   license "Apache-2.0"
+  head "https://github.com/aristocratos/bpytop.git", branch: "master"
 
   bottle do
-    rebuild 4
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "afbf743207adc75d2e3892ce97f745e488d10cf684c3403cb2bf8ca380413143"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "fd9246bfdd892cc310121f01b98ad28affb17a62e85fc9739a2b5d80be8f20b9"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "c3d37cdbe668836efa2cad572810831e376cfbb7e3aa5cd1d47591806a6fb077"
-    sha256 cellar: :any_skip_relocation, sonoma:         "6adb154d1352cc284cfe07dc2a4832e56d702a065253c35955a89eded824fe18"
-    sha256 cellar: :any_skip_relocation, ventura:        "3f1faa82258730cb0c6408b4906ecf5c48c0e11129c59bcf971fa5c394f5fd3a"
-    sha256 cellar: :any_skip_relocation, monterey:       "620f4bc5466211bea4b3bcd363f5a97a15ed6081d7d12fc8cb4998f54e36f392"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "8f053d1d4872dfbe70e7a432ffd4d80c0254369887ef65182673ac4e73ed16f0"
+    rebuild 6
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "b19bca99c4b0dadd6f0acaab677713cb36e69066d938e40975bb6ec5e1e5e0a5"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "f5de2cc3e6a468f7de3afc1a4c0e89b6fdc5b015c9948a069163a4cd8f5e883f"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "a68fda2ed5723d9a9dbd8314b432256fea597aed76249e118f5d84f9ad7f3435"
+    sha256 cellar: :any_skip_relocation, sonoma:        "f47e3022d6b8328e32736b7193ac9d3c6678567697ad808252db830ce3b634db"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "7c67cef4be215e9374aebee5f4541a7f87b4d3a87dde27c738ce4f9d349ad90c"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "f8429d3cbe14ef4215355724446eb5720130c89d596441d7184166f3b4c1f8dd"
   end
 
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   on_macos do
     depends_on "osx-cpu-temp"
@@ -38,7 +38,7 @@ class Bpytop < Formula
   end
 
   def install
-    venv = virtualenv_create(libexec, "python3.12")
+    venv = virtualenv_create(libexec, "python3.14")
     venv.pip_install resources
     system "make", "install", "PREFIX=#{prefix}"
     pkgshare.install "themes"
@@ -65,7 +65,7 @@ class Bpytop < Formula
 
     r, w, pid = PTY.spawn(bin/"bpytop")
     r.winsize = [80, 130]
-    sleep 5
+    sleep 15
     w.write "\cC"
 
     log = (config/"error.log").read

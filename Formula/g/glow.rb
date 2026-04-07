@@ -1,18 +1,19 @@
 class Glow < Formula
   desc "Render markdown on the CLI"
   homepage "https://github.com/charmbracelet/glow"
-  url "https://github.com/charmbracelet/glow/archive/refs/tags/v2.0.0.tar.gz"
-  sha256 "55872e36c006e7e715b86283baf14add1f85b0a0304e867dd0d80e8d7afe49a8"
+  url "https://github.com/charmbracelet/glow/archive/refs/tags/v2.1.1.tar.gz"
+  sha256 "f13e1d6be1ab4baf725a7fedc4cd240fc7e5c7276af2d92f199e590e1ef33967"
   license "MIT"
+  compatibility_version 1
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "f2fb47736f87b48761db48dfed4a9590363d9add8862ca9f71ef492e350bd476"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "f2fb47736f87b48761db48dfed4a9590363d9add8862ca9f71ef492e350bd476"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "f2fb47736f87b48761db48dfed4a9590363d9add8862ca9f71ef492e350bd476"
-    sha256 cellar: :any_skip_relocation, sonoma:         "dce632f932d1e7d7548dafb8187d02b5752f4071505df75905e45bc1858f98b1"
-    sha256 cellar: :any_skip_relocation, ventura:        "dce632f932d1e7d7548dafb8187d02b5752f4071505df75905e45bc1858f98b1"
-    sha256 cellar: :any_skip_relocation, monterey:       "dce632f932d1e7d7548dafb8187d02b5752f4071505df75905e45bc1858f98b1"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "8c0a44d1f7c7a47053fc73f3fef4d05e12c5fd30de38d409f875f5d1f5d6e66f"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "405c8ef5d9d73d681262c71f23f0ed7961ba5c5eff080e60b8aa54d26064412a"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "405c8ef5d9d73d681262c71f23f0ed7961ba5c5eff080e60b8aa54d26064412a"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "405c8ef5d9d73d681262c71f23f0ed7961ba5c5eff080e60b8aa54d26064412a"
+    sha256 cellar: :any_skip_relocation, sonoma:        "1520aab400517fb4fc94839296343ef10d585551a37eb36a316722091415fb2f"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "8abf70a282b522fe4a74596f2520b4cfe0b500904f37e25839b13ce2c875b94e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "84ac1b0534794163758eb6c05728732620ff8b595d037fea7052f23633f2f179"
   end
 
   depends_on "go" => :build
@@ -20,7 +21,7 @@ class Glow < Formula
   def install
     system "go", "build", *std_go_args(ldflags: "-s -w -X main.Version=#{version}")
 
-    generate_completions_from_executable(bin/"glow", "completion")
+    generate_completions_from_executable(bin/"glow", shell_parameter_format: :cobra)
   end
 
   test do

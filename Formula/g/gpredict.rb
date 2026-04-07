@@ -1,29 +1,9 @@
 class Gpredict < Formula
   desc "Real-time satellite tracking/prediction application"
-  homepage "https://gpredict.oz9aec.net/"
+  homepage "https://oz9aec.dk/gpredict/"
+  url "https://github.com/csete/gpredict/releases/download/v2.5.1/gpredict-2.5.1.tar.bz2"
+  sha256 "c26ff5f9bfe9468bd48426dac4782f860c208960b0551feba3e38e364fbcd797"
   license "GPL-2.0-or-later"
-  revision 4
-
-  stable do
-    url "https://github.com/csete/gpredict/releases/download/v2.2.1/gpredict-2.2.1.tar.bz2"
-    sha256 "e759c4bae0b17b202a7c0f8281ff016f819b502780d3e77b46fe8767e7498e43"
-
-    # Dependencies to regenerate configure for patch. Remove in the next release
-    depends_on "autoconf" => :build
-    depends_on "automake" => :build
-    depends_on "libtool" => :build
-
-    # Fix compilation with GCC 10+. Remove in the next release.
-    # Issue ref: https://github.com/csete/gpredict/issues/195
-    patch do
-      url "https://github.com/csete/gpredict/commit/c565bb3d48777bfe17114b5d01cd81150521f056.patch?full_index=1"
-      sha256 "fbefbb898a565cb830006996803646d755729bd4d5307a3713274729d1778462"
-    end
-
-    # Backport support for GooCanvas 3. Remove in the next release along with `autoreconf`
-    # Ref: https://github.com/csete/gpredict/commit/86fb71aad0bba311268352539b61225bf1f1e279
-    patch :DATA
-  end
 
   livecheck do
     url :stable
@@ -31,13 +11,12 @@ class Gpredict < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "a2f0896b69d12cc6fcefff733bb0c1f8dad89309125453ad660b3bca6d6bfb1d"
-    sha256 arm64_ventura:  "6e7826d912ce8ab58e41957be7c2f5430e72a8dd1d4e12da7c1500e167c3135a"
-    sha256 arm64_monterey: "10d957077407004e9a1f24871417521fc89ce9400a28880d606357d6c97b9153"
-    sha256 sonoma:         "1f22599c86203b19a4a41d0b99b8a149ba6a5453f77f870af3febc88b41b8086"
-    sha256 ventura:        "e87506b7e96f33c83ba138514835c060ea7f8574a2c85547264c03fe666ae5bc"
-    sha256 monterey:       "ba26824909be3fb95aceca85485c8e858071f1e0ad861c7c9e541630859a1dc4"
-    sha256 x86_64_linux:   "e81cbab517c5a422abe3f0cc1a2fdac16b9c6d118949d343dfd30cd4d5026e8d"
+    sha256 arm64_tahoe:   "1a47866daea3fd50e4c2996d322b071620254d5735c6c7f27f3fd79ef4565d89"
+    sha256 arm64_sequoia: "acb958de628380732cd372d06f0051c365fa51bfa700a61a48fbe4a3a4eaa358"
+    sha256 arm64_sonoma:  "8db3e7f3c3878078f8e31900719e66f23af0f38c3c243214dba7ad88ba140594"
+    sha256 sonoma:        "af3b1cd8cc2473b646ce470e35b2b73bd0d58674b6e1e5eea275efa05d768b3f"
+    sha256 arm64_linux:   "e0def017a93ad0ac1a26c49d61cf1c43c714d6fe09f7833c2a4db655c13dd35b"
+    sha256 x86_64_linux:  "ea1a04cd9761d0a09bd50ad5ab0c616765835ad38b6b87e46133286366b63f5d"
   end
 
   head do
@@ -48,13 +27,13 @@ class Gpredict < Formula
     depends_on "libtool" => :build
   end
 
+  depends_on "gettext" => :build
   depends_on "intltool" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
 
   depends_on "adwaita-icon-theme"
   depends_on "cairo"
   depends_on "gdk-pixbuf"
-  depends_on "gettext"
   depends_on "glib"
   depends_on "goocanvas"
   depends_on "gtk+3"
@@ -66,72 +45,28 @@ class Gpredict < Formula
 
   on_macos do
     depends_on "at-spi2-core"
+    depends_on "gettext"
     depends_on "harfbuzz"
   end
 
   on_linux do
     depends_on "perl-xml-parser" => :build
+    depends_on "xorg-server" => :test
   end
 
   def install
-    ENV.prepend_path "PERL5LIB", Formula["perl-xml-parser"].libexec/"lib/perl5" if OS.linux?
-
     if build.head?
       inreplace "autogen.sh", "libtoolize", "glibtoolize"
       system "./autogen.sh", *std_configure_args
     else
-      system "autoreconf", "--force", "--install", "--verbose" # TODO: remove in the next release
       system "./configure", *std_configure_args
     end
     system "make", "install"
   end
 
   test do
-    return if OS.linux? && ENV["HOMEBREW_GITHUB_ACTIONS"]
-
-    assert_match "real-time", shell_output("#{bin}/gpredict -h")
+    cmd = "#{bin}/gpredict -h"
+    cmd = "#{Formula["xorg-server"].bin}/xvfb-run #{cmd}" if OS.linux? && ENV.exclude?("DISPLAY")
+    assert_match "real-time", shell_output(cmd)
   end
 end
-
-__END__
-diff --git a/configure.ac b/configure.ac
-index e3fe564..d50615f 100644
---- a/configure.ac
-+++ b/configure.ac
-@@ -44,12 +44,19 @@ else
-     AC_MSG_ERROR(Gpredict requires libglib-dev 2.32 or later)
- fi
- 
--# check for goocanvas (depends on gtk and glib)
-+# check for goocanvas 2 or 3 (depends on gtk and glib)
- if pkg-config --atleast-version=2.0 goocanvas-2.0; then
-     CFLAGS="$CFLAGS `pkg-config --cflags goocanvas-2.0`"
-     LIBS="$LIBS `pkg-config --libs goocanvas-2.0`"
-+    havegoocanvas2=true
- else
--    AC_MSG_ERROR(Gpredict requires libgoocanvas-2.0-dev)
-+	if pkg-config --atleast-version=3.0 goocanvas-3.0; then
-+		CFLAGS="$CFLAGS `pkg-config --cflags goocanvas-3.0`"
-+		LIBS="$LIBS `pkg-config --libs goocanvas-3.0`"
-+		havegoocanvas3=true
-+	else
-+		AC_MSG_ERROR(Gpredict requires libgoocanvas-2.0-dev)
-+	fi
- fi
- 
- # check for libgps (optional)
-@@ -93,8 +100,13 @@ GIO_V=`pkg-config --modversion gio-2.0`
- GTHR_V=`pkg-config --modversion gthread-2.0`
- GDK_V=`pkg-config --modversion gdk-3.0`
- GTK_V=`pkg-config --modversion gtk+-3.0`
--GOOC_V=`pkg-config --modversion goocanvas-2.0`
- CURL_V=`pkg-config --modversion libcurl`
-+if test "$havegoocanvas2" = true ;  then
-+	GOOC_V=`pkg-config --modversion goocanvas-2.0`
-+fi
-+if test "$havegoocanvas3" = true ;  then
-+	GOOC_V=`pkg-config --modversion goocanvas-3.0`
-+fi
- if test "$havelibgps" = true ; then
-    GPS_V=`pkg-config --modversion libgps`
- fi

@@ -1,12 +1,29 @@
 class ClickhouseOdbc < Formula
   desc "Official ODBC driver implementation for accessing ClickHouse as a data source"
   homepage "https://github.com/ClickHouse/clickhouse-odbc"
-  # Git modules are all for bundled libraries so can use tarball without them
-  url "https://github.com/ClickHouse/clickhouse-odbc/archive/refs/tags/v1.2.1.20220905.tar.gz"
-  sha256 "ca8666cbc7af9e5d4670cd05c9515152c34543e4f45e2bc8fa94bee90d724f1b"
   license "Apache-2.0"
-  revision 4
+  revision 1
   head "https://github.com/ClickHouse/clickhouse-odbc.git", branch: "master"
+
+  stable do
+    # Git modules are all for bundled libraries so can use tarball without them
+    url "https://github.com/ClickHouse/clickhouse-odbc/archive/refs/tags/v1.5.3.20260311.tar.gz"
+    sha256 "bb9311b48ddcd499ed2222a72a07f168f3d4909bd77ec69a78c665784b81c1c1"
+
+    # TODO: Consider adding formula for https://github.com/nanodbc/nanodbc
+    resource "nanodbc" do
+      url "https://github.com/ClickHouse/nanodbc/archive/69a9376d033e1fcf483a08e2feb9f09399cf56b6.tar.gz"
+      version "69a9376d033e1fcf483a08e2feb9f09399cf56b6"
+      sha256 "898ecf9bb614d6275e29266960811c1642946cece1f79e50643fa8022789bf89"
+
+      livecheck do
+        url "https://api.github.com/repos/ClickHouse/clickhouse-odbc/contents/contrib/nanodbc?ref=v#{LATEST_VERSION}"
+        strategy :json do |json|
+          json["sha"]
+        end
+      end
+    end
+  end
 
   livecheck do
     url :stable
@@ -14,51 +31,54 @@ class ClickhouseOdbc < Formula
   end
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any,                 arm64_sonoma:   "d1ec82bbcf45c1c3526a4699da073b5ce44de9c0d74b823d0350b7ca937dbffc"
-    sha256 cellar: :any,                 arm64_ventura:  "be163859c30c1eb7b874d975147cf3cd3198fc02de5b24cbb0356ebdaa2ef371"
-    sha256 cellar: :any,                 arm64_monterey: "c404681ad9b6d7028f1b82788aea502c01eb9aa7ef17867fdcbeefda20c7da17"
-    sha256 cellar: :any,                 sonoma:         "79e87369497bb05b0a71d043cf02f7ff6d315d018ed93a2df0e138cb60559cfa"
-    sha256 cellar: :any,                 ventura:        "ff86eef7168fa6415a078a683d1caf48b4ecc35ba32c054be755d9b6791b4716"
-    sha256 cellar: :any,                 monterey:       "45d467672731adc68583f3592bdaf4d6132af3e9bdf965cdf9ec7e0ade577691"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "95eda36214b3988aecb8ad96eef4383f68c16fa1dbe8b014e4b4520f32dafc85"
+    sha256 cellar: :any,                 arm64_tahoe:   "0476153860efb67da83d39e81b5694095c370678cfe68661cc9e5fa105a53700"
+    sha256 cellar: :any,                 arm64_sequoia: "3b845e4f8dab031fa77a80eefc0003e0cfe81a416c6b3d3a778a13ad0c65bc68"
+    sha256 cellar: :any,                 arm64_sonoma:  "ce66a47518ebf24e5cb79ef50bc134abde8af9ab7ed02a2efcb253765619ea42"
+    sha256 cellar: :any,                 sonoma:        "e74d6ef534ed5314a1a735c36c6f344e954e49b6b0ecee46dc68cb95782235b0"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "76cb0450584ef7bb2450dec8277ef13e47b4782ee25ded389a65ffc7028ec1e6"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "7c1a0f7bc15a630b93d3a22ee54129a84054f1b3beb6a2a81c1978623e199b05"
   end
 
   depends_on "cmake" => :build
   depends_on "folly" => :build
-  depends_on "pkg-config" => :build
-  depends_on "icu4c"
+  depends_on "icu4c@78"
   depends_on "openssl@3"
   depends_on "poco"
-
-  on_macos do
-    depends_on "libiodbc"
-    depends_on "pcre2"
-  end
-
-  on_linux do
-    depends_on "unixodbc"
-  end
-
-  fails_with :gcc do
-    version "6"
-  end
+  depends_on "unixodbc"
 
   def install
-    # Remove bundled libraries
-    %w[folly googletest nanodbc poco ssl].each { |l| rm_r(buildpath/"contrib"/l) }
+    resource("nanodbc").stage("contrib/nanodbc")
 
-    args = %W[
+    # Avoid trying to build LLVM libc++ and libunwind
+    inreplace "cmake/linux/default_libs.cmake" do |s|
+      s.gsub! "include (cmake/cxx.cmake)", ""
+      s.gsub! "include (cmake/unwind.cmake)", ""
+    end
+
+    # Unbundle dependencies
+    inreplace "CMakeLists.txt" do |s|
+      s.gsub! "add_subdirectory(contrib/poco)", ""
+      s.gsub! "add_subdirectory (contrib EXCLUDE_FROM_ALL)", <<~CMAKE
+        find_package(ICU REQUIRED COMPONENTS i18n uc data)
+        add_library(_icu INTERFACE)
+        target_link_libraries(_icu INTERFACE ICU::i18n ICU::uc ICU::data)
+        add_library(ch_contrib::icu ALIAS _icu)
+
+        find_package(ODBC REQUIRED)
+        add_library(ch_contrib::unixodbc ALIAS ODBC::Driver)
+
+        find_package(Poco REQUIRED Net NetSSL Util)
+        add_library(Poco::Net::SSL ALIAS Poco::NetSSL)
+
+        \\0
+      CMAKE
+    end
+
+    args = %w[
       -DCH_ODBC_PREFER_BUNDLED_THIRD_PARTIES=OFF
       -DCH_ODBC_THIRD_PARTY_LINK_STATIC=OFF
-      -DICU_ROOT=#{Formula["icu4c"].opt_prefix}
-      -DOPENSSL_ROOT_DIR=#{Formula["openssl@3"].opt_prefix}
+      -DODBC_PROVIDER=UnixODBC
     ]
-    args += if OS.mac?
-      ["-DODBC_PROVIDER=iODBC", "-DODBC_DIR=#{Formula["libiodbc"].opt_prefix}"]
-    else
-      ["-DODBC_PROVIDER=UnixODBC", "-DODBC_DIR=#{Formula["unixodbc"].opt_prefix}"]
-    end
 
     system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
     system "cmake", "--build", "build"
@@ -66,7 +86,7 @@ class ClickhouseOdbc < Formula
   end
 
   test do
-    (testpath/"my.odbcinst.ini").write <<~EOS
+    (testpath/"my.odbcinst.ini").write <<~INI
       [ODBC Drivers]
       ClickHouse ODBC Test Driver A = Installed
       ClickHouse ODBC Test Driver W = Installed
@@ -82,9 +102,9 @@ class ClickhouseOdbc < Formula
       Driver      = #{lib/shared_library("libclickhouseodbcw")}
       Setup       = #{lib/shared_library("libclickhouseodbcw")}
       UsageCount  = 1
-    EOS
+    INI
 
-    (testpath/"my.odbc.ini").write <<~EOS
+    (testpath/"my.odbc.ini").write <<~INI
       [ODBC Data Sources]
       ClickHouse ODBC Test DSN A = ClickHouse ODBC Test Driver A
       ClickHouse ODBC Test DSN W = ClickHouse ODBC Test Driver W
@@ -98,26 +118,16 @@ class ClickhouseOdbc < Formula
       Driver      = ClickHouse ODBC Test Driver W
       Description = DSN for ClickHouse ODBC Test Driver (Unicode)
       Url         = https://default:password@example.com:8443/query?database=default
-    EOS
+    INI
 
     ENV["ODBCSYSINI"] = testpath
     ENV["ODBCINSTINI"] = "my.odbcinst.ini"
     ENV["ODBCINI"] = "#{ENV["ODBCSYSINI"]}/my.odbc.ini"
 
-    if OS.mac?
-      ENV["ODBCINSTINI"] = "#{ENV["ODBCSYSINI"]}/#{ENV["ODBCINSTINI"]}"
+    assert_match "Connected!",
+      pipe_output("#{Formula["unixodbc"].bin}/isql 'ClickHouse ODBC Test DSN A'", "quit\n")
 
-      assert_match "SQL>",
-        pipe_output("#{Formula["libiodbc"].bin}/iodbctest 'DSN=ClickHouse ODBC Test DSN A'", "exit\n")
-
-      assert_match "SQL>",
-        pipe_output("#{Formula["libiodbc"].bin}/iodbctestw 'DSN=ClickHouse ODBC Test DSN W'", "exit\n")
-    elsif OS.linux?
-      assert_match "Connected!",
-        pipe_output("#{Formula["unixodbc"].bin}/isql 'ClickHouse ODBC Test DSN A'", "quit\n")
-
-      assert_match "Connected!",
-        pipe_output("#{Formula["unixodbc"].bin}/iusql 'ClickHouse ODBC Test DSN W'", "quit\n")
-    end
+    assert_match "Connected!",
+      pipe_output("#{Formula["unixodbc"].bin}/iusql 'ClickHouse ODBC Test DSN W'", "quit\n")
   end
 end

@@ -9,6 +9,10 @@ class Webkit2png < Formula
     sha256 cellar: :any_skip_relocation, all: "ad209d841f88f9b5d3a969e2493d853237c89234bd09dfc3d1aa2106832d2d7d"
   end
 
+  # requires Python 2, see https://github.com/paulhammond/webkit2png/issues/108
+  deprecate! date: "2025-03-21", because: :unsupported
+  disable! date: "2026-03-21", because: :unsupported
+
   # Requires Quartz, as well as other potentially Mac-only libraries
   depends_on :macos
 

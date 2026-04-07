@@ -3,31 +3,24 @@ class AllRepos < Formula
 
   desc "Clone all your repositories and apply sweeping changes"
   homepage "https://github.com/asottile/all-repos"
-  url "https://files.pythonhosted.org/packages/a6/56/29006be2546b897a5c62a3d4a7e613abf5a3533554d948b0e0af27546f1b/all_repos-1.27.0.tar.gz"
-  sha256 "96fea3e34caa004b0770501e6efb93dc49cbca05fb56c2b8b2a85d06fb3a4573"
+  url "https://files.pythonhosted.org/packages/81/6d/2e793a3884244034e2a4e587759ddda0a94f808571a01d6acb15cb3702c8/all_repos-1.31.0.tar.gz"
+  sha256 "b9083857addd96b76ae958b25ac19ad314f3e5c43e3212721b943fc7f14ea851"
   license "MIT"
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "b2fa8c56988879e6fde4225ee508808727b0c0f7e7693478c26fea948ee64650"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "09fc178a99cb173c83ef1de1eac435a6c99ac3bb5c13364212bcdce6b45219f0"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "6479b239edd3c6fa0d4f1ee7e88fcba6e5f1433ff3a6cc6f20cb87eb73b9eb03"
-    sha256 cellar: :any_skip_relocation, sonoma:         "a9297534b052c7ad5262f439df803efffae923493ed8db714d1d75123fd44960"
-    sha256 cellar: :any_skip_relocation, ventura:        "6c84d2dda2b192bd3f2c2b46ee7696bf03a2aad1b3500e3fdf1f1a3dc55c51e1"
-    sha256 cellar: :any_skip_relocation, monterey:       "ff58b3a8c9be8b05175e3ba556a38dc0a8d8dfd47ace84a86ceb9b3bbf283c1a"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "eda91965585b8feabd8c909f3a92687e647befd80901d25e8597bb08dbba6820"
+    sha256 cellar: :any_skip_relocation, all: "d814d6697713609b2396d80fc04f27b0cadff970894c236b6c0fd73c6e8de8ca"
   end
 
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   resource "identify" do
-    url "https://files.pythonhosted.org/packages/70/40/6df30e7ec1934ad43736248bb2c2800782fba42bad2bfda91b514cf7bdea/identify-2.5.34.tar.gz"
-    sha256 "ee17bc9d499899bc9eaec1ac7bf2dc9eedd480db9d88b96d123d3b64a9d34f5d"
+    url "https://files.pythonhosted.org/packages/ff/e7/685de97986c916a6d93b3876139e00eef26ad5bbbd61925d670ae8013449/identify-2.6.15.tar.gz"
+    sha256 "e4f4864b96c6557ef2a1e1c951771838f4edc9df3a72ec7118b338801b11c7bf"
   end
 
   resource "packaging" do
-    url "https://files.pythonhosted.org/packages/fb/2b/9b9c33ffed44ee921d0967086d653047286054117d584f1b1a7c22ceaf7b/packaging-23.2.tar.gz"
-    sha256 "048fb0e9405036518eaaf48a55953c750c11e1a1b68e0dd1a9d62ed0c092cfc5"
+    url "https://files.pythonhosted.org/packages/a1/d4/1fc4078c65507b51b96ca8f8c3ba19e6a61c8253c72794544580a7b6c24d/packaging-25.0.tar.gz"
+    sha256 "d443872c98d677bf60f6a1f2f8c1cb748e8fe762d2bf9d3148b5599295b0fc4f"
   end
 
   def install
@@ -35,7 +28,7 @@ class AllRepos < Formula
   end
 
   test do
-    (testpath/"all-repos.json").write <<~EOS
+    (testpath/"all-repos.json").write <<~JSON
       {
         "output_dir": "out",
         "source": "all_repos.source.json_file",
@@ -43,14 +36,14 @@ class AllRepos < Formula
         "push": "all_repos.push.readonly",
         "push_settings": {}
       }
-    EOS
+    JSON
     chmod 0600, "all-repos.json"
-    (testpath/"repos.json").write <<~EOS
+    (testpath/"repos.json").write <<~JSON
       {"discussions": "https://github.com/Homebrew/discussions"}
-    EOS
+    JSON
 
     system bin/"all-repos-clone"
-    assert_predicate testpath/"out/discussions", :exist?
+    assert_path_exists testpath/"out/discussions"
     output = shell_output("#{bin}/all-repos-grep discussions")
     assert_match "out/discussions:README.md", output
   end

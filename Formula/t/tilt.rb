@@ -2,19 +2,20 @@ class Tilt < Formula
   desc "Define your dev environment as code. For microservice apps on Kubernetes"
   homepage "https://tilt.dev/"
   url "https://github.com/tilt-dev/tilt.git",
-    tag:      "v0.33.20",
-    revision: "73707128f97c6f5ddfa0a530f664c2e238eb03a3"
+      tag:      "v0.37.0",
+      revision: "3b46fa9b81adbeb078239a99d71fb170d0afbc19"
   license "Apache-2.0"
   head "https://github.com/tilt-dev/tilt.git", branch: "master"
 
+  no_autobump! because: :bumped_by_upstream
+
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "8891ad14c958156fdddd309550df66de6c57f64e39c8c6b90e98da8b56ee866f"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "efe5e9af44122535ebc0ba55176feec05f63c16b8117ff1a77ff9ed7c356d7be"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "84c39a244a146695468ca2d49eeb3d2a42ddb1f353d969e94b6a8a10123d00ab"
-    sha256 cellar: :any_skip_relocation, sonoma:         "e0cd9fa0b63f57cbc9f248de39b5c159e875b9513284b84d7d97c25961eedd08"
-    sha256 cellar: :any_skip_relocation, ventura:        "164afd93851ef7719f325e4adf00bae188fe5367c8967ea7e86c423b858e43fd"
-    sha256 cellar: :any_skip_relocation, monterey:       "6ec200fc5bf94e676b6e279f9ac727ee4ab3517ce2c778fc70263f3b6144d983"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "0b5f125709b8bfc5b6ae7c987484b1be000d5041659c9382f16bec98de5bc46c"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "ef146e2f979d75f61e910f9b76856b681d0d87d78a80bf044a8492e7a85ad96e"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "b9ac705ad17e10524bd64e9066e695a4c54d83ef49d52e8e46147a5da51d24d7"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "a6cc0a759a05aec252ed3a83796df835c7102bc66ea30ce1260e870889b96992"
+    sha256 cellar: :any_skip_relocation, sonoma:        "c93acf8f6661b9be137a1a53c45a269087bff398e922d9c2df9dd31d96868fe0"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "c9aab03206d8e7ab80b6ce88f4ea19eb10d695927eaa33510cc76c38dc143366"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "e6e8dd9ec0fec8f5dba50cb4a3102558ae939bd572f4275d6896175f981bb4ea"
   end
 
   depends_on "go" => :build
@@ -36,7 +37,7 @@ class Tilt < Formula
     ]
     system "go", "build", *std_go_args(ldflags:), "./cmd/tilt"
 
-    generate_completions_from_executable(bin/"tilt", "completion")
+    generate_completions_from_executable(bin/"tilt", shell_parameter_format: :cobra)
   end
 
   test do

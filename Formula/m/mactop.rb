@@ -1,14 +1,15 @@
 class Mactop < Formula
-  desc "Apple Silicon Monitor Top written in Golang"
-  homepage "https://github.com/context-labs/mactop"
-  url "https://github.com/context-labs/mactop/archive/refs/tags/v0.1.9.tar.gz"
-  sha256 "dc5ec6cbe74ddae95bfdc8bf8da1b447b1924c10e90cfc3acb82ec8738ba557c"
+  desc "Apple Silicon Monitor Top written in Go Lang"
+  homepage "https://github.com/metaspartan/mactop"
+  url "https://github.com/metaspartan/mactop/archive/refs/tags/v2.1.2.tar.gz"
+  sha256 "3ebfacea4ad9e4f570a1425f02263cb2d76c6df24a2523ed7312ba42701d2468"
   license "MIT"
+  head "https://github.com/metaspartan/mactop.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "708bec6a72c64f63b7f4afff189ec074b742614b4bf4573e8de9d82bbf2abb06"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "8f2cf7e9113364464d7c74ddcf1c90e87d0189ad841830c50f4fede2e7e690c7"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "54d5347f41c463d40a8ddac94deb165130b32cfdea8b2ab1c50973db8bd1c43c"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "8eef1556f06b537034c7ef1fc844226e76f4640512c98b52cd05fa5363d79e21"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "5df5de342d3c799976de6803c76fd016145c9a2bfa77713fb6ed929e9cc17e38"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "2a23ae4ca26601de341e06f50a59a0a7a5da7209e578666e9a3568fa740dd8f3"
   end
 
   depends_on "go" => :build
@@ -17,13 +18,6 @@ class Mactop < Formula
 
   def install
     system "go", "build", *std_go_args(ldflags: "-s -w")
-  end
-
-  def caveats
-    <<~EOS
-      mactop requires root privileges, so you will need to run `sudo mactop`.
-      You should be certain that you trust any software you grant root privileges.
-    EOS
   end
 
   test do

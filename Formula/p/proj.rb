@@ -1,24 +1,30 @@
 class Proj < Formula
   desc "Cartographic Projections Library"
   homepage "https://proj.org/"
-  url "https://github.com/OSGeo/PROJ/releases/download/9.4.1/proj-9.4.1.tar.gz"
-  sha256 "ffe20170ee2b952207adf8a195e2141eab12cda181e49fdeb54425d98c7171d7"
+  url "https://github.com/OSGeo/PROJ/releases/download/9.8.0/proj-9.8.0.tar.gz"
+  mirror "https://download.osgeo.org/proj/proj-9.8.0.tar.gz"
+  sha256 "a8b493b00cf4d08b712b9e063ed5e53e2be90fcde46770e9dbd773341f378f43"
   license "MIT"
+  compatibility_version 1
   head "https://github.com/OSGeo/proj.git", branch: "master"
 
+  livecheck do
+    url "https://download.osgeo.org/proj/"
+    regex(/href=.*?proj[._-]v?(\d+(?:\.\d+)+)\.t/i)
+  end
+
   bottle do
-    sha256 arm64_sonoma:   "132e3f4430847e1b9291d5f54a0a97ab67b4d7e3edcc4028a5e663d92fa10abc"
-    sha256 arm64_ventura:  "4c876d4d7661c895714788a75d999fa39f0710d4c9663ca83da7e3fafd7a0e1f"
-    sha256 arm64_monterey: "cae02ecf57bf23576f36161fdbff13ac00b1c9df700799465a1bf65ac3ff69ca"
-    sha256 sonoma:         "e286266c38598cb40b5b8e807cb0fc801a81180daa26a38f09aa04a5c3a08945"
-    sha256 ventura:        "fb457f6bc573da71e1c2828a29b883873fa2a8cac01f520457b7502871e09647"
-    sha256 monterey:       "96005c3cb466545a7812966a44eb1861bd3f142de4054f1933885e8f601207b0"
-    sha256 x86_64_linux:   "32928534aa92e0e0aef6f01d27b264dd8e2083261d44b73e48413aab355deacc"
+    sha256 arm64_tahoe:   "defaf305951c06d26473ea55fa96451d530e82a74d0dd11911e6ad53e3acf50f"
+    sha256 arm64_sequoia: "489348a45b865ce6a2e2e34de21271251cda77104abfc9c3de65e3a12a4ab69d"
+    sha256 arm64_sonoma:  "5a0a7ec12a0ec3086b275be2e8fed4c26ec5cec600ad8b5f885093ae0f0422e9"
+    sha256 sonoma:        "f7acf07cc52b72edb0c528cfa0b358f886b572e75d4f03872e4cdeabdb3271ad"
+    sha256 arm64_linux:   "b72a50c2b03999df89651807900a18cca8d8b11af76a0d1e026cf9863e99b8f7"
+    sha256 x86_64_linux:  "d8425387f472b5c29ce4590aa6af183e21a81c0a4a98d7a55430d28214c31d8e"
   end
 
   depends_on "cmake" => :build
   depends_on "libtool" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "libtiff"
 
   uses_from_macos "curl"
@@ -30,8 +36,14 @@ class Proj < Formula
 
   # The datum grid files are required to support datum shifting
   resource "proj-data" do
-    url "https://download.osgeo.org/proj/proj-data-1.18.tar.gz"
-    sha256 "bc18bfe967f51eb05bb2fd61cb7045548d992d20842d2c38f4cbc37d904dfd50"
+    url "https://github.com/OSGeo/PROJ-data/releases/download/1.24.0/proj-data-1.24.zip"
+    mirror "https://download.osgeo.org/proj/proj-data-1.24.zip"
+    sha256 "08617c38078c56ba0df67c760bdf7253141ba5c6749898afe7e779ab14a08271"
+
+    livecheck do
+      url "https://download.osgeo.org/proj/"
+      regex(/href=.*?proj-data[._-]v?(\d+(?:\.\d+)+)\.zip/i)
+    end
   end
 
   def install

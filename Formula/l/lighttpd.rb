@@ -1,8 +1,8 @@
 class Lighttpd < Formula
   desc "Small memory footprint, flexible web-server"
   homepage "https://www.lighttpd.net/"
-  url "https://download.lighttpd.net/lighttpd/releases-1.4.x/lighttpd-1.4.76.tar.xz"
-  sha256 "8cbf4296e373cfd0cedfe9d978760b5b05c58fdc4048b4e2bcaf0a61ac8f5011"
+  url "https://download.lighttpd.net/lighttpd/releases-1.4.x/lighttpd-1.4.82.tar.xz"
+  sha256 "abfe74391f9cbd66ab154ea07e64f194dbe7e906ef4ed47eb3b0f3b46246c962"
   license "BSD-3-Clause"
 
   livecheck do
@@ -11,33 +11,36 @@ class Lighttpd < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "091059b0ac1e2356912caf2fe85f5bb0d88ebde56c43579d28c9a68b5eac1075"
-    sha256 arm64_ventura:  "00fb719b4328a1b7593452f8f6bae234a595ca089492f192bc309bdab055502f"
-    sha256 arm64_monterey: "aa6d7a5fe4662bdbbae1389091aec850c99d47f851dca621a55f9fcf7e5e7844"
-    sha256 sonoma:         "f5604bd4748f47f72e87a7e1192efc40748e1f1d7d271eb555e1bd6444776c75"
-    sha256 ventura:        "685d709d0d522aace4a102e2b28c3c04f2e6a6079de349d6148f999796571a8e"
-    sha256 monterey:       "596921b5fcabab2c21e6b75b54589016755e990cd86728810839b233cb4a830e"
-    sha256 x86_64_linux:   "8aa1c17b796dfc07c3e4d7543abc43af33469b5236aada5531baf3f98f8a66e2"
+    rebuild 1
+    sha256 arm64_tahoe:   "8e6000d9ebee3364d83babba1271abfb827020f0ac611bd1f137c59229132b84"
+    sha256 arm64_sequoia: "50093f112787c67d9ca3d236eff0441751c453dd59ad065ec2c76b7ddfe47614"
+    sha256 arm64_sonoma:  "d50f7214b9644d56e9a5c2c048fb60b4ba10038e667ec19099abcf82b52287e6"
+    sha256 sonoma:        "cfdb31aa3e83547b1fc22979098f00453307751d367e5407825d1dcddb198123"
+    sha256 arm64_linux:   "84f45685dc6ea785eec1794bf41316bc38c85a3c11980d4d3dafa2b27cdae2ba"
+    sha256 x86_64_linux:  "1895e77ef23228f1640ac369440fecfb78acc4d8ce9fcbd56af8a8fc01947aa6"
   end
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
   depends_on "libtool" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "openldap"
   depends_on "openssl@3"
   depends_on "pcre2"
 
+  uses_from_macos "bzip2"
   uses_from_macos "libxcrypt"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   # default max. file descriptors; this option will be ignored if the server is not started as root
   MAX_FDS = 512
 
   def install
     args = %W[
-      --disable-dependency-tracking
       --disable-silent-rules
-      --prefix=#{prefix}
       --sbindir=#{bin}
       --with-bzip2
       --with-ldap
@@ -50,19 +53,20 @@ class Lighttpd < Formula
     # autogen must be run, otherwise prebuilt configure may complain
     # about a version mismatch between included automake and Homebrew's
     system "./autogen.sh"
-    system "./configure", *args
+    system "./configure", *args, *std_configure_args
     system "make", "install"
 
     unless File.exist? etc/"lighttpd"
-      (etc/"lighttpd").install "doc/config/lighttpd.conf", "doc/config/modules.conf"
+      (etc/"lighttpd").install "doc/config/lighttpd.conf", "doc/config/lighttpd.annotated.conf",
+        "doc/config/modules.conf"
       (etc/"lighttpd/conf.d/").install Dir["doc/config/conf.d/*.conf"]
-      inreplace etc + "lighttpd/lighttpd.conf" do |s|
+      inreplace etc + "lighttpd/lighttpd.annotated.conf" do |s|
         s.sub!(/^var\.log_root\s*=\s*".+"$/, "var.log_root    = \"#{var}/log/lighttpd\"")
         s.sub!(/^var\.server_root\s*=\s*".+"$/, "var.server_root = \"#{var}/www\"")
         s.sub!(/^var\.state_dir\s*=\s*".+"$/, "var.state_dir   = \"#{var}/lighttpd\"")
         s.sub!(/^var\.home_dir\s*=\s*".+"$/, "var.home_dir    = \"#{var}/lighttpd\"")
         s.sub!(/^var\.conf_dir\s*=\s*".+"$/, "var.conf_dir    = \"#{etc}/lighttpd\"")
-        s.sub!(/^server\.port\s*=\s*80$/, "server.port = 8080")
+        s.sub!(/^#server\.port\s*=\s*80$/, "server.port = 8080")
         s.sub!(%r{^server\.document-root\s*=\s*server_root \+ "/htdocs"$}, "server.document-root = server_root")
 
         s.sub!(/^server\.username\s*=\s*".+"$/, 'server.username  = "_www"')

@@ -4,19 +4,19 @@ class Travis < Formula
   url "https://github.com/travis-ci/travis.rb/archive/refs/tags/v1.14.0.tar.gz"
   sha256 "6fe418bf33b025a106dd99762aa8ebc595b4b549d4087c6921d5565b741f7361"
   license "MIT"
+  revision 2
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "5766618d480fb76e3005eba00f3a7a7ed5a7d51dfc324371d72babe0c4ff3910"
-    sha256 cellar: :any,                 arm64_ventura:  "159636202070bdb08a71e8536d3f3fec6a1c1cb2337f7e7155541069eae7db65"
-    sha256 cellar: :any,                 arm64_monterey: "d29494581f310f89b031c7890aa97f543135142ab5358b4822354091c6691c25"
-    sha256 cellar: :any,                 sonoma:         "644741937292acf07e3906cb16e5da38f6f38a3f1b3a5b4b6635e228f5b785ec"
-    sha256 cellar: :any,                 ventura:        "8608c07f7223723636ff0f0006e581ca79b192aa43bb4c1a7463f208e7f5efb1"
-    sha256 cellar: :any,                 monterey:       "259c73779364bf1ffa6e4742697f16909f84499180cf30b153ee38d146126e7e"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "8c12a3598e9cfdf75556100cbd028916085d5de6c6f49c9d50c27f8c5935fe6b"
+    sha256 cellar: :any,                 arm64_tahoe:   "7b1d54790aeac9a064ea9447f0a40c26ee6035a2985ec9e75f0f6d77f364a932"
+    sha256 cellar: :any,                 arm64_sequoia: "0f9bb3574e12920aba886efc69c9ff09612387722a52143c489aa6474536881e"
+    sha256 cellar: :any,                 arm64_sonoma:  "e9f1bca4991c3d06290fe852be8436e8191fa3508d4821f952d7ef2e5d4d1c7b"
+    sha256 cellar: :any,                 sonoma:        "88529185b3d99b3a0b296842b3acf81020285bad203e3df14bd7630b70f980bd"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "b44c7c0f02ffa3aa586c66676fab5079f0a3efa6513a5ddac16bc25f708e4301"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "d5ae5f903cdc8a392312e2c41301e5a0ad166f815040f8e90fd0dd94ea9d22f7"
   end
 
-  depends_on "pkg-config" => :build
-  depends_on "ruby"
+  depends_on "pkgconf" => :build
+  depends_on "ruby@3.4"
 
   uses_from_macos "libffi"
 
@@ -171,8 +171,6 @@ class Travis < Formula
 
   def install
     ENV["GEM_HOME"] = libexec
-    # gem issue on Mojave
-    ENV["SDKROOT"] = MacOS.sdk_path if OS.mac? && MacOS.version == :mojave
 
     resources.each do |r|
       r.fetch
@@ -187,7 +185,7 @@ class Travis < Formula
   end
 
   test do
-    output = shell_output(bin/"travis whoami 2>&1 --pro", 1)
+    output = shell_output("#{bin}/travis whoami 2>&1 --pro", 1)
     assert_match "not logged in, please run travis login", output
 
     output = shell_output("#{bin}/travis init 2>&1", 1)

@@ -1,9 +1,10 @@
 class ProtocGenGrpcWeb < Formula
   desc "Protoc plugin that generates code for gRPC-Web clients"
   homepage "https://github.com/grpc/grpc-web"
-  url "https://github.com/grpc/grpc-web/archive/refs/tags/1.5.0.tar.gz"
-  sha256 "d3043633f1c284288e98e44c802860ca7203c7376b89572b5f5a9e376c2392d5"
+  url "https://github.com/grpc/grpc-web/archive/refs/tags/2.0.2.tar.gz"
+  sha256 "0f0c8c0c1104306d67dad678be7c14efe52a698795a58b2b72ab67a8bb100c15"
   license "Apache-2.0"
+  revision 4
 
   livecheck do
     url :stable
@@ -11,37 +12,42 @@ class ProtocGenGrpcWeb < Formula
   end
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any,                 arm64_sonoma:   "b89aa0ba6730eaad8968e03c7cdabdc8de90f56f841bebb0ba8d72d1753065ee"
-    sha256 cellar: :any,                 arm64_ventura:  "b473d8ad0f6cafd1332fae6a53f19d4b1e9d1bd18e474610d954e63bdec13a66"
-    sha256 cellar: :any,                 arm64_monterey: "17d9fb48ecfd5d783335352b4c4542f33b2030a0ddc28a8c97cf25129453c112"
-    sha256 cellar: :any,                 sonoma:         "c889676f319943872be69fb44187852f9d2e16ddde51587ab5bf73e93b158ca3"
-    sha256 cellar: :any,                 ventura:        "e891721d95f76ea73be1cbcae6707ea6bf8b404668f5760d34c5db0ae074fe29"
-    sha256 cellar: :any,                 monterey:       "3f34b457d37d16e122b65bc2941432470cb45b0598f5ea8226fad6e1cd1ce3d1"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "066c224c130c3a628c49551eac976a0bd4eea89314bc9195b31b13d3892f1160"
+    sha256 cellar: :any,                 arm64_tahoe:   "436f7b2afc7848bcce1f759f043a107fc3ec61d312b3144de8a0d5d25eb50f06"
+    sha256 cellar: :any,                 arm64_sequoia: "ca0f3f5f31f4210073857358a5337c749952e359c9ef326819d516e6a4958768"
+    sha256 cellar: :any,                 arm64_sonoma:  "372185dc387c2594f93dd99d110fb5c5a3766413d518f72dafeae28e98b95c94"
+    sha256 cellar: :any,                 sonoma:        "6c56579d6d53676942e7ad5d00524cc5fca5847e434b88ea81851df38b31866c"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "e1f9ce755130f9b1a35cfff5cc5b7fb84c5b1fa71d705a230fa9e6d5460c20bd"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "b7101d72606da62adac644cf18c1a4cb55bd12d88b79152f380d148ac3904918"
   end
 
   depends_on "cmake" => :build
+  depends_on "pkgconf" => :build
   depends_on "node" => :test
   depends_on "typescript" => :test
-  depends_on "protobuf@21"
+  depends_on "abseil"
+  depends_on "protobuf"
   depends_on "protoc-gen-js"
 
-  def install
-    bin.mkpath
-    system "make", "install-plugin", "PREFIX=#{prefix}"
+  # Workaround to build with Protobuf 30+. Issue ref: https://github.com/grpc/grpc-web/issues/1522
+  patch do
+    url "https://raw.githubusercontent.com/Homebrew/homebrew-core/d0b7cf85a11a9acfa1a422305948dff6621bbda9/Patches/protoc-gen-grpc-web/protobuf-30.diff"
+    sha256 "9c7e0ddf5ba68c179e7b8edc2c48de5b9b9d4801a6c8fd93ee199e27291aeebd"
+  end
 
-    # Remove these two lines when this formula depends on unversioned `protobuf`.
-    libexec.install bin/"protoc-gen-grpc-web"
-    (bin/"protoc-gen-grpc-web").write_env_script libexec/"protoc-gen-grpc-web",
-                                                 PATH: "#{Formula["protobuf@21"].opt_bin}:${PATH}"
+  def install
+    # Workarounds to build with latest `protobuf` which needs Abseil link flags and C++17
+    ENV.append "LDFLAGS", Utils.safe_popen_read("pkgconf", "--libs", "protobuf").chomp
+    inreplace "javascript/net/grpc/web/generator/Makefile", "-std=c++11", "-std=c++17"
+
+    args = ["PREFIX=#{prefix}", "STATIC=no"]
+    args << "MIN_MACOS_VERSION=#{MacOS.version}" if OS.mac?
+
+    system "make", "install-plugin", *args
   end
 
   test do
-    ENV.prepend_path "PATH", Formula["protobuf@21"].opt_bin
-
     # First use the plugin to generate the files.
-    testdata = <<~EOS
+    (testpath/"test.proto").write <<~PROTO
       syntax = "proto3";
       package test;
       message TestCase {
@@ -56,21 +62,20 @@ class ProtocGenGrpcWeb < Formula
       service TestService {
         rpc RunTest(Test) returns (TestResult);
       }
-    EOS
-    (testpath/"test.proto").write testdata
-    system "protoc", "test.proto", "--plugin=#{bin}/protoc-gen-grpc-web",
-                     "--js_out=import_style=commonjs:.",
-                     "--grpc-web_out=import_style=typescript,mode=grpcwebtext:."
+    PROTO
+    protoc = Formula["protobuf"].bin/"protoc"
+    system protoc, "test.proto", "--plugin=#{bin}/protoc-gen-grpc-web",
+                   "--js_out=import_style=commonjs:.",
+                   "--grpc-web_out=import_style=typescript,mode=grpcwebtext:."
 
     # Now see if we can import them.
-    testts = <<~EOS
+    (testpath/"test.ts").write <<~TYPESCRIPT
       import * as grpcWeb from 'grpc-web';
       import {TestServiceClient} from './TestServiceClientPb';
       import {Test, TestResult} from './test_pb';
-    EOS
-    (testpath/"test.ts").write testts
+    TYPESCRIPT
     system "npm", "install", *std_npm_args(prefix: false), "grpc-web", "@types/google-protobuf"
-    # Specify including lib for `tsc` since `es6` is required for `@types/google-protobuf`.
-    system "tsc", "--lib", "es6", "test.ts"
+    # Include DOM for AbortSignal used by grpc-web 2.x typings; ES level also satisfies @types/google-protobuf.
+    system "tsc", "--lib", "es2021,dom", "test.ts"
   end
 end

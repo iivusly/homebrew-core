@@ -1,32 +1,31 @@
 class GoCamo < Formula
   desc "Secure image proxy server"
   homepage "https://github.com/cactus/go-camo"
-  url "https://github.com/cactus/go-camo/archive/refs/tags/v2.6.0.tar.gz"
-  sha256 "c6491a9364e621da6a2f204b2bc77aac14eb7d0eba895bd5c60240853d572f4d"
+  url "https://github.com/cactus/go-camo/archive/refs/tags/v2.7.3.tar.gz"
+  sha256 "72279e0836f4d4ccdd73c1828f2d680b8c1e42f56a67e75233459aa6d1a6027a"
   license "MIT"
+  head "https://github.com/cactus/go-camo.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "2e88abfca2c294c8966ab21d0fece9b7a0117461a81508cee2cf39f4de790978"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "2e88abfca2c294c8966ab21d0fece9b7a0117461a81508cee2cf39f4de790978"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "2e88abfca2c294c8966ab21d0fece9b7a0117461a81508cee2cf39f4de790978"
-    sha256 cellar: :any_skip_relocation, sonoma:         "68c115ff6731fff9e5f84b0d4894bd22f52afaae67b2fcdf4c9e40b23f43016e"
-    sha256 cellar: :any_skip_relocation, ventura:        "68c115ff6731fff9e5f84b0d4894bd22f52afaae67b2fcdf4c9e40b23f43016e"
-    sha256 cellar: :any_skip_relocation, monterey:       "68c115ff6731fff9e5f84b0d4894bd22f52afaae67b2fcdf4c9e40b23f43016e"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "2eebd364b64215bf9b2a06f64edc58078c21ac9ca6d039985b3b6e1c8edb90ae"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "af0c15a84d50414f7d242c71a733fb18d33b856ded9a21f417cc7ebf64d5a047"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "af0c15a84d50414f7d242c71a733fb18d33b856ded9a21f417cc7ebf64d5a047"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "af0c15a84d50414f7d242c71a733fb18d33b856ded9a21f417cc7ebf64d5a047"
+    sha256 cellar: :any_skip_relocation, sonoma:        "55febc5b14eaa80b0a937bcd03dedf879855d08f86630cc4152f8aad096658a1"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "1121a0839b27bf1f278b2c8b55abff0d9574390830cda0614040f432c337c83b"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "8eccf14c9dc9be9c7f5b3488e0937f618af6ef2086ab4c0ba44b5de8216f9d87"
   end
 
   depends_on "go" => :build
+  depends_on "just" => :build
 
   def install
-    system "make", "build", "APP_VER=#{version}"
+    system "just", "build"
     bin.install Dir["build/bin/*"]
   end
 
   test do
     port = free_port
-    fork do
-      exec bin/"go-camo", "--key", "somekey", "--listen", "127.0.0.1:#{port}", "--metrics"
-    end
+    spawn bin/"go-camo", "--key", "somekey", "--listen", "127.0.0.1:#{port}", "--metrics"
     sleep 1
     assert_match "200 OK", shell_output("curl -sI http://localhost:#{port}/metrics")
 

@@ -1,41 +1,36 @@
 class QbittorrentCli < Formula
   desc "Command-line interface for qBittorrent written in Go"
   homepage "https://github.com/ludviglundgren/qbittorrent-cli"
-  url "https://github.com/ludviglundgren/qbittorrent-cli/archive/refs/tags/v2.0.0.tar.gz"
-  sha256 "91969f22bb167f99091a1ff8f4dbfe61cb1b592cb000453859ca9173ecbb8f10"
+  url "https://github.com/ludviglundgren/qbittorrent-cli/archive/refs/tags/v2.2.0.tar.gz"
+  sha256 "66b082b4b1653aae785b0f12bc00d7ac4dd8f17028d99e3feafac8aded931957"
   license "MIT"
   head "https://github.com/ludviglundgren/qbittorrent-cli.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "2d1c5fb756844c20716657afb77ebe37ee8379482946db1eaef3a9219ef31bf3"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "0b022b67a52e85f8a45704a3fac937b9222ecae032b57d1b28be7d3f7f016431"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "4bcac1629bb928fc3b5cbce2d1016a53542e2bbf19fb15e4ca2bf8b122c8878a"
-    sha256 cellar: :any_skip_relocation, sonoma:         "6bb9f6e806e31b6af0baf61497d09e3ec9054868d55d0d2bc5d336b5e3ddae98"
-    sha256 cellar: :any_skip_relocation, ventura:        "0ca83cbdf66246e6042d1224ead2b9bfa762ba1553b6812940d921dcc634b1c5"
-    sha256 cellar: :any_skip_relocation, monterey:       "8c3f597d225f26e14548083ab785a4dbbb4dddf250c919e3cf80dc552a7fba73"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "b59dc2b5c911a5cf008c32873d5e2799bde307efb789a429dac242a8c350ad40"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "716525b58fbeb4067f489a3eb10428012b3fa9bcf3210a8054cae07778378e1e"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "716525b58fbeb4067f489a3eb10428012b3fa9bcf3210a8054cae07778378e1e"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "716525b58fbeb4067f489a3eb10428012b3fa9bcf3210a8054cae07778378e1e"
+    sha256 cellar: :any_skip_relocation, sonoma:        "3e5efce627c5e7478eea9103fb6d7804785d5596b666f00603d7d5ea89ee28dd"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "800339a3ae35a1ce3a8e523a5da78433475910b71186386a212ae4705928d3d5"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "beba3400eaf3260e34176efee850cd40f05ccb387156640327aa0495db3b9b7c"
   end
 
   depends_on "go" => :build
 
   def install
-    ldflags = %W[
-      -s -w
-      -X main.version=#{version}
-      -X main.commit=#{tap.user}
-      -X main.date=#{time.iso8601}
-    ]
+    ldflags = "-s -w -X main.version=#{version} -X main.commit=#{tap.user} -X main.date=#{time.iso8601}"
     system "go", "build", *std_go_args(ldflags:, output: bin/"qbt"), "./cmd/qbt"
 
-    generate_completions_from_executable(bin/"qbt", "completion")
+    generate_completions_from_executable(bin/"qbt", shell_parameter_format: :cobra)
   end
 
   test do
     port = free_port
-    (testpath/"config.qbt.toml").write <<~EOS
+    (testpath/"config.qbt.toml").write <<~TOML
       [qbittorrent]
       addr = "http://127.0.0.1:#{port}"
-    EOS
+    TOML
 
     output = shell_output("#{bin}/qbt app version --config #{testpath}/config.qbt.toml 2>&1", 1)
     assert_match "could not get app version", output

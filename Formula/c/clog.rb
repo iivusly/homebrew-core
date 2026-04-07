@@ -1,10 +1,10 @@
 class Clog < Formula
   desc "Colorized pattern-matching log tail utility"
-  homepage "https://taskwarrior.org/docs/clog/"
+  homepage "https://gothenburgbitfactory.org/clog/docs/"
   url "https://github.com/GothenburgBitFactory/clog/releases/download/v1.3.0/clog-1.3.0.tar.gz"
   sha256 "fed44a8d398790ab0cf426c1b006e7246e20f3fcd56c0ec4132d24b05d5d2018"
   license "MIT"
-  head "https://github.com/GothenburgBitFactory/clog.git", branch: "1.4.0"
+  head "https://github.com/GothenburgBitFactory/clog.git", branch: "master"
 
   livecheck do
     url "https://gothenburgbitfactory.org"
@@ -12,6 +12,8 @@ class Clog < Formula
   end
 
   bottle do
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:    "c14c0f289d7f795ec4a4cf88ded115bbd95cbe14d1d2da796fc8e2cfd7b63090"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia:  "324768db7056ee6258ee9bc6a19b15e325061e637a4074201e299f110979f81b"
     sha256 cellar: :any_skip_relocation, arm64_sonoma:   "ca002e0ad80711f5ca0edc944efd4ab5c0eb5698eecce8913f53e961d7040a90"
     sha256 cellar: :any_skip_relocation, arm64_ventura:  "f9bb8aee30f0a25183545a2a3e775fac4f8605aad93e63cb0928c8d196f3812a"
     sha256 cellar: :any_skip_relocation, arm64_monterey: "503a96204475c67ba2d564cc98b0964bbff48da89e4c2b3f0d4125a7fb32ffc4"
@@ -21,18 +23,18 @@ class Clog < Formula
     sha256 cellar: :any_skip_relocation, monterey:       "71bcca7b6cb4bf84c6c0c678d45b593f551e9b351bcb0fd557e7e7c0b90648c7"
     sha256 cellar: :any_skip_relocation, big_sur:        "864d26fdc6960a6b4daf9ca76ef52e5e2db4a8ece187dbc7d8b87939e4823d32"
     sha256 cellar: :any_skip_relocation, catalina:       "0a5985eee7c41d2199e64105cb0d32b8e065b57257841f48b2eb36a3a662bc7b"
-    sha256 cellar: :any_skip_relocation, mojave:         "ec11a01ddd6a6ad70a655c74f569af9a6b56cf66f87ea448e296a1e208449ba4"
-    sha256 cellar: :any_skip_relocation, high_sierra:    "b5309f9e692f111a0b68599ff465da02783d2f28a4b10d958c19e616177eb37a"
-    sha256 cellar: :any_skip_relocation, sierra:         "97e07b94ea058c766f4d036cc503fc6ec08ca64cddced33d63723e4611534595"
-    sha256 cellar: :any_skip_relocation, el_capitan:     "8f42168b8e165c4c1f1265b410ef62087b370075cc27269f1908eb0f373645c5"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "1d94d1596bb077ec7890f1bee8650ecf592c75c9415e310eb55f541df1d52c13"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "74b571a8740f2d0d8798ed8ee046d9239404ec6789987b98eb48b25c122c00e3"
   end
 
   depends_on "cmake" => :build
 
   def install
-    system "cmake", ".", *std_cmake_args
-    system "make", "install"
+    # Workaround for CMake 4 compatibility
+    args = %w[-DCMAKE_POLICY_VERSION_MINIMUM=3.5]
+    system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
+    system "cmake", "--build", "build"
+    system "cmake", "--install", "build"
   end
 
   def caveats
@@ -50,6 +52,6 @@ class Clog < Formula
     assert_equal "do not suppress", pipe_output("#{bin}/clog --file #{testpath}/.clogrc", "do not suppress").chomp
 
     # Test to ensure that a line that matches the above rule is suppressed
-    assert_equal "", pipe_output("#{bin}/clog --file #{testpath}/.clogrc", "ignore this line").chomp
+    assert_empty pipe_output("#{bin}/clog --file #{testpath}/.clogrc", "ignore this line").chomp
   end
 end

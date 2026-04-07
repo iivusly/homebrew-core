@@ -20,6 +20,7 @@ class Mahout < Formula
   # see https://github.com/Homebrew/homebrew-core/pull/158322
   # https://github.com/Homebrew/homebrew-core/pull/138608
   deprecate! date: "2024-08-03", because: "does not build with 14.1"
+  disable! date: "2025-08-03", because: "does not build with 14.1"
 
   depends_on "hadoop"
   depends_on "openjdk@11"
@@ -43,15 +44,15 @@ class Mahout < Formula
       libexec.install Dir["*.jar"]
     end
 
-    bin.install Dir["#{libexec}/bin/*"]
+    bin.install libexec.glob("bin/*")
     bin.env_script_all_files libexec/"bin", JAVA_HOME: ENV["JAVA_HOME"]
   end
 
   test do
-    (testpath/"test.csv").write <<~EOS
+    (testpath/"test.csv").write <<~CSV
       "x","y"
       0.1234567,0.101201201
-    EOS
+    CSV
 
     assert_match "0.101201201", pipe_output("#{bin}/mahout cat #{testpath}/test.csv")
   end

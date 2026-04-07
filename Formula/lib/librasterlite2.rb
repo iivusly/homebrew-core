@@ -4,7 +4,7 @@ class Librasterlite2 < Formula
   url "https://www.gaia-gis.it/gaia-sins/librasterlite2-sources/librasterlite2-1.1.0-beta1.tar.gz"
   sha256 "f7284cdfc07ad343a314e4878df0300874b0145d9d331b063b096b482e7e44f4"
   license any_of: ["MPL-1.1", "GPL-2.0-or-later", "LGPL-2.1-or-later"]
-  revision 4
+  revision 5
 
   livecheck do
     url :homepage
@@ -12,18 +12,16 @@ class Librasterlite2 < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "d31a806dc93f565780c5704c3d4ac4d4925f02f3682a1638ee85f384470ceae3"
-    sha256 cellar: :any,                 arm64_ventura:  "594f332c68d15b51bb405623131a630fa528693ee21f2f220d3220bc280fd2dc"
-    sha256 cellar: :any,                 arm64_monterey: "3733644a6d712a0be663b99b9b153cba11d05cfb34dc5c207fab8df8a4077a56"
-    sha256 cellar: :any,                 arm64_big_sur:  "6bbd6b88f06188a5009e8d451c6f3898e2df630131f5c68953528863a06e9ec2"
-    sha256 cellar: :any,                 sonoma:         "d96d40ff1a70980b217bf88a930594175b3b4d4b2f8b308d3978337c31abab39"
-    sha256 cellar: :any,                 ventura:        "385aeaee7f4a7e565b6368e2577a73ba58f75d7161bbbe480cc1a6eebc12552f"
-    sha256 cellar: :any,                 monterey:       "fcc1aba7b865bd46d2986e77c9d9bf3d8dca6641b9c9fb7ebbbeca409692153e"
-    sha256 cellar: :any,                 big_sur:        "642c88a5013468fbc96058720beadc6f6aacbb3a47b60530c434b9df4081aa86"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "0e91e0eafa3ab9941d7e7b9610089e8398b3259e40951711bc9a70f34c76d0e9"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "aedae0439b69ea9c2e069dd3d4cb868db71deb9e953806354bd57ea476f4698c"
+    sha256 cellar: :any,                 arm64_sequoia: "f02cc5381292362b7128c25c0ece3cbcbba43ef9fd0e61afa994eb22044032f0"
+    sha256 cellar: :any,                 arm64_sonoma:  "3d3f1875ddad0758159259e6608f6f170064ad474ba4912aad480c117fed161e"
+    sha256 cellar: :any,                 sonoma:        "431c45dd52bc4491321fdd17e420cfcab8c70e0854873aee1104f2296177a792"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "778b21f4a0da7c8f5bce15877479198bb03cb37c81b9682af06907773178bce8"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "aaacb56f12774ee2064e0993afad66d2bce90846b22d834bfd91ecff2b61bd6a"
   end
 
-  depends_on "pkg-config" => [:build, :test]
+  depends_on "pkgconf" => [:build, :test]
   depends_on "cairo"
   depends_on "fontconfig"
   depends_on "freetype"
@@ -48,11 +46,14 @@ class Librasterlite2 < Formula
   depends_on "zstd"
 
   uses_from_macos "curl"
-  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   # Fix -flat_namespace being used on Big Sur and later.
   patch do
-    url "https://raw.githubusercontent.com/Homebrew/formula-patches/03cf8088210822aa2c1ab544ed58ea04c897d9c4/libtool/configure-pre-0.4.2.418-big_sur.diff"
+    url "https://raw.githubusercontent.com/Homebrew/homebrew-core/1cf441a0/Patches/libtool/configure-pre-0.4.2.418-big_sur.diff"
     sha256 "83af02f2aa2b746bb7225872cab29a253264be49db0ecebb12f841562d9a2923"
   end
 
@@ -70,7 +71,7 @@ class Librasterlite2 < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <stdlib.h>
       #include <unistd.h>
       #include <stdio.h>
@@ -108,11 +109,11 @@ class Librasterlite2 < Formula
 
           return 0;
       }
-    EOS
+    C
 
-    pkg_config_flags = shell_output("pkg-config --cflags --libs rasterlite2").chomp.split
-    system ENV.cc, "test.c", *pkg_config_flags, "-o", "test"
+    flags = shell_output("pkgconf --cflags --libs rasterlite2").chomp.split
+    system ENV.cc, "test.c", "-o", "test", *flags
     system testpath/"test"
-    assert_predicate testpath/"from_gif.png", :exist?
+    assert_path_exists testpath/"from_gif.png"
   end
 end

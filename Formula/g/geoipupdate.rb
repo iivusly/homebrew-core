@@ -1,26 +1,29 @@
 class Geoipupdate < Formula
   desc "Automatic updates of GeoIP2 and GeoIP Legacy databases"
   homepage "https://github.com/maxmind/geoipupdate"
-  url "https://github.com/maxmind/geoipupdate/archive/refs/tags/v7.0.1.tar.gz"
-  sha256 "59c80ab737f128fc05e4ecdec4d84652182851dc8c8bea892022e3fc12db9101"
+  url "https://github.com/maxmind/geoipupdate/archive/refs/tags/v7.1.1.tar.gz"
+  sha256 "f21b26d9be7281a0c90f9009ed150acb97e68e02be8a3e975315a7956de6965a"
   license "Apache-2.0"
   head "https://github.com/maxmind/geoipupdate.git", branch: "main"
 
   bottle do
-    sha256 arm64_sonoma:   "ff0063a996d01a0b1072191a821f42c85ddf94cade101d39b47a24b2ab5488bb"
-    sha256 arm64_ventura:  "207a09ecc2abd3cbeec899b7c070e7d4a77961d24f8d5fe723e23e454b784635"
-    sha256 arm64_monterey: "936095b925f1eee1921482dd93f0e5ebcb942d215db8e962faaa3e29446a0a14"
-    sha256 sonoma:         "82c628d8c011f90f08b0adeaa00c72da8b4393fba61aca2f0bc027132c54523b"
-    sha256 ventura:        "c49b1ffb5af72a5b6191ea7a6352f194a1973b8fce5c0168fcd5c9cfb39477bb"
-    sha256 monterey:       "dd0d88ecb489a04f098b871f3a4341443de67d088c8bab3efc74c285b3732980"
-    sha256 x86_64_linux:   "b5135fa64973d1d4588e161a0fa15b5452d9f88bb06e120b741358d2ce1c71a5"
+    rebuild 2
+    sha256                               arm64_tahoe:   "6ffcdd5b4d20042abc7c43cfad948193d2dcc608bbcf3a0e8df942b05c0995ad"
+    sha256                               arm64_sequoia: "6edf968afba83f6d986ca2dc7ee31b3b2538f2307788fa0f51febbafc66ce702"
+    sha256                               arm64_sonoma:  "12a26bb493069864f06579428ef9a2ba1278883bc6209fa9e97cca49fb814c62"
+    sha256 cellar: :any_skip_relocation, sonoma:        "1c1a3de1f94838ecf0836a3966342dcafa2101f3c44908823e88493ae3262574"
+    sha256                               arm64_linux:   "800bb13a38ccb17e75e9dc3c724f7e859a2bf5ba4c32e9fb55947e42c183a675"
+    sha256                               x86_64_linux:  "96189a674d2791bf8d4eb5063077bf00ba59c7c78d9044f17a12d4cf58afb114"
   end
 
   depends_on "go" => :build
   depends_on "pandoc" => :build
 
   uses_from_macos "curl"
-  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     system "make", "CONFFILE=#{etc}/GeoIP.conf", "DATADIR=#{var}/GeoIP", "VERSION=#{version} (homebrew)"
@@ -29,9 +32,6 @@ class Geoipupdate < Formula
     etc.install  "build/GeoIP.conf"
     man1.install "build/geoipupdate.1"
     man5.install "build/GeoIP.conf.5"
-  end
-
-  def post_install
     (var/"GeoIP").mkpath
   end
 

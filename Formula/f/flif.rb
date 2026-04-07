@@ -7,42 +7,44 @@ class Flif < Formula
   head "https://github.com/FLIF-hub/FLIF.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "6e2f70fa17688130a568e64fd6a4abdfe8e61681c1948cf2ecca01dfb04ee535"
-    sha256 cellar: :any,                 arm64_ventura:  "398fe8152e8f752057a746c1369b9d8313ed3c7556c6e1011670ce2d4e060747"
-    sha256 cellar: :any,                 arm64_monterey: "20c8b44c6ce76226aa53c3dc217bfe4ed82e7f181fb6122df515bf86e4e434f9"
-    sha256 cellar: :any,                 arm64_big_sur:  "3d0d4c63012d30413c24e8b5e16829801d53887da55766e8143bbcc837875303"
-    sha256 cellar: :any,                 sonoma:         "50f55719285af27732c0cb4081ced394c4b967d8d8af2484bfbc181a4f306721"
-    sha256 cellar: :any,                 ventura:        "601d0af71a74a364161912f8104787690e75e69fde57c8c82fab073570e478ea"
-    sha256 cellar: :any,                 monterey:       "dfb3655e7c80bec23170595b2188ad897fd2e0e69af28711e6734f25b3c0db4e"
-    sha256 cellar: :any,                 big_sur:        "41d2cd255724005a767991ab0bf3b7ae5f8ad9767a1413c9efa92bf6ba47af9f"
-    sha256 cellar: :any,                 catalina:       "e757a4df0939f225afceae1b632542b9689f3fc9fcee7cf0364e463c1be778bc"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "4c76e5794a775d5d5d8b0dc8c92960ffdf5641b302132279a1a57a67e3e41550"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "9f31d2fdf99e6e6a7bc79e1cb303d246a023edae4a4cbab9010c991a42b3f15d"
+    sha256 cellar: :any,                 arm64_sequoia: "947265f79e930463ef0e44212cb95aef425b064a9d50abdee3b308c4dc03ab25"
+    sha256 cellar: :any,                 arm64_sonoma:  "bdb1164b2c7592791b612169d1ccef5520183da9b9325e8eb9428ede90349f67"
+    sha256 cellar: :any,                 sonoma:        "23d44bc668159febffba7d69a39050438097b9abdccd979e604f19463338dc07"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "d6d277b41d4575ffc47d7a6db35c7a8ef7eb4a124ac3fc1fed3abeebbfcfb71a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "7fe8d950811505c384945d0dd7901010b548cd1f06a59bd6438f2f8417cc01b3"
   end
 
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "libpng"
   depends_on "sdl2"
 
-  resource "homebrew-test_c" do
-    url "https://raw.githubusercontent.com/FLIF-hub/FLIF/dcc2011/tools/test.c"
-    sha256 "a20b625ba0efdb09ad21a8c1c9844f686f636656f0e9bd6c24ad441375223afe"
-  end
-
   def install
-    system "cmake", "-S", "src", "-B", "build", *std_cmake_args
+    args = %W[
+      -DCMAKE_INSTALL_RPATH=#{rpath}
+    ]
+    # Workaround to build with CMake 4
+    args << "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
+    system "cmake", "-S", "src", "-B", "build", *args, *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
     doc.install "doc/flif.pdf"
   end
 
   test do
+    resource "homebrew-test_c" do
+      url "https://raw.githubusercontent.com/FLIF-hub/FLIF/dcc2011/tools/test.c"
+      sha256 "a20b625ba0efdb09ad21a8c1c9844f686f636656f0e9bd6c24ad441375223afe"
+    end
+
     testpath.install resource("homebrew-test_c")
     system ENV.cc, "test.c", "-I#{include}", "-L#{lib}", "-lflif", "-o", "test"
     system "./test", "dummy.flif"
     system bin/"flif", "-i", "dummy.flif"
     system bin/"flif", "-I", test_fixtures("test.png"), "test.flif"
     system bin/"flif", "-d", "test.flif", "test.png"
-    assert_predicate testpath/"test.png", :exist?, "Failed to decode test.flif"
+    assert_path_exists testpath/"test.png", "Failed to decode test.flif"
   end
 end

@@ -1,8 +1,8 @@
 class Loki < Formula
   desc "Horizontally-scalable, highly-available log aggregation system"
   homepage "https://grafana.com/loki"
-  url "https://github.com/grafana/loki/archive/refs/tags/v3.1.1.tar.gz"
-  sha256 "d53a46e3ee51a258f49f865cc5795fe05ade1593237709417de0e1395b5a21cf"
+  url "https://github.com/grafana/loki/archive/refs/tags/v3.7.1.tar.gz"
+  sha256 "05c5d23eff751b9c4f4e49918359e35b7ba840a5b504e3eac0befe4ad94ad464"
   license "AGPL-3.0-only"
   head "https://github.com/grafana/loki.git", branch: "main"
 
@@ -12,13 +12,12 @@ class Loki < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "f4af6a1fee9fe664f8e1aab0913ac977a9d7dc62d3a6b583bb5480d95f28a136"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "657c01bd74044dff21c3c210809e0965a84e4024e4d841f1a9e78f6a76bd84e9"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "efc2b1c68ad0ee994b142fb107d0f6d526c6e194526fe6e0bef5246bf5bfd353"
-    sha256 cellar: :any_skip_relocation, sonoma:         "e5f62f84a90d138339ebbeaae5a4c4806fb6d6b75691fb17c1efa18611a3c205"
-    sha256 cellar: :any_skip_relocation, ventura:        "aa739b150b7bd189a16b49bf580dc0acb16308356d87b267d7cda7e353425c8b"
-    sha256 cellar: :any_skip_relocation, monterey:       "5faae058b798fa4698f49c0c59cc1156885f4f3212acd388367c31cede7e4bb2"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "bea7a2ea7fcb0a96fdec1f464fa230cca5efb55eacaa958ed2d9a735a9aecc7b"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "0721a615a9e6c1f58bf845ff76d59ff7460e85b1b299d64d68ee108169928e04"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "5b6ab94353e0eba23fca400c2a2c6aad5ff7c8d48bec92049ee0022d1919a7d2"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "a073b3c0a081610ff3647eff70ef46a505cc84ce36188eb325b268805872b596"
+    sha256 cellar: :any_skip_relocation, sonoma:        "668547c70181344fe16bc664cc44b1a7bee46f4ed1c57ecb4e63da32e098e7c4"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "6a920f1f58ecfcbf27beaceb85e7844101dd4fee4ada75a97046aa6646a6f030"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "9e85c71f7aa49abe94ea5c84f864dba40e3ff665aed15d2889adf30a8c375681"
   end
 
   depends_on "go" => :build
@@ -48,10 +47,9 @@ class Loki < Formula
       s.gsub! var, testpath
     end
 
-    fork { exec bin/"loki", "-config.file=loki-local-config.yaml" }
-    sleep 3
+    spawn bin/"loki", "-config.file=loki-local-config.yaml"
 
-    output = shell_output("curl -s localhost:#{port}/metrics")
+    output = shell_output("curl --silent --retry 5 --retry-connrefused localhost:#{port}/metrics")
     assert_match "log_messages_total", output
   end
 end

@@ -1,16 +1,15 @@
 class AescryptPacketizer < Formula
   desc "Encrypt and decrypt using 256-bit AES encryption"
   homepage "https://www.aescrypt.com"
-  url "https://www.aescrypt.com/download/v3/linux/aescrypt-3.16.tgz"
+  # v3 source is currently removed. See https://forums.packetizer.com/viewtopic.php?t=1777
+  # url "https://www.aescrypt.com/download/v3/linux/aescrypt-3.16.tgz"
+  url "https://www.mirrorservice.org/sites/distfiles.gentoo.org/distfiles/13/aescrypt-3.16.tgz"
   sha256 "e2e192d0b45eab9748efe59e97b656cc55f1faeb595a2f77ab84d44b0ec084d2"
   license "GPL-2.0-or-later"
 
-  livecheck do
-    url "https://www.aescrypt.com/download/"
-    regex(%r{href=.*?/linux/aescrypt[._-]v?(\d+(?:\.\d+)+)\.t}i)
-  end
-
   bottle do
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:    "f8ea5602c897a56c72464bea7b0de0b3e06694dae88df581be1e27aa6a67a2b2"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia:  "1039232a96b3efc3d8c4a1da6d48d8d37cc2991e8275dc467d0b8b16229ead5c"
     sha256 cellar: :any_skip_relocation, arm64_sonoma:   "d840ff8d10cb48274d58dac6bc26126ceba767c36e56b2e9e24f2b591dccca0d"
     sha256 cellar: :any_skip_relocation, arm64_ventura:  "b40247d58019bfa5346f2cf07d75dbe765f64d9fea747c088f0ac1d44555fe7e"
     sha256 cellar: :any_skip_relocation, arm64_monterey: "823e51604fff46f1cb74a791f7a94c35092393352861fee84c9e5517df795395"
@@ -20,39 +19,29 @@ class AescryptPacketizer < Formula
     sha256 cellar: :any_skip_relocation, monterey:       "3e96703d06fcb1ac6114af1929f87cba2c6d04cb65f2d44aa4f51b56d28c04ac"
     sha256 cellar: :any_skip_relocation, big_sur:        "6ded6050675d0f771f473d5873bf897d0391859c9f9280362444f2189661ac3b"
     sha256 cellar: :any_skip_relocation, catalina:       "d129279cb28702f27173f99338f5ffd08f042202f5cc3bf2fd71f9107155cc51"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "64bf374350078c9e283cd1b4e283fc477f9c484ca0388eebf12a140d1f1fa999"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "3eddb8372fd630b7f93288f2fb19c3ec96a061b1de150918bee53d0a7a1d55ee"
   end
 
-  head do
-    url "https://github.com/paulej/AESCrypt.git", branch: "master"
-
-    depends_on "autoconf" => :build
-    depends_on "automake" => :build
-    depends_on "libtool" => :build
-  end
-
-  depends_on xcode: :build
+  # v3 source code has been unavailable since at least 2024-09-01.
+  # v4 requires purchase of license (https://www.aescrypt.com/license.html)
+  deprecate! date: "2025-03-17", because: "switched to a commercial license in v4"
+  disable! date: "2026-03-17", because: "switched to a commercial license in v4"
 
   def install
     if build.head?
-      cd "linux"
-      system "autoreconf", "-ivf"
+      cd "Linux"
+      system "autoreconf", "--force", "--install", "--verbose"
 
-      args = %W[
-        prefix=#{prefix}
-        --disable-gui
-      ]
+      args = ["--disable-gui"]
       args << "--enable-iconv" if OS.mac?
 
-      system "./configure", *args
+      system "./configure", *args, *std_configure_args
       system "make", "install"
     else
-      cd "src" do
-        system "make"
-
-        bin.install "aescrypt"
-        bin.install "aescrypt_keygen"
-      end
+      system "make"
+      bin.install "src/aescrypt"
+      bin.install "src/aescrypt_keygen"
       man1.install "man/aescrypt.1"
     end
 
@@ -74,7 +63,7 @@ class AescryptPacketizer < Formula
     path.write original_contents
 
     system bin/"paescrypt", "-e", "-p", "fire", path
-    assert_predicate testpath/"#{path}.aes", :exist?
+    assert_path_exists testpath/"#{path}.aes"
 
     system bin/"paescrypt", "-d", "-p", "fire", "#{path}.aes"
     assert_equal original_contents, path.read

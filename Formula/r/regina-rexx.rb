@@ -1,18 +1,18 @@
 class ReginaRexx < Formula
   desc "Interpreter for Rexx"
   homepage "https://regina-rexx.sourceforge.io/"
-  url "https://downloads.sourceforge.net/project/regina-rexx/regina-rexx/3.9.6/regina-rexx-3.9.6.tar.gz"
-  sha256 "ed98c7a7f1d5a4148b02fef1b16aee4a6a6d8658d01a80cf5c503015ef01afa5"
+  url "https://downloads.sourceforge.net/project/regina-rexx/regina-rexx/3.9.7/regina-rexx-3.9.7.tar.gz"
+  sha256 "f13701ebd542e74d0fc83b2a7876a812b07d21e43400275ed65b1ac860204bd4"
   license "GPL-2.0-or-later"
 
   bottle do
-    sha256 arm64_sonoma:   "c66acc278833ab29504dea15de9e0982fe5e138e2d10452429721a2e69925c71"
-    sha256 arm64_ventura:  "0f6d600a409156119c45453232d6d020023cb9aee2c063bfa30841d835e72521"
-    sha256 arm64_monterey: "cf0cfee8e56e38403ac472aed56cde78850121b7b5adbd52ccc27387d763af5a"
-    sha256 sonoma:         "96b18ac7771715b1655532e50a80d53652270297ba98f543818392a9f55fe850"
-    sha256 ventura:        "dbace070503339b00048f858b5e84dda450c15954d1e58b7141a8ea47eec0f39"
-    sha256 monterey:       "2a03b38f8aadc69740e1fcf98425fa4e978f9549f65b7cbab31c64bca431be9b"
-    sha256 x86_64_linux:   "3b18e755fb8d0f75a5782a91ca4f36dd6be9cba68e24575af20dc7c271d99381"
+    rebuild 1
+    sha256 arm64_tahoe:   "d76bfed5b0028c56cafecba2170f782ed8931dd6407df7d000bd96d0efdf8e40"
+    sha256 arm64_sequoia: "d46186cbae2e186143060856047562350893ed578530dc613bf6937d6256fd03"
+    sha256 arm64_sonoma:  "bab4ff512b66e827e7da2dcf394cdf82aba419cc239080d869f57d99a2cfa2d5"
+    sha256 sonoma:        "8145e5d4412439e1e009aa1f4ed9c38f3a09f98a52d95c2ec1a12f3d44615a06"
+    sha256 arm64_linux:   "7af7c2860e82d3491fd3c16780357d93cf5e079faa31818422788639409ef536"
+    sha256 x86_64_linux:  "bfd12c2f8bcc5e7a606df315404dd46fe556613c395bb87f0971c7bf7f85e868"
   end
 
   uses_from_macos "libxcrypt"

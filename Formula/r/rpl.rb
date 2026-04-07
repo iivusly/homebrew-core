@@ -1,41 +1,48 @@
 class Rpl < Formula
-  include Language::Python::Virtualenv
-
   desc "Text replacement utility"
   homepage "https://github.com/rrthomas/rpl"
-  url "https://files.pythonhosted.org/packages/40/ad/840b679493c49e0c4368662e2ddd6296f9bac41e8ee992e0d43d144b4f35/rpl-1.15.7.tar.gz"
-  sha256 "5eadc62dad539d2e27a1b3c71c2905504a3dbe02380c6c98dbf8505ad9303510"
+  url "https://github.com/rrthomas/rpl/releases/download/v2.0.4/rpl-2.0.4.tar.gz"
+  sha256 "cb48bf6712cd4e7aa70b2225dcab0cb081582181d7e9766ada196b3ab5b2ec61"
   license "GPL-3.0-or-later"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "59015416ba8ad9993261a50d78c24c60aa606b0b39f4777521f55d834c5e5cf4"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "dce5e52f2472bacc14700c111ba5940ac0716123707dcb938f379a8a43df475a"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "397ee7b7b672f1e0d3debe4c36c94bea1185762403503253426743483974029c"
-    sha256 cellar: :any_skip_relocation, sonoma:         "8c5f5b86c9dd8bd32b98488eb679afaad4a06d3f53abcfbc7f0b4422250de3b7"
-    sha256 cellar: :any_skip_relocation, ventura:        "24545f8ce43bfabe8599c7c2df6c488954786b32a3e692aa345889c6afbd7942"
-    sha256 cellar: :any_skip_relocation, monterey:       "d0ec7966aabe42f8bcff6e4e6263f9f4d028161bcfce30bcdcb39299d97281c1"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "f7eb5d986bc69e230e3ba7d3da3f029f624992b96948a82c8b7b976ee441bf9e"
+    sha256 cellar: :any,                 arm64_tahoe:   "b9818e66d4be4d4459dc59bba02beca0044596cf508c26ba29f7cb98f4c0ab1e"
+    sha256 cellar: :any,                 arm64_sequoia: "b628ab24e76ae6d47df7e7b409b745f62d1e068053adb8234b7bf6dc64ad7ff8"
+    sha256 cellar: :any,                 arm64_sonoma:  "be9e98e87ce5b54a49d72f9c7028601daea83bab9491015f43a00d9c4c90846b"
+    sha256 cellar: :any,                 sonoma:        "efd688e33dad7f7bc9de4319febb6ed07e836fd5ed8c2fe1c2ec4035c97ad852"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "e0049ccf0f0623607cbb7e5123b55b0699948e5a9691e222763b12450fc4cbb3"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "e1ea919345b90a09395c9a0f57441c3b0a917ef1f2e7f4b1af006e66e96bce24"
   end
 
-  depends_on "python@3.12"
+  depends_on "help2man" => :build
+  depends_on "pkgconf" => :build
+  depends_on "vala" => :build
+  depends_on "glib"
+  depends_on "pcre2"
+  depends_on "uchardet"
 
-  resource "chainstream" do
-    url "https://files.pythonhosted.org/packages/44/fd/ec0c4df1e2b00080826b3e2a9df81c912c8dc7dbab757b55d68af3a51dcf/chainstream-1.0.1.tar.gz"
-    sha256 "df4d8fd418b112690e0e6faa4cb6706962e4b6b95ff5c133890fd32157c8d3b7"
+  on_macos do
+    depends_on "gettext"
   end
 
-  resource "chardet" do
-    url "https://files.pythonhosted.org/packages/f3/0d/f7b6ab21ec75897ed80c17d79b15951a719226b9fababf1e40ea74d69079/chardet-5.2.0.tar.gz"
-    sha256 "1b3b6ff479a8c414bc3fa2c0852995695c4a026dcd6d0633b2dd092ca39c1cf7"
+  # TODO: Remove next release
+  resource "vala-extra-vapis" do
+    url "https://gitlab.gnome.org/GNOME/vala-extra-vapis/-/archive/6b8a3e4faaabc462f90ffcb0cf0f91991ee58077/vala-extra-vapis-6b8a3e4faaabc462f90ffcb0cf0f91991ee58077.tar.bz2"
+    sha256 "161fbc1e2ac51886ec52c0ee8db69d6afe408279ec79a8bea2b472a23fef9e99"
   end
 
-  resource "regex" do
-    url "https://files.pythonhosted.org/packages/3f/51/64256d0dc72816a4fe3779449627c69ec8fee5a5625fd60ba048f53b3478/regex-2024.7.24.tar.gz"
-    sha256 "9cfd009eed1a46b27c14039ad5bbc5e71b6367c5b2e6d5f5da0ea91600817506"
+  # Backport fix for newer PCRE2.
+  # TODO: Remove patch and `vala` dependency in next release
+  patch do
+    url "https://github.com/rrthomas/rpl/commit/6e452376e32c230819078d92248433e800878bb0.patch?full_index=1"
+    sha256 "3b3634aaeff9e0eac0f3ec22a1a0346c1c56c8fd30a38aa12d90b3e5b71ce0fa"
   end
 
   def install
-    virtualenv_install_with_resources
+    (buildpath/"vala-extra-vapis").install resource("vala-extra-vapis")
+
+    system "./configure", "--disable-silent-rules", *std_configure_args
+    system "make", "install"
   end
 
   test do

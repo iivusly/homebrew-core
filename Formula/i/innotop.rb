@@ -1,41 +1,24 @@
 class Innotop < Formula
   desc "Top clone for MySQL"
   homepage "https://github.com/innotop/innotop/"
-  url "https://github.com/innotop/innotop/archive/refs/tags/v1.13.0.tar.gz"
-  sha256 "6ec91568e32bda3126661523d9917c7fbbd4b9f85db79224c01b2a740727a65c"
+  url "https://github.com/innotop/innotop/archive/refs/tags/v1.15.2.tar.gz"
+  sha256 "cfedf31ba5617a5d53ff0fedc86a8578f805093705a5e96a5571d86f2d8457c0"
   license any_of: ["GPL-2.0-only", "Artistic-1.0-Perl"]
-  revision 9
-  head "https://github.com/innotop/innotop.git"
+  revision 1
+  head "https://github.com/innotop/innotop.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "85d95a6535f9faee3b036381c8bbc025c00a3bcc11e2c347ba192bab5234c8b6"
-    sha256 cellar: :any,                 arm64_ventura:  "4bf05ccc4fe1ac5987fb1168a42305582784f511649a8bc75d757b0eb5aaf6c1"
-    sha256 cellar: :any,                 arm64_monterey: "b35348e6b4f2b95fb7f5ff02ca5fb36bacb2eddfd85e84109563c25d1769c743"
-    sha256 cellar: :any,                 sonoma:         "7a66b736dd4226d3ad4f98627a1b7fb79cfeaa1f2cafa6826cea701ed3697b30"
-    sha256 cellar: :any,                 ventura:        "d948152a68a84aa2e82d18d8b8b182bf206d161d0b5f9ff1482c2082fcf48a0d"
-    sha256 cellar: :any,                 monterey:       "c5e9dfe2530c6c898db115ab583987749cd60f4a8d82726b6028c71076533e00"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "8198b82e42c0544d11edc1e668830ec0c84af94efc06694c9390b901f49c15bf"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "5f1f7200e8bc7f549dd1ac59d991d20fc90fefbd86e1aaa94e6c1106e02b651f"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "5f1f7200e8bc7f549dd1ac59d991d20fc90fefbd86e1aaa94e6c1106e02b651f"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "5f1f7200e8bc7f549dd1ac59d991d20fc90fefbd86e1aaa94e6c1106e02b651f"
+    sha256 cellar: :any_skip_relocation, sonoma:        "5f1f7200e8bc7f549dd1ac59d991d20fc90fefbd86e1aaa94e6c1106e02b651f"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "1f2878c0dbd65584c8a7d7c7a04a569412c1301654a02ecc227f1b509df65a8b"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "994567fc14ad431d0d5e464dd59887da03c8ea478d712b24492c20f5a3b5c827"
   end
 
-  depends_on "mysql-client"
-  depends_on "openssl@3"
+  depends_on "perl-dbd-mysql"
 
   uses_from_macos "perl"
-
-  resource "Devel::CheckLib" do
-    url "https://cpan.metacpan.org/authors/id/M/MA/MATTN/Devel-CheckLib-1.16.tar.gz"
-    sha256 "869d38c258e646dcef676609f0dd7ca90f085f56cf6fd7001b019a5d5b831fca"
-  end
-
-  resource "DBI" do
-    url "https://cpan.metacpan.org/authors/id/T/TI/TIMB/DBI-1.643.tar.gz"
-    sha256 "8a2b993db560a2c373c174ee976a51027dd780ec766ae17620c20393d2e836fa"
-  end
-
-  resource "DBD::mysql" do
-    url "https://cpan.metacpan.org/authors/id/D/DV/DVEEDEN/DBD-mysql-5.008.tar.gz"
-    sha256 "a2324566883b6538823c263ec8d7849b326414482a108e7650edc0bed55bcd89"
-  end
 
   resource "Term::ReadKey" do
     on_linux do
@@ -45,21 +28,18 @@ class Innotop < Formula
   end
 
   def install
+    ENV.prepend_path "PERL5LIB", Formula["perl-dbd-mysql"].opt_libexec/"lib/perl5"
     ENV.prepend_create_path "PERL5LIB", libexec/"lib/perl5"
+
     resources.each do |r|
       r.stage do
-        system "perl", "Makefile.PL", "INSTALL_BASE=#{libexec}"
+        system "perl", "Makefile.PL", "INSTALL_BASE=#{libexec}", "INSTALLMAN1DIR=none", "INSTALLMAN3DIR=none"
         system "make", "install"
       end
     end
 
-    # Disable dynamic selection of perl which may cause segfault when an
-    # incompatible perl is picked up.
-    inreplace "innotop", "#!/usr/bin/env perl", "#!/usr/bin/perl"
-
-    system "perl", "Makefile.PL", "INSTALL_BASE=#{prefix}"
+    system "perl", "Makefile.PL", "INSTALL_BASE=#{prefix}", "INSTALLSITEMAN1DIR=#{man1}"
     system "make", "install"
-    share.install prefix/"man"
     bin.env_script_all_files(libexec/"bin", PERL5LIB: ENV["PERL5LIB"])
   end
 

@@ -1,31 +1,27 @@
 class MbedtlsAT2 < Formula
   desc "Cryptographic & SSL/TLS library"
   homepage "https://tls.mbed.org/"
-  url "https://github.com/Mbed-TLS/mbedtls/archive/refs/tags/mbedtls-2.28.9.tar.gz"
-  sha256 "53231b898f908dde38879bf27a29ddf670dee252dec37681f2c1f83588c0c40e"
+  url "https://github.com/Mbed-TLS/mbedtls/archive/refs/tags/mbedtls-2.28.10.tar.gz"
+  sha256 "c785ddf2ad66976ab429c36dffd4a021491e40f04fe493cfc39d6ed9153bc246"
   license "Apache-2.0"
-  head "https://github.com/Mbed-TLS/mbedtls.git", branch: "mbedtls-2.28"
-
-  livecheck do
-    url :stable
-    regex(/^v?(2(?:\.\d+)+)$/i)
-  end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "5cc14e7a9ce31d594a907663011aeae35e74c0ef2044cc9e9e2e974249d2d5a6"
-    sha256 cellar: :any,                 arm64_ventura:  "9f38c7b850b6d6455283d68a663236d4960ab99c2ef51aee2f4338bbeb3faa56"
-    sha256 cellar: :any,                 arm64_monterey: "c482fbc260e3fd3a30aebb0c9a4281608f070241e52dd1521160298270f72796"
-    sha256 cellar: :any,                 sonoma:         "239f56266e9c4973052fcd4649503a41b353bd533fe7ee10b8ed7154ac94f93a"
-    sha256 cellar: :any,                 ventura:        "1dc26fe3274a6fe6d464801ec39fbc5aa6d54b8f9ea6a8709c53f032a13ce156"
-    sha256 cellar: :any,                 monterey:       "c007e6e7cd5cbeb33de3004050953cb2a72b69d6d85e1715660b058e62db9d58"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "04f2d19b6fc2a76e6675df52e0a052a8d204ac659d68157812b514ca949f3568"
+    sha256 cellar: :any,                 arm64_tahoe:   "5464397f0b136439069dd2c763b20192d423cd5c1c2f0771b031656a660e75a8"
+    sha256 cellar: :any,                 arm64_sequoia: "1ac6bd9c970e98200758af383b9e8295387bd7b4c247dcdcb16cb05521b39607"
+    sha256 cellar: :any,                 arm64_sonoma:  "194e03a15d26c9c866962875b2d1e5ccedab9e10f7ad9d60e01a155c88fdc2b6"
+    sha256 cellar: :any,                 arm64_ventura: "353399bc51df1d729cdcf045ad7da4f268acbc4f562eb9ae9fb18e12658ee9a1"
+    sha256 cellar: :any,                 sonoma:        "2269cb5ed16600a247a38499b79c7418c9af39087c0d0e0775b045e87cd11f7c"
+    sha256 cellar: :any,                 ventura:       "b73d53ebca5b7ca6781171b446c2120d01ca0979c3d510f51026de739650a470"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "839293c23e53ef5576077ab17ca04d66e5ea23dc70b6da9ce5f31672bc4d5b29"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "2ae36df2af07705fc3817ecc1374a68eb2a21dac30b77e1e1b46970f4ab8e8a8"
   end
 
   keg_only :versioned_formula
 
   # mbedtls-2.28 maintained until the end of 2024
   # Ref: https://github.com/Mbed-TLS/mbedtls/blob/development/BRANCHES.md#current-branches
-  deprecate! date: "2024-12-31", because: :unsupported
+  deprecate! date: "2025-03-31", because: :unsupported
+  disable! date: "2026-03-31", because: :unsupported
 
   depends_on "cmake" => :build
   depends_on "python@3.12" => :build
@@ -38,11 +34,16 @@ class MbedtlsAT2 < Formula
       s.gsub! "//#define MBEDTLS_THREADING_C", "#define MBEDTLS_THREADING_C"
     end
 
-    system "cmake", "-S", ".", "-B", "build",
-                    "-DUSE_SHARED_MBEDTLS_LIBRARY=On",
-                    "-DPython3_EXECUTABLE=#{which("python3.12")}",
-                    *std_cmake_args
+    args = %W[
+      -DUSE_SHARED_MBEDTLS_LIBRARY=On
+      -DPython3_EXECUTABLE=#{which("python3.12")}
+      -DCMAKE_INSTALL_RPATH=#{rpath}
+    ]
+    # Workaround for CMake 4 compatibility
+    args << "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
+    system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
     system "cmake", "--build", "build"
+
     # We run CTest because this is a crypto library. Running tests in parallel causes failures.
     # https://github.com/Mbed-TLS/mbedtls/issues/4980
     with_env(CC: DevelopmentTools.locate(DevelopmentTools.default_compiler)) do

@@ -13,13 +13,15 @@ class LlvmAT16 < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "e799fe5056da9a07d79474f7a7290e0a465474eb004cfc614775f290197e10e5"
-    sha256 cellar: :any,                 arm64_ventura:  "1814e78f92d133918a597c4f7c30fef32f3665989951c1cefdda331eb4402ed1"
-    sha256 cellar: :any,                 arm64_monterey: "37035d480d967046905bc5e1cb71b96310a3096b4b066e7542c22cccc4abaf3f"
-    sha256 cellar: :any,                 sonoma:         "16844a4822d3afecf5783a368abf980636d8a3a110100ca4e8b06de383a44b56"
-    sha256 cellar: :any,                 ventura:        "eec48597281d704edb178eccb4180ffaba79418ff7e478b138097a1a9b3aaa62"
-    sha256 cellar: :any,                 monterey:       "332da3b9d1d8d75a82c77fc84802f72ba2e8f39db4728df3d4fa7c1dfb5bef08"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "8dc1596bb9da879a127448ef1811b6c093348139f0408c2f9b80cd55cf26ce4b"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "5e7fbf091d4da41cf9aca178cbb32549f290c2792af2efb24586f42809f95f5a"
+    sha256 cellar: :any,                 arm64_sequoia: "72e974bb3fc659063c90a66cf6b22c18b0d861230fed5b3e020e1c47a6a9a23e"
+    sha256 cellar: :any,                 arm64_sonoma:  "8f12acd71d106e55c0148324222e24b7dddc3810e8760ad14e301484888c180e"
+    sha256 cellar: :any,                 tahoe:         "733a0105a82360673318f3eb2f1d9414b5be983398be136562b1f764d4160ec9"
+    sha256 cellar: :any,                 sequoia:       "e240f9c95cc324d6b36296ac05e0e6993ef33a14b78aa8bb3e6345f85862918d"
+    sha256 cellar: :any,                 sonoma:        "cf5af69ab448081f9fd83eeb25572eb5796508196e28325181a6c1bcda0a2bbc"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "c0e0ead92d47d078643b89d944d97a036695b0783e950b37ec8d4e6123a7ca10"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "5ebc8a0e2d3d18b121568cec215e3d2a65b0a5f52072d54c92ac139fea8f08e2"
   end
 
   # Clang cannot find system headers if Xcode CLT is not installed
@@ -32,21 +34,23 @@ class LlvmAT16 < Formula
   depends_on "ninja" => :build
   depends_on "swig" => :build
   depends_on "python@3.12"
+  depends_on "xz"
   depends_on "zstd"
 
   uses_from_macos "libedit"
-  uses_from_macos "libffi", since: :catalina
+  uses_from_macos "libffi"
   uses_from_macos "ncurses"
-  uses_from_macos "zlib"
 
-  on_linux do
-    depends_on "pkg-config" => :build
-    depends_on "binutils" # needed for gold
-    depends_on "elfutils" # openmp requires <gelf.h>
+  on_sequoia do
+    depends_on xcode: ["16.4", :build]
   end
 
-  # Fails at building LLDB
-  fails_with gcc: "5"
+  on_linux do
+    depends_on "pkgconf" => :build
+    depends_on "binutils" # needed for gold
+    depends_on "elfutils" # openmp requires <gelf.h>
+    depends_on "zlib-ng-compat"
+  end
 
   # Fixes https://github.com/mesonbuild/meson/issues/11642
   patch do
@@ -95,9 +99,6 @@ class LlvmAT16 < Formula
                              .map { |py| py.delete_prefix("python@") }
     site_packages = Language::Python.site_packages(python3).delete_prefix("lib/")
 
-    # Apple's libstdc++ is too old to build LLVM
-    ENV.libcxx if ENV.compiler == :clang
-
     # compiler-rt has some iOS simulator features that require i386 symbols
     # I'm assuming the rest of clang needs support too for 32-bit compilation
     # to work correctly, but if not, perhaps universal binaries could be
@@ -142,10 +143,8 @@ class LlvmAT16 < Formula
 
     if OS.mac?
       macos_sdk = MacOS.sdk_path_if_needed
-      if MacOS.version >= :catalina
-        args << "-DFFI_INCLUDE_DIR=#{macos_sdk}/usr/include/ffi"
-        args << "-DFFI_LIBRARY_DIR=#{macos_sdk}/usr/lib"
-      end
+      args << "-DFFI_INCLUDE_DIR=#{macos_sdk}/usr/include/ffi"
+      args << "-DFFI_LIBRARY_DIR=#{macos_sdk}/usr/lib"
 
       args << "-DLLVM_BUILD_LLVM_C_DYLIB=ON"
       args << "-DLLVM_ENABLE_LIBCXX=ON"
@@ -153,6 +152,9 @@ class LlvmAT16 < Formula
       args << "-DLIBCXXABI_INSTALL_LIBRARY_DIR=#{lib}/c++"
       args << "-DDEFAULT_SYSROOT=#{macos_sdk}" if macos_sdk
       runtimes_cmake_args << "-DCMAKE_INSTALL_RPATH=#{loader_path}"
+      if DevelopmentTools.ld64_version >= "1221.4"
+        runtimes_cmake_args << "-DCMAKE_SHARED_LINKER_FLAGS=-Wl,-ld_classic"
+      end
 
       # Disable builds for OSes not supported by the CLT SDK.
       clt_sdk_support_flags = %w[I WATCH TV].map { |os| "-DCOMPILER_RT_ENABLE_#{os}OS=OFF" }
@@ -278,7 +280,7 @@ class LlvmAT16 < Formula
     assert_equal (lib/shared_library("libLLVM-#{soversion}")).to_s,
                  shell_output("#{bin}/llvm-config --libfiles").chomp
 
-    (testpath/"omptest.c").write <<~EOS
+    (testpath/"omptest.c").write <<~C
       #include <stdlib.h>
       #include <stdio.h>
       #include <omp.h>
@@ -289,7 +291,7 @@ class LlvmAT16 < Formula
           }
           return EXIT_SUCCESS;
       }
-    EOS
+    C
 
     system bin/"clang", "-L#{lib}", "-fopenmp", "-nobuiltininc",
                            "-I#{lib}/clang/#{llvm_version_major}/include",
@@ -305,23 +307,23 @@ class LlvmAT16 < Formula
     EOS
     assert_equal expected_result.strip, sorted_testresult.strip
 
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <stdio.h>
       int main()
       {
         printf("Hello World!\\n");
         return 0;
       }
-    EOS
+    C
 
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include <iostream>
       int main()
       {
         std::cout << "Hello World!" << std::endl;
         return 0;
       }
-    EOS
+    CPP
 
     # Testing default toolchain and SDK location.
     system bin/"clang++", "-v",
@@ -332,9 +334,9 @@ class LlvmAT16 < Formula
     assert_equal "Hello World!", shell_output("./test").chomp
 
     # To test `lld`, we mock a broken `ld` to make sure it's not what's being used.
-    (testpath/"fake_ld.c").write <<~EOS
+    (testpath/"fake_ld.c").write <<~C
       int main() { return 1; }
-    EOS
+    C
     (testpath/"bin").mkpath
     system ENV.cc, "-v", "fake_ld.c", "-o", "bin/ld"
     with_env(PATH: "#{testpath}/bin:#{ENV["PATH"]}") do
@@ -419,19 +421,19 @@ class LlvmAT16 < Formula
         refute_match(/libunwind/, lib)
       end
 
-      (testpath/"test_plugin.cpp").write <<~EOS
+      (testpath/"test_plugin.cpp").write <<~CPP
         #include <iostream>
         __attribute__((visibility("default")))
         extern "C" void run_plugin() {
           std::cout << "Hello Plugin World!" << std::endl;
         }
-      EOS
-      (testpath/"test_plugin_main.c").write <<~EOS
+      CPP
+      (testpath/"test_plugin_main.c").write <<~C
         extern void run_plugin();
         int main() {
           run_plugin();
         }
-      EOS
+      C
       system bin/"clang++", "-v", "-o", "test_plugin.so",
              "-shared", "-fPIC", "test_plugin.cpp", "-L#{opt_lib}",
              "-stdlib=libc++", "-rtlib=compiler-rt",
@@ -449,7 +451,7 @@ class LlvmAT16 < Formula
     end
 
     # Testing mlir
-    (testpath/"test.mlir").write <<~EOS
+    (testpath/"test.mlir").write <<~MLIR
       func.func @main() {return}
 
       // -----
@@ -461,10 +463,10 @@ class LlvmAT16 < Formula
 
       // expected-error @+1 {{redefinition of symbol named 'foo'}}
       func.func @foo() { return }
-    EOS
+    MLIR
     system bin/"mlir-opt", "--split-input-file", "--verify-diagnostics", "test.mlir"
 
-    (testpath/"scanbuildtest.cpp").write <<~EOS
+    (testpath/"scanbuildtest.cpp").write <<~CPP
       #include <iostream>
       int main() {
         int *i = new int;
@@ -473,23 +475,23 @@ class LlvmAT16 < Formula
         std::cout << *i << std::endl;
         return 0;
       }
-    EOS
+    CPP
     assert_includes shell_output("#{bin}/scan-build make scanbuildtest 2>&1"),
                     "warning: Use of memory after it is freed"
 
-    (testpath/"clangformattest.c").write <<~EOS
+    (testpath/"clangformattest.c").write <<~C
       int    main() {
           printf("Hello world!"); }
-    EOS
+    C
     assert_equal "int main() { printf(\"Hello world!\"); }\n",
       shell_output("#{bin}/clang-format -style=google clangformattest.c")
 
     # This will fail if the clang bindings cannot find `libclang`.
     with_env(PYTHONPATH: prefix/Language::Python.site_packages(python3)) do
-      system python3, "-c", <<~EOS
+      system python3, "-c", <<~PYTHON
         from clang import cindex
         cindex.Config().get_cindex_library()
-      EOS
+      PYTHON
     end
 
     # Check that lldb can use Python
@@ -506,13 +508,14 @@ class LlvmAT16 < Formula
     # was known to output incorrect linker flags; e.g., `-llibxml2.tbd` instead of `-lxml2`.
     # On the other hand, note that a fully qualified path to `dylib` or `tbd` is OK, e.g.,
     # `/usr/local/lib/libxml2.tbd` or `/usr/local/lib/libxml2.dylib`.
+    abs_path_exts = [".tbd", ".dylib"]
     shell_output("#{bin}/llvm-config --system-libs").chomp.strip.split.each do |lib|
       if lib.start_with?("-l")
         assert !lib.end_with?(".tbd"), "expected abs path when lib reported as .tbd"
         assert !lib.end_with?(".dylib"), "expected abs path when lib reported as .dylib"
       else
         p = Pathname.new(lib)
-        if p.extname == ".tbd" || p.extname == ".dylib"
+        if abs_path_exts.include?(p.extname)
           assert p.absolute?, "expected abs path when lib reported as .tbd or .dylib"
         end
       end

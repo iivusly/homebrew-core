@@ -1,8 +1,8 @@
 class Allure < Formula
   desc "Flexible lightweight test report tool"
   homepage "https://github.com/allure-framework/allure2"
-  url "https://repo.maven.apache.org/maven2/io/qameta/allure/allure-commandline/2.30.0/allure-commandline-2.30.0.zip"
-  sha256 "2e3e9af0772796862da17d95007abd8d3df1176c13aca89ee2c79118fe4dd2f7"
+  url "https://repo.maven.apache.org/maven2/io/qameta/allure/allure-commandline/2.38.1/allure-commandline-2.38.1.zip"
+  sha256 "3b410bd6d85d33eaff8ea245e72da2e416b008eaae08a110c9088c76c7e5302b"
   license "Apache-2.0"
 
   livecheck do
@@ -11,8 +11,7 @@ class Allure < Formula
   end
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, all: "0b1f05a1263f29783b3ff0b9e48f9c8b97f4653f48ae2b33003307effa462d22"
+    sha256 cellar: :any_skip_relocation, all: "c6f9e7aaebae740af1ae1d407a54556a18754a17f6231d9755b1059102d9944d"
   end
 
   depends_on "openjdk"
@@ -22,12 +21,12 @@ class Allure < Formula
     rm(Dir["bin/*.bat"])
 
     libexec.install Dir["*"]
-    bin.install Dir["#{libexec}/bin/*"]
+    bin.install libexec.glob("bin/*")
     bin.env_script_all_files libexec/"bin", JAVA_HOME: Formula["openjdk"].opt_prefix
   end
 
   test do
-    (testpath/"allure-results/allure-result.json").write <<~EOS
+    (testpath/"allure-results/allure-result.json").write <<~JSON
       {
         "uuid": "allure",
         "name": "testReportGeneration",
@@ -51,7 +50,7 @@ class Allure < Formula
           }
         ]
       }
-    EOS
-    system bin/"allure", "generate", "#{testpath}/allure-results", "-o", "#{testpath}/allure-report"
+    JSON
+    system bin/"allure", "generate", testpath/"allure-results", "-o", testpath/"allure-report"
   end
 end

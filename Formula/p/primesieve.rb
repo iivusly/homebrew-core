@@ -1,18 +1,17 @@
 class Primesieve < Formula
   desc "Fast C/C++ prime number generator"
   homepage "https://github.com/kimwalisch/primesieve"
-  url "https://github.com/kimwalisch/primesieve/archive/refs/tags/v12.4.tar.gz"
-  sha256 "eb7081adebe8030e93b3675c74ac603438d10a36792246b274c79f11d8a987ce"
+  url "https://github.com/kimwalisch/primesieve/archive/refs/tags/v12.13.tar.gz"
+  sha256 "4cd3f1b70f6b02d695e6495e6a0fc0fa99b4dc043e0f21686d2cf409e98295c9"
   license "BSD-2-Clause"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "fa02e41a21f214425987866dad0ce74d252b5e3e7ad0f9b1f4d75ffe7dd1a1e8"
-    sha256 cellar: :any,                 arm64_ventura:  "228d0bfe7758cd12500784ff76c44b9fa243fd1b86a8c747ad34d3188a9a36fb"
-    sha256 cellar: :any,                 arm64_monterey: "9be7d308ad56ac5abdba3c3c730413167219b62f8158dfd0d52c061848279d24"
-    sha256 cellar: :any,                 sonoma:         "8a41c7174b2d073959b6aebdd388a9522f96f2efaf358538c7fdeca6e9899858"
-    sha256 cellar: :any,                 ventura:        "59e89c63d85b741b06b4892455fa9d26fd7ff32db4fa8e494b8073a5b7c35b8b"
-    sha256 cellar: :any,                 monterey:       "f829ed656bf7d0e80741222928416aaaac7a6047cd30178d8f4a7d6bac88493f"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "fc72e05d67e8afb3f01cda0808fadb937d5d607d4fc1e094c8b8f0724665bd28"
+    sha256 cellar: :any,                 arm64_tahoe:   "14ac2584e2e13ec4d2154342a6928be5dd798abcd36b3968a98294a36ce938e3"
+    sha256 cellar: :any,                 arm64_sequoia: "bdd60a867fc72ed814861a1c734c43e72baf14a9ee761793c9d492561b4fb335"
+    sha256 cellar: :any,                 arm64_sonoma:  "a4818c04abfd735ea1f7a59be08694512a90fd2ac9bd613a17b8ba908488f926"
+    sha256 cellar: :any,                 sonoma:        "085aa6f8743c2d186c31aa02a0df8d66b829d17539c771bc2db94fd6c0dba04c"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "29cd0c69ea9f6be89d8da4fb8ff25c63b360f21c974dccbbb908bbd34664ad6a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "458c1e93376e3e244d8c4835f6cbb0b3b34d6e15a86044c6249ad29e57271e65"
   end
 
   depends_on "cmake" => :build

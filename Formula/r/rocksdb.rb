@@ -1,19 +1,19 @@
 class Rocksdb < Formula
   desc "Embeddable, persistent key-value store for fast storage"
   homepage "https://rocksdb.org/"
-  url "https://github.com/facebook/rocksdb/archive/refs/tags/v9.5.2.tar.gz"
-  sha256 "b20780586d3df4a3c5bcbde341a2c1946b03d18237960bda5bc5e9538f42af40"
+  url "https://github.com/facebook/rocksdb/archive/refs/tags/v10.10.1.tar.gz"
+  sha256 "df2ff348f3fac8578fd4b727eee7267aaf90cd403c99b55e898d1db63fa8cff5"
   license any_of: ["GPL-2.0-only", "Apache-2.0"]
   head "https://github.com/facebook/rocksdb.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "4ac670f22bfaf32815f546a35a222a485a312a13d1ab3f6d4f888d6e4f14cf54"
-    sha256 cellar: :any,                 arm64_ventura:  "291a6fa0702509962eb29a3461cb2568af03a2615b8c11bf83f2985385157886"
-    sha256 cellar: :any,                 arm64_monterey: "e494f538d2b282fc489ee06f97db6cdf38ca7e99ba5ba67715ae5476b4505313"
-    sha256 cellar: :any,                 sonoma:         "689dd8ce1788161b7c6a9e8cb2590a267b3ee96a95e8b179b81aee5e3caffd72"
-    sha256 cellar: :any,                 ventura:        "ecc9320177a255d5441f1b0de72c473eee57ac986661059c5aa7c4ebfc14f237"
-    sha256 cellar: :any,                 monterey:       "f3f6a20e2fdbeb7f3b430223ad7674c20bfd5f48f27b4fb447abe3f3345f2245"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "622ed36e532e2a6d45671f4a8d1cbc520f7c755e25806d1bd2e16c1ffd056fb4"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "d1614d2a4c5acb5bf39aebcb2792717cff23ef9d8dd761cbc4c03f42227a44f3"
+    sha256 cellar: :any,                 arm64_sequoia: "fbd10ebeaf9b1518d3af65eec5ba4bbf9a71dfe53f6022163af62068dfcfa72f"
+    sha256 cellar: :any,                 arm64_sonoma:  "5fcd71d99272f69748d20547639cd29f8b74eee68c7cbdcc965f64c1c79c54ac"
+    sha256 cellar: :any,                 sonoma:        "04b506ca88a63e1f6f17d9710c175642b139f570d4601c2062403e0a2483eccc"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "ad10f71bedbadd5f0cd51bc782704e0e10d710ee1599500916331d79d1af7d9e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "90c4057d4b34589ce782a576fca13702246c2f9bb94cb421930f7dd1e9b45f93"
   end
 
   depends_on "cmake" => :build
@@ -23,11 +23,9 @@ class Rocksdb < Formula
   depends_on "zstd"
 
   uses_from_macos "bzip2"
-  uses_from_macos "zlib"
 
-  fails_with :gcc do
-    version "6"
-    cause "Requires C++17 compatible compiler. See https://github.com/facebook/rocksdb/issues/9388"
+  on_linux do
+    depends_on "zlib-ng-compat"
   end
 
   def install
@@ -61,7 +59,7 @@ class Rocksdb < Formula
   end
 
   test do
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include <assert.h>
       #include <rocksdb/options.h>
       #include <rocksdb/memtablerep.h>
@@ -70,7 +68,7 @@ class Rocksdb < Formula
         Options options;
         return 0;
       }
-    EOS
+    CPP
 
     extra_args = []
     if OS.mac?
@@ -78,7 +76,7 @@ class Rocksdb < Formula
       extra_args << "-lstdc++"
     end
     system ENV.cxx, "test.cpp", "-o", "db_test", "-v",
-                                "-std=c++17",
+                                "-std=c++20",
                                 *extra_args,
                                 "-lz", "-lbz2",
                                 "-L#{lib}", "-lrocksdb",
@@ -87,7 +85,7 @@ class Rocksdb < Formula
                                 "-L#{Formula["zstd"].opt_lib}", "-lzstd"
     system "./db_test"
 
-    assert_match "sst_dump --file=", shell_output("#{bin}/rocksdb_sst_dump --help 2>&1")
+    assert_match "sst_dump <db_dirs_OR_sst_files...>", shell_output("#{bin}/rocksdb_sst_dump --help 2>&1")
     assert_match "rocksdb_sanity_test <path>", shell_output("#{bin}/rocksdb_sanity_test --help 2>&1", 1)
     assert_match "rocksdb_stress [OPTIONS]...", shell_output("#{bin}/rocksdb_stress --help 2>&1", 1)
     assert_match "rocksdb_write_stress [OPTIONS]...", shell_output("#{bin}/rocksdb_write_stress --help 2>&1", 1)
@@ -96,7 +94,7 @@ class Rocksdb < Formula
     assert_match "rocksdb_dump:", shell_output("#{bin}/rocksdb_dump --help 2>&1", 1)
     assert_match "rocksdb_undump:", shell_output("#{bin}/rocksdb_undump --help 2>&1", 1)
 
-    db = testpath / "db"
+    db = testpath/"db"
     %w[no snappy zlib bzip2 lz4 zstd].each_with_index do |comp, idx|
       key = "key-#{idx}"
       value = "value-#{idx}"

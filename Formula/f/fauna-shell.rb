@@ -1,44 +1,40 @@
 class FaunaShell < Formula
   desc "Interactive shell for FaunaDB"
   homepage "https://fauna.com/"
-  url "https://registry.npmjs.org/fauna-shell/-/fauna-shell-2.0.2.tgz"
-  sha256 "26810b12aaa3b1794f7dc384db4dcc8e6be721ff14d6d97d414f7499b6a11aa0"
+  url "https://registry.npmjs.org/fauna-shell/-/fauna-shell-4.0.0.tgz"
+  sha256 "6dd5c853c1a62e72d6101741a498b3b9fe4db21e68ec2e024541b488b858c77f"
   license "MPL-2.0"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "b65e24ac1b5a2dbaa84bb7e322769a5998a51057bdfa1d47848c3e46787d5a7b"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "b65e24ac1b5a2dbaa84bb7e322769a5998a51057bdfa1d47848c3e46787d5a7b"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "b65e24ac1b5a2dbaa84bb7e322769a5998a51057bdfa1d47848c3e46787d5a7b"
-    sha256 cellar: :any_skip_relocation, sonoma:         "184b4a9e54bae80675c164bac45864224e4e3cf4ff42a624303d53daa24ab078"
-    sha256 cellar: :any_skip_relocation, ventura:        "184b4a9e54bae80675c164bac45864224e4e3cf4ff42a624303d53daa24ab078"
-    sha256 cellar: :any_skip_relocation, monterey:       "184b4a9e54bae80675c164bac45864224e4e3cf4ff42a624303d53daa24ab078"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "b65e24ac1b5a2dbaa84bb7e322769a5998a51057bdfa1d47848c3e46787d5a7b"
+    sha256                               arm64_tahoe:   "7cbe4b189cebb2bb9600e19880221987abdae68071e39baee6dd9b7a5c8d1000"
+    sha256                               arm64_sequoia: "3a775fa6fad091d1c382d58c49d484e416261ce2073c36ed6271364a34fc4821"
+    sha256                               arm64_sonoma:  "9002e01f762eb91b75a41e88d537b00610cbfa942f2fa84c2bc157882cefa551"
+    sha256                               arm64_ventura: "374ccb0c275550317f8b579c6e663eaa8ae22a498c83f94cb33f5ca06d3b7640"
+    sha256                               sonoma:        "ff54487e87007c2255d2821735ef79a48e2110eabcced192b53efc067339eb63"
+    sha256                               ventura:       "1c13fb4091005e6408f8db2b02e2a56d69a1833d4b1dc3d4e9d9b50ea8676c5c"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "efe0fab8f5576b66ad2b6ced19f7c5e545a8d5c1a8d34c36e917facbf18ef240"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "a682cf65cd7e19afb1a0c8af45d3d76325376311433592478c2412e091ba7cfd"
   end
+
+  # Fauna Service Winding Down, https://news.ycombinator.com/item?id=43414742
+  deprecate! date: "2025-06-22", because: :unmaintained
+  disable! date: "2026-06-22", because: :unmaintained
 
   depends_on "node"
 
   def install
     system "npm", "install", *std_npm_args
-    bin.install_symlink Dir["#{libexec}/bin/*"]
+    bin.install_symlink libexec.glob("bin/*")
+
+    # Remove incompatible pre-built binaries
+    libexec.glob("lib/node_modules/fauna-shell/dist/{*.node,fauna}")
+           .each { |f| rm(f) }
   end
 
   test do
-    output = shell_output("#{bin}/fauna endpoint list 2>&1")
-    assert_match "Available endpoints:\n", output
+    assert_match version.to_s, shell_output("#{bin}/fauna --version")
 
-    # FIXME: This test seems to stall indefinitely on Linux.
-    # https://github.com/jdxcode/password-prompt/issues/12
-    return if OS.linux? && ENV["HOMEBREW_GITHUB_ACTIONS"].present?
-
-    output = shell_output("#{bin}/fauna endpoint add https://db.fauna.com:443 " \
-                          "--non-interactive --url http://localhost:8443 " \
-                          "--secret your_fauna_secret --set-default")
-    assert_match "Saved endpoint https://db.fauna.com:443", output
-
-    expected = <<~EOS
-      Available endpoints:
-      * https://db.fauna.com:443
-    EOS
-    assert_equal expected, shell_output("#{bin}/fauna endpoint list")
+    output = shell_output("#{bin}/fauna local --name local-fauna 2>&1", 1)
+    assert_match "[StartContainer] Docker service is not available", output
   end
 end

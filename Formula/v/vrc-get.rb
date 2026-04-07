@@ -1,8 +1,8 @@
 class VrcGet < Formula
   desc "Open Source alternative of Command-line client of VRChat Package Manager"
   homepage "https://github.com/vrc-get/vrc-get"
-  url "https://github.com/vrc-get/vrc-get/archive/refs/tags/v1.8.1.tar.gz"
-  sha256 "79157a0dc592837aca541b1b85a2fab4eb86e0becbc28282459b2d60a6097144"
+  url "https://github.com/vrc-get/vrc-get/archive/refs/tags/v1.9.1.tar.gz"
+  sha256 "a8d35448a01b70df0753dd264c096a32b21dc2bd2ef9b5a54423c4309c7aa3db"
   license "MIT"
   head "https://github.com/vrc-get/vrc-get.git", branch: "master"
 
@@ -12,13 +12,14 @@ class VrcGet < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "dca7679227d0a18cca706624960922789ea83367097430a577d9db983e874194"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "912d0e25b3f056bf6295e6202603f3441f093770a93432474ace49040bf8af2d"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "ca36790160878f1227cee2c2dfc9691d7a60e0d12678fded6ee86baca67f0759"
-    sha256 cellar: :any_skip_relocation, sonoma:         "e33c646e105e706e06e8e3d9cd1c9549f950729ce6b527b54106aa3cc2e38866"
-    sha256 cellar: :any_skip_relocation, ventura:        "fb13b69dd5534810a76adb5ee2f10c69496d01cbbd1d0ecf310abd45bdc64fc3"
-    sha256 cellar: :any_skip_relocation, monterey:       "c7706dd968693ce092fd280b86a7cb730d7da4c86f4e6ca4377f66d64e2d81ba"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "a20bc378fe730a06171ae0f90f55d2af25547c58d2c2594b11e4f9c94f2c9fbd"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "de850d693542af7f6e08660d844b13e76331feed2e0ac47367bebbf9816bc4b7"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "12597ac2dd9b97563c431a6c0220ad2daa8bd519d18467ebf0955d0ff0682670"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "e96d29ec329670fd8fb921193e07ef71e5699358df6b60ee65a14fc068927526"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "3660f27b64f9e969466fe49bfa55f631dd67ce978bccbac2f9826033637de250"
+    sha256 cellar: :any_skip_relocation, sonoma:        "3c4202ebc728de42372a7db3a926572b7de9de197a1deeb35f207be9f5d131b7"
+    sha256 cellar: :any_skip_relocation, ventura:       "d108f92673c5e0502b59e7682ddaa208886bad7a8162fc2172315759ba20aae6"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "ecec52be3888898c5755c085e97cdb6aab7c36ea33ccf5a8adf81735de95bc93"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "fcf026916c83f75b0ede1071e1cd8c1eb87a74d131456a6bd417d8e31edc7580"
   end
 
   depends_on "rust" => :build
@@ -30,6 +31,6 @@ class VrcGet < Formula
   test do
     ENV["XDG_DATA_HOME"] = testpath/"data-home"
     system bin/"vrc-get", "update"
-    assert_predicate testpath/"data-home/VRChatCreatorCompanion/Repos/vrc-official.json", :exist?
+    assert_path_exists testpath/"data-home/VRChatCreatorCompanion/Repos/vrc-official.json"
   end
 end

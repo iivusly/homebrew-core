@@ -1,46 +1,54 @@
 class Pandoc < Formula
   desc "Swiss-army knife of markup format conversion"
   homepage "https://pandoc.org/"
-  url "https://github.com/jgm/pandoc/archive/refs/tags/3.3.tar.gz"
-  sha256 "7025e32e9cce7cbde9f43afedbf34f16b37fd71b96626752fd18425ae67baef7"
+  url "https://github.com/jgm/pandoc/archive/refs/tags/3.9.0.2.tar.gz"
+  sha256 "c300c60ae4d47da6e5d265e93f89b896324cdc84ccbb504b88a9855bacd6b5d7"
   license "GPL-2.0-or-later"
+  compatibility_version 3
   head "https://github.com/jgm/pandoc.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "4d2d723abab4cbe54eb9bcc30bde8412c58b708203833dd32cf79c4c9aa2e830"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "68e33efb596ef5dc6ffea7326c0772ac975e01871fd904231cacb5a0fb20843b"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "825acbda6041526458b7004ed7d712a7c08534b75d3bf60992d951b9af360473"
-    sha256 cellar: :any_skip_relocation, sonoma:         "eea2768ec327af33c47b4a2c30a6cc025ad0d0ab3c3a07c396632129e8883ad6"
-    sha256 cellar: :any_skip_relocation, ventura:        "7a387350b73838bcdd9cee1c91bb81739fa8e74839e639128845bd8fcb316889"
-    sha256 cellar: :any_skip_relocation, monterey:       "637e5e99b56af6608247c65990be24c1b9870a642ce3a451ba2470051d2de813"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "2875eaebe531bedcdc73d576047e855708ee380c1302519a3661cc7647596d4f"
+    sha256 cellar: :any,                 arm64_tahoe:   "40762c24f0337d9dc07466e365c0c3e0cb6023122bca9a6b36dcc0dd962f0b04"
+    sha256 cellar: :any,                 arm64_sequoia: "94e1a3309022f75f42f7aba3c9d17f14fa743ad6704c469090e555f30c1c2552"
+    sha256 cellar: :any,                 arm64_sonoma:  "400988089c12d7a44b9aa4f06214362ef3afd861a9fb2ef880787f287a91b989"
+    sha256 cellar: :any,                 sonoma:        "61e744c37e05f28910e506d594e4304ded58c5785a5ea81dd9a42ba2c9a4b73f"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "0ff02fb459c083ca44395eb4cc5be0926a9623ef555eeb775181d7b6f8a88461"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "918d76d5425b6e862faa3eebb5f2cf3d1ccbc28fb63eb51623bea89c4947f90a"
   end
 
   depends_on "cabal-install" => :build
-  depends_on "ghc@9.8" => :build
+  depends_on "ghc" => :build
+  depends_on "gmp"
 
   uses_from_macos "unzip" => :build # for cabal install
-  uses_from_macos "zlib"
+  uses_from_macos "libffi"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
+    # Workaround to build aeson with GHC 9.14, https://github.com/haskell/aeson/issues/1155
+    args = ["--allow-newer=base,containers,template-haskell"]
+
     system "cabal", "v2-update"
-    system "cabal", "v2-install", *std_cabal_v2_args, "pandoc-cli"
+    system "cabal", "v2-install", *args, *std_cabal_v2_args, "pandoc-cli"
     generate_completions_from_executable(bin/"pandoc", "--bash-completion",
                                          shells: [:bash], shell_parameter_format: :none)
     man1.install "pandoc-cli/man/pandoc.1"
   end
 
   test do
-    input_markdown = <<~EOS
+    input_markdown = <<~MARKDOWN
       # Homebrew
 
       A package manager for humans. Cats should take a look at Tigerbrew.
-    EOS
-    expected_html = <<~EOS
+    MARKDOWN
+    expected_html = <<~HTML
       <h1 id="homebrew">Homebrew</h1>
       <p>A package manager for humans. Cats should take a look at
       Tigerbrew.</p>
-    EOS
-    assert_equal expected_html, pipe_output("#{bin}/pandoc -f markdown -t html5", input_markdown)
+    HTML
+    assert_equal expected_html, pipe_output("#{bin}/pandoc -f markdown -t html5", input_markdown, 0)
   end
 end

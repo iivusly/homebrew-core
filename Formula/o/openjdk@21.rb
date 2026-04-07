@@ -1,46 +1,45 @@
 class OpenjdkAT21 < Formula
   desc "Development kit for the Java programming language"
-  homepage "https://openjdk.java.net/"
-  url "https://github.com/openjdk/jdk21u/archive/refs/tags/jdk-21.0.4-ga.tar.gz"
-  sha256 "9223a0f1db1b7ee0ca480e010d6473a8be72eaae93d883fd31ef9ba6dcc41014"
+  homepage "https://openjdk.org/"
+  url "https://github.com/openjdk/jdk21u/archive/refs/tags/jdk-21.0.10-ga.tar.gz"
+  sha256 "133a864987b4732d46cca5084b7cde8ffef168bde4e4b0118ebd2b38c1fda2f1"
   license "GPL-2.0-only" => { with: "Classpath-exception-2.0" }
+  compatibility_version 1
 
   livecheck do
     url :stable
-    regex(/^jdk[._-]v?(21+(?:\.\d+)*)-ga$/i)
+    regex(/^jdk[._-]v?(21(?:\.\d+)*)-ga$/i)
   end
 
   bottle do
-    sha256 cellar: :any, arm64_sonoma:   "9c746b162f12f2c3ac7ef4cca58676e7c4a6c1234b2b35b2fe2c1d6dba4ef3d8"
-    sha256 cellar: :any, arm64_ventura:  "d19ae20da8a2ac5c6a6ddc3ac09842e7bf68f2bd5e69459b52c9f536db3b0820"
-    sha256 cellar: :any, arm64_monterey: "e3202b8d03ae38b2573a5070a8e562edfdc3ece36e7b73ceaa6f25dee4d91bab"
-    sha256 cellar: :any, sonoma:         "be8c445b5620e6f192ed5fd62d7e38ef787840ef2ea9edd6d54c80eb414d0690"
-    sha256 cellar: :any, ventura:        "5f3d8b8928fca61cc9cc850a26182f8df5f4b657e1dcd7ee308138437b37f9fa"
-    sha256 cellar: :any, monterey:       "ae616ae18b3021cfcc6ade320570afa3f55ebcae70cbd0b5660daeae59684988"
-    sha256               x86_64_linux:   "0207f847d33688cfdc651f737cd2316cbf06ca95deda455056840b590619ca06"
+    rebuild 1
+    sha256 cellar: :any, arm64_tahoe:   "962a2da031ce13316faf2c39403d8ecd632ed17e0764f2afa4ba30dcefbc8c50"
+    sha256 cellar: :any, arm64_sequoia: "0f3c9f0d46bd5c00ef7288ce25fddfbde916e52f2b777e302154f8f7ed4f9d07"
+    sha256 cellar: :any, arm64_sonoma:  "1dce538fdaf92e00f234f5b10ba84ab5902e85bec814456abe4839616cbf7f0e"
+    sha256 cellar: :any, sonoma:        "218e75240a18972769316599b2fbe200011d0655a8b750df92af6748b759b00f"
+    sha256               arm64_linux:   "f9d83172974692b3b009917e3704b8d44ee75d28a3bfb67b2255aa0c13481d21"
+    sha256               x86_64_linux:  "19c403df7f39c328f54a0a117be2cfc8a730d4c2a5c7d6eb4b4601598a0ca5f4"
   end
 
   keg_only :versioned_formula
 
   depends_on "autoconf" => :build
-  depends_on "pkg-config" => :build
-  depends_on xcode: :build
+  depends_on "pkgconf" => :build
+  depends_on xcode: :build # for metal
+  depends_on "freetype"
   depends_on "giflib"
   depends_on "harfbuzz"
   depends_on "jpeg-turbo"
   depends_on "libpng"
   depends_on "little-cms2"
-  depends_on macos: :catalina
 
   uses_from_macos "cups"
   uses_from_macos "unzip"
   uses_from_macos "zip"
-  uses_from_macos "zlib"
 
   on_linux do
     depends_on "alsa-lib"
     depends_on "fontconfig"
-    depends_on "freetype"
     depends_on "libx11"
     depends_on "libxext"
     depends_on "libxi"
@@ -48,9 +47,8 @@ class OpenjdkAT21 < Formula
     depends_on "libxrender"
     depends_on "libxt"
     depends_on "libxtst"
+    depends_on "zlib-ng-compat"
   end
-
-  fails_with gcc: "5"
 
   # From https://jdk.java.net/archive/
   resource "boot-jdk" do
@@ -97,6 +95,7 @@ class OpenjdkAT21 < Formula
       --with-version-build=#{revision}
       --without-version-opt
       --without-version-pre
+      --with-freetype=system
       --with-giflib=system
       --with-harfbuzz=system
       --with-lcms=system
@@ -109,8 +108,13 @@ class OpenjdkAT21 < Formula
     args += if OS.mac?
       ldflags << "-headerpad_max_install_names"
 
+      # Allow unbundling `freetype` on macOS
+      inreplace "make/autoconf/lib-freetype.m4", '= "xmacosx"', '= ""'
+
       %W[
         --enable-dtrace
+        --with-freetype-include=#{Formula["freetype"].opt_include}
+        --with-freetype-lib=#{Formula["freetype"].opt_lib}
         --with-sysroot=#{MacOS.sdk_path}
       ]
     else
@@ -118,11 +122,14 @@ class OpenjdkAT21 < Formula
         --with-x=#{HOMEBREW_PREFIX}
         --with-cups=#{HOMEBREW_PREFIX}
         --with-fontconfig=#{HOMEBREW_PREFIX}
-        --with-freetype=system
         --with-stdc++lib=dynamic
       ]
     end
     args << "--with-extra-ldflags=#{ldflags.join(" ")}"
+
+    if DevelopmentTools.clang_build_version == 1600
+      args << "--with-extra-cflags=-mllvm -enable-constraint-elimination=0"
+    end
 
     system "bash", "configure", *args
 
@@ -153,13 +160,13 @@ class OpenjdkAT21 < Formula
   end
 
   test do
-    (testpath/"HelloWorld.java").write <<~EOS
+    (testpath/"HelloWorld.java").write <<~JAVA
       class HelloWorld {
         public static void main(String args[]) {
           System.out.println("Hello, world!");
         }
       }
-    EOS
+    JAVA
 
     system bin/"javac", "HelloWorld.java"
 

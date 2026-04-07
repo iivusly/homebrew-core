@@ -1,21 +1,20 @@
 class SolrAT811 < Formula
   desc "Enterprise search platform from the Apache Lucene project"
   homepage "https://solr.apache.org/"
-  url "https://dlcdn.apache.org/lucene/solr/8.11.3/solr-8.11.3.tgz"
-  mirror "https://archive.apache.org/dist/lucene/solr/8.11.3/solr-8.11.3.tgz"
-  sha256 "178300ae095094c2060a1060cf475aa935f1202addfb5bacb38e8712ccb56455"
+  url "https://www.apache.org/dyn/closer.lua?path=lucene/solr/8.11.4/solr-8.11.4.tgz"
+  mirror "https://archive.apache.org/dist/lucene/solr/8.11.4/solr-8.11.4.tgz"
+  sha256 "163fbdf246bbd78910bc36c3257ad50cdf31ccc3329a5ef885c23c9ef69e0ebe"
   license "Apache-2.0"
 
-  livecheck do
-    url "https://solr.apache.org/downloads.html"
-    regex(/href=.*?solr[._-]v?(8\.11(?:\.\d+)+)\.t/i)
-  end
-
   bottle do
-    sha256 cellar: :any_skip_relocation, all: "9215d75465b9410dc267924991044a2b4e0e781e654583db2d01a7767d631bfa"
+    sha256 cellar: :any_skip_relocation, all: "65d79494d324de0e00931020fc1e1624c7929566a4d66cee0b33052111f6e523"
   end
 
   keg_only :versioned_formula
+
+  # Solr 8 reached end of life (EOL) on 2024-10-25:
+  # https://solr.apache.org/news.html#solr-8-reaches-end-of-life
+  deprecate! date: "2025-11-07", because: :unsupported
 
   depends_on "openjdk"
 

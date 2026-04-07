@@ -4,39 +4,44 @@ class AptDater < Formula
   url "https://github.com/DE-IBH/apt-dater/archive/refs/tags/v1.0.4.tar.gz"
   sha256 "a4bd5f70a199b844a34a3b4c4677ea56780c055db7c557ff5bd8f2772378a4d6"
   license "GPL-2.0-or-later"
-  revision 1
+  revision 2
   version_scheme 1
 
   bottle do
-    sha256 arm64_sonoma:   "0cbe2caeff1b45c9ac4785ff89a0cd070d6b8d69a5a4e4c31ebbd63b1b5a1e67"
-    sha256 arm64_ventura:  "1e0c235813ee8af790fad21875c7a0ed0a367bdc07b268c28932e01dacbe5289"
-    sha256 arm64_monterey: "2253ecce6880052d48b9f02ef422d43b7b7197218a84001935da0bec8c92ddad"
-    sha256 arm64_big_sur:  "ae020a711348a85409b5fa30467b329b1e009c006029809da302e9dc89bbee40"
-    sha256 sonoma:         "37fa8000e61823ae775209c2bc33c865a6a0c11cf250078fd2e338ee9057cb54"
-    sha256 ventura:        "5189385c850b95b97c41a6fae9f09825f8f812e1603c174c73cc9d86d0954ece"
-    sha256 monterey:       "19f6c2ffd1f4257b99c1b181061c5d0c8f1f56f6dfa638903ec5c8e6444b9e5f"
-    sha256 big_sur:        "cf4a97e076ce5f8820c9a1dc787c5e751b350cc223d17ec0ba6007d6e8d97484"
-    sha256 catalina:       "5fe58574f889c5e29bd2f4c492848281450da398cace807a33c5100b44090665"
-    sha256 mojave:         "d736fdabb393e90e6895b9d5694cc0a78f592bd363483e7e935d044fd0331d41"
-    sha256 high_sierra:    "f6b5f606925ac38d24ef56fc52e93c3f5a4e8f1ab2d687ebb376c78d4f91f366"
-    sha256 sierra:         "66d81a3bf524ab635a34803119837ef26704011b2d362ab7f41aba0d40b54ea3"
-    sha256 x86_64_linux:   "8122a7f2c4d9c1f80fddaeb7b65b333d37662a3cc8dcf2473892341879648dbb"
+    sha256 arm64_tahoe:   "ca8d65020e488e692c5785619fda1d960a49f88b2f80e2213f1d56f39b6f40de"
+    sha256 arm64_sequoia: "e9a104010e991369030ef2f6b060658977e33252724fb5a1891a69242a8c3fc8"
+    sha256 arm64_sonoma:  "cd11a9f62b4e94d1909c0f60bb5a30703d5558e5572b583ccf92ff235e055503"
+    sha256 sonoma:        "ad40cadf8e75368960e13f510c8e91977ff13908150431a50066bbab0dfd521b"
+    sha256 arm64_linux:   "8aaa2fb5be47e7037a24f2b6bfc14fac79eabf28187a11d5c949db515b34b4a9"
+    sha256 x86_64_linux:  "b68bb3ff46e775c78d4201392f44d95e8e28aacdce0dd624469f5bfe6a839557"
   end
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
-  depends_on "pkg-config" => :build
-  depends_on "gettext"
+  depends_on "gettext" => :build
+  depends_on "pkgconf" => :build
   depends_on "glib"
   depends_on "popt"
 
   uses_from_macos "libxml2"
+  uses_from_macos "ncurses"
+
+  on_macos do
+    depends_on "coreutils" => :build # for `date -d`
+    depends_on "gettext"
+  end
+
+  # Fix incorrect args to g_strlcpy
+  # Part of open PR: https://github.com/DE-IBH/apt-dater/pull/182
+  patch do
+    url "https://github.com/DE-IBH/apt-dater/commit/70a6e4a007d2bbd891442794080ab4fe713a6f94.patch?full_index=1"
+    sha256 "de100e8ddd576957e7e2ac6cb5ac43e55235c4031efd7ee6fd0e0e81b7b0b2f4"
+  end
 
   def install
-    system "autoreconf", "-ivf"
-    system "./configure", "--disable-debug",
-                          "--disable-dependency-tracking",
-                          "--prefix=#{prefix}"
+    ENV.prepend_path "PATH", Formula["coreutils"].libexec/"gnubin" if OS.mac?
+    system "autoreconf", "--force", "--install", "--verbose"
+    system "./configure", "--disable-silent-rules", *std_configure_args
     system "make", "install"
     # Global config overrides local config, so delete global config to prioritize the
     # config in $HOME/.config/apt-dater

@@ -1,9 +1,10 @@
 class Sdl12Compat < Formula
   desc "SDL 1.2 compatibility layer that uses SDL 2.0 behind the scenes"
   homepage "https://github.com/libsdl-org/sdl12-compat"
-  url "https://github.com/libsdl-org/sdl12-compat/archive/refs/tags/release-1.2.68.tar.gz"
-  sha256 "63c6e4dcc1154299e6f363c872900be7f3dcb3e42b9f8f57e05442ec3d89d02d"
+  url "https://github.com/libsdl-org/sdl12-compat/archive/refs/tags/release-1.2.76.tar.gz"
+  sha256 "e889ac9c7e8a6bdfc31972bf1f1254b84882cb52931608bada62e8febbf0270b"
   license all_of: ["Zlib", "MIT-0"]
+  compatibility_version 1
   head "https://github.com/libsdl-org/sdl12-compat.git", branch: "main"
 
   livecheck do
@@ -12,13 +13,12 @@ class Sdl12Compat < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "4948b9d4e38766595d0c173458b97c00121834dd6b4161496a09fec4fc094950"
-    sha256 cellar: :any,                 arm64_ventura:  "d8d666b4c119e5dadd9d338d12c59723adad83565e18612afaf934fcf58e2872"
-    sha256 cellar: :any,                 arm64_monterey: "f5a78c668498f0507ffecfce91a2f690b46fc0adc91ed1c3bf207466c1d08f4d"
-    sha256 cellar: :any,                 sonoma:         "e5a972e8c3bd9012f6dca3512f1953c4f7f9b1f1580b7066b930fa9fabc54150"
-    sha256 cellar: :any,                 ventura:        "f355c15e6d99d002a44af8689e835ab14765f0abea078b40c1301283cbd28535"
-    sha256 cellar: :any,                 monterey:       "30cbfb49ab9560fcce09b372ad986a74caa3007704012454f76cc4416dfa0e93"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "ac00966975256217cace0e9acf45e8659d5d668e16972a072eb6c298ff630fa2"
+    sha256 cellar: :any,                 arm64_tahoe:   "72161caba641a583c35ae7329d312e133e075d22181e6e73b05ee419606c02ef"
+    sha256 cellar: :any,                 arm64_sequoia: "2f0e4787c520344e1ce8e10f60c1b9d671a17d7a8895e38ce96b517fc23021e5"
+    sha256 cellar: :any,                 arm64_sonoma:  "99b0dba0da565a052dbb4ec3791f81a7880c20de8e69d2aa0e40a68001a9dc7c"
+    sha256 cellar: :any,                 sonoma:        "49274bc46c2f0f2ba1494e4ac6e70f494c894e0e6559835d4f7cc3f7c601ceed"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "5a4fe54f8946efbcc8db2e5775f09ece08c6fc0b7e141ad49c7e0caed0cf4a46"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "0510ee9c54c6ce20809c5bbad6e295d4cd1c280f64829f1ac2c1331863a7bbb9"
   end
 
   depends_on "cmake" => :build
@@ -41,14 +41,14 @@ class Sdl12Compat < Formula
   end
 
   test do
-    assert_predicate lib/shared_library("libSDL"), :exist?
+    assert_path_exists lib/shared_library("libSDL")
     versioned_libsdl = "libSDL-1.2"
     versioned_libsdl << ".0" if OS.mac?
-    assert_predicate lib/shared_library(versioned_libsdl), :exist?
-    assert_predicate lib/"libSDLmain.a", :exist?
+    assert_path_exists lib/shared_library(versioned_libsdl)
+    assert_path_exists lib/"libSDLmain.a"
     assert_equal version.to_s, shell_output("#{bin}/sdl-config --version").strip
 
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <SDL.h>
 
       int main(int argc, char* argv[]) {
@@ -56,7 +56,7 @@ class Sdl12Compat < Formula
         SDL_Quit();
         return 0;
       }
-    EOS
+    C
     flags = Utils.safe_popen_read(bin/"sdl-config", "--cflags", "--libs").split
     system ENV.cc, "test.c", "-o", "test", *flags
     system "./test"

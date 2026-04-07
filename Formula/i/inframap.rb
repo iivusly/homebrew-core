@@ -1,8 +1,8 @@
 class Inframap < Formula
   desc "Read your tfstate or HCL to generate a graph"
   homepage "https://github.com/cycloidio/inframap"
-  url "https://github.com/cycloidio/inframap/archive/refs/tags/v0.7.0.tar.gz"
-  sha256 "1dd1080245198eb53451502b40994a90e97eb283dc61b0d77d620f0ee6c1d23b"
+  url "https://github.com/cycloidio/inframap/archive/refs/tags/v0.8.0.tar.gz"
+  sha256 "f0e3d2a5f51339549802f8ad1650850ddfe81650ceb72ac9ea86fdd95ab2bfb8"
   license "MIT"
   head "https://github.com/cycloidio/inframap.git", branch: "master"
 
@@ -12,19 +12,21 @@ class Inframap < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "80770fc43ea2135c2e0d5b570613f6be76f793f27c6fd4a789bbccf0f2a055fc"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "f0b7cb30405634f07640eb264e406d472f155719b0b7bb51e6a39728ff5cedd1"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "ef9bc0bde009c80f6d1e4c5646936799fccfecaec04077fc91f34ff83f260a41"
-    sha256 cellar: :any_skip_relocation, sonoma:         "f3e228ba7ef4a41d01eeafc2818078661487352e305afdecfac6aedc29f4ef31"
-    sha256 cellar: :any_skip_relocation, ventura:        "cc2d627e9356b2ee35339a302320873daf4170f7d5fe7d55d5d8c3ada572af2e"
-    sha256 cellar: :any_skip_relocation, monterey:       "151e48157fad893e8edc1c353460ebe42713c50f1565c5450e17aea0754f2cb4"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "c039f5aa5c65db786cdfe4095b8257999b90b5fdd7321a4e3b83bfc62f1226b2"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "35238fd6006c1e1292640c56f85a7f36c2794851727b2ea8ea91a28ecd3b5056"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "35238fd6006c1e1292640c56f85a7f36c2794851727b2ea8ea91a28ecd3b5056"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "35238fd6006c1e1292640c56f85a7f36c2794851727b2ea8ea91a28ecd3b5056"
+    sha256 cellar: :any_skip_relocation, sonoma:        "869a30f97467cc4df989f532fd8e587e600bbcea1e32b7ae1ecb54ef7f545122"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "34b08303d1e7bf81b263e4c775e3fca3900eb31d1e951667255a3cc5e6dc7ad0"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "373101f264996d311db6bf6fdb35db1f53d1f0099ec8964bfd5168cdab64f1da"
   end
 
   depends_on "go" => :build
 
   def install
     system "go", "build", *std_go_args(ldflags: "-s -w -X github.com/cycloidio/inframap/cmd.Version=v#{version}")
+
+    generate_completions_from_executable(bin/"inframap", shell_parameter_format: :cobra)
   end
 
   test do

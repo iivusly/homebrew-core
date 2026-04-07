@@ -2,29 +2,30 @@ class Minio < Formula
   desc "High Performance, Kubernetes Native Object Storage"
   homepage "https://min.io"
   url "https://github.com/minio/minio.git",
-      tag:      "RELEASE.2024-08-29T01-40-52Z",
-      revision: "504e52b45e8350d0b64ae52f4b4307fd5d6b23d1"
-  version "20240829014052"
+      tag:      "RELEASE.2025-10-15T17-29-55Z",
+      revision: "9e49d5e7a648f00e26f2246f4dc28e6b07f8c84a"
+  version "2025-10-15T17-29-55Z"
   license "AGPL-3.0-or-later"
+  version_scheme 1
   head "https://github.com/minio/minio.git", branch: "master"
 
   livecheck do
     url :stable
     regex(/^(?:RELEASE[._-]?)?([\dTZ-]+)$/i)
-    strategy :github_latest do |json, regex|
-      json["tag_name"]&.scan(regex)&.map { |match| match[0].tr("TZ-", "") }
-    end
+    strategy :github_latest
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "2649bd56ef2da88610b955a6b295e86f3ba7606c839227a68d1aa2de639a12af"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "5fb1315e515ea07409cb79caab25282ef26f0131307dc73f84a668a00995ff7e"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "21002372a82bf98e6078e851207e95c96179811a4f90f1c320baf84995d8fd45"
-    sha256 cellar: :any_skip_relocation, sonoma:         "351218e96ff5aaa45d12bf9228f1ed0c225a421c584ccc652f0deeb306c7c972"
-    sha256 cellar: :any_skip_relocation, ventura:        "26a8abc54e8c1ca7b75106b404a87193cb1bc30ce9747116c4df05151b528b41"
-    sha256 cellar: :any_skip_relocation, monterey:       "903b9457b5a8d57d588013d42ba185fc6ff15a62a10e027ff9a6d8bb25f6b695"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "d831b3798fd415cb06193d3194bf43898a9d766058806bfd31b260c89221a3a6"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "3e2fa706f5b973ff2927c21538d1e0be160aced2d5f646742f40291a7529d484"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "80b0d45a0099d2077e7b1c6b219c74a243f5a50520aab2973f54a46843ce7f53"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "ac206377ae9be883cd86cab99f522898668608614837eee76cc9ac657d3e9233"
+    sha256 cellar: :any_skip_relocation, sonoma:        "54154dcdba031f5a053608848ca767dd7549a1c1a2d7fb419c09d0e7f8c463c0"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "9111c9baff73c9c8e552b1147114b606fddf35ffb0e4e164085ab5b715b277ef"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "4eec0924999ec02512516b58be63a3c29dc75a2d9e46494d4f6197d457d7846a"
   end
+
+  deprecate! date: "2026-02-17", because: :repo_archived
+  disable! date: "2027-02-17", because: :repo_archived
 
   depends_on "go" => :build
 
@@ -32,14 +33,15 @@ class Minio < Formula
     if build.head?
       system "go", "build", *std_go_args
     else
-      release = `git tag --points-at HEAD`.chomp
-      version = release.gsub("RELEASE.", "").chomp.gsub(/T(\d+)-(\d+)-(\d+)Z/, 'T\1:\2:\3Z')
+      minio_release = stable.specs[:tag]
+      minio_version = version.to_s.gsub(/T(\d+)-(\d+)-(\d+)Z/, 'T\1:\2:\3Z')
 
       ldflags = %W[
         -s -w
-        -X github.com/minio/minio/cmd.Version=#{version}
-        -X github.com/minio/minio/cmd.ReleaseTag=#{release}
+        -X github.com/minio/minio/cmd.Version=#{minio_version}
+        -X github.com/minio/minio/cmd.ReleaseTag=#{minio_release}
         -X github.com/minio/minio/cmd.CommitID=#{Utils.git_head}
+        -X github.com/minio/minio/cmd.CopyrightYear=#{version.major}
       ]
 
       system "go", "build", *std_go_args(ldflags:)
@@ -60,14 +62,10 @@ class Minio < Formula
   end
 
   test do
-    assert_equal version.to_s,
-                 shell_output("#{bin}/minio --version 2>&1")
-                   .match(/(?:RELEASE[._-]?)?([\dTZ-]+)/)
-                   .to_s
-                   .gsub(/[^\d]/, ""),
-                 "`version` is incorrect"
+    output = shell_output("#{bin}/minio --version 2>&1")
+    assert_equal version.to_s, output[/(?:RELEASE[._-]?)?([\dTZ-]+)/, 1], "`version` is incorrect"
 
-    assert_match "minio server - start object storage server",
-      shell_output("#{bin}/minio server --help 2>&1")
+    output = shell_output("#{bin}/minio server --help 2>&1")
+    assert_match "minio server - start object storage server", output
   end
 end

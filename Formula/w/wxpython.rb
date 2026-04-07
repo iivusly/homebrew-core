@@ -1,46 +1,46 @@
 class Wxpython < Formula
   desc "Python bindings for wxWidgets"
   homepage "https://www.wxpython.org/"
-  url "https://files.pythonhosted.org/packages/aa/64/d749e767a8ce7bdc3d533334e03bb1106fc4e4803d16f931fada9007ee13/wxPython-4.2.1.tar.gz"
-  sha256 "e48de211a6606bf072ec3fa778771d6b746c00b7f4b970eb58728ddf56d13d5c"
+  url "https://files.pythonhosted.org/packages/22/43/81657a6b126ffc19163500a8184d683cec08eb4e1d06905cd0c371c702d0/wxpython-4.2.5.tar.gz"
+  sha256 "44e836d1bccd99c38790bb034b6ecf70d9060f6734320560f7c4b0d006144793"
   license "LGPL-2.0-or-later" => { with: "WxWindows-exception-3.1" }
+  revision 1
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any, arm64_sonoma:   "120938b86adb0a5317edec17ad9b8e9d490ce7988a9b0677c9fdf1f688e7ed59"
-    sha256 cellar: :any, arm64_ventura:  "16bec214594988fe4ecc3828eda9c031daee2b5bd17a3d01a101bb6e52f7360b"
-    sha256 cellar: :any, arm64_monterey: "89e763016f0d5176f591072d1e13b78c2fa8b86ab5ecf2588a461b435c8f27cb"
-    sha256 cellar: :any, sonoma:         "092cddd2dc534cbda892fba573c7b4062679e099b1b85ba18061608d2bcfec76"
-    sha256 cellar: :any, ventura:        "7a61784a48ab5d9462492528c3c66b79542a9c319226c9e92bffc64612778584"
-    sha256 cellar: :any, monterey:       "370c1dd9ade8b71d481a5ea8bea50babefc8baeba38303fb5232c4d18c783224"
-    sha256               x86_64_linux:   "87d2e67b3a6d57d840c286949e73781feba27ba7007055344687b332349322ad"
+    sha256 cellar: :any, arm64_tahoe:   "f386143a6e4461fde98aaa60c28f8dc1c87270ad53aaef1fc3b059753ca7d04b"
+    sha256 cellar: :any, arm64_sequoia: "101056218733233f473e26ed0836b3c385fc55a8cb6653ab4840241df62c444e"
+    sha256 cellar: :any, arm64_sonoma:  "1d8b4b5e2a4548a25fd602ceca03f1d217a508f6160b528c88cabd5da92379ac"
+    sha256 cellar: :any, sonoma:        "fb2da74fde2f55b27d36418a776ed1a3a3f884319d406618d022f8e409450ba6"
+    sha256               arm64_linux:   "4321aecdd3168f3f2bb0ae102d2f93da7449c0f4968f5c746f18e2e25feabf39"
+    sha256               x86_64_linux:  "8b3b5bea2efe6ccac67b575e3d308d9d5688120e9da07693be91c47ff5f6f0c5"
   end
 
+  depends_on "cython" => :build
   depends_on "doxygen" => :build
   depends_on "python-setuptools" => :build
   depends_on "sip" => :build
   depends_on "numpy"
   depends_on "pillow"
-  depends_on "python@3.12"
-  depends_on "six"
-  depends_on "wxwidgets"
+  depends_on "python@3.14"
+  depends_on "wxwidgets@3.2" # issue ref: https://github.com/wxWidgets/Phoenix/issues/2764
 
   on_linux do
-    depends_on "pkg-config" => :build
+    depends_on "pkgconf" => :build
     depends_on "gtk+3"
   end
 
-  # Backport fix for doxygen 1.9.7+. Remove in the next release.
-  patch do
-    url "https://github.com/wxWidgets/Phoenix/commit/0b21230ee21e5e5d0212871b96a6d2fefd281038.patch?full_index=1"
-    sha256 "befd2a9594a2fa41f926edf412476479f2f311b4088c4738a867c5e7ca6c0f82"
-  end
+  pypi_packages exclude_packages: %w[numpy pillow]
 
   def python
-    "python3.12"
+    "python3.14"
   end
 
   def install
+    wxwidgets = deps.find { |dep| dep.name.match?(/^wxwidgets(@\d+(\.\d+)*)?$/) }.to_formula
+    wx_config = wxwidgets.opt_bin/"wx-config-#{wxwidgets.version.major_minor}"
+    ENV["WX_CONFIG"] = wx_config.to_s
+
+    ENV.append_path "PYTHONPATH", Formula["cython"].opt_libexec/Language::Python.site_packages(python)
     ENV.cxx11
     ENV["DOXYGEN"] = Formula["doxygen"].opt_bin/"doxygen"
     system python, "-u", "build.py", "dox", "touch", "etg", "sip", "build_py",

@@ -8,43 +8,54 @@ class Wal2json < Formula
   livecheck do
     url :stable
     regex(/(?:wal2json[._-])?v?(\d+(?:[._]\d+)+)/i)
-    strategy :github_latest
+    strategy :github_latest do |json, regex|
+      json["tag_name"]&.scan(regex)&.map { |match| match[0].tr("_", ".") }
+    end
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "710ff8f3b3864341881f87eb09404d769eca2e46b55ee16cb04ba6965a9663be"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "5e40b5c9a14fbc9201990660af9061bb67c3a14b1354b0f8dbaca18c57667103"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "dd10e9889a5adf9fe3868ed5b6c66abe196b1541b48cbeccae8fba619df05205"
-    sha256 cellar: :any_skip_relocation, sonoma:         "4b5daf478e22769735e816c363e2cbb4663615927d66d1ec069f8dcc3d6d8753"
-    sha256 cellar: :any_skip_relocation, ventura:        "7fe8fde86fe3cd826107d4609bb3d62ee495788f3fb045a5662c1cc59ea2890e"
-    sha256 cellar: :any_skip_relocation, monterey:       "570e8c65efd211e7354a9d68f8c34d44ab237e1b51db1e5ce6116bc6a3d1f939"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "acdb17c44def80cc1c92841a0c06589c21a7ca7fe73445d93909bc6620a1f9a4"
+    rebuild 2
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "6df07eb3b4c76fd3a26aabbd3d9512f2018ca40991a213805b3d97a359e6bbea"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "0cd88f515f6d34e3aeb5ecbf7ef5a869639b032373512e8eb6d68b58e9b3b2af"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "79300555385707acce8e526b38f75d91445f7bf43ad8dcc4b3d51083edd29a82"
+    sha256 cellar: :any_skip_relocation, sonoma:        "1bd372e6fe5bf4532c35eea95a8da392cca051f40fb43eb2721a6d8669375eb0"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "98ff83a1fd6e9730c36c443fd57824831f83b48d426836a33e6a98e94b70647b"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "b73b0d8f8d95d485c6a5b8e9bc0ccf357292d8ca232ca6708cba79cb0875a7e9"
   end
 
-  depends_on "postgresql@14"
+  depends_on "postgresql@17" => [:build, :test]
+  depends_on "postgresql@18" => [:build, :test]
 
-  def postgresql
-    Formula["postgresql@14"]
+  def postgresqls
+    deps.map(&:to_formula).sort_by(&:version).filter { |f| f.name.start_with?("postgresql@") }
   end
 
   def install
-    system "make", "install", "USE_PGXS=1",
-                              "PG_CONFIG=#{postgresql.opt_bin}/pg_config",
-                              "pkglibdir=#{lib/postgresql.name}"
+    odie "Too many postgresql dependencies!" if postgresqls.count > 2
+
+    postgresqls.each do |postgresql|
+      system "make", "install", "USE_PGXS=1",
+                                "PG_CONFIG=#{postgresql.opt_bin}/pg_config",
+                                "pkglibdir=#{lib/postgresql.name}"
+      system "make", "clean"
+    end
   end
 
   test do
     ENV["LC_ALL"] = "C"
-    pg_ctl = postgresql.opt_bin/"pg_ctl"
-    port = free_port
+    postgresqls.each do |postgresql|
+      pg_ctl = postgresql.opt_bin/"pg_ctl"
+      port = free_port
 
-    system pg_ctl, "initdb", "-D", testpath/"test"
-    (testpath/"test/postgresql.conf").write <<~EOS, mode: "a+"
+      datadir = testpath/postgresql.name
+      system pg_ctl, "initdb", "-D", datadir
+      (datadir/"postgresql.conf").write <<~EOS, mode: "a+"
 
-      shared_preload_libraries = 'wal2json'
-      port = #{port}
-    EOS
-    system pg_ctl, "start", "-D", testpath/"test", "-l", testpath/"log"
-    system pg_ctl, "stop", "-D", testpath/"test"
+        shared_preload_libraries = 'wal2json'
+        port = #{port}
+      EOS
+      system pg_ctl, "start", "-D", datadir, "-l", testpath/"log-#{postgresql.name}"
+      system pg_ctl, "stop", "-D", datadir
+    end
   end
 end

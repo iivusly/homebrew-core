@@ -1,18 +1,18 @@
 class Hcloud < Formula
   desc "Command-line interface for Hetzner Cloud"
   homepage "https://github.com/hetznercloud/cli"
-  url "https://github.com/hetznercloud/cli/archive/refs/tags/v1.47.0.tar.gz"
-  sha256 "2f1c15f71cca7c2e725a5047dbd918cc919962930b9681c53402e9c693884894"
+  url "https://github.com/hetznercloud/cli/archive/refs/tags/v1.62.0.tar.gz"
+  sha256 "942bd763ddce01c69efaef033a9207b3d543e068b69cb6910981ec26eb0cc434"
   license "MIT"
+  head "https://github.com/hetznercloud/cli.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "d7c7f90ec74f8119f0d5c95a2d43df7c1c5973ac47bc3f92828cab5194960e11"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "d7c7f90ec74f8119f0d5c95a2d43df7c1c5973ac47bc3f92828cab5194960e11"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "d7c7f90ec74f8119f0d5c95a2d43df7c1c5973ac47bc3f92828cab5194960e11"
-    sha256 cellar: :any_skip_relocation, sonoma:         "034f8534280e82fb0d641682b71a0e9f95f84b4561b9976918c4cee67ce54db2"
-    sha256 cellar: :any_skip_relocation, ventura:        "034f8534280e82fb0d641682b71a0e9f95f84b4561b9976918c4cee67ce54db2"
-    sha256 cellar: :any_skip_relocation, monterey:       "034f8534280e82fb0d641682b71a0e9f95f84b4561b9976918c4cee67ce54db2"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "9b81830b472d0052cbcf4413b1a402a4e59dba3c394d15562cc535888c352f9e"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "ed2a1123adc4885eeb25b9a536062e3bf4674f6f915463563377319774d4c5f4"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "d7d9e1ff61000938e267e4af27ae8849c5412240a23611f12ae1d4ac1571b0cd"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "b6f5a1eb8df2cdabe8900c127c1bd502bcdd42cbd029f1413a13f9c5bc6ca68b"
+    sha256 cellar: :any_skip_relocation, sonoma:        "5d229e6fc039c9ed1cbc9fb70ee63c7e05600175df765c01ee2da1f876d04d2a"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "f41a7c28b8498b914deb19c9cb710338273d48c59a1a8451453eb12c4d05fd17"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "721c01a21dc3c00cfe4497d0995c6386ac9c2e24ee76339051d2741826ab377c"
   end
 
   depends_on "go" => :build
@@ -25,7 +25,7 @@ class Hcloud < Formula
     ]
     system "go", "build", *std_go_args(ldflags:), "./cmd/hcloud"
 
-    generate_completions_from_executable(bin/"hcloud", "completion")
+    generate_completions_from_executable(bin/"hcloud", shell_parameter_format: :cobra)
   end
 
   test do

@@ -12,6 +12,8 @@ class Ucl < Formula
 
   bottle do
     rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:    "be21a9408fd10aabdb648f2c5075a234cd1308fd2628f6fb205751883835532f"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia:  "c2bf62c73925dcc1099836d528dd46f4f6f3fdae979f58584a930dbe92e89055"
     sha256 cellar: :any_skip_relocation, arm64_sonoma:   "efc85c20038e401439abb0d3889816554d0476e968422782c97661a9b5c51ef1"
     sha256 cellar: :any_skip_relocation, arm64_ventura:  "462fd1b3bf0382d5dd445f4d12b86f47e4577ab52a17d227b2c80a8e2faf5307"
     sha256 cellar: :any_skip_relocation, arm64_monterey: "4c7f82e2d2c969d71a2dbaca2cc6c0f2577c422a16281a981e3193535263803c"
@@ -21,13 +23,16 @@ class Ucl < Formula
     sha256 cellar: :any_skip_relocation, monterey:       "4317885999b8297a1919d5d65a9246efdd7bc1807fd2df4a9268a202fbf3a97c"
     sha256 cellar: :any_skip_relocation, big_sur:        "91ce0597dc8e648e4ee0d0caaa30bceb5f569acc90634d88fa5e7859f2ae682a"
     sha256 cellar: :any_skip_relocation, catalina:       "116db1f8157bf88831fece730fb3e6fa82420d53c29b032afd63b979df42b386"
-    sha256 cellar: :any_skip_relocation, mojave:         "89c37d38b41d5107f85c0880eb1599c885dafc2a7150a378c645b3fbe1f0e5ef"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "b6a1eb60e36db3e3b262b7953d6523e61dc6cf519c06eb6487bdd2f7efda29bc"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "f1733761c7ce4452219f15055b4d72ca6e287c9c18691d9aa66c4aae0349d28c"
   end
 
   depends_on "automake" => :build
 
   def install
+    # Workaround to build with newer GCC
+    ENV.append "CFLAGS", "-std=c90" if OS.linux?
+
     # Workaround for ancient ./configure file
     # Normally it would be cleaner to run "autoremake" to get a more modern one,
     # but the tarball doesn't seem to include all of the local m4 files that were used
@@ -39,14 +44,12 @@ class Ucl < Formula
          "acconfig/#{fn}"
     end
 
-    system "./configure", "--disable-debug",
-                          "--disable-dependency-tracking",
-                          "--prefix=#{prefix}"
+    system "./configure", *std_configure_args
     system "make", "install"
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       // simplified version of
       // https://github.com/korczis/ucl/blob/HEAD/examples/simple.c
       #include <stdio.h>
@@ -76,7 +79,7 @@ class Ucl < Formula
           ucl_free(in);
           return 0;
       }
-    EOS
+    C
     system ENV.cc, "test.c", "-L#{lib}", "-lucl", "-o", "test"
     system "./test"
   end

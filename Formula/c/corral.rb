@@ -1,19 +1,18 @@
 class Corral < Formula
   desc "Dependency manager for the Pony language"
   homepage "https://github.com/ponylang/corral"
-  url "https://github.com/ponylang/corral/archive/refs/tags/0.8.1.tar.gz"
-  sha256 "a6c95833ec4bd0fcdc2ba5dd3f5ab509c0a500a086f6be8df22f28c752148dc1"
+  url "https://github.com/ponylang/corral/archive/refs/tags/0.9.2.tar.gz"
+  sha256 "c6b0000fe2f5c451923988e2fc44da3f2a3c37dd35f2125239028edebdb408b5"
   license "BSD-2-Clause"
   head "https://github.com/ponylang/corral.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "47042034b51889ffb4e5c8e2e39bc6bee3b07913df912830e1ce7be697884de2"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "9e777fcf9a0d25fe2c433d1585abe5364313d83d17b479fc2ceba6f70f1fec08"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "02719312b46a15d2f5adc1bb9c1f7358f65c564e5a6106d36ff69c8ca28d2089"
-    sha256 cellar: :any_skip_relocation, sonoma:         "e3c26add1c6b56e36bbc4ae18dd54f5526bdb87a6f3a6eec0cb736448a824028"
-    sha256 cellar: :any_skip_relocation, ventura:        "9a0c150865035cd34404a2601389ce91844b4ca41e4e56b3272a6563fb0f0e5f"
-    sha256 cellar: :any_skip_relocation, monterey:       "9402ef0ff8a3b4a3363dd5b5d025139cd5a01890ddea26ad2614abc2171286c6"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "441af9edd92535db5a01d1c913744be72a7c9de65150a61aa6e3d23cb61451da"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "6f3de1320410cb39bc11d33df5cad6e582d890625cd335e86cb7989d0a386f68"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "3a562e1fe2715cef547ce09cf263d19b07b8bb20264a90b1a49782eed5e8ff4c"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "d4273e435e4df08d17fb7607379c1d978e76d8af4e7e83c57abe3a99d328abc5"
+    sha256 cellar: :any_skip_relocation, sonoma:        "3e715fac5e78e7b91e8e5f7ad998aac7133a8ab8197b2f6cd4f40cf547b89d4e"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "e91957a9613d01dcf70d745a9ee58142e325573b9ac051351796e669efa1b0fe"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "10b3afde7155d1a4ce99cd9e25442fd8cfa52052cc1abfc24469e99fd1f077e2"
   end
 
   depends_on "ponyc"
@@ -23,11 +22,11 @@ class Corral < Formula
   end
 
   test do
-    (testpath/"test/main.pony").write <<~EOS
+    (testpath/"test/main.pony").write <<~PONY
       actor Main
         new create(env: Env) =>
           env.out.print("Hello World!")
-    EOS
+    PONY
     system bin/"corral", "run", "--", "ponyc", "test"
     assert_equal "Hello World!", shell_output("./test1").chomp
   end

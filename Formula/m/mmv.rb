@@ -1,22 +1,23 @@
 class Mmv < Formula
   desc "Move, copy, append, and link multiple files"
   homepage "https://github.com/rrthomas/mmv"
-  url "https://github.com/rrthomas/mmv/releases/download/v2.7/mmv-2.7.tar.gz"
-  sha256 "11346686634000e22aa909e08d9d450237c4b61062779935cbd81df78efad72d"
+  url "https://github.com/rrthomas/mmv/releases/download/v2.10/mmv-2.10.tar.gz"
+  sha256 "2bbba14c099b512b4a7e9effacec53caa06998069d108a5669ff424ffc879d03"
   license "GPL-3.0-or-later"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "44f737a7861fc7692883eada12e02ecd673d2db2428e912b01e37fd1b5508e1c"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "a667fc3965a68ce82e8061940b2a2915cb30590b2302e3bb81f3feb92d9274d2"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "b59c98077002707111ce2e8b490db9be55cdf3e385d2cb75799f83c3a5a4cda1"
-    sha256 cellar: :any_skip_relocation, sonoma:         "5e002f3bd903786200bcd2798faac24e743c3fad64d8783c8c060fddeb9f630e"
-    sha256 cellar: :any_skip_relocation, ventura:        "28cf147b34c926e2128d916c0270f2bb7be13e3811aa7f9e6510b7cb2c6f9018"
-    sha256 cellar: :any_skip_relocation, monterey:       "5535a2af0359dcd6e5efe6d37fb7ba3d9d92dcd748ba63104497b9dc64007771"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "8fe30b30ee1bff52f9d14a95fbd17d99cb45359677dfaf4ca9ff6051596e4588"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "b9393ab6a8fa37ce23cc3ad7b991a01d6d3a81bb84a3cf5f4ae6e8aee4d4ee67"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "2b250b77db698b27f905bb70f9a51d543eebcb46473ef3e45cf1633ac5a1e218"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "6dffb0decf330e154afb5051a9120c158daa722d8526c1262b5983fd80378bda"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "223ee17e0352fb0555d0de4f10a3f41ccc32557ea1b4391f5179772adaf86fa9"
+    sha256 cellar: :any_skip_relocation, sonoma:        "7124ecddb8f17257dd6014e7b24b450237f01626dda1cf5e7523e67004f61418"
+    sha256 cellar: :any_skip_relocation, ventura:       "5db972a05a287b8d0f50be04ef2ebf6dcfef37e5553b56a4d29d4b84292e8197"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "0dcde0c3b0f9468bb0768250c4ceb47a63bc8ff2b9ffefc27a01cf01a947bbb3"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "eb72ba0164ea3fb58177cc5a9ee2470c1614913a78e86ed91fa3026e36f861c3"
   end
 
   depends_on "help2man" => :build # for patch
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "bdw-gc"
 
   def install
@@ -32,13 +33,13 @@ class Mmv < Formula
     (testpath/"b").write "2"
 
     assert_match "a -> b : old b would have to be deleted", shell_output("#{bin}/mmv -p a b 2>&1", 1)
-    assert_predicate testpath/"a", :exist?
+    assert_path_exists testpath/"a"
     assert_match "a -> b (*) : done", shell_output("#{bin}/mmv -d -v a b")
-    refute_predicate testpath/"a", :exist?
+    refute_path_exists testpath/"a"
     assert_equal "1", (testpath/"b").read
 
     assert_match "b -> c : done", shell_output("#{bin}/mmv -s -v b c")
-    assert_predicate testpath/"b", :exist?
+    assert_path_exists testpath/"b"
     assert_predicate testpath/"c", :symlink?
     assert_equal "1", (testpath/"c").read
   end

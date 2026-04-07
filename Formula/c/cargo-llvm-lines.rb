@@ -1,19 +1,18 @@
 class CargoLlvmLines < Formula
   desc "Count lines of LLVM IR per generic function"
   homepage "https://github.com/dtolnay/cargo-llvm-lines"
-  url "https://github.com/dtolnay/cargo-llvm-lines/archive/refs/tags/0.4.39.tar.gz"
-  sha256 "34b2b308a4d24247d75b19ef5e5e05d9f69e49e4c93958b45152aed7ad49ed85"
+  url "https://github.com/dtolnay/cargo-llvm-lines/archive/refs/tags/0.4.45.tar.gz"
+  sha256 "d1e6fb07760239c2f7ee1ee7e7a857ffb4f82df1378bbd0e4d2e8d75e74f13eb"
   license any_of: ["Apache-2.0", "MIT"]
   head "https://github.com/dtolnay/cargo-llvm-lines.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "5f9c06ff5a8ae5843a55d63332ace4490748a31cac7e8fb758133e0f43b13461"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "b117ba3261efc349bea91b29642abea1ecfaed7a2de2774daeacdacfe3058134"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "5e0c2fe08b98a9d30f8f54c015fb5a3c477cf0b333558043b198cc309e283d28"
-    sha256 cellar: :any_skip_relocation, sonoma:         "01dc30e345cdccc0de17c323c01584f72bea99905a910a71fd7bd054445a36dd"
-    sha256 cellar: :any_skip_relocation, ventura:        "53f73081e30ccd6272642527456fa45cb8d96545da30d651f85fc5bc757b1a6e"
-    sha256 cellar: :any_skip_relocation, monterey:       "42cb0d0ebf18f476b9f65f44a881ff2850604d2485d7c5a7f1f4752ab55359f8"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "63fc50e0b61320ff46b17d1535a15ba768bc39c9de9b72c7b8ff2e58fc1ced6a"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "1f96bc5657cec596d1c8345a7b33c2b8eb0dcb5e80e677b8c1bcc55ee7153f05"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "b003e01713c2c21b2ded471c1617b74d349574847e4ec18b9040e5aac73e5ddb"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "78435265c11559ef3470087d97d951ff12c1fa29590c1f485daf1fedf186001b"
+    sha256 cellar: :any_skip_relocation, sonoma:        "6710eaf6730d103df0bbddd44ff1b71b80dd1c69590798d5a325d71f97cafa1b"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "93bbb22430a1d3b4dd16d55a5ce5759a370b973cc8272aa528ae80881acedf89"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "b83bd2492130d970f7488f4c2ae35852e026a01a79f1668d52704a7977f4dc01"
   end
 
   depends_on "rust" => :build
@@ -27,8 +26,8 @@ class CargoLlvmLines < Formula
     # Show that we can use a different toolchain than the one provided by the `rust` formula.
     # https://github.com/Homebrew/homebrew-core/pull/134074#pullrequestreview-1484979359
     ENV.prepend_path "PATH", Formula["rustup"].bin
-    system "rustup", "default", "beta"
     system "rustup", "set", "profile", "minimal"
+    system "rustup", "default", "beta"
 
     system "cargo", "new", "hello_world", "--bin"
     cd "hello_world" do

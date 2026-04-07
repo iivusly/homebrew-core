@@ -1,66 +1,77 @@
 class Profanity < Formula
   desc "Console based XMPP client"
   homepage "https://profanity-im.github.io"
-  url "https://profanity-im.github.io/tarballs/profanity-0.14.0.tar.gz"
-  sha256 "fd23ffd38a31907974a680a3900c959e14d44e16f1fb7df2bdb7f6c67bd7cf7f"
+  url "https://profanity-im.github.io/tarballs/profanity-0.17.0.tar.xz"
+  sha256 "508e18c0e797d46cc38779eb207480fc3e93b814e202a351050f395c1b262804"
   license "GPL-3.0-or-later"
-  revision 2
+  head "https://github.com/profanity-im/profanity.git", branch: "master"
 
   bottle do
-    sha256 arm64_sonoma:   "796e4f6d0df72b4fba98c6767294a0c34126e507178f62c059305e1447b1d57c"
-    sha256 arm64_ventura:  "f3af3a72068af54c2a5dfed25f8b4974d484e2a1c6c04782e452999f03b04a7c"
-    sha256 arm64_monterey: "026ec8f456effae8170417422b863ffcc7defd02f660f03878522e8aa73fe467"
-    sha256 sonoma:         "9daaa88e4367a56347e0fe2697f8a838452ca069ac92d37aaa4161db13b59c5c"
-    sha256 ventura:        "18296f861b95ef07102130df116f8da3a442fe038524f3a235cd95a423891368"
-    sha256 monterey:       "fb5dc8733a2fe8c043c3a77a665af9c9a30acde98d1e74d2d195b8a2699fdaa4"
-    sha256 x86_64_linux:   "b5a3eda754ad116b984759d462ec0a691a74005e262c234d7bd5b812c66c2bb5"
+    sha256 arm64_tahoe:   "2f567c165e355a6aa6b0d577f03c856791df3ddebd3f9ffbd595665761efd073"
+    sha256 arm64_sequoia: "edf9f7f259796f41180caa949a6ebc8c84a383c4226c4a59a995001f6fefcf7d"
+    sha256 arm64_sonoma:  "693892cddb95d56dff09da433c86da52f38a51dd5c70ea58d26241595b62d34e"
+    sha256 sonoma:        "537fc9ab1f71f61916f5ec8ce45b58c6e6340fd01eca667d8d7320a6af546c39"
+    sha256 arm64_linux:   "4d2caeb7dbf41a46e3ff90c34689a864153f5866944fb6fa99ea8e270e3952b8"
+    sha256 x86_64_linux:  "ae8c6b511ccd488753ca14b0af9996c518ec7093ddb46c60868a966807bedb91"
   end
 
-  head do
-    url "https://github.com/profanity-im/profanity.git", branch: "master"
-
-    depends_on "autoconf" => :build
-    depends_on "autoconf-archive" => :build
-    depends_on "automake" => :build
-    depends_on "libtool" => :build
-  end
-
-  depends_on "libomemo-c" => :build
-  depends_on "pkg-config" => :build
-
-  depends_on "curl"
+  depends_on "meson" => :build
+  depends_on "ninja" => :build
+  depends_on "pkgconf" => :build
+  depends_on "gdk-pixbuf"
   depends_on "glib"
-  depends_on "gnutls"
   depends_on "gpgme"
+  depends_on "gtk+3"
   depends_on "libgcrypt"
+  depends_on "libomemo-c"
   depends_on "libotr"
   depends_on "libstrophe"
-  depends_on "python@3.12"
+  depends_on "libx11"
+  depends_on "libxscrnsaver"
+  depends_on "python@3.14"
+  depends_on "qrencode"
   depends_on "readline"
   depends_on "sqlite"
 
+  uses_from_macos "curl"
   uses_from_macos "ncurses"
 
   on_macos do
-    depends_on "gettext"
-    depends_on "libassuan"
-    depends_on "libgpg-error"
     depends_on "terminal-notifier"
   end
 
+  on_linux do
+    depends_on "libnotify"
+  end
+
+  # Fix missing imports for libomemo-c support: https://github.com/profanity-im/profanity/pull/2133
+  patch do
+    url "https://github.com/profanity-im/profanity/commit/9a501e6ecdaf65d28362e5888a0529fb734a353e.patch?full_index=1"
+    sha256 "ac0f514496890bbcbed9cee3f6a84387c64f3a299d9b2f700e07ae57bb887447"
+  end
+
   def install
-    ENV.prepend_path "PATH", Formula["python@3.12"].opt_libexec/"bin"
+    # Meson shells out to `brew --prefix readline` on macOS if `dependency("readline")`
+    # cannot resolve directly, so keep Homebrew's `brew` executable discoverable.
+    ENV.prepend_path "PATH", File.dirname(HOMEBREW_BREW_FILE)
 
-    system "./bootstrap.sh" if build.head?
+    args = %w[
+      -Dnotifications=enabled
+      -Dpython-plugins=enabled
+      -Dc-plugins=enabled
+      -Dotr=enabled
+      -Dpgp=enabled
+      -Domemo=enabled
+      -Domemo-backend=libomemo-c
+      -Domemo-qrcode=enabled
+      -Dicons-and-clipboard=enabled
+      -Dgdk-pixbuf=enabled
+      -Dxscreensaver=enabled
+    ]
 
-    # We need to pass `BREW` to `configure` to make sure it can be found inside the sandbox in non-default
-    # prefixes. `configure` knows to check `/opt/homebrew` and `/usr/local`, but the sanitised build
-    # environment will prevent any other `brew` installations from being found.
-    system "./configure", "--disable-silent-rules",
-                          "--enable-python-plugins",
-                          "BREW=#{HOMEBREW_BREW_FILE}",
-                          *std_configure_args.reject { |s| s["--disable-debug"] }
-    system "make", "install"
+    system "meson", "setup", "build", *std_meson_args, *args
+    system "meson", "compile", "-C", "build", "-v"
+    system "meson", "install", "-C", "build"
   end
 
   test do

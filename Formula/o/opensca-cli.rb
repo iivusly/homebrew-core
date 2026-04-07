@@ -1,19 +1,18 @@
 class OpenscaCli < Formula
   desc "OpenSCA is a supply-chain security tool for security researchers and developers"
   homepage "https://opensca.xmirror.cn"
-  url "https://github.com/XmirrorSecurity/OpenSCA-cli/archive/refs/tags/v3.0.5.tar.gz"
-  sha256 "3efd767629e58c9f05682e5e843efadef8544861c1f30e80f334c0daa9bca4e1"
+  url "https://github.com/XmirrorSecurity/OpenSCA-cli/archive/refs/tags/v3.0.10.tar.gz"
+  sha256 "9aa71e08e252e5a817e35d02c10f33e892e18005cf9f81080ef19a2455bdc696"
   license "Apache-2.0"
   head "https://github.com/XmirrorSecurity/OpenSCA-cli.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "dc3048f9e95a7e74fc62790f8add12b99eaeb457898eb4a2bc4b30797fea1c28"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "515633284e6f6e764e03e8013f2dbbdaf051968e7b6953f705dca454714ca4af"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "1005d2ae0cca98a7f18b2c2dd446f958a8ed51cf7b81a4157f236aa71fb1b0dd"
-    sha256 cellar: :any_skip_relocation, sonoma:         "ce17e0b3ac7d4b3db854526d3ee07e18fce5a26c246b34d0946e1250337ac80b"
-    sha256 cellar: :any_skip_relocation, ventura:        "8ee93fba6ea28c36415e85e282693662333eb9f419d7445c79465b99d59de153"
-    sha256 cellar: :any_skip_relocation, monterey:       "ad98af248ed82ba2556e9da245f5b23233fbe45eedb282567682fab3eab3d556"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "06a4099949014ccc6efe47696861472027e7fd2f9ce0cf2c39737693e394a85c"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "0f722830c0675e3acc563072214f4d2b616eef591a7541c135e6eb06f417ebf2"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "cfe931d6004e3b34851a74370340a5f3c2a34e04508ca1cd88f7d4bd65e31eb7"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "bc3a3bb01d6806ad313f7325b0391dc29b6c09b20b47b01a4d6191a5b2f5a1ee"
+    sha256 cellar: :any_skip_relocation, sonoma:        "a7c7918457e484925465509ecb78c2682002d424299b4bb8a7882407959e61ca"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "f2a276c9936bfca76d2310ac371e9ddecd589e499985703441e561a7696c2523"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "1e496d5b0b324d5d3777a2fdfb58374c9352ec55994511da9adaa30e80d5d1d3"
   end
 
   depends_on "go" => :build
@@ -25,7 +24,7 @@ class OpenscaCli < Formula
 
   test do
     system bin/"opensca-cli", "-path", testpath
-    assert_predicate testpath/"opensca.log", :exist?
-    assert_match version.to_s, shell_output(bin/"opensca-cli -version")
+    assert_path_exists testpath/"opensca.log"
+    assert_match version.to_s, shell_output("#{bin}/opensca-cli -version")
   end
 end

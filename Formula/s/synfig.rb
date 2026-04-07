@@ -1,34 +1,31 @@
 class Synfig < Formula
   desc "Command-line renderer"
-  homepage "https://synfig.org/"
+  homepage "https://www.synfig.org/"
   # TODO: Update livecheck to track only stable releases when 1.6.x is available.
-  url "https://downloads.sourceforge.net/project/synfig/development/1.5.2/source/synfig-1.5.2.tar.gz"
-  mirror "https://github.com/synfig/synfig/releases/download/v1.5.2/synfig-1.5.2.tar.gz"
-  sha256 "0a7cff341eb0bcd31725996ad70c1461ce5ddb3c3ee9f899abeb4a3e77ab420e"
+  url "https://github.com/synfig/synfig/releases/download/v1.5.5/synfig-1.5.5.tar.gz"
+  sha256 "95783c92925bd8ae494e00fdab0340caba9b19d2a0aac989fd8c200434b26f06"
   license "GPL-3.0-or-later"
-  revision 1
   head "https://github.com/synfig/synfig.git", branch: "master"
 
   livecheck do
     url :stable
-    regex(%r{url=.*?/synfig[._-]v?(\d+(?:\.\d+)+)\.t}i)
+    regex(/^v?(\d+(?:\.\d+)+)$/i)
   end
 
   bottle do
-    sha256 arm64_sonoma:   "215e214b9ebb1e44193cc9c9b72d79dc6f9a35a33f4bab89893c1943a553a38a"
-    sha256 arm64_ventura:  "005402c971bd3fff896a2b5953029bc47c74d9ad47c244b8876d37c0008b8acd"
-    sha256 arm64_monterey: "87580f412466c2cc5f6e871de5ae2f331831abc02d204dda705f00ca8c87e216"
-    sha256 sonoma:         "91327f9de2c7cfaa6d805338e5b7c9a4bc4f3c6e6166ee815de090f38e4b6c74"
-    sha256 ventura:        "d0eecbd0a7629c95a7e2d2b447ed88388772cb81a822cc0fb31e129fa17f108c"
-    sha256 monterey:       "a136f2dd2ce9ca0860ebbf517831b4ead42250a92e4fc2aeee0c88186f301d4e"
-    sha256 x86_64_linux:   "8756ad19dc3c0f2b49a0b07a8e07d4766df49f3aa6cdcc6ae1c95cadab4306b0"
+    sha256                               arm64_tahoe:   "0075ee7f2b25f9de48de93254a812e88fa322d69aa957f7ea5b6e476568a2fe2"
+    sha256                               arm64_sequoia: "5152754bac39e931dc349b505fcf372efb685c2cce060f4b55f699209ad1461a"
+    sha256                               arm64_sonoma:  "a42fa1cdaf0f9e9747cdc428856f7aae6a2d956ff2a02aa0b9813c0629711931"
+    sha256                               sonoma:        "5de592eda1f7ea792af3d7e997a57389caa25a865c68f0153c2a38287f8b12d4"
+    sha256                               arm64_linux:   "32554a263478194272fddda52532ee6a7cb8092cc470776c65cef8249bb72c39"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ea2ec08203b96158a0a24897ce37ff1a2f40d94ae01691df1f8df89f88f7cc33"
   end
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
   depends_on "intltool" => :build
   depends_on "libtool" => :build
-  depends_on "pkg-config" => [:build, :test]
+  depends_on "pkgconf" => [:build, :test]
 
   depends_on "cairo"
   depends_on "etl"
@@ -48,12 +45,12 @@ class Synfig < Formula
   depends_on "libsigc++@2"
   depends_on "libtool"
   depends_on "libxml++"
+  depends_on "libzip"
   depends_on "mlt"
   depends_on "openexr"
   depends_on "pango"
 
   uses_from_macos "perl" => :build
-  uses_from_macos "zlib"
 
   on_macos do
     depends_on "liblqr"
@@ -63,14 +60,18 @@ class Synfig < Formula
 
   on_linux do
     depends_on "perl-xml-parser" => :build
+    depends_on "zlib-ng-compat"
   end
 
-  fails_with gcc: "5"
-
   def install
-    ENV.prepend_path "PERL5LIB", Formula["perl-xml-parser"].libexec/"lib/perl5" unless OS.mac?
-
     ENV.cxx11
+
+    # Workaround to fix error: a template argument list is expected after
+    # a name prefixed by the template keyword [-Wmissing-template-arg-list-after-template-kw]
+    # PR ref: https://github.com/synfig/synfig/pull/3559
+    if DevelopmentTools.clang_build_version >= 1700
+      ENV.append_to_cflags "-Wno-missing-template-arg-list-after-template-kw"
+    end
 
     # missing install-sh in the tarball, and re-generate configure script
     # upstream bug report, https://github.com/synfig/synfig/issues/3398
@@ -83,7 +84,7 @@ class Synfig < Formula
   end
 
   test do
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include <stddef.h>
       #include <synfig/version.h>
       int main(int argc, char *argv[])
@@ -91,11 +92,10 @@ class Synfig < Formula
         const char *version = synfig::get_version();
         return 0;
       }
-    EOS
+    CPP
 
-    ENV.append_path "PKG_CONFIG_PATH", Formula["ffmpeg@6"].opt_lib/"pkgconfig"
-    pkg_config_flags = shell_output("pkg-config --cflags --libs libavcodec synfig").chomp.split
-    system ENV.cxx, "-std=c++11", "test.cpp", "-o", "test", *pkg_config_flags
+    pkgconf_flags = shell_output("pkgconf --cflags --libs libavcodec synfig").chomp.split
+    system ENV.cxx, "-std=c++11", "test.cpp", "-o", "test", *pkgconf_flags
     system "./test"
   end
 end

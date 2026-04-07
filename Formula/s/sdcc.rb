@@ -1,8 +1,8 @@
 class Sdcc < Formula
   desc "ANSI C compiler for Intel 8051, Maxim 80DS390, and Zilog Z80"
   homepage "https://sdcc.sourceforge.net/"
-  url "https://downloads.sourceforge.net/project/sdcc/sdcc/4.4.0/sdcc-src-4.4.0.tar.bz2"
-  sha256 "ae8c12165eb17680dff44b328d8879996306b7241efa3a83b2e3b2d2f7906a75"
+  url "https://downloads.sourceforge.net/project/sdcc/sdcc/4.5.0/sdcc-src-4.5.0.tar.bz2"
+  sha256 "d5030437fb436bb1d93a8dbdbfb46baaa60613318f4fb3f5871d72815d1eed80"
   license all_of: ["GPL-2.0-only", "GPL-3.0-only", :public_domain, "Zlib"]
   head "https://svn.code.sf.net/p/sdcc/code/trunk/sdcc"
 
@@ -12,42 +12,49 @@ class Sdcc < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "1b9ecefe9331bd7932a5b277188f2c05bab3d883bd22e0210336ce070a068b96"
-    sha256 arm64_ventura:  "a3feae25c1dc7b0e760862cdcea40bf246bb8367fb7e32713d60a72ca67b0198"
-    sha256 arm64_monterey: "b8d1facd553ec7e49cfe80d7ab70e81c89bed40920e82bf4dd02c5b93b1053ab"
-    sha256 sonoma:         "9e7802e6ad9355271be8782121f5ac27fa4de082f82e010f24e136eafc08d764"
-    sha256 ventura:        "473634c817b54b4709c3579e571c4005eb6ae4d856114f6c85bc2f271e5a1ade"
-    sha256 monterey:       "470dc349d2a3e87b91d0874d788199d31cbb1a2d8e74d2e98013cd11e67ea8fb"
-    sha256 x86_64_linux:   "41d0b195b867e851a31290fa8d2b51a5f53f47ae0873d7dc3ca54e6442219fc2"
+    rebuild 1
+    sha256 arm64_tahoe:   "42efbd33b94c29841d06d3e55dcdaca4d15c580283cafa557bcaa897d229c383"
+    sha256 arm64_sequoia: "d20234031c26f6ce70e990137707f6efdb58f44f0937874cec4ea58c02957a75"
+    sha256 arm64_sonoma:  "b33d78cfa452a144e36cb97e7fa6a21f4bb190d54db6bb66cb93a7dfc3f56661"
+    sha256 sonoma:        "923eff6fa7522d6ef4bb001edb69ed9372b8eb55a143f8f1b392b2ef82604719"
+    sha256 arm64_linux:   "52df93b8ad9113b0a8c560a1702c58f2743e1e39ddba31de70316446a34d9f5c"
+    sha256 x86_64_linux:  "93e44c24cbcd84f457b2e496d544261a4dfbd146824d36b6f86542727f570bae"
   end
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
-  depends_on "boost"
+  depends_on "boost" => :build
   depends_on "gputils"
   depends_on "readline"
 
   uses_from_macos "bison" => :build
   uses_from_macos "flex" => :build
 
+  on_macos do
+    depends_on "zstd"
+  end
+
   on_system :linux, macos: :ventura_or_newer do
     depends_on "texinfo" => :build
   end
 
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
+
   def install
-    system "./configure", "--prefix=#{prefix}"
-    system "make", "all"
+    system "./configure", "--disable-non-free", "--without-ccache", *std_configure_args
     system "make", "install"
-    rm Dir["#{bin}/*.el"]
+    elisp.install bin.glob("*.el")
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       int main() {
         return 0;
       }
-    EOS
-    system bin/"sdcc", "-mz80", "#{testpath}/test.c"
-    assert_predicate testpath/"test.ihx", :exist?
+    C
+    system bin/"sdcc", "-mz80", testpath/"test.c"
+    assert_path_exists testpath/"test.ihx"
   end
 end

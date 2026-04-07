@@ -1,19 +1,18 @@
 class WasmPack < Formula
   desc "Your favorite rust -> wasm workflow tool!"
-  homepage "https://rustwasm.github.io/wasm-pack/"
-  url "https://github.com/rustwasm/wasm-pack/archive/refs/tags/v0.13.0.tar.gz"
-  sha256 "d9eeb1116a584afc50ccb7c4ca15e0256453d4d2b4bc437b83f312b78432fdab"
+  homepage "https://wasm-bindgen.github.io/wasm-pack/"
+  url "https://github.com/wasm-bindgen/wasm-pack/archive/refs/tags/v0.14.0.tar.gz"
+  sha256 "60e866ce851219b18b7e16b2dbcd8323d5af0eac7d3a8a616bec3bd62fc051c4"
   license any_of: ["Apache-2.0", "MIT"]
-  head "https://github.com/rustwasm/wasm-pack.git", branch: "master"
+  head "https://github.com/wasm-bindgen/wasm-pack.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "9f9874054430a355a1b89f89a61ee567443b08034408848ea2921b7f98969499"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "ed6e00095ccaa2ba64277113d6a4e12d41a16933c61e94f8ba1ac2a666f2e9b5"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "19284846b04cc4435caed6a9ef012ea03fdb5dfdc35c9854c343b143e5cddb6b"
-    sha256 cellar: :any_skip_relocation, sonoma:         "92f0033ece6cc83109306625ab03dcbf3aafa11d350bb972d5dbf4d6babd1231"
-    sha256 cellar: :any_skip_relocation, ventura:        "e9fcecc4da9399e5db97298e3270fd7b1ae2b2664a45285eb7ad9b82d4ecaf85"
-    sha256 cellar: :any_skip_relocation, monterey:       "afbf975761f20b901d3b44540d0ba2cdd1493c4e8bf371b2c1577313faa55ff7"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "82499d28c9b6cbbc017bc939fbaef4b755c8605e4376da07dd1a482bdfdd02a7"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "31c12ac93a4e52a4b61b4bdb3e6fea208eaa93b9c30039babedc5957c0bc8d6a"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "f0ea3f4acbea89d2ef42c0b04336cbd739fe8abedc06199d708af7dfbe00bb7b"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "2551c330819e973202af932f61610c8f2d78144081aefb839cc66cd11bb329b0"
+    sha256 cellar: :any_skip_relocation, sonoma:        "c25bada8ea52c2d71c8f919567fc95cad7e9238bda41458cdbb5c160014c3708"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "8a5f303937f07117619ec2adb850245769636b4829c2cda9d9f3c6089879be82"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "a46421d5f180137993d83ea1f60b902e0678971a562e18397aab8c57b8ec479c"
   end
 
   depends_on "cmake" => :build
@@ -28,11 +27,18 @@ class WasmPack < Formula
     assert_match "wasm-pack #{version}", shell_output("#{bin}/wasm-pack --version")
 
     ENV.prepend_path "PATH", Formula["rustup"].bin
-    system "rustup", "default", "stable"
     system "rustup", "set", "profile", "minimal"
+    system "rustup", "default", "stable"
+
+    # Prevent Homebrew/CI AArch64 CPU features from bleeding into wasm32 builds
+    ENV.delete "RUSTFLAGS"
+    ENV.delete "CARGO_ENCODED_RUSTFLAGS"
+
+    # Explicitly enable reference-types to resolve "failed to find intrinsics" error
+    ENV["RUSTFLAGS"] = "-C target-feature=+reference-types"
 
     system bin/"wasm-pack", "new", "hello-wasm"
     system bin/"wasm-pack", "build", "hello-wasm"
-    assert_predicate testpath/"hello-wasm/pkg/hello_wasm_bg.wasm", :exist?
+    assert_path_exists testpath/"hello-wasm/pkg/hello_wasm_bg.wasm"
   end
 end

@@ -1,46 +1,43 @@
 class Osm2pgrouting < Formula
   desc "Import OSM data into pgRouting database"
   homepage "https://pgrouting.org/docs/tools/osm2pgrouting.html"
-  url "https://github.com/pgRouting/osm2pgrouting/archive/refs/tags/v2.3.8.tar.gz"
-  sha256 "e3a58bcacf0c8811e0dcf3cf3791a4a7cc5ea2a901276133eacf227b30fd8355"
+  url "https://github.com/pgRouting/osm2pgrouting/archive/refs/tags/v3.0.0.tar.gz"
+  sha256 "3d3042aa0dd30930d27801c9833ebfbe16eba0ab0e5d6277636ce17b157f2a0f"
   license "GPL-2.0-or-later"
-  revision 13
-  head "https://github.com/pgRouting/osm2pgrouting.git", branch: "main"
+  revision 1
+  head "https://github.com/pgRouting/osm2pgrouting.git", branch: "develop"
 
   bottle do
-    sha256 cellar: :any, arm64_sonoma:   "65d7687ba5f23d47d7ee737050706fcd2663cf185d6a8e35a6e8e6ff5cec2d87"
-    sha256 cellar: :any, arm64_ventura:  "88adc64e52319b44b1f3f0e73d9511a3e36db0040859d9b528aa76a02570666d"
-    sha256 cellar: :any, arm64_monterey: "81565a691a1f95000e45594e0f7c938d7960694c5e4722d013bc4fe4c54401ca"
-    sha256 cellar: :any, sonoma:         "1b1702478ac4b650960b2227dd605dc84a6e8d15c5da96d3973a700545425bfc"
-    sha256 cellar: :any, ventura:        "ed29492dadc022e58bb198e7ab20871d3c45272abacbd99d7c350c13d6ae0995"
-    sha256 cellar: :any, monterey:       "0f7cdcc3eb7ddbabf32a02836a733e709a0ebbcd0e4158316536daebf8b67246"
+    sha256 cellar: :any,                 arm64_tahoe:   "a91a2713349eee362e0573e68b3ec50eb81b9f9cfcb2eef36b9e487df9311da5"
+    sha256 cellar: :any,                 arm64_sequoia: "aea29e697c550c06589149f97088db0dca3cf7ebd577f62bd3901eb7ea042c49"
+    sha256 cellar: :any,                 arm64_sonoma:  "1eb36bc2d0a5fd533413f64d56b4a076636c42a6e56cc08833aae60a9eabc8d0"
+    sha256 cellar: :any,                 sonoma:        "dabb062d43c2eb3c333325fc23e21c0c8ef4f10cf1cc25702fea5ef6971a3479"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "6ca30d07f2c57c79fe534fe378a27df5be505ee58f30abb0295e5985650dbb6b"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "a4f6bed7ff0a1a0bfffc5c4a25a5e5874cb5fbad7c151ec861916bd8bf63d70c"
   end
 
   depends_on "cmake" => :build
   depends_on "boost"
-  depends_on "expat"
   depends_on "libpq"
   depends_on "libpqxx"
   depends_on "pgrouting"
   depends_on "postgis"
 
-  fails_with gcc: "5"
+  uses_from_macos "expat"
 
-  # Fix build failure due to missing include
-  # src/osm_elements/osm_tag.cpp:34:18: error: 'transform' is not a member of 'std'
-  patch :DATA
+  # Work around superenv to avoid mixing `expat` usage in libraries across dependency tree.
+  # Brew `expat` usage in Python has low impact as it isn't loaded unless pyexpat is used.
+  # TODO: Consider adding a DSL for this or change how we handle Python's `expat` dependency
+  def remove_brew_expat
+    env_vars = %w[CMAKE_PREFIX_PATH HOMEBREW_INCLUDE_PATHS HOMEBREW_LIBRARY_PATHS PATH PKG_CONFIG_PATH]
+    ENV.remove env_vars, /(^|:)#{Regexp.escape(Formula["expat"].opt_prefix)}[^:]*/
+    ENV.remove "HOMEBREW_DEPENDENCIES", "expat"
+  end
 
   def install
-    # Work around an Xcode 15 linker issue which causes linkage against LLVM's
-    # libunwind due to it being present in a library search path.
-    if DevelopmentTools.clang_build_version >= 1500
-      recursive_dependencies
-        .select { |d| d.name.match?(/^llvm(@\d+)?$/) }
-        .map { |llvm_dep| llvm_dep.to_formula.opt_lib }
-        .each { |llvm_lib| ENV.remove "HOMEBREW_LIBRARY_PATHS", llvm_lib }
-    end
+    remove_brew_expat if OS.mac? && MacOS.version < :sequoia
 
-    system "cmake", "-S", ".", "-B", "build", *std_cmake_args
+    system "cmake", "-S", ".", "-B", "build", "-DCMAKE_POLICY_VERSION_MINIMUM=3.5", *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
   end
@@ -49,17 +46,3 @@ class Osm2pgrouting < Formula
     system bin/"osm2pgrouting", "--help"
   end
 end
-
-__END__
-diff --git a/src/osm_elements/osm_tag.cpp b/src/osm_elements/osm_tag.cpp
-index 6f122ec..b41d6ff 100644
---- a/src/osm_elements/osm_tag.cpp
-+++ b/src/osm_elements/osm_tag.cpp
-@@ -20,6 +20,7 @@
-
-
- #include "osm_elements/osm_tag.h"
-+#include <algorithm>
- #include <string>
-
- namespace osm2pgr {

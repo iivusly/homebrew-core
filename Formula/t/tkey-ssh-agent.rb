@@ -1,8 +1,8 @@
 class TkeySshAgent < Formula
   desc "SSH agent for use with the TKey security stick"
   homepage "https://tillitis.se/"
-  url "https://github.com/tillitis/tkey-ssh-agent/archive/refs/tags/v1.0.0.tar.gz"
-  sha256 "abe43e1948101a5da007ff997161216ee7d44a54e3fa6b0aa255c22fcab11ae1"
+  url "https://github.com/tillitis/tkey-ssh-agent/archive/refs/tags/v1.1.1.tar.gz"
+  sha256 "cdd91008020d1c68778c8bc9869e77f230a314cb389621e3fa0aa1034283faea"
   license "GPL-2.0-only"
 
   livecheck do
@@ -11,13 +11,12 @@ class TkeySshAgent < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "858a66ab63cfde2b070de13ee0d7e440a13d3215c3fb8f97714fa28b5c20b4d5"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "c191dcb7265469492b7bdc6f9acd2acdee23149d96c5e91d74bd7a01c90a8d02"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "9b84ded0ad2a15580436087607efaf173b28356d4ce46ace2862947d4cb41b05"
-    sha256 cellar: :any_skip_relocation, sonoma:         "d3f4b8eeaf67e42b56043d539607a54f5a28eb6ecea69c3d62744ac027c8865d"
-    sha256 cellar: :any_skip_relocation, ventura:        "80ff5be57d0784f94c05403897524d25f26779a0474eb5699833134f575fa7d2"
-    sha256 cellar: :any_skip_relocation, monterey:       "464090fb25f2826ce0495ebd2d17c39276726044e3d6bc87ea22ceac9d7db469"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "9e001c74cb92e401e908892f2baedade9fc815124f6ca28b45db0c06c3599172"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "12f0f2068128036add825cab6c379ff57b17288e675ef771e44931fa8fb1aba1"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "83e57ea747aea61d45c1099babd1eab023581b3e43f56d3df3409bf02cd6a947"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "f3323c0dc0b5ea7e421a341443472bfbbfdc6934625c8d957dc1b80677df4fa7"
+    sha256 cellar: :any_skip_relocation, sonoma:        "207012f364b1ee24f1a1da21b05949e528ed3c09ef611fe593089ff3166ca2f0"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "843332db81352ee2130ed860b1ee03a30da62e881abc6d1a5b435ab0e2f5e68d"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "6dcd2f951740ed9dd9814e7009e66dbc3f7409cd8095083ca5f2e813e8d7723b"
   end
 
   depends_on "go" => :build
@@ -34,9 +33,7 @@ class TkeySshAgent < Formula
     ldflags = "-s -w -X main.version=#{version}"
     system "go", "build", *std_go_args(ldflags:), "./cmd/tkey-ssh-agent"
     man1.install "system/tkey-ssh-agent.1"
-  end
 
-  def post_install
     (var/"run").mkpath
     (var/"log").mkpath
   end
@@ -71,8 +68,8 @@ class TkeySshAgent < Formula
   test do
     assert_match version.to_s, shell_output("#{bin}/tkey-ssh-agent --version")
     socket = testpath/"tkey-ssh-agent.sock"
-    fork { exec bin/"tkey-ssh-agent", "--agent-socket", socket }
+    spawn bin/"tkey-ssh-agent", "--agent-socket", socket
     sleep 1
-    assert_predicate socket, :exist?
+    assert_path_exists socket
   end
 end

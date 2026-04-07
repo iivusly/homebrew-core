@@ -1,22 +1,21 @@
 class Baresip < Formula
   desc "Modular SIP useragent"
   homepage "https://github.com/baresip/baresip"
-  url "https://github.com/baresip/baresip/archive/refs/tags/v3.15.0.tar.gz"
-  sha256 "8618cfbdfcf80013cb4cabff413b9ff8a5db52fdf692fbf27a53133c34039d8e"
+  url "https://github.com/baresip/baresip/archive/refs/tags/v4.7.0.tar.gz"
+  sha256 "fa281d041e6c5d02f9f71b88524ca8fe05b54d37bbdf985f44fb6a034e02a604"
   license "BSD-3-Clause"
 
   bottle do
-    sha256 arm64_sonoma:   "64a39acdcf404375d86d58d4cc1e9d8110a4386e587cd3fc0544a45a733f45dd"
-    sha256 arm64_ventura:  "59364d7e3a8b2af467f083f9c10ff7c043eebfedc338468dc9b795f7dde19a45"
-    sha256 arm64_monterey: "b0e7396f3ef0336ef7b028489f9d233e62722b4afcf0cff9eda64316eb20a778"
-    sha256 sonoma:         "6667056046247d7fb4f1b8eb1782b44742cc105f0253260bd84fa1eb3da5ea5a"
-    sha256 ventura:        "20f82613c1d577a1a923507c443df43e2fb614bb63a66a33a750de0f47ba5289"
-    sha256 monterey:       "986e7852ef76b06fb5aadb599a661296f13c463e6e037b2936b7d40aae28c246"
-    sha256 x86_64_linux:   "2a2047e97f15d6e6342066396d2677cafa37448dbe0be2d5b3d0d652b839ba2e"
+    sha256 arm64_tahoe:   "03f6a32353e1147a8a70e483ddf28a4f0423b6932f2e8028a0c8a1d2ee03a541"
+    sha256 arm64_sequoia: "f7067437db59bf7c870a7383dcc2b7a880349532987673213575f869eb77950d"
+    sha256 arm64_sonoma:  "34b13de302e1ec33880078166a799a735e558dc3ba2b4c8f9c21a38c7e541f04"
+    sha256 sonoma:        "06c0431350efe08d713689776e9e559a10b8bc63ef1b0f78fae798b46011c15a"
+    sha256 arm64_linux:   "555db0a500acf127f89b074b4afb444fe1ad18387f2b430d514850130a6d397f"
+    sha256 x86_64_linux:  "3229e501f5738da0144381e939415389d02fb584b3fe8e22aeea617309415cc2"
   end
 
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "libre"
 
   on_macos do
@@ -24,13 +23,12 @@ class Baresip < Formula
   end
 
   def install
-    libre = Formula["libre"]
     args = %W[
       -DCMAKE_INSTALL_RPATH=#{rpath}
-      -DRE_INCLUDE_DIR=#{libre.opt_include}/re
+      -DRE_INCLUDE_DIR=#{Formula["libre"].opt_include}/re
     ]
-    system "cmake", "-B", "build", *args, *std_cmake_args
-    system "cmake", "--build", "build", "-j"
+    system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
+    system "cmake", "--build", "build"
     system "cmake", "--install", "build"
   end
 

@@ -6,7 +6,11 @@ class QuartzWm < Formula
   sha256 "11a344d8ad9375b61461f0e90b465bc569e60ce973f78e84d3476e7542065be0"
   license "APSL-2.0"
 
+  no_autobump! because: :incompatible_version_format
+
   bottle do
+    sha256 cellar: :any, arm64_tahoe:    "06ea0e9f6b34bc42af50738f3d878afd8cd0ebbf1cb5df938fdd8b1295e9c965"
+    sha256 cellar: :any, arm64_sequoia:  "4c47db2f95f422bf84be4900c8ed90c96f5337a34c0a6279f524b618671c2425"
     sha256 cellar: :any, arm64_sonoma:   "8383efc0dafe5d0f14b6dd255b3f4a336ff8b5ad347005fab412e0b466bf3253"
     sha256 cellar: :any, arm64_ventura:  "a6c735c400154429cb612b7886bdcab1337a7e1b65e2c94a14bef1404e6aa4dd"
     sha256 cellar: :any, arm64_monterey: "cabeb2c482930b2f1e03a6328659546bd6847497a56c838f48efb86678cf798b"
@@ -20,7 +24,7 @@ class QuartzWm < Formula
   depends_on "autoconf"    => :build
   depends_on "automake"    => :build
   depends_on "libtool"     => :build
-  depends_on "pkg-config"  => :build
+  depends_on "pkgconf"     => :build
   depends_on "util-macros" => :build
   depends_on "xorg-server" => :test
 
@@ -40,16 +44,9 @@ class QuartzWm < Formula
   end
 
   test do
+    spawn Formula["xorg-server"].bin/"Xvfb", ":1"
     ENV["DISPLAY"] = ":1"
-
-    fork do
-      exec Formula["xorg-server"].bin/"Xvfb", ":1"
-    end
-
-    sleep 5
-
-    fork do
-      exec bin/"quartz-wm"
-    end
+    sleep 10
+    spawn bin/"quartz-wm"
   end
 end

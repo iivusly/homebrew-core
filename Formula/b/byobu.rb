@@ -1,8 +1,8 @@
 class Byobu < Formula
   desc "Text-based window manager and terminal multiplexer"
   homepage "https://github.com/dustinkirkland/byobu"
-  url "https://github.com/dustinkirkland/byobu/archive/refs/tags/6.12.tar.gz"
-  sha256 "abb000331858609dfda9214115705506249f69237625633c80487abe2093dd45"
+  url "https://github.com/dustinkirkland/byobu/archive/refs/tags/6.15.tar.gz"
+  sha256 "2d670627aeb068447654b78fd83901ea4b0d08df59f6fa0721d61cb1fc2f56ae"
   license "GPL-3.0-only"
 
   livecheck do
@@ -11,17 +11,18 @@ class Byobu < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, all: "bafc7a347cbae8dfe9acea444716c905e64d3cb3bb74ba549d03b48341fa2409"
+    sha256 cellar: :any_skip_relocation, all: "905dc94353f90aa5dc34dda6befa9631b9131e97c5dabd6969d6f8bdd37d5585"
   end
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
-  depends_on "gettext"
+
   depends_on "newt"
   depends_on "tmux"
 
   on_macos do
     depends_on "coreutils"
+    depends_on "gettext"
   end
 
   conflicts_with "ctail", because: "both install `ctail` binaries"
@@ -30,7 +31,8 @@ class Byobu < Formula
     cp "./debian/changelog", "./ChangeLog"
     system "autoreconf", "--force", "--install", "--verbose"
     system "./configure", *std_configure_args
-    system "make", "install"
+    system "make"
+    ENV.deparallelize { system "make", "install" }
 
     byobu_python = Formula["newt"].deps
                                   .find { |d| d.name.match?(/^python@\d\.\d+$/) }

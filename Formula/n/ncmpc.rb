@@ -1,9 +1,10 @@
 class Ncmpc < Formula
   desc "Curses Music Player Daemon (MPD) client"
   homepage "https://www.musicpd.org/clients/ncmpc/"
-  url "https://www.musicpd.org/download/ncmpc/0/ncmpc-0.49.tar.xz"
-  sha256 "65bbec0ede9e6bcf62ac647b0c706485beb2bdd5db70ca8d60103f32f162cf29"
+  url "https://www.musicpd.org/download/ncmpc/0/ncmpc-0.52.tar.xz"
+  sha256 "3af225496fe363a8534a9780fb46ae1bd17baefd80cf4ba7430a19cddd73eb1a"
   license "GPL-2.0-or-later"
+  revision 1
 
   livecheck do
     url "https://www.musicpd.org/download/ncmpc/0/"
@@ -11,31 +12,39 @@ class Ncmpc < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "a77a6d24bf2507a9059e103ef4f3c9bbc0161c542a12e0e366e15cf8b0c2bd25"
-    sha256 arm64_ventura:  "15989335a5bc1062e17991a3a1db21beaeb884f6a40a019e3858ba44ccd844d1"
-    sha256 arm64_monterey: "d6c9bf0666b53074ecb94a3ba567768bd4de62800896e4f9adccf2e818bdb45f"
-    sha256 arm64_big_sur:  "0e141cf84da309476a6f32e93b378fb1b6ed69611aef8e801f4686f4dd8cf488"
-    sha256 sonoma:         "029393700d3b2d588df2d80bda58aabdb70c7b56c0f63c90be70765a738c57e3"
-    sha256 ventura:        "a6af63f5f197e00bd933ae8fff37ffdb957dd67c0337dcdfe8d48762d2774561"
-    sha256 monterey:       "a54816a8a15927f3fad83fe079e3fe78dec18f2f7556483a7ce51882cae0d3fa"
-    sha256 big_sur:        "8711f7bddb05dfcdb2c8b8060efda8e03b0595dac98dcdb0c33781ecc0f20f44"
-    sha256 x86_64_linux:   "08a6994f6f47fbfd0f1ea6d947f840dd9e110ecbdcbd8555041ba002e27a8ca9"
+    sha256 arm64_tahoe:   "79925b06f7a4619e7e1e062db3ce4cac42646b6e3152de52554cad995969cbe1"
+    sha256 arm64_sequoia: "0f280c690e83b4c4d4cb20aca9084c5bbcafb8046ac0c90b524f001ca4a45fcf"
+    sha256 arm64_sonoma:  "4047ec4992db95e0b22057f9164dfcbbf69104d765674f62d5acb502e56c61e2"
+    sha256 sonoma:        "57f3acdb57163d256a7470b702b6630cf79585c84822cfc6b1d10784c18a8fcc"
+    sha256 arm64_linux:   "40bc8c01c1dfcd01f160e9ee0286225a681ebcf2962a47d820137d54a5bc50c8"
+    sha256 x86_64_linux:  "8244e48ef47afc6f03c012409429e6fd1c2c8631a53a197d31b0df9ac88a7628"
   end
 
   depends_on "boost" => :build
+  depends_on "gettext" => :build
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => :build
-  depends_on "gettext"
+  depends_on "pkgconf" => :build
+
+  depends_on "fmt"
   depends_on "libmpdclient"
   depends_on "pcre2"
 
+  uses_from_macos "ncurses"
+
   on_macos do
-    depends_on "llvm" => :build if DevelopmentTools.clang_build_version <= 1300
+    depends_on "gettext"
+    depends_on "llvm" if DevelopmentTools.clang_build_version <= 1500
+
+    # Fixes: error: use of undeclared identifier 'strcoll_l'
+    patch do
+      url "https://github.com/MusicPlayerDaemon/ncmpc/commit/af478b5ba2447592c640c5b7f86c47d9a412c639.patch?full_index=1"
+      sha256 "193f6c3192ba39974a2f1ef4935c623d58e0614f9978b2e6545c6231fd5ffdb5"
+    end
   end
 
   fails_with :clang do
-    build 1300
+    build 1500
     cause "Requires C++20"
   end
 
@@ -45,8 +54,6 @@ class Ncmpc < Formula
   end
 
   def install
-    ENV.llvm_clang if OS.mac? && (DevelopmentTools.clang_build_version <= 1300)
-
     system "meson", "setup", "build", "-Dcolors=false", "-Dnls=enabled", "-Dregex=enabled", *std_meson_args
     system "meson", "compile", "-C", "build", "--verbose"
     system "meson", "install", "-C", "build"

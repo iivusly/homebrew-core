@@ -1,9 +1,10 @@
 class Talloc < Formula
   desc "Hierarchical, reference-counted memory pool with destructors"
   homepage "https://talloc.samba.org/"
-  url "https://www.samba.org/ftp/talloc/talloc-2.4.2.tar.gz"
-  sha256 "85ecf9e465e20f98f9950a52e9a411e14320bc555fa257d87697b7e7a9b1d8a6"
+  url "https://www.samba.org/ftp/talloc/talloc-2.4.4.tar.gz"
+  sha256 "55e47994018c13743485544e7206780ffbb3c8495e704a99636503e6e77abf59"
   license "GPL-3.0-or-later"
+  compatibility_version 1
 
   livecheck do
     url "https://www.samba.org/ftp/talloc/"
@@ -11,13 +12,12 @@ class Talloc < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "735391b7b483e6445dfbf14c0c45f563d57348edd6f9ba2c62d3d28cb40d73a8"
-    sha256 cellar: :any,                 arm64_ventura:  "10a6626844a9157e5b7250db70fc230920a7b216115983e50481ca2ad798277e"
-    sha256 cellar: :any,                 arm64_monterey: "4e3a718a021474b1d2fb1d726dd862436079a7af0d1e92a0119cf5eefeff6228"
-    sha256 cellar: :any,                 sonoma:         "ff79b75b2642777c53198e3a993e65e5df618a972f2d3bf4f4df8a83443a3a16"
-    sha256 cellar: :any,                 ventura:        "a9df241ae263f4f08c0ce968000e213e015633e153668e693db123c06c50b8c7"
-    sha256 cellar: :any,                 monterey:       "294d224f5f6f26b9d1a71c747cf42947242e0385235185da48178f5b95e0a380"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "19b80b6e3c9e4ed4bb1ccdaf1d5270e032e99e944cd105f25cc9b295350849e0"
+    sha256 cellar: :any,                 arm64_tahoe:   "43e94268855378635002149f973c14b5da328ac90a27c1c64556123b8b8866d4"
+    sha256 cellar: :any,                 arm64_sequoia: "73396ffac450d962f1b798039a86cbbbeac57e4e1ed922d4fecc03e347585601"
+    sha256 cellar: :any,                 arm64_sonoma:  "9d10a64fc6fc482cfb58487a5b8020f819989f91111d4573e2e4160fc391f53e"
+    sha256 cellar: :any,                 sonoma:        "e593faad8218064edc4531ecdd7774dfbf1dfdbe612ca538f8058e32d0babd20"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "9f880a4f3119f311fd97e29e14805a8afd85f25a9ad1698fb5818f5202495b05"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "91876f82f97fedcb67b3529e3927390b3056047b3cf0d43cb2741fa289ce399d"
   end
 
   uses_from_macos "python" => :build
@@ -31,7 +31,7 @@ class Talloc < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <talloc.h>
       int main()
       {
@@ -46,7 +46,7 @@ class Talloc < Formula
         talloc_free(tmp_ctx);
         return ret;
       }
-    EOS
+    C
     system ENV.cc, "test.c", "-I#{include}", "-L#{lib}", "-ltalloc", "-o", "test"
     system testpath/"test"
   end

@@ -1,8 +1,8 @@
 class Rmw < Formula
   desc "Trashcan/recycle bin utility for the command-line"
   homepage "https://theimpossibleastronaut.github.io/rmw-website/"
-  url "https://github.com/theimpossibleastronaut/rmw/releases/download/v0.9.2/rmw-0.9.2.tar.xz"
-  sha256 "f1a7003f920297b0d1904c7c79debc06fbb00e1ef62871615a4fe836715a889d"
+  url "https://github.com/theimpossibleastronaut/rmw/releases/download/v0.9.4/rmw-0.9.4.tar.xz"
+  sha256 "81c6b7f1868695f4662be45a5e645fd149fda362e8ec1a822d74d735735ba808"
   license "GPL-3.0-or-later"
   head "https://github.com/theimpossibleastronaut/rmw.git", branch: "master"
 
@@ -12,23 +12,26 @@ class Rmw < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "29b9e30ceb600ae6b8af8f170a72228b6734aee040fd8c48b79d98fed477be32"
-    sha256 arm64_ventura:  "9f1dc8c2a1ba4631f3502959d988473e9a55f915a02a0ba8f06f1279846538df"
-    sha256 arm64_monterey: "89fda4126f92fe441a6bbd56640aabdcddfc4383aca9214e82914c4f8b79cead"
-    sha256 sonoma:         "cdfcd0de3451565df2df12264e14616c144d139508374eec2fea96c0cb4b642d"
-    sha256 ventura:        "43ccd75b06bf85779799c91368cb91bdc43ca38449a74b3d7706df10b337afde"
-    sha256 monterey:       "4e655492692254ffab63eb9e73193463187f848a0a1583ff4f246a0e1e573fbd"
-    sha256 x86_64_linux:   "1b4a5d2dc6c56247cf6abcff5ef01f7262b3d749a559c4f741e99b8483cca099"
+    sha256 arm64_tahoe:   "84a5f3d95667b0b73a17a49d4649fda233e9abb44097225efa537f99399fed86"
+    sha256 arm64_sequoia: "1446355fe36c6c169635c74e0a40b478877f690b7f201aa0b23921d2ad225a15"
+    sha256 arm64_sonoma:  "7bd3f9d80d766ab2cf306ff6840a99858bc9e93b6a710100f0cca9c2558508b0"
+    sha256 sonoma:        "07ecdebd01dfd87db1e36cc87fa5255f70c8d8c7d4fc730b7bb3cffe269a7613"
+    sha256 arm64_linux:   "ab15e030b9ed1c6883dcc6c3e574d3d5741dcfdfb6dc3e0e23a0e422f81bd8e5"
+    sha256 x86_64_linux:  "3a5eab29ba4ed0ef73d00edf9e33fb2bd424d775973cfaed388360dca1938686"
   end
 
+  depends_on "gettext" => :build
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "canfigger"
-  depends_on "gettext"
   # Slightly buggy with system ncurses
   # https://github.com/theimpossibleastronaut/rmw/issues/205
   depends_on "ncurses"
+
+  on_macos do
+    depends_on "gettext"
+  end
 
   def install
     system "meson", "setup", "build", "-Db_sanitize=none", *std_meson_args
@@ -40,9 +43,9 @@ class Rmw < Formula
     file = testpath/"foo"
     touch file
     assert_match "removed", shell_output("#{bin}/rmw #{file}")
-    refute_predicate file, :exist?
+    refute_path_exists file
     system bin/"rmw", "-u"
-    assert_predicate file, :exist?
+    assert_path_exists file
     assert_match "/.local/share/Waste", shell_output("#{bin}/rmw -l")
     assert_match "purging is disabled", shell_output("#{bin}/rmw -vvg")
   end

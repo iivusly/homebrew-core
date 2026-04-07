@@ -1,19 +1,18 @@
 class Bounceback < Formula
   desc "Stealth redirector for red team operation security"
   homepage "https://github.com/D00Movenok/BounceBack"
-  url "https://github.com/D00Movenok/BounceBack/archive/refs/tags/v1.5.1.tar.gz"
-  sha256 "6d65d82fc702728aecab608fff8437f4920c4deeea18351e9978f0f400e64ca7"
+  url "https://github.com/D00Movenok/BounceBack/archive/refs/tags/v1.5.3.tar.gz"
+  sha256 "47673a62ab5fdef6d1d34e5ce84b0f9faa0e481a50a0580276a2b89544d067f3"
   license "MIT"
   head "https://github.com/D00Movenok/BounceBack.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "0376b68002fbcfdc2dfed3fa9cab94cfaa8c81fa6e4fbe81964cd51ae99f428c"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "07be63668fea95277e1dfc474dfda6f49645bcb1e024bcebc22995ba60ae2491"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "8b4d186fe33acd339d8782897a16bcdef1677296c9fc8e0dd517f7ac1455de68"
-    sha256 cellar: :any_skip_relocation, sonoma:         "6ff969438b2dbf80d762d79d9be4d5d3057a6fd16501aa3a9d64525863350386"
-    sha256 cellar: :any_skip_relocation, ventura:        "489f7fbe868db0acbeb2ba5a655174a1c73edcb3a350d8bba163e3a54276f438"
-    sha256 cellar: :any_skip_relocation, monterey:       "b349939b90fc5ca637cfbb9780e3cfc48179f5a86ab5794f0b3fa9cd7beb08c6"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "834127906e053cf93616455abd4489179cd434a50377278575d1344d07c74dff"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "e7096c878b874f7954b658549c2498418a7bf5ca840ee6f8d0e28438269925c9"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "e7096c878b874f7954b658549c2498418a7bf5ca840ee6f8d0e28438269925c9"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "e7096c878b874f7954b658549c2498418a7bf5ca840ee6f8d0e28438269925c9"
+    sha256 cellar: :any_skip_relocation, sonoma:        "461ef1bbbee371072559282a90e6c41009f20b5f2c2411edf5cc77ec72100a19"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "73bc1080c0f6c4b689e82e5bf20ba1188d9eae00100dac6814d9f781e3652685"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "80740283f2ee9072d209356cf0d831b2ad37a4aa785a14cd93dda9891bf6e184"
   end
 
   depends_on "go" => :build
@@ -24,9 +23,7 @@ class Bounceback < Formula
 
     pkgshare.install "data"
     # update relative data path to homebrew pkg path
-    inreplace "config.yml" do |s|
-      s.gsub! " data", " #{pkgshare}/data"
-    end
+    inreplace "config.yml", " data", " #{pkgshare}/data"
     etc.install "config.yml" => "bounceback.yml"
   end
 
@@ -39,11 +36,12 @@ class Bounceback < Formula
   end
 
   test do
-    fork do
-      exec bin/"bounceback", "--config", etc/"bounceback.yml"
-    end
+    pid = spawn bin/"bounceback", "--config", etc/"bounceback.yml"
     sleep 2
     assert_match "\"message\":\"Starting proxies\"", (testpath/"bounceback.log").read
     assert_match version.to_s, shell_output("#{bin}/bounceback --help", 2)
+  ensure
+    Process.kill("TERM", pid)
+    Process.wait(pid)
   end
 end

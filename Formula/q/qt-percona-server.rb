@@ -1,99 +1,89 @@
 class QtPerconaServer < Formula
   desc "Qt SQL Database Driver"
   homepage "https://www.qt.io/"
-  url "https://download.qt.io/official_releases/qt/6.7/6.7.0/submodules/qtbase-everywhere-src-6.7.0.tar.xz"
-  sha256 "11b2e29e2e52fb0e3b453ea13bbe51a10fdff36e1c192d8868c5a40233b8b254"
+  url "https://download.qt.io/official_releases/qt/6.11/6.11.0/submodules/qtbase-everywhere-src-6.11.0.tar.xz"
+  mirror "https://qt.mirror.constant.com/archive/qt/6.11/6.11.0/submodules/qtbase-everywhere-src-6.11.0.tar.xz"
+  mirror "https://mirrors.ukfast.co.uk/sites/qt.io/archive/qt/6.11/6.11.0/submodules/qtbase-everywhere-src-6.11.0.tar.xz"
+  sha256 "231ad85979864d914dc9568a1b71c91d6cf20d7b2021d059103bf0eb51cb755e"
   license any_of: ["GPL-2.0-only", "GPL-3.0-only", "LGPL-3.0-only"]
 
   livecheck do
-    formula "qt"
+    formula "qtbase"
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "7d05b7354bbddba75b7aa113afd2b35e59aab6a45f4ccaf74e61fc5297dba5b8"
-    sha256 cellar: :any,                 arm64_ventura:  "c2018a73accfb05d9a7a3c3b9f52fe62a662153caf7c68a0d616ea1972bffe18"
-    sha256 cellar: :any,                 arm64_monterey: "1546fa626dc78c0e12e16329c8f8a7c7686799a7da660fc91deb2e0b8514f30b"
-    sha256 cellar: :any,                 sonoma:         "4eb7ec934197e39264477d87bf7888e93658b70213320c0b09618c8c1bf93a66"
-    sha256 cellar: :any,                 ventura:        "dcc7d37417591e950049d60e3b568919d01113a3d8692c7fb684aa16d56d5d7b"
-    sha256 cellar: :any,                 monterey:       "df7a248a8e460a30ce07aec13faafa7919b183fb792000622e6cf585af383fde"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "96595854460237a907b8af5045dd219020b0092d1a4e984d1d120739c64466a6"
+    sha256 cellar: :any,                 arm64_tahoe:   "bae423d69b940ff6d17c8993be45d7bf2536a7aeb9ac785d97ab457f52a333c0"
+    sha256 cellar: :any,                 arm64_sequoia: "965ac3f480066c43fa7ede2856fe348ee56fbcb4304a6fdbe5e76c81ebd0deab"
+    sha256 cellar: :any,                 arm64_sonoma:  "32491f8b0ead01a8718b707e92ec28d85ad571c8d9522932c76f2389535a018e"
+    sha256 cellar: :any,                 sonoma:        "a0b2c6b3374a2e315433f073e5a3bcb917a6c7a4c587754bbd4d3dc0b77e9d70"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "0801fde6ce65723933b16aab806ec7bf2f16027e0c6abd39069f7d386a273af6"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "212257a3aae365f9fbc189e6f6b916c958ddfebf476a7281c3320610bcb34b2d"
   end
 
   depends_on "cmake" => [:build, :test]
-  depends_on "pkg-config" => :build
+  depends_on "ninja" => :build
 
   depends_on "percona-server"
-  depends_on "qt"
+  depends_on "qtbase"
 
-  conflicts_with "qt-mysql", "qt-mariadb",
-    because: "qt-mysql, qt-mariadb, and qt-percona-server install the same binaries"
-
-  fails_with gcc: "5"
+  conflicts_with "qt-mysql", "qt-mariadb", because: "both install the same binaries"
 
   def install
-    args = std_cmake_args + %W[
+    args = %W[
       -DCMAKE_STAGING_PREFIX=#{prefix}
-
       -DFEATURE_sql_ibase=OFF
       -DFEATURE_sql_mysql=ON
       -DFEATURE_sql_oci=OFF
       -DFEATURE_sql_odbc=OFF
       -DFEATURE_sql_psql=OFF
       -DFEATURE_sql_sqlite=OFF
-
-      -DMySQL_LIBRARY=#{Formula["percona-server"].opt_lib}/#{shared_library("libperconaserverclient")}
+      -DMySQL_LIBRARY=#{Formula["percona-server"].opt_lib/shared_library("libperconaserverclient")}
+      -DQT_GENERATE_SBOM=OFF
     ]
+    args << "-DQT_NO_APPLE_SDK_AND_XCODE_CHECK=ON" if OS.mac?
 
-    cd "src/plugins/sqldrivers" do
-      system "cmake", "-S", ".", "-B", "build", *args
-      system "cmake", "--build", "build"
-      system "cmake", "--install", "build"
-    end
+    system "cmake", "-S", "src/plugins/sqldrivers", "-B", "build", "-G", "Ninja", *args, *std_cmake_args
+    system "cmake", "--build", "build"
+    system "cmake", "--install", "build"
   end
 
   test do
-    (testpath/"CMakeLists.txt").write <<~EOS
-      cmake_minimum_required(VERSION 3.16.0)
+    (testpath/"CMakeLists.txt").write <<~CMAKE
+      cmake_minimum_required(VERSION 4.0)
       project(test VERSION 1.0.0 LANGUAGES CXX)
-      set(CMAKE_CXX_STANDARD 17)
-      set(CMAKE_CXX_STANDARD_REQUIRED ON)
-      set(CMAKE_AUTOMOC ON)
-      set(CMAKE_AUTORCC ON)
-      set(CMAKE_AUTOUIC ON)
       find_package(Qt6 COMPONENTS Core Sql REQUIRED)
-      add_executable(test
-          main.cpp
-      )
+      qt_standard_project_setup()
+      qt_add_executable(test main.cpp)
       target_link_libraries(test PRIVATE Qt6::Core Qt6::Sql)
-    EOS
+    CMAKE
 
-    (testpath/"test.pro").write <<~EOS
-      QT       += core sql
-      QT       -= gui
-      TARGET = test
-      CONFIG   += console
-      CONFIG   -= app_bundle
+    (testpath/"test.pro").write <<~QMAKE
+      QT      += core sql
+      QT      -= gui
+      TARGET   = test
+      CONFIG  += console
+      CONFIG  -= app_bundle
       TEMPLATE = app
       SOURCES += main.cpp
-    EOS
+    QMAKE
 
-    (testpath/"main.cpp").write <<~EOS
+    (testpath/"main.cpp").write <<~CPP
       #include <QCoreApplication>
       #include <QtSql>
       #include <cassert>
       int main(int argc, char *argv[])
       {
-        QCoreApplication::addLibraryPath("#{share}/qt/plugins");
         QCoreApplication a(argc, argv);
         QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL");
         assert(db.isValid());
         return 0;
       }
-    EOS
+    CPP
 
-    system "cmake", "-DCMAKE_BUILD_TYPE=Debug", testpath
-    system "make"
-    system "./test"
+    ENV["LC_ALL"] = "en_US.UTF-8"
+    system "cmake", "-S", ".", "-B", "build"
+    system "cmake", "--build", "build"
+    system "./build/test"
 
     ENV.delete "CPATH"
     system "qmake"

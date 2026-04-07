@@ -1,19 +1,13 @@
 class Inxi < Formula
   desc "Full featured CLI system information tool"
   homepage "https://smxi.org/docs/inxi.htm"
-  url "https://codeberg.org/smxi/inxi/archive/3.3.35-1.tar.gz"
-  sha256 "08e43312bc60435d770607c3611f2fa35478ea0f48c60d5d5fd60ab2ee421f2e"
+  url "https://codeberg.org/smxi/inxi/archive/3.3.40-1.tar.gz"
+  sha256 "b3f307f06c3b969bd65151d39729b97a767af42fddd3d9bab971135c0e7cd873"
   license "GPL-3.0-or-later"
   head "https://codeberg.org/smxi/inxi.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "9fb5b8e89607a8168c5afd2a000c8d30ae4d791f43307456bdc5935fe76a2856"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "9fb5b8e89607a8168c5afd2a000c8d30ae4d791f43307456bdc5935fe76a2856"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "9fb5b8e89607a8168c5afd2a000c8d30ae4d791f43307456bdc5935fe76a2856"
-    sha256 cellar: :any_skip_relocation, sonoma:         "9c3e0ead40b496916e109f692bbc55f131a415da1e1976b58c478d91a96e5adb"
-    sha256 cellar: :any_skip_relocation, ventura:        "9c3e0ead40b496916e109f692bbc55f131a415da1e1976b58c478d91a96e5adb"
-    sha256 cellar: :any_skip_relocation, monterey:       "9c3e0ead40b496916e109f692bbc55f131a415da1e1976b58c478d91a96e5adb"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "be7db540b44c91bd65ef2f298d6cfbaaeda79d2e37907704594c3d6fa33dc209"
+    sha256 cellar: :any_skip_relocation, all: "d5477e01b33fb03b8b0083054edb4594277f16c35210bffb81d2ebb5192d2129"
   end
 
   uses_from_macos "perl"
@@ -21,6 +15,9 @@ class Inxi < Formula
   def install
     bin.install "inxi"
     man1.install "inxi.1"
+
+    # Build an `:all` bottle
+    inreplace "inxi.changelog", "/usr/local/etc/inxi", "#{HOMEBREW_PREFIX}/etc/inxi"
 
     ["LICENSE.txt", "README.txt", "inxi.changelog"].each do |file|
       prefix.install file

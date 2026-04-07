@@ -1,17 +1,18 @@
 class Sshfs < Formula
   desc "File system client based on SSH File Transfer Protocol"
   homepage "https://github.com/libfuse/sshfs"
-  url "https://github.com/libfuse/sshfs/archive/refs/tags/sshfs-3.7.3.tar.gz"
-  sha256 "52a1a1e017859dfe72a550e6fef8ad4f8703ce312ae165f74b579fd7344e3a26"
+  url "https://github.com/libfuse/sshfs/archive/refs/tags/sshfs-3.7.5.tar.gz"
+  sha256 "b975121189cb82ed4c675320155a855adf7632abfd7fbdc385ca448d214b581f"
   license any_of: ["LGPL-2.1-only", "GPL-2.0-only"]
 
   bottle do
-    sha256 x86_64_linux: "a98d273e64706971684935a3ae87da16b1dda98f7289eb79e82f4cdfb7f12bb8"
+    sha256 arm64_linux:  "6237fd00c727ad8fe85a3e6c0e6986b07cba640c35cb40db58cc76817313f8a5"
+    sha256 x86_64_linux: "1589c3db81b505fb0f853475346572d40bf1d35951578df1da2813dddd84d47b"
   end
 
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "glib"
   depends_on "libfuse"
   depends_on :linux # on macOS, requires closed-source macFUSE

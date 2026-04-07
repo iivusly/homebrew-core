@@ -1,65 +1,76 @@
 class Eiffelstudio < Formula
   desc "Development environment for the Eiffel language"
   homepage "https://www.eiffel.com"
-  url "https://ftp.eiffel.com/pub/download/22.05/pp/PorterPackage_std_106302.tar"
-  version "22.05.10.6302"
-  sha256 "c2ede38b19cedead58a9e075cf79d6a4b113e049c0723fe9556c4f36ee68b80d"
+  url "https://ftp.eiffel.com/pub/download/25.02/pp/PorterPackage_25.02_rev_98732.tar"
+  version "25.02.98732"
+  sha256 "fd7a1ec2a09e87535f077bdef542fed1665f6790c46b837b44497aec5b65c6dd"
   license "GPL-2.0-only"
-  revision 1
 
   livecheck do
     url "https://ftp.eiffel.com/pub/download/latest/pp/"
-    regex(/href=.*?PorterPackage[._-]std[._-]v?(\d+(?:[._-]\d+)+).t/i)
+    regex(/href=.*?PorterPackage[._-]v?(\d+(?:[._-]\d+|[._-]rev)+).t/i)
     strategy :page_match do |page, regex|
-      page.scan(regex).map { |match| match[0].tr("_-", ".") }
+      page.scan(regex).map { |match| match[0].gsub("_rev_", ".") }
     end
   end
 
+  no_autobump! because: :incompatible_version_format
+
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "eb80572a9f45330718c9d37480bf5dd883654e1fef524447d828558d3fa86223"
-    sha256 cellar: :any,                 arm64_ventura:  "13f283babf97160d03bd4793575262df0d96abccbab80a0e23749c43c72b2000"
-    sha256 cellar: :any,                 arm64_monterey: "b38d768b91d114b8e1fcc2f010043ded8d4fafaec9858b1523044d33d3c78331"
-    sha256 cellar: :any,                 sonoma:         "c431ca8133ea66b0ca7d454c9df091cbbfe49919452eff177bcb60ef2704de05"
-    sha256 cellar: :any,                 ventura:        "b9e26ab5cd7c6743642b95b88062306a61e1347daa3cb78d986f8b66d770765b"
-    sha256 cellar: :any,                 monterey:       "94244ccd7e1fcb3c01386840912cc5a1e0b57e54431493b40a57b2258e05963d"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "3e8570d391bf49d1208347ae385debef2ef5b3156a338417ecfa8b05610ee4ad"
+    sha256 cellar: :any,                 arm64_tahoe:   "f14da97c4684f2384c2d68dab556ea970b6191e8995634a31707e5a14bfb85a1"
+    sha256 cellar: :any,                 arm64_sequoia: "4030c9fa5e0a839aae6c9f9f8b04af32d7f45c2203453ee51b23388444a74d67"
+    sha256 cellar: :any,                 arm64_sonoma:  "ee29d34eabd019521717887b411c3a8edae4d29dbfd4c5d5cc20262df03dc6af"
+    sha256 cellar: :any,                 arm64_ventura: "fedc736ae91c56ad1ff16d5dd21a0950ba47ed1dc51df977e20759348aa0e924"
+    sha256 cellar: :any,                 sonoma:        "2b4450d781483aab1345f9453246ab778c820c208d910523c9918da5588aa0b7"
+    sha256 cellar: :any,                 ventura:       "c630a8e2c1aa1857bfc26e40611293c855fa568285b17a1254ba13c8dcf1b162"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "90856df61aa3521fa22d999c3298cbe52f144c705927fee102798a3e2af7f3f2"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "00230c658b6733ffde14178ef47d9919dbaf4694ebae211d938423068282aefb"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
+  depends_on "cairo"
+  depends_on "gdk-pixbuf"
+  depends_on "glib"
   depends_on "gtk+3"
+  depends_on "libx11"
+  depends_on "pango"
 
   uses_from_macos "pax" => :build
 
+  on_macos do
+    depends_on "at-spi2-core"
+    depends_on "gettext"
+    depends_on "harfbuzz"
+  end
+
   def install
-    # Fix flat namespace usage in C shared library.
+    platform = if OS.mac?
+      "macosx-x86-64"
+    else
+      "#{OS.kernel_name.downcase}-#{Hardware::CPU.arch.to_s.tr("_", "-")}"
+    end
+
+    # Apply workarounds
+    ENV.append_to_cflags "-Wno-incompatible-function-pointer-types" if DevelopmentTools.clang_build_version >= 1500
     if OS.mac?
       system "tar", "xf", "c.tar.bz2"
-      inreplace "C/CONFIGS/macosx-x86-64", "-flat_namespace -undefined suppress", "-undefined dynamic_lookup"
+      # Fix flat namespace usage in C shared library.
+      inreplace "C/CONFIGS/#{platform}", "-flat_namespace -undefined suppress", "-undefined dynamic_lookup"
       system "tar", "cjf", "c.tar.bz2", "C"
     end
 
-    # Use ENV.cc to link shared objects instead of directly invoking ld.
-    # Reported upstream: https://support.eiffel.com/report_detail/19873.
-    if OS.linux?
-      system "tar", "xf", "c.tar.bz2"
-      inreplace "C/CONFIGS/linux-x86-64", "sharedlink='ld'", "sharedlink='#{ENV.cc}'"
-      inreplace "C/CONFIGS/linux-x86-64", "ldflags=\"-m elf_x86_64\"", "ldflags=''"
-      system "tar", "cjf", "c.tar.bz2", "C"
-    end
+    system "./compile_exes", platform
+    system "./make_images", platform
+    prefix.install (buildpath/"Eiffel_#{version.to_s[/^(\d+\.\d+)/, 1]}").children
 
-    os = OS.mac? ? "macosx" : OS.kernel_name.downcase
-    os_tag = "#{os}-x86-64"
-    system "./compile_exes", os_tag
-    system "./make_images", os_tag
-    prefix.install Dir["Eiffel_#{version.major}.#{version.minor.to_s.rjust(2, "0")}/*"]
-    eiffel_env = { ISE_EIFFEL: prefix, ISE_PLATFORM: os_tag }
+    eiffel_env = { ISE_EIFFEL: prefix, ISE_PLATFORM: platform }
     {
       studio:       %w[ec ecb estudio finish_freezing],
       tools:        %w[compile_all iron syntax_updater],
       vision2_demo: %w[vision2_demo],
     }.each do |subdir, targets|
       targets.each do |target|
-        (bin/target).write_env_script prefix/subdir.to_s/"spec"/os_tag/"bin"/target, eiffel_env
+        (bin/target).write_env_script prefix/subdir.to_s/"spec"/platform/"bin"/target, eiffel_env
       end
     end
   end

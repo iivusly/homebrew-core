@@ -1,9 +1,9 @@
 class Umple < Formula
   desc "Modeling tool/programming language that enables Model-Oriented Programming"
-  homepage "https://www.umple.org"
-  url "https://github.com/umple/umple/releases/download/v1.34.0/umple-1.34.0.7242.6b8819789.jar"
-  version "1.34.0"
-  sha256 "817891ba9299f12bc3753c5902d9d61dc15a80096322aceea5c9996922ace0b5"
+  homepage "https://cruise.umple.org/umple/"
+  url "https://github.com/umple/umple/releases/download/v1.36.0/umple-1.36.0.8088.f0fbd82bc.jar"
+  version "1.36.0"
+  sha256 "bc29c60a4bf65120097295f347ab20085b0be376661d6779f8d380f3e9470618"
   license "MIT"
   version_scheme 1
 
@@ -12,9 +12,10 @@ class Umple < Formula
     strategy :github_latest
   end
 
+  no_autobump! because: :incompatible_version_format
+
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, all: "73215534a29d049a8b64e101afe675fc1862196658972d90ec2dfc80d86c4db2"
+    sha256 cellar: :any_skip_relocation, all: "7a5687205837be7e5d3264326e6c729996d88f29e714bb83039592a49e95097f"
   end
 
   depends_on "openjdk"
@@ -29,7 +30,7 @@ class Umple < Formula
   test do
     (testpath/"test.ump").write("class X{ a; }")
     system bin/"umple", "test.ump", "-c", "-"
-    assert_predicate testpath/"X.java", :exist?
-    assert_predicate testpath/"X.class", :exist?
+    assert_path_exists testpath/"X.java"
+    assert_path_exists testpath/"X.class"
   end
 end

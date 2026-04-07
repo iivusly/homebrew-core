@@ -1,20 +1,18 @@
 class Zls < Formula
   desc "Language Server for Zig"
-  homepage "https://github.com/zigtools/zls"
-  url "https://github.com/zigtools/zls.git",
-      tag:      "0.13.0",
-      revision: "a26718049a8657d4da04c331aeced1697bc7652b"
+  homepage "https://zigtools.org/zls/"
+  url "https://github.com/zigtools/zls/archive/refs/tags/0.15.1.tar.gz"
+  sha256 "40a4559c3007ed9333769fc3e111ed466403b53f31ad9242874a62ab385b331b"
   license "MIT"
   head "https://github.com/zigtools/zls.git", branch: "master"
 
   bottle do
-    sha256 arm64_sonoma:   "ad033c76a56c3e673f5a98b858044b6cce0943e4efc1f65e1808e96e6bc35526"
-    sha256 arm64_ventura:  "8cec98eb089329c697832b25e173f6b136c007dfbcb6c3831d6b20df9ca65738"
-    sha256 arm64_monterey: "dc17fa3ed91c7f1fe2f3978d5179f1b7d3bf49be1efe432c0de5c7934bc4b984"
-    sha256 sonoma:         "0b9f2c664b2df58c11636bb2e79c29ea6fd3763ec294ad4df9752943241bf0f7"
-    sha256 ventura:        "4b901bea62efa0dac5ab5301f50c6130bc749820e4c00769ab17fa6f33e7b9cc"
-    sha256 monterey:       "c8f8837db476edf57943adc3a050c7f7514eec746f6d5deace1f0877a3ca6e08"
-    sha256 x86_64_linux:   "efbbcc9ee2e1ff6189e5efe21281b621114c44091ca07e3e05fcb10ea4a3c60c"
+    sha256 arm64_tahoe:   "912517e70986dc8b31f03dd170ec42e4656b011839a7b9be0c411d9e15d3ed90"
+    sha256 arm64_sequoia: "722bdfcd3532ddc387d0ee1c01f08f89c5b95e6bc9f4a21bd35e8ca3ad9a2fdf"
+    sha256 arm64_sonoma:  "911834f15737777240a5067d7fca4fcf0835447b23a3859fbff8eb1792a9aa4b"
+    sha256 sonoma:        "62af47f178f960cc1bce1b884e20fa4152f36773d4b70a51dee9da6a5d8b866c"
+    sha256 arm64_linux:   "35c82e4a09bf0942d42852ba9a0d57ba07912c286af306e0746aa7afceb86101"
+    sha256 x86_64_linux:  "e1047a7ce5b87627cb4f024c7466db76e41e06f888164a8d0174f9901f48f287"
   end
 
   depends_on "zig"
@@ -22,24 +20,25 @@ class Zls < Formula
   def install
     # Fix illegal instruction errors when using bottles on older CPUs.
     # https://github.com/Homebrew/homebrew-core/issues/92282
-    cpu = case Hardware.oldest_cpu
+    cpu = case ENV.effective_arch
     when :arm_vortex_tempest then "apple_m1" # See `zig targets`.
-    else Hardware.oldest_cpu
+    when :armv8 then "xgene1" # Closest to `-march=armv8-a`
+    else ENV.effective_arch
     end
 
-    args = %W[--prefix #{prefix} -Doptimize=ReleaseFast]
+    args = []
     args << "-Dcpu=#{cpu}" if build.bottle?
 
-    system "zig", "build", *args
+    system "zig", "build", *args, *std_zig_args
   end
 
   test do
     test_config = testpath/"zls.json"
-    test_config.write <<~EOS
+    test_config.write <<~JSON
       {
         "enable_semantic_tokens": true
       }
-    EOS
+    JSON
 
     json = <<~JSON
       {

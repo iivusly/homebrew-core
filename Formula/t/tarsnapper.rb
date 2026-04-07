@@ -9,18 +9,17 @@ class Tarsnapper < Formula
   revision 1
 
   bottle do
-    rebuild 6
-    sha256 cellar: :any,                 arm64_sonoma:   "7922f887ef1f2c23b843435951889a33145c859b8056eda662eec00d04d8b5d3"
-    sha256 cellar: :any,                 arm64_ventura:  "769ab15671e835ba1756c30c3ea76032a5c52ba1927bf9fdde439e7082075d61"
-    sha256 cellar: :any,                 arm64_monterey: "1b66153ebd94f85ee560cdf236a8d26ecef1e620a8efd98ca63281a141a5ee15"
-    sha256 cellar: :any,                 sonoma:         "b8e11ff3fa7bf119727cea4cdcc6ebf2ba981f8997c99b2d270f2ebd611c248d"
-    sha256 cellar: :any,                 ventura:        "62e6e995e43df7c081980a7c31023c159433abb3e986a97e401f93f6756c884d"
-    sha256 cellar: :any,                 monterey:       "daca75dc6b4cf283f8e435fdcea2370928a329ec75d12fd6cf9b0777e3ad927e"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "122789a1d359511eef13ffcb1b0c377659e9dc601c194fab1efbdefa20a6fa90"
+    rebuild 8
+    sha256 cellar: :any,                 arm64_tahoe:   "32c13f98b225238a1c36beb4aea44cc7aa9fc5f0ea6916836e9f24c9009a759a"
+    sha256 cellar: :any,                 arm64_sequoia: "aede490b7d29991225df23efd94e0c740fc0a179b2625a54e026865ac4916f78"
+    sha256 cellar: :any,                 arm64_sonoma:  "4a553095ec22748abec5bdab416bd67fc74865d373b20d36befb36afe40ba08f"
+    sha256 cellar: :any,                 sonoma:        "4368cf715ad3a98e93ae54bcd6df1532199927753a4bb5915155141a183ea5a0"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "4a08f2b3ac06f061600d9a402ac6ffca74de70f9e973699fbf14e9f3dfaa7a08"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ba5eacaf4328d52c8277a96a4befdcac0570cb99372882717562683797c677c5"
   end
 
   depends_on "libyaml"
-  depends_on "python@3.12"
+  depends_on "python@3.14"
   depends_on "tarsnap"
 
   resource "pexpect" do
@@ -39,13 +38,13 @@ class Tarsnapper < Formula
   end
 
   resource "pyyaml" do
-    url "https://files.pythonhosted.org/packages/cd/e5/af35f7ea75cf72f2cd079c95ee16797de7cd71f29ea7c68ae5ce7be1eda0/PyYAML-6.0.1.tar.gz"
-    sha256 "bfdf460b1736c775f2ba9f6a92bca30bc2095067b8a9d77876d1fad6cc3b4a43"
+    url "https://files.pythonhosted.org/packages/05/8e/961c0007c59b8dd7729d542c61a4d537767a59645b82a0b521206e1e25c2/pyyaml-6.0.3.tar.gz"
+    sha256 "d76623373421df22fb4cf8817020cbb7ef15c725b9d5e45f17e189bfc384190f"
   end
 
   resource "six" do
-    url "https://files.pythonhosted.org/packages/71/39/171f1c67cd00715f190ba0b100d606d440a28c93c7714febeca8b79af85e/six-1.16.0.tar.gz"
-    sha256 "1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"
+    url "https://files.pythonhosted.org/packages/94/e7/b2c673351809dca68a0e064b6af791aa332cf192da575fd474ed7d6f16a2/six-1.17.0.tar.gz"
+    sha256 "ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81"
   end
 
   # Drop unneeded argparse requirement: https://github.com/miracle2k/tarsnapper/pull/72

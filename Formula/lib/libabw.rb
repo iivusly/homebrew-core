@@ -4,6 +4,7 @@ class Libabw < Formula
   url "https://dev-www.libreoffice.org/src/libabw/libabw-0.1.3.tar.xz"
   sha256 "e763a9dc21c3d2667402d66e202e3f8ef4db51b34b79ef41f56cacb86dcd6eed"
   license "MPL-2.0"
+  revision 1
 
   livecheck do
     url "https://dev-www.libreoffice.org/src/libabw/"
@@ -11,33 +12,33 @@ class Libabw < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "8ac829af4a67294bc85e6959843282df8944dc88c3d295dca20a1f7914881119"
-    sha256 cellar: :any,                 arm64_ventura:  "6ad85dc29ed6262c148bd70631ea06886e1e7fce5d6c8abf66b9486d85e8055b"
-    sha256 cellar: :any,                 arm64_monterey: "32cfa5aeedc8f7bff68a474f0bb6cc8d3501b301bb57c3a13c2a3bf535bedada"
-    sha256 cellar: :any,                 arm64_big_sur:  "7218127205f7f8cc1032b769e29ec9d12aba7d24c919b5afecde92b5e877953d"
-    sha256 cellar: :any,                 sonoma:         "86c2fb927daac6b886d4262e5ee7481bb783fe76495c3cee38fc156b61531b9b"
-    sha256 cellar: :any,                 ventura:        "8e7b0a87423c367ac899cb7459b8d28604f3f75988de7ba3daea77ef2bf70bb0"
-    sha256 cellar: :any,                 monterey:       "79862a34d53145dcd6c2435578500f6fa01f8697e294d20001430d07ee4fcde6"
-    sha256 cellar: :any,                 big_sur:        "cb183a618afaa39fca1c827c37d3e93c163b160af94290a65f87ca226a129415"
-    sha256 cellar: :any,                 catalina:       "01cfa53a2e623a95444477cc924aaa67f362dcf18b5c0780ed271284fa66174b"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "3080aed8222be7eb35addd5e04c18ed6c0b322832059a07d029ab1c814c2190e"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "94f750ee7bbbf84e58e7673ab8c00d6f5ac7805e3866887ef3a598f10465d555"
+    sha256 cellar: :any,                 arm64_sequoia: "615103d929d3d41b86505ec51bca88f383c9a890588bd6cfa1ac17de264e2575"
+    sha256 cellar: :any,                 arm64_sonoma:  "36fd000ef3d1a511d89e6f050465b3dbdc6ced760615222779812ea836df25d9"
+    sha256 cellar: :any,                 sonoma:        "5874a09fd09d99442394994ce591cdde79b201131e1f33c5268ebef8b0f3d02f"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "1d5c1ad4d34c3dbab41b53d369abbe5bda59801caed9e238de74a12a04d18bb5"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "0e3863e042c26afed865f3857ae6b63054bd082b829bdf7f9ea6118aa8a1ae94"
   end
 
   depends_on "boost" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "librevenge"
 
   uses_from_macos "gperf" => :build
   uses_from_macos "libxml2"
-  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
-    system "./configure", *std_configure_args, "--disable-silent-rules", "--without-docs"
+    system "./configure", "--disable-silent-rules", "--without-docs", *std_configure_args
     system "make", "install"
   end
 
   test do
-    (testpath/"test.abw").write <<~EOS
+    (testpath/"test.abw").write <<~XML
       <?xml version="1.0" encoding="UTF-8"?>
       <!DOCTYPE abiword PUBLIC "-//ABISOURCE//DTD AWML 1.0 Strict//EN"
         "http://www.abisource.com/awml.dtd">
@@ -80,9 +81,9 @@ class Libabw < Formula
       lang:en-US">word</c><c props="lang:en-US"> is bold.</c></p>
       </section>
       </abiword>
-    EOS
+    XML
 
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include <stdio.h>
       #include <string.h>
       #include <librevenge-stream/librevenge-stream.h>
@@ -106,9 +107,9 @@ class Libabw < Formula
         printf("ok\\n");
         return 0;
       }
-    EOS
+    CPP
 
-    assert_equal shell_output("#{bin}/abw2text test.abw"), "This word is bold.\n"
+    assert_equal "This word is bold.\n", shell_output("#{bin}/abw2text test.abw")
 
     args = %W[
       -I#{include/"libabw-0.1"} -I#{Formula["librevenge"].opt_include/"librevenge-0.0"}
@@ -116,6 +117,6 @@ class Libabw < Formula
       -labw-0.1 -lrevenge-stream-0.0 -lrevenge-generators-0.0 -lrevenge-0.0
     ]
     system ENV.cxx, "test.cpp", *args, "-o", "test"
-    assert_equal shell_output(testpath/"test"), "ok\n"
+    assert_equal "ok\n", shell_output(testpath/"test")
   end
 end

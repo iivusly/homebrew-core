@@ -11,6 +11,8 @@ class Duktape < Formula
   end
 
   bottle do
+    sha256 cellar: :any,                 arm64_tahoe:    "5fe1dd30da74b054c84215502091d01461ee22644b32f278cb883bf8e65d71f7"
+    sha256 cellar: :any,                 arm64_sequoia:  "3d744482873a3e4aee3ba9a4471a7d75c1065519466e1730169b2d47a6ef8a18"
     sha256 cellar: :any,                 arm64_sonoma:   "8afe806970354b4fafeb1e390d3823964c2fe969d5ae9498612a1c0422cea24f"
     sha256 cellar: :any,                 arm64_ventura:  "cb5c28b480f4948b1c058146568829a0a31a082ee5646af9f1c9d163f8fea00a"
     sha256 cellar: :any,                 arm64_monterey: "50433844eb30fed82c204f4ad5b0fe58f70f6ab3fdcaf88f58df1080cc65d3cd"
@@ -20,6 +22,7 @@ class Duktape < Formula
     sha256 cellar: :any,                 monterey:       "1da51e2ceb61766abe0074b869c482feb2b61cffbd9419ceb70157191528f703"
     sha256 cellar: :any,                 big_sur:        "89c9cbfd84d99f2cc97f1cd8a4e57f18c3aa3803be295328a8b67239ae51ed27"
     sha256 cellar: :any,                 catalina:       "b4dbf4083450e750f2ddfa26d4f4bca18a342703ef950360528e4c390d171636"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "6bf806c110978a59312df80334012c02e8a285b364effe90c1aea33370549d83"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "158b015f9c3b091605deed158af5f37c816c48d00b1163402282459298fd921e"
   end
 
@@ -34,7 +37,7 @@ class Duktape < Formula
     (testpath/"test.js").write "console.log('Hello Homebrew!');"
     assert_equal "Hello Homebrew!", shell_output("#{bin}/duk test.js").strip
 
-    (testpath/"test.cc").write <<~EOS
+    (testpath/"test.cc").write <<~CPP
       #include <stdio.h>
       #include "duktape.h"
 
@@ -45,7 +48,7 @@ class Duktape < Formula
         duk_destroy_heap(ctx);
         return 0;
       }
-    EOS
+    CPP
     system ENV.cc, "test.cc", "-o", "test", "-I#{include}", "-L#{lib}", "-lduktape", "-lm"
     assert_equal "1 + 2 = 3", shell_output("./test").strip, "Duktape can add number"
   end

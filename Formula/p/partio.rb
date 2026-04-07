@@ -1,28 +1,29 @@
 class Partio < Formula
   desc "Particle library for 3D graphics"
   homepage "https://github.com/wdas/partio"
-  url "https://github.com/wdas/partio/archive/refs/tags/v1.17.3.tar.gz"
-  sha256 "08a571ca75cf133f373415dfd50b7d0e33a0dd1811dfb63409f0ae46652033c1"
+  url "https://github.com/wdas/partio/archive/refs/tags/v1.20.0.tar.gz"
+  sha256 "e60a89364f2b5d9c9b1f143175fc1a5018027a59bb31af56e5df88806b506e49"
   license "BSD-3-Clause"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "797ccfe2fbd825a19397be286127b6324e0f667adbfe1cb7ed55e3dbebb0738d"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "f94e796a8de500173d1f38abb5dfd2df90efd79b53f3eb0c720a29a262178c68"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "a454868fbfb8cae81d7378f2cceb8a0a80090e68be97b951fcf8112e286416e1"
-    sha256 cellar: :any_skip_relocation, sonoma:         "b6471ee7399bb0a5716d8da41ebd57a67650f65829b56d36ad74732b29e489a2"
-    sha256 cellar: :any_skip_relocation, ventura:        "a962b61c79ebbf651f653e5199a44ca809057dc3c771b511bd354babfe711880"
-    sha256 cellar: :any_skip_relocation, monterey:       "673b079ad6d8a85208d26a41412e6d9f79182e200fa9e8f56ef74f099ce61b32"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "484bcec4c5896ca121126bf1a1ea79f82e4babfac09461e164a8aa77c8d9d752"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "1df6144f110d59a0a2702a819891b5d2431c1b2d5320c8a754c70c7afe121979"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "0d85a46d17cd0d8faa344925cc6e7a735c68efb81c30f9e7e366d160ef31c91f"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "33038f52f8f29283fa3a34105974fd9a816eb7afc123326c09b238f6ae51057b"
+    sha256 cellar: :any_skip_relocation, sonoma:        "23633ba6707787461a94f4093040e6cf61a0d0e47e0bf4cc76122554952f5dcc"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "d26cd91d005741e2c3953bd72ec068bad724c4bfe83914ab96b18f988aeac93f"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "dc0eb880e0fd2c7c033434e9433dd6ffc9af4b3ec6b61f81f705877f337f3bb6"
   end
 
   depends_on "cmake" => :build
   depends_on "doxygen" => :build
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   on_linux do
     depends_on "freeglut"
     depends_on "mesa"
     depends_on "mesa-glu"
+    depends_on "zlib-ng-compat"
   end
 
   def install

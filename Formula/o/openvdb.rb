@@ -1,20 +1,20 @@
 class Openvdb < Formula
   desc "Sparse volumetric data processing toolkit"
   homepage "https://www.openvdb.org/"
-  url "https://github.com/AcademySoftwareFoundation/openvdb/archive/refs/tags/v11.0.0.tar.gz"
-  sha256 "6314ff1db057ea90050763e7b7d7ed86d8224fcd42a82cdbb9c515e001b96c74"
+  url "https://github.com/AcademySoftwareFoundation/openvdb/archive/refs/tags/v13.0.0.tar.gz"
+  sha256 "4d6a91df5f347017496fe8d22c3dbb7c4b5d7289499d4eb4d53dd2c75bb454e1"
   license "MPL-2.0"
-  revision 3
+  revision 1
   head "https://github.com/AcademySoftwareFoundation/openvdb.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "2e438c59d4d2cb1905c395e7aecf06ffd8d31e1ce364dbeede6cee719525a43f"
-    sha256 cellar: :any,                 arm64_ventura:  "6331dfd7b9a92f4e5107a08d4a0d1df9b2a3c89b182e543d41c7fa86fb615b6b"
-    sha256 cellar: :any,                 arm64_monterey: "2a43a1edffe1a2ad2a9b6bb44074d07682caff5ac5a3349c2fa72dcc5bf8caeb"
-    sha256 cellar: :any,                 sonoma:         "076615ec23b41f4964411ca5ff4e5089d2ca6a45bc9ace90ae88054b5661c53f"
-    sha256 cellar: :any,                 ventura:        "db0bba1bc1b53a719660e375db433144c7f4e8ff35f688ed83410d1d8fcd0813"
-    sha256 cellar: :any,                 monterey:       "a0f29c79abd63667a4827b905c1491b6c7d68ded8b391279db5caaefb674e00e"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "47b4dba9cf936c2a44873e232b804c784222e1a80ee88a243933bea4c6acdeda"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "1293e06e4fc2e23da53c13d0ff875e61484d85c6d734a8df1817ac7522b368e9"
+    sha256 cellar: :any,                 arm64_sequoia: "d92c0b472575bdd80490eeb159c01abc9bffcb0c282173067622a13b25cf1273"
+    sha256 cellar: :any,                 arm64_sonoma:  "40b91eee6ca47d33a5d0568ef6f98ae1984cbe312abbbffa6acdec3fc9641afa"
+    sha256 cellar: :any,                 sonoma:        "a7edb4bef446e3b92421e3a66a282b6c0c0fa0440e79e8c8567c00b59f84bbd8"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "12ab28558982809431b5d9eb176a8f8e133b59698e40db52bb0fb8682a66b20b"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "595a235b9cbabb8f5dd8797681e9bde7d00662a91835b21ad7a961f1ee9fa09b"
   end
 
   depends_on "cmake" => :build
@@ -26,7 +26,9 @@ class Openvdb < Formula
   depends_on "openexr"
   depends_on "tbb"
 
-  uses_from_macos "zlib"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     args = [

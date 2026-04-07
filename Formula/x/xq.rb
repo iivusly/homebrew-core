@@ -2,18 +2,17 @@ class Xq < Formula
   desc "Command-line XML and HTML beautifier and content extractor"
   homepage "https://github.com/sibprogrammer/xq"
   url "https://github.com/sibprogrammer/xq.git",
-      tag:      "v1.2.5",
-      revision: "fb8ac87a3431cdfebeeda81053562e3aeebde6af"
+      tag:      "v1.4.0",
+      revision: "02a8c391497a63acbea1c57f036770cef2e87b65"
   license "MIT"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "56adba6745dda15519f526ad670b2e4efbd2d716ac22cf3a3f472bd551e4808b"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "56adba6745dda15519f526ad670b2e4efbd2d716ac22cf3a3f472bd551e4808b"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "56adba6745dda15519f526ad670b2e4efbd2d716ac22cf3a3f472bd551e4808b"
-    sha256 cellar: :any_skip_relocation, sonoma:         "feb158b48cbbd3f0a451969192f713238797a3b1945f97743766151a27b9945c"
-    sha256 cellar: :any_skip_relocation, ventura:        "feb158b48cbbd3f0a451969192f713238797a3b1945f97743766151a27b9945c"
-    sha256 cellar: :any_skip_relocation, monterey:       "feb158b48cbbd3f0a451969192f713238797a3b1945f97743766151a27b9945c"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "4fab4c651a2b92463a643615ea80996674ebaa3bb7f313728e3878848eb75556"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "44d099153ec4a4be002387d1ad5c3217abe3ef79505690586c958114e6ff19b3"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "44d099153ec4a4be002387d1ad5c3217abe3ef79505690586c958114e6ff19b3"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "44d099153ec4a4be002387d1ad5c3217abe3ef79505690586c958114e6ff19b3"
+    sha256 cellar: :any_skip_relocation, sonoma:        "9837eca65155b5e8d9ac7343865a0aaaf6c4c9da667827b9e2b5a667b00e6c59"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "d0d82a46bd720fb0b7d0c963261efc56cdf3588ebb77525324dba58ce8253be1"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "0a4c75879494e05edd80fd217c005edd65f1580856e9b613ca8f1118a0337f3f"
   end
 
   depends_on "go" => :build
@@ -34,7 +33,7 @@ class Xq < Formula
   end
 
   test do
-    version_output = shell_output(bin/"xq --version 2>&1")
+    version_output = shell_output("#{bin}/xq --version 2>&1")
     assert_match "xq version #{version}", version_output
 
     run_output = pipe_output(bin/"xq", "<root></root>")

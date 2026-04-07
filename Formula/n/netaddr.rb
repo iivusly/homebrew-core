@@ -9,18 +9,18 @@ class Netaddr < Formula
   head "https://github.com/netaddr/netaddr.git", branch: "master"
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, all: "a7284179680caf2362b7b59aece0fd13ce71d9ee590609b68c8706b0baf8671c"
+    rebuild 3
+    sha256 cellar: :any_skip_relocation, all: "cdcc4a712683eb68803860ecb8047079ebe5d8151c3bfa345fa4aab7d3a34177"
   end
 
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   def install
     virtualenv_install_with_resources
   end
 
   test do
-    output = shell_output(bin/"netaddr info 10.0.0.0/16")
+    output = shell_output("#{bin}/netaddr info 10.0.0.0/16")
     assert_match "Usable addresses         65534", output
   end
 end

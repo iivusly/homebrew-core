@@ -1,5 +1,5 @@
 class GnupgAT14 < Formula
-  desc "GNU Pretty Good Privacy (PGP) package"
+  desc "GNU Privacy Guard (OpenPGP)"
   homepage "https://www.gnupg.org/"
   url "https://gnupg.org/ftp/gcrypt/gnupg/gnupg-1.4.23.tar.bz2"
   mirror "https://www.mirrorservice.org/sites/ftp.gnupg.org/gcrypt/gnupg/gnupg-1.4.23.tar.bz2"
@@ -13,35 +13,35 @@ class GnupgAT14 < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "bc3e33a439e34c3e1e39a6e3d38c507d000f6cbc241ea0aa92977ffcc5eda72e"
-    sha256 arm64_ventura:  "0745d4b4468cfecd559c6ddd3aa81582bde9f1def99761e8bf7989ddb9a76abf"
-    sha256 arm64_monterey: "d35c8557e2e77c6074a75bf4f4e575bd0a24ed57fbd061f9bd2a06d58bf8415c"
-    sha256 arm64_big_sur:  "30169aa8ef5373a4d5b36ee5714bd7e34d7222d02ad090bf3094b92b1c203bd6"
-    sha256 sonoma:         "591c85555be72806574e292e42a7a44d6f1bff7f9747c50cba4164b85f4dc3fd"
-    sha256 ventura:        "d1beb68c6abb3a1d249621c8995d8e26bd1c8792260f36407c47627f84c84668"
-    sha256 monterey:       "d010750043549f48f60a95d8b6c02bc5754168d09f298a4dace80eb84ccacd52"
-    sha256 big_sur:        "408013c7748d2b6de6c09520e4b3948a493fcc338624493050c081e200820390"
-    sha256 catalina:       "3796803df0956a54dfc5ed26f17a92791622c4ddc6b0dfa6b8fabc0f65afdd0d"
-    sha256 mojave:         "32f23f8ceec79b8073f8b69a2c7f1278adf9020c00d78d2cd9d07c1e5f3bdb89"
-    sha256 high_sierra:    "dbd43b52f11e65c2bb6dadf3adbf8ccf7f740af33b56e4d8c8b037611840f127"
-    sha256 sierra:         "abc1e142397fbe833f2f7c5f71409d925ce690506d77296f7f3d41656a0791f2"
-    sha256 el_capitan:     "397c92b88bd189ef61dfb01d5fe2e27e0477a63de64a713ffb883eb799dcbb87"
-    sha256 x86_64_linux:   "4e742c3b7160f0cdc5d4399857508ed58d3e43abb7f41bc9f173b5b83c12bccf"
+    rebuild 1
+    sha256 arm64_tahoe:   "4ca96fcb6e85fd587e3716a10c8aadc3117fd1055e368627efb8eb8ecbbd486f"
+    sha256 arm64_sequoia: "d7ac6385a597f2793c1da1f6a037d44009827fe6f8e92780121ba6a7d66c422a"
+    sha256 arm64_sonoma:  "9fc6d326a446c03cea4d945563169f5209a8585a5a882f7df7550dbb58664c4b"
+    sha256 sonoma:        "7721cebd4f645feeb8b7587177c0553377a1589ab89023dced381afdec98788f"
+    sha256 arm64_linux:   "15bb19626345f79fdb0ad5be25352cb1622d71de933e907384195dc3ada271af"
+    sha256 x86_64_linux:  "7f184495fcd172935dea746755da90bb1fe3fb04e0b59e1faecc426a8325b8bc"
   end
 
-  uses_from_macos "zlib"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
-    args = %W[
-      --disable-dependency-tracking
+    # Work around failure from GCC 10+ using default of `-fno-common`
+    # multiple definition of `mpi_debug_mode'; mpicalc.o:(.bss+0x344): first defined here
+    # multiple definition of `memory_stat_debug_mode'; mpicalc.o:(.bss+0x348): first defined here
+    # multiple definition of `memory_debug_mode'; mpicalc.o:(.bss+0x34c): first defined here
+    # multiple definition of `iobuf_debug_mode'; mpicalc.o:(.bss+0x350): first defined here
+    ENV.append_to_cflags "-fcommon" if OS.linux?
+
+    args = %w[
       --disable-silent-rules
-      --prefix=#{prefix}
       --disable-asm
       --program-suffix=1
       --with-libusb=no
     ]
 
-    system "./configure", *args
+    system "./configure", *args, *std_configure_args
     system "make"
     system "make", "check"
 

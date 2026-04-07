@@ -1,18 +1,26 @@
 class VulkanHeaders < Formula
   desc "Vulkan Header files and API registry"
   homepage "https://github.com/KhronosGroup/Vulkan-Headers"
-  url "https://github.com/KhronosGroup/Vulkan-Headers/archive/refs/tags/v1.3.295.tar.gz"
-  sha256 "b4568b984be4b8a317343cc14d854669e258705079a16cabef3fb92302f55561"
+  url "https://github.com/KhronosGroup/Vulkan-Headers/archive/refs/tags/vulkan-sdk-1.4.341.0.tar.gz"
+  sha256 "d73bc5036b6556b741f6985ff600ca720308c5f2850e4a43ceb498bd3de069e7"
   license "Apache-2.0"
+  compatibility_version 1
   head "https://github.com/KhronosGroup/Vulkan-Headers.git", branch: "main"
 
   livecheck do
     url :stable
-    regex(/^v?(\d+(?:\.\d+)+)$/i)
+    regex(/^vulkan-sdk[._-]v?(\d+(?:\.\d+)+)$/i)
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, all: "86744d89727cee0390ec38fcdf41d3a7994b06ab23fb32fd9989b4046519ad13"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "b1c04ae00c5603d90d9dec39386d824bc75239abc3d3b58b1404bfe4ce891cdd"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "b1c04ae00c5603d90d9dec39386d824bc75239abc3d3b58b1404bfe4ce891cdd"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "b1c04ae00c5603d90d9dec39386d824bc75239abc3d3b58b1404bfe4ce891cdd"
+    sha256 cellar: :any_skip_relocation, tahoe:         "bf673dbeb19b05465c269952cc2a46f6c17210209899c0252162f33bb3b4b633"
+    sha256 cellar: :any_skip_relocation, sequoia:       "bf673dbeb19b05465c269952cc2a46f6c17210209899c0252162f33bb3b4b633"
+    sha256 cellar: :any_skip_relocation, sonoma:        "bf673dbeb19b05465c269952cc2a46f6c17210209899c0252162f33bb3b4b633"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "bf673dbeb19b05465c269952cc2a46f6c17210209899c0252162f33bb3b4b633"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "bf673dbeb19b05465c269952cc2a46f6c17210209899c0252162f33bb3b4b633"
   end
 
   depends_on "cmake" => :build
@@ -23,7 +31,7 @@ class VulkanHeaders < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <stdio.h>
       #include <vulkan/vulkan_core.h>
 
@@ -31,7 +39,7 @@ class VulkanHeaders < Formula
         printf("vulkan version %d", VK_VERSION_1_0);
         return 0;
       }
-    EOS
+    C
     system ENV.cc, "test.c", "-o", "test"
     system "./test"
   end

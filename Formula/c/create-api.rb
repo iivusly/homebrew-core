@@ -4,18 +4,19 @@ class CreateApi < Formula
   url "https://github.com/CreateAPI/CreateAPI/archive/refs/tags/0.2.0.tar.gz"
   sha256 "9f61943314797fe4f09b40be72e1f72b0a616c66cb1b66cd042f97a596ffd869"
   license "MIT"
+  revision 1
   head "https://github.com/CreateAPI/CreateAPI.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "8d17d4dbb015aa085d070861eae7aaac01bf63a5897b48489582fa88f350a620"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "1a23b2e7e6929d586771bcab06de3f1dd785918828dab95d9f58ae19e646c3ae"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "f65b99b02709736555a41e9ae392c921acde1eac1a6cacc04e1977a3fd34228d"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "a6160b88a1a896a5afd230b1708b98b9ee8a4feb2e7a2d068a41af63e5f7ffd9"
-    sha256 cellar: :any_skip_relocation, sonoma:         "e2f6e3ba2228afae806bb80f1902e2b9b00c0853ed6ec6a2a2a554565dc65aeb"
-    sha256 cellar: :any_skip_relocation, ventura:        "84f5410c757703de3be514f212e5dd1b06674c66237e67f41919ec800cff933a"
-    sha256 cellar: :any_skip_relocation, monterey:       "3e02e51410146f3993426a2418d34d84558ee1b7d24891231b05f089a5a57f3e"
-    sha256 cellar: :any_skip_relocation, big_sur:        "3cc02041040c669aedc28506411668f1e285293eef0a4736a225aca1781ff4fe"
-    sha256                               x86_64_linux:   "dd0151810906d53f62239aceb79899a8b512b2cedc642239121efb7b7bf85763"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "669393e0173057f300559c44055716228c89dbf1dd91a0d898eef408c98ec184"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "ad0253916ad9e261c6f172f26a86114522ff41915bc71e8d4db3c85692b4ff55"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "d13191abe5e4a79f12ddb325118fb1d5ad2abeae2269e7a3e6b404d9913584bd"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "8d56775719688b44d0b8425c3662879424a79a337db732cb052006cbc9db988a"
+    sha256 cellar: :any_skip_relocation, sonoma:        "0a285919042a7d87a437dd6baf16cd3cdeb19b957bd655c2f88ffbbca59d3d5c"
+    sha256 cellar: :any_skip_relocation, ventura:       "b6fc15cf43f820ec337a72ebbf119e8837f3bd801d7d06f0125b9aaec2997dfb"
+    sha256                               arm64_linux:   "2abf5d3b403a7046f7ae8d806181047a7820356c4c8c6fc70bd5b55ddbd2263c"
+    sha256                               x86_64_linux:  "958733d65c7aff3b75b64ac6f5a547961d6bc0fa0242e078dddc5686e4a05ded"
   end
 
   depends_on xcode: "13.0"
@@ -23,9 +24,15 @@ class CreateApi < Formula
   uses_from_macos "swift"
 
   def install
-    system "swift", "build", "--disable-sandbox", "--configuration", "release"
+    args = if OS.mac?
+      ["--disable-sandbox"]
+    else
+      ["--static-swift-stdlib"]
+    end
+    system "swift", "build", *args, "--configuration", "release"
     bin.install ".build/release/create-api"
     pkgshare.install "Tests/Support/Specs/cookpad.json" => "test-spec.json"
+    generate_completions_from_executable(bin/"create-api", "--generate-completion-script")
   end
 
   test do

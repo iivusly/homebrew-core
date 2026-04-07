@@ -17,7 +17,11 @@ class Arabica < Formula
     end
   end
 
+  no_autobump! because: :incompatible_version_format
+
   bottle do
+    sha256 cellar: :any,                 arm64_tahoe:    "c5797a1e8e13b35bfb400c09bd783382c517006dafae47a33204a1f292faddd0"
+    sha256 cellar: :any,                 arm64_sequoia:  "5448f9dfdd462014fca6f549d3d8e42a8831e7af763ec90ec55d5f9de259a171"
     sha256 cellar: :any,                 arm64_sonoma:   "d066bb2e2067e8487d5e161c2c0d438ac331f377b4103833ee4859c6d680540a"
     sha256 cellar: :any,                 arm64_ventura:  "0a4fd034a7098d204a0b3c772023f6bc35f024e2f048216fdfe8e589f38cf2a8"
     sha256 cellar: :any,                 arm64_monterey: "3e92d822c2e0c5d314a92e5e26df14b3a84774494fb100f401c3a2d0c7e54768"
@@ -27,8 +31,7 @@ class Arabica < Formula
     sha256 cellar: :any,                 monterey:       "db7acb62fe52ebc6b315b9e1e94cbf5ead317e7856af95efa8d5eeb0a41f62bf"
     sha256 cellar: :any,                 big_sur:        "c1a63f10d7451ba663ad8d974a69d83091be30730ca962a2fbd0e36b95ab16d2"
     sha256 cellar: :any,                 catalina:       "4fbf676c46941de213b095ab74f0b4973e5984c2bbaa7679757b0db4b369480a"
-    sha256 cellar: :any,                 mojave:         "acc299016dbd644658880e9fa29af6d3f0b9f8e226b16ccd3fcaea8dae23febf"
-    sha256 cellar: :any,                 high_sierra:    "62920d4f26c2da71c6abf60c90c1322457e340df8142d7133a9ee1f7c2b46745"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "fca2b168c6149c388d0692cecce3959175ef8aeec053cb64c0fa653f2c6553a2"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "129967d8e801a766a2d8209dff39cc8358bff641249838682ac1a943d0b7d385"
   end
 
@@ -42,8 +45,8 @@ class Arabica < Formula
   conflicts_with "nss", because: "both install `mangle` binaries"
 
   def install
-    system "autoreconf", "-fvi"
-    system "./configure", "--disable-dependency-tracking", "--prefix=#{prefix}"
+    system "autoreconf", "--force", "--install", "--verbose"
+    system "./configure", *std_configure_args
     system "make"
     system "make", "check"
     system "make", "install"

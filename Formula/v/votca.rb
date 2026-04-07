@@ -1,39 +1,34 @@
 class Votca < Formula
   desc "Versatile Object-oriented Toolkit for Coarse-graining Applications"
   homepage "https://www.votca.org/"
-  url "https://github.com/votca/votca/archive/refs/tags/v2024.1.tar.gz"
-  sha256 "74d447f976a7d5c05ec65ab99f52b75379cafa3b40b8bc3b9b328f8402bc53dc"
+  url "https://github.com/votca/votca/archive/refs/tags/v2026.tar.gz"
+  sha256 "bf5827e93aecdfd040131ef8427f49efac4ea87d30882c2eb83fea16a054fbc8"
   license "Apache-2.0"
-  revision 1
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "99fedc9b85634f468a7e4682910f80741540ec142a76dc25a6274abbbadd11ce"
-    sha256 cellar: :any,                 arm64_ventura:  "24f0bb5d366aa024007b616564143df01cfdfc912441e8011e036974ab2c8273"
-    sha256 cellar: :any,                 arm64_monterey: "82184cadf874cc9cce63f290f5a7c035938d8f731632b113eb38546fadcb94cc"
-    sha256 cellar: :any,                 sonoma:         "bf88a4c0818a02a027791f1b786014ea8615597c1b4bc461d370270ba2f91d51"
-    sha256 cellar: :any,                 ventura:        "66f200ae21a2fe9ff8b524bebc36cb52d2af1f4e29d6565830585db5f1f7d1a0"
-    sha256 cellar: :any,                 monterey:       "5d8b58ac3e94b1d33aca9ad48c218a2ef112cc6466749daf4801d3b0acced78a"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "5c698934a60c802666b3466925e19e85019410e4d67fc648192a189a77cc9241"
+    sha256 cellar: :any,                 arm64_tahoe:   "48327d11d3107d70c65c5e1bd1dd2e1e5209d6179e8c0df0f623ec22e29ad1a1"
+    sha256 cellar: :any,                 arm64_sequoia: "2675954a5c9193d1cc46283914b8312ca4173edd4e34773cc14c3dd75ec9e2ad"
+    sha256 cellar: :any,                 arm64_sonoma:  "7de2373e697dc6c25eb3c04c8c6b877a4172a423ecc67f3106abaa44cda216bf"
+    sha256 cellar: :any,                 sonoma:        "53575de7b3f4627b382f0201874d3da6edc2f295a9151124c8b7553aa87ced39"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "a7d9729f829ec9735fceffe634453a2eb822ff5e12f5638a76595fa30b71da07"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "298b74dbe679bfbe6fcd723cff91d57588e1812abf73665b5b8379b0d3e0473c"
   end
 
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
+  depends_on "python@3.14" => :build
   depends_on "boost"
-  depends_on "eigen"
+  depends_on "eigen" => :no_linkage
   depends_on "fftw"
-  depends_on "gcc" # for OpenMP
-  # add gromacs dep back once it was built with clang
+  depends_on "gromacs"
   depends_on "hdf5"
   depends_on "libecpint"
   depends_on "libint"
   depends_on "libxc"
-  depends_on "numpy"
-  depends_on "python@3.12"
 
   uses_from_macos "expat"
 
   on_macos do
-    depends_on "libaec"
     depends_on "libomp"
   end
 
@@ -42,21 +37,27 @@ class Votca < Formula
       "-DINSTALL_RC_FILES=OFF",
       "-DINSTALL_CSGAPPS=ON",
       "-DBUILD_XTP=ON",
-      "-DCMAKE_DISABLE_FIND_PACKAGE_GROMACS=ON",
       "-DENABLE_RPATH_INJECT=ON",
+      "-DPYrdkit_FOUND=OFF",
     ]
-    system "cmake", "-S", ".", "-B", "build", *std_cmake_args, *args
+
+    system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
   end
 
   test do
-    system bin/"csg_property", "--help"
-    (testpath/"table.in").write <<~EOS
-      0 0 i
-      1 1 i
-    EOS
-    system bin/"csg_resample", "--in", "table.in", "--out", "table.out", "--grid", "0:0.1:1", "--type", "linear"
-    assert_path_exists "#{testpath}/table.out"
+    (testpath/"topol.xml").write <<~XML
+      <topology>
+        <molecules>
+          <molecule name="MOL" nmols="1" nbeads="1">
+            <bead name="B" type="B" mass="1.0" q="0.0" resid="1"/>
+          </molecule>
+        </molecules>
+      </topology>
+    XML
+
+    output = shell_output("#{bin}/csg_dump --top topol.xml")
+    assert_match "I have 1 beads in 1 molecules", output
   end
 end

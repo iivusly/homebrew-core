@@ -16,27 +16,42 @@ class AircrackNg < Formula
   end
 
   bottle do
-    sha256                               arm64_sonoma:   "fe96a817b4755ca8a498ad1cd45666a04238d3ed1a7bd3ce97f27f0fd68ae2ef"
-    sha256                               arm64_ventura:  "d3d59c186fb570afbf6c925fece858ae01ed7d0a7290e3cccbd45a1ae3789881"
-    sha256                               arm64_monterey: "ae0d6fe850335049e70c0eed7486182be424fe7e9f1f449687ab2a4248e0816a"
-    sha256                               arm64_big_sur:  "146f8023328aff76b469874b408e00a2bb142e05753badd291be1e0370a21502"
-    sha256                               sonoma:         "857116e74cf96666577ff3bcc36a18ce3a4b629e3fba09c96224efe47f7195ae"
-    sha256                               ventura:        "f418df11db6bc8af148f4f889715009da8e7084fb2777c3831f38cd5a90a3c4a"
-    sha256                               monterey:       "32bab474db5a9602788ffd7d32f4bd25199732705cc4856b7335c96d6675a961"
-    sha256                               big_sur:        "c7b4666859d336a5219c53d5b9310547495438e460d38c7f1b3175c274245b55"
-    sha256                               catalina:       "09115822ebac9a6d9903635faa0a393dc1bcaaaf2fcbb344a5dee123fe1f02f1"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "72556b434c07c994c66ac4f37b9946884357af00a7543d6e961808ca78a6818c"
+    rebuild 3
+    sha256                               arm64_tahoe:   "c1461024ee7d85a1f0024b7e79aee529a2ffc577b4e7f55df1b93bce01a4a9c0"
+    sha256                               arm64_sequoia: "240101a996380066deb81a5f2baa3df5c940231082f13bb5f6955ba815a760eb"
+    sha256                               arm64_sonoma:  "8e0f9fda43350ce0365407b05c02bbbe59edb719612e7522e431bfa12de6a83b"
+    sha256                               sonoma:        "e5e3a8ae160dcdca43edb6382efc2873748e6a02f537cbcb27003b2321e7c44d"
+    sha256                               arm64_linux:   "73fe80cec55d4e7058ed7d3bf9fc5a57e30d39941fd665714ed90d74c63d2ab5"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "4aa4f09ec6d620ea76c8a799abebea56382ed5c055b4a4aed414a6339a7a3591"
   end
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
   depends_on "libtool" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "openssl@3"
-  depends_on "pcre"
+  depends_on "pcre2"
   depends_on "sqlite"
 
   uses_from_macos "libpcap"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
+
+  # Backport support for PCRE2
+  patch do
+    url "https://github.com/aircrack-ng/aircrack-ng/commit/adbb91bbec99b8c12924966314714a26ec86f504.patch?full_index=1"
+    sha256 "b3b4eae6987f1a0a812f30426b7ceb77cd50da958c05415840291f69cbe005d6"
+  end
+  patch do
+    url "https://github.com/aircrack-ng/aircrack-ng/commit/88408f6441a1527b6e7e55ab5bccd113cfad4156.patch?full_index=1"
+    sha256 "fe162569841b0f101759e019ba2034e7370555c2bea7b2b9113c70910708b062"
+  end
+  patch do
+    url "https://github.com/aircrack-ng/aircrack-ng/commit/f7d65bdbdd83ba8ae4ea0f145939da7a5a2fb0d1.patch?full_index=1"
+    sha256 "98a675f0bca1fc7a8e85b8ac67f1a0e554aae824679b849b0e41f77d2d84a69f"
+  end
 
   # Remove root requirement from OUI update script. See:
   # https://github.com/Homebrew/homebrew/pull/12755
@@ -44,22 +59,16 @@ class AircrackNg < Formula
 
   def install
     system "./autogen.sh", "--disable-silent-rules",
-                           "--disable-dependency-tracking",
-                           "--prefix=#{prefix}",
                            "--sysconfdir=#{etc}",
-                           "--with-experimental"
+                           "--with-experimental",
+                           *std_configure_args
     system "make", "install"
     inreplace sbin/"airodump-ng-oui-update", "/usr/local", HOMEBREW_PREFIX
-  end
-
-  def post_install
     pkgetc.mkpath
   end
 
   def caveats
-    <<~EOS
-      Run `airodump-ng-oui-update` install or update the Airodump-ng OUI file.
-    EOS
+    "Run `airodump-ng-oui-update` install or update the Airodump-ng OUI file."
   end
 
   test do
@@ -96,6 +105,6 @@ __END__
 -	echo Run it as root ; exit ;
 -fi
 -
- 
+
  if [ ! -d "${OUI_PATH}" ]; then
  	mkdir -p ${OUI_PATH}

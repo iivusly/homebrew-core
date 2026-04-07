@@ -5,9 +5,12 @@ class Dashing < Formula
   sha256 "81b21acae83c144f10d9eea05a0b89f0dcdfa694c3760c2a25bd4eab72a2a3b9"
   license "MIT"
   revision 1
+  head "https://github.com/technosophos/dashing.git", branch: "master"
 
   bottle do
     rebuild 2
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:    "78209eefb9ac2ea5604da56e5128386f4f14f0e520377a1ec2a3541eebe452de"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia:  "44a8c08c0183e0bd8a4981e81213332334e5c818a26008c90ca6bf6a5895f206"
     sha256 cellar: :any_skip_relocation, arm64_sonoma:   "aba051824c3bbf06b791ce36a5362d6c7b10becfe692c91dcc3b784d275565f3"
     sha256 cellar: :any_skip_relocation, arm64_ventura:  "b6afd8514bfadafabffcf92070f6daf79070d39d0cfa6f246c0baf83720f1632"
     sha256 cellar: :any_skip_relocation, arm64_monterey: "068ec0d62e2f599509d34a2d366895dce2464eaa9aa1939a553dd1e31c8238d5"
@@ -17,7 +20,7 @@ class Dashing < Formula
     sha256 cellar: :any_skip_relocation, monterey:       "a0c325204c959b5956248606f6b7fcb4437c6dfa2c75f739d4624fb912ecaa55"
     sha256 cellar: :any_skip_relocation, big_sur:        "7297bb9c8b50feeda73af51b59acfcac18f9d2beb57738de293146aaca7cd089"
     sha256 cellar: :any_skip_relocation, catalina:       "43702cf1fbdeb449e9205716635cba4c62449e575f9a6ab45eeb4aeb166fdf9a"
-    sha256 cellar: :any_skip_relocation, mojave:         "bbd3a7995a6b5a0a87f4a08a4e4bb52fe75990bdde6b63bea1a9c56c7c144165"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "6ac970aad0a46e0f50606334b2218aa1b2103347300e59e01fc2cc942580e7d1"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "982d82dc58980aa81fadf686557c5c075ddb95b9ef0f8456e7b32b6ed49aa382"
   end
 
@@ -38,17 +41,17 @@ class Dashing < Formula
     testpath.install resource("redux_saga_docs_tarball")
     innerpath = testpath
     system bin/"dashing", "create"
-    assert_predicate innerpath/"dashing.json", :exist?
+    assert_path_exists innerpath/"dashing.json"
     system bin/"dashing", "build", "."
     innerpath /= "dashing.docset/Contents"
-    assert_predicate innerpath/"Info.plist", :exist?
+    assert_path_exists innerpath/"Info.plist"
     innerpath /= "Resources"
-    assert_predicate innerpath/"docSet.dsidx", :exist?
+    assert_path_exists innerpath/"docSet.dsidx"
     innerpath /= "Documents"
-    assert_predicate innerpath/"README.md", :exist?
+    assert_path_exists innerpath/"README.md"
     innerpath /= "docs"
-    assert_predicate innerpath/"index.html", :exist?
+    assert_path_exists innerpath/"index.html"
     innerpath /= "introduction"
-    assert_predicate innerpath/"SagaBackground.html", :exist?
+    assert_path_exists innerpath/"SagaBackground.html"
   end
 end

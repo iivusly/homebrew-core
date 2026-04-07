@@ -1,9 +1,10 @@
 class Goenv < Formula
   desc "Go version management"
   homepage "https://github.com/go-nv/goenv"
-  url "https://github.com/go-nv/goenv/archive/refs/tags/2.2.4.tar.gz"
-  sha256 "fd11151546235a2abd3bde542a1e148654b7a3c6f75f45bf8e599cc91cf01527"
+  url "https://github.com/go-nv/goenv/archive/refs/tags/2.2.38.tar.gz"
+  sha256 "ec22b8ca7f869f67e657fe6a2155e3fd1407a364429bdbaf04bb3daf33e12aeb"
   license "MIT"
+  revision 1
   version_scheme 1
   head "https://github.com/go-nv/goenv.git", branch: "master"
 
@@ -13,13 +14,7 @@ class Goenv < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "6166d43c934a147ee9f61582d2dfc5a621a49ab4fab5ef1f74fc310467ce1983"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "6166d43c934a147ee9f61582d2dfc5a621a49ab4fab5ef1f74fc310467ce1983"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "6166d43c934a147ee9f61582d2dfc5a621a49ab4fab5ef1f74fc310467ce1983"
-    sha256 cellar: :any_skip_relocation, sonoma:         "0d969e29b156d0224cb1c841c2e3020ccf3142213d1c2ae51f2f00d59e2bff57"
-    sha256 cellar: :any_skip_relocation, ventura:        "0d969e29b156d0224cb1c841c2e3020ccf3142213d1c2ae51f2f00d59e2bff57"
-    sha256 cellar: :any_skip_relocation, monterey:       "0d969e29b156d0224cb1c841c2e3020ccf3142213d1c2ae51f2f00d59e2bff57"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "6166d43c934a147ee9f61582d2dfc5a621a49ab4fab5ef1f74fc310467ce1983"
+    sha256 cellar: :any_skip_relocation, all: "b8bc908bc6c60b183035d20dbc709b4a6e42793ae1f29c55976431d520583d63"
   end
 
   def install
@@ -28,6 +23,7 @@ class Goenv < Formula
       "plugins/go-build/install.sh",
       "test/goenv.bats",
       "test/test_helper.bash",
+      "plugins/go-build/test/test_helper.bash",
     ]
     inreplace inreplace_files, "/usr/local", HOMEBREW_PREFIX
 

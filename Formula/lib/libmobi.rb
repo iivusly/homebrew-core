@@ -4,23 +4,27 @@ class Libmobi < Formula
   url "https://github.com/bfabiszewski/libmobi/releases/download/v0.12/libmobi-0.12.tar.gz"
   sha256 "9a6fb2c56b916f8fa8b15e0c71008d908109508c944ea1d297881d4e277bf7e7"
   license "LGPL-3.0-or-later"
+  revision 1
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "d1fe8e0413649a0a838d650e614ef07010aa121e1ab3a2b360d8ba6da1124a77"
-    sha256 cellar: :any,                 arm64_ventura:  "1f4ea76703406a4f5453ac1767100a8198d6bf14782c1a6a862fcb3e2dd5d908"
-    sha256 cellar: :any,                 arm64_monterey: "4745216331bec2106dad3b68997ff46888b15ca74a19f4e6aafc510ed16daa26"
-    sha256 cellar: :any,                 sonoma:         "d510c86ba6f58c1835f3b4721986058711d2db5d94c9d6c9afc1d08f6f7a5316"
-    sha256 cellar: :any,                 ventura:        "5182d5625306772b104ee2fa38105e399c82bc33b25c01934f5722bfefddd177"
-    sha256 cellar: :any,                 monterey:       "ac43b774943fed966a0698c82cf05ec9bd8f020380ac12810cb60613d7d8923b"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "380132da0b9faf43d841d6eeaeafa37cfbf1381d2a66549a105c44808022fcc8"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "2c692dcb58d257bfaeb352c4bf6240d7479ca2fe5ebc2064b2ca1b4d2466e592"
+    sha256 cellar: :any,                 arm64_sequoia: "0d79535ee222bee7cf090b9f36217fa2b88d92ac96c72665e6f2012e562c4c59"
+    sha256 cellar: :any,                 arm64_sonoma:  "811f7c109ae3f3b535c51d381ae0dfb7703a8515ed207fb847df6036c4893d23"
+    sha256 cellar: :any,                 sonoma:        "227cc265d99edfe9ffe1526ad3a64b774cdcf75afc42546f472af1fe5563d209"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "f2a3bc46369f896c9b4211d84bf368829ca6d3bb98411c2675c0696cbf4e9f7e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "189a28e29037f0925fa470adbcb876f4e07a16c09731ecd9c2ad2db060b49597"
   end
 
   uses_from_macos "libxml2"
-  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   # Fix -flat_namespace being used on Big Sur and later.
   patch do
-    url "https://raw.githubusercontent.com/Homebrew/formula-patches/03cf8088210822aa2c1ab544ed58ea04c897d9c4/libtool/configure-big_sur.diff"
+    url "https://raw.githubusercontent.com/Homebrew/homebrew-core/1cf441a0/Patches/libtool/configure-big_sur.diff"
     sha256 "35acd6aebc19843f1a2b3a63e880baceb0f5278ab1ace661e57a502d9d78c93c"
   end
 
@@ -30,7 +34,7 @@ class Libmobi < Formula
   end
 
   test do
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include <mobi.h>
       int main() {
         MOBIData *m = mobi_init();
@@ -40,7 +44,7 @@ class Libmobi < Formula
         mobi_free(m);
         return 0;
       }
-    EOS
+    CPP
     system ENV.cxx, "test.cpp", "-I#{include}", "-L#{lib}", "-lmobi", "-o", "test"
     system "./test"
   end

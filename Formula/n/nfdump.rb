@@ -1,25 +1,24 @@
 class Nfdump < Formula
   desc "Tools to collect and process netflow data on the command-line"
   homepage "https://github.com/phaag/nfdump"
-  url "https://github.com/phaag/nfdump/archive/refs/tags/v1.7.4.tar.gz"
-  sha256 "8cf76ad0b4e3c1e7edf9532ec7508b11f125adcfcdac5010fd7eec8fe792cfd8"
+  url "https://github.com/phaag/nfdump/archive/refs/tags/v1.7.7.tar.gz"
+  sha256 "1b74b58e16dfa7a846bbe3135a7deaf2da54da009aa9d6f63340b3a046add319"
   license "BSD-3-Clause"
   head "https://github.com/phaag/nfdump.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "42fa76feef300134d762f24e8d44867855ad1f43641fec68998d39df23dce6cb"
-    sha256 cellar: :any,                 arm64_ventura:  "543982b0fe73e4278ae50a28305e2503f6f0923114b0793e5f848a49055d6b92"
-    sha256 cellar: :any,                 arm64_monterey: "798c9f5fa5609a306c20de9a6521792152aefd2e027f8144ec6f4a6a342aaca5"
-    sha256 cellar: :any,                 sonoma:         "f1e1729415f6311951d6a910d1a616c0b608eec317285be862559cc735a92a92"
-    sha256 cellar: :any,                 ventura:        "830e40010f31f0e9487b018b27b7a9539adec2d19d33b1a6c35c358e8b0eea41"
-    sha256 cellar: :any,                 monterey:       "a9123fe3397f88570182367261c1c6b30a323e4da4a1427bcb200898149bcdb1"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "64b660aaaa2bea081d802e32c32af4d2869b8a421cefb000467758b106f20847"
+    sha256 cellar: :any,                 arm64_tahoe:   "6a203863decd6e32077b5596b28d7ff5f3d7add64c3185d4308d5175dc2e8659"
+    sha256 cellar: :any,                 arm64_sequoia: "42fd1d0dbc4ed108675af031cde76aa65216d36f5eb5716ac16248998014ce6c"
+    sha256 cellar: :any,                 arm64_sonoma:  "bb2c609176152b4fe82c1b3a61411388d8e2ba22a72a30722e1f82507e402125"
+    sha256 cellar: :any,                 sonoma:        "f1895991433aadeddb6c7a75a838b1b39c192fafe5958b5e1925d7c6195871ab"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "2e0e2ad726ff8ab3d891ebf44f3f020e16ab49a0eade592a3aeced3de419f6f3"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "48f7c1063e36f2d139855e443c713a7d9d3bbc691b042d76717a2684217b15f1"
   end
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
   depends_on "libtool" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
 
   uses_from_macos "bison" => :build
   uses_from_macos "flex" => :build
@@ -28,7 +27,7 @@ class Nfdump < Formula
 
   def install
     system "./autogen.sh"
-    system "./configure", *std_configure_args, "--enable-readpcap", "LEXLIB="
+    system "./configure", "--enable-readpcap", "LEXLIB=", *std_configure_args
     system "make", "install"
   end
 

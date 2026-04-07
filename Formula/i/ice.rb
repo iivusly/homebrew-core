@@ -1,8 +1,10 @@
 class Ice < Formula
   desc "Comprehensive RPC framework"
   homepage "https://zeroc.com"
-  url "https://github.com/zeroc-ice/ice/archive/refs/tags/v3.7.10.tar.gz"
-  sha256 "b90e9015ca9124a9eadfdfc49c5fba24d3550c547f166f3c9b2b5914c00fb1df"
+  url "https://github.com/zeroc-ice/ice/archive/refs/tags/v3.8.1.tar.gz"
+  sha256 "87aa0381f2347715467686547bccf253fa208948bf2a462584872d2d0f8b1720"
+  # See https://github.com/zeroc-ice/ice/blob/main/ICE_LICENSE for a special
+  # exception to combine Ice with the OpenSSL library and Apache-2.0 libraries
   license "GPL-2.0-only"
 
   livecheck do
@@ -11,13 +13,12 @@ class Ice < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "9e16e4dc54af25f1f87ada450ac1179be3f2ddbdfaf53d75fc242f20dd093721"
-    sha256 cellar: :any,                 arm64_ventura:  "c13e1bd19804740b88a1a91acb548a66a4407bb234c74423bf0fa5a4c529b59c"
-    sha256 cellar: :any,                 arm64_monterey: "0193902362ba7001f9ada681d417b2ff2178a259e1742a1ef7b40a13a0c1659f"
-    sha256 cellar: :any,                 sonoma:         "7f5e821c0f5341f106eb7ac794cc28212fff4cb1ea7c1bc4a9b4be0f9045453f"
-    sha256 cellar: :any,                 ventura:        "f51b98196d1bbd54ebc2f5fd0afc4ca79581109d94546741cf60abb6c7a5f32f"
-    sha256 cellar: :any,                 monterey:       "0cddb56c9be86ab8f4c9741f3ef2b4b1cebd4893692f8ddd06085c4e6bd82512"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "52ec26319cdc6a02479ca493939ca965d97fde730b6d2f35eb151f55b0735e2a"
+    sha256 cellar: :any,                 arm64_tahoe:   "e73d5cc15f629eb8381d7dbbb6dc196f67234bba957ca78bc6f7884e925eb763"
+    sha256 cellar: :any,                 arm64_sequoia: "fa69325f0ba3ad72906a3f86e40cb52908b6f89aea97c68424256ac3d537db81"
+    sha256 cellar: :any,                 arm64_sonoma:  "31fffc8a580481083e88786d2996e47fadf8ddde7478e1018db0aec5d470605d"
+    sha256 cellar: :any,                 sonoma:        "32f6816651a201d6c364b04745e2df920777bbaac0d3d5599e1edf0477a2097c"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "9586db5fca4281079514d7b00c50f9c40204d789d81abd854d99274e2261c595"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "8440c54d6797e2ccfdc0bd26dc0b64d6e3563b976a8d19936dbe4e2dd6280a8b"
   end
 
   depends_on "lmdb"
@@ -33,39 +34,21 @@ class Ice < Formula
   end
 
   def install
+    if DevelopmentTools.clang_build_version < 1700
+      inreplace "config/Make.rules.Darwin", "-Wl,-max_default_common_align,0x4000", ""
+    end
+
     args = [
       "prefix=#{prefix}",
       "V=1",
       "USR_DIR_INSTALL=yes", # ensure slice and man files are installed to share
       "MCPP_HOME=#{Formula["mcpp"].opt_prefix}",
       "LMDB_HOME=#{Formula["lmdb"].opt_prefix}",
-      "CONFIGS=shared cpp11-shared xcodesdk cpp11-xcodesdk",
+      "CONFIGS=all",
       "PLATFORMS=all",
-      "SKIP=slice2confluence",
-      "LANGUAGES=cpp objective-c",
+      "LANGUAGES=cpp",
     ]
-
-    # Fails with Xcode < 12.5
-    inreplace "cpp/include/Ice/Object.h", /^#.+"-Wdeprecated-copy-dtor"+/, "" if OS.mac? && MacOS.version <= :catalina
-
     system "make", "install", *args
-
-    # We install these binaries to libexec because they conflict with those
-    # installed along with the ice packages from PyPI, RubyGems and npm.
-    (libexec/"bin").mkpath
-    %w[slice2py slice2rb slice2js].each do |r|
-      mv bin/r, libexec/"bin"
-    end
-  end
-
-  def caveats
-    <<~EOS
-      slice2py, slice2js and slice2rb were installed in:
-
-        #{opt_libexec}/bin
-
-      You may wish to add this directory to your PATH.
-    EOS
   end
 
   test do
@@ -81,14 +64,14 @@ class Ice < Formula
 
     port = free_port
 
-    (testpath/"Test.cpp").write <<~EOS
+    (testpath/"Test.cpp").write <<~CPP
+      #include "Hello.h"
       #include <Ice/Ice.h>
-      #include <Hello.h>
 
       class HelloI : public Test::Hello
       {
       public:
-        virtual void sayHello(const Ice::Current&) override {}
+          void sayHello(const Ice::Current&) override {}
       };
 
       int main(int argc, char* argv[])
@@ -99,12 +82,12 @@ class Ice < Formula
         adapter->activate();
         return 0;
       }
-    EOS
+    CPP
 
     system bin/"slice2cpp", "Hello.ice"
-    system ENV.cxx, "-DICE_CPP11_MAPPING", "-std=c++11", "-c", "-I#{include}", "-I.", "Hello.cpp"
-    system ENV.cxx, "-DICE_CPP11_MAPPING", "-std=c++11", "-c", "-I#{include}", "-I.", "Test.cpp"
-    system ENV.cxx, "-L#{lib}", "-o", "test", "Test.o", "Hello.o", "-lIce++11", "-pthread"
+    system ENV.cxx, "-std=c++20", "-c", "-I#{include}", "Hello.cpp"
+    system ENV.cxx, "-std=c++20", "-c", "-I#{include}", "Test.cpp"
+    system ENV.cxx, "-L#{lib}", "-o", "test", "Test.o", "Hello.o", "-lIce", "-lpthread"
     system "./test"
   end
 end

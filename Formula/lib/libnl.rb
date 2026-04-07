@@ -1,26 +1,35 @@
 class Libnl < Formula
   desc "Netlink Library Suite"
   homepage "https://github.com/thom311/libnl"
-  url "https://github.com/thom311/libnl/releases/download/libnl3_10_0/libnl-3.10.0.tar.gz"
-  sha256 "49b3e2235fdb58f5910bbb3ed0de8143b71ffc220571540502eb6c2471f204f5"
+  url "https://github.com/thom311/libnl/releases/download/libnl3_12_0/libnl-3.12.0.tar.gz"
+  sha256 "fc51ca7196f1a3f5fdf6ffd3864b50f4f9c02333be28be4eeca057e103c0dd18"
   license "LGPL-2.1-or-later"
 
+  livecheck do
+    url :stable
+    regex(/^libnl(\d+(?:[._]\d+)+)$/i)
+    strategy :git do |tags, regex|
+      tags.filter_map { |tag| tag[regex, 1]&.tr("_", ".") }
+    end
+  end
+
   bottle do
-    sha256 x86_64_linux: "1a9b2071dd76f8b2d35c2064fa5305dabaf610e0f408c50024ce8bcc7902ba28"
+    sha256 arm64_linux:  "75c3dff2c1bd4a952ab0b661639b0629829b1d447e20cb6bb7471655d13ffe83"
+    sha256 x86_64_linux: "1d3128ef9d8dde95c5da2f454abc2b4b62670fd72528f4a0b9f62e7e163561f7"
   end
 
   depends_on "bison" => :build
   depends_on "flex" => :build
-  depends_on "pkg-config" => :test
+  depends_on "pkgconf" => [:build, :test]
   depends_on :linux # Netlink sockets are only available in Linux.
 
   def install
-    system "./configure", *std_configure_args, "--disable-silent-rules", "--sysconfdir=#{etc}"
+    system "./configure", "--disable-silent-rules", "--sysconfdir=#{etc}", *std_configure_args
     system "make", "install"
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <netlink/netlink.h>
       #include <netlink/route/link.h>
 
@@ -51,11 +60,11 @@ class Libnl < Formula
 
         return 0;
       }
-    EOS
+    C
 
-    pkg_config_flags = shell_output("pkg-config --cflags --libs libnl-3.0 libnl-route-3.0").chomp.split
-    system ENV.cc, "test.c", *pkg_config_flags, "-o", "test"
-    assert_match "Unable to delete link: Operation not permitted", shell_output("#{testpath}/test 2>&1", 228)
+    flags = shell_output("pkgconf --cflags --libs libnl-3.0 libnl-route-3.0").chomp.split
+    system ENV.cc, "test.c", "-o", "test", *flags
+    assert_match "Unable to delete link: Operation not permitted", shell_output("./test 2>&1", 228)
 
     assert_match "inet 127.0.0.1", shell_output("#{bin}/nl-route-list")
   end

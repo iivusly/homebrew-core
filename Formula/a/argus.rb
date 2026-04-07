@@ -1,28 +1,28 @@
 class Argus < Formula
   desc "Audit Record Generation and Utilization System server"
   homepage "https://openargus.org"
-  url "https://github.com/openargus/argus/archive/refs/tags/v5.0.0.tar.gz"
-  sha256 "d2ac1013832ba502570ce4a152c02c898e3725b8682e21af54d8e3a513c3396e"
+  url "https://github.com/openargus/argus/archive/refs/tags/v5.0.2.tar.gz"
+  sha256 "1718454ac717fe5f500d00ff608097e3c5483f4e138aa789e67e306feb52bafb"
   license "GPL-3.0-or-later"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "cd66bf50cf9c6dd402c58e531708893cd2aca10266d6d2d70ecb00768775ac27"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "5dff8faed6dd67b53ab7bfdba11cc52385e32c675d2610dee21eb0bdecc3d0c6"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "7626939126bc907b343cc0782fbb87bcb05928e2147f3314c2e4f77d8df21548"
-    sha256 cellar: :any_skip_relocation, sonoma:         "68c8c71f306e9f13d030a81c69a6f0325b57b9b06c3d8ea6ee1037bc75fca757"
-    sha256 cellar: :any_skip_relocation, ventura:        "a358ec3026dbb2b9c0f8dc6800a97c608859993a5bc46d129d9c668fb174c785"
-    sha256 cellar: :any_skip_relocation, monterey:       "fc9b325392bbd2b9838141d04dcb2f145599fa55f4f5dc4d75e83d26baac2261"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "7b66d1d53a26ee4246fb31053f0ce4cddea6a54b27529cd0cdbf852942ccdd51"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "7c1a76bb7c5737f627ebfc27f321fc34cedc903ae21a33c0a9280529dce6917f"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "f0dea329a17b51f48861d6dbfd53900af81bb75bcd9dd173b8bef89e41a978e1"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "823afbc6210ecbc3bb273fefd593ee7d3698c8115a3469e1829c902f4c64435e"
+    sha256 cellar: :any_skip_relocation, sonoma:        "9216f8cbb95b5f44214aca06da967e5eb97ebd42667c340504bfc04da72bd5cb"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "d84ccbdbdb94cb8281f0e2b529b7389a961f31c86f3fc0fd678a9502460d096a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "9988cefee9faa56b8626339270477793a75757df731e86169db368542a1360ad"
   end
 
   uses_from_macos "bison" => :build
   uses_from_macos "flex" => :build
   uses_from_macos "cyrus-sasl"
   uses_from_macos "libpcap"
-  uses_from_macos "zlib"
 
   on_linux do
     depends_on "libtirpc"
+    depends_on "zlib-ng-compat"
   end
 
   def install
@@ -39,6 +39,6 @@ class Argus < Formula
     assert_match "Pages", shell_output(bin/"argus-vmstat") if OS.mac?
     assert_match "Argus Version #{version}", shell_output("#{sbin}/argus -h", 255)
     system sbin/"argus", "-r", test_fixtures("test.pcap"), "-w", testpath/"test.argus"
-    assert_predicate testpath/"test.argus", :exist?
+    assert_path_exists testpath/"test.argus"
   end
 end

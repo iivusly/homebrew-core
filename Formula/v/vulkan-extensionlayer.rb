@@ -1,29 +1,26 @@
 class VulkanExtensionlayer < Formula
   desc "Layer providing Vulkan features when native support is unavailable"
   homepage "https://github.com/KhronosGroup/Vulkan-ExtensionLayer"
-  url "https://github.com/KhronosGroup/Vulkan-ExtensionLayer/archive/refs/tags/v1.3.295.tar.gz"
-  sha256 "271527cd0ab0576b413f2616a204c85fede6c263daaf70394ca50a2d6f7fb201"
+  url "https://github.com/KhronosGroup/Vulkan-ExtensionLayer/archive/refs/tags/vulkan-sdk-1.4.341.0.tar.gz"
+  sha256 "9845b8c85099fab61efe932372be7af374532df0f1135ab25604f2363e35d864"
   license "Apache-2.0"
   head "https://github.com/KhronosGroup/Vulkan-ExtensionLayer.git", branch: "main"
 
   livecheck do
     url :stable
-    regex(/^v?(\d+(?:\.\d+)+)$/i)
+    regex(/^vulkan-sdk[._-]v?(\d+(?:\.\d+)+)$/i)
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "61c08a85655fc2c1d6cf01d57424e0764d4a7831fbc70a8a8beafb493ed39797"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "fd34361498230085105e8cc6c4aec492fc2c378acf1e4c5e08e42b4be3c59568"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "e79992abf9bc3f93d43eea157b07cd0212c9c263e082cc14e243f61952a2dfac"
-    sha256 cellar: :any_skip_relocation, sonoma:         "486e7763fb8c94f242b7627290b6b33d939fae705f9b36ee1a67fc4da86449db"
-    sha256 cellar: :any_skip_relocation, ventura:        "1baac413caf66dc4519c1673f2c34d7516952ae6b3f5e94b1684a85d07973916"
-    sha256 cellar: :any_skip_relocation, monterey:       "2f371bde7de2345dfb5e2e72b8201600775f55ffcb6aa32719638ca3db03cd3e"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "6c15a70233e55a48afbffed4a3b4b4e52147ee8851ed98ffed23a33ece2d4364"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "4801ab6a83086e66d75089be132850327fa89f4f55c46dbb7e21274693e46729"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "d46919da53997b8c4befea6ed8780cdbfbb9f26f26ca62e66da279c2a6b69708"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "c4188718d9db9fb20c9938caa8bbd53d846dfe6a355bfb4609647559bd076d3e"
+    sha256 cellar: :any_skip_relocation, sonoma:        "b81c95c4c366c34a3d662768bc8ae9be4d97b5ec78ef965372e4b2bc195da41d"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "69541c5a33d57b3c1c041eda50aea03450d16c3ec6b53e941c99d29759add85a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ef211ce2ce607aa1f852ff1b06c60522f89f518c75274ef516e2776b0fb4090c"
   end
 
   depends_on "cmake" => :build
-  depends_on "googletest" => :build
-  depends_on "python@3.12" => :build
   depends_on "vulkan-loader" => :test
   depends_on "vulkan-tools" => :test
   depends_on "glslang"
@@ -36,17 +33,18 @@ class VulkanExtensionlayer < Formula
     depends_on "libxcb" => :build
     depends_on "libxrandr" => :build
     depends_on "mesa" => :build
-    depends_on "pkg-config" => :build
+    depends_on "pkgconf" => :build
     depends_on "wayland" => :build
   end
 
   def install
     system "cmake", "-S", ".", "-B", "build",
+                    "-DBUILD_TESTS=OFF",
+                    "-DCMAKE_INSTALL_RPATH=#{rpath(target: Formula["vulkan-loader"].opt_lib)}",
                     "-DGLSLANG_INSTALL_DIR=#{Formula["glslang"].prefix}",
                     "-DSPIRV_HEADERS_INSTALL_DIR=#{Formula["spirv-headers"].prefix}",
                     "-DSPIRV_TOOLS_INSTALL_DIR=#{Formula["spirv-tools"].prefix}",
                     "-DVULKAN_HEADERS_INSTALL_DIR=#{Formula["vulkan-headers"].prefix}",
-                    "-DCMAKE_INSTALL_RPATH=#{rpath(target: Formula["vulkan-loader"].opt_lib)}",
                     *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"

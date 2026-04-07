@@ -1,19 +1,12 @@
 class Basedpyright < Formula
   desc "Pyright fork with various improvements and built-in pylance features"
   homepage "https://github.com/DetachHead/basedpyright"
-  url "https://registry.npmjs.org/basedpyright/-/basedpyright-1.17.2.tgz"
-  sha256 "b25f4b2f23276d99aad6c165776c9ceaa5d06b80bf9688aa29953f7e9dc19048"
+  url "https://registry.npmjs.org/basedpyright/-/basedpyright-1.39.0.tgz"
+  sha256 "01a7dca24d190326da83ee706e27d53b6f910fcbc583943897c27d9a9b9f2ae8"
   license "MIT"
-  head "https://github.com/detachhead/basedpyright.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "c438af49842fdb17d81240e3ba480ad83be7316396eeee5edf482b4e40d6d9df"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "c438af49842fdb17d81240e3ba480ad83be7316396eeee5edf482b4e40d6d9df"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "c438af49842fdb17d81240e3ba480ad83be7316396eeee5edf482b4e40d6d9df"
-    sha256 cellar: :any_skip_relocation, sonoma:         "7f7238b5b0af695b513033a320a5385be9bf1301f115f45c351f0474e9b42e72"
-    sha256 cellar: :any_skip_relocation, ventura:        "7f7238b5b0af695b513033a320a5385be9bf1301f115f45c351f0474e9b42e72"
-    sha256 cellar: :any_skip_relocation, monterey:       "7f7238b5b0af695b513033a320a5385be9bf1301f115f45c351f0474e9b42e72"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "c438af49842fdb17d81240e3ba480ad83be7316396eeee5edf482b4e40d6d9df"
+    sha256 cellar: :any_skip_relocation, all: "4aeb307a032a7d6237e407af48b5a563292903d3fd532c911cbdfccc3eb4500c"
   end
 
   depends_on "node"
@@ -22,14 +15,17 @@ class Basedpyright < Formula
     system "npm", "install", *std_npm_args
     bin.install_symlink libexec/"bin/pyright" => "basedpyright"
     bin.install_symlink libexec/"bin/pyright-langserver" => "basedpyright-langserver"
+
+    # Remove empty folder to make :all bottle
+    rm_r libexec/"lib/node_modules/basedpyright/node_modules" if OS.mac?
   end
 
   test do
-    (testpath/"broken.py").write <<~EOS
+    (testpath/"broken.py").write <<~PYTHON
       def wrong_types(a: int, b: int) -> str:
           return a + b
-    EOS
-    output = pipe_output("#{bin}/basedpyright broken.py 2>&1")
+    PYTHON
+    output = shell_output("#{bin}/basedpyright broken.py 2>&1", 1)
     assert_match "error: Type \"int\" is not assignable to return type \"str\"", output
   end
 end

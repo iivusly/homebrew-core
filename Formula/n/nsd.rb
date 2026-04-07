@@ -1,8 +1,8 @@
 class Nsd < Formula
   desc "Name server daemon"
   homepage "https://www.nlnetlabs.nl/projects/nsd/"
-  url "https://www.nlnetlabs.nl/downloads/nsd/nsd-4.10.1.tar.gz"
-  sha256 "c0190f923f0095995f2e6331dacd92c6e1f4d578b880d61690602b43a5acfd84"
+  url "https://www.nlnetlabs.nl/downloads/nsd/nsd-4.14.2.tar.gz"
+  sha256 "2bff57349841844d7560e76d7bd70b6bd6f4c462cdaa6d57b8e83d1e14dd22d6"
   license "BSD-3-Clause"
 
   # We check the GitHub repo tags instead of
@@ -18,15 +18,15 @@ class Nsd < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "3460116714f6081ea1b1ff74aa6d69af3dcd90c5afdebe393aae19af8d052224"
-    sha256 arm64_ventura:  "6b051779b60b8d878dd094338c58fed35c7a54874297f3039a1c1e196b95e363"
-    sha256 arm64_monterey: "7a814959891aea2529609ab8e88f382956669f2ba69d194c7c4a57bf9085454f"
-    sha256 sonoma:         "cd6d2ed468d4183bcf79002d0f533f01380ba0eea2c606200b69bc4f56104e27"
-    sha256 ventura:        "93bbc4a2bd5b2f7cb8e764c011e262785a06398d5c7a362fe9955422d3c5c4ba"
-    sha256 monterey:       "2a607b26919ffce37e867e790d24bc6920fd6a6a2cb19393dab5f1f64ff0d608"
-    sha256 x86_64_linux:   "202a6511ed192c3cb3409f9ba7c50b8bfcb3dcb887037fe67b7317e34eb1f765"
+    sha256 arm64_tahoe:   "a4394782121330129516d8754a1afc60fcf65021a825f5bb7299b29e19471f46"
+    sha256 arm64_sequoia: "542fa3457af566ece535603d02358889450e0f261ef4e95979066e3dbe3054d8"
+    sha256 arm64_sonoma:  "c6d2bd7ca911de2af6ee07cda601e324d5864c19338fb1e1efa517ed055f9108"
+    sha256 sonoma:        "84be842d16cf6d959917750f4519bae976aba6e3bae3ecd1f7ce865b0b212376"
+    sha256 arm64_linux:   "24005bb47835c5d7df0fcf7cd12671f29c7b807f529b6822f958a64b71366e7f"
+    sha256 x86_64_linux:  "ba65dde178817e42ce9436607b1cb60857dd8848c7ce00e94be9a0e80cd86dfd"
   end
 
+  depends_on "pkgconf" => :build
   depends_on "libevent"
   depends_on "openssl@3"
 
@@ -35,6 +35,7 @@ class Nsd < Formula
 
     system "./configure", "--sysconfdir=#{etc}",
                           "--localstatedir=#{var}",
+                          "--disable-dnstap",
                           "--with-libevent=#{Formula["libevent"].opt_prefix}",
                           "--with-ssl=#{Formula["openssl@3"].opt_prefix}",
                           *std_configure_args

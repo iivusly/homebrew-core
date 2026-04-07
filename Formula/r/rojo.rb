@@ -3,22 +3,21 @@ class Rojo < Formula
   homepage "https://rojo.space/"
   # pull from git tag to get submodules
   url "https://github.com/rojo-rbx/rojo.git",
-      tag:      "v7.4.4",
-      revision: "5bd3c74db023c5588612bc73caace5f8d3a265b9"
+      tag:      "v7.6.1",
+      revision: "825726c8835d26e37290cb7343e7765741aefefd"
   license "MPL-2.0"
   head "https://github.com/rojo-rbx/rojo.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "124502f09f177403d38bafe52c9392ce46ac6063daeb0244a1bf1c1e9df76369"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "8b24719dba60457c261697e46cf3a0fe187c5edd990f644271dd33348b40506c"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "c490667709f9c7ecdb2b5ad22591255700b981e191c6ad1d38a724a72f53a2b3"
-    sha256 cellar: :any_skip_relocation, sonoma:         "dd37712e2fec0ea5912b0203916ab176806daf02a798f3355427965551317b38"
-    sha256 cellar: :any_skip_relocation, ventura:        "06e415405c965afa0f0845a86e664c92f083f39c4c3e072ac22aaa27d6d3f7e4"
-    sha256 cellar: :any_skip_relocation, monterey:       "2091fae5e8336a3e06bc0d676c6d005565ec1b75ec53475e7ee686fb092b2854"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "d455bb69759f1d0030ef0d1a7ee8a182f682eb169169c3c5084e0dca263ecc68"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "7342fb03360adf9da87f85e2f7e0a4d9165ed15fba501a5d570e417ea8131929"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "bf6599feb5a14753afc072b730d5f13f288b7e85820b172c8086aca04ec8e06a"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "b06bacf8121e829628f38ef50ebe51088cb8c84cadb6b2662dc57faeb8d77042"
+    sha256 cellar: :any_skip_relocation, sonoma:        "1dd5086711d202388aefd2c5c0bfa918474440258ca4d5f7bca95ec74cb2c99d"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "b89b0bbd30ab66f4bf75373ca1fd2334a19805b89a027282014a46bb7e90cbe0"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "cff0fe4bb57f025548214ff6227c8973ac5308a2414fde120542a0bb5332e7b7"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "rust" => :build
   depends_on "openssl@3"
 
@@ -32,8 +31,8 @@ class Rojo < Formula
 
   test do
     system bin/"rojo", "init"
-    assert_predicate testpath/"default.project.json", :exist?
+    assert_path_exists testpath/"default.project.json"
 
-    assert_match version.to_s, shell_output(bin/"rojo --version")
+    assert_match version.to_s, shell_output("#{bin}/rojo --version")
   end
 end

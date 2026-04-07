@@ -1,8 +1,8 @@
 class CargoBinstall < Formula
   desc "Binary installation for rust projects"
   homepage "https://github.com/cargo-bins/cargo-binstall"
-  url "https://github.com/cargo-bins/cargo-binstall/archive/refs/tags/v1.10.3.tar.gz"
-  sha256 "4b6ce187baa1826001b6122929294e5c873d9592533f44e45f0c529bb26e45be"
+  url "https://github.com/cargo-bins/cargo-binstall/archive/refs/tags/v1.17.9.tar.gz"
+  sha256 "33ffb0260d498dbc8aa1cc933bd4cf3087099897caedc976448391826562207f"
   license "GPL-3.0-only"
   head "https://github.com/cargo-bins/cargo-binstall.git", branch: "main"
 
@@ -15,13 +15,12 @@ class CargoBinstall < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "761fcbd51f319d9783d506cdc99bb9b58305ed5baf16adcb2937a513b0e7fd92"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "a424954048495c0935d3a9f7e299d57ae2c077f4500b547b87d986528acce060"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "6ac3e9745e011643b7e8a273f75d32244e9afa7d1348e70dbf03423153e01538"
-    sha256 cellar: :any_skip_relocation, sonoma:         "2301f61be9ee99ce7f89a2efaf8c17e2a884ffca3ccdae0b0698a90fe1b4a184"
-    sha256 cellar: :any_skip_relocation, ventura:        "f6722deab78ce112086d6b5cb910fda0476d38701e4b3c6e61ba75e6aee4729e"
-    sha256 cellar: :any_skip_relocation, monterey:       "e8f8df30e1e10cd27c21c6d2bc82b27523d858667c38ab7e79669e337fba43c3"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "84afadd0c17395003b48dc0a7867986f30d4dc20fdf01b67687981046711ca52"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "be4cca7544776c79aee620ed18c8fc5eb17de6b218efe484c3df312f1111ec30"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "4f9f348ce9646c5bf35afb6103154f05e4046cca0319946f20a089d1a6d88579"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "e6553836410090f98bf0609b6fea2fea14ff6f9e4c3841babbee1af11652bfa1"
+    sha256 cellar: :any_skip_relocation, sonoma:        "8fb43b8cbb1c5486aa66a78284091274eac8ef5876d13709bf64ef6285f3c02d"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "1c2c9406eb22c97126d337aed5bcaa42c9e6c67ccda1ade19bb78054874b95f2"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "3eeb952c1c426213e2548e51752b2dcb8b2fb0679ce9c66648c3e0ca1e1dcd8e"
   end
 
   depends_on "rust" => :build
@@ -31,6 +30,8 @@ class CargoBinstall < Formula
   end
 
   test do
+    ENV["BINSTALL_DISABLE_TELEMETRY"] = "true"
+
     output = shell_output("#{bin}/cargo-binstall --dry-run radio-sx128x")
     assert_match "resolve: Resolving package: 'radio-sx128x'", output
 

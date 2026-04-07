@@ -2,24 +2,29 @@ class AliyunCli < Formula
   desc "Universal Command-Line Interface for Alibaba Cloud"
   homepage "https://github.com/aliyun/aliyun-cli"
   url "https://github.com/aliyun/aliyun-cli.git",
-      tag:      "v3.0.221",
-      revision: "04b24bde03797cbb6dfd6b75740fa5b56c71157c"
+      tag:      "v3.3.4",
+      revision: "7971aeffcf810d79742f7911334a7fb1a11473fb"
   license "Apache-2.0"
+  head "https://github.com/aliyun/aliyun-cli.git", branch: "master"
+
+  livecheck do
+    url :stable
+    strategy :github_latest
+  end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "dd83f3b21d9fbb5cbce6fb00fa3da94963b8a73ffd5d6c8fe4d8daee20d44b3e"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "dd83f3b21d9fbb5cbce6fb00fa3da94963b8a73ffd5d6c8fe4d8daee20d44b3e"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "dd83f3b21d9fbb5cbce6fb00fa3da94963b8a73ffd5d6c8fe4d8daee20d44b3e"
-    sha256 cellar: :any_skip_relocation, sonoma:         "e0065d6f37860d76b164a1522400bf2c4d1587311bfac132e14aaacf74d1d8d9"
-    sha256 cellar: :any_skip_relocation, ventura:        "e0065d6f37860d76b164a1522400bf2c4d1587311bfac132e14aaacf74d1d8d9"
-    sha256 cellar: :any_skip_relocation, monterey:       "e0065d6f37860d76b164a1522400bf2c4d1587311bfac132e14aaacf74d1d8d9"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "ddc0c5abb3be0ff35fc153dcc8dfeded94e1371fb6857d303d1192f92fa9705f"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "3ec3c02ecfdd1017e232236a3083628ca5eb4868e2193b1a6d29a734e7ace3dc"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "3ec3c02ecfdd1017e232236a3083628ca5eb4868e2193b1a6d29a734e7ace3dc"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "3ec3c02ecfdd1017e232236a3083628ca5eb4868e2193b1a6d29a734e7ace3dc"
+    sha256 cellar: :any_skip_relocation, sonoma:        "6a1f577728113334b5c8ee1721d02b0803b9d434fdda071cb3dcba4307f17c7a"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "91a7cd1d34f8ca224fd16b7a722142a5f9189c67fa7c0d45702b0700a3b1135b"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ffed4602cc97cef865793c913a58bc8573fe1c291fe25352c88cccecae4061fa"
   end
 
   depends_on "go" => :build
 
   def install
-    ldflags = "-s -w -X github.com/aliyun/aliyun-cli/cli.Version=#{version}"
+    ldflags = "-s -w -X github.com/aliyun/aliyun-cli/v#{version.major}/cli.Version=#{version}"
     system "go", "build", *std_go_args(output: bin/"aliyun", ldflags:), "main/main.go"
   end
 

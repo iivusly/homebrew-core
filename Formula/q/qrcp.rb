@@ -1,8 +1,8 @@
 class Qrcp < Formula
   desc "Transfer files to and from your computer by scanning a QR code"
   homepage "https://qrcp.sh"
-  url "https://github.com/claudiodangelis/qrcp/archive/refs/tags/0.11.3.tar.gz"
-  sha256 "de6a9e29d7c71268e40452abf2f1f593d5d53baa34df5abcb7352ebfd72a952f"
+  url "https://github.com/claudiodangelis/qrcp/archive/refs/tags/v0.11.6.tar.gz"
+  sha256 "a3eff505f366713fcb7694e0e292ff2da05e270f9539b6a8561c4cf267ec23c8"
   license "MIT"
 
   livecheck do
@@ -11,45 +11,48 @@ class Qrcp < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "e2a1feee6e390e192dc3c9750ffab42cbb99282ed024211f2d8f34ed1b6d290b"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "e2a1feee6e390e192dc3c9750ffab42cbb99282ed024211f2d8f34ed1b6d290b"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "e2a1feee6e390e192dc3c9750ffab42cbb99282ed024211f2d8f34ed1b6d290b"
-    sha256 cellar: :any_skip_relocation, sonoma:         "889feb401afde85d10a584249efd64810cc7c6a28de0935b2c70ddbdc4abeae5"
-    sha256 cellar: :any_skip_relocation, ventura:        "889feb401afde85d10a584249efd64810cc7c6a28de0935b2c70ddbdc4abeae5"
-    sha256 cellar: :any_skip_relocation, monterey:       "889feb401afde85d10a584249efd64810cc7c6a28de0935b2c70ddbdc4abeae5"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "4c8ae9e3c53ff4f2483f61a75bb47e7a7d7ae1924116229f68b9bf9d78f4806d"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "7a8bbc5ad237bf97d73501062a2f1e30d7ce8a5b9a38912f6ffb158370c96a8e"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "7a8bbc5ad237bf97d73501062a2f1e30d7ce8a5b9a38912f6ffb158370c96a8e"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "7a8bbc5ad237bf97d73501062a2f1e30d7ce8a5b9a38912f6ffb158370c96a8e"
+    sha256 cellar: :any_skip_relocation, sonoma:        "ffc63e2c7d66b1e1faedb36c2df428c712fb5852f1d88d55c7ed80bb7b18bb2e"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "9a37b2bba75a20fd96c2dc6754444afb0bb152258e869d855644fa5bebb185a9"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "d18ce31b0d751e4fffb64ecbac9d20fcb3bcda31877ca6de1950070fa3c06c91"
   end
 
   depends_on "go" => :build
 
   def install
-    system "go", "build", *std_go_args
+    ldflags = %W[
+      -s -w
+      -X github.com/claudiodangelis/qrcp/version.version=#{version}
+      -X github.com/claudiodangelis/qrcp/version.date=#{time.iso8601}
+    ]
+    system "go", "build", *std_go_args(ldflags:)
 
-    generate_completions_from_executable(bin/"qrcp", "completion")
+    generate_completions_from_executable(bin/"qrcp", shell_parameter_format: :cobra)
   end
 
   test do
-    (testpath/"test_data.txt").write <<~EOS
-      Hello there, big world
-    EOS
+    assert_match version.to_s, shell_output("#{bin}/qrcp version")
 
+    data = "Hello there, big world\n"
     port = free_port
     server_url = "http://localhost:#{port}/send/testing"
 
-    (testpath/"config.json").write <<~EOS
+    (testpath/"test_data.txt").write data
+    (testpath/"config.json").write <<~JSON
       {
         "interface": "any",
         "fqdn": "localhost",
         "port": #{port}
       }
-    EOS
+    JSON
 
-    fork do
-      exec bin/"qrcp", "-c", testpath/"config.json", "--path", "testing", testpath/"test_data.txt"
-    end
+    spawn bin/"qrcp", "-c", testpath/"config.json", "--path", "testing", testpath/"test_data.txt"
     sleep 1
 
     # User-Agent header needed in order for curl to be able to receive file
-    assert_equal shell_output("curl -H \"User-Agent: Mozilla\" #{server_url}"), "Hello there, big world\n"
+    assert_equal data, shell_output("curl -H \"User-Agent: Mozilla\" #{server_url}")
   end
 end

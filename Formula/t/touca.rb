@@ -1,5 +1,6 @@
 class Touca < Formula
   include Language::Python::Virtualenv
+
   desc "Open source tool for regression testing complex software workflows"
   homepage "https://github.com/trytouca/trytouca/tree/main/sdk/python"
   url "https://files.pythonhosted.org/packages/c8/6d/e1986d8c9b4f6cd2b583d0df8bd1769989b5ce5cb91dcc613b0d187e4a7a/touca-1.8.7.tar.gz"
@@ -8,12 +9,16 @@ class Touca < Formula
   revision 3
 
   bottle do
-    rebuild 2
-    sha256 cellar: :any_skip_relocation, all: "faec0e27e56389b412bd930fbe5f326d6301a6affef185e7345979f1b1ecc65e"
+    rebuild 4
+    sha256 cellar: :any_skip_relocation, all: "2aef71401d6fa95a1c2a1d9ce7ccf63c49e0131602a7876914ddbb373246b6f3"
   end
 
+  deprecate! date: "2025-08-13", because: :unmaintained
+
   depends_on "certifi"
-  depends_on "python@3.12"
+  depends_on "python@3.14"
+
+  pypi_packages exclude_packages: "certifi"
 
   resource "commonmark" do
     url "https://files.pythonhosted.org/packages/60/48/a60f593447e8f0894ebb7f6e6c1f25dafc5e89c5879fdc9360ae93ff83f0/commonmark-0.9.1.tar.gz"
@@ -26,8 +31,8 @@ class Touca < Formula
   end
 
   resource "pygments" do
-    url "https://files.pythonhosted.org/packages/8e/62/8336eff65bcbc8e4cb5d05b55faf041285951b6e80f33e2bff2024788f31/pygments-2.18.0.tar.gz"
-    sha256 "786ff802f32e91311bff3889f6e9a86e81505fe99f2735bb6d60ae0c5004f199"
+    url "https://files.pythonhosted.org/packages/b0/77/a5b8c569bf593b0140bde72ea885a803b82086995367bf2037de0159d924/pygments-2.19.2.tar.gz"
+    sha256 "636cb2477cec7f8952536970bc533bc43743542f70392ae026374600add5b887"
   end
 
   resource "rich" do
@@ -41,14 +46,26 @@ class Touca < Formula
   end
 
   resource "urllib3" do
-    url "https://files.pythonhosted.org/packages/c8/93/65e479b023bbc46dab3e092bda6b0005424ea3217d711964ccdede3f9b1b/urllib3-1.26.19.tar.gz"
-    sha256 "3e3d753a8618b86d7de333b4223005f68720bcd6a7d2bcb9fbd2229ec7c1e429"
+    url "https://files.pythonhosted.org/packages/e4/e8/6ff5e6bc22095cfc59b6ea711b687e2b7ed4bdb373f7eeec370a97d7392f/urllib3-1.26.20.tar.gz"
+    sha256 "40c2dc0c681e47eb8f90e7e27bf6ff7df2e677421fd46756da1161c39ca70d32"
   end
 
   def install
     # Allow latest `certifi`: https://github.com/trytouca/trytouca/pull/663
     inreplace "pyproject.toml", 'certifi = "^2022.12.7"', 'certifi = ">=2022.12.7"'
-    virtualenv_install_with_resources
+    # Workaround broken script with poetry 2+
+    inreplace "pyproject.toml", 'touca = { callable = "touca.cli.__main__:main" }',
+                                'touca = "touca.cli.__main__:main"'
+    venv = virtualenv_install_with_resources without: "flatbuffers"
+
+    # Workaround a relative LICENSE file failing with new setuptools validation
+    # https://github.com/pypa/setuptools/commit/c31ebdc4749f1439972451a7b9b28734281d3830
+    # Backport of https://github.com/google/flatbuffers/commit/6cb4d671a88e054744ce3029df9e733dc724ee76
+    resource("flatbuffers").stage do
+      inreplace "setup.cfg", "../license", "../LICENSE"
+      inreplace "setup.py", "license_files='../LICENSE',", ""
+      venv.pip_install Pathname.pwd
+    end
   end
 
   test do

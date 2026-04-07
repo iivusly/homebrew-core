@@ -1,8 +1,8 @@
 class MariadbAT106 < Formula
   desc "Drop-in replacement for MySQL"
   homepage "https://mariadb.org/"
-  url "https://archive.mariadb.org/mariadb-10.6.19/source/mariadb-10.6.19.tar.gz"
-  sha256 "bcecb0ff7b79a41344736fa994710787c15516d51eb7715f278c3f0fcb7e8703"
+  url "https://archive.mariadb.org/mariadb-10.6.25/source/mariadb-10.6.25.tar.gz"
+  sha256 "ae221fbcaf3730070343e848e11e256092ba52c6fcf51a510374931720240a6c"
   license "GPL-2.0-only"
 
   livecheck do
@@ -18,13 +18,13 @@ class MariadbAT106 < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "45fe27bb1ed14d6a5a195bbca0f83916ac58b3962500b29878b46cfc4c829444"
-    sha256 arm64_ventura:  "98efec6af144006909bc233c6e9accb901c05b62a62fe3a0c2c6b6e1cd96e314"
-    sha256 arm64_monterey: "1b261390bce7bf4c19bc1b9b7638478aae036dd0eeefd3a5baa62d6a917faac3"
-    sha256 sonoma:         "c5e330c6d8c71ebfd80863b8abc9a65e5897e5526576476fa9ac1bf329019a30"
-    sha256 ventura:        "6201d8ba1778d8ec0a3774f90395fb60d9c28d240434e1f6aa632f2dd356bedc"
-    sha256 monterey:       "4e67f430e786846620cc3dd946837fb9996a5a5ebbb8b8d039cec9110dd8f79d"
-    sha256 x86_64_linux:   "eead2cba54726e8e2be3a366090bad853f2c897be9d3e6e438b4a3e2ab580f46"
+    rebuild 1
+    sha256 arm64_tahoe:   "cfca34a077173f6a788ace993bfea0b6f496fecad693e7f0509648c15a6309bd"
+    sha256 arm64_sequoia: "38c80cdc7b8eb4f47ad785cb0ecb937a3e5eb5c3b95110d24d4263cf9fd67d1e"
+    sha256 arm64_sonoma:  "322d7e40a93d18e8e9d6667d84ede37aa6a2332949c0da05fcc96eb640b9dc3a"
+    sha256 sonoma:        "454e5f2d0a128808d4b0ed31a4263a397b671b7a15fa23041abe412711f61f57"
+    sha256 arm64_linux:   "0311764c1042cb8d605cac7786a7476eb9684d509fb4dd4b170a79a409c2d982"
+    sha256 x86_64_linux:  "6e1cae4504664ef03352371fbfd23afe3dabe53137c5240dd471c984a1ab79b6"
   end
 
   keg_only :versioned_formula
@@ -35,7 +35,7 @@ class MariadbAT106 < Formula
   depends_on "bison" => :build
   depends_on "cmake" => :build
   depends_on "openjdk" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
 
   depends_on "groonga"
   depends_on "lz4"
@@ -52,16 +52,22 @@ class MariadbAT106 < Formula
   uses_from_macos "libxml2"
   uses_from_macos "ncurses"
   uses_from_macos "xz"
-  uses_from_macos "zlib"
 
   on_linux do
     depends_on "linux-pam"
-    depends_on "readline" # uses libedit on macOS
+    depends_on "zlib-ng-compat"
   end
 
-  fails_with gcc: "5"
-
   def install
+    ENV.runtime_cpu_detection
+
+    # Backport fix for CMake 4.0 in columnstore submodule
+    # https://github.com/mariadb-corporation/mariadb-columnstore-engine/commit/726cc3684b4de08934c2b14f347799fd8c3aac9a
+    # https://github.com/mariadb-corporation/mariadb-columnstore-engine/commit/7e17d8825409fb8cc0629bfd052ffac6e542b50e
+    inreplace "storage/columnstore/columnstore/CMakeLists.txt",
+              "CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12)",
+              "CMAKE_MINIMUM_REQUIRED(VERSION 3.10)"
+
     # Set basedir and ldata so that mysql_install_db can find the server
     # without needing an explicit path to be set. This can still
     # be overridden by calling --basedir= when calling.
@@ -98,10 +104,9 @@ class MariadbAT106 < Formula
     # Disable RocksDB on Apple Silicon (currently not supported)
     args << "-DPLUGIN_ROCKSDB=NO" if Hardware::CPU.arm?
 
-    system "cmake", ".", *std_cmake_args, *args
-
-    system "make"
-    system "make", "install"
+    system "cmake", "-S", ".", "-B", "_build", *std_cmake_args, *args
+    system "cmake", "--build", "_build"
+    system "cmake", "--install", "_build"
 
     # Fix my.cnf to point to #{etc} instead of /etc
     (etc/"my.cnf.d").mkpath

@@ -1,9 +1,10 @@
 class Nspr < Formula
   desc "Platform-neutral API for system-level and libc-like functions"
   homepage "https://hg.mozilla.org/projects/nspr"
-  url "https://archive.mozilla.org/pub/nspr/releases/v4.35/src/nspr-4.35.tar.gz"
-  sha256 "7ea3297ea5969b5d25a5dd8d47f2443cda88e9ee746301f6e1e1426f8a6abc8f"
+  url "https://archive.mozilla.org/pub/nspr/releases/v4.38.2/src/nspr-4.38.2.tar.gz"
+  sha256 "e4092faeab77bdc9b32db1113e4215948ee768e26c4666db3b5a60b35f2c9105"
   license "MPL-2.0"
+  compatibility_version 1
 
   livecheck do
     url "https://ftp.mozilla.org/pub/nspr/releases/"
@@ -11,16 +12,12 @@ class Nspr < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "64c2270786c71c700dce08a8abb8f8e626fae6b1f09f44f4e932491447e0e858"
-    sha256 cellar: :any,                 arm64_ventura:  "f687611cbb5d48ff8a9e5312eebac9f12f31fb700c3cc1f5a8d2732c0cae9afc"
-    sha256 cellar: :any,                 arm64_monterey: "466fd0ffb45153ddc9ce8d882440bc3f2c9c2e1e5ff1caf00ea3e5a7f2dbff0c"
-    sha256 cellar: :any,                 arm64_big_sur:  "2e3a32904cb5f089c1dba35df40a81513b2519c1e33b5b29af0c06a639cc554f"
-    sha256 cellar: :any,                 sonoma:         "dd2f50c1f3b6329df544dfd372e385d9379234c0ac45652a0388d285e7111455"
-    sha256 cellar: :any,                 ventura:        "230771659d8bd6227c5cd2b7dbb89953d02a0b0646a80d4ac0920782990e98fb"
-    sha256 cellar: :any,                 monterey:       "7b4bd4b9800bad2ae7322c125defee4da9a94a2cc6abeb6c3897af64a8f023a3"
-    sha256 cellar: :any,                 big_sur:        "9c50db49ddcd26100b885dc4054ac7c2fd4559012eedc1fdaf4b4d03145ce10f"
-    sha256 cellar: :any,                 catalina:       "4310f8360717b354f2e29eb205d7de77a34d83a7d9c08addaa85c7fba397ed6a"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "592605a1cac69bf9728b59f9deb9b4fcdcc77461d44cabcd6f59669f77278b08"
+    sha256 cellar: :any,                 arm64_tahoe:   "3805d2575867676338bd8bdb1bb4780482a14282b6a175826937404ebd1cb4dd"
+    sha256 cellar: :any,                 arm64_sequoia: "ceefc5a539beb299e3c9a57c9d7f53610bb81cba02902ed387cd5a37982ac046"
+    sha256 cellar: :any,                 arm64_sonoma:  "b2cd63bc9b605523db2d1bf60c0f5f6f0d5531983ba7fcc2d3063060ebe25cbd"
+    sha256 cellar: :any,                 sonoma:        "4eeb9ea3c9f202f2d35205f36bc3c36db4484ed3805ea1b1887e6c6b1f6c3c3d"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "94d286afeb03039c370534bbe9efeb43ed42c72853541d059f0abf7624a6ae34"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "1c6caf9854b18196ecd60afa83011882654e93b5244524962bb1389f68981231"
   end
 
   def install

@@ -1,6 +1,6 @@
 class Blazegraph < Formula
   desc "Graph database supporting RDF data model, Sesame, and Blueprint APIs"
-  homepage "https://www.blazegraph.com/"
+  homepage "https://blazegraph.com/"
   url "https://github.com/blazegraph/database/releases/download/BLAZEGRAPH_RELEASE_2_1_5/blazegraph.jar"
   version "2.1.5"
   sha256 "fbaeae7e1b3af71f57cfc4da58b9c52a9ae40502d431c76bafa5d5570d737610"
@@ -14,6 +14,7 @@ class Blazegraph < Formula
   # see https://github.com/blazegraph/database/issues/196
   # 2.1.6 release in rc phase for four years
   deprecate! date: "2024-07-26", because: :unmaintained
+  disable! date: "2025-07-26", because: :unmaintained
 
   # Dependencies can be lifted in the upcoming release, > 2.1.5
   depends_on "openjdk@8"
@@ -37,7 +38,7 @@ class Blazegraph < Formula
     end
     sleep 5
     Process.kill("TERM", server)
-    assert_predicate testpath/"blazegraph.jnl", :exist?
-    assert_predicate testpath/"rules.log", :exist?
+    assert_path_exists testpath/"blazegraph.jnl"
+    assert_path_exists testpath/"rules.log"
   end
 end

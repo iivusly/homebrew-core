@@ -1,8 +1,8 @@
 class Gping < Formula
   desc "Ping, but with a graph"
   homepage "https://github.com/orf/gping"
-  url "https://github.com/orf/gping/archive/refs/tags/gping-v1.17.3.tar.gz"
-  sha256 "bed3e1d46c2311ae15cad114700458a138e7d29fd45322cb9dd2c1108eb5a68e"
+  url "https://github.com/orf/gping/archive/refs/tags/gping-v1.20.1.tar.gz"
+  sha256 "0df965111429d5fcef832a4ff23b452a1ec8f683d51ed31ce9b10902c0a18a9c"
   license "MIT"
   head "https://github.com/orf/gping.git", branch: "master"
 
@@ -16,16 +16,17 @@ class Gping < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "e6eb418ec57e33d1bfcfda69a0738e5e164de6a1d197849dbde6da4c63756d91"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "f959a7aa732520112d44a85bc11012239ceb3e275a8dcf46ecc19b464caf5e0a"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "3b48ca5b370e8eb0f569d4f21e6663da95d2a0de3ed734a3e8b1e3177d258590"
-    sha256 cellar: :any_skip_relocation, sonoma:         "9aa68b0f94c94e6427408eb1f1f529ffcb834a03d89b6d903e252be94b53a886"
-    sha256 cellar: :any_skip_relocation, ventura:        "de2141acb5076142902729d31b6e61355cb881c31a4d5a66f2865436f70a3788"
-    sha256 cellar: :any_skip_relocation, monterey:       "fec4f74efb785001b2c963521c08112ad4f783aab0f1c2aeb9cfb00371577bf4"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "b4bb666c77ecb5e01cb365cef6e6064f75c136bebb4aa0a9786893dc9a9edc28"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "2ea7c7e96a88df4ee9e8cf12a47849a778eabdd015c2c56e0ac1b46dba8b329f"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "e4b724bca246855e7c11aa972489d8a99fff3b1775ee68832ce55b645d219210"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "a9e5e2357d554380b42514cc043dfca7e24dbd00eed6c49640aa984a5dd8d551"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "c3825f08e0158e83a76fc27c7103364db82d748010c72f1afb1d607f8aa79fa8"
+    sha256 cellar: :any_skip_relocation, sonoma:        "88b15ad904d11c0353fb62c62a0e8aef8cbe054275324d281fcb1c36d2ca4882"
+    sha256 cellar: :any_skip_relocation, ventura:       "f042f035aa83f1ac2a29ef5e3f7437fba693a50fb14c939e6b4fc08a9e100f86"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "a071b10dbf714a17277fc3d007876025e8eeb7ccd8233871cec335845c2b15e8"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "773e0bb37bb0a63656ad1ff05f8f135054b5bb935440b58936f22726392aef09"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "rust" => :build
 
   on_linux do
@@ -36,19 +37,19 @@ class Gping < Formula
 
   def install
     system "cargo", "install", *std_cargo_args(path: "gping")
+    man.install "gping.1"
   end
 
   test do
     require "pty"
     require "io/console"
 
-    r, w, = PTY.spawn("#{bin}/gping google.com")
-    r.winsize = [80, 130]
-    sleep 10
-    w.write "q"
+    PTY.spawn(bin/"gping", "google.com") do |r, w, _pid|
+      r.winsize = [80, 130]
+      sleep 10
+      w.write "q"
 
-    begin
-      screenlog = r.read
+      screenlog = r.read_nonblock(1024)
       # remove ANSI colors
       screenlog.encode!("UTF-8", "binary",
         invalid: :replace,
@@ -57,8 +58,6 @@ class Gping < Formula
       screenlog.gsub!(/\e\[([;\d]+)?m/, "")
 
       assert_match "google.com (", screenlog
-    rescue Errno::EIO
-      # GNU/Linux raises EIO when read is done on closed pty
     end
   end
 end

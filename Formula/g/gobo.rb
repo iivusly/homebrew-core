@@ -1,21 +1,17 @@
 class Gobo < Formula
   desc "Free and portable Eiffel tools and libraries"
-  homepage "http://www.gobosoft.com/"
-  url "https://downloads.sourceforge.net/project/gobo-eiffel/gobo-eiffel/22.01/gobo2201-src.tar.gz"
-  sha256 "ed2d82ce3c271e60914a42bde1d1c99446df8902ae1b62fd0e4dca2b99de8068"
+  homepage "https://www.gobosoft.com/"
+  url "https://downloads.sourceforge.net/project/gobo-eiffel/gobo-eiffel/26.03/gobo-26.03.tar.gz"
+  sha256 "d96b635a14da59c708e043d1129e0ef10bcd2a70db2df5e62545397effdf6d2b"
   license "MIT"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "b446b9e9a0589618cfe849f251df510d77a5f169f71bcf0798ea6d771713fea8"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "ca5892fdebe4452e551a8ffa6e09a27c1ecb45582870518b8895ad75890f989b"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "e533b348ea2064b407e0c4da4375334a284ff9a4327f86b18a400202ab3632b5"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "30ef413627040ba2d8a1f5f1b4248aff968dca12c171278e7a615df5c843240f"
-    sha256 cellar: :any_skip_relocation, sonoma:         "db2204d18d5988c89e3ce3b6bb8c1e9ce81366e00352666ccef0731f93e9af67"
-    sha256 cellar: :any_skip_relocation, ventura:        "559002ba3854a7e01f0b1d72bf0a2321b219a67dbed0154e0d446085c193a50b"
-    sha256 cellar: :any_skip_relocation, monterey:       "930a459b40e131dc3076dc1f4aafaa3e58dcc7173134e7f162145040ee4bfd68"
-    sha256 cellar: :any_skip_relocation, big_sur:        "a26f0cf33aebe2dca17fc9ad9b1741530e789d9ab4e289245fe8886fcddf65ef"
-    sha256 cellar: :any_skip_relocation, catalina:       "c8eea87acca4311c744bcd7aa7444d41728e157d778b12a6c24923173ebab77e"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "ff95ec6c9c2a1785e6ff593ca1fcd658f2b46e080bd956bd7ece4a01db6e3ac9"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "6b606d0f39abbd2b5e79a8690e826d8b65405389b2b0043febf183cd43eb04b8"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "e2b58ef14ae859a1c6e2765dd3e12ce516805f12a0feb3b14b78c989bd842b9f"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "071a6bfea465cc15394a6d2a88a14ea3a901a387da3620c9f4bf51b070afbda1"
+    sha256 cellar: :any_skip_relocation, sonoma:        "83a317259e2f7623575c87e321a7ec23e71b585d50cfb00736e3802c868f8eab"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "ad7afb2103bd8753fc881cc77753c853a23cc1480a5e280972e9004df334e9ce"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "4a008f02156bfb1992209c27cadb9427578fd75bfeb14b86dbc8714a1529e40f"
   end
 
   depends_on "eiffelstudio" => :test
@@ -36,7 +32,7 @@ class Gobo < Formula
   end
 
   test do
-    (testpath/"build.eant").write <<~EOS
+    (testpath/"build.eant").write <<~XML
       <?xml version="1.0" encoding="UTF-8"?>
       <project name="hello" default="help">
         <description>
@@ -52,8 +48,8 @@ class Gobo < Formula
           <set name="system_dir" value="#{testpath}" />
         </target>
       </project>
-    EOS
-    (testpath/"system.ecf").write <<~EOS
+    XML
+    (testpath/"system.ecf").write <<~XML
       <?xml version="1.0" encoding="UTF-8"?>
       <system
           xmlns="http://www.eiffel.com/developers/xml/configuration-1-20-0"
@@ -83,7 +79,7 @@ class Gobo < Formula
           </capability>
         </target>
       </system>
-    EOS
+    XML
     mkdir "src" do
       (testpath/"hello.e").write <<~EOS
         note

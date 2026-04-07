@@ -1,26 +1,24 @@
 class Mbt < Formula
   desc "Multi-Target Application (MTA) build tool for Cloud Applications"
   homepage "https://sap.github.io/cloud-mta-build-tool"
-  url "https://github.com/SAP/cloud-mta-build-tool/archive/refs/tags/v1.2.31.tar.gz"
-  sha256 "b4d7d8a226728cd73d34b5f3255cbe6b745ad920daaff3f5c0265bcb688e7818"
+  url "https://github.com/SAP/cloud-mta-build-tool/archive/refs/tags/v1.2.45.tar.gz"
+  sha256 "2c808e7920691dfd0dbf3bab48f86b5aab57a936de5fc9086daf6a090fce18d4"
   license "Apache-2.0"
   head "https://github.com/SAP/cloud-mta-build-tool.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "16765b382a547e7fc5285c87ce46bc5f863aa6f49252c245526d4ee49583fc31"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "9436b2972a50ab062b6edd8d3491e5b4709c34258dffa5f65c7b4d6bf05a480c"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "4f1bf638b389d371cba3ecc4e21dcb13f2548427641acf43e265d22529fd8b05"
-    sha256 cellar: :any_skip_relocation, sonoma:         "93d1a08f229ae26df0d1a7b7b464c016dbf4c96664faa47ebf8b9b9ae88a6432"
-    sha256 cellar: :any_skip_relocation, ventura:        "ec34c587a106f3e4cfb998622681685419e1aafb979c99491bbb2457b3040653"
-    sha256 cellar: :any_skip_relocation, monterey:       "03bc22bebf8085091ecae34fab474e25f4fa8b31a227c44dfba89c9151f29f47"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "d41f319d087901f5dc9c31f0eb9f5ffe55245d2d8226b1ad7dbcd7581071ea03"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "5b44380596b3206fc81a45de4a6fdbe474c26ad8a992605885ae7045bc3abba3"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "5b44380596b3206fc81a45de4a6fdbe474c26ad8a992605885ae7045bc3abba3"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "5b44380596b3206fc81a45de4a6fdbe474c26ad8a992605885ae7045bc3abba3"
+    sha256 cellar: :any_skip_relocation, sonoma:        "cf1ca2608fc2473a229983b40ea653eed3f69dd5fd97cf5337ee5488e4d1ad68"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "e7a248614a6dad8253525537b10cca4b83ebf28f8a02e3f13fbe9471fcd4e553"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "9faaf010089663b23d04307f3886af2712a0e9662486ef2778f1d9d746e7bf4e"
   end
 
   depends_on "go" => :build
 
   def install
-    ldflags = %W[ -s -w -X main.Version=#{version}
-                  -X main.BuildDate=#{time.iso8601} ]
+    ldflags = "-s -w -X main.Version=#{version} -X main.BuildDate=#{time.iso8601}"
     system "go", "build", *std_go_args(ldflags:)
   end
 

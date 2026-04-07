@@ -4,12 +4,12 @@ class Sophus < Formula
   url "https://github.com/strasdat/Sophus/archive/refs/tags/1.24.6.tar.gz"
   sha256 "3f3098bdac2c74d42a921dbfb0e5e4b23601739e35a1c1236c2807c399da960c"
   license "MIT"
+  revision 2
   version_scheme 1
-  head "https://github.com/strasdat/Sophus.git", branch: "master"
+  head "https://github.com/strasdat/Sophus.git", branch: "main"
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, all: "04f59dd02e4845866fc1513e4292e87432b29310adc0ebbc3c39f5ba4a1588ea"
+    sha256 cellar: :any_skip_relocation, all: "fece7681865de760678d27236420c150d92b2a4ffb0ae376228e7d793ec07d6a"
   end
 
   depends_on "cmake" => [:build, :test]
@@ -17,7 +17,12 @@ class Sophus < Formula
   depends_on "eigen"
   depends_on "fmt"
 
-  fails_with gcc: "5" # C++17 (ceres-solver dependency)
+  # Apply open PR to support eigen 5.0.0
+  # PR ref: https://github.com/strasdat/Sophus/pull/558
+  patch do
+    url "https://github.com/strasdat/Sophus/commit/fd3fcfa116f078d731d062d1d74f2b31aaf8854f.patch?full_index=1"
+    sha256 "0f91d6051c9b66051916a1c52fb223b63575a43ec941f5091a68848195aa2429"
+  end
 
   def install
     system "cmake", "-S", ".", "-B", "build", *std_cmake_args,
@@ -29,7 +34,7 @@ class Sophus < Formula
 
   test do
     cp pkgshare/"examples/hello_so3.cpp", testpath
-    (testpath/"CMakeLists.txt").write <<~EOS
+    (testpath/"CMakeLists.txt").write <<~CMAKE
       cmake_minimum_required(VERSION #{Formula["cmake"].version})
       project(HelloSO3)
 
@@ -39,7 +44,7 @@ class Sophus < Formula
       find_package(Sophus REQUIRED)
       add_executable(HelloSO3 hello_so3.cpp)
       target_link_libraries(HelloSO3 Sophus::Sophus)
-    EOS
+    CMAKE
 
     system "cmake", "-S", ".", "-B", "build", "-DSophus_DIR=#{share}/Sophus"
     system "cmake", "--build", "build"

@@ -4,6 +4,7 @@ class Gauche < Formula
   url "https://github.com/shirok/Gauche/releases/download/release0_9_15/Gauche-0.9.15.tgz"
   sha256 "3643e27bc7c8822cfd6fb2892db185f658e8e364938bc2ccfcedb239e35af783"
   license "BSD-3-Clause"
+  revision 1
 
   livecheck do
     url :stable
@@ -14,26 +15,30 @@ class Gauche < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "090ea0130482168c2f2c8ba1bce87c9b3e2c6cb5066dd89d311848a8d5b9a742"
-    sha256 arm64_ventura:  "1a6606f8577358fea7eae8a2de08c7f5d994796e7554578e57e17cc03cc350e2"
-    sha256 arm64_monterey: "2b960106887fc6c0bb983e472fed0f740ed5f7f0ff6fd81fb8072645f247bfa0"
-    sha256 sonoma:         "723aa7870618f0a7591472266d84817873b8f6956c3d68200bfa95b2cd62547d"
-    sha256 ventura:        "2fb60084dd73329026216d0ee1177d4a62ff5bbb6e2466ed6a6fc53816513edc"
-    sha256 monterey:       "2b079d1c270ec9ea36caed1f2762a88120f61326f2b81a67128aef54304d9295"
-    sha256 x86_64_linux:   "bdff2646649040e73891540a312c8280bfed6a5427a8a5748b57fee8560c1c63"
+    rebuild 1
+    sha256 arm64_tahoe:   "4dcc399b09f0db638cb74c51b46a1d289f7d9eb7602e1632f409af0d780d6b70"
+    sha256 arm64_sequoia: "4b312853feb31d6e0c53f679e95365ed3990ae356e956d37c4b2f2ee89ea6ac6"
+    sha256 arm64_sonoma:  "66e48914a2fed1e6561d51ebd211968a501dabb9915744995afe9fc437b3dd1b"
+    sha256 sonoma:        "53b8b035250f0814c8a2cc90c59e05ca51ef82116a487fc76ceece4cfad07e48"
+    sha256 arm64_linux:   "1b93c768dbd692d811173b3c6b9773165d88060cfca88764493b05f0e9ba05a2"
+    sha256 x86_64_linux:  "ad6815598d031b43b878c75511c43cee7e1d18bafc3cb1e59781c0fcdd5c560d"
   end
 
   depends_on "ca-certificates"
-  depends_on "mbedtls"
+  depends_on "mbedtls@3"
 
   uses_from_macos "libxcrypt"
-  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
-    system "./configure",
-           *std_configure_args,
-           "--enable-multibyte=utf-8",
-           "--with-ca-bundle=#{HOMEBREW_PREFIX}/share/ca-certificates/cacert.pem"
+    args = %W[
+      --enable-multibyte=utf-8
+      --with-ca-bundle=#{HOMEBREW_PREFIX}/share/ca-certificates/cacert.pem
+    ]
+    system "./configure", *args, *std_configure_args
     system "make"
     system "make", "install"
   end

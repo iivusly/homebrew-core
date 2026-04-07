@@ -1,30 +1,33 @@
 class Dbmate < Formula
   desc "Lightweight, framework-agnostic database migration tool"
   homepage "https://github.com/amacneil/dbmate"
-  url "https://github.com/amacneil/dbmate/archive/refs/tags/v2.20.0.tar.gz"
-  sha256 "83f2af9db8e42fc2fc034b5da7aacd9b197f232cc4fe27b090e7a6f364f49fbc"
+  url "https://github.com/amacneil/dbmate/archive/refs/tags/v2.32.0.tar.gz"
+  sha256 "13225082e16e8c9f93f1421de2dc3c42ced31de0629b7d5fd668d4c8ade3a365"
   license "MIT"
   head "https://github.com/amacneil/dbmate.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "5b154ce3d8cfcaaa41dd86a04134b2cd17b04bf4e0790cf24adb89a5a57afd5a"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "d6b9557573f1c740145a7e99bd8003c0982401eea29af443f610f1bf2012bf1f"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "767d4e0314fbbbb48c7fa5d92b361e59afb24a38bb8ac6d7c27178cd135697fd"
-    sha256 cellar: :any_skip_relocation, sonoma:         "d457099db3005b84f3a734b88c32b8b50ceb8b860c7918b065914bc6bfbabd5d"
-    sha256 cellar: :any_skip_relocation, ventura:        "d53b8f2738ea0c4ef3629dfb57b8fd4d78e517e6c36667fe59444730bbd6a46d"
-    sha256 cellar: :any_skip_relocation, monterey:       "a40ce1f1750c5e6f87f8b384c2ba53ed7bed3961b501f29fb0e5b23ee4394126"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "7850093d39a766b2071e34fe6c3e1695179dd4e4c6ddc6364157dfed2cc4d186"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "adf2acfcef50241ea7683db983852214ee8817ba2b8efe59dbf78bea942b01a8"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "ece68c578841694549f907f2813eeb5d7ce96813eec46a98856d4a78fccaf034"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "c4b15d88282567759387f73c3373158e7f66a86be2d03db0f43fd370ac91482b"
+    sha256 cellar: :any_skip_relocation, sonoma:        "160355089c59affc892457d3431231f57e9db47a6e7f14257e3b4acd2d12d67f"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "cc7dbc56c42bf92a20f77dae6046a26c8a9ad61a5a0acffca3e2be45931701e9"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "d7e2b5fb33f9fea4796a3e9f416cef699b1036013296e0b1cf4c89202c422765"
   end
 
   depends_on "go" => :build
 
   def install
-    system "go", "build", *std_go_args(ldflags: "-s -w"), "-tags", "sqlite_omit_load_extension,sqlite_json"
+    ENV["CGO_ENABLED"] = "1"
+    tags = %w[
+      sqlite_omit_load_extension sqlite_json sqlite_fts5
+    ]
+    system "go", "build", *std_go_args(ldflags: "-s -w", tags:)
   end
 
   test do
     (testpath/".env").write("DATABASE_URL=sqlite3:test.sqlite3")
     system bin/"dbmate", "create"
-    assert_predicate testpath/"test.sqlite3", :exist?, "failed to create test.sqlite3"
+    assert_path_exists testpath/"test.sqlite3", "failed to create test.sqlite3"
   end
 end

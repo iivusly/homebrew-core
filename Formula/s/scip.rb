@@ -1,39 +1,43 @@
 class Scip < Formula
   desc "Solver for mixed integer programming and mixed integer nonlinear programming"
   homepage "https://scipopt.org"
-  url "https://scipopt.org/download/release/scip-9.1.0.tgz"
-  sha256 "40459696c513c376bd1dbde10744837d0d4d4b9359df26243e749ba7991481f6"
+  url "https://scipopt.org/download/release/scip-10.0.2.tgz"
+  sha256 "7544647007c9a63a770a71f5884a50ac81da37372bb6958d08588870bd58a50b"
   license "Apache-2.0"
 
   livecheck do
-    url "https://scipopt.org/scipdata.js"
-    regex(/["']name["']:\s*?["']scip[._-]v?(\d+(?:\.\d+)+)\.t/i)
+    url "https://github.com/scipopt/scip"
+    strategy :github_latest
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "705a97ff1ca9f055004c006185e899c99d05a12d0e5c3609f86ca675fbb57e43"
-    sha256 cellar: :any,                 arm64_ventura:  "896b0868587888345ace85d2ec03f9cd265d753ad320c07ed0bba89de8b756a7"
-    sha256 cellar: :any,                 arm64_monterey: "1803a116966786bdda39fd83cd1c288f76419273eea70475ee8ccd8e0880eac6"
-    sha256 cellar: :any,                 sonoma:         "ad3ac0efe663d0842daa73b1dae468057a26494d2893d57bbc21fb9d7160772b"
-    sha256 cellar: :any,                 ventura:        "895f958e2dbad907ebd9155ced804c8a884bd6cecfcf10e39d366a2e78b02191"
-    sha256 cellar: :any,                 monterey:       "dafe677b7d8aa59f5f11383fbb52ad4b6fa818c6e5e1e6f3903045fa0f99b37c"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "611c37768da18821b98a4233005548ec9d4867b726a2713e8f36b94ccc90c007"
+    sha256 cellar: :any,                 arm64_tahoe:   "7c19c0c741487ae4510c4b6c9a1153a281a88f34fac38a003f7dd3c44c4b9079"
+    sha256 cellar: :any,                 arm64_sequoia: "9b4274caff954b9a3c1cf1e9c7d40fc463bd85e2c2bb17a4d5ce655bd4efc4b4"
+    sha256 cellar: :any,                 arm64_sonoma:  "74592695f57e9711b936f200c414bd56512ce0e58b5e103ea74a23d7084f0625"
+    sha256 cellar: :any,                 sonoma:        "45073bd25f64ab72d9eba4dc9f2df699da72f3b7f309ca3fa22066af2a8a4a98"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "9996d235dfe0374db8fbda66a93bef51d4c59ebcc63d44579764d8268068a2c6"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "36cc79aa4cea363dfcc9356b9cefbba3d260c6cb27a69b83fb9f06b997c65262"
   end
 
   depends_on "cmake" => :build
-  depends_on "cppad"
+  depends_on "papilo" => :build # for static libraries
+  depends_on "soplex" => :build # for static libraries
+  depends_on "cppad" => :no_linkage
+  depends_on "gcc" # for gfortran
   depends_on "gmp"
   depends_on "ipopt"
+  depends_on "mpfr"
   depends_on "openblas"
-  depends_on "papilo"
   depends_on "readline"
-  depends_on "soplex"
   depends_on "tbb"
 
-  uses_from_macos "zlib"
-
   on_macos do
-    depends_on "gcc"
+    depends_on "boost"
+  end
+
+  on_linux do
+    depends_on "boost" => :no_linkage
+    depends_on "zlib-ng-compat"
   end
 
   def install
@@ -43,10 +47,15 @@ class Scip < Formula
 
     pkgshare.install "check/instances/MIP/enigma.mps"
     pkgshare.install "check/instances/MINLP/gastrans.nl"
+    pkgshare.install "check/instances/MIPEX/flugpl_rational.mps"
   end
 
   test do
-    assert_match "problem is solved [optimal solution found]", shell_output("#{bin}/scip -f #{pkgshare}/enigma.mps")
-    assert_match "problem is solved [optimal solution found]", shell_output("#{bin}/scip -f #{pkgshare}/gastrans.nl")
+    expected = "problem is solved [optimal solution found]"
+    assert_match expected, shell_output("#{bin}/scip -f #{pkgshare}/enigma.mps")
+    assert_match expected, shell_output("#{bin}/scip -f #{pkgshare}/gastrans.nl")
+
+    command = "set exact enable TRUE read #{pkgshare}/flugpl_rational.mps optimize quit"
+    assert_match expected, shell_output("#{bin}/scip -c \"#{command}\"")
   end
 end

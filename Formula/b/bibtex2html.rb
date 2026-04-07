@@ -12,6 +12,8 @@ class Bibtex2html < Formula
 
   bottle do
     rebuild 2
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:    "261c680993c384f4739fb747b85d0c6b346e5075a0450c588d4cd25093359d30"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia:  "ec23acda42eaa89ba7dba681bdf117a0abd5b083e57f718ab35c5402d31e1470"
     sha256 cellar: :any_skip_relocation, arm64_sonoma:   "edf466eae14117ebf2bdc825cd21d26306067b62f15245be0a0ac96b099bffa6"
     sha256 cellar: :any_skip_relocation, arm64_ventura:  "91f93894cd23e18564b8ef53f832e8a754be6e49a00326fbb0a82325056bc8f4"
     sha256 cellar: :any_skip_relocation, arm64_monterey: "48733e197e054f9681c722737a11503615cc2f7363de7ba78b6aa04c655c7d03"
@@ -21,8 +23,7 @@ class Bibtex2html < Formula
     sha256 cellar: :any_skip_relocation, monterey:       "85debacb26917549e04bf951f253fc2d51da9515cc9b1dcc9d54310ad93b4b06"
     sha256 cellar: :any_skip_relocation, big_sur:        "04836e8704ec993d86ae5534e3a16432edb9ebcd2eebc1549b29c6353e3ff865"
     sha256 cellar: :any_skip_relocation, catalina:       "e9c4f95aaae6ddb40473a8c4349dbd9455c58e71ea4f580c8aa268292578464d"
-    sha256 cellar: :any_skip_relocation, mojave:         "1a56c6ff9929a75570f231a4fd8b1a4e367d82a8a632c4a45f126b1845ff8ff3"
-    sha256 cellar: :any_skip_relocation, high_sierra:    "e2b32aea9dcfb51cff11b8014425975198b73b3a74f48c2f7103e01ef2ec7a9b"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "de9b81d5eaae752f37d96d2015cad99401acf76322e440eb7e56cc46db59d9f6"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "ad67db6800da40bac05bfa7e9158ca392d135241e82e300e58cded0533349a11"
   end
 
@@ -46,7 +47,7 @@ class Bibtex2html < Formula
   end
 
   test do
-    (testpath/"test.bib").write <<~EOS
+    (testpath/"test.bib").write <<~BIBTEX
       @article{Homebrew,
           title   = {Something},
           author  = {Someone},
@@ -55,7 +56,7 @@ class Bibtex2html < Formula
           number  = {2},
           pages   = {3--4}
       }
-    EOS
+    BIBTEX
 
     system bin/"bib2bib", "test.bib", "--remove", "pages", "-ob", "out.bib"
     assert(/pages\s*=\s*\{3--4\}/ !~ File.read("out.bib"))

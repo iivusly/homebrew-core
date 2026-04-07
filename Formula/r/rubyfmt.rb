@@ -1,9 +1,8 @@
 class Rubyfmt < Formula
   desc "Ruby autoformatter"
   homepage "https://github.com/fables-tales/rubyfmt"
-  url "https://github.com/fables-tales/rubyfmt.git",
-    tag:      "v0.10.0",
-    revision: "e00d2ab89fd4b0b85a7897fac393c1ad987136de"
+  url "https://github.com/fables-tales/rubyfmt/archive/refs/tags/v0.13.0.tar.gz"
+  sha256 "18964b26fda04549ee1a7b9b6a413775661f7d39595d90bf603f4c373cf373ca"
   license "MIT"
   head "https://github.com/fables-tales/rubyfmt.git", branch: "trunk"
 
@@ -16,39 +15,31 @@ class Rubyfmt < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "53a6870d51b42778724d9f6d051a16e2769701cf3c4946d5b464ac0da0656fe5"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "bd0e320c01c7848a26b51e6d06f9d96d2d8d765eb4b943ca570a546bc063d503"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "54ac9bdaab5905b208a7b80f6f8c1f0fd6752636821322d27d33458cd94988fd"
-    sha256 cellar: :any_skip_relocation, sonoma:         "72a7b6f0425b6ff0ad1bd324db39cf6dfca154dbfa71eae087088fd22254e84a"
-    sha256 cellar: :any_skip_relocation, ventura:        "733d2fe74b0a32666b708b5b265302268dcc088c897798380f2c6f677e06c707"
-    sha256 cellar: :any_skip_relocation, monterey:       "00f60ebdde76b0ac30df678b597e2b184b65146021099f8fecde4a36fb7cf4f2"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "3d10a98c28284d130b05f63649d4e89bbdd73b57d1522b0b2fc1ca3f4ddce973"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "6abe58bc74b6efaf266a6d4c0d030d0bd03eb9fede6646c989369de3f916b380"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "e0928934ba9c20c01523cb0b18ded982fa4128af0a3a8848dda3434f031e6a58"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "8088a4968d835b33d53eb82c6752fc2bd6342f43ab57bb54f1c2f502786994f3"
+    sha256 cellar: :any_skip_relocation, sonoma:        "e617fc6c14cf0934a27c3a25c8816113ffba1a1a5b1c55e8ad64d9cb69d6c2eb"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "c16d746c55a73664697cb31eba97ff478e22452525f860de482b5730804ce196"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "b801d8c0a8e81abbfc7ce88850f78bf5e6f0b22e67616bfcc663051c49debfbf"
   end
 
-  depends_on "autoconf" => :build
-  depends_on "automake" => :build
-  depends_on "bison" => :build
   depends_on "rust" => :build
-  # https://bugs.ruby-lang.org/issues/18616
-  # error: '__declspec' attributes are not enabled;
-  # use '-fdeclspec' or '-fms-extensions' to enable support for __declspec attributes
-  depends_on macos: :monterey
-  uses_from_macos "ruby"
+  uses_from_macos "llvm" => :build # for libclang to build ruby-prism-sys
 
   def install
     system "cargo", "install", *std_cargo_args
-    bin.install "target/release/rubyfmt-main" => "rubyfmt"
+    bin.install bin/"rubyfmt-main" => "rubyfmt"
   end
 
   test do
-    (testpath/"test.rb").write <<~EOS
+    (testpath/"test.rb").write <<~RUBY
       def foo; 42; end
-    EOS
-    expected = <<~EOS
+    RUBY
+    expected = <<~RUBY
       def foo
         42
       end
-    EOS
+    RUBY
     assert_equal expected, shell_output("#{bin}/rubyfmt -- #{testpath}/test.rb")
   end
 end

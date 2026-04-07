@@ -21,14 +21,14 @@ class Pulp < Formula
 
   def install
     system "npm", "install", *std_npm_args
-    bin.install_symlink Dir["#{libexec}/bin/*"]
+    bin.install_symlink libexec.glob("bin/*")
   end
 
   test do
     assert_match version.to_s, shell_output("#{bin}/pulp --version")
 
     system bin/"pulp", "init"
-    assert_predicate testpath/".gitignore", :exist?
-    assert_predicate testpath/"bower.json", :exist?
+    assert_path_exists testpath/".gitignore"
+    assert_path_exists testpath/"bower.json"
   end
 end

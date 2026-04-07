@@ -6,25 +6,43 @@ class Staq < Formula
   license "MIT"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "f29a73fe7f84e7ba37c5b09f433ecbf3388ab8131b2e185a7890cb42d444c025"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "609b7cff660d38139392cb80745e992ea20998886c38c9f3e1b99fae0c4540f1"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "55e15069ca3e7830d6d5147f60d03dafd118a8636390d0c0584f5e03af46985d"
-    sha256 cellar: :any_skip_relocation, sonoma:         "b693740d394888d92fa991b20a5740a2cd27dc28aa29a26a9b232128220f95eb"
-    sha256 cellar: :any_skip_relocation, ventura:        "4fc208e0bae6d80eeaa8d440cf13634dc93b07eb0f2fdb138480c0e4f39e4188"
-    sha256 cellar: :any_skip_relocation, monterey:       "68ebaa20a66420c76631803f6285345b27eb71eaa4dfb4f2e95dd3208dcd1f04"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "bbbc33cbd8374d3218dcf4da026f5733bd8bed35b8ccbe1c493e9b2618970eca"
+    rebuild 2
+    sha256 cellar: :any,                 arm64_tahoe:   "1518fdd5369e20863afefa4158c78b87fc4f01cf09967623a2b1af8225499790"
+    sha256 cellar: :any,                 arm64_sequoia: "8081f841203e64e3423fb6305558c1a538b86fdcbbd2e13d02944ea36dfa9ae9"
+    sha256 cellar: :any,                 arm64_sonoma:  "716a1214491fac80364ace9c88950c123f669912fd76dd950504c60780ddeac5"
+    sha256 cellar: :any,                 sonoma:        "6b589aefacd45146637ecf6f4b39d69fd1e32aec9f2f60c0da80776cac60dc28"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "7c0ea0b4548a55c3c72c3f33761cc9bf58e460b84db244b951eb586b0c2b77d2"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "c16a8a25583b15bc7384c346ea277598642e637f19b36ebbab73dcd48e3dfb1b"
   end
 
   depends_on "cmake" => :build
+  depends_on "gmp"
+
+  # Backport fix to error: no member named 'row' in 'col_vec2_t<T>'
+  # Issue ref: https://github.com/softwareQinc/staq/issues/85
+  patch do
+    url "https://github.com/softwareQinc/staq/commit/4ac5dcd13ae46dd629ee938602452a5c8ec0b7c0.patch?full_index=1"
+    sha256 "c71447c1fd065e8818894965219e0fad652c3a8649be645296d4bc9ca5a9d656"
+  end
+
+  # Backport newer bundled fmt
+  patch do
+    url "https://github.com/softwareQinc/staq/commit/6847ebed2d167a0f1aa476cfb1d2b62b54fde6f9.patch?full_index=1"
+    sha256 "acdcdd7afd9650425f1659b0b3b0e601c27e368d3722385416dcc5ee145528f1"
+  end
 
   def install
-    system "cmake", "-S", ".", "-B", "build", "-D", "INSTALL_SOURCES=ON", *std_cmake_args
+    system "cmake", "-S", ".", "-B", "build",
+                    "-DINSTALL_SOURCES=ON",
+                    "-DFETCHCONTENT_SOURCE_DIR_GOOGLETEST=/dev/null", # skip unused FetchContent
+                    "-DPython3_EXECUTABLE=/dev/null", # skip macOS /usr/bin/python3
+                    *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
   end
 
   test do
-    (testpath/"input.qasm").write <<~EOS
+    (testpath/"input.qasm").write <<~QASM
       OPENQASM 2.0;
       include "qelib1.inc";
 
@@ -33,14 +51,14 @@ class Staq < Formula
       h q[0];
       h q[0];
       measure q->c;
-    EOS
-    assert_equal <<~EOS, shell_output("#{bin}/staq -O3 ./input.qasm").chomp
+    QASM
+    assert_equal <<~QASM, shell_output("#{bin}/staq -O3 ./input.qasm").chomp
       OPENQASM 2.0;
       include "qelib1.inc";
 
       qreg q[1];
       creg c[1];
       measure q[0] -> c[0];
-    EOS
+    QASM
   end
 end

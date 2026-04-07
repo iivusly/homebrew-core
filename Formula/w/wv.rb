@@ -5,39 +5,36 @@ class Wv < Formula
   mirror "https://abisource.com/downloads/wv/1.2.9/wv-1.2.9.tar.gz"
   sha256 "4c730d3b325c0785450dd3a043eeb53e1518598c4f41f155558385dd2635c19d"
   license "GPL-2.0-or-later"
-  revision 1
+  revision 2
 
   livecheck do
     skip "Not actively developed or maintained"
   end
 
   bottle do
-    sha256 arm64_sonoma:   "282ed73a67d00953c4fbd390a82f3d1148822dbe103beaa7f81cfdc92ca8194a"
-    sha256 arm64_ventura:  "af7ed2ef919eb856fd37e52bce5d7d5ff8ed39785969aeb565b07c62160807c9"
-    sha256 arm64_monterey: "a96f5e5c182887f42939ab725f79d4a9f31801d3f92a19da1e08da6477edcfe7"
-    sha256 arm64_big_sur:  "36bac1865cab3a50dafdf0477bb914d6c9df08c386b5586951f6681e5d5f73ad"
-    sha256 sonoma:         "fb64e12f1f800257a79b538a3651a0abcc6bea703e91843f1ab84128470ae988"
-    sha256 ventura:        "96dd06b5837281f09cbb87bc62ba805285c1ca2c960420f6903962618755d92e"
-    sha256 monterey:       "376a60947357ebe4662e6f197745da5c76e75c0a5559456711f95b138519eba6"
-    sha256 big_sur:        "6e6499eca2f6ab68a58a4a0548ac4954eec052d20558dc1bd834cc4bb030e0cc"
-    sha256 catalina:       "c617efb5a72bf2dbca4a3c85fdb59460ce6aaaf21b1f1db1e89f53ac3fc07224"
-    sha256 mojave:         "e3b62df7fad6fefbd233abc45ede4f9705b447df51433e0129a82d98dc321811"
-    sha256 high_sierra:    "470ecfe6b84e931d4c4363b8274a04d42b2e2c3b6c5f50bc12b55a7fda6f5acb"
-    sha256 sierra:         "7df867080d9b2edb57780c5f971a4a22d01c301aff70c1af7a6ce13385828908"
-    sha256 x86_64_linux:   "af62ebf3c81d88115b669a44a957c3f0128702364387aea07fdc1812e7895bad"
+    rebuild 1
+    sha256 arm64_tahoe:   "0b1a7b66a5369c2e739d1b1b39315a0813672e1e3a314e9656d4e3be6bf4dece"
+    sha256 arm64_sequoia: "c0ae3245bfab0575b61cd15afeb41080e5e8de9c0c032855b882e2186faec7ac"
+    sha256 arm64_sonoma:  "e1a3352d9798bbd49a719cf55050f1f68982b6e57b361bc380dd7ef1545079ec"
+    sha256 sonoma:        "708f70cc17691035a34e92db0885c6e868f44ce29a6f224f5630ca10cad1b42a"
+    sha256 arm64_linux:   "ff673a4f8e3c22e69aa7c4692145d0a5a48bc60a32eced373d875dcde0a045c1"
+    sha256 x86_64_linux:  "6f66b42660930fafb95f88fde932773f48f9742b8dfb94c2a5a96e78a89fe7a8"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "glib"
   depends_on "libgsf"
   depends_on "libpng"
   depends_on "libwmf"
 
   uses_from_macos "libxml2"
-  uses_from_macos "zlib"
 
   on_macos do
     depends_on "gettext"
+  end
+
+  on_linux do
+    depends_on "zlib-ng-compat"
   end
 
   def install
@@ -46,7 +43,11 @@ class Wv < Formula
       ENV.append_to_cflags "-Wno-incompatible-function-pointer-types -Wno-int-conversion"
     end
 
-    system "./configure", "--mandir=#{man}", *std_configure_args
+    args = ["--mandir=#{man}"]
+    # Help old config scripts identify arm64 linux
+    args << "--build=aarch64-unknown-linux-gnu" if OS.linux? && Hardware::CPU.arm64?
+
+    system "./configure", *args, *std_configure_args
     system "make"
     ENV.deparallelize
     # the makefile generated does not create the file structure when installing

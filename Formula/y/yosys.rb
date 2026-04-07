@@ -1,34 +1,36 @@
 class Yosys < Formula
   desc "Framework for Verilog RTL synthesis"
   homepage "https://yosyshq.net/yosys/"
-  # pull from git tag to get submodules
-  url "https://github.com/YosysHQ/yosys.git",
-      tag:      "yosys-0.45",
-      revision: "3e0dc2ff1ee0dfec10e96b7eaaa774231ba4a248"
+  url "https://github.com/YosysHQ/yosys/releases/download/v0.63/yosys.tar.gz"
+  sha256 "ab1cca30e9c45ebcdae240823aeaf7139b22f86b6046644807e074b7da5466b9"
   license "ISC"
   head "https://github.com/YosysHQ/yosys.git", branch: "main"
 
   bottle do
-    sha256 arm64_sonoma:   "1d4318a4d819fca8fc93af86d19cf9d9ed8782c4867c16ce51b577f677ff195e"
-    sha256 arm64_ventura:  "c4123b638f8a9273a90917e51d20f8edea6a9e64cf038b05d28225d186b9a224"
-    sha256 arm64_monterey: "7839f5634a993c4c6e2c8f37551d80fd2142ab78db6d3feb233adcfbccb0fbc7"
-    sha256 sonoma:         "372833bf11f3d95033ac373abbd9440f2766cd9b68fee841b11a14f1d47dad98"
-    sha256 ventura:        "848e66c0f4adeeed78f0edb62557e3f856bc4fe0bb5580c28a91b529e481bb81"
-    sha256 monterey:       "f6bff3439866afff57bcbe53470ed86c04a1cf02598d2851bc192ba0b0e25d9e"
-    sha256 x86_64_linux:   "6971a541213213afff96cddce5893944076f12dd35270ec9be64f817eeea31c5"
+    sha256 arm64_tahoe:   "664bf46c55500f3859312de86f119d494caf53be145d03df312a63a0bdc95166"
+    sha256 arm64_sequoia: "a0e9be3d859a0ba6e04206e7f285d80644995e5de7c2b5c06f0a9a70b3254d81"
+    sha256 arm64_sonoma:  "ba1d73d323b1e8745d810ee5bac5d63649d0aecc1209ffde3fd33f94ce06fe38"
+    sha256 sonoma:        "547ca79f85722c89d42236ac39660401fd36e5db5361952a9b268fdbbb1ab677"
+    sha256 arm64_linux:   "c41e811729ea911431712e51a62b8fcd78a1a922f6f680575d77ad5947665784"
+    sha256 x86_64_linux:  "88bd589f2515390139f8bbda0bb0840532d92aa6f700b0cb132e610e10e58ffc"
   end
 
   depends_on "bison" => :build
-  depends_on "pkg-config" => :build
-  depends_on "python@3.12"
+  depends_on "flex" => :build
+  depends_on "pkgconf" => :build
+  depends_on "libtommath"
   depends_on "readline"
+  depends_on "tcl-tk"
 
-  uses_from_macos "flex"
-  uses_from_macos "libffi", since: :catalina
-  uses_from_macos "tcl-tk"
-  uses_from_macos "zlib"
+  uses_from_macos "libffi"
+  uses_from_macos "python"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
+    ENV.append "LINKFLAGS", "-L#{Formula["readline"].opt_lib}"
     system "make", "install", "PREFIX=#{prefix}", "PRETTY=0"
   end
 

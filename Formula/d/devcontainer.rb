@@ -1,37 +1,33 @@
 class Devcontainer < Formula
   desc "Reference implementation for the Development Containers specification"
   homepage "https://containers.dev"
-  url "https://registry.npmjs.org/@devcontainers/cli/-/cli-0.69.0.tgz"
-  sha256 "fa20a4a95bd9ca7143187d7958a47f0a087a78e4e89d0c592a9cf78fa363a91e"
+  url "https://registry.npmjs.org/@devcontainers/cli/-/cli-0.85.0.tgz"
+  sha256 "54cb822bc2218186458e5690f67b0116f6800c45f5cb14671285e704a2ee2c29"
   license "MIT"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "98aa876cafa71d6ff1e8e7cda62dc425fdd81a0919a20470f8b6a64841143e5e"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "98aa876cafa71d6ff1e8e7cda62dc425fdd81a0919a20470f8b6a64841143e5e"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "98aa876cafa71d6ff1e8e7cda62dc425fdd81a0919a20470f8b6a64841143e5e"
-    sha256 cellar: :any_skip_relocation, sonoma:         "517f405d3603adce917e91b1cc37fa12b143abf99a635cb18243e808c42b0d34"
-    sha256 cellar: :any_skip_relocation, ventura:        "517f405d3603adce917e91b1cc37fa12b143abf99a635cb18243e808c42b0d34"
-    sha256 cellar: :any_skip_relocation, monterey:       "517f405d3603adce917e91b1cc37fa12b143abf99a635cb18243e808c42b0d34"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "98aa876cafa71d6ff1e8e7cda62dc425fdd81a0919a20470f8b6a64841143e5e"
+    sha256 cellar: :any_skip_relocation, all: "dcaeece6cc3d4aeb5dbdff10dfa8fe8978c6277dd0e3a5ebc23f52d7363685dd"
   end
 
   depends_on "node"
 
   def install
     system "npm", "install", *std_npm_args
-    bin.install_symlink Dir["#{libexec}/bin/*"]
+    bin.install_symlink libexec.glob("bin/*")
   end
 
   test do
-    ENV["DOCKER_HOST"] = "/dev/null"
+    assert_match version.to_s, shell_output("#{bin}/devcontainer --version")
+
+    ENV["DOCKER_HOST"] = File::NULL
     # Modified .devcontainer/devcontainer.json from CLI example:
     # https://github.com/devcontainers/cli#try-out-the-cli
-    (testpath/".devcontainer.json").write <<~EOS
+    (testpath/".devcontainer.json").write <<~JSON
       {
         "name": "devcontainer-homebrew-test",
         "image": "mcr.microsoft.com/devcontainers/rust:0-1-bullseye"
       }
-    EOS
+    JSON
     output = shell_output("#{bin}/devcontainer up --workspace-folder .", 1)
     assert_match '{"outcome":"error","message":"', output
   end

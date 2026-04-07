@@ -1,9 +1,10 @@
 class Vapoursynth < Formula
   desc "Video processing framework with simplicity in mind"
   homepage "https://www.vapoursynth.com"
-  url "https://github.com/vapoursynth/vapoursynth/archive/refs/tags/R69.tar.gz"
-  sha256 "cbd5421df85ba58228ea373cc452ca677e0e2ec61b59944d7e514234633057d9"
+  url "https://github.com/vapoursynth/vapoursynth/archive/refs/tags/R73.tar.gz"
+  sha256 "1bb8ffe31348eaf46d8f541b138f0136d10edaef0c130c1e5a13aa4a4b057280"
   license "LGPL-2.1-or-later"
+  compatibility_version 1
   head "https://github.com/vapoursynth/vapoursynth.git", branch: "master"
 
   livecheck do
@@ -12,13 +13,12 @@ class Vapoursynth < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "c068b4aae76a49f75fa69f2a0c912b2c42cae12e23633a62790b236e521c853c"
-    sha256 cellar: :any,                 arm64_ventura:  "f0c7cdf6870a2ca1ad28375c56ad558be931a857eeab8e3e6ab6c44bd83d0614"
-    sha256 cellar: :any,                 arm64_monterey: "6959ec30fec16d7dab2c8ca24f1194242a5ea676bc9faf10971c53dea36bf4da"
-    sha256 cellar: :any,                 sonoma:         "8e1b3d94df8e77be8657080738cde6d93e854bbf879ed020fd4dadde8881788e"
-    sha256 cellar: :any,                 ventura:        "2eef107de5fea6860c811323416bc0ff931297edce5c1df27fdb9ab8c8a37796"
-    sha256 cellar: :any,                 monterey:       "e62b9b2e233f8da7eb1ba3125214897efa17df41787d47f12d420fbbd55bd342"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "bc3320b2db9df43d7dbd5029026fc555da39d1b8c698d2460155bda5d49336eb"
+    sha256 cellar: :any,                 arm64_tahoe:   "badc56f5fb9d2c6c5963df0f619b08c74b098d1835126f8cd9c1b15fcce33aee"
+    sha256 cellar: :any,                 arm64_sequoia: "3af090044e6962bdcc19c4e92dd724d1ec07cb6bc3e958721d2f63dcab766cf3"
+    sha256 cellar: :any,                 arm64_sonoma:  "bdab1c52e43ec390ca27d76f07b1f43967b0f091c09da17e756e81bb879cd350"
+    sha256 cellar: :any,                 sonoma:        "bd2188a75e9cd09589e746facd492c5ff8342fbffc71e7f6aebda2b74bb523a2"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "ca5e6a5ecdb6203b2979ab67a27bcc400fe4baffc42459346e5d83c2f187696a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "a020d5253bc39fbe0f077128478632d24ab5d19e375e94a1d8ed08583558c0df"
   end
 
   depends_on "autoconf" => :build
@@ -26,8 +26,8 @@ class Vapoursynth < Formula
   depends_on "cython" => :build
   depends_on "libtool" => :build
   depends_on "nasm" => :build
-  depends_on "pkg-config" => :build
-  depends_on "python@3.12"
+  depends_on "pkgconf" => :build
+  depends_on "python@3.14"
   depends_on "zimg"
 
   # std::to_chars requires at least MACOSX_DEPLOYMENT_TARGET=13.3
@@ -38,23 +38,17 @@ class Vapoursynth < Formula
     fails_with :clang
   end
 
-  fails_with gcc: "5"
-
   def install
-    if OS.mac? && MacOS.version <= :ventura
-      ENV.llvm_clang
-      ENV.prepend "LDFLAGS", "-L#{Formula["llvm"].opt_lib}/c++"
-    end
+    ENV.prepend "LDFLAGS", "-L#{Formula["llvm"].opt_lib}/c++" if OS.mac? && MacOS.version <= :ventura
 
     system "./autogen.sh"
     inreplace "Makefile.in", "pkglibdir = $(libdir)", "pkglibdir = $(exec_prefix)"
-    system "./configure", "--prefix=#{prefix}",
-                          "--disable-silent-rules",
-                          "--disable-dependency-tracking",
+    system "./configure", "--disable-silent-rules",
                           "--with-cython=#{Formula["cython"].bin}/cython",
                           "--with-plugindir=#{HOMEBREW_PREFIX}/lib/vapoursynth",
                           "--with-python_prefix=#{prefix}",
-                          "--with-python_exec_prefix=#{prefix}"
+                          "--with-python_exec_prefix=#{prefix}",
+                          *std_configure_args
     system "make", "install"
   end
 
@@ -76,7 +70,7 @@ class Vapoursynth < Formula
   end
 
   test do
-    system Formula["python@3.12"].opt_bin/"python3.12", "-c", "import vapoursynth"
+    system Formula["python@3.14"].opt_bin/"python3.14", "-c", "import vapoursynth"
     system bin/"vspipe", "--version"
   end
 end

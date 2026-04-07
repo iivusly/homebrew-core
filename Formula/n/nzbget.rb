@@ -1,20 +1,19 @@
 class Nzbget < Formula
   desc "Binary newsgrabber for nzb files"
   homepage "https://nzbget.com"
-  url "https://github.com/nzbgetcom/nzbget/archive/refs/tags/v24.2.tar.gz"
-  sha256 "4fbcfc4faa49be0dc9d0b85cfbae2e38043be1e2f6755e6891d48785baa9438b"
+  url "https://github.com/nzbgetcom/nzbget/archive/refs/tags/v26.0.tar.gz"
+  sha256 "9b683ce96d7a2e5e702a169e3fbfd16824cfe0ce8ed887c76cc25a574f69c9cd"
   license "GPL-2.0-or-later"
-  revision 1
   head "https://github.com/nzbgetcom/nzbget.git", branch: "develop"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "e65c740f6d8452a78ef6e7b7c75ef219c72415dc9d199c5bd187c01c8bbbf33d"
-    sha256 cellar: :any,                 arm64_ventura:  "135e32ca381d46996a7dcbaa235a1cd3045f6bd89857de01cd1ac059366acf57"
-    sha256 cellar: :any,                 arm64_monterey: "1bdf12fd7460c1acf17d5bf57e49700b270b13ac8724206f2f71b08c4c58b855"
-    sha256                               sonoma:         "b48d2d37fb08de9e4c023f6fff9065b6bd7b6db9f8ba31031b27212178ce4b29"
-    sha256                               ventura:        "a4fbbe58120c77e1ce583774fdcf18b85b56a3e99375dee3492e96835c4d9e91"
-    sha256                               monterey:       "7ee6109325d674327ddb8328ec9dd4ea77561e496fd6899f5dc2a1d22945a916"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "c161baa92be6db5c451e73a4282acdafcfd10f6a0528ea0eab8eca6dd4552432"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "0ef5b4f7469e5631621c1ed63d84933f7352abc73b937864bef5daecf00fa087"
+    sha256 cellar: :any,                 arm64_sequoia: "64f66197a63d763cb07c3cdf1d7fc7b6700133ebb028aed7333838cee038b9ad"
+    sha256 cellar: :any,                 arm64_sonoma:  "c57ca253d74301155b648a4998f5ed5c24f878995ceaaf5142aefd1429ec18c5"
+    sha256                               sonoma:        "cfc0132db636459975d13d7670b11bc3be865932135ab4e4d079c1bfb9f55fea"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "c5d6e7929ac4cafac423cee1b6429a3d2728b9973d512af8ef478437d4402c48"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "5baf160d0c98f2e683488824e3ee822a58b6f5abaab36f6f820036d53931965a"
   end
 
   depends_on "cmake" => :build
@@ -24,25 +23,26 @@ class Nzbget < Formula
 
   uses_from_macos "libxml2"
   uses_from_macos "ncurses"
-  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     system "cmake", "-S", ".", "-B", "build", *std_cmake_args
     system "cmake", "--build", "build"
-
-    # nzbget CMake build does not strip binary
-    # must be removed in v25, tracking issue https://github.com/nzbgetcom/nzbget/issues/257
-    system "strip", "build/nzbget"
-
     system "cmake", "--install", "build"
 
-    if OS.mac?
-      # Set upstream's recommended values for file systems without
-      # sparse-file support (e.g., HFS+); see Homebrew/homebrew-core#972
-      inreplace "nzbget.conf", "DirectWrite=yes", "DirectWrite=no"
-      inreplace "nzbget.conf", "ArticleCache=0", "ArticleCache=700"
+    inreplace "nzbget.conf" do |s|
+      if OS.mac?
+        # Set upstream's recommended values for file systems without
+        # sparse-file support (e.g., HFS+); see Homebrew/homebrew-core#972
+        s.gsub! "DirectWrite=yes", "DirectWrite=no"
+        s.gsub! "ArticleCache=0", "ArticleCache=700"
+      end
+
       # Update 7z cmd to match homebrew binary
-      inreplace "nzbget.conf", "SevenZipCmd=7z", "SevenZipCmd=7zz"
+      s.gsub! "SevenZipCmd=7z", "SevenZipCmd=7zz"
     end
 
     etc.install "nzbget.conf"

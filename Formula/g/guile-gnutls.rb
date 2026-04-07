@@ -1,21 +1,28 @@
 class GuileGnutls < Formula
   desc "Guile bindings for the GnuTLS library"
-  homepage "https://gitlab.com/gnutls/guile"
-  url "https://gitlab.com/gnutls/guile/uploads/9060bc55069cedb40ab46cea49b439c0/guile-gnutls-4.0.0.tar.gz"
-  sha256 "5b4cb926032076ec346bb5c0bc0d0231f968fe0f565913cc16934bb793afb239"
+  homepage "https://codeberg.org/guile-gnutls/guile-gnutls"
+  url "https://codeberg.org/guile-gnutls/guile-gnutls/releases/download/v5.0.1/guile-gnutls-5.0.1.tar.gz"
+  sha256 "cc0067f3eeb421bc17247140962a49086df5450f0d3e71c55bf541a2d2b9ef2b"
   license "LGPL-2.1-or-later"
-  head "https://gitlab.com/gnutls/guile.git", branch: "master"
 
   bottle do
-    sha256 arm64_sonoma:   "fa04d75c5e4ce832178da0dd59c0903976517ec88bab6e447c2635f8efabcf86"
-    sha256 arm64_ventura:  "904211d84327edf97c2f981c332cfa4b87f9ae6acead1bd3fb03dbf730f86eb7"
-    sha256 arm64_monterey: "4a838b2cf2c2dd0e6709cd43201a9c8dc5cc7e09705a00eb2523cb9785048c07"
-    sha256 arm64_big_sur:  "ba2ef38bd8e6930920cbc9541d52e1d661858dd6f1a678018f3352b9affb6da5"
-    sha256 sonoma:         "60ec990b57c525b59f4dc15a197c55efabf364be72a569db4e5231a60c6b8a00"
-    sha256 ventura:        "ce529583a5a68f8ee4369922bf37ed729a4a7889347047f41221c654b95fc040"
-    sha256 monterey:       "13b7f3129d9b70f721db8e2a111c8e013e981076aef2d80628c83464a7c5b5f8"
-    sha256 big_sur:        "a9a905b1b7d1a8c74558474e5f75a3b267688221b598babdee1601e72f72d0f6"
-    sha256 x86_64_linux:   "4ac661ae9b1570dac4da9e15ded15e72c88be83d44d7b6f11a74b9773e1b5993"
+    sha256 arm64_tahoe:   "975e9b65e6b30080b9bbac5a87afd83e2a5722c2b72920c90fb9122a2f45144c"
+    sha256 arm64_sequoia: "95394cff621d1adab78963342fe6af29b5465190b0fbe67cc0df79f7219e735c"
+    sha256 arm64_sonoma:  "1e31541c1f148acff0657dc55a994409d31c6d8be13fc16c2282775d70c5b727"
+    sha256 sonoma:        "1046862293e93ae8a461b7a6dcaf2f823c4ec052ac4f24dd6ee8ac154196bce9"
+    sha256 arm64_linux:   "1bb943a6cbc6f7aab143dfb69b26e0b17ac316f9e88614e1b833a525d134ccc4"
+    sha256 x86_64_linux:  "e83b5913dec6fedd693056a6cc6a136b7036ffbc80ab83d21896c6a013244a1f"
+  end
+
+  head do
+    url "https://codeberg.org/guile-gnutls/guile-gnutls.git", branch: "main"
+
+    depends_on "autoconf" => :build
+    depends_on "automake" => :build
+
+    on_system :linux, macos: :ventura_or_newer do
+      depends_on "texinfo" => :build
+    end
   end
 
   depends_on "gnutls"
@@ -26,6 +33,7 @@ class GuileGnutls < Formula
   end
 
   def install
+    system "./bootstrap" if build.head?
     system "./configure", "--with-guile-site-dir=#{share}/guile/site/3.0",
                           "--with-guile-site-ccache-dir=#{lib}/guile/3.0/site-ccache",
                           "--with-guile-extension-dir=#{lib}/guile/3.0/extensions",
@@ -51,10 +59,10 @@ class GuileGnutls < Formula
 
   test do
     gnutls = testpath/"gnutls.scm"
-    gnutls.write <<~EOS
+    gnutls.write <<~SCHEME
       (use-modules (gnutls))
       (gnutls-version)
-    EOS
+    SCHEME
 
     ENV["GUILE_AUTO_COMPILE"] = "0"
     ENV["GUILE_LOAD_PATH"] = HOMEBREW_PREFIX/"share/guile/site/3.0"

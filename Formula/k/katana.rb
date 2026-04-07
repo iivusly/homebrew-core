@@ -1,24 +1,25 @@
 class Katana < Formula
   desc "Crawling and spidering framework"
   homepage "https://github.com/projectdiscovery/katana"
-  url "https://github.com/projectdiscovery/katana/archive/refs/tags/v1.1.0.tar.gz"
-  sha256 "d95921d3a4f01b5bdc60416f943d67b1622b222066e3e701f873d2947483b0a7"
+  url "https://github.com/projectdiscovery/katana/archive/refs/tags/v1.5.0.tar.gz"
+  sha256 "ee18fd5d0bf3e8f6c73fdc77c7b874dfa993d0e4b5f8d4e475eaea2ce62d8bdb"
   license "MIT"
-  head "https://github.com/projectdiscovery/katana.git", branch: "main"
+  head "https://github.com/projectdiscovery/katana.git", branch: "dev"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "b3aa8fbaa11155801f8d41d2e8bca59df6c848ff5684adbf3ce9958665ec691f"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "f337c4f91d142a3f72cfd1568a46761bd728d2970b004b640106b8f94708ff5e"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "882c599862fa1cde6101ff80b3fc103294e9b76e705a1486d35b28d3ec06f224"
-    sha256 cellar: :any_skip_relocation, sonoma:         "eaa45d8fdd61cfc2f7ce2602ef45fbbf530811890fe789b777f9ee8ffc5a5695"
-    sha256 cellar: :any_skip_relocation, ventura:        "00c70f58bc0c7fc7e51640fca83a73fe93656a5f85a6445fd28972a986b71934"
-    sha256 cellar: :any_skip_relocation, monterey:       "3d2d71f63d2f100eb8709c1e30ac51e88dd4eb23de9ab07bc507e94f1cc66be4"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "eade19ed36dee4d421a2148e1bbed74e45b3601b84e0668460b7a4dd02833ba9"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "b53dc2653fd4eae2d0e7699e2bc4fe4752bbec77fc7ccb09a6d86af69809b434"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "e7ee984f935a8fb7088a6b198ff9f1a0c2e716a5969f2cda95ac9d411b1a37ec"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "3743ea05922ee8b5f7ec130f8cab1455545708120c1300f9ef162eff55d48c6f"
+    sha256 cellar: :any_skip_relocation, sonoma:        "e63b6a315bfbeed73431159a5f4c38abd7fd2fc0d7953c033e3c145ad1d396a2"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "6808287543212b5a02cb27cfaf21d7bb3971bd07c0c23bc5d8b40c9a47cb5e3a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "c7e18bfc230e404df821a890b8aedd60550bf93bc0d2a651791e382b03e51420"
   end
 
   depends_on "go" => :build
 
   def install
+    ENV["CGO_ENABLED"] = "1" if OS.linux? && Hardware::CPU.arm?
+
     system "go", "build", *std_go_args(ldflags: "-s -w"), "./cmd/katana"
   end
 

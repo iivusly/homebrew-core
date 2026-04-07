@@ -1,25 +1,23 @@
 class Libraqm < Formula
   desc "Library for complex text layout"
   homepage "https://github.com/HOST-Oman/libraqm"
-  url "https://github.com/HOST-Oman/libraqm/archive/refs/tags/v0.10.1.tar.gz"
-  sha256 "ff8f0604dc38671b57fc9ca5c15f3613e063d2f988ff14aa4de60981cb714134"
+  url "https://github.com/HOST-Oman/libraqm/archive/refs/tags/v0.10.4.tar.gz"
+  sha256 "6b583fb0eb159a3727a1e8c653bb0294173a14af8eb60195a775879de72320a3"
   license "MIT"
+  compatibility_version 1
 
   bottle do
-    sha256 cellar: :any, arm64_sonoma:   "9b5a391bb26536281881edbf59e39ab0fe746ee19551d931c8b4c0168ce1033c"
-    sha256 cellar: :any, arm64_ventura:  "ac95b8239c3e26dfd2cba18417d279cf5fe39cf1e3b02e01930e324fa4334174"
-    sha256 cellar: :any, arm64_monterey: "d9099efce8323f9b653b9277a98a392aea1cb850ca69988aa17616cd44fc5741"
-    sha256 cellar: :any, arm64_big_sur:  "1df9106df6fbcc29f5ec9dd66790a04c9d34480a42b4c43ae868ff72a3e312ed"
-    sha256 cellar: :any, sonoma:         "860fe5236ee6417c25794bbe427b77815b585920c9f1ef9173342ca692311cbb"
-    sha256 cellar: :any, ventura:        "0f1d8cb37227f292b974a59b065a0c5d52869a85a5aa8f2dcd3c1466a32030e7"
-    sha256 cellar: :any, monterey:       "2e263d71e11d6e370a8e162d4abd2b086bbecb522d26935f8045dc3943cb85d4"
-    sha256 cellar: :any, big_sur:        "8726ac6422de7578e09239f921548c394c0c5005d8b3a2931d4d202187fe9281"
-    sha256               x86_64_linux:   "daf4d9a748329b05386ae982acb20fc88f1b1eac39d10d8f657527f255438165"
+    sha256 cellar: :any, arm64_tahoe:   "80573133b47b2923ed7e407a873c31f71c88acd9c84553a289757a908bcaf386"
+    sha256 cellar: :any, arm64_sequoia: "d6d61caf0cfea3c41e461f5a1025cccb581df32833095c54deb9ac1a9c7a1782"
+    sha256 cellar: :any, arm64_sonoma:  "7123cff4762e4ec7d1045f20789fc1eecc2529a69c84e0c3f8a89c1cd91acc18"
+    sha256 cellar: :any, sonoma:        "85ebe16cdd41a156dac23c0d97faf8efb6456ca34cb016ba1c94110f21c1e317"
+    sha256               arm64_linux:   "b39145fa67adc360e8bbb66372ca603600a7c4a206d528f552554742f74d0a8f"
+    sha256               x86_64_linux:  "5163492384bc5eb6606b7d7cc490962fe0da9cfcf24f0557408d5bdfe4f84675"
   end
 
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "freetype"
   depends_on "fribidi"
   depends_on "harfbuzz"
@@ -31,13 +29,13 @@ class Libraqm < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <raqm.h>
 
       int main() {
         return 0;
       }
-    EOS
+    C
 
     system ENV.cc, "test.c",
                    "-I#{include}",

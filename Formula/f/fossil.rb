@@ -1,8 +1,8 @@
 class Fossil < Formula
   desc "Distributed software configuration management"
   homepage "https://www.fossil-scm.org/home/"
-  url "https://fossil-scm.org/home/tarball/version-2.24/fossil-src-2.24.tar.gz"
-  sha256 "e6f5a559369bf16baf539e69e6d0cea5a6410efa9a6e7f160c7a4932080413be"
+  url "https://fossil-scm.org/home/tarball/version-2.28/fossil-src-2.28.tar.gz"
+  sha256 "84c18824ca227e7602d2408b663c3747f754ad306ed5c73ddab959d6589538a6"
   license "BSD-2-Clause"
   head "https://www.fossil-scm.org/", using: :fossil
 
@@ -12,17 +12,19 @@ class Fossil < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "57017ccd96af0539aa018cf48940242f0c5b32cd2fd31ce25e7faa047924e644"
-    sha256 cellar: :any,                 arm64_ventura:  "40dc9b1f55904916ebdc854d88dc6573ba919f43e2266d0323a954c1e6d68243"
-    sha256 cellar: :any,                 arm64_monterey: "65798cc7241b7a750814d3b16329a93824ee82a2e71356403ac8b038dfbbd831"
-    sha256 cellar: :any,                 sonoma:         "41c32d18fcbd268a84b05586b899ef809f6a39ee6143e3fc6bb7cd688490ae50"
-    sha256 cellar: :any,                 ventura:        "7228d43abc37ca6b88547e00f8903d60187e3466204fad3f888c911f2bdd16f8"
-    sha256 cellar: :any,                 monterey:       "6f7266e8686f5fff3931c68ec351c09924c291dd650cafdcaeed934c4cf0ad6c"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "3ea54ffd2dad970235c48c33224d53069af59082106b1639ea91f99c2ccaff70"
+    sha256                               arm64_tahoe:   "4b4e87850124a9ac1e744a1666dcb130559b2a42211c88fd6638bf4aaf94bedd"
+    sha256                               arm64_sequoia: "374946eaa9167456cb3a8afdfbfd682f6b3d1fec6f824e8f5675fbb39b6affaa"
+    sha256                               arm64_sonoma:  "5257caee28e4c79d291c042d068d6d6224516349af37bbbb44364502a19d12ba"
+    sha256 cellar: :any,                 sonoma:        "a0b0f4dd1d52c16dfc8c86eef57c54931c3f6a63b8ea823d57a81250f823579d"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "527bcb7891799919f0b6219d088421a044f5af220ae06c2d1305444014a12701"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "bbd65f925258794188c892a90210dd3c84d48feef1c435c7d432a2f7cfec8f7b"
   end
 
   depends_on "openssl@3"
-  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     args = [
@@ -42,7 +44,7 @@ class Fossil < Formula
     system "./configure", *args
     system "make"
     bin.install "fossil"
-    bash_completion.install "tools/fossil-autocomplete.bash"
+    bash_completion.install "tools/fossil-autocomplete.bash" => "fossil"
     zsh_completion.install "tools/fossil-autocomplete.zsh" => "_fossil"
   end
 

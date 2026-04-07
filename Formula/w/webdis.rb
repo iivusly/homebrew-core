@@ -1,20 +1,18 @@
 class Webdis < Formula
   desc "Redis HTTP interface with JSON output"
   homepage "https://webd.is/"
-  url "https://github.com/nicolasff/webdis/archive/refs/tags/0.1.22.tar.gz"
-  sha256 "4ee465f85999aeba3743a8ed6c7d79690bffe7a8ffb6c7ddec1d4bb6bd1d8685"
+  url "https://github.com/nicolasff/webdis/archive/refs/tags/0.1.23.tar.gz"
+  sha256 "e482e7eb2f7ba453df87a893791948b1f7921e51c14838179bc680a5d1a2018c"
   license "BSD-2-Clause"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "f13baa947b72dccf1e0d6cd43bedd62a52652a09b504260ad753c7ebc33dea6d"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "cc9a4b2972b379a2eb1b8d17f92dd59605ffdddf80bafbb5eab82a6ee0dc878d"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "708958851d482d0d79df358fe54e33e3e9c8b153c9d54c0e58120fa738180c24"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "dd82e75ae53372ac7c9c1db084727bc013db727ae55105095c58f02764a7e7a9"
-    sha256 cellar: :any,                 sonoma:         "46582e4494e8a853cf25c2238035cce8d129c2a094e4c786c62150a48ed48fac"
-    sha256 cellar: :any_skip_relocation, ventura:        "0946d5940af495f94ac3ecdbcd546c8028d7a3f4941832f656f8d5abdec0cd0d"
-    sha256 cellar: :any_skip_relocation, monterey:       "343f6bfd9a87ee3dc6b509555ff8f7c3ac813986e10cbe698e03b0c03d640ad6"
-    sha256 cellar: :any_skip_relocation, big_sur:        "e1e3894807840f4df17b2824d3dad0f885f94560323630024d2c16b3bb8a55de"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "da907e42d62719633fa070032c4f2041a65aabbc50cf23538a91ef29a2fe86d0"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "62087345de921d60b2299cd9ee575187ccff7e30a253c241c22903297175276f"
+    sha256 cellar: :any,                 arm64_sequoia: "6defb9b07385ddcec869ea600b6a018005b18c0b0b561409c1f3e430708c60a5"
+    sha256 cellar: :any,                 arm64_sonoma:  "8f829fe011b08d4e0f6d7f211d0d0842e8ad088488a683fe7125bff05f1658ba"
+    sha256 cellar: :any,                 sonoma:        "1ac5b717e0b555322d262561bbf1f7a23cb586be72967b9ef91496582018bdc1"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "d4c8683d5df1e10cfc4ae2d87a2b0fa315167d38410c4c06fe46435c47c02d64"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "cdf61ea9001c741118e9629972014cab7b200c0ca8433e718906707a0715fed5"
   end
 
   depends_on "libevent"
@@ -29,9 +27,6 @@ class Webdis < Formula
     end
 
     etc.install "webdis.json", "webdis.prod.json"
-  end
-
-  def post_install
     (var/"log").mkpath
   end
 
@@ -43,13 +38,11 @@ class Webdis < Formula
 
   test do
     port = free_port
-    cp "#{etc}/webdis.json", "#{testpath}/webdis.json"
-    inreplace "#{testpath}/webdis.json", "\"http_port\":\t7379,", "\"http_port\":\t#{port},"
+    cp etc/"webdis.json", testpath/"webdis.json"
+    inreplace "webdis.json", "7379", port.to_s
 
-    server = fork do
-      exec bin/"webdis", "#{testpath}/webdis.json"
-    end
-    sleep 0.5
+    server = spawn bin/"webdis", "webdis.json"
+    sleep 2
     # Test that the response is from webdis
     assert_match(/Server: Webdis/, shell_output("curl --silent -XGET -I http://localhost:#{port}/PING"))
   ensure

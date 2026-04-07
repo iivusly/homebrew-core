@@ -1,11 +1,12 @@
 class Libcerf < Formula
   desc "Numeric library for complex error functions"
   homepage "https://jugit.fz-juelich.de/mlz/libcerf"
-  url "https://jugit.fz-juelich.de/mlz/libcerf/-/archive/v2.4/libcerf-v2.4.tar.gz"
-  sha256 "080b30ae564c3dabe3b89264522adaf5647ec754021572bee54929697b276cdc"
+  url "https://jugit.fz-juelich.de/mlz/libcerf/-/archive/v3.3/libcerf-v3.3.tar.gz"
+  sha256 "ea2910085448e269b5f0f0fabe51ffd846ac68881904be99669d94dc0cc09765"
   license "MIT"
   version_scheme 1
-  head "https://jugit.fz-juelich.de/mlz/libcerf.git", branch: "master"
+  compatibility_version 1
+  head "https://jugit.fz-juelich.de/mlz/libcerf.git", branch: "main"
 
   livecheck do
     url "https://jugit.fz-juelich.de/api/v4/projects/269/releases"
@@ -13,15 +14,12 @@ class Libcerf < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "34b1ea071894550defd96682761ad9a6e9b9df19ac66ce5e0541bc5f82267946"
-    sha256 cellar: :any,                 arm64_ventura:  "b3b61822329b217da59ae7255dda43a504ac83256f6fa0ac8420317a2d73c339"
-    sha256 cellar: :any,                 arm64_monterey: "ded6d40e220e6e5258f589f36172ad6e0ddd110b1a38134dca1676b7db43f089"
-    sha256 cellar: :any,                 arm64_big_sur:  "939d2020151a7061a1615ff87b841121662d6be8d6441eb5e41beac6586b9625"
-    sha256 cellar: :any,                 sonoma:         "449f2996aa67026fab6fd8e70068d78d507f3855c844274b01757015de16d364"
-    sha256 cellar: :any,                 ventura:        "24d10b02769be590e55fca864a080e13fd0def7f2b655a5e0f0861393d036f22"
-    sha256 cellar: :any,                 monterey:       "5338caa2b9422debd382f920fef79a1f0acaedd843ab3924905cf332df708144"
-    sha256 cellar: :any,                 big_sur:        "237d8d549c7bfc15d7d770eff70cfe3df04fe264b156f63bc156ac1a9ddf52a7"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "24d01493cf36431018586ecbef6ad3d7a14837e257188d0f78d18f4c0f77113f"
+    sha256 cellar: :any,                 arm64_tahoe:   "c3a49c2f598757609120ae99569565f67e2a1b817cd7a2a8648cbfcf79fb022c"
+    sha256 cellar: :any,                 arm64_sequoia: "a533115d2cc04cf3b55b2cfcea18d40bfb9e60c48bd84b4c7d15f520fbaf55df"
+    sha256 cellar: :any,                 arm64_sonoma:  "b0a676b18a17826dfc57958aa8b700c307d21fe3f8f510276b75b4d8b5f8d41d"
+    sha256 cellar: :any,                 sonoma:        "0954bcc977146151fed6268836c9ebb1ca199aa09d500d769546da54131c2c2f"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "f32ea4a843889204e68320fac5815758680c994ad607abeb735f7e2f44c944bb"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "08a45c344ce19f291d6cb74c5c89eb461caa4f56c71f5d00637a8dde5945e0f4"
   end
 
   depends_on "cmake" => :build
@@ -33,7 +31,7 @@ class Libcerf < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <cerf.h>
       #include <complex.h>
       #include <math.h>
@@ -47,7 +45,7 @@ class Libcerf < Formula
         if (fabs(cimag(a)+0.156454) > 1.e-6) abort();
         return 0;
       }
-    EOS
+    C
 
     system ENV.cc, "test.c", "-I#{include}", "-L#{lib}", "-lcerf", "-o", "test"
     system "./test"

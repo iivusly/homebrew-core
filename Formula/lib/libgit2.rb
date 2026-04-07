@@ -1,9 +1,11 @@
 class Libgit2 < Formula
   desc "C library of Git core methods that is re-entrant and linkable"
-  homepage "https://libgit2.github.com/"
-  url "https://github.com/libgit2/libgit2/archive/refs/tags/v1.8.1.tar.gz"
-  sha256 "8c1eaf0cf07cba0e9021920bfba9502140220786ed5d8a8ec6c7ad9174522f8e"
+  homepage "https://libgit2.org/"
+  url "https://github.com/libgit2/libgit2/archive/refs/tags/v1.9.2.tar.gz"
+  sha256 "6f097c82fc06ece4f40539fb17e9d41baf1a5a2fc26b1b8562d21b89bc355fe6"
   license "GPL-2.0-only" => { with: "GCC-exception-2.0" }
+  revision 1
+  compatibility_version 1
   head "https://github.com/libgit2/libgit2.git", branch: "main"
 
   livecheck do
@@ -12,22 +14,39 @@ class Libgit2 < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "c74a306a3d2a68d22dd3951ca1a2fb0c566fccd4ff7ac1b40c75fb739cf4359f"
-    sha256 cellar: :any,                 arm64_ventura:  "da870e964178facdcfddf478f968122daf1ef8e6ef2cf80e23069191c65ce532"
-    sha256 cellar: :any,                 arm64_monterey: "6b51ca0ebc9c17d000e7fd88bccb00d60ef33845ac418b8d1ff6f9093e541c58"
-    sha256 cellar: :any,                 sonoma:         "52f39e230581ec9b36b5d9021ca9eaed0c8d2bb49c31c2102b74402b5e7b3937"
-    sha256 cellar: :any,                 ventura:        "b81c00e45d323da3331f6a6f3ab4c2ce27e7a35f45c256accbb5f534d059e26d"
-    sha256 cellar: :any,                 monterey:       "1e0ba01d5c036ae7991437fafd5695bd1c4f4298b6f873a9de751906ddc50445"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "66c64820e1f7ce0ec927b8195f2748f4bc11065488c59a33ea053f2b3a8f0eb9"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "8a30e6866a9d341a0536d1ee79084d9a38ccefa0070f36defcf7cd7d0c42d968"
+    sha256 cellar: :any,                 arm64_sequoia: "67f5becf455b5bd4fdb21207f914abb074fb48f4b58e0c159e70e916d9256356"
+    sha256 cellar: :any,                 arm64_sonoma:  "a805127b9a4bbeeb9f27effee5cc459ce5b5672779bffbaee94e7405db03ec73"
+    sha256 cellar: :any,                 sonoma:        "005aea9f682b2dfa3a2606fd953c1fe1bc5e2c10b6b3ad1bda12abe1a61a77af"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "05d6d6c13bf3130e180ddb471799e8b5ec5cea5ac8d08f7cbecc8b34951cad0a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ef33f5f695d8bbd7e2dd2b6041ed3fb0b018ffb8d547135224dac33653397d13"
   end
 
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "libssh2"
-  depends_on "openssl@3"
+  depends_on "llhttp"
+
+  on_linux do
+    depends_on "openssl@3" # Uses SecureTransport on macOS
+    depends_on "pcre2" # Uses regcomp_l on macOS which needs xlocale.h
+    depends_on "zlib-ng-compat"
+  end
 
   def install
-    args = %w[-DBUILD_EXAMPLES=OFF -DBUILD_TESTS=OFF -DUSE_SSH=ON]
+    # Remove bundled libraries
+    rm_r(Dir["deps/*"] - ["deps/ntlmclient", "deps/xdiff"])
+
+    args = %w[
+      -DBUILD_EXAMPLES=OFF
+      -DBUILD_TESTS=OFF
+      -DUSE_BUNDLED_ZLIB=OFF
+      -DUSE_HTTP_PARSER=llhttp
+      -DUSE_SSH=ON
+    ]
+    # TODO: Switch to USE_REGEX in 1.10
+    args << "-DREGEX_BACKEND=pcre2" if OS.linux?
 
     system "cmake", "-S", ".", "-B", "build", "-DBUILD_SHARED_LIBS=ON", *args, *std_cmake_args
     system "cmake", "--build", "build"
@@ -39,7 +58,7 @@ class Libgit2 < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <git2.h>
       #include <assert.h>
 
@@ -48,7 +67,7 @@ class Libgit2 < Formula
         assert(options & GIT_FEATURE_SSH);
         return 0;
       }
-    EOS
+    C
     libssh2 = Formula["libssh2"]
     flags = %W[
       -I#{include}

@@ -1,10 +1,10 @@
 class Hackrf < Formula
   desc "Low cost software radio platform"
   homepage "https://github.com/greatscottgadgets/hackrf"
-  url "https://github.com/greatscottgadgets/hackrf/releases/download/v2024.02.1/hackrf-2024.02.1.tar.xz"
-  sha256 "d9ced67e6b801cd02c18d0c4654ed18a4bcb36c24a64330c347dfccbd859ad16"
+  url "https://github.com/greatscottgadgets/hackrf/releases/download/v2026.01.3/hackrf-2026.01.3.tar.xz"
+  sha256 "d2b76a1115d9b4df648c29efb2f3c8e80009b7cf9a8adf37abbfdba72101b086"
   license "GPL-2.0-or-later"
-  head "https://github.com/greatscottgadgets/hackrf.git", branch: "master"
+  head "https://github.com/greatscottgadgets/hackrf.git", branch: "main"
 
   livecheck do
     url :stable
@@ -12,32 +12,33 @@ class Hackrf < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "5bcb0c337a5f17808365a9472d8537f4bc91a7e16d0147656020a9e2c7fb8735"
-    sha256 cellar: :any,                 arm64_ventura:  "785f40b5807a55615798acdb3c2f3084da4f619199ce4680dbdb03a33800e656"
-    sha256 cellar: :any,                 arm64_monterey: "34c1393265906dce624d9ce369a051d119523f5c645f0ce651ac2fd3127101b8"
-    sha256 cellar: :any,                 sonoma:         "0f6aad32f2fcec8733d6f1c6e2cd5454973a52c33f7797032a90bc9a730285ff"
-    sha256 cellar: :any,                 ventura:        "d5620a9f49dd68c91a36ffb55c2b60c4a28baa5b98440e3425f2d0c35ce299b6"
-    sha256 cellar: :any,                 monterey:       "b8fc89adc569dc32b152eafcea69a98d5fbe47264938992c5450048c392abcf4"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "a5305ace77af21dc264b7c83e17e95a89d05ef7f23e8af8cc29315728b340fbe"
+    sha256 cellar: :any,                 arm64_tahoe:   "d76b5c4bfbd77bee1f5e1f48481773c5128ffccb9188bd218801e6f9b3d6d30c"
+    sha256 cellar: :any,                 arm64_sequoia: "c3d36821448dcbf52035462d67fcf6ad31049039cb1e6e5a9c4852b887f46382"
+    sha256 cellar: :any,                 arm64_sonoma:  "5fc5f1972720b14717a98c0b7212656e47060b984e210c070a50eb2680cf63af"
+    sha256 cellar: :any,                 sonoma:        "4b65b90b39360e44ae20f9f143c1f0fe9bc6e74b27dde87c4b4b756695c4737a"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "713262f12d04f9c9e42392c6082c74f6599c29de3a1e91a548fdf6fcccdc6e92"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "8a9e96a3ec6c4042cabd4823c6b40d1bf1d37ad7e69573eb67733188188f55ed"
   end
 
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "fftw"
   depends_on "libusb"
 
   def install
-    cd "host" do
-      args = std_cmake_args
-
-      if OS.linux?
-        args << "-DUDEV_RULES_GROUP=plugdev"
-        args << "-DUDEV_RULES_PATH=#{lib}/udev/rules.d"
-      end
-
-      system "cmake", ".", *args
-      system "make", "install"
+    args = %W[
+      -DCMAKE_INSTALL_RPATH=#{rpath}
+    ]
+    if OS.linux?
+      args += %W[
+        -DUDEV_RULES_GROUP=plugdev
+        -DUDEV_RULES_PATH=#{lib}/udev/rules.d
+      ]
     end
+
+    system "cmake", "-S", "host", "-B", "build", *args, *std_cmake_args
+    system "cmake", "--build", "build"
+    system "cmake", "--install", "build"
     pkgshare.install "firmware-bin/"
   end
 

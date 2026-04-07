@@ -1,23 +1,12 @@
 class Boost < Formula
   desc "Collection of portable C++ source libraries"
   homepage "https://www.boost.org/"
+  url "https://github.com/boostorg/boost/releases/download/boost-1.90.0/boost-1.90.0-b2-nodocs.tar.xz"
+  sha256 "9e6bee9ab529fb2b0733049692d57d10a72202af085e553539a05b4204211a6f"
   license "BSL-1.0"
+  revision 1
+  compatibility_version 1
   head "https://github.com/boostorg/boost.git", branch: "master"
-
-  stable do
-    url "https://github.com/boostorg/boost/releases/download/boost-1.86.0/boost-1.86.0-b2-nodocs.tar.xz"
-    sha256 "a4d99d032ab74c9c5e76eddcecc4489134282245fffa7e079c5804b92b45f51d"
-
-    # Backport Boost.Compute support for latest Boost.Uuid
-    patch :p2 do
-      url "https://github.com/boostorg/compute/commit/79452d5279831ee59a650c17b71259a821f1a554.patch?full_index=1"
-      sha256 "ed4b9740c1f300ed0413498f0cba6f05389b570bec6a4b456d53314a2561d061"
-    end
-    patch :p2 do
-      url "https://github.com/boostorg/compute/commit/54915acaafa003b7aab6f24c74e7fdeaae297ad6.patch?full_index=1"
-      sha256 "1d1e83f4cb371003bad84a3789b2fecf215768f4a6f933444eaa4c26905f1e9f"
-    end
-  end
 
   livecheck do
     url "https://www.boost.org/users/download/"
@@ -28,22 +17,30 @@ class Boost < Formula
   end
 
   bottle do
-    rebuild 2
-    sha256 cellar: :any,                 arm64_sonoma:   "8f6d3d3c76708a287c0157a0e48f0e2b8c7175ee23269c03c8eb0ad7c003dc86"
-    sha256 cellar: :any,                 arm64_ventura:  "7eb491c2e34ff445b92883bba4483f085c35eeb40cc6f021636d09c9fc3b7b25"
-    sha256 cellar: :any,                 arm64_monterey: "e1942964bba4803b5c01bf1b69f1fa15908e4f1372732f7bf2edb5fa1be54a75"
-    sha256 cellar: :any,                 sonoma:         "eb5a1eab5cfa550707a4e2148451c9a9c2b0ecdd2b7a4f4cf786cc830055e80c"
-    sha256 cellar: :any,                 ventura:        "f40318ac4b779df9fbb13bed9166a39eb9819438fe8b9c4b764cca973f739295"
-    sha256 cellar: :any,                 monterey:       "bd5f3394381a43315858c033adfbc430ead8e53d607686efef760637fe77298f"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "9b54de744fca5203371e41bbe08f18fe347d9873558b9b0e1c40b60e4bc5515c"
+    sha256                               arm64_tahoe:   "47ceccf6792941c223a6464f974b6ac56e1d3457e6d72e1f71b4fdb742cef1d0"
+    sha256                               arm64_sequoia: "48b32cf2c35011a4b7e9b6ac8a68247aebb872b39f4629dbfc3f343d9f6a2b2d"
+    sha256                               arm64_sonoma:  "900f3a5db294a038351027a97e5de0c72d3f3fb754b081294dbea4267b69963d"
+    sha256 cellar: :any,                 sonoma:        "29e1095cff0cab11964d27ad12ca18556ff9715f2c6b3216f0deb389ffdba653"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "533706af6bd0f1e62589e7421f190466451755f4e7bc91937661e3b2a13560c3"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "175119f6f95179930c676c24615133249fea40b9bd86e1f37340c1544c18f9bc"
   end
 
-  depends_on "icu4c"
+  depends_on "icu4c@78"
   depends_on "xz"
   depends_on "zstd"
 
   uses_from_macos "bzip2"
-  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
+
+  # Fix for `ncmpcpp`, pr ref: https://github.com/boostorg/range/pull/157
+  patch :p3 do
+    url "https://github.com/boostorg/range/commit/9ac89e9936b826c13e90611cb9a81a7aa0508d20.patch?full_index=1"
+    sha256 "914464ffa1d53b3bf56ee0ff1a78c25799170c99c9a1cda075e6298f730236ad"
+    directory "boost"
+  end
 
   def install
     # Force boost to compile with the desired compiler
@@ -56,11 +53,11 @@ class Boost < Formula
     end
 
     # libdir should be set by --prefix but isn't
-    icu4c_prefix = Formula["icu4c"].opt_prefix
+    icu4c = deps.map(&:to_formula).find { |f| f.name.match?(/^icu4c@\d+$/) }
     bootstrap_args = %W[
       --prefix=#{prefix}
       --libdir=#{lib}
-      --with-icu=#{icu4c_prefix}
+      --with-icu=#{icu4c.opt_prefix}
     ]
 
     # Handle libraries that will not be built.
@@ -78,16 +75,17 @@ class Boost < Formula
       --libdir=#{lib}
       -d2
       -j#{ENV.make_jobs}
-      --layout=tagged-1.66
+      --layout=system
       --user-config=user-config.jam
       install
-      threading=multi,single
+      threading=multi
       link=shared,static
     ]
 
-    # Boost is using "clang++ -x c" to select C compiler which breaks C++14
-    # handling using ENV.cxx14. Using "cxxflags" and "linkflags" still works.
-    args << "cxxflags=-std=c++14"
+    # Boost is using "clang++ -x c" to select C compiler which breaks C++
+    # handling in superenv. Using "cxxflags" and "linkflags" still works.
+    # C++17 is due to `icu4c`.
+    args << "cxxflags=-std=c++17"
     args << "cxxflags=-stdlib=libc++" << "linkflags=-stdlib=libc++" if ENV.compiler == :clang
 
     system "./bootstrap.sh", *bootstrap_args
@@ -96,7 +94,7 @@ class Boost < Formula
   end
 
   test do
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include <boost/algorithm/string.hpp>
       #include <boost/iostreams/device/array.hpp>
       #include <boost/iostreams/device/back_inserter.hpp>
@@ -142,8 +140,8 @@ class Boost < Formula
 
         return 0;
       }
-    EOS
-    system ENV.cxx, "test.cpp", "-std=c++14", "-o", "test", "-L#{lib}", "-lboost_iostreams",
+    CPP
+    system ENV.cxx, "test.cpp", "-std=c++17", "-o", "test", "-L#{lib}", "-lboost_iostreams",
                     "-L#{Formula["zstd"].opt_lib}", "-lzstd"
     system "./test"
   end

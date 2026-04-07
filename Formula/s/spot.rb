@@ -1,8 +1,8 @@
 class Spot < Formula
   desc "Platform for LTL and ω-automata manipulation"
   homepage "https://spot.lre.epita.fr"
-  url "https://www.lrde.epita.fr/dload/spot/spot-2.12.tar.gz"
-  sha256 "26ba076ad57ec73d2fae5482d53e16da95c47822707647e784d8c7cec0d10455"
+  url "https://www.lrde.epita.fr/dload/spot/spot-2.14.5.tar.gz"
+  sha256 "8703d33426eea50a8e3b7f4b984c05b8058cbff054b260863a1688980d8b8d19"
   license "GPL-3.0-or-later"
 
   livecheck do
@@ -11,21 +11,18 @@ class Spot < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "e4c76f482118ead7179f160c066dfdf0ab3a2e1c7d00b2c90c00278921ab527f"
-    sha256 cellar: :any,                 arm64_ventura:  "0820204a038373d059598cc87c0e65a9302abff79d89fe16b8726d746b6d06a8"
-    sha256 cellar: :any,                 arm64_monterey: "af8c2ecf6ccf310913e30dd943b3020814adb5fd771e2884471f4b26e64c478b"
-    sha256 cellar: :any,                 sonoma:         "ceefbedede95d7a74cecdce0b0c0616c3130a5fe72094be2590b37f0522d87f3"
-    sha256 cellar: :any,                 ventura:        "b263cfe52f46515fb7ed5cf8bb60a480135bc3ba75e4cb167da98c456f648e54"
-    sha256 cellar: :any,                 monterey:       "6c7200f7ad180a1a54caa6b19380c53934f7e6697a9891916a0b8945d3115992"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "2729262b1b52510bf7f256f7d54bbb7b4a99e820c19f718947785ad33b541a72"
+    sha256 cellar: :any,                 arm64_tahoe:   "8e2ae80fe051f56744bd18c1fb98c7f95da877d5be0cd0ae5abeaa7172d277d3"
+    sha256 cellar: :any,                 arm64_sequoia: "7e9253e66c7e43d9085dcd6bad09be7840034a0aac1ec10053532e0bb1cdefc4"
+    sha256 cellar: :any,                 arm64_sonoma:  "7aa52c9c2d1eacbbef5afd551871e55683373b2a830af50eec9f1bc39767e343"
+    sha256 cellar: :any,                 sonoma:        "51c5717d7b691cf3772606962d492c663bb750d4622b43f01737c07a91840250"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "31a06e35f69b57052208f0ae22f71afbbc9101ac4a275e4b21e4241e2b07c97b"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "31c53a6f56b6f0fdb2855302518280692bf5e50cd6ae7cdef7fa3c2029a583c7"
   end
 
-  depends_on "python@3.12" => :build
-
-  fails_with gcc: "5" # C++17
+  depends_on "python@3.14" => :build
 
   def install
-    system "./configure", *std_configure_args, "--disable-silent-rules"
+    system "./configure", "--disable-silent-rules", *std_configure_args
     system "make", "install"
   end
 

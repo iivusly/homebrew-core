@@ -1,19 +1,18 @@
 class Ctl < Formula
   desc "Programming language for digital color management"
   homepage "https://github.com/ampas/CTL"
-  url "https://github.com/ampas/CTL/archive/refs/tags/ctl-1.5.3.tar.gz"
-  sha256 "0a9f5f3de8964ac5cca31597aca74bf915a3d8214e3276fdcb52c80ad25b0096"
+  url "https://github.com/ampas/CTL/archive/refs/tags/ctl-1.5.5.tar.gz"
+  sha256 "b6a36ac31e0a79224216e4fc41b56982939cec7a1afd4e80165cec3f1c37d265"
   license "AMPAS"
   head "https://github.com/ampas/CTL.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "09e00ca81ea0579317522d47dc94b7569c0ec006779af1688e321db694be4039"
-    sha256 cellar: :any,                 arm64_ventura:  "7a3fd5eca1686d5396816bc4f7110e49fa03d0c4e1d5a31e4e7a1797661e9379"
-    sha256 cellar: :any,                 arm64_monterey: "18d01a3812983c2dda174e54a1ba361545be2e26977520d30209a232e67bd34b"
-    sha256 cellar: :any,                 sonoma:         "87183233f8b431d80d3e3e0cc48a63640ab648cf8f8ee9e28ef28388a5f00ebe"
-    sha256 cellar: :any,                 ventura:        "99dad1064acd32072818f9461897f7e135b3e83e74327470dee8fa471dbb67a6"
-    sha256 cellar: :any,                 monterey:       "4654b4b1cd581df25409b0953009b57b7e8e58c15e55a459e068cee4b1c18661"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "41978658fbcaa4a098be2a6cb93fc4ee0240b3bc3fc7663a84f54a04e58d3fcf"
+    sha256 cellar: :any,                 arm64_tahoe:   "ca511a0c2b48007131b0582bb71116f5cc0eac17087434738e6f7a6c50397d91"
+    sha256 cellar: :any,                 arm64_sequoia: "45d8158cce14a51d6974e9cc1603b88c0329e26c76574ccbeaf9372d687bf05d"
+    sha256 cellar: :any,                 arm64_sonoma:  "46d3f74998db9417edb5725421b181e05a11e1a35dbd6cd19aa961a443c7b04c"
+    sha256 cellar: :any,                 sonoma:        "29d9deebf5250fa3faa927ce5ee71a4488ea49dd00c595c1f6443006e8106899"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "9ec0a75ad70ea5c05ce1165095a98a1a69cf898cf09eb7206c7885e752fb7045"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "0d035e411659b169fb4d073389599ddb0337c3a5b43cdb088e57496cff47709e"
   end
 
   depends_on "cmake" => :build

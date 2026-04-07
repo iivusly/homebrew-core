@@ -1,28 +1,25 @@
 class Atop < Formula
   desc "Advanced system and process monitor for Linux using process events"
   homepage "https://www.atoptool.nl"
-  url "https://github.com/Atoptool/atop/archive/refs/tags/v2.11.0.tar.gz"
-  sha256 "f61d01fcae4fd5e2644ed4e210a0cbcfc9bf85cef32b00e342417e3923eda49c"
+  url "https://github.com/Atoptool/atop/archive/refs/tags/v2.12.1.tar.gz"
+  sha256 "0f49f3aa5e3449f8c1cf10ac08036e2b67887640fe7980b8bc6ca9fd84d46fdf"
   license "GPL-2.0-or-later"
   head "https://github.com/Atoptool/atop.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "724dc68495d244ecc250ab08de07a9e5b746a59fe5dd22a75c98a9544b589557"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_linux:  "7eeb10893379965126504f749bae728e46029889b60a9b1344a2bdabd5411e96"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "a72f4e6fa04f2f46b615bc5385f881ea3fc093b4f3ec9705da8fb3e187c2514d"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "glib"
   depends_on :linux
-  depends_on "linux-headers@5.15"
   depends_on "ncurses"
-  depends_on "zlib"
+  depends_on "zlib-ng-compat"
 
   def install
-    if build.head?
-      inreplace "version.h" do |s|
-        s.sub!(/"$/, "-#{Utils.git_short_head}\"")
-      end
-    end
+    inreplace "version.h", /"$/, "-#{Utils.git_short_head}\"", global: false if build.head?
     # As this project does not use configure, we have to configure manually:
     ENV["BINPATH"] = bin.to_s
     ENV["SBINPATH"] = bin.to_s

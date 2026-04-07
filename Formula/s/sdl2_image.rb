@@ -1,38 +1,29 @@
 class Sdl2Image < Formula
   desc "Library for loading images as SDL surfaces and textures"
   homepage "https://github.com/libsdl-org/SDL_image"
-  url "https://github.com/libsdl-org/SDL_image/releases/download/release-2.8.2/SDL2_image-2.8.2.tar.gz"
-  sha256 "8f486bbfbcf8464dd58c9e5d93394ab0255ce68b51c5a966a918244820a76ddc"
+  url "https://github.com/libsdl-org/SDL_image/releases/download/release-2.8.10/SDL2_image-2.8.10.tar.gz"
+  sha256 "ebc059d01c007a62f4b04f10cf858527c875062532296943174df9a80264fd65"
   license "Zlib"
-  revision 1
+  head "https://github.com/libsdl-org/SDL_image.git", branch: "main"
 
-  # This formula uses a file from a GitHub release, so we check the latest
-  # release version instead of Git tags.
   livecheck do
     url :stable
-    regex(/release[._-]v?(\d+(?:\.\d+)+)/i)
-    strategy :github_latest
+    regex(/^(?:release[._-])?v?(2(?:\.\d+)+)$/i)
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "11c9581ed82a84f5c63626690d7c3c9c98fba13265e6491f31f985a782adc1cb"
-    sha256 cellar: :any,                 arm64_ventura:  "ce011bc3fb0f71b07b634bf8b2a0833df323eaa758da3dd6fc0c7ee5b0c2f5fa"
-    sha256 cellar: :any,                 arm64_monterey: "32a207af0f34a17677ff240d637a07214528c716c19cf8099ba155e25bebb9cc"
-    sha256 cellar: :any,                 sonoma:         "308fdb3aed323827bfbf6bb7e669553af535268d933511ad721ae43e38b54860"
-    sha256 cellar: :any,                 ventura:        "7d0a3805e94d526829545c6b9727ddfa2386601e4faad857b8d9b3da24d81cf9"
-    sha256 cellar: :any,                 monterey:       "d9d9ec8a7898531a6c89e22fbb98a9537649a26899d3bfd0ee4352f3bd003f42"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "f4508612c1f8603d490e9947ccc09a2954a482d76f94962d6bfc18577616db52"
+    sha256 cellar: :any,                 arm64_tahoe:   "4af4f5678df6e698c06eec00764c851ad6073a0c84374acbd4789ed3118847d4"
+    sha256 cellar: :any,                 arm64_sequoia: "39ea4cab3c24d6464c4680f5364b3fe4cc2bd05412d2ca7ed301ce71d36f037b"
+    sha256 cellar: :any,                 arm64_sonoma:  "789d926342b5030419c8d390fb41a1b10e24824459ddb694891baf219cc373e5"
+    sha256 cellar: :any,                 sonoma:        "10edafacc760e03c4e345d55d3ecbdb62484e86a064fcf5a68cd3f977a5bb9a7"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "1f7493edf1d8424f9230769cce95b8d1cbeb93b5a34707572fe39ee332b6e460"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "f56bf1bd84d2bffa1db0e6b1fff8de36e69a22e5a1dd962a0adf4b0d72f943b6"
   end
 
-  head do
-    url "https://github.com/libsdl-org/SDL_image.git", branch: "main"
-
-    depends_on "autoconf" => :build
-    depends_on "automake" => :build
-    depends_on "libtool" => :build
-  end
-
-  depends_on "pkg-config" => :build
+  depends_on "autoconf" => :build
+  depends_on "automake" => :build
+  depends_on "libtool" => :build
+  depends_on "pkgconf" => :build
   depends_on "jpeg-turbo"
   depends_on "jpeg-xl"
   depends_on "libavif"
@@ -44,22 +35,22 @@ class Sdl2Image < Formula
   def install
     inreplace "SDL2_image.pc.in", "@prefix@", HOMEBREW_PREFIX
 
-    system "./autogen.sh" if build.head?
-
-    system "./configure", *std_configure_args,
-                          "--disable-imageio",
+    # upstream bug report, https://github.com/libsdl-org/SDL_image/issues/490
+    system "./autogen.sh"
+    system "./configure", "--disable-imageio",
                           "--disable-avif-shared",
                           "--disable-jpg-shared",
                           "--disable-jxl-shared",
                           "--disable-png-shared",
                           "--disable-stb-image",
                           "--disable-tif-shared",
-                          "--disable-webp-shared"
+                          "--disable-webp-shared",
+                          *std_configure_args
     system "make", "install"
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <SDL2/SDL_image.h>
 
       int main()
@@ -69,7 +60,7 @@ class Sdl2Image < Formula
           IMG_Quit();
           return result == INIT_FLAGS ? EXIT_SUCCESS : EXIT_FAILURE;
       }
-    EOS
+    C
     system ENV.cc, "test.c", "-I#{Formula["sdl2"].opt_include}/SDL2", "-L#{lib}", "-lSDL2_image", "-o", "test"
     system "./test"
   end

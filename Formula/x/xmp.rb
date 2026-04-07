@@ -6,6 +6,8 @@ class Xmp < Formula
   license "GPL-2.0-or-later"
 
   bottle do
+    sha256 arm64_tahoe:    "36e826302cd05a73582ffc6d1a196b64c71aa256069b9a605da25ab1692cb2d4"
+    sha256 arm64_sequoia:  "656fb3759733a4e097ca973439b9ed791ddfeb768bbbe8203b9aa5684bb5883b"
     sha256 arm64_sonoma:   "95c30bbd87a818cdc81a4a90f27ba11585c5e11ddebfa5bc552e20246a4ab26c"
     sha256 arm64_ventura:  "0281add88058d565b3265efce120612e0602ba1b91b6a40f4334638917bb699f"
     sha256 arm64_monterey: "4701d7463ddc87e673d22631004939224605bb24c30b6054795d2844f514cabe"
@@ -14,6 +16,7 @@ class Xmp < Formula
     sha256 ventura:        "f6b3bd880711583a9412817d663c83d05c64e70bde3fc17a20e050af70b9cb8c"
     sha256 monterey:       "151f11955e3f9db1c51ebde5e40ec1af12a3856ab50940f585983a3d59ff186f"
     sha256 big_sur:        "43193a0619e22f454184a1427ce8b306a22327b807f3f8d81fdb726357bc9842"
+    sha256 arm64_linux:    "43d7f8abecadad5b2730da6399bce8db70e7f27289be34a5fc404afccfda33c5"
     sha256 x86_64_linux:   "bfa9f0f48823e7861c008d89c25cd43bdbe3553196b6684d15d962c8ca7087b4"
   end
 
@@ -25,7 +28,7 @@ class Xmp < Formula
     depends_on "libtool"  => :build
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "libxmp"
 
   def install

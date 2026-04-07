@@ -12,6 +12,8 @@ class Most < Formula
   end
 
   bottle do
+    sha256 cellar: :any,                 arm64_tahoe:    "31f896dfc693f1cd1014b870faad91a036405d61a943941ea61f5010fc2c9525"
+    sha256 cellar: :any,                 arm64_sequoia:  "2d8b015bce1f30f98a2a60a907ac22a7a38d01d4aa86bd8332c243870a0b184a"
     sha256 cellar: :any,                 arm64_sonoma:   "0b738de8c83a8f67ef1c79d9443d20a50928ece07c4c847fb8315ded7f7601c2"
     sha256 cellar: :any,                 arm64_ventura:  "f77965c676d147011c6456b7da9f7097d02e5de8fb81a0282b9cb6a5caedc527"
     sha256 cellar: :any,                 arm64_monterey: "a59940ffff8a004be1e310759e22c16d3c69521e9c8bf7c7a75dd8c919cc8d4b"
@@ -21,6 +23,7 @@ class Most < Formula
     sha256 cellar: :any,                 monterey:       "e5661527b7f93c4f8277d58508004f5c6ddd642b1b72ace3364df24593c2bfac"
     sha256 cellar: :any,                 big_sur:        "a2839cdbb2da468947d084bb3f78f9c4b575d8d090f59ae0c24a09bf86c8d67c"
     sha256 cellar: :any,                 catalina:       "9a61d3f7087d729dbb2d9aa01d32d6ab59330ef64711ce080e6702a8fbae3bb3"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "7dc9281437347488ca3a9722495f5a35797aecd8b900accb507d0a5328ef6e99"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "701edb9b61b659c7b3531b3527ede68e563a19b8ef989efc537e2400b4259233"
   end
 

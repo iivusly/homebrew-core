@@ -1,49 +1,49 @@
 class Muparser < Formula
   desc "C++ math expression parser library"
   homepage "https://github.com/beltoforion/muparser"
-  url "https://github.com/beltoforion/muparser/archive/refs/tags/v2.3.4.tar.gz"
-  sha256 "0c3fa54a3ebf36dda0ed3e7cd5451c964afbb15102bdbcba08aafb359a290121"
+  url "https://github.com/beltoforion/muparser/archive/refs/tags/v2.3.5.tar.gz"
+  sha256 "20b43cc68c655665db83711906f01b20c51909368973116dfc8d7b3c4ddb5dd4"
   license "BSD-2-Clause"
+  revision 2
   head "https://github.com/beltoforion/muparser.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "badcf6bec2378a87e78207e2b378d525a75ce0fc3511e47c7dc10fc8e5ed5fbb"
-    sha256 cellar: :any,                 arm64_ventura:  "6b959115733d494a5a6cb3256853e368313eda71d1df964ae2b67496e092f55d"
-    sha256 cellar: :any,                 arm64_monterey: "c2514a95c8f9e08c8c9792ecbc78397fd1c8e52069cf16fdaf87d9cc1cfc8de5"
-    sha256 cellar: :any,                 arm64_big_sur:  "36f09677be96fe1f60945c6d16c0bbe48b51d898443420f6360d07c478c1127c"
-    sha256 cellar: :any,                 sonoma:         "ce0a3ba8a87a944fc5d1ab48efc3fd69db79d10c8d5224231e690b6de23f788b"
-    sha256 cellar: :any,                 ventura:        "f1312db2dadecaabd79c4539f9d19dfbbcff6320ac1e3f019dc2696938eebcfb"
-    sha256 cellar: :any,                 monterey:       "091cad450a37fbe0b51d83a0302260eca95f872d6d272811df0b82319f37d822"
-    sha256 cellar: :any,                 big_sur:        "646599aca3fac21f7e0d0f9f3c02d28dae9f03bae2130d3866e7953125ee9779"
-    sha256 cellar: :any,                 catalina:       "dce05e4517b703b8d41d7477fb64585b20d26cdf83e1bc1e591555e2246f6826"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "a22a520b128642ade29eded38b0c9e33c20ddbdcc6055f8522409a48b416df04"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "23a51e97ef3d4ff02c8d8d6fb5dd53b142e89899927a9204eb4dd0018d21afe5"
+    sha256 cellar: :any,                 arm64_sequoia: "533245424ca9045f9e246b1c2092466b11b26fb13545b19d82469c8fd36eb2c6"
+    sha256 cellar: :any,                 arm64_sonoma:  "6e95b519ddaac7419352a19803d374262d8edf9780e942b287046be0e2e5c9c5"
+    sha256 cellar: :any,                 sonoma:        "62577464227b08a4c38a09c93f7438e21c55cd3438fdf67f227ee6bc5c2a51ee"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "d9b39ed5b616e3f67f8429a33ed9c42b3f404c74881c4718e4f12444153611ca"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "9e7935fbf6a0c3698082df30fb1b5e7140e45c9b98d16377810efd80585691d5"
   end
 
   depends_on "cmake" => :build
 
+  on_macos do
+    depends_on "libomp"
+  end
+
+  link_overwrite "lib/libmuparser.dylib", "lib/libmuparser.2.dylib"
+
   def install
-    ENV.cxx11 if OS.linux?
-    mkdir "build" do
-      system "cmake", "..", *std_cmake_args, "-DENABLE_OPENMP=OFF"
-      system "make", "install"
-    end
+    system "cmake", "-S", ".", "-B", "build", "-DENABLE_OPENMP=ON", *std_cmake_args
+    system "cmake", "--build", "build"
+    system "cmake", "--install", "build"
   end
 
   test do
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include <iostream>
-      #include "muParser.h"
+      #include <muParser.h>
 
-      double MySqr(double a_fVal)
-      {
+      double MySqr(double a_fVal) {
         return a_fVal*a_fVal;
       }
 
-      int main(int argc, char* argv[])
-      {
+      int main() {
         using namespace mu;
-        try
-        {
+
+        try {
           double fVal = 1;
           Parser p;
           p.DefineVar("a", &fVal);
@@ -55,17 +55,15 @@ class Muparser < Formula
             fVal = a;  // Change value of variable a
             std::cout << p.Eval() << std::endl;
           }
-        }
-        catch (Parser::exception_type &e)
-        {
+        } catch (Parser::exception_type &e) {
           std::cout << e.GetMsg() << std::endl;
         }
+
         return 0;
       }
-    EOS
-    system ENV.cxx, "-std=c++11", "-I#{include}",
-           testpath/"test.cpp", "-L#{lib}", "-lmuparser",
-           "-o", testpath/"test"
+    CPP
+
+    system ENV.cxx, "-std=c++11", "test.cpp", "-o", "test", "-I#{include}", "-L#{lib}", "-lmuparser"
     system "./test"
   end
 end

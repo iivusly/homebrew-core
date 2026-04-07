@@ -3,22 +3,16 @@ class EgExamples < Formula
 
   desc "Useful examples at the command-line"
   homepage "https://github.com/srsudar/eg"
-  url "https://files.pythonhosted.org/packages/5f/3f/f55eef404adae2d5429728722d6a81ad6ac50a80e9b47be046cfbe97bc44/eg-1.2.2.tar.gz"
-  sha256 "8d3745eceb2a4c91507b1923193747b7ae88888e6257eb8aaccf7deae2a300a7"
+  url "https://files.pythonhosted.org/packages/dc/9b/9f254b434ed6af1e8566a398660c9f8ecada95ccf03ed799e09637a13b77/eg-1.2.3.tar.gz"
+  sha256 "31f221b24701a9fc4b034d9593f081859d943b14bf26b2e98190509b64e2622b"
   license "MIT"
 
   bottle do
-    rebuild 3
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "a9aea56e5fbcc015c6d927edf5b65b474ae0329c52aecd9d10193c0697b852cd"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "cec5e6f848042f1b91ed94cf0eeb49f09e12878149db5b47d72f3b574d0a36bc"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "b905e39bc6039c31712d0a064239790bef509b022f36fa457e47d2b0e00fbfb4"
-    sha256 cellar: :any_skip_relocation, sonoma:         "7065d0352a19259d8bf4ac5b9fb6d7d5c01af88c48853ee3e79974fa22fbc520"
-    sha256 cellar: :any_skip_relocation, ventura:        "b8eb98698911e503da4f1899cd0e5d3319acda5f60409c4e22e46b53c495ae95"
-    sha256 cellar: :any_skip_relocation, monterey:       "eb03b72a6572d0e7d253eff9d3a6c08185fbfd0ec2826e98b7873719b79ac0ac"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "2d45e298ab423592028574b32a1255b04704090228f5dbe2602fc555a26bc72e"
+    rebuild 2
+    sha256 cellar: :any_skip_relocation, all: "da37695bd2e546b5078212271f95cc9999a12ea2c3bc0830c864cb47d585fdb8"
   end
 
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   conflicts_with "eg", because: "both install `eg` binaries"
 

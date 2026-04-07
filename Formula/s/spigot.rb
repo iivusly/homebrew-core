@@ -1,9 +1,9 @@
 class Spigot < Formula
   desc "Command-line streaming exact real calculator"
   homepage "https://www.chiark.greenend.org.uk/~sgtatham/spigot/"
-  url "https://www.chiark.greenend.org.uk/~sgtatham/spigot/spigot-20240202.10bd0ca.tar.gz"
-  version "20240202"
-  sha256 "5bccbeaa48968e79e97af032a13fa5643d34f5142014f710d0c198e5088affe7"
+  url "https://www.chiark.greenend.org.uk/~sgtatham/spigot/spigot-20260114.ed81b83.tar.gz"
+  version "20260114"
+  sha256 "40a1bcfc52d6c581ae67b2a1456ec9f28b959789a00faf487cd06b4585576e67"
   license "MIT"
 
   livecheck do
@@ -11,14 +11,15 @@ class Spigot < Formula
     regex(/href=.*?spigot[._-]v?(\d+(?:\.\d+)*)(?:[._-][\da-z]+)?\.t/i)
   end
 
+  no_autobump! because: :incompatible_version_format
+
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "9ac8ecbbd6e813dc9ffed29f98740bc04cca493387348ed9d7aa1ed5527dec52"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "8524a2242c2a01dddabecce6784a19ee14f66c2affd0dca7b3ef0e4771e3f512"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "6549e181c26fe45b9f4c09eda98e6750d97109285670e07a47f93c47f88d4f61"
-    sha256 cellar: :any_skip_relocation, sonoma:         "0832df09ea00d162d5a07ab80b4310ed994f3a3ab0428f745120857f4d6f5052"
-    sha256 cellar: :any_skip_relocation, ventura:        "3b70982556818fa2bf60baf121feb2036350200acb8e7d98ddaef3a3b0528bf5"
-    sha256 cellar: :any_skip_relocation, monterey:       "f83ab94d4c56ad5052849489a07518ff3dedafc27e6ad5cd82af1def0e64e634"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "59093bf7c15030fe7ce289edd152f03474f02f0d5620dce01535e132ab47b575"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "796c91a6f26abde3e8b1e7442dc494ac9565d9b713abd90364dc8f3b5f4d8201"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "d646d7a7573059b0c84a2b400308c3a9bb3c9e36ae4e37bcbc45c714accc873a"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "7dffcdd0a5c8cf6b69da95b6b0bf5ec3a5ab21c4cfeb38a95662774710263cda"
+    sha256 cellar: :any_skip_relocation, sonoma:        "2d0a76572b40b8b54901a3f783d6cdda0192ecdde9c9509dbd65545525fe6c1a"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "f5bfffdc5199f78db2f9300a5e2cec93fcb5e02e24d6a7e081603db12c28278b"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "eb0e856d59ab1089a7681eb42de24233ab637699b51dc1471735fae61e579d22"
   end
 
   depends_on "cmake" => :build

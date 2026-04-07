@@ -1,8 +1,8 @@
 class Mx < Formula
   desc "Command-line tool used for the development of Graal projects"
   homepage "https://github.com/graalvm/mx"
-  url "https://github.com/graalvm/mx/archive/refs/tags/7.29.6.tar.gz"
-  sha256 "42712d9b1d89699ab47a4dfc8015fa3e59c2d780fd11d7fe7db9b0963a1f8619"
+  url "https://github.com/graalvm/mx/archive/refs/tags/7.78.3.tar.gz"
+  sha256 "fa88564e46e23b72debd9757eb23a7a89cff947c72457d09804b67bee17c5167"
   license "GPL-2.0-only"
 
   livecheck do
@@ -11,31 +11,28 @@ class Mx < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, all: "608cca7a593e117186e18ed078804672da2333bce86ca7babddeea09a9ef3238"
+    sha256 cellar: :any_skip_relocation, all: "185c90c4742869e2fb14841e7c9dc81dc120931f132295f09cce1972d087156b"
   end
 
-  depends_on "openjdk" => :test
-  depends_on "python@3.12"
+  depends_on "openjdk" => [:build, :test]
+  depends_on "python@3.14"
 
   def install
     libexec.install Dir["*"]
-    (bin/"mx").write_env_script libexec/"mx", MX_PYTHON: "#{Formula["python@3.12"].opt_libexec}/bin/python"
+    (bin/"mx").write_env_script libexec/"mx", MX_PYTHON: "#{Formula["python@3.14"].opt_libexec}/bin/python"
     bash_completion.install libexec/"bash_completion/mx" => "mx"
-  end
 
-  def post_install
-    # Run a simple `mx` command to create required empty directories inside libexec
-    Dir.mktmpdir do |tmpdir|
-      with_env(HOME: tmpdir) do
-        system bin/"mx", "--user-home", tmpdir, "version"
-      end
-    end
+    # Run a simple `mx` command to create required directories inside libexec
+    ENV["JAVA_HOME"] = Language::Java.java_home
+    ENV.remove "PATH", Superenv.shims_path # avoid ninja shim
+    chmod 0555, bin/"mx"
+    system bin/"mx", "version"
   end
 
   test do
     resource "homebrew-testdata" do
-      url "https://github.com/oracle/graal/archive/refs/tags/vm-22.3.2.tar.gz"
-      sha256 "77c7801038f0568b3c2ef65924546ae849bd3bf2175e2d248c35ba27fd9d4967"
+      url "https://github.com/oracle/graal/archive/refs/tags/vm-25.0.2.tar.gz"
+      sha256 "129261a9c43d43ca8cad235b65ee9cf8bfa9a2e2d51e90ac188e3cf5174323a0"
     end
 
     ENV["JAVA_HOME"] = Language::Java.java_home

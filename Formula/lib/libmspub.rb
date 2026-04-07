@@ -4,7 +4,7 @@ class Libmspub < Formula
   url "https://dev-www.libreoffice.org/src/libmspub/libmspub-0.1.4.tar.xz"
   sha256 "ef36c1a1aabb2ba3b0bedaaafe717bf4480be2ba8de6f3894be5fd3702b013ba"
   license "MPL-2.0"
-  revision 15
+  revision 19
 
   livecheck do
     url "https://dev-www.libreoffice.org/src/"
@@ -12,40 +12,49 @@ class Libmspub < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "8cb2377b7d0cfa029bc64851ccc621c7e75f28fd9d96ecdd87b46c043ef5fdcf"
-    sha256 cellar: :any,                 arm64_ventura:  "a17bfc0422565de7fade8199f23c2a97c1daf0834a34b113f11b83777c7138b7"
-    sha256 cellar: :any,                 arm64_monterey: "58d3b2c548f8d38cda3ade55681f0b41d045b33d36614f4eeb38e28ca0b2d763"
-    sha256 cellar: :any,                 sonoma:         "0e8a7db8b068af6009973bcf3a077c13f6107e1d0e9b0b92e109ad38429b0396"
-    sha256 cellar: :any,                 ventura:        "45ddab4bd14a6f2a5b8f0814cb10eb58328076d076e0444177f063a4c634d222"
-    sha256 cellar: :any,                 monterey:       "d792d2c08761c3e13de216ae3a4e8b516cd1a4d749c4397b9dc284901475c477"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "18293c8d8717b1fcf2388ee6eb6278295cc02c4e4b92335dbfe2ec9828479245"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "5cecb8db1dca13e86f7b8a41e9270f34e37485235327f3cca023975fb2ce630c"
+    sha256 cellar: :any,                 arm64_sequoia: "4d212ebced14322c8c144697985552a703826c17d511d168b9ffc780ece1d421"
+    sha256 cellar: :any,                 arm64_sonoma:  "164c06f73c3cba7a6c97282455db62a070f69a2dccb0ccf694788e8e452a155f"
+    sha256 cellar: :any,                 sonoma:        "dc435295289043990c51abaca7c3030409065cd293202dcb0e4d38a426e3dc04"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "b15fe31563699e7f8021c51965fcd4785e18399a29a933465f68fc1f73d35b3c"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "fdc0c07625d05b05a48378cda67ba1d66ea6e549c2489b386d104594381a5f5e"
   end
 
   depends_on "boost" => :build
   depends_on "libwpg" => :build
-  depends_on "pkg-config" => :build
-  depends_on "icu4c"
+  depends_on "pkgconf" => :build
+  depends_on "icu4c@78"
   depends_on "librevenge"
   depends_on "libwpd"
 
-  # Fix for missing include needed to build with recent GCC. Remove in the next release.
-  # Commit ref: https://git.libreoffice.org/libmspub/+/698bed839c9129fa7a90ca1b5a33bf777bc028d1%5E%21
   on_linux do
+    depends_on "zlib-ng-compat"
+
+    # Fix for missing include needed to build with recent GCC. Remove in the next release.
+    # Commit ref: https://git.libreoffice.org/libmspub/+/698bed839c9129fa7a90ca1b5a33bf777bc028d1%5E%21
     patch :DATA
   end
 
   def install
-    system "./configure", "--without-docs",
-                          "--disable-dependency-tracking",
-                          "--enable-static=no",
-                          "--disable-werror",
+    # icu4c 75+ needs C++17 and icu4c 76+ needs icu-uc
+    # TODO: Fix upstream
+    icu4c = deps.find { |dep| dep.name.match?(/^icu4c(@\d+)?$/) }
+                .to_formula
+    ENV["ICU_LIBS"] = "-L#{icu4c.opt_lib} -licui18n -licuuc"
+    ENV.append "CXXFLAGS", "-std=gnu++17"
+
+    system "./configure", "--disable-silent-rules",
+                          "--disable-static",
                           "--disable-tests",
-                          "--prefix=#{prefix}"
+                          "--disable-werror",
+                          "--without-docs",
+                          *std_configure_args
     system "make", "install"
   end
 
   test do
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include <librevenge-stream/librevenge-stream.h>
       #include <libmspub/MSPUBDocument.h>
       int main() {
@@ -53,7 +62,7 @@ class Libmspub < Formula
           libmspub::MSPUBDocument::isSupported(&docStream);
           return 0;
       }
-    EOS
+    CPP
     system ENV.cxx, "test.cpp", "-o", "test", "-lrevenge-stream-0.0",
                     "-I#{Formula["librevenge"].include}/librevenge-0.0",
                     "-lmspub-0.1", "-I#{include}/libmspub-0.1",

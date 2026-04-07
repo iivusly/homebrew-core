@@ -3,8 +3,8 @@ class Trino < Formula
 
   desc "Distributed SQL query engine for big data"
   homepage "https://trino.io"
-  url "https://search.maven.org/remotecontent?filepath=io/trino/trino-server/455/trino-server-455.tar.gz", using: :nounzip
-  sha256 "38331c11df9c7542448176dcbf3ef537fca8ed812afecbbf07efb79cb5b4c65f"
+  url "https://search.maven.org/remotecontent?filepath=io/trino/trino-server/476/trino-server-476.tar.gz"
+  sha256 "cfd5accde17e8ebd251eeeb78aed1f490e77bb3a164d95a0f454bf8a7c1cbd3f"
   license "Apache-2.0"
 
   livecheck do
@@ -13,62 +13,111 @@ class Trino < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, all: "93b3830dfc7522e166c1b99bdf78d5436ef0749fd70a898c4d0c38182520a755"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "ec736f795ac95764efc7be9505aed6c0aec627582e36c5b8e72142b2bacba08d"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "ec736f795ac95764efc7be9505aed6c0aec627582e36c5b8e72142b2bacba08d"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "ec736f795ac95764efc7be9505aed6c0aec627582e36c5b8e72142b2bacba08d"
+    sha256 cellar: :any_skip_relocation, sonoma:        "5c80298e351182358e20a726d986b05f0f814b5cefc63bd1fea48191d4e7d7a4"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "1ed73d00bd5967d64423e902cf1c4a95a98465f989f0b18e132449c1f596157c"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "650f9396b6330b486eff57179aa12fb0db0c43051ee6dda4b48cb58fbe964ee1"
   end
 
-  depends_on "gnu-tar" => :build
+  depends_on "go" => :build
   depends_on "openjdk"
-  depends_on "python@3.12"
 
   resource "trino-src" do
-    url "https://github.com/trinodb/trino/archive/refs/tags/455.tar.gz", using: :nounzip
-    sha256 "e52dd95d73b2e6ed47f42046e7690ffa0e78be99db0ad20e7bf63952529303a7"
+    url "https://github.com/trinodb/trino/archive/refs/tags/476.tar.gz"
+    sha256 "5a288d90f02858131387a93e9c221bed77849073fb107e6cdf0a74945ee33cbe"
+
+    livecheck do
+      formula :parent
+    end
   end
 
   resource "trino-cli" do
-    url "https://search.maven.org/remotecontent?filepath=io/trino/trino-cli/455/trino-cli-455-executable.jar"
-    sha256 "7c4dfd34611f19b6af260d8821b2c713f2ad5d937cf907413dca4feb86f8d8a2"
+    url "https://search.maven.org/remotecontent?filepath=io/trino/trino-cli/476/trino-cli-476-executable.jar"
+    sha256 "fe4e9c7fb569cd67673afa1622945f6308e1e59bdb825419352b80887661757b"
+
+    livecheck do
+      formula :parent
+    end
+  end
+
+  # `brew livecheck --autobump --resources trino` should show the launcher version which is found by
+  # getting airbase version at https://github.com/trinodb/trino/blob/#{version}/pom.xml#L8 and then
+  # dep.launcher.version at https://github.com/airlift/airbase/blob/<airbase-version>/airbase/pom.xml#L225
+  resource "launcher" do
+    url "https://github.com/airlift/launcher/archive/refs/tags/304.tar.gz"
+    sha256 "4afd1ed339c64bccab54421c01317665364a5e71dec20fb6b7b2f60281f1b344"
+
+    livecheck do
+      url "https://raw.githubusercontent.com/trinodb/trino/refs/tags/#{LATEST_VERSION}/pom.xml"
+      regex(%r{<artifactId>airbase</artifactId>\s*<version>(\d+(?:\.\d+)*)</version>}i)
+      strategy :page_match do |page, regex|
+        airbase_version = page[regex, 1]
+        next if airbase_version.blank?
+
+        get_airbase_page = Homebrew::Livecheck::Strategy.page_content(
+          "https://raw.githubusercontent.com/airlift/airbase/refs/tags/#{airbase_version}/airbase/pom.xml",
+        )
+        next if get_airbase_page[:content].blank?
+
+        get_airbase_page[:content][%r{<dep\.launcher\.version>(\d+(?:\.\d+)*)</dep\.launcher\.version>}i, 1]
+      end
+    end
+  end
+
+  resource "procname" do
+    on_linux do
+      url "https://github.com/airlift/procname/archive/c75422ec5950861852570a90df56551991399d8c.tar.gz"
+      sha256 "95b04f7525f041c1fa651af01dced18c4e9fb68684fb21a298684e56eee53f48"
+    end
   end
 
   def install
     odie "trino-src resource needs to be updated" if version != resource("trino-src").version
     odie "trino-cli resource needs to be updated" if version != resource("trino-cli").version
 
-    # Manually extract tarball to avoid losing hardlinks which increases bottle
-    # size from MBs to GBs. Remove once Homebrew is able to preserve hardlinks.
-    # Ref: https://github.com/Homebrew/brew/pull/13154
-    libexec.mkpath
-    system "tar", "-C", libexec.to_s, "--strip-components", "1", "-xzf", "trino-server-#{version}.tar.gz"
+    # Workaround for https://github.com/airlift/launcher/issues/8
+    inreplace "bin/launcher", 'case "$(arch)" in', 'case "$(uname -m)" in' if OS.mac? && Hardware::CPU.intel?
 
-    # Manually untar, since macOS-bundled tar produces the error:
-    #   trino-363/plugin/trino-hive/src/test/resources/<truncated>.snappy.orc.crc: Failed to restore metadata
-    # Remove when https://github.com/trinodb/trino/issues/8877 is fixed
-    resource("trino-src").stage do |r|
-      ENV.prepend_path "PATH", Formula["gnu-tar"].opt_libexec/"gnubin"
-      system "tar", "-xzf", "trino-#{r.version}.tar.gz"
-      (libexec/"etc").install Dir["trino-#{r.version}/core/docker/default/etc/*"]
+    # Replace pre-build binaries
+    rm_r(Dir["bin/{darwin,linux}-*"])
+    arch = Hardware::CPU.intel? ? "amd64" : Hardware::CPU.arch.to_s
+    platform_dir = buildpath/"bin/#{OS.kernel_name.downcase}-#{arch}"
+    resource("launcher").stage do |r|
+      ldflags = "-s -w -X launcher/args.Version=#{r.version}"
+      system "go", "build", "-C", "src/main/go", *std_go_args(ldflags:, output: platform_dir/"launcher")
+    end
+    if OS.linux?
+      resource("procname").stage do
+        system "make"
+        platform_dir.install "libprocname.so"
+      end
+    end
+
+    libexec.install Dir["*"]
+    libexec.install resource("trino-cli")
+    bin.write_jar_script libexec/"trino-cli-#{version}-executable.jar", "trino"
+    (bin/"trino-server").write_env_script libexec/"bin/launcher", Language::Java.overridable_java_home_env
+
+    resource("trino-src").stage do
+      (libexec/"etc").install Dir["core/docker/default/etc/*"]
       inreplace libexec/"etc/node.properties", "docker", tap.user.downcase
       inreplace libexec/"etc/node.properties", "/data/trino", var/"trino/data"
       inreplace libexec/"etc/jvm.config", %r{^-agentpath:/usr/lib/trino/bin/libjvmkill.so$\n}, ""
     end
 
-    rewrite_shebang detected_python_shebang, libexec/"bin/launcher.py"
-    (bin/"trino-server").write_env_script libexec/"bin/launcher", Language::Java.overridable_java_home_env
+    # Work around OpenJDK / Apple (FB12076992) issue causing crashes with brew-built OpenJDK.
+    # TODO: May want to look into privileges/signing as this doesn't happen on casks like Temurin & Zulu
+    #
+    # Ref: https://github.com/trinodb/trino/issues/18983#issuecomment-1794206475
+    # Ref: https://bugs.openjdk.org/browse/CODETOOLS-7903447
+    (libexec/"etc/jvm.config").append_lines <<~CONFIG if OS.mac?
+      # https://bugs.openjdk.org/browse/CODETOOLS-7903447
+      -Djol.skipHotspotSAAttach=true
+    CONFIG
 
-    resource("trino-cli").stage do
-      libexec.install "trino-cli-#{version}-executable.jar"
-      bin.write_jar_script libexec/"trino-cli-#{version}-executable.jar", "trino"
-    end
-
-    # Remove incompatible pre-built binaries
-    libprocname_dirs = libexec.glob("bin/procname/*")
-    # Keep the Linux-x86_64 directory to make bottles identical
-    libprocname_dirs.reject! { |dir| dir.basename.to_s == "Linux-x86_64" } if build.bottle?
-    libprocname_dirs.reject! { |dir| dir.basename.to_s == "#{OS.kernel_name}-#{Hardware::CPU.arch}" }
-    rm_r libprocname_dirs
-  end
-
-  def post_install
     (var/"trino/data").mkpath
   end
 
@@ -79,10 +128,26 @@ class Trino < Formula
 
   test do
     assert_match version.to_s, shell_output("#{bin}/trino --version")
-    # A more complete test existed before but we removed it because it crashes macOS
-    # https://github.com/Homebrew/homebrew-core/pull/153348
-    # You can add it back when the following issue is fixed:
-    # https://github.com/trinodb/trino/issues/18983#issuecomment-1794206475
-    # https://bugs.openjdk.org/browse/CODETOOLS-7903448
+
+    ENV["CATALOG_MANAGEMENT"] = "static"
+    port = free_port
+    cp libexec/"etc/config.properties", testpath/"config.properties"
+    inreplace testpath/"config.properties", "8080", port.to_s
+    server = spawn bin/"trino-server", "run", "--verbose",
+                                              "--data-dir", testpath,
+                                              "--config", testpath/"config.properties"
+    sleep 30
+    sleep 30 if OS.mac? && Hardware::CPU.intel?
+
+    query = "SELECT state FROM system.runtime.nodes"
+    output = shell_output("#{bin}/trino --debug --server localhost:#{port} --execute '#{query}'")
+    assert_match '"active"', output
+  ensure
+    Process.kill("TERM", server)
+    begin
+      Process.wait(server)
+    rescue Errno::ECHILD
+      quiet_system "pkill", "-9", "-P", server.to_s
+    end
   end
 end

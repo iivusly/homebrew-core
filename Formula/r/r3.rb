@@ -1,10 +1,19 @@
 class R3 < Formula
   desc "High-performance URL router library"
   homepage "https://github.com/c9s/r3"
-  url "https://github.com/c9s/r3/archive/refs/tags/1.3.4.tar.gz"
-  sha256 "db1fb91e51646e523e78b458643c0250231a2640488d5781109f95bd77c5eb82"
   license "MIT"
   head "https://github.com/c9s/r3.git", branch: "master"
+
+  stable do
+    url "https://github.com/c9s/r3/archive/refs/tags/1.3.4.tar.gz"
+    sha256 "db1fb91e51646e523e78b458643c0250231a2640488d5781109f95bd77c5eb82"
+
+    # Backport of https://github.com/c9s/r3/commit/c105117b40d1a7b2b9ddf1672cd08b11bd565bd9
+    patch do
+      url "https://raw.githubusercontent.com/Homebrew/homebrew-core/7ecb03ef6d73f3ed71546fb0c34023f9a23dbd74/Patches/r3/1.3.4.patch"
+      sha256 "c00d9af0b30d94d918cf438834f2ca06e1f756ee56ed0205f9f6f82bf909cb0e"
+    end
+  end
 
   livecheck do
     url :stable
@@ -12,48 +21,39 @@ class R3 < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "9648d6bd8f125398cc101581e8ee3b8b304fa6e8ab92f018dc538843c04fd920"
-    sha256 cellar: :any,                 arm64_ventura:  "fa1e649709ce6c6d16c631a2192d2dd7fea34b7398e55eabe5f7bd51953745ab"
-    sha256 cellar: :any,                 arm64_monterey: "2f26748893003e7e0b99a574126c06c451222144979b0230babe37128328214f"
-    sha256 cellar: :any,                 arm64_big_sur:  "be0883f3dfc67b2469eef537376a04bbae36ec3aab8ca58ffb66491a81e6db5d"
-    sha256 cellar: :any,                 sonoma:         "bdf44bc7e03016c2b5c4b2f414d2c4560d6b6a502023f5225dfb98cbd615d9fb"
-    sha256 cellar: :any,                 ventura:        "95f67c8b6bd1c106e6c61623df3ea82a5faf030928bb4a996fb1bea738f27679"
-    sha256 cellar: :any,                 monterey:       "a33cc32d0cfb9190bb99931d5dc9dba21899df9103ef7d892b8b083672d78662"
-    sha256 cellar: :any,                 big_sur:        "c9fa16048947ebd0c297b700ff7a528c7e45f46bd719cd196d4f7c74de7b491d"
-    sha256 cellar: :any,                 catalina:       "96787f402bbc3a37207c3d5c3468d3b98028a12335a66d176d18d268e2406462"
-    sha256 cellar: :any,                 mojave:         "f136221b1d7a0a4ee057ea0551a2b742d1a49cb50011e5651e8fa5c96327b0b0"
-    sha256 cellar: :any,                 high_sierra:    "5239e5302b1952367f6cdc066e43483de6b0d30fa70f1dcf2e9f03b10983890f"
-    sha256 cellar: :any,                 sierra:         "d39c22ae9e69454cc7c205ff0cecc3dd6084a38a1e1742091f55df389e5a8f4a"
-    sha256 cellar: :any,                 el_capitan:     "6122bbc3566581f130e54cd563ed69f169598f5ce62d6319e7b5a95b10b802ef"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "36037bda00ae1253fb158f5cdf2619c2194a33a6ddb6598f9fb7901f37928348"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "ee6d57c13ed2ec24283ad9837f731a7964943070535d903206e8b7481a73dfad"
+    sha256 cellar: :any,                 arm64_sequoia: "a6aaba3f459b35b6ef04844f558fc82886c589159e406ad206a0a62e6b15cc1d"
+    sha256 cellar: :any,                 arm64_sonoma:  "8a3ba999410ade8c4c63d420e75f480a6c655172f462da5ed1e61ef4614b2861"
+    sha256 cellar: :any,                 sonoma:        "6ab1c2ef8e37e2d55981cb55fb8ea9556521f4cd9df65792f909573e72d05bc0"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "b947da0474e0674ab147aa19a3e7d6a5adbf6f22eeb99445be3e43e6af89ff58"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "06edf11bc09dab6f013e3d3ec0c2789572bd64fbdabcb546e6b87600d3c48d4b"
   end
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
   depends_on "libtool" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "jemalloc"
-  depends_on "pcre"
+  depends_on "pcre2"
 
   def install
     system "./autogen.sh"
-    system "./configure", "--disable-debug",
-                          "--disable-dependency-tracking",
-                          "--disable-silent-rules",
-                          "--prefix=#{prefix}",
-                          "--with-malloc=jemalloc"
+    system "./configure", "--disable-silent-rules",
+                          "--with-malloc=jemalloc",
+                          *std_configure_args
     system "make", "install"
   end
 
   test do
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include "r3.h"
       int main() {
           node * n = r3_tree_create(1);
           r3_tree_free(n);
           return 0;
       }
-    EOS
+    CPP
     system ENV.cc, "test.cpp", "-o", "test",
                   "-L#{lib}", "-lr3", "-I#{include}/r3"
     system "./test"

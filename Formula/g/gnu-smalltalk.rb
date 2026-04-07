@@ -5,8 +5,8 @@ class GnuSmalltalk < Formula
   revision 10
 
   stable do
-    url "https://ftp.gnu.org/gnu/smalltalk/smalltalk-3.2.5.tar.xz"
-    mirror "https://ftpmirror.gnu.org/smalltalk/smalltalk-3.2.5.tar.xz"
+    url "https://ftpmirror.gnu.org/gnu/smalltalk/smalltalk-3.2.5.tar.xz"
+    mirror "https://ftp.gnu.org/gnu/smalltalk/smalltalk-3.2.5.tar.xz"
     sha256 "819a15f7ba8a1b55f5f60b9c9a58badd6f6153b3f987b70e7b167e7755d65acc"
 
     # Backport fix to support ARM macOS and fix build with Xcode 15+
@@ -18,16 +18,13 @@ class GnuSmalltalk < Formula
   end
 
   bottle do
-    rebuild 1
-    sha256 arm64_sonoma:   "d8fae2219f2257f6d225d46bfd70f91ba8021e7679e32e38e3397ef688384509"
-    sha256 arm64_ventura:  "4de8a4750039f3dc1dd6b79a33f0e309cadd5c9f7fd4bedca768c2bc32899d51"
-    sha256 arm64_monterey: "62a1595337f20f89ec9004114659b91cddaa674018b3f52127d5f9be56bbc247"
-    sha256 sonoma:         "004d31cd45e95d426796626816a456b8372ec00038239771ab20448fd9655afc"
-    sha256 ventura:        "0d0749c9612ed7111d1e923e6cdee688f5aa2943dfbd45a62ab4701074b06fcf"
-    sha256 monterey:       "a1fc98f122660e0bcf6005eb04cdc7ab941e4e44ee888ca20de10a411f1d2938"
-    sha256 big_sur:        "3de7522ec83425a3ad683f0050298630d3a1dfe4065cd5f57c8e18e266e434d8"
-    sha256 catalina:       "b389791ed3f702f317883b54421e9a47122326607b603a592dd5903a057ff344"
-    sha256 x86_64_linux:   "d10915dea08be1b60576263f619653fca70471bfa64a07f1a0d73eac94055362"
+    rebuild 3
+    sha256 arm64_tahoe:   "0b4242a4f666b10130804e15b8ac1cb06db8ca8c2dce4b3ff22809b27e3bed03"
+    sha256 arm64_sequoia: "baa1b37e3cc684dae9fa2bec7372228339adfc3c775a95ce93553f72249d9516"
+    sha256 arm64_sonoma:  "29864f96663e3b39da8d1b27e896ccf7d76921dea8a950a155b8a931f49a1ef3"
+    sha256 sonoma:        "8153d28cbf7150c2c8f5067f37f8ff9a0fe6c2dcfda627d3838fd02130ca0b3c"
+    sha256 arm64_linux:   "0c98372d450e874686423037537b0be9f07793cb285b8e63b7d5ab5318354b02"
+    sha256 x86_64_linux:  "e4cbaebdce96bc94f1fe18569515079f6c6e370146805bb04a6e4bbc7e19a331"
   end
 
   head do
@@ -41,7 +38,7 @@ class GnuSmalltalk < Formula
   depends_on "autoconf" => :build
   depends_on "automake" => :build
   depends_on "gawk" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "gdbm"
   depends_on "gmp"
   depends_on "gnutls"
@@ -51,8 +48,11 @@ class GnuSmalltalk < Formula
 
   uses_from_macos "zip" => :build
   uses_from_macos "expat"
-  uses_from_macos "libffi", since: :catalina
-  uses_from_macos "zlib"
+  uses_from_macos "libffi"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     # Fix compile with newer Clang

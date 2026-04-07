@@ -1,8 +1,8 @@
 class Uuu < Formula
   desc "Universal Update Utility, mfgtools 3.0. NXP I.MX Chip image deploy tools"
   homepage "https://github.com/nxp-imx/mfgtools"
-  url "https://github.com/nxp-imx/mfgtools/releases/download/uuu_1.5.182/uuu_source-uuu_1.5.182.tar.gz"
-  sha256 "723d3da358e6af974a056e3adbcb105fac9dad4b87544de0d22b8c974a8037aa"
+  url "https://github.com/nxp-imx/mfgtools/releases/download/uuu_1.5.243/uuu_source-uuu_1.5.243.tar.gz"
+  sha256 "dee3be0f337c631bf93232f5ea42440f07782ce005c9219a14731d66bbe83658"
   license "BSD-3-Clause"
   head "https://github.com/nxp-imx/mfgtools.git", branch: "master"
 
@@ -13,17 +13,16 @@ class Uuu < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "2d0b798240aa95ac17d48010de1eacf4115b7cfbe3c30a216fee81ac52210716"
-    sha256 arm64_ventura:  "be2915e1eb0d229e66cc94e18873863af4d23d04194a266e95850ba08435b7df"
-    sha256 arm64_monterey: "ba7c3dd03436445bb5405d73d53c0631b323b5021fb845906009e24274c45f9b"
-    sha256 sonoma:         "a77873946eb1b54f22f61e7d8f3a1d33fee09e72bcf50ec86f474532a5ac233b"
-    sha256 ventura:        "7e06483006d74914e337b98add7df1a38e9f79cd97d3eb05695df5968f6dd9cf"
-    sha256 monterey:       "50935214e4b33cf3d80dae31ec529e32e5c02ed4ef7efd86c45e87eb31faaa2d"
-    sha256 x86_64_linux:   "19e6bebfc3fdb36ef5b0ee3c517e294c75a2ebc9460501a104c00d7586239616"
+    sha256 arm64_tahoe:   "4647654b18285ec907a87f85da36b8ec63cf7c22836f45815c0a0ceacf1f8e36"
+    sha256 arm64_sequoia: "b40e7e680e9d7e1b2f416e2e6e1c7c1c4ecf04a30ec1744da19119dd1b570634"
+    sha256 arm64_sonoma:  "89a11b1316b94142eba3efa3286dde5384fcec4710f8000e7105b1a8dcdb2fea"
+    sha256 sonoma:        "2fd66ee2db00c408a5d62a0cf3ec3d8dd6db445057e9fe11bddb56ba0e7a22da"
+    sha256 arm64_linux:   "129e2c8078ebe4f17a6536b26784fcf149994cb8a16643f2027c640341dc67fe"
+    sha256 x86_64_linux:  "f3cbcdd779051e500329b6588600fc0241667164281d8361bbc0c0bec95ddf38"
   end
 
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
 
   depends_on "libusb"
   depends_on "libzip"
@@ -32,7 +31,10 @@ class Uuu < Formula
   depends_on "zstd"
 
   uses_from_macos "bzip2"
-  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     system "cmake", "-S", ".", "-B", "build", *std_cmake_args

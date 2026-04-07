@@ -12,13 +12,13 @@ class Prestd < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "d9e890adab9d3c25273d2da7fa712f09e9d33f0433c41e0622f8b434be37c72d"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "52064a37e3a319280c38605c65a5b6dbe8fe6b91755668e3e7924b6677749912"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "04531c9856304488cae5fcdcadf6dc7fa2d59a02ac67fc41cc2381a74afcf20d"
-    sha256 cellar: :any_skip_relocation, sonoma:         "34894d39bbef0a368d84c4f7b2e8bfea3f08255c99122dd4ab777a3880ed1cb0"
-    sha256 cellar: :any_skip_relocation, ventura:        "cc85d1dd808c37aada1e38c52ae10be65929ea936beb528854e22e311c023dc6"
-    sha256 cellar: :any_skip_relocation, monterey:       "01487780b57de6f5ff37ccfd018a0d368dd7f284dc86529f587703d454229c28"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "cfdd4ff2adfe8116f6a0719a4217e003cfcfe855fbf60fcfb6d4096f29185453"
+    rebuild 2
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "acc8c8862ea6867aa11b5a5e9431c978c6252bc9c267b455cb004be3c4589efa"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "49bb751ee32ae1ba13d0e1b87b801b4b3f80d74adfdabc44467068c0abcd1a12"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "e1d02886e9ac10386dc793878548d3429bd99405212f10a27d25d63519702192"
+    sha256 cellar: :any_skip_relocation, sonoma:        "adaa7ed259ca16397bdc67c323eb8969aa02b6541275b892f98efae4ae49bb36"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "067511ae084f7eeb570344d47d52ed78ff71b5a679c92bd8dfb63d411ccb7307"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "4ac75a592d6bd7599df97d1ee3cd17d52c5d6c3ab8e37834a03a45abac8f81b2"
   end
 
   depends_on "go" => :build
@@ -26,10 +26,12 @@ class Prestd < Formula
   def install
     ldflags = "-s -w -X github.com/prest/prest/helpers.PrestVersionNumber=#{version}"
     system "go", "build", *std_go_args(ldflags:), "./cmd/prestd"
+
+    generate_completions_from_executable(bin/"prestd", shell_parameter_format: :cobra)
   end
 
   test do
-    (testpath/"prest.toml").write <<~EOS
+    (testpath/"prest.toml").write <<~TOML
       [jwt]
       default = false
 
@@ -39,7 +41,7 @@ class Prestd < Formula
       pass = "prest"
       port = 5432
       database = "prest"
-    EOS
+    TOML
 
     output = shell_output("#{bin}/prestd migrate up --path .", 255)
     assert_match "connect: connection refused", output

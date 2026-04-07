@@ -1,28 +1,34 @@
 class Mint < Formula
   desc "Dependency manager that installs and runs Swift command-line tool packages"
   homepage "https://github.com/yonaskolb/Mint"
-  url "https://github.com/yonaskolb/Mint/archive/refs/tags/0.17.5.tar.gz"
-  sha256 "f55350f7778c4ccd38311ed36f39287ff74bb63eb230f6d448e35e7f934c489c"
+  url "https://github.com/yonaskolb/Mint/archive/refs/tags/0.18.0.tar.gz"
+  sha256 "e99c0a351cf7452451d72180c8ccd18e1da710dc55d036502809a0db52779a99"
   license "MIT"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "ada351985ef562807e7460f869c527bb314600311738a944219225226f43addf"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "250948fe6fc14179d7c381d084a90d6796861ba9a8456617cadda9ac62cbc2b8"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "6546b80b980a45036415162189dd340b1f8d3f4e82a80d40a24e7b5dd672eb04"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "39f9d254b248a44bb44e399081b7e50a6c598834e2bf86bb7de3ebc349f11e0d"
-    sha256 cellar: :any_skip_relocation, sonoma:         "154b8b94602d6d38249cfa936f7d071d9113935b3756d5781021fe04c3971e29"
-    sha256 cellar: :any_skip_relocation, ventura:        "068f9984e81b578f2ed6cef4cc9659835a689bdecf121651ea24ebcfefd49339"
-    sha256 cellar: :any_skip_relocation, monterey:       "f8b09a640942548a151c7450c85f33d40162c7540049666131740d49c68e61e6"
-    sha256 cellar: :any_skip_relocation, big_sur:        "528ea907912e8002cd3a769e8ddda4556cf2482122c3f848a7d923146df37101"
-    sha256                               x86_64_linux:   "7c8dd63f0310a46f67550f92ee48a370fadfc1a4d884b8a3904a36b7b610b3f2"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "2b8ee3e9e0b9057b49327c202d96c8b713589098579e3c3f6fad275babe47808"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "03f825e0fd5918402a464d928e1e8ae91622c95cf62098858bd2b40424716e94"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "89bc9449b108a6cae523b0435820043a1834654662067582543304aab7f32290"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "8176c18a31425df3d05f1584756d365f4e5179decbc7d9dd4666823a1462f06c"
+    sha256 cellar: :any_skip_relocation, sonoma:        "c46cfdc50fbaf93e0881988ba995420b04bfca1fe3fe6f401e8acf7565ff1669"
+    sha256 cellar: :any_skip_relocation, ventura:       "6be5974302eff0e0139abf6bb9daf011cf3c39577bf521031e858d6f80c4dc15"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "4908cc3e06dccb23970b73cacd57d7984d813448d5322cad346a5960c2ab255a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "b8475fe55ddddff036a03d1cb6d255167b1c3418bcab0be6fe8e0b1801bcdc5e"
   end
 
   depends_on xcode: ["12.0", :build]
 
-  uses_from_macos "swift"
+  uses_from_macos "swift" => :build
+
+  conflicts_with "mintoolkit", because: "both install `mint` binaries"
 
   def install
-    system "swift", "build", "--disable-sandbox", "-c", "release"
+    args = if OS.mac?
+      ["--disable-sandbox"]
+    else
+      ["--static-swift-stdlib"]
+    end
+    system "swift", "build", *args, "-c", "release"
     bin.install ".build/release/#{name}"
   end
 

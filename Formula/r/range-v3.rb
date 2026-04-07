@@ -12,20 +12,21 @@ class RangeV3 < Formula
 
   depends_on "cmake" => :build
 
-  fails_with gcc: "5"
-
   def install
-    system "cmake", ".",
-                    "-DRANGE_V3_TESTS=OFF",
-                    "-DRANGE_V3_HEADER_CHECKS=OFF",
-                    "-DRANGE_V3_EXAMPLES=OFF",
-                    "-DRANGE_V3_PERF=OFF",
-                    *std_cmake_args
-    system "make", "install"
+    args = %w[
+      -DRANGE_V3_TESTS=OFF
+      -DRANGE_V3_HEADER_CHECKS=OFF
+      -DRANGE_V3_EXAMPLES=OFF
+      -DRANGE_V3_PERF=OFF
+    ]
+
+    system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
+    system "cmake", "--build", "build"
+    system "cmake", "--install", "build"
   end
 
   test do
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include <range/v3/all.hpp>
       #include <iostream>
       #include <string>
@@ -35,7 +36,7 @@ class RangeV3 < Formula
         ranges::for_each( s, [](char c){ std::cout << c << " "; });
         std::cout << std::endl;
       }
-    EOS
+    CPP
     stdlib_ldflag = OS.mac? ? "-lc++" : "-lstdc++"
     flags = [stdlib_ldflag]
     flags << "-stdlib=libc++" if OS.mac?

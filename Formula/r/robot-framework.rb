@@ -3,46 +3,63 @@ class RobotFramework < Formula
 
   desc "Open source test framework for acceptance testing"
   homepage "https://robotframework.org/"
-  url "https://files.pythonhosted.org/packages/51/84/3f1913910c8b877f13b444487861096049341a16b44a4aaee947e5546e2d/robotframework-7.0.1.zip"
-  sha256 "58d01b84cd7eccea69f2dbe13cbcbff1299e551168d3b88c25617b0c9d6ddc75"
+  url "https://files.pythonhosted.org/packages/19/f3/ad51daf85d95848831601851598640f951a47a9f9de88039235cf58c5bb9/robotframework-7.4.2.tar.gz"
+  sha256 "1c934e7f43600de407860cd2bd2fdc41adad4a4a785d8b46b1ed485fdc0f6c9f"
   license "Apache-2.0"
-  revision 1
   head "https://github.com/robotframework/robotframework.git", branch: "master"
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any,                 arm64_sonoma:   "71f2888f02ee49bbd029b14f3dd5bb7c3b64b51e83b48d89fde8028da1ce1219"
-    sha256 cellar: :any,                 arm64_ventura:  "6ea3a63156b2b3a57071c549598673a09c87a7dff96ed5225b8e50854998fa43"
-    sha256 cellar: :any,                 arm64_monterey: "0c68e5130e1d0a46c725a756ba8bf2a00b778da496ca3291a80af12ad86174f3"
-    sha256 cellar: :any,                 sonoma:         "779de37143c712e437ace85ab7776c8507043f2ecb6502d56bc186727d908184"
-    sha256 cellar: :any,                 ventura:        "ee1ad181d163c519084eaf8126da227669b68475f74a9d59e1947c4c37c07668"
-    sha256 cellar: :any,                 monterey:       "67ef85194ada4222625aa330e23b908fcbe8b53c9b02abee672d2887f6537da9"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "0f553f8b849fec68054d418ed41311ba45e38c01750716d107b0fffe58c3b61f"
+    sha256 cellar: :any,                 arm64_tahoe:   "12ce6dba6cc7c87a211ea936d2b3835f1d3322271ca0690d5667f6b8b88daa40"
+    sha256 cellar: :any,                 arm64_sequoia: "16b72b188726363ce34b5d468636749e602b3a01c13d2fc524b140938178b604"
+    sha256 cellar: :any,                 arm64_sonoma:  "a57d0a7a4a0d1fb05ee1211bd6384d4ec20d0b0fc296d02d9c06ad385033b102"
+    sha256 cellar: :any,                 sonoma:        "4be22444f24e37e8ca3c0c91846f9b4e609b7881b6b34858ebe3d2d873cd9b55"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "ca856fa051c0c60c8ef1343ed4b8967dc7153ae65161f6e093dd71e7fafd1da9"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "5d5dcb9a2dc9a5141aacd54ac1bfd8462cf38d9a2f72fa90a6ed33d9a4523bdb"
   end
 
   depends_on "rust" => :build # for bcrypt
-  depends_on "certifi"
-  depends_on "cryptography"
-  depends_on "python@3.12"
+  depends_on "certifi" => :no_linkage
+  depends_on "cryptography" => :no_linkage
+  depends_on "libsodium" # for pynacl
+  depends_on "python@3.14"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
+
+  pypi_packages extra_packages:   %w[robotframework-archivelibrary
+                                     robotframework-selenium2library
+                                     robotframework-sshlibrary],
+                exclude_packages: ["certifi", "cryptography"]
 
   resource "attrs" do
-    url "https://files.pythonhosted.org/packages/fc/0f/aafca9af9315aee06a89ffde799a10a582fe8de76c563ee80bbcdc08b3fb/attrs-24.2.0.tar.gz"
-    sha256 "5cfb1b9148b5b086569baec03f20d7b6bf3bcacc9a42bebf87ffaaca362f6346"
+    url "https://files.pythonhosted.org/packages/6b/5c/685e6633917e101e5dcb62b9dd76946cbb57c26e133bae9e0cd36033c0a9/attrs-25.4.0.tar.gz"
+    sha256 "16d5969b87f0859ef33a48b35d55ac1be6e42ae49d5e853b597db70c35c57e11"
   end
 
   resource "bcrypt" do
-    url "https://files.pythonhosted.org/packages/e4/7e/d95e7d96d4828e965891af92e43b52a4cd3395dc1c1ef4ee62748d0471d0/bcrypt-4.2.0.tar.gz"
-    sha256 "cf69eaf5185fd58f268f805b505ce31f9b9fc2d64b376642164e9244540c1221"
+    url "https://files.pythonhosted.org/packages/d4/36/3329e2518d70ad8e2e5817d5a4cac6bba05a47767ec416c7d020a965f408/bcrypt-5.0.0.tar.gz"
+    sha256 "f748f7c2d6fd375cc93d3fba7ef4a9e3a092421b8dbf34d8d4dc06be9492dfdd"
+  end
+
+  resource "click" do
+    url "https://files.pythonhosted.org/packages/3d/fa/656b739db8587d7b5dfa22e22ed02566950fbfbcdc20311993483657a5c0/click-8.3.1.tar.gz"
+    sha256 "12ff4785d337a1bb490bb7e9c2b1ee5da3112e94a8622f26a6c77f5d2fc6842a"
   end
 
   resource "h11" do
-    url "https://files.pythonhosted.org/packages/f5/38/3af3d3633a34a3316095b39c8e8fb4853a28a536e55d347bd8d8e9a14b03/h11-0.14.0.tar.gz"
-    sha256 "8f19fbbe99e72420ff35c00b27a34cb9937e902a8b810e2c88300c6f0a3b699d"
+    url "https://files.pythonhosted.org/packages/01/ee/02a2c011bdab74c6fb3c75474d40b3052059d95df7e73351460c8588d963/h11-0.16.0.tar.gz"
+    sha256 "4e35b956cf45792e4caa5885e69fba00bdbc6ffafbfa020300e549b208ee5ff1"
   end
 
   resource "idna" do
-    url "https://files.pythonhosted.org/packages/21/ed/f86a79a07470cb07819390452f178b3bef1d375f2ec021ecfc709fc7cf07/idna-3.7.tar.gz"
-    sha256 "028ff3aadf0609c1fd278d8ea3089299412a7a8b9bd005dd08b9f8285bcb5cfc"
+    url "https://files.pythonhosted.org/packages/6f/6d/0703ccc57f3a7233505399edb88de3cbd678da106337b9fcde432b65ed60/idna-3.11.tar.gz"
+    sha256 "795dafcc9c04ed0c1fb032c2aa73654d8e8c5023a7df64a53f39190ada629902"
+  end
+
+  resource "invoke" do
+    url "https://files.pythonhosted.org/packages/de/bd/b461d3424a24c80490313fd77feeb666ca4f6a28c7e72713e3d9095719b4/invoke-2.2.1.tar.gz"
+    sha256 "515bf49b4a48932b79b024590348da22f39c4942dff991ad1fb8b8baea1be707"
   end
 
   resource "outcome" do
@@ -51,13 +68,13 @@ class RobotFramework < Formula
   end
 
   resource "paramiko" do
-    url "https://files.pythonhosted.org/packages/0b/6a/1d85cc9f5eaf49a769c7128039074bbb8127aba70756f05dfcf4326e72a1/paramiko-3.4.1.tar.gz"
-    sha256 "8b15302870af7f6652f2e038975c1d2973f06046cb5d7d65355668b3ecbece0c"
+    url "https://files.pythonhosted.org/packages/1f/e7/81fdcbc7f190cdb058cffc9431587eb289833bdd633e2002455ca9bb13d4/paramiko-4.0.0.tar.gz"
+    sha256 "6a25f07b380cc9c9a88d2b920ad37167ac4667f8d9886ccebd8f90f654b5d69f"
   end
 
   resource "pynacl" do
-    url "https://files.pythonhosted.org/packages/a7/22/27582568be639dfe22ddb3902225f91f2f17ceff88ce80e4db396c8986da/PyNaCl-1.5.0.tar.gz"
-    sha256 "8ac7448f09ab85811607bdd21ec2464495ac8b7c66d146bf545b0f08fb9220ba"
+    url "https://files.pythonhosted.org/packages/d9/9a/4019b524b03a13438637b11538c82781a5eda427394380381af8f04f467a/pynacl-1.6.2.tar.gz"
+    sha256 "018494d6d696ae03c7e656e5e74cdfd8ea1326962cc401bcf018f1ed8436811c"
   end
 
   resource "pysocks" do
@@ -66,13 +83,13 @@ class RobotFramework < Formula
   end
 
   resource "robotframework-archivelibrary" do
-    url "https://files.pythonhosted.org/packages/fb/20/a41b8c6694491c3cba5cb22f20a18015df1ed03fed78decafd60c254460f/robotframework-archivelibrary-0.4.2.tar.gz"
-    sha256 "c2ae4d8b16aa79686cbc583e504d17c05852a41560a05d34811d815a9e1d5e79"
+    url "https://files.pythonhosted.org/packages/ef/59/82904e6a51bce72a1812b05da613577c5615a1c72022ba12abd688994d19/robotframework-archivelibrary-0.4.3.tar.gz"
+    sha256 "d5c94e52c01fb0faf8b2ff3e0bbd41951e81980a94bc406d1b9d6fa695ff1744"
   end
 
   resource "robotframework-pythonlibcore" do
-    url "https://files.pythonhosted.org/packages/71/89/5dc8c8186c897ee4b7d0b2631ebc90e679e8c8f04ea85505f96ad38aad64/robotframework-pythonlibcore-4.4.1.tar.gz"
-    sha256 "2d695b2ea906f5815179643e29182466675e682d82c5fa9d1009edfae2f84b16"
+    url "https://files.pythonhosted.org/packages/53/24/f85366679f4ee63d5534cad009ad466f0d038a72dad4ffd91802004c2758/robotframework_pythonlibcore-4.5.0.tar.gz"
+    sha256 "54ad47c592b2959bffe865e006fd4517f3c46dfb9df5b68a3f335ab842ab065e"
   end
 
   resource "robotframework-selenium2library" do
@@ -81,8 +98,8 @@ class RobotFramework < Formula
   end
 
   resource "robotframework-seleniumlibrary" do
-    url "https://files.pythonhosted.org/packages/e6/ce/97f650115c3a9b2fc8b5b4c7bff93d3582713de6c29e06436eb7321b6ff2/robotframework-seleniumlibrary-6.3.0.tar.gz"
-    sha256 "5846f5ca4f1729567f9c8b10a3bb191601c654e6c04b952194310434da8e6826"
+    url "https://files.pythonhosted.org/packages/2d/d5/aa063b493a14cdb2771c23e6d5fdaa90c3d4712f8a086077bc5595aae9b9/robotframework_seleniumlibrary-6.8.0.tar.gz"
+    sha256 "60fb0584b11eabc687e8433134093b764ec011e0e8a9ec417bfdeeab59d748bb"
   end
 
   resource "robotframework-sshlibrary" do
@@ -96,8 +113,8 @@ class RobotFramework < Formula
   end
 
   resource "selenium" do
-    url "https://files.pythonhosted.org/packages/ab/38/f511decb16f49aba250bbe73185834fea170e1a59d4403ee881c7f0ac7df/selenium-4.23.1.tar.gz"
-    sha256 "128d099e66284437e7128d2279176ec7a06e6ec7426e167f5d34987166bd8f46"
+    url "https://files.pythonhosted.org/packages/04/7c/133d00d6d013a17d3f39199f27f1a780ec2e95d7b9aa997dc1b8ac2e62a7/selenium-4.41.0.tar.gz"
+    sha256 "003e971f805231ad63e671783a2b91a299355d10cefb9de964c36ff3819115aa"
   end
 
   resource "sniffio" do
@@ -111,33 +128,33 @@ class RobotFramework < Formula
   end
 
   resource "trio" do
-    url "https://files.pythonhosted.org/packages/9a/03/ab0e9509be0c6465e2773768ec25ee0cb8053c0b91471ab3854bbf2294b2/trio-0.26.2.tar.gz"
-    sha256 "0346c3852c15e5c7d40ea15972c4805689ef2cb8b5206f794c9c19450119f3a4"
+    url "https://files.pythonhosted.org/packages/52/b6/c744031c6f89b18b3f5f4f7338603ab381d740a7f45938c4607b2302481f/trio-0.33.0.tar.gz"
+    sha256 "a29b92b73f09d4b48ed249acd91073281a7f1063f09caba5dc70465b5c7aa970"
   end
 
   resource "trio-websocket" do
-    url "https://files.pythonhosted.org/packages/dd/36/abad2385853077424a11b818d9fd8350d249d9e31d583cb9c11cd4c85eda/trio-websocket-0.11.1.tar.gz"
-    sha256 "18c11793647703c158b1f6e62de638acada927344d534e3c7628eedcb746839f"
+    url "https://files.pythonhosted.org/packages/d1/3c/8b4358e81f2f2cfe71b66a267f023a91db20a817b9425dd964873796980a/trio_websocket-0.12.2.tar.gz"
+    sha256 "22c72c436f3d1e264d0910a3951934798dcc5b00ae56fc4ee079d46c7cf20fae"
   end
 
   resource "typing-extensions" do
-    url "https://files.pythonhosted.org/packages/df/db/f35a00659bc03fec321ba8bce9420de607a1d37f8342eee1863174c69557/typing_extensions-4.12.2.tar.gz"
-    sha256 "1a7ead55c7e559dd4dee8856e3a88b41225abfe1ce8df57b7c13915fe121ffb8"
+    url "https://files.pythonhosted.org/packages/72/94/1a15dd82efb362ac84269196e94cf00f187f7ed21c242792a923cdb1c61f/typing_extensions-4.15.0.tar.gz"
+    sha256 "0cea48d173cc12fa28ecabc3b837ea3cf6f38c6d1136f85cbaaf598984861466"
   end
 
   resource "urllib3" do
-    url "https://files.pythonhosted.org/packages/43/6d/fa469ae21497ddc8bc93e5877702dca7cb8f911e337aca7452b5724f1bb6/urllib3-2.2.2.tar.gz"
-    sha256 "dd505485549a7a552833da5e6063639d0d177c04f23bc3864e41e5dc5f612168"
+    url "https://files.pythonhosted.org/packages/c7/24/5f1b3bdffd70275f6661c76461e25f024d5a38a46f04aaca912426a2b1d3/urllib3-2.6.3.tar.gz"
+    sha256 "1b62b6884944a57dbe321509ab94fd4d3b307075e0c2eae991ac71ee15ad38ed"
   end
 
   resource "websocket-client" do
-    url "https://files.pythonhosted.org/packages/e6/30/fba0d96b4b5fbf5948ed3f4681f7da2f9f64512e1d303f94b4cc174c24a5/websocket_client-1.8.0.tar.gz"
-    sha256 "3239df9f44da632f96012472805d40a23281a991027ce11d2f45a6f24ac4c3da"
+    url "https://files.pythonhosted.org/packages/2c/41/aa4bf9664e4cda14c3b39865b12251e8e7d239f4cd0e3cc1b6c2ccde25c1/websocket_client-1.9.0.tar.gz"
+    sha256 "9e813624b6eb619999a97dc7958469217c3176312b3a16a4bd1bc7e08a46ec98"
   end
 
   resource "wsproto" do
-    url "https://files.pythonhosted.org/packages/c9/4a/44d3c295350d776427904d73c189e10aeae66d7f555bb2feee16d1e4ba5a/wsproto-1.2.0.tar.gz"
-    sha256 "ad565f26ecb92588a3e43bc3d96164de84cd9902482b130d0ddbaa9664a85065"
+    url "https://files.pythonhosted.org/packages/c7/79/12135bdf8b9c9367b8701c2c19a14c913c120b882d50b014ca0d38083c2c/wsproto-1.3.2.tar.gz"
+    sha256 "b86885dcf294e15204919950f666e06ffc6c7c114ca900b060d6e16293528294"
   end
 
   def install
@@ -145,19 +162,19 @@ class RobotFramework < Formula
   end
 
   test do
-    (testpath/"HelloWorld.robot").write <<~EOS
+    (testpath/"HelloWorld.robot").write <<~ROBOT
       *** Settings ***
       Library         HelloWorld.py
 
       *** Test Cases ***
       HelloWorld
           Hello World
-    EOS
+    ROBOT
 
-    (testpath/"HelloWorld.py").write <<~EOS
+    (testpath/"HelloWorld.py").write <<~PYTHON
       def hello_world():
           print("HELLO WORLD!")
-    EOS
+    PYTHON
     system bin/"robot", testpath/"HelloWorld.robot"
   end
 end

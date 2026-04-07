@@ -1,27 +1,33 @@
 class Prs < Formula
   desc "Secure, fast & convenient password manager CLI with GPG & git sync"
   homepage "https://timvisee.com/projects/prs"
-  url "https://github.com/timvisee/prs/archive/refs/tags/v0.5.1.tar.gz"
-  sha256 "9a4cc8371ec166c0a62da12cdb2c5e053fe399c49b026dea9c67258546630abe"
+  url "https://github.com/timvisee/prs/archive/refs/tags/v0.5.7.tar.gz"
+  sha256 "8505d8dc0bacd13cef65f1f17c90e11a762e745dcd5f51a85bc4d2ada810715b"
   license "GPL-3.0-only"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "8a93fda36c4e71d0530ff82829b8834ca2798503b07ddbd215736a99c5692d45"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "f1f84a217868717c2d34388ab151d771f6cb1366c03e9113600c710dcec8731d"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "1ebb272933f7017e878eafbf46a779451361504a38dfbf4701b8daf0b2b96376"
-    sha256 cellar: :any_skip_relocation, sonoma:         "8fc865fed685cba423c806c8501a9439fc91cdbb579714696cab3569063625f2"
-    sha256 cellar: :any_skip_relocation, ventura:        "dbb75b374a81e5246790a9df5bc90b10353ca0b82cafc7843d3b601809b5d96c"
-    sha256 cellar: :any_skip_relocation, monterey:       "8c1a4619c349cad988a4e83b406b7054b45f675a201fc515dd74c76088de4c67"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "74dbee9d5ae9011d4adf16ab1723a0200842b304f443900865fae59be2877ac2"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "f53f048b8032b0c131746e445fd4c896a65e5aae465e7b084a71a79a82cebe38"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "c5abb9e5a43f538983f27343f23e0ed1871abc7a2e7a1f2ac3c6c365d89c1384"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "16b44d4ebdd5bba2a59fcc869c82138465dfefd8059ce3ded727dd0cebf3be7a"
+    sha256 cellar: :any_skip_relocation, sonoma:        "7f82b973048c8f4b0f3b3c724a251f72269debbe48122154cfd32c110b63058d"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "80b326c45a7233857d739be2a63869e098b78a048a8c9e6a65a80fc544a44d7c"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ab608fbae7c8ed1b01104fe4e95d8035c815a751e299355d9af19492b6c35225"
   end
 
+  depends_on "pkgconf" => :build
   depends_on "rust" => :build
   depends_on "gpgme"
 
   on_linux do
-    depends_on "pkg-config" => :build
     depends_on "libxcb"
     depends_on "openssl@3"
+  end
+
+  # Fix compilation error on macOS
+  # PR ref: https://github.com/timvisee/prs/pull/46
+  patch do
+    url "https://github.com/timvisee/prs/commit/dd29c60992714a160e88c32f6ec8848e7ccbee12.patch?full_index=1"
+    sha256 "51ce3804136dc7712e7c2d6c434d68d7ab10885f16b0d79f7549f2c99d9d45a4"
   end
 
   def install
@@ -40,6 +46,6 @@ class Prs < Formula
 
     assert_equal expected, shell_output("#{bin}/prs init --no-interactive 2>&1")
     assert_equal "prs #{version}\n", shell_output("#{bin}/prs --version")
-    assert_equal "", shell_output("#{bin}/prs list --no-interactive --quiet")
+    assert_empty shell_output("#{bin}/prs list --no-interactive --quiet")
   end
 end

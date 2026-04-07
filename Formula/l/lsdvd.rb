@@ -1,33 +1,37 @@
 class Lsdvd < Formula
   desc "Read the content info of a DVD"
   homepage "https://sourceforge.net/projects/lsdvd/"
-  url "https://downloads.sourceforge.net/project/lsdvd/lsdvd/lsdvd-0.17.tar.gz"
-  sha256 "7d2c5bd964acd266b99a61d9054ea64e01204e8e3e1a107abe41b1274969e488"
+  url "https://git.code.sf.net/p/lsdvd/git.git",
+      tag:      "0.21",
+      revision: "de9cf2379335076368cc848de04a60279d944b68"
   license "GPL-2.0-only"
-  revision 4
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "f1cd3a4917d6825315999218d37b76414eef62bf994f959250f0f95ca97d4659"
-    sha256 cellar: :any,                 arm64_ventura:  "ba757936a28fde65072032578477812044621f4f8f73d9b9919c547ea902b402"
-    sha256 cellar: :any,                 arm64_monterey: "0d71d460c8eaa5c01899c164df92f07d04648ca2807511be675cd08b161dbba5"
-    sha256 cellar: :any,                 arm64_big_sur:  "d581725cf2628d8c123d3f6f54d1baf06cb33362d9f6dc7d033a4f7768729474"
-    sha256 cellar: :any,                 sonoma:         "3520dc9651fd11c1f553b91e0c4ddd6665c9cb3a6ca5b6cbe331b372d708a4b6"
-    sha256 cellar: :any,                 ventura:        "c1cad4dfbf96e83e2112dfabc98bff8b7482e3dfd79bd9a93286dc27436ac790"
-    sha256 cellar: :any,                 monterey:       "5268aec2b5e5e3c89840661870ac95821c77aef6bfbe38447355402fae4b86f3"
-    sha256 cellar: :any,                 big_sur:        "0d5d1a272ba88ff70ce68ddc35fca9811e2ca5222696373aaf3d2ffc0126a471"
-    sha256 cellar: :any,                 catalina:       "986e89fe0980a78d7d7ef18fd646d3176edbaa7fd6531c38f698d3bdf2aed5dd"
-    sha256 cellar: :any,                 mojave:         "66cbfc0e273fc63813c4948638ab849357ef9d3f72ce5b6322a27f5f614507f9"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "fd9145daad69de5b544d8e9824b42829c74b048322044a35b76bd9b2b355f1eb"
+    sha256 cellar: :any,                 arm64_tahoe:   "854b44a0716635a744a6deed7eddd2661d613dbff82b55090b29326a7a302306"
+    sha256 cellar: :any,                 arm64_sequoia: "5c5bd9c12da6fda6bce4718fe8657afa4865517e1e08a1112ada89725e3a0e7a"
+    sha256 cellar: :any,                 arm64_sonoma:  "d5ddb6d8f67c637c854a6b09806c51c7ee3dd5588a3c0aba656919555e853ed8"
+    sha256 cellar: :any,                 sonoma:        "78e3cfc9ffaf25187125a7eb66e1cc4e8ca3bebd017330a8a50b3208a3d782db"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "6cb0bebbc1be23440c8fa57039b03f196e52fc59b6dc87177ee7255dc28012ae"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "bb64d0cda764af93c0ae41ace40dfcc89a5c388388e981003a214b4f3d688b57"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "autoconf" => :build
+  depends_on "automake" => :build
+  depends_on "pkgconf" => :build
   depends_on "libdvdcss"
   depends_on "libdvdread"
+  depends_on "libxml2"
+
+  # Move `dvdlogger` function out of `main()`, as Clang (rightfully) does not allow nested functions
+  # Can be removed once this has been merged: https://sourceforge.net/p/lsdvd/git/merge-requests/2/
+  patch do
+    url "https://raw.githubusercontent.com/Homebrew/homebrew-core/443cea9c2797b473f4069aad0e12ff06521333b7/Patches/lsdvd/logging.patch"
+    sha256 "5879230867a18b52264428b064e2b5f96423563da1409909f85e0f2163e0ae94"
+  end
 
   def install
-    system "./configure", "--disable-debug", "--disable-dependency-tracking",
-                          "--prefix=#{prefix}",
-                          "--mandir=#{man}"
+    system "autoreconf", "--force", "--install", "--verbose"
+    system "./configure", "--mandir=#{man}", *std_configure_args
     system "make", "install"
   end
 

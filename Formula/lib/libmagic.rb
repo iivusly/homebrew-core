@@ -1,35 +1,35 @@
 class Libmagic < Formula
   desc "Implementation of the file(1) command"
   homepage "https://www.darwinsys.com/file/"
-  url "https://astron.com/pub/file/file-5.45.tar.gz"
-  sha256 "fc97f51029bb0e2c9f4e3bffefdaf678f0e039ee872b9de5c002a6d09c784d82"
+  url "https://astron.com/pub/file/file-5.47.tar.gz"
+  sha256 "45672fec165cb4cc1358a2d76b5d57d22876dcb97ab169427ac385cbe1d5597a"
   license all_of: ["BSD-2-Clause-Darwin", "BSD-2-Clause", :public_domain]
+  compatibility_version 1
 
   livecheck do
     formula "file-formula"
   end
 
   bottle do
-    sha256 arm64_sonoma:   "4175e9bd00edb289020b1412fe1762554ccea7f5073050134995fc1578062341"
-    sha256 arm64_ventura:  "ec5c143e70bff4635e77a831ac3a03a059d11fdf0512d37e6ab7de977dca8ad9"
-    sha256 arm64_monterey: "a2e6411d29aaeff36e1e458fa9ac152d5f16a6093f8dd7c724c70da1afbd1f88"
-    sha256 arm64_big_sur:  "3bbb6a6b220df55a5fcb8df54a170003d1dc4c7a3fbd3bd26a56f17ada8d0025"
-    sha256 sonoma:         "41360c07f92f0a4ab86a78048f6c1fa74a0d1192b60ad45954d384d7606adada"
-    sha256 ventura:        "81ae0df797e6cf1af040f0a99f446ff1ad2f8a8ca2a70d6b34c847996754a585"
-    sha256 monterey:       "7d6b7e742b260e15df798b70e56f96a978aca56fe16777416bffec271bd077b6"
-    sha256 big_sur:        "81c93a0805ef1e1a519988bf0c561bbcff058f9a129bec9691c4177505052bff"
-    sha256 x86_64_linux:   "213f20f87112c4e7a6415baace66d49fdf165d96e8ca96c128e12745a1ea8862"
+    sha256 arm64_tahoe:   "f7aa29830da3062c82a1573bcadb35df0951de214d908543db23f89d55fdb831"
+    sha256 arm64_sequoia: "6f52d18caa98d2f3aee461cff07e20ee353476e5612bad6ab0865f5d0b90921b"
+    sha256 arm64_sonoma:  "8fb3f8f7fdd14723f494b82c85a7c83fdedaf88a042d8c33dae09ed02e2382ae"
+    sha256 sonoma:        "b386f869ea612420b8835424308c886c7ce72667b1e9e41d08fb8358daa918cb"
+    sha256 arm64_linux:   "c66a9827c4498d168f68346243ea5ab6772b9a707b9a79dadccb59f5ec847574"
+    sha256 x86_64_linux:  "2fd518dd644a4e1b94cde7150b7d1d7f24403940a20c0a175dda85465d207b99"
   end
 
-  depends_on "pkg-config" => :test
-  uses_from_macos "zlib"
+  depends_on "pkgconf" => :test
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
-    system "./configure", "--disable-dependency-tracking",
-                          "--disable-silent-rules",
-                          "--prefix=#{prefix}",
+    system "./configure", "--disable-silent-rules",
                           "--enable-fsect-man5",
-                          "--enable-static"
+                          "--enable-static",
+                          *std_configure_args
     system "make", "install"
     (share/"misc/magic").install Dir["magic/Magdir/*"]
 
@@ -39,7 +39,7 @@ class Libmagic < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <assert.h>
       #include <stdio.h>
 
@@ -52,8 +52,8 @@ class Libmagic < Formula
           // Prints the MIME type of the file referenced by the first argument.
           puts(magic_file(cookie, argv[1]));
       }
-    EOS
-    flags = shell_output("pkg-config --cflags --libs #{name}").chomp.split
+    C
+    flags = shell_output("pkgconf --cflags --libs #{name}").chomp.split
     system ENV.cc, "test.c", "-o", "test", *flags
     cp test_fixtures("test.png"), "test.png"
     assert_equal "image/png", shell_output("./test test.png").chomp

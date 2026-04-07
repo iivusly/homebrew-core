@@ -12,6 +12,8 @@ class Libaacs < Formula
   end
 
   bottle do
+    sha256 cellar: :any,                 arm64_tahoe:    "bb76e9a99df6cbd2ddafd00b7d2bfec36f1d2340573402d912e25f2602d2a9af"
+    sha256 cellar: :any,                 arm64_sequoia:  "ff23fb9dd6dd26f6dde8ac12c298be21546d2e3696fe7b064af1647b3788156d"
     sha256 cellar: :any,                 arm64_sonoma:   "7299a85edecb49ec7e77d70dbda59f4ef4d4879f7c7c28f01b7ccfe213675c2b"
     sha256 cellar: :any,                 arm64_ventura:  "17fb11e42e6b614543f8bdb7f79ab5ed918a5d2fac7442b9abc46c0bcbab3712"
     sha256 cellar: :any,                 arm64_monterey: "821c6fed1af02d4446d3e376bf8eda6ef671e9623ff1332b5d299a60ef1f2dbc"
@@ -21,6 +23,7 @@ class Libaacs < Formula
     sha256 cellar: :any,                 monterey:       "32d350f3eb0294166767cf9f6f4f65c48e4619a635c8450bea42330d071e74ed"
     sha256 cellar: :any,                 big_sur:        "cb432910cc4b313478eeb21e71035f82310189f54090723c9bc4167dc25ada9e"
     sha256 cellar: :any,                 catalina:       "75e631b79c6ba6115572a390dd1c2ae75653449b8bd1edc27c549745b3d03ba8"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "bef6e8371ad31a24f757a5b645cc6ec1c608da65e05a5da1c09a7256cc47af27"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "bc5a1b4925f4a25d7714f9ddebdd14478d2c75d7d292153a709a412dbb3ba63d"
   end
 
@@ -34,6 +37,7 @@ class Libaacs < Formula
 
   depends_on "bison" => :build
   depends_on "libgcrypt"
+  depends_on "libgpg-error"
 
   uses_from_macos "flex" => :build
 
@@ -48,7 +52,7 @@ class Libaacs < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include "libaacs/aacs.h"
       #include <stdio.h>
 
@@ -60,7 +64,7 @@ class Libaacs < Formula
         printf("%d.%d.%d", major_v, minor_v, micro_v);
         return(0);
       }
-    EOS
+    C
     system ENV.cc, "test.c", "-I#{include}", "-L#{lib}", "-laacs",
                    "-o", "test"
     system "./test"

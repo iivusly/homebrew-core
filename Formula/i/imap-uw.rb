@@ -13,6 +13,7 @@ class ImapUw < Formula
 
   bottle do
     rebuild 1
+    sha256 cellar: :any,                 arm64_sequoia:  "1c6588d448256165bc075365c4261d53de52575e394b9661c7837e6cce5450f8"
     sha256 cellar: :any,                 arm64_sonoma:   "0c3e132c651b5e9b2a8deed4b0c512144c118d72df933fdc87046e2b631793c9"
     sha256 cellar: :any,                 arm64_ventura:  "853cb9eabed350f511e68b7198005a276b86efecf79846ed68858d226df546de"
     sha256 cellar: :any,                 arm64_monterey: "52ef7c6c326e06a85524eab3a22f29ff095877b1a640979958b72cede3dc8758"
@@ -22,10 +23,12 @@ class ImapUw < Formula
     sha256 cellar: :any,                 monterey:       "b103e67bafbc727288fe497dc634d65489b9c9272ed23971a35348988e0fd21d"
     sha256 cellar: :any,                 big_sur:        "03c5fc6a4e888a756809749d359b45141b95fbb8b3cfa662ebd9687e55ba958a"
     sha256 cellar: :any,                 catalina:       "f98ac44c956015b954474247210e3b19dbcf629280b69ab2c33386ad6f298c31"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "b472a137b28ddcf33d31429f2a6deb39ba923ba6b61853572fe432866758a570"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "5b87416d2dcf7b2384df72ef50f309556b3e4e267eedf11f05ae54b53f67c8a1"
   end
 
   deprecate! date: "2024-07-03", because: :unmaintained
+  disable! date: "2025-07-07", because: :unmaintained
 
   depends_on "openssl@3"
 
@@ -34,8 +37,6 @@ class ImapUw < Formula
   on_linux do
     depends_on "linux-pam"
   end
-
-  conflicts_with "alpine", because: "both install `mailutil` binaries"
 
   # Two patches below are from Debian, to fix OpenSSL 3 compatibility
   # https://salsa.debian.org/holmgren/uw-imap/tree/master/debian/patches
@@ -89,8 +90,8 @@ class ImapUw < Formula
     #   as such. Pulling from within the src dir achieves the desired result.
     doc.install Dir["docs/*"]
     lib.install "c-client/c-client.a" => "libc-client.a"
-    (include + "imap").install "c-client/osdep.h", "c-client/linkage.h"
-    (include + "imap").install Dir["src/c-client/*.h", "src/osdep/unix/*.h"]
+    (include/"imap").install "c-client/osdep.h", "c-client/linkage.h"
+    (include/"imap").install Dir["src/c-client/*.h", "src/osdep/unix/*.h"]
   end
 
   test do

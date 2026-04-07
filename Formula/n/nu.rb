@@ -4,18 +4,22 @@ class Nu < Formula
   url "https://github.com/programming-nu/nu/archive/refs/tags/v2.3.0.tar.gz"
   sha256 "1a6839c1f45aff10797dd4ce5498edaf2f04c415b3c28cd06a7e0697d6133342"
   license "Apache-2.0"
-  revision 3
-  head "https://github.com/programming-nu/nu.git", branch: "master"
+  revision 4
+  head "https://github.com/programming-nu/nu.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "b333e5e5a6f47ef0b6c8e3146f9e7d220f7c0c91cd5133579932e88dcf5eb672"
-    sha256 cellar: :any,                 arm64_ventura:  "c8eeb76f76f94dd1e92d32bc28801850ce163221f52eeb0ff5eb0edd98ae3409"
-    sha256 cellar: :any,                 arm64_monterey: "cda6e75c378552f53b6ef15a7105cc8afb0f0cf138cb3bc579a8e9fcd410374d"
-    sha256 cellar: :any,                 sonoma:         "3d9d6edf45ee62dd196bbf02aa9bb9fea37688110679b6c6441db579f91adf38"
-    sha256 cellar: :any,                 ventura:        "21eff9b6953028247e171a74fa8c444de3fb2fbf5162cf9ff6e0b2f5f2da8881"
-    sha256 cellar: :any,                 monterey:       "a15a99fd81159845a89179e13a823722e485063435e85caaf2a1866d00c20cd0"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "3fef96dedf553210c501538ed8cd5f7056eb2e521e71a081d724ab8f2358d634"
+    sha256 cellar: :any, arm64_tahoe:   "b58a4f88db0117eae2d986cfb083129c6247b160f4a79f45d8af94b32a557ec1"
+    sha256 cellar: :any, arm64_sequoia: "d3bb01d2370d369f17fc335866e16b316332705eb82ac79c9ec5572abefc3dba"
+    sha256 cellar: :any, arm64_sonoma:  "69497e945208739a28df606a1378a92c58df44126be188d8326e4d9a2dd19d58"
+    sha256 cellar: :any, arm64_ventura: "f1ba59236538e76c7c7dcd66e99e644c959ba55ecaae3f04bb3c38d0f6d1727f"
+    sha256 cellar: :any, sonoma:        "b2c929078f30bbd7c3dd6fe407323a86df1b525d87980ce87828dfb8f2dd9ad0"
+    sha256 cellar: :any, ventura:       "f193d95cab2271ca80753f5ec2915e54b70eeb60200f56f82bea6a0dbd59098c"
+    sha256               x86_64_linux:  "e574e9a1043c30df8da1995fb0d344271e4d2f3cd92815a57a3ddbf420a8f794"
   end
+
+  # Last release on 2019-07-29. Needs multiple workarounds/hacks and uses EOL `pcre`
+  deprecate! date: "2025-10-29", because: :unmaintained
+  disable! date: "2026-10-29", because: :unmaintained
 
   depends_on "pcre"
 
@@ -25,6 +29,7 @@ class Nu < Formula
 
   on_linux do
     depends_on "gnustep-make" => :build
+    depends_on arch: :x86_64 # fails to build on arm64 linux
     depends_on "gnustep-base"
     depends_on "libobjc2"
     depends_on "readline"
@@ -58,7 +63,6 @@ class Nu < Formula
   end
 
   def install
-    ENV.delete("SDKROOT") if OS.mac? && MacOS.version < :sierra
     ENV["PREFIX"] = prefix
     # Don't hard code path to clang.
     inreplace "tools/nuke", "/usr/bin/clang", ENV.cc

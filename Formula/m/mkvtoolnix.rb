@@ -1,20 +1,11 @@
 class Mkvtoolnix < Formula
   desc "Matroska media files manipulation tools"
   homepage "https://mkvtoolnix.download/"
+  url "https://mkvtoolnix.download/sources/mkvtoolnix-98.0.tar.xz"
+  mirror "https://fossies.org/linux/misc/mkvtoolnix-98.0.tar.xz"
+  sha256 "1600f4a768ede6356e70785393f02f34dd54fbb5f661ffe6e7e8bc0f40229b79"
   license "GPL-2.0-or-later"
-  revision 2
-
-  stable do
-    url "https://mkvtoolnix.download/sources/mkvtoolnix-86.0.tar.xz"
-    mirror "https://fossies.org/linux/misc/mkvtoolnix-86.0.tar.xz"
-    sha256 "29a9155fbba99f9074de2abcfbdc4e966ea38c16d9f6f547cf2d8d9a48152c97"
-
-    # Compatibility with fmt 11. Remove in next release.
-    patch do
-      url "https://gitlab.com/mbunkus/mkvtoolnix/-/commit/b57dde69dc80b151844e0762a2ae6bca3ba86d95.diff"
-      sha256 "602e0d5fce2ef082f4aecc715352cecb632f99493b8132575ad4c8fc9239579b"
-    end
-  end
+  compatibility_version 1
 
   livecheck do
     url "https://mkvtoolnix.download/sources/"
@@ -22,48 +13,56 @@ class Mkvtoolnix < Formula
   end
 
   bottle do
-    sha256 cellar: :any, arm64_sonoma:   "40df2a5775c076cfab6b1f1ae2f3ca8fc9e5eab65b83a9ba7258c74718f56978"
-    sha256 cellar: :any, arm64_ventura:  "d59b175055d7b202fad6241afa290ab41e0d3b56e6e059d1de37b6229fd050e1"
-    sha256 cellar: :any, arm64_monterey: "720432f783d7b8a947283d5d619932f139ac25b5ac284cdaf53ee356340611a4"
-    sha256 cellar: :any, sonoma:         "75adc2f45121b6eef16b9a30b2d001a149251f533798ae7a40ed50a1691ff77e"
-    sha256 cellar: :any, ventura:        "f38321865993e6c1f9738558f926f31f438a01da7030ac027ab2fe9ac0221d2c"
-    sha256 cellar: :any, monterey:       "632e3838f7847f9195f0330707698f3247e16588c17d563eb0069b1d1e23671e"
-    sha256               x86_64_linux:   "21d2ed6afb62cb9bfae54e58c0eaa4ee3755a181dbe09ee8022ab686931e7dbd"
+    sha256 cellar: :any, arm64_tahoe:   "3a38a050337dc7faa76830aeff9d5964061891af134b1d9249553ec40d010842"
+    sha256 cellar: :any, arm64_sequoia: "8e0fc353f395d122454d523b78c22464dc519aa9af689aaa3b67901f3f94fa3f"
+    sha256 cellar: :any, arm64_sonoma:  "63b03a7709422bbbad026fbbe259b1cd2fd6ace8114254563d807c70ed0044ea"
+    sha256 cellar: :any, sonoma:        "a5cda12c9468959d6d750d1ed519802665a543889d137fa00279ea866804d260"
+    sha256               arm64_linux:   "a0f5717dd023017fb4f3f6cfe3f18b93cc3634ec577c946f85888f189188c13c"
+    sha256               x86_64_linux:  "cc4415d56004b7cce11db02244b1ee926041e56d6c9c6f0527f19578d036d8e1"
   end
 
   head do
-    url "https://gitlab.com/mbunkus/mkvtoolnix.git", branch: "main"
+    url "https://codeberg.org/mbunkus/mkvtoolnix.git", branch: "main"
     depends_on "autoconf" => :build
     depends_on "automake" => :build
     depends_on "libtool" => :build
   end
 
   depends_on "docbook-xsl" => :build
-  depends_on "pkg-config" => :build
+  depends_on "gettext" => :build
+  depends_on "nlohmann-json" => :build
+  depends_on "pkgconf" => :build
+  depends_on "utf8cpp" => :build
   depends_on "boost"
   depends_on "flac"
   depends_on "fmt"
-  depends_on "gettext"
   depends_on "gmp"
   depends_on "libebml"
   depends_on "libmatroska"
   depends_on "libogg"
   depends_on "libvorbis"
-  # https://mkvtoolnix.download/downloads.html#macosx
-  depends_on macos: :catalina # C++17
-  depends_on "nlohmann-json"
   depends_on "pugixml"
-  depends_on "qt"
-  depends_on "utf8cpp"
+  depends_on "qtbase"
 
   uses_from_macos "libxslt" => :build
   uses_from_macos "ruby" => :build
-  uses_from_macos "zlib"
 
-  fails_with gcc: "5"
+  on_macos do
+    depends_on "gettext"
+  end
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
+
+  conflicts_with cask: "mkvtoolnix-app"
 
   def install
-    ENV.cxx11
+    # Remove bundled libraries
+    rm_r(buildpath.glob("lib/*") - buildpath.glob("lib/{avilib,librmff}*"))
+
+    # Configure script needs help with C++ standard in Boost Math
+    ENV.append "CXXFLAGS", "-std=c++20"
 
     features = %w[flac gmp libebml libmatroska libogg libvorbis]
     extra_includes = ""
@@ -77,13 +76,12 @@ class Mkvtoolnix < Formula
     extra_libs.chop!
 
     system "./autogen.sh" if build.head?
-    system "./configure", "--disable-debug",
-                          "--prefix=#{prefix}",
-                          "--with-boost=#{Formula["boost"].opt_prefix}",
+    system "./configure", "--with-boost=#{Formula["boost"].opt_prefix}",
                           "--with-docbook-xsl-root=#{Formula["docbook-xsl"].opt_prefix}/docbook-xsl",
                           "--with-extra-includes=#{extra_includes}",
                           "--with-extra-libs=#{extra_libs}",
-                          "--disable-gui"
+                          "--disable-gui",
+                          *std_configure_args
     system "rake", "-j#{ENV.make_jobs}"
     system "rake", "install"
   end

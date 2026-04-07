@@ -3,44 +3,38 @@ class Aerleon < Formula
 
   desc "Generate firewall configs for multiple firewall platforms"
   homepage "https://aerleon.readthedocs.io/en/latest/"
-  url "https://files.pythonhosted.org/packages/ca/bd/87869c1cb33a2b4d269c6f66056c44453e643925731cb85e6861d1121be8/aerleon-1.9.0.tar.gz"
-  sha256 "850cd621dda750263db313d4473302b48b82adaaa9220e6fd0677cb7900f95f6"
+  url "https://files.pythonhosted.org/packages/91/27/aeaf0098e517f9eeda65e71f5764f3913d465d2c7557281f69b43a66d83c/aerleon-1.16.0.tar.gz"
+  sha256 "3678e15a1faf00fc63263bbbc413e746261893c59d3383358d23a7f1a04ab61c"
   license "Apache-2.0"
   head "https://github.com/aerleon/aerleon.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "66ed88e3888a7584e9574f20fda2afcd4535ce25c74d6694b1c1805502942cd8"
-    sha256 cellar: :any,                 arm64_ventura:  "7974e30641c93665207c6d6775118347f8acc75899a96a0f6463fbaf680eeae6"
-    sha256 cellar: :any,                 arm64_monterey: "31fbe5882a576becd288f72d63213654955713d4197621745a61bd995843d015"
-    sha256 cellar: :any,                 sonoma:         "0b6c03084055867198bcb9e9d6e87d15969fe814a3c393b9d2ac378b9a18cfee"
-    sha256 cellar: :any,                 ventura:        "b5fe4630ad59e7649acb26a635644428bf4c940e8f6435341782b135aaae174b"
-    sha256 cellar: :any,                 monterey:       "161cb0611f0565b6fb1b289190e6611dbca52b232da72df9b7783216c5fadb38"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "970a29563825fa5b291db0f44c4ababfa3e3528aed7c3511d0640f273a9772d2"
+    sha256 cellar: :any,                 arm64_tahoe:   "3a26808bb88e041a8681a42639932c0791c5600d6d671cc529afee3b73882b34"
+    sha256 cellar: :any,                 arm64_sequoia: "0d5a369ce5f61009c393f94dea67f520e79e6228458cbabb9864c56f6ac96317"
+    sha256 cellar: :any,                 arm64_sonoma:  "59f04ba3720520a3b573037e60c656bd6385bcf43633ed8cdb48dcaf1c754bc4"
+    sha256 cellar: :any,                 sonoma:        "13327dffd80008987d3d62077fd5b19244df2aac25cb3c4d7e7524f26c05aa86"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "f1c14613ced8a37ec2302f2b0e11786d15c457cb33dfb0cc0a53d140bbd490dd"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "aa49ed0e1471da0aef020b20852871e99ada06d4e01c3030a9885330b3152bb9"
   end
 
   depends_on "libyaml"
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   conflicts_with "cgrep", because: "both install `cgrep` binaries"
 
   resource "absl-py" do
-    url "https://files.pythonhosted.org/packages/79/c9/45ecff8055b0ce2ad2bfbf1f438b5b8605873704d50610eda05771b865a0/absl-py-1.4.0.tar.gz"
-    sha256 "d2c244d01048ba476e7c080bd2c6df5e141d211de80223460d5b3b8a2a58433d"
-  end
-
-  resource "ply" do
-    url "https://files.pythonhosted.org/packages/e5/69/882ee5c9d017149285cab114ebeab373308ef0f874fcdac9beb90e0ac4da/ply-3.11.tar.gz"
-    sha256 "00c7c1aaa88358b9c765b6d3000c6eec0ba42abca5351b095321aef446081da3"
+    url "https://files.pythonhosted.org/packages/64/c7/8de93764ad66968d19329a7e0c147a2bb3c7054c554d4a119111b8f9440f/absl_py-2.4.0.tar.gz"
+    sha256 "8c6af82722b35cf71e0f4d1d47dcaebfff286e27110a99fc359349b247dfb5d4"
   end
 
   resource "pyyaml" do
-    url "https://files.pythonhosted.org/packages/cd/e5/af35f7ea75cf72f2cd079c95ee16797de7cd71f29ea7c68ae5ce7be1eda0/PyYAML-6.0.1.tar.gz"
-    sha256 "bfdf460b1736c775f2ba9f6a92bca30bc2095067b8a9d77876d1fad6cc3b4a43"
+    url "https://files.pythonhosted.org/packages/05/8e/961c0007c59b8dd7729d542c61a4d537767a59645b82a0b521206e1e25c2/pyyaml-6.0.3.tar.gz"
+    sha256 "d76623373421df22fb4cf8817020cbb7ef15c725b9d5e45f17e189bfc384190f"
   end
 
   resource "typing-extensions" do
-    url "https://files.pythonhosted.org/packages/f6/f3/b827b3ab53b4e3d8513914586dcca61c355fa2ce8252dea4da56e67bf8f2/typing_extensions-4.11.0.tar.gz"
-    sha256 "83f085bd5ca59c80295fc2a82ab5dac679cbe02b9f33f7d83af68e241bea51b0"
+    url "https://files.pythonhosted.org/packages/72/94/1a15dd82efb362ac84269196e94cf00f187f7ed21c242792a923cdb1c61f/typing_extensions-4.15.0.tar.gz"
+    sha256 "0cea48d173cc12fa28ecabc3b837ea3cf6f38c6d1136f85cbaaf598984861466"
   end
 
   def install
@@ -48,7 +42,7 @@ class Aerleon < Formula
   end
 
   test do
-    (testpath/"def/definitions.yaml").write <<~EOS
+    (testpath/"def/definitions.yaml").write <<~YAML
       networks:
         RFC1918:
           values:
@@ -86,9 +80,9 @@ class Aerleon < Formula
             protocol: tcp
           - port: 1024-65535
             protocol: udp
-    EOS
+    YAML
 
-    (testpath/"policies/pol/example.pol.yaml").write <<~EOS
+    (testpath/"policies/pol/example.pol.yaml").write <<~YAML
       filters:
       - header:
           comment: Example inbound
@@ -104,7 +98,7 @@ class Aerleon < Formula
           - name: default-deny
             comment: Deny anything else.
             action: deny#{"  "}
-    EOS
+    YAML
 
     assert_match "writing file: example.pol.acl", shell_output("#{bin}/aclgen 2>&1")
     assert_path_exists "example.pol.acl"

@@ -1,9 +1,10 @@
 class AlsaLib < Formula
   desc "Provides audio and MIDI functionality to the Linux operating system"
   homepage "https://www.alsa-project.org/"
-  url "https://www.alsa-project.org/files/pub/lib/alsa-lib-1.2.12.tar.bz2"
-  sha256 "4868cd908627279da5a634f468701625be8cc251d84262c7e5b6a218391ad0d2"
+  url "https://www.alsa-project.org/files/pub/lib/alsa-lib-1.2.15.3.tar.bz2"
+  sha256 "7b079d614d582cade7ab8db2364e65271d0877a37df8757ac4ac0c8970be861e"
   license all_of: ["LGPL-2.1-or-later", "GPL-2.0-or-later"]
+  compatibility_version 1
 
   livecheck do
     url "https://www.alsa-project.org/files/pub/lib/"
@@ -11,7 +12,8 @@ class AlsaLib < Formula
   end
 
   bottle do
-    sha256 x86_64_linux: "d093a3482e754eeca28241ea1fb0502cfbc91d982ec158362d72c52b3b2f4657"
+    sha256 arm64_linux:  "423c02ab3ac3cafcd37c0cfe58042a64be9227a7a8680d299fe39428f38f077e"
+    sha256 x86_64_linux: "54d16f2f52c4145966031382203596485bb9c9663a6398627ba65712febf24c9"
   end
 
   depends_on :linux
@@ -23,7 +25,7 @@ class AlsaLib < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <alsa/asoundlib.h>
       int main(void)
       {
@@ -31,7 +33,7 @@ class AlsaLib < Formula
           snd_ctl_card_info_alloca(&info);
           return 0;
       }
-    EOS
+    C
     system ENV.cc, "test.c", "-L#{lib}", "-lasound", "-o", "test"
     system "./test"
   end

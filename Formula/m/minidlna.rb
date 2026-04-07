@@ -4,16 +4,18 @@ class Minidlna < Formula
   url "https://downloads.sourceforge.net/project/minidlna/minidlna/1.3.3/minidlna-1.3.3.tar.gz"
   sha256 "39026c6d4a139b9180192d1c37225aa3376fdf4f1a74d7debbdbb693d996afa4"
   license "GPL-2.0-only"
-  revision 1
+  revision 2
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "5cdc4271499e5b8b3e6c7effab75da360de272d956e592c74ceb272012cbedc2"
-    sha256 cellar: :any,                 arm64_ventura:  "cfd00cc9d042aa7c6348edb85ccd3d46e961cf5db7889a983c3db86b7c426350"
-    sha256 cellar: :any,                 arm64_monterey: "4ca9b45f96b3db7f8623ac80b17861b25091e851bd0d3b98ab018c2b70593797"
-    sha256 cellar: :any,                 sonoma:         "0f9c174c508fe889e1e5849b43e779b360186fbc416303037379445fe0d713bd"
-    sha256 cellar: :any,                 ventura:        "c4934d6d2fbc41afce5d1bf4a2f79b9fe9ffeef3dbf2c303c42e71db9bf27794"
-    sha256 cellar: :any,                 monterey:       "321cde081415e6c35efe2c8522808c746578c3c5127f7a08df1bc3986c57ee4c"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "257e53c6ef6bd70fc2369d097e0c7e0da5013dc8e9c763a0762ba5df0bc9588a"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "9fc0ed3ac5675b3dbfe74a361c9b43f7d82a29a65a12abc56ac1b9efd30d1258"
+    sha256 cellar: :any,                 arm64_sequoia: "f7e718095ef9388cd38793641bcc399107f037cbf6bc744705ce58a5deb9c291"
+    sha256 cellar: :any,                 arm64_sonoma:  "a848bf8fdcace687463088fbbbb1095d0259bd65de13e580f76c05673bf31cc3"
+    sha256 cellar: :any,                 arm64_ventura: "014e64f8d81857532e0a65c2aaf361d18090fe2ff791ef351ea02311ccd69410"
+    sha256 cellar: :any,                 sonoma:        "ff6b2f6bd3fcad653e0db52c02c40db6edb23d7bfbeb9647ed13c97e7607a9d1"
+    sha256 cellar: :any,                 ventura:       "a95db24b987a5f9139174ccffbb740b561dca9218a2f683b89aeff6ce5156985"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "bb6c7d8e54a0dda78af8f46d94643bcbd11914bf8e6b20b534d4470127e4d492"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "12eec6b926c5633f8fd7565e772a4e334f2f61fa0ab9dfd3a2dfd654e594c997"
   end
 
   head do
@@ -25,8 +27,9 @@ class Minidlna < Formula
     depends_on "libtool" => :build
   end
 
-  depends_on "ffmpeg@6" # ffmpeg 7 issue: https://sourceforge.net/p/minidlna/bugs/363/
+  depends_on "ffmpeg"
   depends_on "flac"
+  depends_on "gettext"
   depends_on "jpeg-turbo"
   depends_on "libexif"
   depends_on "libid3tag"
@@ -34,11 +37,12 @@ class Minidlna < Formula
   depends_on "libvorbis"
   depends_on "sqlite"
 
-  on_macos do
-    depends_on "gettext"
+  # Apply Fedora's patch to support newer FFmpeg. This has an open merge request:
+  # https://sourceforge.net/p/minidlna/git/merge-requests/58/
+  patch do
+    url "https://src.fedoraproject.org/rpms/minidlna/raw/5de0e84859aa974c489b999ba75c83b5697eecb9/f/0001-Add-compatibility-with-FFMPEG-7.0.patch"
+    sha256 "871833e6ae0dbf629b1ff3adc9a2e1c76f7e3ac9a07d0db29ad389847ce9fab4"
   end
-
-  fails_with gcc: "5" # ffmpeg is compiled with GCC
 
   # Add missing include: https://sourceforge.net/p/minidlna/bugs/351/
   patch :DATA
@@ -57,7 +61,7 @@ class Minidlna < Formula
       log_dir=#{Dir.home}/.config/minidlna
     EOS
 
-    (pkgshare/"minidlna.conf").write conf unless File.exist? pkgshare/"minidlna.conf"
+    (pkgshare/"minidlna.conf").write conf unless (pkgshare/"minidlna.conf").exist?
   end
 
   def caveats
@@ -94,8 +98,13 @@ class Minidlna < Formula
     port = free_port
 
     io = IO.popen("#{sbin}/minidlnad -d -f minidlna.conf -p #{port} -P #{testpath}/minidlna.pid", "r")
-    io.expect("debug: Initial file scan completed", 30)
-    assert_predicate testpath/"minidlna.pid", :exist?
+    timeout = if Hardware::CPU.arm?
+      30
+    else
+      50
+    end
+    io.expect("debug: Initial file scan completed", timeout)
+    assert_path_exists testpath/"minidlna.pid"
 
     # change back to localhost once https://sourceforge.net/p/minidlna/bugs/346/ is addressed
     assert_match "MiniDLNA #{version}", shell_output("curl 127.0.0.1:#{port}")

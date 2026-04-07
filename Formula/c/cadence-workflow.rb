@@ -2,9 +2,9 @@ class CadenceWorkflow < Formula
   desc "Distributed, scalable, durable, and highly available orchestration engine"
   homepage "https://cadenceworkflow.io/"
   url "https://github.com/uber/cadence.git",
-      tag:      "v1.2.12",
-      revision: "f3350d0da50887770d7c365dc270703ff26b4178"
-  license "MIT"
+      tag:      "v1.4.0",
+      revision: "1a42a949010b4257020c0641f88cbcd385184bb8"
+  license "Apache-2.0"
   head "https://github.com/uber/cadence.git", branch: "master"
 
   # Upstream creates releases that use a stable tag (e.g., `v1.2.3`) but are
@@ -16,13 +16,12 @@ class CadenceWorkflow < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "2472be6f8e45cafb9de2f92898e933d798a08458090292eda07f3f38b4c920f8"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "9a9cc7e9a0cd2b8b62d5856b30da0f8a908c7b3ce5e1a5ce433fa621b883fa3d"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "d5232107997c53fe801ddcd7646a63dfb52bb5fb8577a0878d5102b6237bd287"
-    sha256 cellar: :any_skip_relocation, sonoma:         "aa8bef8f4f8ff7e721c780417bca865500468a35d491a59cd32b0d07d849d3ad"
-    sha256 cellar: :any_skip_relocation, ventura:        "6003cdd0950385cf0453cfbf5f06321255f2c526f2b2d181510d174d31fb58a7"
-    sha256 cellar: :any_skip_relocation, monterey:       "0b7b24e99141d445d7a62607b7f130b5f1f3f701946a02a1d6f199c2b8743c01"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "670f6605b97fa449c129aee7d6ee51ca4a7f2e8a7f8846773e5eaef585b2bda0"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "c8a3964e7a66146c41e9513dc6c9a1186595e2e80e58ab4b008e146c4d2716b5"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "3e2b72d6ad8a73fb6e918794eaaa96d599d51efeffbade48ed933e77bf2f39c3"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "168814777006447c91ae02f9aa9a6549b4949c6a00f44e1f578f7b16f1fe3d9f"
+    sha256 cellar: :any_skip_relocation, sonoma:        "95c75946272ffdeb70ce9265054e41845b8741da3f25b65df63f03adc05aed81"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "980bb6386730269f3e5e4c8907cef1f1539e46aa82b908f93db1a54cfde78cda"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "91650d5bac50e659793533f28ab8fc036b77734fc30237d73061be3e6df5b41d"
   end
 
   depends_on "go" => :build
@@ -52,9 +51,9 @@ class CadenceWorkflow < Formula
 
   test do
     output = shell_output("#{bin}/cadence-server start 2>&1", 1)
-    assert_match "Loading config; env=development,zone=,configDir", output
+    assert_match "no config files found within ./config", output
 
-    output = shell_output("#{bin}/cadence --domain samples-domain domain desc ", 1)
+    output = shell_output("#{bin}/cadence --domain samples-domain domain desc 2>&1", 1)
     assert_match "Error: Operation DescribeDomain failed", output
   end
 end

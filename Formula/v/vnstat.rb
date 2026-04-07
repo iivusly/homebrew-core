@@ -1,19 +1,19 @@
 class Vnstat < Formula
   desc "Console-based network traffic monitor"
   homepage "https://humdi.net/vnstat/"
-  url "https://humdi.net/vnstat/vnstat-2.12.tar.gz"
-  sha256 "b7386b12fc1fc6f47fab31f208b12eda61862e63e229e84e95a6fa80406d2852"
+  url "https://humdi.net/vnstat/vnstat-2.13.tar.gz"
+  sha256 "c9fe19312d1ec3ddfbc4672aa951cf9e61ca98dc14cad3d3565f7d9803a6b187"
   license "GPL-2.0-only"
   head "https://github.com/vergoh/vnstat.git", branch: "master"
 
   bottle do
-    sha256 arm64_sonoma:   "b9f2f91ebb02d0abeac163c0964816202483cde13f53832cbb390e477fa344df"
-    sha256 arm64_ventura:  "ba02bb2d0ae58290104e3ee06cdc915d16007f53c45833081083f52bddb4cf6f"
-    sha256 arm64_monterey: "638b93276b154fc5339c440e98961d986fae27d855a1ad22e764cffa53818735"
-    sha256 sonoma:         "f9e45487f466e1d613f2880d278b47f324e6142b0e73b711add74e9d0f672e07"
-    sha256 ventura:        "2ab99304bb533b71dc0df069bbe8795bd053723d724600e538b5aedb0fb7b625"
-    sha256 monterey:       "46d35cbc5297d77dea91df6a1109fb6313e715a201af6051d327853586feb6a9"
-    sha256 x86_64_linux:   "242acd29230207c57e434823a2246674d0e1efbf7f4f61db859437affacb5857"
+    rebuild 1
+    sha256 arm64_tahoe:   "af145bbd1da554febe818a33724a04fd13316d589279f3e7c7dd44178556f1ae"
+    sha256 arm64_sequoia: "22d6d6ad688b31df0baaa7ba2fb89124c36656c59a3a1d3362fd71aea74a2d26"
+    sha256 arm64_sonoma:  "00d035664c11d7302dc5e4cf16e09539e0f598bb3ab309036452b3dca029c0be"
+    sha256 sonoma:        "edeb08c785444734a8d1c2952fb88959b058406792628f3b99e10f744f207057"
+    sha256 arm64_linux:   "c390b99feadced13f30746c1f6caa889592001edb5a001cde6a40bed344728e7"
+    sha256 x86_64_linux:  "41fb94bbbdbb6533741c6cd5b0cdf6e1713ce55b499ef80950cf31a94a25015e"
   end
 
   depends_on "gd"
@@ -31,16 +31,13 @@ class Vnstat < Formula
       s.gsub! "\"eth0\"", "\"en0\"", audit_result: false if OS.mac?
     end
 
-    system "./configure", "--disable-dependency-tracking",
-                          "--disable-silent-rules",
-                          "--prefix=#{prefix}",
-                          "--sysconfdir=#{etc}",
+    system "./configure", "--disable-silent-rules",
+                          "--localstatedir=#{var}",
                           "--sbindir=#{bin}",
-                          "--localstatedir=#{var}"
+                          "--sysconfdir=#{etc}",
+                          *std_configure_args
     system "make", "install"
-  end
 
-  def post_install
     (var/"db/vnstat").mkpath
     (var/"log/vnstat").mkpath
     (var/"run/vnstat").mkpath
@@ -70,6 +67,7 @@ class Vnstat < Formula
     begin
       stat = IO.popen("#{bin}/vnstatd --nodaemon --config vnstat.conf")
       sleep 1
+      sleep 2 if OS.mac? && Hardware::CPU.intel?
     ensure
       Process.kill "SIGINT", stat.pid
       Process.wait stat.pid

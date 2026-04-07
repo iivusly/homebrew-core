@@ -1,8 +1,8 @@
 class Allegro < Formula
   desc "C/C++ multimedia library for cross-platform game development"
   homepage "https://liballeg.org/"
-  url "https://github.com/liballeg/allegro5/releases/download/5.2.9.1/allegro-5.2.9.1.tar.gz"
-  sha256 "0ee3fc22ae74601ad36c70afd793ff062f0f7187eeb6e78f8a24e5bf69170d30"
+  url "https://github.com/liballeg/allegro5/releases/download/5.2.11.3/allegro-5.2.11.3.tar.gz"
+  sha256 "aba4679a5b1f2bf62482eba6e8814a94de7ffc86de5f8587ba199fcc61b4a04f"
   license "Zlib"
   head "https://github.com/liballeg/allegro5.git", branch: "master"
 
@@ -12,20 +12,21 @@ class Allegro < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "b97f4ec79c8d719f8fbdc13ba2f8a22ccccffe0f2018b24a1e07da97d0f9b657"
-    sha256 cellar: :any,                 arm64_ventura:  "aa6bb7451473ddcdd561b18320ab796b8b49da42298051d4cc3296bac2bdd1a2"
-    sha256 cellar: :any,                 arm64_monterey: "519864e5f46d08950e520c5b6e78a2862870bb75c104fa39f49d23b03d3e12e7"
-    sha256 cellar: :any,                 sonoma:         "220a11469f57805a841c694e01c4380cace79d824763f87ae020f9d417478b8f"
-    sha256 cellar: :any,                 ventura:        "2f313c856da22770699bf8aa80995a5df7f07b0bf62f36166647e001ca925dfd"
-    sha256 cellar: :any,                 monterey:       "f8c47be9eb80f02a1cfdd6d2bba2a148a6794542fc3941861389dce011bcb3b6"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "ee72b21114fea150045e575b6ab3db8ab7332deb7499d25d284e776c9a367a4b"
+    sha256 cellar: :any,                 arm64_tahoe:   "e3e3538d2dd7ac9ab3c79343acec0f77a2746a50a6435371dfc35a75715aba9b"
+    sha256 cellar: :any,                 arm64_sequoia: "8c04e595d03638289223bedd1696bacd8df8530f1a55721b3682af08c198a603"
+    sha256 cellar: :any,                 arm64_sonoma:  "5da777e9838c3f86978a15ea5359b928123e70d32ca7ac43670631f17e85458b"
+    sha256 cellar: :any,                 sonoma:        "1e0c9fe820bf392ee0707eff299fe523ebbd6e21d1327714f5c3ac36a53f3df7"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "70dbfd0353c0655b5a6bfe5520fabe067e17e423a209465b435cc067b1eec6bc"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "5ae31e6b786d07b263625a5c9d6ac16e77749a438492d9a8cf69a00e9be4b5ac"
   end
 
   depends_on "cmake" => :build
-  depends_on "dumb"
   depends_on "flac"
   depends_on "freetype"
+  depends_on "jpeg-turbo"
   depends_on "libogg"
+  depends_on "libopenmpt"
+  depends_on "libpng"
   depends_on "libvorbis"
   depends_on "opusfile"
   depends_on "physfs"
@@ -37,8 +38,6 @@ class Allegro < Formula
   end
 
   on_linux do
-    depends_on "jpeg-turbo"
-    depends_on "libpng"
     depends_on "libx11"
     depends_on "libxcursor"
     depends_on "libxi"
@@ -49,21 +48,21 @@ class Allegro < Formula
     depends_on "mesa-glu"
   end
 
-  fails_with gcc: "5"
-
   def install
-    cmake_args = std_cmake_args + %W[
+    cmake_args = %W[
       -DWANT_DOCS=OFF
+      -DWANT_DUMB=OFF
       -DCMAKE_INSTALL_RPATH=#{rpath}
+      -DCMAKE_POLICY_VERSION_MINIMUM=3.5
     ]
 
-    system "cmake", "-S", ".", "-B", "build", *cmake_args
+    system "cmake", "-S", ".", "-B", "build", *cmake_args, *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
   end
 
   test do
-    (testpath/"allegro_test.cpp").write <<~EOS
+    (testpath/"allegro_test.cpp").write <<~CPP
       #include <assert.h>
       #include <allegro5/allegro5.h>
 
@@ -73,7 +72,7 @@ class Allegro < Formula
         }
         return 0;
       }
-    EOS
+    CPP
 
     system ENV.cxx, "allegro_test.cpp", "-I#{include}", "-L#{lib}",
                     "-lallegro", "-lallegro_main", "-o", "allegro_test"

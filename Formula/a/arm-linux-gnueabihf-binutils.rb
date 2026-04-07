@@ -1,9 +1,9 @@
 class ArmLinuxGnueabihfBinutils < Formula
   desc "FSF/GNU binutils for cross-compiling to arm-linux"
   homepage "https://www.gnu.org/software/binutils/binutils.html"
-  url "https://ftp.gnu.org/gnu/binutils/binutils-2.43.1.tar.bz2"
-  mirror "https://ftpmirror.gnu.org/binutils/binutils-2.43.1.tar.bz2"
-  sha256 "becaac5d295e037587b63a42fad57fe3d9d7b83f478eb24b67f9eec5d0f1872f"
+  url "https://ftpmirror.gnu.org/gnu/binutils/binutils-2.46.0.tar.bz2"
+  mirror "https://ftp.gnu.org/gnu/binutils/binutils-2.46.0.tar.bz2"
+  sha256 "0f3152632a2a9ce066f20963e9bb40af7cf85b9b6c409ed892fd0676e84ecd12"
   license "GPL-3.0-or-later"
 
   livecheck do
@@ -11,23 +11,26 @@ class ArmLinuxGnueabihfBinutils < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:  "fc58d0db195365cfbae0778ddb159b972bba0f8025a4748d6a622b27b36a4a37"
-    sha256 arm64_ventura: "4b4b2e940fd37153d23adbe7a05fe7c191232cff01ed6fa7545e2ac4018c2ca1"
-    sha256 sonoma:        "14d772054e88d8a57c6f6d96968866130d49943bc72e4943198a988b8c4deab7"
-    sha256 ventura:       "2c8df1295a2dd0f809e069198378358caacd8688d180917d5216c2bda0dbb86c"
-    sha256 x86_64_linux:  "6dca015b099d6221e09b9acfba7514099d538d5bf57fa5b40940a7bf1bb256be"
+    sha256 arm64_tahoe:   "0cfc6f6aa9caa4d26566113476e9e6363a26728d4f23cfe7735f21f7ffb5383c"
+    sha256 arm64_sequoia: "38948864d8d2bd66854fa4b9c7c912e62685add57394bb51f9ccaf876f4ecc39"
+    sha256 arm64_sonoma:  "e74ca2c3523c847f358a4d98eec72c7b3bb4fbea7c3508ac78e3c25a5006099c"
+    sha256 sonoma:        "bb8d99caaa6729636d012cf68a3819e7f8d86d0ba5d41be45e43481db9ba0a16"
+    sha256 arm64_linux:   "9c8d7f64dedef7ee36b69aaaf0c0ece9d4a19e0a48a04ded9811d751c9e665c0"
+    sha256 x86_64_linux:  "8a1e75510838008f58ce0dccbd0090a52c15a0afaec2f6534f557294a4aeada5"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   # Requires the <uchar.h> header
   # https://sourceware.org/bugzilla/show_bug.cgi?id=31320
   depends_on macos: :ventura
   depends_on "zstd"
 
-  uses_from_macos "zlib"
-
   on_system :linux, macos: :ventura_or_newer do
     depends_on "texinfo" => :build
+  end
+
+  on_linux do
+    depends_on "zlib-ng-compat"
   end
 
   def install
@@ -37,10 +40,7 @@ class ArmLinuxGnueabihfBinutils < Formula
     ENV.append "CXXFLAGS", "-Wno-c++11-narrowing"
 
     target = "arm-linux-gnueabihf"
-    system "./configure", "--disable-debug",
-                          "--disable-dependency-tracking",
-                          "--enable-deterministic-archives",
-                          "--prefix=#{prefix}",
+    system "./configure", "--enable-deterministic-archives",
                           "--libdir=#{lib}/#{target}",
                           "--infodir=#{info}/#{target}",
                           "--disable-werror",
@@ -50,7 +50,8 @@ class ArmLinuxGnueabihfBinutils < Formula
                           "--enable-interwork",
                           "--with-system-zlib",
                           "--with-zstd",
-                          "--disable-nls"
+                          "--disable-nls",
+                          *std_configure_args
     system "make"
     system "make", "install"
   end

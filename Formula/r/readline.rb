@@ -1,33 +1,34 @@
 class Readline < Formula
   desc "Library for command-line editing"
   homepage "https://tiswww.case.edu/php/chet/readline/rltop.html"
-  url "https://ftp.gnu.org/gnu/readline/readline-8.2.tar.gz"
-  mirror "https://ftpmirror.gnu.org/readline/readline-8.2.tar.gz"
-  version "8.2.13"
-  sha256 "3feb7171f16a84ee82ca18a36d7b9be109a52c04f492a053331d7d1095007c35"
+  url "https://ftpmirror.gnu.org/gnu/readline/readline-8.3.tar.gz"
+  mirror "https://ftp.gnu.org/gnu/readline/readline-8.3.tar.gz"
+  version "8.3.3"
+  sha256 "fe5383204467828cd495ee8d1d3c037a7eba1389c22bc6a041f627976f9061cc"
   license "GPL-3.0-or-later"
 
-  %w[
-    001 bbf97f1ec40a929edab5aa81998c1e2ef435436c597754916e6a5868f273aff7
-    002 e06503822c62f7bc0d9f387d4c78c09e0ce56e53872011363c74786c7cd4c053
-    003 24f587ba46b46ed2b1868ccaf9947504feba154bb8faabd4adaea63ef7e6acb0
-    004 79572eeaeb82afdc6869d7ad4cba9d4f519b1218070e17fa90bbecd49bd525ac
-    005 622ba387dae5c185afb4b9b20634804e5f6c1c6e5e87ebee7c35a8f065114c99
-    006 c7b45ff8c0d24d81482e6e0677e81563d13c74241f7b86c4de00d239bc81f5a1
-    007 5911a5b980d7900aabdbee483f86dab7056851e6400efb002776a0a4a1bab6f6
-    008 a177edc9d8c9f82e8c19d0630ab351f3fd1b201d655a1ddb5d51c4cee197b26a
-    009 3d9885e692e1998523fd5c61f558cecd2aafd67a07bd3bfe1d7ad5a31777a116
-    010 758e2ec65a0c214cfe6161f5cde3c5af4377c67d820ea01d13de3ca165f67b4c
-    011 e0013d907f3a9e6482cc0934de1bd82ee3c3c4fd07a9646aa9899af237544dd7
-    012 6c8adf8ed4a2ca629f7fd11301ed6293a6248c9da0c674f86217df715efccbd3
-    013 1ea434957d6ec3a7b61763f1f3552dad0ebdd6754d65888b5cd6d80db3a788a8
-  ].each_slice(2) do |p, checksum|
+  # Add new patches using this format:
+  #
+  # patch_checksum_pairs = %w[
+  #   001 <checksum for <major>.<minor>.1>
+  #   002 <checksum for <major>.<minor>.2>
+  #   ...
+  # ]
+
+  patch_checksum_pairs = %w[
+    001 21f0a03106dbe697337cd25c70eb0edbaa2bdb6d595b45f83285cdd35bac84de
+    002 e27364396ba9f6debf7cbaaf1a669e2b2854241ae07f7eca74ca8a8ba0c97472
+    003 72dee13601ce38f6746eb15239999a7c56f8e1ff5eb1ec8153a1f213e4acdb29
+  ]
+
+  patch_checksum_pairs.each_slice(2) do |p, checksum|
     patch :p0 do
-      url "https://ftp.gnu.org/gnu/readline/readline-8.2-patches/readline82-#{p}"
-      mirror "https://ftpmirror.gnu.org/readline/readline-8.2-patches/readline82-#{p}"
+      url "https://ftpmirror.gnu.org/gnu/readline/readline-8.3-patches/readline83-#{p}"
+      mirror "https://ftp.gnu.org/gnu/readline/readline-8.3-patches/readline83-#{p}"
       sha256 checksum
     end
   end
+  compatibility_version 1
 
   # We're not using `url :stable` here because we need `url` to be a string
   # when we use it in the `strategy` block.
@@ -53,7 +54,7 @@ class Readline < Formula
 
       # Fetch the page for the patches directory
       patches_page = Homebrew::Livecheck::Strategy.page_content(
-        "https://ftp.gnu.org/gnu/readline/#{patches_directory[1]}",
+        "https://ftpmirror.gnu.org/gnu/readline/#{patches_directory[1]}",
       )
       next versions if patches_page[:content].blank?
 
@@ -67,14 +68,17 @@ class Readline < Formula
     end
   end
 
+  no_autobump! because: :incompatible_version_format
+
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "e46d4ff0c800dd35b9d5cef74e61ade54edc0834231f35c695af206bed9e3608"
-    sha256 cellar: :any,                 arm64_ventura:  "57580f6ff00c7717c8d791a583f7837944a230c573f1fb8338fd155656be4f04"
-    sha256 cellar: :any,                 arm64_monterey: "c3245660eb2d39b76441960dd6c80212debcec51de1ef4d6f86bb13d9a5f1fe3"
-    sha256 cellar: :any,                 sonoma:         "0cf2cae0b9bb71bee1f9f9b3ab1e5dfc27b32f474db7f2d38b8b2dffd02da5ff"
-    sha256 cellar: :any,                 ventura:        "62d86d4a0c7be5d568eaf5abbb6477e4c95dc1821ef232bcb45b658dbf8f9bc4"
-    sha256 cellar: :any,                 monterey:       "5e5ae8819679057596a21cfde4f575d33c87db70151386d01579bc2863b948fd"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "099378b496dd58f6a0fdb09e4c32d2ccae5631c0b423c1df77626d844553a85f"
+    sha256 cellar: :any,                 arm64_tahoe:   "1c6234c033c83ea742d50aa45fd60821947fa800d5cadecb0a1aa045564bb7d1"
+    sha256 cellar: :any,                 arm64_sequoia: "2e055f7b620fcbe1f809e850a23a68daa429edcf9b484b1967f9a49d89ebed8e"
+    sha256 cellar: :any,                 arm64_sonoma:  "15440b045b3e8294c8cbb819b32ba26520ce53b18bf947166a21a38e34662d84"
+    sha256 cellar: :any,                 tahoe:         "67a24889119e6429144cd15fb9b0dc8ae37cf272388605a5780bb734f8e6b093"
+    sha256 cellar: :any,                 sequoia:       "fd72a581442e1826e1386b8620e6ca5b75d858ded59d9fe60b9e0e9001675dc3"
+    sha256 cellar: :any,                 sonoma:        "614b89ff043bb59540c284dc696aedb1ffe30c4cc902d4e27b088ebaa3dc9312"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "5cbd86f40534c4ef8b800e605408411bc6b047bf7c4f3911b2c020b1cfa39b89"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ea989e13a1df95ab899b8b1d35713def4330950259e7a48053fcd7967ee316b2"
   end
 
   keg_only :shadowed_by_macos, "macOS provides BSD libedit"
@@ -91,7 +95,7 @@ class Readline < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <stdio.h>
       #include <stdlib.h>
       #include <readline/readline.h>
@@ -101,7 +105,7 @@ class Readline < Formula
         printf("%s\\n", readline("test> "));
         return 0;
       }
-    EOS
+    C
 
     system ENV.cc, "-L", lib, "test.c", "-L#{lib}", "-lreadline", "-o", "test"
     assert_equal "test> Hello, World!\nHello, World!", pipe_output("./test", "Hello, World!\n").strip

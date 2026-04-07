@@ -11,6 +11,8 @@ class Mpfi < Formula
   end
 
   bottle do
+    sha256 cellar: :any,                 arm64_tahoe:    "d14d9dd673a7e6bdcb8b910766ad693f6f3be81aea82d329a4ceed79e90aea4e"
+    sha256 cellar: :any,                 arm64_sequoia:  "826e309c5518bcf7aa755eefe369c2b91704820d2bf0730c0341b16e7a877033"
     sha256 cellar: :any,                 arm64_sonoma:   "2a77c1ce37a69afb7a40355c560e72294c3445b7f97f93f235756ce56e0747c0"
     sha256 cellar: :any,                 arm64_ventura:  "7401897771e7e1714d9bdf79ca0a384af06d756b2ce331a727c4253b93cae7fc"
     sha256 cellar: :any,                 arm64_monterey: "da4f0c1a2da5779a03ca4dd3c813bd6134c23687418ff5cf1f98687f0561ccb8"
@@ -20,6 +22,7 @@ class Mpfi < Formula
     sha256 cellar: :any,                 monterey:       "a46d41cbd8e5eb649b6f33ec56eeafe79a75ec89ba7652c426e661340249a128"
     sha256 cellar: :any,                 big_sur:        "4c9a07e8889087a34c932c567b4e5f256d7d146f76206d3d62b5e2aa128f8689"
     sha256 cellar: :any,                 catalina:       "4cfd2197c9eed1b74d9518b0054d69556942e5ed7b0d3b8a6d93fffc50e95726"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "9207b79383b311f8d1c89240bc6274793c3fdba17706b08bb018e5c4162138c6"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "43395ab987d381a3f22eb91b2ce74c8a7d39623e0eac8a78f95d2e50b644b1cd"
   end
 
@@ -33,7 +36,7 @@ class Mpfi < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <mpfi.h>
 
       int main()
@@ -43,7 +46,7 @@ class Mpfi < Formula
         mpfi_clear(x);
         return 0;
       }
-    EOS
+    C
 
     system ENV.cc, "test.c", "-o", "test",
                    "-L#{lib}", "-lmpfi",

@@ -3,39 +3,40 @@ class Manim < Formula
 
   desc "Animation engine for explanatory math videos"
   homepage "https://www.manim.community"
-  url "https://files.pythonhosted.org/packages/83/5f/717ba528eb191124211036ec710bafd605dc7f7bb948a41219a8dd1124b6/manim-0.18.1.tar.gz"
-  sha256 "4bf2b479d258b410259c6828261fe79e107beb8f2dd04ebfa73b96bcefdde93d"
+  url "https://files.pythonhosted.org/packages/dc/3b/ad54ce02f3e95d17d016cb1254708ae3795b60d5661f3b2085655940a565/manim-0.20.1.tar.gz"
+  sha256 "1e9747fb2fc1bde58ad09bcbd77d141793ce4b61811726a7fce537193d92e16b"
   license "MIT"
-  revision 2
   head "https://github.com/manimCommunity/manim.git", branch: "main"
 
+  # FIXME: Fails trying to resolve pycairo as pip tries compiling it but cannot find cairo
+  no_autobump! because: "`update-python-resources` cannot determine dependencies"
+
   bottle do
-    rebuild 1
-    sha256 cellar: :any,                 arm64_sonoma:   "d108d31fcffc46da729773754850637a05ddb4eda4b2437492f1e1ac941da88a"
-    sha256 cellar: :any,                 arm64_ventura:  "b426acd4318a8878234f78aa553a1068b801a33706deaad530956ed52796aa61"
-    sha256 cellar: :any,                 arm64_monterey: "c9e084c263f0a485d4803954c35f9d2c008331d9daca954d92e5fc4604a377fc"
-    sha256 cellar: :any,                 sonoma:         "d463689bcc401300aaf81d7194b863b405d3f969f0832995a30be333e5bf8d8d"
-    sha256 cellar: :any,                 ventura:        "fb64f12d5d4df9ee4693071614a36869e6b563bcfc25557086c8aaa07ce33985"
-    sha256 cellar: :any,                 monterey:       "db86d235d0053376adc8d8d11d8fe65e7db88833a95aa21e81845c3b2e8bedc7"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "84bf4558e70b655644cbd49e3dd1f36ecc683cfa6a80365285ca1c1914e4fb1e"
+    sha256 cellar: :any,                 arm64_tahoe:   "1146698c3f5898d4f39f6e6ccbe86f934d6098d4a38340457bdbf6530dbb99eb"
+    sha256 cellar: :any,                 arm64_sequoia: "6932594897fec81b58a4b4656ffa25670a63007a2f737bec0e83506dd69e4042"
+    sha256 cellar: :any,                 arm64_sonoma:  "97296a0f2ed9a52bc0e568c6c3d1d8d0fb0431ad1b4a350922a17c0a145d8476"
+    sha256 cellar: :any,                 sonoma:        "ca8e1507b9e599a1fe30689f0acc4433297487dcdd81cbf420311bf343b9b16b"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "40347e0a6f413b4a0b5ddb9c2f4bed311e885e66cbfcb57199fea25ecbd375ef"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "eebc67284d7012862e7d5d896bbcaa2b1edef42092477ae74a3a917afa208638"
   end
 
-  depends_on "cython" => :build
+  depends_on "cmake" => :build # for mapbox_earcut
   depends_on "ninja" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "cairo" # for cairo.h
   depends_on "ffmpeg"
   depends_on "fontconfig"
   depends_on "freetype"
   depends_on "glib"
-  depends_on "numpy"
+  depends_on "numpy" => :no_linkage
   depends_on "pango"
-  depends_on "pillow"
+  depends_on "pillow" => :no_linkage
   depends_on "py3cairo"
-  depends_on "python@3.12"
-  depends_on "scipy"
+  depends_on "python@3.14"
+  depends_on "scipy" => :no_linkage
 
   on_macos do
+    depends_on "llvm" => :build if DevelopmentTools.clang_build_version <= 1699
     depends_on "gettext"
     depends_on "harfbuzz"
   end
@@ -45,29 +46,51 @@ class Manim < Formula
     depends_on "patchelf" => :build
   end
 
+  fails_with :clang do
+    build 1699
+    cause "pyobjc-core uses `-fdisable-block-signature-string`"
+  end
+
+  pypi_packages exclude_packages: %w[numpy pillow pycairo scipy]
+
+  resource "audioop-lts" do
+    url "https://files.pythonhosted.org/packages/38/53/946db57842a50b2da2e0c1e34bd37f36f5aadba1a929a3971c5d7841dbca/audioop_lts-0.2.2.tar.gz"
+    sha256 "64d0c62d88e67b98a1a5e71987b7aa7b5bcffc7dcee65b635823dbdd0a8dbbd0"
+  end
+
+  resource "av" do
+    url "https://files.pythonhosted.org/packages/78/cd/3a83ffbc3cc25b39721d174487fb0d51a76582f4a1703f98e46170ce83d4/av-16.1.0.tar.gz"
+    sha256 "a094b4fd87a3721dacf02794d3d2c82b8d712c85b9534437e82a8a978c175ffd"
+  end
+
+  resource "beautifulsoup4" do
+    url "https://files.pythonhosted.org/packages/c3/b0/1c6a16426d389813b48d95e26898aff79abbde42ad353958ad95cc8c9b21/beautifulsoup4-4.14.3.tar.gz"
+    sha256 "6292b1c5186d356bba669ef9f7f051757099565ad9ada5dd630bd9de5fa7fb86"
+  end
+
   resource "click" do
-    url "https://files.pythonhosted.org/packages/96/d3/f04c7bfcf5c1862a2a5b845c6b2b360488cf47af55dfa79c98f6a6bf98b5/click-8.1.7.tar.gz"
-    sha256 "ca9853ad459e787e2192211578cc907e7594e294c7ccc834310722b41b9ca6de"
+    url "https://files.pythonhosted.org/packages/3d/fa/656b739db8587d7b5dfa22e22ed02566950fbfbcdc20311993483657a5c0/click-8.3.1.tar.gz"
+    sha256 "12ff4785d337a1bb490bb7e9c2b1ee5da3112e94a8622f26a6c77f5d2fc6842a"
   end
 
   resource "cloup" do
-    url "https://files.pythonhosted.org/packages/cf/71/608e4546208e5a421ef00b484f582e58ce0f17da05459b915c8ba22dfb78/cloup-3.0.5.tar.gz"
-    sha256 "c92b261c7bb7e13004930f3fb4b3edad8de2d1f12994dcddbe05bc21990443c5"
+    url "https://files.pythonhosted.org/packages/46/cf/09a31f0f51b5c8ef2343baf37c35a5feb4f6dfdcbd0592a014baf837f2e4/cloup-3.0.8.tar.gz"
+    sha256 "f91c080a725196ddf74feabd6250266f466e97fc16dfe21a762cf6bc6beb3ecb"
   end
 
   resource "cython" do
-    url "https://files.pythonhosted.org/packages/d5/f7/2fdd9205a2eedee7d9b0abbf15944a1151eb943001dbdc5233b1d1cfc34e/Cython-3.0.10.tar.gz"
-    sha256 "dcc96739331fb854dcf503f94607576cfe8488066c61ca50dfd55836f132de99"
+    url "https://files.pythonhosted.org/packages/91/85/7574c9cd44b69a27210444b6650f6477f56c75fee1b70d7672d3e4166167/cython-3.2.4.tar.gz"
+    sha256 "84226ecd313b233da27dc2eb3601b4f222b8209c3a7216d8733b031da1dc64e6"
   end
 
   resource "decorator" do
-    url "https://files.pythonhosted.org/packages/66/0c/8d907af351aa16b42caae42f9d6aa37b900c67308052d10fdce809f8d952/decorator-5.1.1.tar.gz"
-    sha256 "637996211036b6385ef91435e4fae22989472f9d571faba8927ba8253acbc330"
+    url "https://files.pythonhosted.org/packages/43/fa/6d96a0978d19e17b68d634497769987b16c8f4cd0a7a05048bec693caa6b/decorator-5.2.1.tar.gz"
+    sha256 "65f266143752f734b0a7cc83c46f4618af75b8c5911b00ccb61d0ac9b6da0360"
   end
 
   resource "glcontext" do
-    url "https://files.pythonhosted.org/packages/5e/cc/b32b0cd5cd527a53ad9a90cd1cb32d1ff97127265cd026c052f8bb9e8014/glcontext-2.5.0.tar.gz"
-    sha256 "0f70d4be0cdd2b532a16da76c8f786b6367754a4086aaadffdbf3e37badbad02"
+    url "https://files.pythonhosted.org/packages/3a/80/8238a0e6e972292061176141c1028b5e670aa8c94cf4c2f819bd730d314e/glcontext-3.0.0.tar.gz"
+    sha256 "57168edcd38df2fc0d70c318edf6f7e59091fba1cd3dadb289d0aa50449211ef"
   end
 
   resource "isosurfaces" do
@@ -76,18 +99,18 @@ class Manim < Formula
   end
 
   resource "manimpango" do
-    url "https://files.pythonhosted.org/packages/48/5b/d1249c3d90324a1d4dce4711e507c8ec87addca61d1304ffa55513783ba3/ManimPango-0.5.0.tar.gz"
-    sha256 "299913bbccb0f15954b64401cf9df24607e1a01edda589ea77de1ed4cc2bc284"
+    url "https://files.pythonhosted.org/packages/47/55/d360e73eb4d04b102cef399ddebcba486a9b6c1977a26fe710beffd52e95/manimpango-0.6.1.tar.gz"
+    sha256 "59a00bbf8e99dab5f94341087c88e609fe946e79724627429cf59da84cbd40bf"
   end
 
   resource "mapbox-earcut" do
-    url "https://files.pythonhosted.org/packages/97/f9/38f72877be0a5bf35c04a75c8ceb261589f2807eeaffaa22055079f53839/mapbox_earcut-1.0.1.tar.gz"
-    sha256 "9f155e429a22e27387cfd7a6372c3a3865aafa609ad725e2c4465257f154a438"
+    url "https://files.pythonhosted.org/packages/bc/7b/bbf6b00488662be5d2eb7a188222c264b6f713bac10dc4a77bf37a4cb4b6/mapbox_earcut-2.0.0.tar.gz"
+    sha256 "81eab6b86cf99551deb698b98e3f7502c57900e5c479df15e1bdaf1a57f0f9d6"
   end
 
   resource "markdown-it-py" do
-    url "https://files.pythonhosted.org/packages/38/71/3b932df36c1a044d397a1f92d1cf91ee0a503d91e470cbd670aa66b07ed0/markdown-it-py-3.0.0.tar.gz"
-    sha256 "e3f60a94fa066dc52ec76661e37c851cb232d92f9886b15cb560aaada2df8feb"
+    url "https://files.pythonhosted.org/packages/5b/f5/4ec618ed16cc4f8fb3b701563655a69816155e79e24a17b651541804721d/markdown_it_py-4.0.0.tar.gz"
+    sha256 "cb0a2b4aa34f932c007117b194e945bd74e0ec24133ceb5bac59009cda1cb9f3"
   end
 
   resource "mdurl" do
@@ -96,28 +119,18 @@ class Manim < Formula
   end
 
   resource "moderngl" do
-    url "https://files.pythonhosted.org/packages/25/e7/d731fc4b58cb729d337c829a62aa17bc2b70438fa59745c8c9f51e279f42/moderngl-5.10.0.tar.gz"
-    sha256 "119c8d364dde3cd8d1c09f237ed4916617ba759954a1952df4694e51ee4f6511"
+    url "https://files.pythonhosted.org/packages/da/52/540e2f8c45060bb2709f56eb5a44ae828dfcc97ccecb342c1a7deb467889/moderngl-5.12.0.tar.gz"
+    sha256 "52936a98ccb2f2e1d6e3cb18528b2919f6831e7e3f924e788b5873badce5129b"
   end
 
   resource "moderngl-window" do
-    url "https://files.pythonhosted.org/packages/36/36/4823988c2155974a334753bfeef9c772d7b49b7f5c01f3e8a44c3813781c/moderngl-window-2.4.6.tar.gz"
-    sha256 "db9b4c27f35faa6f243b6d8cde6ada6da6e79541d62b8e536c0b20da29720c32"
-  end
-
-  resource "multipledispatch" do
-    url "https://files.pythonhosted.org/packages/fe/3e/a62c3b824c7dec33c4a1578bcc842e6c30300051033a4e5975ed86cc2536/multipledispatch-1.0.0.tar.gz"
-    sha256 "5c839915465c68206c3e9c473357908216c28383b425361e5d144594bf85a7e0"
+    url "https://files.pythonhosted.org/packages/90/02/92e235891300c901f59647112a0267a07454f58aeb2041aa44f6b85f9cb3/moderngl_window-3.1.1.tar.gz"
+    sha256 "29c2827505f87399f3461d480b2778910fddeebe44ea803301215cf212a6c1bc"
   end
 
   resource "networkx" do
-    url "https://files.pythonhosted.org/packages/04/e6/b164f94c869d6b2c605b5128b7b0cfe912795a87fc90e78533920001f3ec/networkx-3.3.tar.gz"
-    sha256 "0c127d8b2f4865f59ae9cb8aafcd60b5c70f3241ebd66f7defad7c4ab90126c9"
-  end
-
-  resource "pycairo" do
-    url "https://files.pythonhosted.org/packages/19/4f/0d48a017090d4527e921d6892bc550ae869902e67859fc960f8fe63a9094/pycairo-1.26.1.tar.gz"
-    sha256 "a11b999ce55b798dbf13516ab038e0ce8b6ec299b208d7c4e767a6f7e68e8430"
+    url "https://files.pythonhosted.org/packages/6a/51/63fe664f3908c97be9d2e4f1158eb633317598cfa6e1fc14af5383f17512/networkx-3.6.1.tar.gz"
+    sha256 "26b7c357accc0c8cde558ad486283728b65b6a95d85ee1cd66bafab4c8168509"
   end
 
   resource "pydub" do
@@ -126,33 +139,33 @@ class Manim < Formula
   end
 
   resource "pyglet" do
-    url "https://files.pythonhosted.org/packages/a2/14/6cb89978608e2a2f5869eab9485f8f1eabaf2240a63d6c9bc23c43d952c5/pyglet-2.0.15.tar.gz"
-    sha256 "42085567cece0c7f1c14e36eef799938cbf528cfbb0150c484b984f3ff1aa771"
+    url "https://files.pythonhosted.org/packages/77/b4/b78df1ec545a151cb7ee64a1632e8f33ba8bd1a97329e4918e76761a80d9/pyglet-2.1.13.tar.gz"
+    sha256 "37a31c212b51658f7c125613f93818a199e8808f86e9b1abe7bfe5395661eee3"
+  end
+
+  resource "pyglm" do
+    url "https://files.pythonhosted.org/packages/41/8b/bdaf7b9cacecd28f7b4c6fc2d7d136824c506ad38cfdb37a05ea7ec88694/pyglm-2.8.3.tar.gz"
+    sha256 "161781ea4d1267f796b645f85ebff53aeb8ee4f13b4e993c04d64c96d286e534"
   end
 
   resource "pygments" do
-    url "https://files.pythonhosted.org/packages/8e/62/8336eff65bcbc8e4cb5d05b55faf041285951b6e80f33e2bff2024788f31/pygments-2.18.0.tar.gz"
-    sha256 "786ff802f32e91311bff3889f6e9a86e81505fe99f2735bb6d60ae0c5004f199"
+    url "https://files.pythonhosted.org/packages/b0/77/a5b8c569bf593b0140bde72ea885a803b82086995367bf2037de0159d924/pygments-2.19.2.tar.gz"
+    sha256 "636cb2477cec7f8952536970bc533bc43743542f70392ae026374600add5b887"
   end
 
   resource "pyobjc-core" do
-    url "https://files.pythonhosted.org/packages/b7/40/a38d78627bd882d86c447db5a195ff307001ae02c1892962c656f2fd6b83/pyobjc_core-10.3.1.tar.gz"
-    sha256 "b204a80ccc070f9ab3f8af423a3a25a6fd787e228508d00c4c30f8ac538ba720"
+    url "https://files.pythonhosted.org/packages/b8/b6/d5612eb40be4fd5ef88c259339e6313f46ba67577a95d86c3470b951fce0/pyobjc_core-12.1.tar.gz"
+    sha256 "2bb3903f5387f72422145e1466b3ac3f7f0ef2e9960afa9bcd8961c5cbf8bd21"
   end
 
   resource "pyobjc-framework-cocoa" do
-    url "https://files.pythonhosted.org/packages/a7/6c/b62e31e6e00f24e70b62f680e35a0d663ba14ff7601ae591b5d20e251161/pyobjc_framework_cocoa-10.3.1.tar.gz"
-    sha256 "1cf20714daaa986b488fb62d69713049f635c9d41a60c8da97d835710445281a"
-  end
-
-  resource "pyrr" do
-    url "https://files.pythonhosted.org/packages/e5/7f/2af23f61340972116e4efabc3ac6e02c8bad7f7315b3002c278092963f17/pyrr-0.10.3.tar.gz"
-    sha256 "3c0f7b20326e71f706a610d58f2190fff73af01eef60c19cb188b186f0ec7e1d"
+    url "https://files.pythonhosted.org/packages/02/a3/16ca9a15e77c061a9250afbae2eae26f2e1579eb8ca9462ae2d2c71e1169/pyobjc_framework_cocoa-12.1.tar.gz"
+    sha256 "5556c87db95711b985d5efdaaf01c917ddd41d148b1e52a0c66b1a2e2c5c1640"
   end
 
   resource "rich" do
-    url "https://files.pythonhosted.org/packages/b3/01/c954e134dc440ab5f96952fe52b4fdc64225530320a910473c1fe270d9aa/rich-13.7.1.tar.gz"
-    sha256 "9be308cb1fe2f1f57d67ce99e95af38a1e2bc71ad9813b0e247cf7ffbcc3a432"
+    url "https://files.pythonhosted.org/packages/b3/c6/f3b320c27991c46f43ee9d856302c70dc2d0fb2dba4842ff739d5f46b393/rich-14.3.3.tar.gz"
+    sha256 "b8daa0b9e4eef54dd8cf7c86c03713f53241884e814f4e2f5fb342fe520f639b"
   end
 
   resource "screeninfo" do
@@ -161,8 +174,13 @@ class Manim < Formula
   end
 
   resource "skia-pathops" do
-    url "https://files.pythonhosted.org/packages/37/15/fa6de52d9cb3a44158431d4cce870e7c2a56cdccedc8fa1262cbf61d4e1e/skia-pathops-0.8.0.post1.zip"
-    sha256 "a056249de2f61fa55116b9ee55513c6a36b878aee00c91450e404d1606485cbb"
+    url "https://files.pythonhosted.org/packages/4a/f6/ab37d6fa21f25965d4ad059745c76f13ddfb92a2c06a842a42ad77961c24/skia_pathops-0.9.2.tar.gz"
+    sha256 "4b6d8459f6f4a69282cb26fca0c2bb0b321cc58a9bf9cc6579a52a391edc0319"
+  end
+
+  resource "soupsieve" do
+    url "https://files.pythonhosted.org/packages/7b/ae/2d9c981590ed9999a0d91755b47fc74f74de286b0f5cee14c9269041e6c4/soupsieve-2.8.3.tar.gz"
+    sha256 "3267f1eeea4251fb42728b6dfb746edc9acaffc4a45b27e19450b676586e8349"
   end
 
   resource "srt" do
@@ -176,30 +194,34 @@ class Manim < Formula
   end
 
   resource "tqdm" do
-    url "https://files.pythonhosted.org/packages/5a/c0/b7599d6e13fe0844b0cda01b9aaef9a0e87dbb10b06e4ee255d3fa1c79a2/tqdm-4.66.4.tar.gz"
-    sha256 "e4d936c9de8727928f3be6079590e97d9abfe8d39a590be678eb5919ffc186bb"
+    url "https://files.pythonhosted.org/packages/09/a9/6ba95a270c6f1fbcd8dac228323f2777d886cb206987444e4bce66338dd4/tqdm-4.67.3.tar.gz"
+    sha256 "7d825f03f89244ef73f1d4ce193cb1774a8179fd96f31d7e1dcde62092b960bb"
   end
 
   resource "typing-extensions" do
-    url "https://files.pythonhosted.org/packages/df/db/f35a00659bc03fec321ba8bce9420de607a1d37f8342eee1863174c69557/typing_extensions-4.12.2.tar.gz"
-    sha256 "1a7ead55c7e559dd4dee8856e3a88b41225abfe1ce8df57b7c13915fe121ffb8"
+    url "https://files.pythonhosted.org/packages/72/94/1a15dd82efb362ac84269196e94cf00f187f7ed21c242792a923cdb1c61f/typing_extensions-4.15.0.tar.gz"
+    sha256 "0cea48d173cc12fa28ecabc3b837ea3cf6f38c6d1136f85cbaaf598984861466"
   end
 
   resource "watchdog" do
-    url "https://files.pythonhosted.org/packages/1b/f9/b01e4632aed9a6ecc2b3e501feffd3af5aa0eb4e3b0283fc9525bf503c38/watchdog-4.0.1.tar.gz"
-    sha256 "eebaacf674fa25511e8867028d281e602ee6500045b57f43b08778082f7f8b44"
+    url "https://files.pythonhosted.org/packages/db/7d/7f3d619e951c88ed75c6037b246ddcf2d322812ee8ea189be89511721d54/watchdog-6.0.0.tar.gz"
+    sha256 "9ddf7c82fda3ae8e24decda1338ede66e1c99883db93711d8fb941eaa2d8c282"
   end
 
   def install
-    python = "python3.12"
-    ENV.prepend_path "PYTHONPATH", Formula["cython"].opt_libexec/Language::Python.site_packages(python)
-    venv = virtualenv_create(libexec, python)
-    venv.pip_install resources.reject { |r| r.name.start_with?("pyobjc") && OS.linux? }
-    venv.pip_install_and_link buildpath
+    if OS.mac?
+      # Help `pyobjc-framework-cocoa` pick correct SDK after removing -isysroot from Python formula
+      ENV.append_to_cflags "-isysroot #{MacOS.sdk_path}"
+    else
+      without = resources.filter_map { |r| r.name if r.name.start_with?("pyobjc") }
+    end
+    virtualenv_install_with_resources(without:)
+
+    generate_completions_from_executable(bin/"manim", shell_parameter_format: :click)
   end
 
   test do
-    (testpath/"testscene.py").write <<~EOS
+    (testpath/"testscene.py").write <<~PYTHON
       from manim import *
 
       class CreateCircle(Scene):
@@ -207,9 +229,9 @@ class Manim < Formula
               circle = Circle()  # create a circle
               circle.set_fill(PINK, opacity=0.5)  # set the color and transparency
               self.play(Create(circle))  # show the circle on screen
-    EOS
+    PYTHON
 
-    system bin/"manim", "-ql", "#{testpath}/testscene.py", "CreateCircle"
-    assert_predicate testpath/"media/videos/testscene/480p15/CreateCircle.mp4", :exist?
+    system bin/"manim", "-ql", testpath/"testscene.py", "CreateCircle"
+    assert_path_exists testpath/"media/videos/testscene/480p15/CreateCircle.mp4"
   end
 end

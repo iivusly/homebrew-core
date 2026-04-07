@@ -1,23 +1,26 @@
 class Solr < Formula
   desc "Enterprise search platform from the Apache Lucene project"
   homepage "https://solr.apache.org/"
-  url "https://dlcdn.apache.org/solr/solr/9.6.1/solr-9.6.1.tgz"
-  mirror "https://archive.apache.org/dist/solr/solr/9.6.1/solr-9.6.1.tgz"
-  sha256 "59d1a0aed1d90f7ca9ce7a158f122a82a5f6ba16463cc16cfbe22a772b7eb26d"
+  url "https://www.apache.org/dyn/closer.lua?path=solr/solr/10.0.0/solr-10.0.0.tgz"
+  mirror "https://archive.apache.org/dist/solr/solr/10.0.0/solr-10.0.0.tgz"
+  sha256 "07c180970f60d13776be13ccb60c707d041e5e1a8b914d197d1358ac25f804b5"
   license "Apache-2.0"
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, all: "2543d8fe0819c9d27f11f643428f746a24bd6834f0938d6cd49b95334560e047"
+    rebuild 2
+    sha256 cellar: :any_skip_relocation, all: "5acd947f8767a29eebf0748639ab369d30c981170b8211082d987aab0c351180"
   end
 
-  depends_on "openjdk"
+  # Can be updated after https://github.com/apache/solr/pull/3153
+  depends_on "openjdk@21"
 
   def install
     pkgshare.install "bin/solr.in.sh"
     (var/"lib/solr").install "server/solr/README.md", "server/solr/solr.xml", "server/solr/zoo.cfg"
+    (var/"log/solr").mkpath
+    (var/"run/solr").mkpath
     prefix.install "licenses", "modules", "server"
-    bin.install "bin/solr", "bin/post"
+    bin.install "bin/solr"
 
     env = Language::Java.overridable_java_home_env
     env["SOLR_HOME"] = "${SOLR_HOME:-#{var}/lib/solr}"
@@ -28,13 +31,8 @@ class Solr < Formula
     inreplace libexec/"solr", "/usr/local/share/solr", pkgshare
   end
 
-  def post_install
-    (var/"run/solr").mkpath
-    (var/"log/solr").mkpath
-  end
-
   service do
-    run [opt_bin/"solr", "start", "-f", "-s", HOMEBREW_PREFIX/"var/lib/solr"]
+    run [opt_bin/"solr", "start", "-f", "--user-managed", "--solr-home", HOMEBREW_PREFIX/"var/lib/solr"]
     working_dir HOMEBREW_PREFIX
   end
 
@@ -45,11 +43,11 @@ class Solr < Formula
     assert_match "No Solr nodes are running", shell_output("#{bin}/solr status")
 
     # Start a Solr node => exit code 0
-    shell_output("#{bin}/solr start -p #{port} -Djava.io.tmpdir=/tmp")
-    assert_match "Found 1 Solr nodes", shell_output("#{bin}/solr status")
+    shell_output("#{bin}/solr start --user-managed -p #{port} -Djava.io.tmpdir=/tmp")
+    assert_match(/Solr process \d+ running on port #{port}/, shell_output("#{bin}/solr status"))
 
     # Impossible to start a second Solr node on the same port => exit code 1
-    shell_output("#{bin}/solr start -p #{port}", 1)
+    shell_output("#{bin}/solr start --user-managed -p #{port}", 1)
     # Stop a Solr node => exit code 0
     # Exit code is 1 without init process in a docker container
     shell_output("#{bin}/solr stop -p #{port}", (OS.linux? && ENV["HOMEBREW_GITHUB_ACTIONS"]) ? 1 : 0)

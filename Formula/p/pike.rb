@@ -1,12 +1,10 @@
 class Pike < Formula
   desc "Dynamic programming language"
   homepage "https://pike.lysator.liu.se/"
-  # Homepage has an expired SSL cert as of 16/12/2020, so we add a Debian mirror
-  url "https://pike.lysator.liu.se/pub/pike/latest-stable/Pike-v8.0.1738.tar.gz"
-  mirror "https://deb.debian.org/debian/pool/main/p/pike8.0/pike8.0_8.0.1738.orig.tar.gz"
-  sha256 "1033bc90621896ef6145df448b48fdfa342dbdf01b48fd9ae8acf64f6a31b92a"
+  url "https://pike.lysator.liu.se/pub/pike/latest-stable/Pike-v8.0.1956.tar.gz"
+  mirror "https://deb.debian.org/debian/pool/main/p/pike8.0/pike8.0_8.0.1956.orig.tar.gz"
+  sha256 "6a0f2677eb579865321bd75118c638c335860157a420a96e52e2765513dad4c0"
   license any_of: ["GPL-2.0-only", "LGPL-2.1-only", "MPL-1.1"]
-  revision 3
 
   livecheck do
     url "https://pike.lysator.liu.se/download/pub/pike/latest-stable/"
@@ -14,51 +12,46 @@ class Pike < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "70b0fbdddedbb800cb84877cc859c3f877809937e372ce220d7b01d0526948c7"
-    sha256 arm64_ventura:  "6e208572c05918a3f7b848e774ca2399c513e1f5f016f3c6c6af4d28f1000080"
-    sha256 arm64_monterey: "92ed5696e91b3f72bdc57a1558857113d166deb19688442518f3c26f9e2e435a"
-    sha256 arm64_big_sur:  "55028a48c997c3e6399e3ce633da298bacc06ae82dd1ab261c98f172b53a0a56"
-    sha256 sonoma:         "1d092bdeb415eb24ee82bcf2fa2fc8aef38c9c5150bfbbacc95227fd9c8abca9"
-    sha256 ventura:        "f5a49dab05cd49eb2ccd647db2d3542a6247e50b3eaa45b91d009cf09f9e727e"
-    sha256 monterey:       "5c353c23f7cd2ef2439d32016731c8f690c735cdd3bddbb090d8d53d4f9dda95"
-    sha256 big_sur:        "4643553b9b42d673a76e20e7b5250713f31e854b4214ac1b5343a3e20547fbe2"
-    sha256 x86_64_linux:   "3dd2a451eee2f35622d5c597460841efef2429a8569a07bfa520377a45dd2d83"
+    rebuild 2
+    sha256 arm64_tahoe:   "fcdd576e2d1f6a9e6e5950e606961b3e2a3342470498789089e279a5d3674be4"
+    sha256 arm64_sequoia: "6555f68623b88de4cbd0b3f79fc8cbe809fc7752f866c74a5daf9df5bbdfffc1"
+    sha256 arm64_sonoma:  "40d3f38c11347d04b10d29c5a9494a8b95d2b99fb666e18c436b36c995a77661"
+    sha256 sonoma:        "a85dee58bfc10160afc4d814cc7665837c404861a2f8ba64df76923835868e16"
+    sha256 arm64_linux:   "9ca8feac2ad91ed44254a1acba6316c24459cc5f0f750727d33e814cd2ee07ab"
+    sha256 x86_64_linux:  "d4c545ecc893e81fbde64c012b73d405749254ff6a5f9feab5ac608cce09390b"
   end
 
-  depends_on "gettext"
   depends_on "gmp"
   depends_on "jpeg-turbo"
   depends_on "libtiff"
   depends_on "nettle"
-  depends_on "pcre"
   depends_on "webp"
 
   uses_from_macos "bzip2"
   uses_from_macos "krb5"
   uses_from_macos "libxcrypt"
   uses_from_macos "sqlite"
-  uses_from_macos "zlib"
 
   on_macos do
     depends_on "gnu-sed" => :build
+    depends_on "gettext"
   end
 
   on_linux do
-    depends_on "libnsl"
+    depends_on "zlib-ng-compat"
   end
 
   def install
-    ENV.append "CFLAGS", "-m64"
+    ENV.append "CFLAGS", "-m64" if !OS.linux? || Hardware::CPU.intel?
     ENV.deparallelize
-
-    # Fix compile with newer Clang
-    # https://git.lysator.liu.se/pikelang/pike/-/issues/10058
-    ENV.append_to_cflags "-Wno-implicit-function-declaration" if DevelopmentTools.clang_build_version >= 1403
 
     # Use GNU sed on macOS to avoid this build failure:
     # sed: RE error: illegal byte sequence
     # Reported upstream here: https://git.lysator.liu.se/pikelang/pike/-/issues/10082.
     ENV.prepend_path "PATH", Formula["gnu-sed"].libexec/"gnubin" if OS.mac?
+
+    # clang: error: unsupported option '-mrdrnd' for target 'arm64-apple-darwin25.0.0'
+    ENV["pike_cv_option_opt_rdrnd"] = "no" if Hardware::CPU.arm?
 
     configure_args = %W[
       --prefix=#{libexec}
@@ -66,6 +59,7 @@ class Pike < Formula
       --without-bundles
       --without-freetype
       --without-gdbm
+      --without-libpcre
       --without-odbc
     ]
 

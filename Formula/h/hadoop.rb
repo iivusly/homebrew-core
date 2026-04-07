@@ -1,10 +1,11 @@
 class Hadoop < Formula
   desc "Framework for distributed processing of large data sets"
   homepage "https://hadoop.apache.org/"
-  url "https://www.apache.org/dyn/closer.lua?path=hadoop/common/hadoop-3.4.0/hadoop-3.4.0.tar.gz"
-  mirror "https://archive.apache.org/dist/hadoop/common/hadoop-3.4.0/hadoop-3.4.0.tar.gz"
-  sha256 "e311a78480414030f9ec63549a5d685e69e26f207103d9abf21a48b9dd03c86c"
+  url "https://www.apache.org/dyn/closer.lua?path=hadoop/common/hadoop-3.5.0/hadoop-3.5.0.tar.gz"
+  mirror "https://archive.apache.org/dist/hadoop/common/hadoop-3.5.0/hadoop-3.5.0.tar.gz"
+  sha256 "82b9c2b89c2c903dc1047b1297da42ae5bcbf4a3e7355940c337eb5a51404850"
   license "Apache-2.0"
+  compatibility_version 1
 
   livecheck do
     url "https://hadoop.apache.org/releases.html"
@@ -12,17 +13,11 @@ class Hadoop < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "3bc4d1af76f0d40746abffa84b42508f1ef53eda3d612b03e5c1f4144bb4826a"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "3bc4d1af76f0d40746abffa84b42508f1ef53eda3d612b03e5c1f4144bb4826a"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "3bc4d1af76f0d40746abffa84b42508f1ef53eda3d612b03e5c1f4144bb4826a"
-    sha256 cellar: :any_skip_relocation, sonoma:         "090c88b44a952701c87d753f376e9465571bfdd4fcb4de38c245e217964574da"
-    sha256 cellar: :any_skip_relocation, ventura:        "090c88b44a952701c87d753f376e9465571bfdd4fcb4de38c245e217964574da"
-    sha256 cellar: :any_skip_relocation, monterey:       "090c88b44a952701c87d753f376e9465571bfdd4fcb4de38c245e217964574da"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "3bc4d1af76f0d40746abffa84b42508f1ef53eda3d612b03e5c1f4144bb4826a"
+    sha256 cellar: :any_skip_relocation, all: "7ed2ca815df59d77574e8d86b9e66a5283c565e39b75e71b1c242e94c881565f"
   end
 
-  # WARNING: Check https://cwiki.apache.org/confluence/display/HADOOP/Hadoop+Java+Versions before updating JDK version
-  depends_on "openjdk@11"
+  # WARNING: Check https://hadoop.apache.org/docs/current/ before updating JDK version
+  depends_on "openjdk@17"
 
   conflicts_with "corepack", because: "both install `yarn` binaries"
   conflicts_with "yarn", because: "both install `yarn` binaries"
@@ -32,7 +27,7 @@ class Hadoop < Formula
     rm ["bin/container-executor", "bin/oom-listener", "bin/test-container-executor"]
     libexec.install %w[bin sbin libexec share etc]
 
-    hadoop_env = Language::Java.overridable_java_home_env("11")
+    hadoop_env = Language::Java.overridable_java_home_env("17")
     hadoop_env[:HADOOP_LOG_DIR] = var/"hadoop"
 
     (libexec/"bin").each_child do |path|
@@ -70,9 +65,9 @@ class Hadoop < Formula
     ].map { |path| libexec/path }
 
     pid = Process.spawn({
-      "JAVA_HOME" => Language::Java.java_home("11"),
+      "JAVA_HOME" => Language::Java.java_home("17"),
       "CLASSPATH" => classpaths.join(":"),
-    }, Formula["openjdk@11"].opt_bin/"java", "org.apache.hadoop.yarn.server.resourcemanager.ResourceManager",
+    }, Formula["openjdk@17"].opt_bin/"java", "org.apache.hadoop.yarn.server.resourcemanager.ResourceManager",
                                              "-Dyarn.resourcemanager.webapp.address=127.0.0.1:#{port}")
     sleep 15
 

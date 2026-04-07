@@ -1,8 +1,8 @@
 class Teleport < Formula
   desc "Modern SSH server for teams managing distributed infrastructure"
   homepage "https://goteleport.com/"
-  url "https://github.com/gravitational/teleport/archive/refs/tags/v14.3.3.tar.gz"
-  sha256 "c30cefedae3df3cacef78e385a369773820f9ed00432b3c1bd12b0026b01f144"
+  url "https://github.com/gravitational/teleport/archive/refs/tags/v18.7.2.tar.gz"
+  sha256 "26822b4dbfba8daa672686c235cdff6714c75c9598fdedc8e26ebd20de1aa2ad"
   license all_of: ["AGPL-3.0-or-later", "Apache-2.0"]
   head "https://github.com/gravitational/teleport.git", branch: "master"
 
@@ -18,30 +18,70 @@ class Teleport < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "327c97012b954c9e17e46926ff6d46e919bc9a32ca55ccf9dce95e0bf1c1b8b0"
-    sha256 cellar: :any,                 arm64_ventura:  "f569c4a8b34f93e23bb76d05e76df1b16b22f7a8cc36c2d9916e67c7873be825"
-    sha256 cellar: :any,                 arm64_monterey: "4e7c7c7d068bf972f65dff941b457db1a663cf26ac163e274a303ccfd6b4759b"
-    sha256 cellar: :any,                 sonoma:         "04bf1dceb7b1dc5864dd0c7f9e192fb0972791f3c9ee9be9e7914ae9471f1101"
-    sha256 cellar: :any,                 ventura:        "1283a664b51ebfc02a78163ba49739a6d990ec023f1898b7dba672cccfb60362"
-    sha256 cellar: :any,                 monterey:       "5f098515fa8e90a07e8274e44fb1ad24cb61db1fa74ed10106d78c82d4f4677d"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "906b35b2c7dcc5bed2b1a9897b2464b113ba6c568340f3a193cfc665f041831a"
+    sha256 cellar: :any,                 arm64_tahoe:   "1ad043ee3ec284145e3dc1dd3518afb57c3cdc03caaaaa94d9d384599954be78"
+    sha256 cellar: :any,                 arm64_sequoia: "fe3281445fef7359ad36588acc998a6fe27ff64a9377a805281c26e7c1f60d1b"
+    sha256 cellar: :any,                 arm64_sonoma:  "8e10e8224c1cb4b16eae067f0e8cffa6b2146482585cd71d09f39b6d56318a21"
+    sha256 cellar: :any,                 sonoma:        "58fc2847bd80280b649ec941274cc5f374b041f36ce81b403e74a8f9911e6948"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "c874ba53a8ff32d46a27edaffa65e031b527b914a423f9a76eb6a46025da8b70"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "86f3a52f196a8a5d3ab3c68f7f5100935e53b5cf15fbf6ce77b64ee905ba877d"
   end
 
-  depends_on "go@1.22" => :build
-  depends_on "pkg-config" => :build
-  depends_on "yarn" => :build
+  depends_on "binaryen" => :build
+  depends_on "go" => :build
+  depends_on "node" => :build
+  depends_on "pkgconf" => :build
+  depends_on "pnpm" => :build
+  depends_on "rust" => :build
+  # TODO: try to remove rustup dependancy, see https://github.com/Homebrew/homebrew-core/pull/191633#discussion_r1774378671
+  depends_on "rustup" => :build
   depends_on "libfido2"
-  depends_on "node"
   depends_on "openssl@3"
 
-  uses_from_macos "curl" => :test
-  uses_from_macos "netcat" => :test
   uses_from_macos "zip"
 
   conflicts_with "etsh", because: "both install `tsh` binaries"
   conflicts_with "tctl", because: "both install `tctl` binaries"
+  conflicts_with cask: "teleport-suite"
+  conflicts_with cask: "teleport-suite@17"
+  conflicts_with cask: "teleport-suite@16"
+  conflicts_with cask: "tsh", because: "both install `tsh` binaries"
+
+  resource "wasm-bindgen" do
+    url "https://github.com/wasm-bindgen/wasm-bindgen/archive/refs/tags/0.2.99.tar.gz"
+    sha256 "1df06317203c9049752e55e59aee878774c88805cc6196630e514fa747f921f2"
+
+    livecheck do
+      url "https://raw.githubusercontent.com/gravitational/teleport/refs/tags/v#{LATEST_VERSION}/Cargo.lock"
+      regex(/name\s*=\s*"wasm-bindgen".*?version\s*=\s*["'](\d+(?:\.\d+)+)["']/im)
+    end
+  end
+
+  # disable `wasm-opt` for ironrdp pkg release build, upstream pr ref, https://github.com/gravitational/teleport/pull/50178
+  patch :DATA
 
   def install
+    # Workaround to avoid patchelf corruption when cgo is required
+    if OS.linux? && Hardware::CPU.arm64?
+      ENV["GO_EXTLINK_ENABLED"] = "1"
+      ENV.append "GOFLAGS", "-buildmode=pie"
+    end
+
+    # Prevent pnpm from downloading another copy due to `packageManager` feature
+    (buildpath/"pnpm-workspace.yaml").append_lines <<~YAML
+      managePackageManagerVersions: false
+    YAML
+
+    ENV.prepend_path "PATH", Formula["rustup"].bin
+    system "rustup", "set", "profile", "minimal"
+    system "rustup", "default", "stable"
+
+    resource("wasm-bindgen").stage do
+      system "cargo", "install", *std_cargo_args(path: "crates/cli", root: buildpath)
+    end
+
+    # Replace wasm-bindgen binary call to the built one
+    inreplace "Makefile", "wasm-bindgen target", buildpath/"bin/wasm-bindgen target"
+
     ENV.deparallelize { system "make", "full", "FIDO2=dynamic" }
     bin.install Dir["build/*"]
   end
@@ -52,7 +92,7 @@ class Teleport < Formula
     assert_match version.to_s, shell_output("#{bin}/tctl version")
 
     mkdir testpath/"data"
-    (testpath/"config.yml").write <<~EOS
+    (testpath/"config.yml").write <<~YAML
       version: v2
       teleport:
         nodename: testhost
@@ -60,17 +100,29 @@ class Teleport < Formula
         log:
           output: stderr
           severity: WARN
-    EOS
+    YAML
 
-    fork do
-      exec "#{bin}/teleport start --roles=proxy,node,auth --config=#{testpath}/config.yml"
-    end
-
+    spawn bin/"teleport", "start", "--roles=proxy,node,auth", "--config=#{testpath}/config.yml"
     sleep 10
     system "curl", "--insecure", "https://localhost:3080"
 
-    status = shell_output("#{bin}/tctl --config=#{testpath}/config.yml status")
-    assert_match(/Cluster\s*testhost/, status)
-    assert_match(/Version\s*#{version}/, status)
+    status = shell_output("#{bin}/tctl status --config=#{testpath}/config.yml")
+    assert_match(/Cluster:\s*testhost/, status)
+    assert_match(/Version:\s*#{version}/, status)
   end
 end
+
+__END__
+diff --git a/web/packages/shared/libs/ironrdp/Cargo.toml b/web/packages/shared/libs/ironrdp/Cargo.toml
+index ddcc4db..913691f 100644
+--- a/web/packages/shared/libs/ironrdp/Cargo.toml
++++ b/web/packages/shared/libs/ironrdp/Cargo.toml
+@@ -7,6 +7,9 @@ publish.workspace = true
+ 
+ # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+ 
++[package.metadata.wasm-pack.profile.release]
++wasm-opt = false
++
+ [lib]
+ crate-type = ["cdylib"]

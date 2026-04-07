@@ -1,18 +1,17 @@
 class Cnats < Formula
   desc "C client for the NATS messaging system"
   homepage "https://github.com/nats-io/nats.c"
-  url "https://github.com/nats-io/nats.c/archive/refs/tags/v3.8.2.tar.gz"
-  sha256 "083ee03cf5a413629d56272e88ad3229720c5006c286e8180c9e5b745c10f37d"
+  url "https://github.com/nats-io/nats.c/archive/refs/tags/v3.12.0.tar.gz"
+  sha256 "06b64d7045fd618c98e5608001b384bdbfa6a17718dba64e732ba72a6f00649b"
   license "Apache-2.0"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "a85b87a12ef0711c647cbc9d5dd4d8e6340f4382483fdd9bd68d521601e47aed"
-    sha256 cellar: :any,                 arm64_ventura:  "0ebd50389b71aafb3eb9634a2d42b75d70c99b62eeb45373e73669bb4ee4ddf5"
-    sha256 cellar: :any,                 arm64_monterey: "0aef56d8fe8fdbcd66eca99e7b3c5af119ae4eaf712552106135ae60dd0b97a0"
-    sha256 cellar: :any,                 sonoma:         "1c02a3280c07e2f283fb197e75497c91791b6081fc4ca6196773bd0a05e729d1"
-    sha256 cellar: :any,                 ventura:        "751e5adda134e3c8fca555bf78b23287e929fe89508f8b9633539393416fc25b"
-    sha256 cellar: :any,                 monterey:       "1c929ab71ac2139f0e693eacbdac44145dcac2f1320c4e374b0c43636cfc7d2b"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "78aadfaf79af653641fefb5ca63359db3a5e367c56f4b8741d73d00c157b23c8"
+    sha256 cellar: :any,                 arm64_tahoe:   "d6b6a71f904ece5d05e820a00279676169c201dd29af015760f14ec90eedf6c3"
+    sha256 cellar: :any,                 arm64_sequoia: "4802784048ccef88363702e5db80b98657daa8dd7ebd90d545535329c516de18"
+    sha256 cellar: :any,                 arm64_sonoma:  "f693d5fc84ab27feef7ef4d67b8674a88f36f42a05039ced84312f5a065d6ef2"
+    sha256 cellar: :any,                 sonoma:        "da0021e25b526acac1a1e0d4f6fbed9aae416f2986f4b000b31b1b80b72741b9"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "f811f0043da5c8aa249aa337e7a983fa76c8e82eb1f5f99c88934551ebfb3882"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "1891557d88308406f2cb6525cd9825777c4bc280becc0b68878d471a82f9c2b5"
   end
 
   depends_on "cmake" => :build
@@ -22,25 +21,20 @@ class Cnats < Formula
   depends_on "protobuf-c"
 
   def install
-    args = %W[
-      -DCMAKE_INSTALL_PREFIX=#{prefix}
-      -DBUILD_TESTING=OFF
-    ]
-
-    system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
+    system "cmake", "-S", ".", "-B", "build", *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <nats/nats.h>
       #include <stdio.h>
       int main() {
         printf("%s\\n", nats_GetVersion());
         return 0;
       }
-    EOS
+    C
     system ENV.cc, "test.c", "-L#{lib}", "-lnats", "-o", "test"
     assert_equal version, shell_output("./test").strip
   end

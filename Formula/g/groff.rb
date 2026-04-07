@@ -1,24 +1,22 @@
 class Groff < Formula
   desc "GNU troff text-formatting system"
   homepage "https://www.gnu.org/software/groff/"
-  url "https://ftp.gnu.org/gnu/groff/groff-1.23.0.tar.gz"
-  mirror "https://ftpmirror.gnu.org/groff/groff-1.23.0.tar.gz"
-  sha256 "6b9757f592b7518b4902eb6af7e54570bdccba37a871fddb2d30ae3863511c13"
+  url "https://ftpmirror.gnu.org/gnu/groff/groff-1.24.1.tar.gz"
+  mirror "https://ftp.gnu.org/gnu/groff/groff-1.24.1.tar.gz"
+  sha256 "74e2819795b6aff431aeac983d63a9c8968eeaba2a2eba7df8ba4c7b41e7cfd8"
   license "GPL-3.0-or-later"
+  compatibility_version 1
 
   bottle do
-    sha256 arm64_sonoma:   "ce07a3e98fa6cfff23826e993d638c12f833b9fb5fc9c2a3593364b0be162031"
-    sha256 arm64_ventura:  "c6d152d002365b25c67782fed7ca0141ee3dafaaa0e726bf3df427d469fb73ce"
-    sha256 arm64_monterey: "4926259bc0c75eb28f9d288c618ae84dc1a1a14952f3f414054e01ef5be345d0"
-    sha256 arm64_big_sur:  "e4dfe40ef95e535d7f9c98e3743ce42112ae74c8aa3cfc4f30089c53aa123ba4"
-    sha256 sonoma:         "e5763fdbb5fb595f8b4588f19b9a5785739568075884563f79dc35fb3c1d2580"
-    sha256 ventura:        "841d00a033f005f7e9eefed0d1190402879de5568a6624e494a52c581353bf5a"
-    sha256 monterey:       "a0bfb5d123ae6766a69b8d245bcc8d0323e8f6bce3f7c55c89403939ba176d46"
-    sha256 big_sur:        "8e8f79c4969912bf20f183dc3450001dc952b94967dca5cea18a7379d9d54f55"
-    sha256 x86_64_linux:   "621ff79fc4f7ff2d66f78b96e1b3229aed81c49cb13831a46918841696b35428"
+    sha256 arm64_tahoe:   "c3e55a14145a5904cba3e5bed3417e66b23cc9808736ca043936813308957c9c"
+    sha256 arm64_sequoia: "dbe1f8e04914c8a8f104261c479c364f780bbd5dce61750f84efa370a10346a7"
+    sha256 arm64_sonoma:  "d52f2237fcf48eac61c290145bd5fff960683b63a9ba4aca5aff899e49803dca"
+    sha256 sonoma:        "9fc655ebe0eb1d7ac14ec84f57b677cce6252a4300e90d4e587743822597f7a8"
+    sha256 arm64_linux:   "0f31f48d9b8fe7b0f052ce4f1713acbfe60ea209ed81c8b695bf39b31be2186c"
+    sha256 x86_64_linux:  "98cc5e858d9adab22a55d1f833df55332354a0a2826212b584c873c527a55d37"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "ghostscript"
   depends_on "netpbm"
   depends_on "psutils"
@@ -36,13 +34,20 @@ class Groff < Formula
   end
 
   def install
-    system "./configure", "--prefix=#{prefix}", "--without-x", "--with-uchardet"
+    # Local config needs to survive upgrades
+    inreplace "Makefile.in" do |s|
+      s.change_make_var! "localfontdir", "@sysconfdir@/groff/site-font"
+      s.change_make_var! "localtmacdir", "@sysconfdir@/groff/site-tmac"
+    end
+    system "./configure", "--sysconfdir=#{etc}",
+                          "--without-x",
+                          "--with-uchardet",
+                          *std_configure_args
     system "make" # Separate steps required
     system "make", "install"
   end
 
   test do
-    assert_match "homebrew\n",
-      pipe_output("#{bin}/groff -a", "homebrew\n")
+    assert_match "homebrew\n", pipe_output("#{bin}/groff -a", "homebrew\n")
   end
 end

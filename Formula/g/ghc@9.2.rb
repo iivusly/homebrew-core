@@ -26,12 +26,13 @@ class GhcAT92 < Formula
   # No longer maintained. 9.2 was removed from current releases on 2023-11-10 with 9.4.8 release.
   # Ref: https://gitlab.haskell.org/ghc/homepage/-/commit/f8e37fc84e6bc3b72e651bc778a1d6a7f2614e4b
   deprecate! date: "2024-08-15", because: :unmaintained
+  disable! date: "2025-08-16", because: :unmaintained
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
+  depends_on maximum_macos: [:sonoma, :build]
   depends_on "python@3.12" => :build
   depends_on "sphinx-doc" => :build
-  depends_on macos: :catalina
 
   uses_from_macos "m4" => :build
   uses_from_macos "xz" => :build

@@ -1,77 +1,62 @@
 class SignalCli < Formula
   desc "CLI and dbus interface for WhisperSystems/libsignal-service-java"
   homepage "https://github.com/AsamK/signal-cli"
-  url "https://github.com/AsamK/signal-cli/archive/refs/tags/v0.13.5.tar.gz"
-  sha256 "c1fdc8ccff324278a9357aed04fa7de88ecba1fc270f5555b5cea77d415d1342"
+  url "https://github.com/AsamK/signal-cli/archive/refs/tags/v0.14.2.tar.gz"
+  sha256 "b9df4f8be106e7ee69902fc4eb944b87c5c3117fe5bcd2306246130d86749dbf"
   license "GPL-3.0-or-later"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "5df7b4a1b402f0bad8a39e3bbcf3c6bbe2d065f846827919ed580db76b7179e7"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "cd97c3784b9732002ac2459f02bc98ce271176c5fe69fbf38b3e7d46d400bd4f"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "71d800c2749004ca1ed6214b87b6acbb4a5f8e6cf775a0aede637a82b6e83ffa"
-    sha256 cellar: :any_skip_relocation, sonoma:         "42724c8265d152666e72151c1ffa3d753c597ac05b93481fc33fadf822cd7bb2"
-    sha256 cellar: :any_skip_relocation, ventura:        "7392fcf9650f2efa1c80113272339dbeb82f8a369f232d345f97a18326036d42"
-    sha256 cellar: :any_skip_relocation, monterey:       "58b01a46c5702ebdea14296964595b0a7c0f43656bce265ec3a7c7ca9449870a"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "d98bafe277e4c3dc429fd4907b809e598445cb1fbfb08088e4f705f1e0cdc7a5"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "aef763bb544d91b45134fe2fbc1258dcfd075f1409fd2a64c3b4c09e4d2eebc0"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "b709e96104926a00734aaafaf7dc592377ad27efe7e6f9158770b10fb0f71403"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "6dbbb70bb72b3f34c054b4d9ee3cd80c0cdfb16060118d95d999f73ff80b6c84"
+    sha256 cellar: :any_skip_relocation, sonoma:        "5d9863ba9280fe24494104e691f6990bc2ca3a8ce9ffc5fb1f19e2f3257c6a33"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "e3b8c4c06b0bab71b4e12c1592257954c1daba72de8eedc990deb05a85d7161e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "342627b3280d85fadd085a33f11316adecafeae5921c91ff59a230d9e67c69ca"
   end
 
   depends_on "cmake" => :build # For `boring-sys` crate in `libsignal-client`
   depends_on "gradle" => :build
   depends_on "protobuf" => :build
-  # libsignal-client requires a specific version of rustc
-  # https://github.com/signalapp/libsignal/blob/#{libsignal-client.version}/rust-toolchain
-  depends_on "rustup" => :build
+  depends_on "rust" => :build
 
-  depends_on "openjdk@21"
+  depends_on "openjdk"
 
   uses_from_macos "llvm" => :build # For `libclang`, used by `boring-sys` crate
   uses_from_macos "zip" => :build
 
-  # https://github.com/AsamK/signal-cli/wiki/Provide-native-lib-for-libsignal#determine-the-required-libsignal-client-version
-  # To check the version of `libsignal-client`, run:
-  # url=https://github.com/AsamK/signal-cli/releases/download/v$version/signal-cli-$version.tar.gz
-  # curl -fsSL $url | tar -tz | grep libsignal-client
   resource "libsignal-client" do
-    url "https://github.com/signalapp/libsignal/archive/refs/tags/v0.52.2.tar.gz"
-    sha256 "40ddc51bc5bf1013c583c07717ed00cedfafda55f9f9a43aad72f9a55986b199"
-  end
+    url "https://github.com/signalapp/libsignal/archive/refs/tags/v0.90.0.tar.gz"
+    sha256 "8b09956cbd6a58a1aafe96e5681b4d49c59c1c2ee03839d9b5ad25d5f347f520"
 
-  def install
-    ENV["JAVA_HOME"] = Language::Java.java_home("21")
-    system "gradle", "build"
-    system "gradle", "installDist"
-    libexec.install (buildpath/"build/install/signal-cli").children
-    (libexec/"bin/signal-cli.bat").unlink
-    (bin/"signal-cli").write_env_script libexec/"bin/signal-cli", Language::Java.overridable_java_home_env("21")
-
-    resource("libsignal-client").stage do |r|
-      # https://github.com/AsamK/signal-cli/wiki/Provide-native-lib-for-libsignal#manual-build
-
-      libsignal_client_jar = libexec.glob("lib/libsignal-client-*.jar").first
-      embedded_jar_version = Version.new(libsignal_client_jar.to_s[/libsignal-client-(.*)\.jar$/, 1])
-      res = r.resource
-      odie "#{res.name} needs to be updated to #{embedded_jar_version}!" if embedded_jar_version != res.version
-
-      # rm originally-embedded libsignal_jni lib
-      system "zip", "-d", libsignal_client_jar, "libsignal_jni.so", "libsignal_jni.dylib", "signal_jni.dll"
-
-      # build & embed library for current platform
-      cd "java" do
-        inreplace "settings.gradle", "include ':android'", ""
-        system "./build_jni.sh", "desktop"
-        cd "shared/resources" do
-          system "zip", "-u", libsignal_client_jar, shared_library("libsignal_jni")
-        end
-      end
+    livecheck do
+      url "https://raw.githubusercontent.com/AsamK/signal-cli/refs/tags/v#{LATEST_VERSION}/libsignal-version"
+      regex(/^v?(\d+(?:\.\d+)+)$/i)
     end
   end
 
+  def install
+    java_version = "25"
+    ENV["JAVA_HOME"] = Language::Java.java_home(java_version)
+
+    # https://github.com/AsamK/signal-cli/wiki/Provide-native-lib-for-libsignal
+    resource("libsignal-client").stage do |r|
+      libsignal_version = (buildpath/"libsignal-version").read.strip
+      odie "libsignal-client needs to be updated to #{libsignal_version}!" if r.version != libsignal_version
+      system "gradle", "--no-daemon", "--project-dir=java", "-PskipAndroid", ":client:jar"
+      buildpath.install Pathname.glob("java/client/build/libs/libsignal-client-*.jar")
+    end
+
+    libsignal_client_jar = buildpath.glob("libsignal-client-*.jar").first
+    system "gradle", "--no-daemon", "-Plibsignal_client_path=#{libsignal_client_jar}", "installDist"
+    libexec.install (buildpath/"build/install/signal-cli").children
+    (libexec/"bin/signal-cli.bat").unlink
+    (bin/"signal-cli").write_env_script libexec/"bin/signal-cli", Language::Java.overridable_java_home_env(java_version)
+  end
+
   test do
-    # test 1: checks class loading is working and version is correct
     output = shell_output("#{bin}/signal-cli --version")
     assert_match "signal-cli #{version}", output
 
-    # test 2: ensure crypto is working
     begin
       io = IO.popen("#{bin}/signal-cli link", err: [:child, :out])
       sleep 24

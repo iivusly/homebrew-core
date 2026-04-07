@@ -4,10 +4,10 @@ class Nanopb < Formula
 
   desc "C library for encoding and decoding Protocol Buffer messages"
   homepage "https://jpa.kapsi.fi/nanopb/docs/index.html"
-  url "https://jpa.kapsi.fi/nanopb/download/nanopb-0.4.8.tar.gz"
-  sha256 "d685e05fc6e56fd7e4e3cacc71f45bd91d90c0455257603ed98a39d2b0f1dd4b"
+  url "https://jpa.kapsi.fi/nanopb/download/nanopb-0.4.9.1.tar.gz"
+  sha256 "882cd8473ad932b24787e676a808e4fb29c12e086d20bcbfbacc66c183094b5c"
   license "Zlib"
-  revision 2
+  revision 6
 
   livecheck do
     url "https://jpa.kapsi.fi/nanopb/download/"
@@ -15,32 +15,29 @@ class Nanopb < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "1f15525c49e93031d767a77fe33cf6d63e7331341a337bac07127fc52e5b231b"
-    sha256 cellar: :any,                 arm64_ventura:  "6919bef03e1f792e010579d18b2a45f83a258d76d9dfd273ad94dee35b31e576"
-    sha256 cellar: :any,                 arm64_monterey: "260303ae3cff7074cb22c1bed0e21ebe2e2b584007ca1cca0144de576ac24861"
-    sha256 cellar: :any,                 sonoma:         "e668b434826985bb97dea2f351fd2eea1bc563c69f4ca3eb2bc5cc197e1c0015"
-    sha256 cellar: :any,                 ventura:        "be8bfe95b11aeb6c73a8298e2467104a3f5ed38d4c04be0ed182ad3094aa3a46"
-    sha256 cellar: :any,                 monterey:       "b943a65449f1614bc4c7b608adac7a8f87e62dd89c7b5e358aafb12b0ca62869"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "edef625d5954c642121ad269d1e3978cec2f653d1bdd9868086e46a0b289438c"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "51fdb8214773b1431f5f54eb3bb94d583140a2af0aa5d13ba4a7d9a95a175ffe"
+    sha256 cellar: :any,                 arm64_sequoia: "b1a79bde77a10714cd34a651d38323804b6ace9c4882469e8eeff447bd527981"
+    sha256 cellar: :any,                 arm64_sonoma:  "cd834785baaa72e3e9cdff0d38c25eeace2f145df358cea150e379121bffba43"
+    sha256 cellar: :any,                 sonoma:        "24be4b707a3495e707546c5fefb63394c666a8562241c77dcce69942937b2648"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "9e9954ea9fa95369fd9f1685dff2f75e0a14b8c65a1d7f0519dcbd3651a08f19"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "f3c0b0233455e0d27ab4a16291f6db79aa1f256b28e419cba62cfbf159361319"
   end
 
   depends_on "cmake" => :build
   depends_on "protobuf"
-  depends_on "python@3.12"
+  depends_on "python@3.14"
+
+  pypi_packages package_name: "nanopb"
 
   resource "protobuf" do
-    url "https://files.pythonhosted.org/packages/71/a5/d61e4263e62e6db1990c120d682870e5c50a30fb6b26119a214c7a014847/protobuf-5.27.2.tar.gz"
-    sha256 "f3ecdef226b9af856075f28227ff2c90ce3a594d092c39bee5513573f25e2714"
-  end
-
-  resource "setuptools" do
-    url "https://files.pythonhosted.org/packages/65/d8/10a70e86f6c28ae59f101a9de6d77bf70f147180fbf40c3af0f64080adc3/setuptools-70.3.0.tar.gz"
-    sha256 "f171bab1dfbc86b132997f26a119f6056a57950d058587841a0082e8830f9dc5"
+    url "https://files.pythonhosted.org/packages/f2/00/04a2ab36b70a52d0356852979e08b44edde0435f2115dc66e25f2100f3ab/protobuf-7.34.0.tar.gz"
+    sha256 "3871a3df67c710aaf7bb8d214cc997342e63ceebd940c8c7fc65c9b3d697591a"
   end
 
   def install
     ENV.append_to_cflags "-DPB_ENABLE_MALLOC=1"
-    venv = virtualenv_create(libexec, "python3.12")
+    venv = virtualenv_create(libexec, "python3.14")
     venv.pip_install resources
 
     system "cmake", "-S", ".", "-B", "build",
@@ -53,18 +50,16 @@ class Nanopb < Formula
   end
 
   test do
-    (testpath/"test.proto").write <<~EOS
+    (testpath/"test.proto").write <<~PROTO
       syntax = "proto2";
 
       message Test {
         required string test_field = 1;
       }
-    EOS
+    PROTO
 
-    system Formula["protobuf"].bin/"protoc",
-      "--proto_path=#{testpath}", "--plugin=#{bin}/protoc-gen-nanopb",
-      "--nanopb_out=#{testpath}", testpath/"test.proto"
-    system "grep", "Test", testpath/"test.pb.c"
-    system "grep", "Test", testpath/"test.pb.h"
+    system Formula["protobuf"].bin/"protoc", "--nanopb_out=.", "test.proto"
+    assert_match "Test", (testpath/"test.pb.c").read
+    assert_match "Test", (testpath/"test.pb.h").read
   end
 end

@@ -1,18 +1,22 @@
 class Pgrok < Formula
   desc "Poor man's ngrok, multi-tenant HTTP/TCP reverse tunnel solution"
   homepage "https://github.com/pgrok/pgrok"
-  url "https://github.com/pgrok/pgrok/archive/refs/tags/v1.4.1.tar.gz"
-  sha256 "e0dd1a9ec350612df37ac5e4c90798ac6f6f8cf2003e6cbb3d736c667bba2198"
+  url "https://github.com/pgrok/pgrok/archive/refs/tags/v1.5.0.tar.gz"
+  sha256 "e0dac3df791e9727c850a18874c7888544b548345b27a1a94914fcfc10f05e9c"
   license "MIT"
 
+  livecheck do
+    url :stable
+    strategy :github_latest
+  end
+
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "37c6d36c1f6b0f22c3115b4be5c1d8af659b53bd845193319c7473d8653bb029"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "7edafb5ce275e575f5d4a99954805c417d98b39386267b6c4c033fb7f61efcf7"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "3ddb52a95411ce24a9369da24259ef59b37b1d86d7b3d92b513aff1ac9f59421"
-    sha256 cellar: :any_skip_relocation, sonoma:         "6aba6a48f1a592e25bde72a2d0fb9a7b07d9ffe23622ac3246e310cd025f2496"
-    sha256 cellar: :any_skip_relocation, ventura:        "30ad1b464b82fa3e9d6a08b08057a72666b8f6ac52eb775a4e6bb72ae8638b9f"
-    sha256 cellar: :any_skip_relocation, monterey:       "9310b35d240c739a5f0df1aa6b111e55fe08b3fa2401c6a9fc8f52f459a62e26"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "34491559e05fb7a8feb9e2d00428754ef5c2555ff954749956adf07c90301cd1"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "cf15fcb2cdcc2f5be2f04781be608941f86663e90d3ee1ff48d970281263aa8c"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "cf15fcb2cdcc2f5be2f04781be608941f86663e90d3ee1ff48d970281263aa8c"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "cf15fcb2cdcc2f5be2f04781be608941f86663e90d3ee1ff48d970281263aa8c"
+    sha256 cellar: :any_skip_relocation, sonoma:        "68efbbd93c7aae98d6cc6a0c15f8cd4dce013eac925aa8d482eb2276e878ad32"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "419e8c45a8430f1b6c793a8e7ad3e5dff7d539e3ff19b6abb8ffacdaca86fb45"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "2e303842681daf112dc720aaa3d091096b5e5cb0bd6771a42ad9d84ea631487e"
   end
 
   depends_on "go" => :build

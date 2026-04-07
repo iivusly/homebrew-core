@@ -1,36 +1,61 @@
 class WebtorrentCli < Formula
   desc "Command-line streaming torrent client"
   homepage "https://webtorrent.io/"
-  url "https://registry.npmjs.org/webtorrent-cli/-/webtorrent-cli-4.1.0.tgz"
-  sha256 "3b7bac7470e65540e45ed92b8b8d70008bbeca36bf96e81318c15bb9dee8b942"
+  url "https://registry.npmjs.org/webtorrent-cli/-/webtorrent-cli-5.1.3.tgz"
+  sha256 "54a53ecdacbccf0f6855bd4ef18f4f154576f8346e3b7aef3792b66dd5aaaa1b"
   license "MIT"
 
   bottle do
-    sha256                               arm64_sonoma:   "15ab8aafa171323e2e057633f8cfff9f23347cdf7f79777082a5b059d26eb19f"
-    sha256                               arm64_ventura:  "be8479b3f65c2a5c11794f53d04ee02357a76bf3c65f5bc410ffc09e805906f8"
-    sha256                               arm64_monterey: "0e582b5e95bd7ae1462caca1b66e796fa83553b75dcf9c1b98b7e4e36f2f57bf"
-    sha256                               arm64_big_sur:  "4658471f872e03c58d8f1ace044942a3debb7e6ad9dbf2a1ac9546e93efde890"
-    sha256                               sonoma:         "94a07b753cec7f30b5270432acd7002e577cd89f76df36ac1c0834c94dad7743"
-    sha256                               ventura:        "7fabff21cbe0391c790a9c05b0a98694ce054223981e012c1d0e65932ff8f63a"
-    sha256                               monterey:       "257f5b960d1291aa153aff64eb1785ae36512bb78516d7d2d132d52a9ff44671"
-    sha256                               big_sur:        "3dc242aefbede7812f1bf60486f7f6627590942b96e44af31197cfaf088e7d0f"
-    sha256                               catalina:       "066aab7a937b40b19e50cc2efe6e336aa89dccbd958022d79e8956a10aa4eaa3"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "5b87f6ede3b7fa60052d477c30c12c72f2cf0d2c50223376d05579c5f43e7ee1"
+    rebuild 2
+    sha256 arm64_tahoe:   "4f3bda6aa26bcf929db135e31c3fb3822ef250a7738438b4256c0706abc736b6"
+    sha256 arm64_sequoia: "2455bfe4e4762ecf6d4110b6e3db3160d6b6f7ed455062fea983f230b127b127"
+    sha256 arm64_sonoma:  "89c52aa581dbbf5676cb8fd1e7837f9e7830b35ee33fda3b1dba4b37484b33d7"
+    sha256 sonoma:        "6ba628acde26d8a0b2c90c235cbb4b55739c860781a3974160556e5bfc4169f6"
+    sha256 arm64_linux:   "a44f21e2d862608a8087a7ec516b56d181ebdf61246c2ac7c21d92af9a3b38db"
+    sha256 x86_64_linux:  "9760ecc99259186588ceccdfa3e25a12296ba01b852c2c3411c2c7eeadc3e0ee"
   end
 
-  depends_on "node"
+  deprecate! date: "2025-10-28", because: "uses deprecated node@20"
+
+  depends_on "cmake" => :build
+  depends_on "ninja" => :build
+  # Using Node 20 due to issue with N-API 10 https://github.com/murat-dogan/node-datachannel/issues/333
+  # and unable to use newer node-datachannel https://github.com/ThaUnknown/webrtc-polyfill/issues/9
+  depends_on "node@20"
 
   def install
+    # Workaround for CMake 4 until node-datachannel -> libdatachannel -> plog is updated
+    ENV["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
+
     system "npm", "install", *std_npm_args
-    bin.install_symlink Dir["#{libexec}/bin/*"]
+    bin.install_symlink libexec.glob("bin/*")
+
+    nm = libexec/"lib/node_modules/webtorrent-cli/node_modules"
+
+    # Remove node-datachannel dev dependencies which were installed via
+    # `npm install --ignore-scripts --production=false` to build node-datachannel.node
+    # Also remove prebuild-install which was needed at install time due to install script
+    node_domexception = nm/"node-datachannel/node_modules/node-domexception"
+    rm_r(nm.glob("node-datachannel/node_modules/*") - [node_domexception])
+    odie "node-domexception not found! Check if it is still a dependency." unless node_domexception.exist?
+
+    # Remove node-datachannel CMake build directory other than the final binary
+    node_datachannel_release_dir = nm/"node-datachannel/build/Release"
+    rm_r(nm.glob("node-datachannel/build/*") - [node_datachannel_release_dir])
+    odie "node-datachannel.node not found!" if node_datachannel_release_dir.glob("*.node").empty?
 
     # Remove incompatible pre-built binaries
     os = OS.kernel_name.downcase
     arch = Hardware::CPU.intel? ? "x64" : Hardware::CPU.arch.to_s
-    libexec.glob("lib/node_modules/webtorrent-cli/node_modules/{bufferutil,utp-native,utf-8-validate}/prebuilds/*")
-           .each { |dir| rm_r(dir) if dir.basename.to_s != "#{os}-#{arch}" }
+    platforms = ["#{os}-#{arch}"]
+    platforms << "#{os}-x64+arm64" if OS.mac?
+    pb = nm/"{bare-fs,bare-os,bare-url,bufferutil,fs-native-extensions,utp-native,utf-8-validate}"
+    libexec.glob(pb/"prebuilds/*").each do |dir|
+      rm_r(dir) if platforms.exclude?(dir.basename.to_s)
+      dir.glob("*.musl.node").map(&:unlink) if OS.linux?
+    end
 
-    # Replace universal binaries with their native slices
+    # Replace universal binaries with native slices
     deuniversalize_machos
   end
 
@@ -42,7 +67,7 @@ class WebtorrentCli < Formula
       &tr=https://tracker.archlinux.org:443/announce
     EOS
 
-    expected_output_raw = <<~EOS
+    expected_output_raw = <<~JSON
       {
         "xt": "urn:btih:9eae210fe47a073f991c83561e75d439887be3f3",
         "dn": "archlinux-2017.02.01-x86_64.iso",
@@ -58,7 +83,7 @@ class WebtorrentCli < Formula
         ],
         "urlList": []
       }
-    EOS
+    JSON
     expected_json = JSON.parse(expected_output_raw)
     actual_output_raw = shell_output("#{bin}/webtorrent info '#{magnet_uri}'")
     actual_json = JSON.parse(actual_output_raw)

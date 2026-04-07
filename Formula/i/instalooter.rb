@@ -6,20 +6,17 @@ class Instalooter < Formula
   url "https://files.pythonhosted.org/packages/30/13/907e6aaba6280e1001080ab47e750068ffc5fb7174203985b3c9d678e3f2/instalooter-2.4.4.tar.gz"
   sha256 "fb9b4a948702361a161cc42e58857e3a6c9dafd9e22568b07bc0d0b09c3c34a9"
   license "GPL-3.0-or-later"
-  revision 10
+  revision 16
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "5972135ec5f30bb1cfc13f789c9fb3c06b9ae04f35d14a12089960bbc1b7bf15"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "5972135ec5f30bb1cfc13f789c9fb3c06b9ae04f35d14a12089960bbc1b7bf15"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "5972135ec5f30bb1cfc13f789c9fb3c06b9ae04f35d14a12089960bbc1b7bf15"
-    sha256 cellar: :any_skip_relocation, sonoma:         "4b77cc8c1709116437be19329430fb4ed951f201ef5cfd4eabb2301d103052b2"
-    sha256 cellar: :any_skip_relocation, ventura:        "4b77cc8c1709116437be19329430fb4ed951f201ef5cfd4eabb2301d103052b2"
-    sha256 cellar: :any_skip_relocation, monterey:       "4b77cc8c1709116437be19329430fb4ed951f201ef5cfd4eabb2301d103052b2"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "efc7ffec06358c73a86953500a2d17a13ffdd7466ec369e8b43a9f5fc7d3e12d"
+    sha256 cellar: :any_skip_relocation, all: "a7b54b3c50b392448ff65eae48c5b988e1ebab860868303e991f4fbf3764dd80"
   end
 
-  depends_on "certifi"
-  depends_on "python@3.12"
+  depends_on "certifi" => :no_linkage
+  depends_on "python@3.14"
+
+  pypi_packages exclude_packages: "certifi",
+                extra_packages:   "setuptools<82" # Upstream uses `pkg_resources`, so should limit the version < 82
 
   resource "appdirs" do
     url "https://files.pythonhosted.org/packages/d7/d8/05696357e0311f5b5c316d7b95f46c669dd9c15aaeecbb48c7d0aeb88c40/appdirs-1.4.4.tar.gz"
@@ -27,8 +24,8 @@ class Instalooter < Formula
   end
 
   resource "charset-normalizer" do
-    url "https://files.pythonhosted.org/packages/63/09/c1bc53dab74b1816a00d8d030de5bf98f724c52c1635e07681d312f20be8/charset-normalizer-3.3.2.tar.gz"
-    sha256 "f30c3cb33b24454a82faecaf01b19c18562b1e89558fb6c56de4d9118a032fd5"
+    url "https://files.pythonhosted.org/packages/7b/60/e3bec1881450851b087e301bedc3daa9377a4d45f1c26aa90b0b235e38aa/charset_normalizer-3.4.6.tar.gz"
+    sha256 "1ae6b62897110aa7c79ea2f5dd38d1abca6db663687c0b1ad9aed6f6bae3d9d6"
   end
 
   resource "coloredlogs" do
@@ -52,8 +49,8 @@ class Instalooter < Formula
   end
 
   resource "idna" do
-    url "https://files.pythonhosted.org/packages/21/ed/f86a79a07470cb07819390452f178b3bef1d375f2ec021ecfc709fc7cf07/idna-3.7.tar.gz"
-    sha256 "028ff3aadf0609c1fd278d8ea3089299412a7a8b9bd005dd08b9f8285bcb5cfc"
+    url "https://files.pythonhosted.org/packages/6f/6d/0703ccc57f3a7233505399edb88de3cbd678da106337b9fcde432b65ed60/idna-3.11.tar.gz"
+    sha256 "795dafcc9c04ed0c1fb032c2aa73654d8e8c5023a7df64a53f39190ada629902"
   end
 
   resource "python-dateutil" do
@@ -62,18 +59,18 @@ class Instalooter < Formula
   end
 
   resource "requests" do
-    url "https://files.pythonhosted.org/packages/63/70/2bf7780ad2d390a8d301ad0b550f1581eadbd9a20f896afe06353c2a2913/requests-2.32.3.tar.gz"
-    sha256 "55365417734eb18255590a9ff9eb97e9e1da868d4ccd6402399eaf68af20a760"
+    url "https://files.pythonhosted.org/packages/34/64/8860370b167a9721e8956ae116825caff829224fbca0ca6e7bf8ddef8430/requests-2.33.0.tar.gz"
+    sha256 "c7ebc5e8b0f21837386ad0e1c8fe8b829fa5f544d8df3b2253bff14ef29d7652"
   end
 
   resource "setuptools" do
-    url "https://files.pythonhosted.org/packages/aa/60/5db2249526c9b453c5bb8b9f6965fcab0ddb7f40ad734420b3b421f7da44/setuptools-70.0.0.tar.gz"
-    sha256 "f211a66637b8fa059bb28183da127d4e86396c991a942b028c6650d4319c3fd0"
+    url "https://files.pythonhosted.org/packages/0d/1c/73e719955c59b8e424d015ab450f51c0af856ae46ea2da83eba51cc88de1/setuptools-81.0.0.tar.gz"
+    sha256 "487b53915f52501f0a79ccfd0c02c165ffe06631443a886740b91af4b7a5845a"
   end
 
   resource "six" do
-    url "https://files.pythonhosted.org/packages/71/39/171f1c67cd00715f190ba0b100d606d440a28c93c7714febeca8b79af85e/six-1.16.0.tar.gz"
-    sha256 "1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"
+    url "https://files.pythonhosted.org/packages/94/e7/b2c673351809dca68a0e064b6af791aa332cf192da575fd474ed7d6f16a2/six-1.17.0.tar.gz"
+    sha256 "ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81"
   end
 
   resource "tenacity" do
@@ -82,19 +79,22 @@ class Instalooter < Formula
   end
 
   resource "tqdm" do
-    url "https://files.pythonhosted.org/packages/5a/c0/b7599d6e13fe0844b0cda01b9aaef9a0e87dbb10b06e4ee255d3fa1c79a2/tqdm-4.66.4.tar.gz"
-    sha256 "e4d936c9de8727928f3be6079590e97d9abfe8d39a590be678eb5919ffc186bb"
+    url "https://files.pythonhosted.org/packages/09/a9/6ba95a270c6f1fbcd8dac228323f2777d886cb206987444e4bce66338dd4/tqdm-4.67.3.tar.gz"
+    sha256 "7d825f03f89244ef73f1d4ce193cb1774a8179fd96f31d7e1dcde62092b960bb"
   end
 
   resource "urllib3" do
-    url "https://files.pythonhosted.org/packages/43/6d/fa469ae21497ddc8bc93e5877702dca7cb8f911e337aca7452b5724f1bb6/urllib3-2.2.2.tar.gz"
-    sha256 "dd505485549a7a552833da5e6063639d0d177c04f23bc3864e41e5dc5f612168"
+    url "https://files.pythonhosted.org/packages/c7/24/5f1b3bdffd70275f6661c76461e25f024d5a38a46f04aaca912426a2b1d3/urllib3-2.6.3.tar.gz"
+    sha256 "1b62b6884944a57dbe321509ab94fd4d3b307075e0c2eae991ac71ee15ad38ed"
   end
 
   resource "verboselogs" do
     url "https://files.pythonhosted.org/packages/29/15/90ffe9bdfdd1e102bc6c21b1eea755d34e69772074b6e706cab741b9b698/verboselogs-1.7.tar.gz"
     sha256 "e33ddedcdfdafcb3a174701150430b11b46ceb64c2a9a26198c76a156568e427"
   end
+
+  # Replace pkg_resources removed from setuptools 82+
+  patch :DATA
 
   def install
     virtualenv_install_with_resources
@@ -104,3 +104,26 @@ class Instalooter < Formula
     system bin/"instalooter", "logout"
   end
 end
+
+__END__
+diff --git a/instalooter/_uadetect.py b/instalooter/_uadetect.py
+index 4763b43..1341944 100644
+--- a/instalooter/_uadetect.py
++++ b/instalooter/_uadetect.py
+@@ -9,14 +9,14 @@ import queue
+ import webbrowser
+
+ import six
+-import pkg_resources
++from importlib import resources
+
+ class UserAgentRequestHandler(six.moves.BaseHTTPServer.BaseHTTPRequestHandler):
+
+     def do_GET(self):
+         """Serve a GET request."""
+         self.do_HEAD()
+-        template = pkg_resources.resource_string(__name__, "static/splash.html")
++        template = (resources.files(__package__) / "static" / "splash.html").read_bytes()
+         page = template.decode('utf-8').format(self.headers.get("User-Agent"), self.cache)
+         self.wfile.write(page.encode('utf-8'))
+

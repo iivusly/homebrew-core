@@ -1,19 +1,18 @@
 class Diffoci < Formula
   desc "Diff for Docker and OCI container images"
   homepage "https://github.com/reproducible-containers/diffoci"
-  url "https://github.com/reproducible-containers/diffoci/archive/refs/tags/v0.1.5.tar.gz"
-  sha256 "c71e9dac5854a61240f82fd31e67eb993bd4340e91b6dbf47d1eba52720a1eca"
+  url "https://github.com/reproducible-containers/diffoci/archive/refs/tags/v0.1.8.tar.gz"
+  sha256 "05fd59d8c6bb5d960077638a3e68725093b73c4ca9f2f2fe2da1f696020ee5d4"
   license "Apache-2.0"
   head "https://github.com/reproducible-containers/diffoci.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "5bd31515137880ec63126e78d42a557167ae0e047d071b0ca2ca3909402d99fb"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "dac9edf366cffda07ebab92be1735b70e248dd2c723b5edb167bd18ee52c0127"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "2b21464f2d7d35799933ec1de2a432b3f10553f3c0b9f1f095e3ce158425ca52"
-    sha256 cellar: :any_skip_relocation, sonoma:         "a9101b986889a7c363159fd22ad74b95c4e3a52d49355a35f374e3b0a3f3d451"
-    sha256 cellar: :any_skip_relocation, ventura:        "bc520a463b7536730380ebd6d5ee2e2dd9e0a37ed611b2328f1980223f5e1c14"
-    sha256 cellar: :any_skip_relocation, monterey:       "25db3bd696e4c1bf6caf9d468dd84ea10889297ded14f8599c80499479859132"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "d4a9db815bb968bb47a10edf9ce0b4fe5b4340807fc78ab493147e7b98a82a00"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "8a82a319d9dd41da78de7ebf39679728d6bf717464633090e8b40a40b41424fd"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "8a82a319d9dd41da78de7ebf39679728d6bf717464633090e8b40a40b41424fd"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "8a82a319d9dd41da78de7ebf39679728d6bf717464633090e8b40a40b41424fd"
+    sha256 cellar: :any_skip_relocation, sonoma:        "ba83691299b16adcf8e966b390a19a3d1bae6725076975ff3cec4625a096aa26"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "5bf9d32792a3fbd7f79727910c36b5ee35f7a79ae404e174fdfbaa67faae6c5e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "56ccb44913fb72336ba70b383eb58dadb313688ad7e4b92a3384a830cd5c4121"
   end
 
   depends_on "go" => :build
@@ -25,7 +24,7 @@ class Diffoci < Formula
     ]
     system "go", "build", *std_go_args(ldflags:), "./cmd/diffoci"
 
-    generate_completions_from_executable(bin/"diffoci", "completion")
+    generate_completions_from_executable(bin/"diffoci", shell_parameter_format: :cobra)
   end
 
   test do

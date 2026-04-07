@@ -1,30 +1,31 @@
 class Spr < Formula
   desc "Submit pull requests for individual, amendable, rebaseable commits to GitHub"
-  homepage "https://github.com/spacedentist/spr"
-  url "https://github.com/spacedentist/spr/archive/refs/tags/v1.3.5.tar.gz"
-  sha256 "d1f53f4222fd9916c9edc0457bfe04bac66d9ff60a7c0e7a0c4519317c3f3fb8"
+  homepage "https://spacedentist.github.io/spr/"
+  url "https://github.com/spacedentist/spr/archive/refs/tags/v1.3.7.tar.gz"
+  sha256 "6b48524abfecea16e0e7a131f0c44027375a80577cde43355f54928c4921ed6c"
   license "MIT"
   head "https://github.com/spacedentist/spr.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "410664abef3b1b365b94d63b796d963b8b0f95fc7396bc1057172b53ee1ce914"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "53a073f763bd23c04670ad82ef854ff0df0d4d9bcbb4210f24bd2e1bbccbc6db"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "a1b34ebc1f5dcd278a53d31aae1a2e86706ceaeb0c0e129a03ee9af9016e8f21"
-    sha256 cellar: :any_skip_relocation, sonoma:         "8305e6d5e45e90c71b91647d4bdda118a0890885c100f75d7ef0d4a1b71e9379"
-    sha256 cellar: :any_skip_relocation, ventura:        "27d08142f74458a94301ca05fae06fea6b2273b991195227f472688fa74e839e"
-    sha256 cellar: :any_skip_relocation, monterey:       "709fbfb646bc6dc827d6e2f7c604941009801a4891fdf7d307c97166f3e7782a"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "b3749d08a6e871d9a0e68cd0eb667d1e667fe5e64ca967c59a2ee5f72728be93"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "77939b958880db3631587b135834ebd6a52733fa5800b68dc8132effe1167202"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "fda7b7bd81ba976da928a79e3579874e455548bf25c954a227748041b8145254"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "7d053d2d87b8b5a46d075854071795c126d3b751f5a58b4a6067952eb2c3dd9c"
+    sha256 cellar: :any_skip_relocation, sonoma:        "8859772520af8cd0c3f23cd98da54cd1196164ee4f6295cf4efe204c1e03bca6"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "b1a84d4a3c5e1be826286e82449f3859ca243077fa8c3ae3c74f663090b0062b"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ff79ed181ff54c4d3dfe9235d356c632d7b1524cb91fdb59e08dbf4ddf73837d"
   end
 
+  depends_on "pkgconf" => :build
   depends_on "rust" => :build
-  uses_from_macos "zlib"
 
   on_linux do
-    depends_on "pkg-config" => :build
+    depends_on "openssl@3"
+    depends_on "zlib-ng-compat"
   end
 
   def install
-    system "cargo", "install", *std_cargo_args(path: "spr")
+    system "cargo", "install", *std_cargo_args
   end
 
   test do

@@ -1,8 +1,8 @@
 class Embree < Formula
   desc "High-performance ray tracing kernels"
   homepage "https://www.embree.org/"
-  url "https://github.com/RenderKit/embree/archive/refs/tags/v4.3.3.tar.gz"
-  sha256 "8a3bc3c3e21aa209d9861a28f8ba93b2f82ed0dc93341dddac09f1f03c36ef2d"
+  url "https://github.com/RenderKit/embree/archive/refs/tags/v4.4.1.tar.gz"
+  sha256 "dcf338cc61b636c871ccf370e673bfd380c5ecb71ce49ad50f28e1d4ec9995dc"
   license "Apache-2.0"
   head "https://github.com/RenderKit/embree.git", branch: "master"
 
@@ -12,13 +12,12 @@ class Embree < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "719d672a8f015eb72d2227a1cf2c28345591976abcbd8a3d096f45318d7edca1"
-    sha256 cellar: :any,                 arm64_ventura:  "2968f35c23daf66b3e6afc07bee6cf68829b3285f1e29dc098b0ace335851711"
-    sha256 cellar: :any,                 arm64_monterey: "c39c1dd2e9dc0cf439a7df98dd74df9c0b86808300a1a44ccc45fefb4b2d88c4"
-    sha256 cellar: :any,                 sonoma:         "ad297f96354b4f7b33a061495b43637f266ad025305a9cccc64b3fbdbd062c56"
-    sha256 cellar: :any,                 ventura:        "61379810c6582eff76eb3b5d6c62008b1315326f8ab0c4b7a9bd893b55c006b5"
-    sha256 cellar: :any,                 monterey:       "2df23844ea00a109fa15abd46077164d6ff93c6d1fdfebe6632c16703085423d"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "85eb36f2191fc119f3cb5c0811fdb50d59e045b148f67d5e6c6fc849a1519eaf"
+    sha256 cellar: :any,                 arm64_tahoe:   "fb11b4f0806271a15840fa9f2c9c4bdebd7de5d7acf31995b964aae38d03c201"
+    sha256 cellar: :any,                 arm64_sequoia: "e34162275529cba08ace54afcfb988b9297794f5aa6ce9559b37e1aeb6cd938f"
+    sha256 cellar: :any,                 arm64_sonoma:  "34dace02f56e7424677e8a037e6ff8952a35d8e5624a17e1c52fe421bb6e03d1"
+    sha256 cellar: :any,                 sonoma:        "22617ba4d4b95d85a6dda3f3d5a6970c78d1a56974a123319048484fcda2c55c"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "b764ddec2965dbff1e317dee360d30daac5cf76244b788fbbe4159ba6182f3d8"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "b8f3059841dfcb2bc51a8dc92d93edeeb7ad19dbdfa2f10aa663dd89280a6656"
   end
 
   depends_on "cmake" => :build
@@ -27,7 +26,6 @@ class Embree < Formula
 
   def install
     args = %w[
-      -DBUILD_TESTING=OFF
       -DEMBREE_IGNORE_CMAKE_CXX_FLAGS=OFF
       -DEMBREE_ISPC_SUPPORT=ON
       -DEMBREE_TUTORIALS=OFF
@@ -47,7 +45,7 @@ class Embree < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <assert.h>
       #include <embree4/rtcore.h>
 
@@ -57,7 +55,7 @@ class Embree < Formula
         rtcReleaseDevice(device);
         return 0;
       }
-    EOS
+    C
 
     system ENV.cc, "test.c", "-I#{include}", "-L#{lib}", "-lembree4"
     assert_match "Embree Ray Tracing Kernels #{version} ()", shell_output("./a.out")

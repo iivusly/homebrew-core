@@ -1,9 +1,10 @@
 class Libffi < Formula
   desc "Portable Foreign Function Interface library"
   homepage "https://sourceware.org/libffi/"
-  url "https://github.com/libffi/libffi/releases/download/v3.4.6/libffi-3.4.6.tar.gz"
-  sha256 "b0dea9df23c863a7a50e825440f3ebffabd65df1497108e5d437747843895a4e"
+  url "https://github.com/libffi/libffi/releases/download/v3.5.2/libffi-3.5.2.tar.gz"
+  sha256 "f3a3082a23b37c293a4fcd1053147b371f2ff91fa7ea1b2a52e335676bac82dc"
   license "MIT"
+  compatibility_version 1
 
   livecheck do
     url :stable
@@ -11,13 +12,14 @@ class Libffi < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "e81237234a3e21d5222c1c8baf4017bc2f2ad7e444fbf58ad6b635fc0ace5078"
-    sha256 cellar: :any,                 arm64_ventura:  "7a6a1d1dffe41d4e9bf117440190be51c432a2a192945ed8e2e10c4bb1f95ad0"
-    sha256 cellar: :any,                 arm64_monterey: "eacdfea3b29d48dc8c3fb7578a9a59dbeb9048eca6493b8cd95605c86652e6de"
-    sha256 cellar: :any,                 sonoma:         "d783974753df1f7347d8cef16403e157f0625302848e8267626064c4f79a97d8"
-    sha256 cellar: :any,                 ventura:        "e5adecfb6ddd1a18ccb492c051adfd693eb091c4b24a58ad7b1cecb6afb0a575"
-    sha256 cellar: :any,                 monterey:       "8b3cb29277a584f1684661823c8232659b04234873430164bc80ba484c8aa8da"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "798c3983a917698d5dd0c60063e7b8c1e5b4fc377d9e11d7cba010725eca1bfb"
+    sha256 cellar: :any,                 arm64_tahoe:   "564ce412bbf20deb184e488fe9b1cbf94b5c770965e48567c829a5f580141a95"
+    sha256 cellar: :any,                 arm64_sequoia: "e53361765ab81aa4bbead3bf1821678d4fb34b68355fe42f43032c7b99cf7224"
+    sha256 cellar: :any,                 arm64_sonoma:  "b7080567d415b510513d3d83db312e530fd1b13d49cb9831fc5a67b9c531d0a3"
+    sha256 cellar: :any,                 arm64_ventura: "a6eee79d333e8773beb401cb710a4ab26380c2e14d7f90583b92ac87328c6ab4"
+    sha256 cellar: :any,                 sonoma:        "4d9e57a4b8bb66b3dd966a931b0be8e916b2587bec5886b8af519dcafe276b13"
+    sha256 cellar: :any,                 ventura:       "4b53c8b6527e22e65de26598797eb3ec2402c152295a34b5e31149e9376a0e02"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "85cdf235032a05637b9b30c3deb0d14c7673a3aefe97fed3c6d781c159d89a9a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "55b77eb2bb125870f6e1ec41e4717f0bc7c7fe294e41b59aaef006be6bdf60bd"
   end
 
   head do
@@ -36,15 +38,14 @@ class Libffi < Formula
   end
 
   test do
-    (testpath/"closure.c").write <<~EOS
+    (testpath/"closure.c").write <<~C
       #include <stdio.h>
       #include <ffi.h>
 
       /* Acts like puts with the file given at time of enclosure. */
-      void puts_binding(ffi_cif *cif, unsigned int *ret, void* args[],
-                        FILE *stream)
+      void puts_binding(ffi_cif *cif, void *ret, void** args, void *stream)
       {
-        *ret = fputs(*(char **)args[0], stream);
+        *(unsigned int *)ret = fputs(*(char **)args[0], (FILE *)stream);
       }
 
       int main()
@@ -83,7 +84,7 @@ class Libffi < Formula
 
         return 0;
       }
-    EOS
+    C
 
     flags = ["-L#{lib}", "-lffi", "-I#{include}"]
     system ENV.cc, "-o", "closure", "closure.c", *(flags + ENV.cflags.to_s.split)

@@ -1,26 +1,26 @@
 class Modsecurity < Formula
   desc "Libmodsecurity is one component of the ModSecurity v3 project"
   homepage "https://github.com/owasp-modsecurity/ModSecurity"
-  url "https://github.com/owasp-modsecurity/ModSecurity/releases/download/v3.0.13/modsecurity-v3.0.13.tar.gz"
-  sha256 "86b4881164a161b822a49df3501e83b254323206906134bdc34a6f3338f4d3f2"
+  url "https://github.com/owasp-modsecurity/ModSecurity/releases/download/v3.0.14/modsecurity-v3.0.14.tar.gz"
+  sha256 "f7599057b35e67ab61764265daddf9ab03c35cee1e55527547afb073ce8f04e8"
   license "Apache-2.0"
+  revision 2
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "feb85b8f1d5cfe4992dcac840ecc468b0b5bb158d3d131f0c607029409266702"
-    sha256 cellar: :any,                 arm64_ventura:  "d7f4470ddcd149ca17f9df55efc216c7b50744ddaa8c15ed927cf3e619fa5183"
-    sha256 cellar: :any,                 arm64_monterey: "2aedcc4915f55fb3ce1bb60e473b9cc0ac130f51bdc2998e7da44d90f66948d2"
-    sha256 cellar: :any,                 sonoma:         "01b24dc6e02e93c31bce18e53503408f40c355de92c0b3d007e6396dc94cbee6"
-    sha256 cellar: :any,                 ventura:        "3dae4f88099a330fafd0864a1e45196187e2383a939928c3e89cd2bde5626257"
-    sha256 cellar: :any,                 monterey:       "d4d7a7a96547426688ae799b3f81527f2620ad2407f183e15f0bf407d9d5c377"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "ca19e80f6115c942465ee2564c44527ff5b466a39fddc36a179cbc3825934802"
+    sha256 cellar: :any,                 arm64_tahoe:   "903816449f1b48c8e20a657b978b80f93ee3f721ebb78a6c1216260983c60b67"
+    sha256 cellar: :any,                 arm64_sequoia: "1e5fb4a1da5ca02302211054c1222e58fe142f4e4b9d51a6abcbbd1e6e4f93c8"
+    sha256 cellar: :any,                 arm64_sonoma:  "128cab434340b33ad4ce2d710e02483d56bc7cf6a91e10dfb677f631f0c2b093"
+    sha256 cellar: :any,                 sonoma:        "c6e2865897da1cffe2d77764b905edd4c400af92385ffe32f9348cefea29f023"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "90659a4c8e50293d7415e09a0e79e9f25bdca5af7cb54eb1134714ce40cd564f"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "81c9b619a94eff97ee7e49985eaf493b984130de34f608eda9b283a94b64c538"
   end
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
   depends_on "libtool" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "libmaxminddb"
-  depends_on "lua"
+  depends_on "lua@5.4"
   depends_on "pcre2"
   depends_on "yajl"
 
@@ -44,14 +44,15 @@ class Modsecurity < Formula
       "--disable-debug-logs",
       "--disable-doxygen-html",
       "--disable-examples",
+      "--disable-silent-rules",
       "--with-libxml=#{libxml2}",
-      "--with-lua=#{Formula["lua"].opt_prefix}",
+      "--with-lua=#{Formula["lua@5.4"].opt_prefix}",
       "--with-pcre2=#{Formula["pcre2"].opt_prefix}",
       "--with-yajl=#{Formula["yajl"].opt_prefix}",
       "--without-geoip",
     ]
 
-    system "./configure", *args, *std_configure_args, "--disable-silent-rules"
+    system "./configure", *args, *std_configure_args
     system "make", "install"
   end
 

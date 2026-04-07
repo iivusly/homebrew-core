@@ -1,8 +1,8 @@
 class Aqbanking < Formula
   desc "Generic online banking interface"
   homepage "https://www.aquamaniac.de/rdm/projects/aqbanking"
-  url "https://www.aquamaniac.de/rdm/attachments/download/499/aqbanking-6.5.4.tar.gz"
-  sha256 "0d16ceae76f0718e466638f4547a8b14927f1d8d98322079cd6481adde30ac99"
+  url "https://www.aquamaniac.de/rdm/attachments/download/652/aqbanking-6.9.1.tar.gz"
+  sha256 "fc94a2bebfbb4fc26b98dc93c8fa36a8026298cd7995f79821c480db35587f6b"
   license "GPL-2.0-or-later"
   revision 1
 
@@ -11,16 +11,15 @@ class Aqbanking < Formula
     regex(/href=.*?aqbanking[._-](\d+(?:\.\d+)+)\.t/i)
   end
 
+  no_autobump! because: :incompatible_version_format
+
   bottle do
-    sha256 arm64_sonoma:   "40c5e3e65530d65705cf5652d443e980595c39c7f2767e4b3719c8339ca26c6e"
-    sha256 arm64_ventura:  "b9a8f344467a7d69267d994da860fade6dda407510eed4398db47f2fd3206408"
-    sha256 arm64_monterey: "fcbf229d4ea7dcde5d788e088e4ff30d6f2a1a62ab2498f2e0c2913b0cda32b5"
-    sha256 arm64_big_sur:  "60da3b01e9cfeef3b9d47673d8353afec5bdfa87fec21c3df9635c41492861fd"
-    sha256 sonoma:         "27737d104556c605d174dcb3400f04ebeb8093481090e1d14ce457a2f600cbab"
-    sha256 ventura:        "c912b990acd3cc02ead0f7619bce81e9feb78f41caa1654b4778569b3050ba2e"
-    sha256 monterey:       "b989a7cb5bf36df5b829828f8452a3661d5d370d02bdce63b266fbf10ef38601"
-    sha256 big_sur:        "9ab40d81b08b2d798d3dc69a6c7557bb72e07a0891338c92bb972457c0998549"
-    sha256 x86_64_linux:   "f7586074ec396a050c9f210d05ae733b9697c0f9f2d366940b6937927f2cd215"
+    sha256 arm64_tahoe:   "7db4a15d5f2aa78404440c074eb6047cc0da90d438eefbe6ffd1d9e1154c643b"
+    sha256 arm64_sequoia: "f0daed13df37ec6ca3a1fc0fd4ecb0d04bbea144a726b7b3fcf787c9b1efa02f"
+    sha256 arm64_sonoma:  "3a864898c11ba68aff2df0bf62de8979c194503e441aa61fd6cac264bb7a9336"
+    sha256 sonoma:        "c30dcfe21ce76e17a1946569670c811c703bccd17b1daea664dd33047b91ed85"
+    sha256 arm64_linux:   "52c58af371c636ab28d10a47fb435fe8b648d4cbda9603a5ff39d0bc354d5f55"
+    sha256 x86_64_linux:  "13e7b2cf905b47f59136a7e109895942314e466993f248804d71f1ef3e16cc0f"
   end
 
   depends_on "gmp"
@@ -30,12 +29,14 @@ class Aqbanking < Formula
   depends_on "libxmlsec1"
   depends_on "libxslt" # Our libxslt links with libgcrypt
   depends_on "openssl@3"
-  depends_on "pkg-config" # aqbanking-config needs pkg-config for execution
-
-  uses_from_macos "zlib"
+  depends_on "pkgconf" # aqbanking-config needs pkg-config for execution
 
   on_macos do
     depends_on "gettext"
+  end
+
+  on_linux do
+    depends_on "zlib-ng-compat"
   end
 
   def install

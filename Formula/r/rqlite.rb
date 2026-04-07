@@ -1,47 +1,57 @@
 class Rqlite < Formula
   desc "Lightweight, distributed relational database built on SQLite"
   homepage "https://www.rqlite.io/"
-  url "https://github.com/rqlite/rqlite/archive/refs/tags/v8.29.4.tar.gz"
-  sha256 "60c5d99e14ecdb6c527ee43f8e7a4f6f6df236d63eb7f22ce4bd1cefb0c5f918"
+  url "https://github.com/rqlite/rqlite/archive/refs/tags/v9.4.5.tar.gz"
+  sha256 "b60aa9dff1c45c9a06816aa37f6f81e05a572331fbe7ef4fb718ca370367f2b1"
   license "MIT"
   head "https://github.com/rqlite/rqlite.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "4a4106377cbadf44f34af0b49424f89fbe509dc25c86ff0f5863f9b676407f7f"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "6d50e20c25d8f527967ac523dbc0deab0dc6a9a7837c7c51770289b5e1e12be6"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "011502ffdab1d0abec69997dcf3984b494d375fde97f8859d9489e1089b0dc95"
-    sha256 cellar: :any_skip_relocation, sonoma:         "7f8f741d20f88fe28b907fa34297bb6839c7cbdb6d6995af9c86d05adce1cf5a"
-    sha256 cellar: :any_skip_relocation, ventura:        "bd28f4526325d0f72f111f5958b2bc73566cffff7e724748ec13092799c34920"
-    sha256 cellar: :any_skip_relocation, monterey:       "3e86715beadbb1feb68a8a958bfefa20236a174b342df8fad704268885a91b1e"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "8f8c844fad842303bbe73aacf3943e0c1ae41f96e2610e5ba82006712e4fba27"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "8a196949ae01312332ed6cd29290a1277716cbd49fbe79b3923188c535736192"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "34b2f2338903a0a5365786e7e25dd5ef26e16bef8ec419cb8d22268f91df1946"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "47f5cf1434642f096910e8c50d637182122c775b6789cf519f940e4c46be223c"
+    sha256 cellar: :any_skip_relocation, sonoma:        "e490b5432642ca557d3dbc8bb4088f6dfe2469d33014202f0cc24e3cb717ac78"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "c22059d42e5c92482ff6339148e43b2508ae92f78a65b1ce25effa981b9c81af"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "293c55cd7d1d4887a37d63cb88bbbb0635dc0156eeb2e3fd4f3e90b5089a382e"
   end
 
   depends_on "go" => :build
 
   def install
+    # Workaround to avoid patchelf corruption when cgo is required (for go-sqlite3)
+    if OS.linux? && Hardware::CPU.arch == :arm64
+      ENV["CGO_ENABLED"] = "1"
+      ENV["GO_EXTLINK_ENABLED"] = "1"
+      ENV.append "GOFLAGS", "-buildmode=pie"
+    end
+
+    version_ldflag_prefix = "-X github.com/rqlite/rqlite/v#{version.major}"
+    ldflags = %W[
+      -s -w
+      #{version_ldflag_prefix}/cmd.Commit=unknown
+      #{version_ldflag_prefix}/cmd.Branch=master
+      #{version_ldflag_prefix}/cmd.Buildtime=#{time.iso8601}
+      #{version_ldflag_prefix}/cmd.Version=v#{version}
+    ]
     %w[rqbench rqlite rqlited].each do |cmd|
-      system "go", "build", *std_go_args(ldflags: "-s -w"), "-o", bin/cmd, "./cmd/#{cmd}"
+      system "go", "build", *std_go_args(ldflags:), "-o", bin/cmd, "./cmd/#{cmd}"
     end
   end
 
   test do
     port = free_port
-    fork do
-      exec bin/"rqlited", "-http-addr", "localhost:#{port}",
-                          "-raft-addr", "localhost:#{free_port}",
-                          testpath
-    end
-    sleep 5
-
-    (testpath/"test.sql").write <<~EOS
+    test_sql = <<~SQL
       CREATE TABLE foo (id INTEGER NOT NULL PRIMARY KEY, name TEXT)
       .schema
       quit
-    EOS
-    output = shell_output("#{bin}/rqlite -p #{port} < test.sql")
-    assert_match "foo", output
+    SQL
 
-    output = shell_output("#{bin}/rqbench -a localhost:#{port} 'SELECT 1'")
-    assert_match "Statements/sec", output
+    spawn bin/"rqlited", "-http-addr", "localhost:#{port}",
+                         "-raft-addr", "localhost:#{free_port}",
+                         testpath
+    sleep 5
+    assert_match "foo", pipe_output("#{bin}/rqlite -p #{port}", test_sql, 0)
+    assert_match "Statements/sec", shell_output("#{bin}/rqbench -a localhost:#{port} 'SELECT 1'")
+    assert_match "Version v#{version}", shell_output("#{bin}/rqlite -v")
   end
 end

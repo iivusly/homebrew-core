@@ -1,53 +1,66 @@
 class PgPartman < Formula
   desc "Partition management extension for PostgreSQL"
   homepage "https://github.com/pgpartman/pg_partman"
-  url "https://github.com/pgpartman/pg_partman/archive/refs/tags/v5.1.0.tar.gz"
-  sha256 "3e3a27d7ff827295d5c55ef72f07a49062d6204b3cb0b9a048645d6db9f3cb9f"
+  url "https://github.com/pgpartman/pg_partman/archive/refs/tags/v5.4.3.tar.gz"
+  sha256 "c52e3b8cf80d306468f48fbdb1905e4c2574bf8362240af57aebbbf9e18c6fe2"
   license "PostgreSQL"
 
-  bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "c56840f6d344008d864863de5feff7b47c2bd0c521083d07e5ef49b4924a3809"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "bf48c9c38dcb45a5646e2148c49d0de6a7099ed316e52b9a3cca5faac1500b5e"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "eda23266bd52c4628e3882d906aa9dad2a7db08d862040c55ad8c946c4e29975"
-    sha256 cellar: :any_skip_relocation, sonoma:         "c1dbe58ee7d246699775795b63ef8163b9e0ee89b5b39ea8569872f0321b9413"
-    sha256 cellar: :any_skip_relocation, ventura:        "b97109681a98ef37ca016346f8a3133d1ed87d8da0fe55086a6001ff2b5996e5"
-    sha256 cellar: :any_skip_relocation, monterey:       "583ba02efc0220db153efbbbd30e8fea14310a60513056db634b5516ecb8309f"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "4fafe8ac83d791278343a73cd2d41511738305e51c099ada727d149481ededdd"
+  livecheck do
+    url :stable
+    regex(/^v?(\d+(?:\.\d+)+)$/i)
   end
 
-  depends_on "postgresql@14"
+  bottle do
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "9b20aa24f431772b40f3c469f4d2d1c41ff63d4653d5a784c6a790776623a152"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "f9f5fe3a0f79c09b46e69d619589ae6f0feaebf2f704b0925af87078df80d860"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "faf2474fb09539ecd1ea6311467a788dde9a4dda4b86249c1a9e60f04bf6031d"
+    sha256 cellar: :any_skip_relocation, sonoma:        "b8bbe80932384f7b87d52ca474fce6240c65b151a70b2afc1e6bedcd7a71f09a"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "c737e57d771637252d4c1f26503ba98f93e3473719cf3af479f527b72e892dd4"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "64eb2a80985e23aed1165c51466f426448d24455e420e621d74accd84fb023e1"
+  end
 
-  def postgresql
-    Formula["postgresql@14"]
+  depends_on "postgresql@17" => [:build, :test]
+  depends_on "postgresql@18" => [:build, :test]
+
+  def postgresqls
+    deps.map(&:to_formula).sort_by(&:version).filter { |f| f.name.start_with?("postgresql@") }
   end
 
   def install
-    ENV["PG_CONFIG"] = postgresql.opt_bin/"pg_config"
+    odie "Too many postgresql dependencies!" if postgresqls.count > 2
 
-    system "make"
-    system "make", "install", "bindir=#{bin}",
-                              "docdir=#{doc}",
-                              "datadir=#{share/postgresql.name}",
-                              "pkglibdir=#{lib/postgresql.name}"
+    postgresqls.each do |postgresql|
+      ENV["PG_CONFIG"] = postgresql.opt_bin/"pg_config"
+
+      system "make"
+      system "make", "install", "bindir=#{bin}",
+                                "docdir=#{doc}",
+                                "datadir=#{share/postgresql.name}",
+                                "pkglibdir=#{lib/postgresql.name}"
+      system "make", "clean"
+    end
   end
 
   test do
     ENV["LC_ALL"] = "C"
-    pg_ctl = postgresql.opt_bin/"pg_ctl"
-    psql = postgresql.opt_bin/"psql"
-    port = free_port
+    postgresqls.each do |postgresql|
+      pg_ctl = postgresql.opt_bin/"pg_ctl"
+      psql = postgresql.opt_bin/"psql"
+      port = free_port
 
-    system pg_ctl, "initdb", "-D", testpath/"test"
-    (testpath/"test/postgresql.conf").write <<~EOS, mode: "a+"
+      datadir = testpath/postgresql.name
+      system pg_ctl, "initdb", "-D", datadir
+      (datadir/"postgresql.conf").write <<~EOS, mode: "a+"
 
-      shared_preload_libraries = 'pg_partman_bgw'
-      port = #{port}
-    EOS
-    system pg_ctl, "start", "-D", testpath/"test", "-l", testpath/"log"
-    begin
-      system psql, "-p", port.to_s, "-c", "CREATE EXTENSION \"pg_partman\";", "postgres"
-    ensure
-      system pg_ctl, "stop", "-D", testpath/"test"
+        shared_preload_libraries = 'pg_partman_bgw'
+        port = #{port}
+      EOS
+      system pg_ctl, "start", "-D", datadir, "-l", testpath/"log-#{postgresql.name}"
+      begin
+        system psql, "-p", port.to_s, "-c", "CREATE EXTENSION \"pg_partman\";", "postgres"
+      ensure
+        system pg_ctl, "stop", "-D", datadir
+      end
     end
   end
 end

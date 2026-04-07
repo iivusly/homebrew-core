@@ -1,18 +1,17 @@
 class DuaCli < Formula
   desc "View disk space usage and delete unwanted data, fast"
   homepage "https://lib.rs/crates/dua-cli"
-  url "https://github.com/Byron/dua-cli/archive/refs/tags/v2.29.2.tar.gz"
-  sha256 "76ebd07c4a4379ef0d45232fa7a9b0bcbff1bd54fad6930ec1a2823806473f5d"
+  url "https://github.com/Byron/dua-cli/archive/refs/tags/v2.34.0.tar.gz"
+  sha256 "eaa924f50efb425302c124f170644e95a08f8dad1f627b86f50d033ca5feb0c1"
   license "MIT"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "c6315c330f498adf21af96cefdea1379c4c4ca76358313e5bdd149f2ef1414b1"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "cbde1b93530be443c633064f54b88ea1bd4300c6421f9d4e07a9fa261b6d4d25"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "5f6285c35ec4e40ab0c527423281aefb23a01da48261b3addbf52160581e3ce4"
-    sha256 cellar: :any_skip_relocation, sonoma:         "5db8cbece8a85105dfe10829aebeb7e6f162a594d8f583a48747527977a9427a"
-    sha256 cellar: :any_skip_relocation, ventura:        "511dd96b9972a6fc336e8472a3beb8f36499a833a33c96398dd7f3ecfba07912"
-    sha256 cellar: :any_skip_relocation, monterey:       "23746a4974aa193874e1990253cbfb2aeb9ba5e93b7cbc6300f6425cfe6c1ec9"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "8ca1287b4653e96f3af3b2406a8e389a3e1d13396533044cc319f34d2a8c74a2"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "aca8d61ff41e16b5708e4a7a4daf73f369db05fd86734d49ddef87214f12cf62"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "68ca0ea1daea555fef6fde7a1471d8770ba37d9df55af523b36e8fa02cb14db2"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "7f5cf8aa21369c808764be57be86cfa9153fe5b9029dd8ecf3fc30b8c30268b4"
+    sha256 cellar: :any_skip_relocation, sonoma:        "167298ee7d3642fad5baa3023b1692f02e5e904290c9ea20eb73a744e65ddf1d"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "4d57e7759ee1184d42909506150937e0f040def676813144e56e800db16a213e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "0f043a8e2a70d5deaac4544c9ec784f6f47e79f0be891681b1fdb26fc341417f"
   end
 
   depends_on "rust" => :build

@@ -2,29 +2,29 @@ class Seal < Formula
   desc "Easy-to-use homomorphic encryption library"
   homepage "https://github.com/microsoft/SEAL"
   url "https://github.com/microsoft/SEAL/archive/refs/tags/v4.1.2.tar.gz"
-  sha256 "55601ea4c9ab96eb29a8e37027637774e64a2868d02852474d625ffced0b92cb"
+  sha256 "acc2a1a127a85d1e1ffcca3ffd148f736e665df6d6b072df0e42fff64795a13c"
   license "MIT"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "fde6d946891affcafc3e5231b576a1b67aed87ab83cd225eace77d72827b1193"
-    sha256 cellar: :any,                 arm64_ventura:  "45449875a4c66daedc4730ee32d6c9d03875fc2139927d7c9e5716ebc2598e94"
-    sha256 cellar: :any,                 arm64_monterey: "b782ba0559923f33086a020b63ab5bcd05fa5262f40a166eb0d3be7ebdd26131"
-    sha256 cellar: :any,                 sonoma:         "f2d97c6b546621bc7a19cf8825787ec57f953ce9caa36d9e41005611d0262e00"
-    sha256 cellar: :any,                 ventura:        "7dcd8c0c88ffe2156af805090507e07389f5a66213f72b48a5ba817929f8b2a2"
-    sha256 cellar: :any,                 monterey:       "0d4a9d88654ccfc0becd6841ed2eaabdfb5673aae8b8477c8751de112404295b"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "284c52f3e1190e14db52e5cf0518ef6fb78011b2a611d7081b1572ca0933ce19"
+    rebuild 2
+    sha256 cellar: :any,                 arm64_tahoe:   "c2b43ab3584c6568ba43786b9ab734c78c86a569efff42025a07b34584d880bc"
+    sha256 cellar: :any,                 arm64_sequoia: "39ed846791c3055f424593bdeaf451b6d1623f69128827591c5cf91932d3b26b"
+    sha256 cellar: :any,                 arm64_sonoma:  "2d44b452c5332cfdf95cbd883e1247fc86b644712c85a38cf8c1a2bb68607090"
+    sha256 cellar: :any,                 sonoma:        "755f905a1b01a50e5e6e7743f4cee17ebec09936f15cc069b804b72baaf031b8"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "c7d87708dcfef3a3c12c3d2341defb5bee81ee1a4d5eb9a51a76990bb9ac784c"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "039ccc740daf1ddc76cef431eac86b73bcf385a78699eb7e247ef1bea16e4178"
   end
 
   depends_on "cmake" => [:build, :test]
   depends_on "cpp-gsl"
   depends_on "zstd"
 
-  uses_from_macos "zlib"
-
-  fails_with gcc: "5"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   resource "hexl" do
-    url "https://github.com/intel/hexl/archive/refs/tags/v1.2.5.tar.gz"
+    url "https://github.com/IntelLabs/hexl/archive/refs/tags/v1.2.5.tar.gz"
     sha256 "3692e6e6183dbc49253e51e86c3e52e7affcac925f57db0949dbb4d34b558a9a"
   end
 
@@ -37,30 +37,33 @@ class Seal < Formula
   def install
     if Hardware::CPU.intel?
       resource("hexl").stage do
-        hexl_args = std_cmake_args + %w[
+        hexl_args = %w[
           -DHEXL_BENCHMARK=OFF
           -DHEXL_TESTING=OFF
           -DHEXL_EXPORT=ON
+          -DCMAKE_POLICY_VERSION_MINIMUM=3.5
         ]
-        system "cmake", "-S", ".", "-B", "build", *hexl_args
+        system "cmake", "-S", ".", "-B", "build", *hexl_args, *std_cmake_args
         system "cmake", "--build", "build"
         system "cmake", "--install", "build"
       end
       ENV.append "LDFLAGS", "-L#{lib}"
     end
 
-    args = std_cmake_args + %W[
+    args = %W[
       -DBUILD_SHARED_LIBS=ON
       -DSEAL_BUILD_DEPS=OFF
-      -DSEAL_USE_ALIGNED_ALLOC=#{(OS.mac? && MacOS.version > :mojave) ? "ON" : "OFF"}
+      -DSEAL_USE_ALIGNED_ALLOC=#{OS.mac? ? "ON" : "OFF"}
       -DSEAL_USE_INTEL_HEXL=#{Hardware::CPU.intel? ? "ON" : "OFF"}
       -DHEXL_DIR=#{lib}/cmake
       -DCMAKE_CXX_FLAGS=-I#{include}
+      -DCMAKE_POLICY_VERSION_MINIMUM=3.5
     ]
 
-    system "cmake", ".", *args
-    system "make"
-    system "make", "install"
+    system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
+    system "cmake", "--build", "build"
+    system "cmake", "--install", "build"
+
     pkgshare.install "native/examples"
   end
 
@@ -71,7 +74,7 @@ class Seal < Formula
     File.delete testpath/"examples/CMakeLists.txt"
 
     # Chip in a new "CMakeLists.txt" for example code tests
-    (testpath/"examples/CMakeLists.txt").write <<~EOS
+    (testpath/"examples/CMakeLists.txt").write <<~CMAKE
       cmake_minimum_required(VERSION 3.12)
       project(SEALExamples VERSION #{version} LANGUAGES CXX)
       # Executable will be in ../bin
@@ -98,7 +101,7 @@ class Seal < Formula
 
       # Link Microsoft SEAL
       target_link_libraries(sealexamples SEAL::seal_shared)
-    EOS
+    CMAKE
 
     system "cmake", "-S", "examples", "-B", "build", "-DHEXL_DIR=#{lib}/cmake"
     system "cmake", "--build", "build", "--target", "sealexamples"

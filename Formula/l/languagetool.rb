@@ -2,8 +2,8 @@ class Languagetool < Formula
   desc "Style and grammar checker"
   homepage "https://www.languagetool.org/"
   url "https://github.com/languagetool-org/languagetool.git",
-      tag:      "v6.4",
-      revision: "0e9362bdd0dfded52f11bd1333cead51d049d71f"
+      tag:      "v6.7",
+      revision: "84625f61a71ae0b54cc683e46f8e209f75169117"
   license "LGPL-2.1-or-later"
   head "https://github.com/languagetool-org/languagetool.git", branch: "master"
 
@@ -13,20 +13,19 @@ class Languagetool < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "26fb92b5cd79ba7cb53e53fbd4cc58842638d44ac94959f6e18ab8b27784d14c"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "ef314170d34b0e2a8a9234c877ade3ec13552da14bdf4056fabed09f39a50b77"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "6df7eabf36e2d8de3984b8be116209b5956d5acec9bea8f0c4c00967143204c5"
-    sha256 cellar: :any_skip_relocation, sonoma:         "d5ac1f6d2380b275c35faee6ce17899220661c8f33d446b6642522944bcf1334"
-    sha256 cellar: :any_skip_relocation, ventura:        "9189140e26e03aee2972c798267319598ba4b18ddb220afc2165bc453538357d"
-    sha256 cellar: :any_skip_relocation, monterey:       "617c20a2e5c94b0eb8d6f8106782318b6e37229fb5d7553037ddadac987d8ae6"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "13de29aa665fe0ece1af8ef700b2d158bc04439fa37e8986b4b82ad079a41fc5"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "6fea33d351a9f879bc18b3482acc005a9745bea3e1e011fca5851d37fd6f83f2"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "b7b92cc5a0913b777c862b42a90b96820630157b08d6601424624d09bdaac52e"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "a98c2e1dfd79d4d61812874ccad3b7cd2da1ade1e91325560e13443151ac6c21"
+    sha256 cellar: :any_skip_relocation, sonoma:        "f9dcf2480437854ab2576be8f4e19ac728f5c8e048751308b01284e226e83b96"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "2375c3a5d2bd25954bc23b0baf74d6007f69e6ed397181d104e4327a331501c2"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "d40b8680fd7e046f54ef4b2e79fb60cc0d7a228cb15ab2301f70016b6bc8a557"
   end
 
   depends_on "maven" => :build
-  depends_on "openjdk@11"
+  depends_on "openjdk@17"
 
   def install
-    java_version = "11"
+    java_version = "17"
     ENV["JAVA_HOME"] = Language::Java.java_home(java_version)
     system "mvn", "clean", "package", "-DskipTests"
 
@@ -47,6 +46,10 @@ class Languagetool < Formula
 
     touch buildpath/"server.properties"
     pkgetc.install "server.properties"
+  end
+
+  def post_install
+    (var/"log/languagetool").mkpath
   end
 
   service do

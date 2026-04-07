@@ -1,19 +1,18 @@
 class Mprocs < Formula
   desc "Run multiple commands in parallel"
   homepage "https://github.com/pvolok/mprocs"
-  url "https://github.com/pvolok/mprocs/archive/refs/tags/v0.7.1.tar.gz"
-  sha256 "17dcb04d2d7caf8c1263b124cf5ecb145d28ac6d0717c2de78c988858c0572af"
+  url "https://github.com/pvolok/mprocs/archive/refs/tags/v0.9.2.tar.gz"
+  sha256 "1eefc5346f3c8b24ee6bf74582312fc61284ea54d4d384a4a8226d4b75ddb98b"
   license "MIT"
   head "https://github.com/pvolok/mprocs.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "32c79218206b64d1b5feb94b2c6d618f3b4419e4e637ce7473163652f6a185bd"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "1310308f89b45f5a892c4b21522d4b50b61f960da3b55644ceb9aea46e2a80f5"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "9862d9eaccab5f7a5eb5ffd86d943467c3c194197baa17ac8fdc25e7a8a664fc"
-    sha256 cellar: :any_skip_relocation, sonoma:         "1cdb7c9e6d4c813c394c42267ca1809e315d1b220e9e6d175965c91575d3e8a3"
-    sha256 cellar: :any_skip_relocation, ventura:        "e1c17e1a0e34777760d5bd364a5e8a36bb85012f5236694dda0574c3f0c3b523"
-    sha256 cellar: :any_skip_relocation, monterey:       "43c9a1ab795584d898f476bd5a5e39fd70c21ffd96d10a1d70b9c199d4013d00"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "68a127061a6a8a2a731b2143c7d6f34a9a17d3a31e4614f4a2bc763b728d7c65"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "c869339d62813971e67d8f884c12fedd6a97e32a2abdd3ca4857fca92eb6b35a"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "98308e0626104774fc560cba95bdc6508ccd618ec195d3b8433aeeccc8401837"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "1af5c10c627a687a41443f8d7d0a116eea05c23bb03dcf11ea21114afd060ee6"
+    sha256 cellar: :any_skip_relocation, sonoma:        "b9ac96d9aa27c7e627d2e5a7860670c6114be2e879b8c545a8768fc588b4919e"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "719870a0ac991acfa4730e1ac474e7c2dab96ee3fbfa51273d0d9463076aa0f6"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "238de7c5d39519ea7b25cd5848d74698600ed8ff18a01502fd8b39ba8bb21b55"
   end
 
   depends_on "rust" => :build

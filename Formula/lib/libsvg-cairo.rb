@@ -12,6 +12,8 @@ class LibsvgCairo < Formula
   end
 
   bottle do
+    sha256 cellar: :any,                 arm64_tahoe:    "081812b09f3aa7da3467f583323424b3cec95d2f371b0745f6e3569857c31d5d"
+    sha256 cellar: :any,                 arm64_sequoia:  "fb922d8f987fcfbf1a37e34cb527ce24345328d188e2fc453a5c70de848dbd41"
     sha256 cellar: :any,                 arm64_sonoma:   "2c255fb61d16b9fd5aee60ed29a000d3eb27028b7e7641d7dd4d1cc11928de1a"
     sha256 cellar: :any,                 arm64_ventura:  "528ec2ea8ffedaff6d5eac18dbb22a8edfc0f41eb8b8fa7bf85068c3bcabb745"
     sha256 cellar: :any,                 arm64_monterey: "039c1d99e08efc5f9b5df9a30ce5d0ff4acde9c3f4f3890b4fb8cd287d12adc1"
@@ -21,13 +23,14 @@ class LibsvgCairo < Formula
     sha256 cellar: :any,                 monterey:       "2d381b736e28fc35193fd120bd265f6cc73e3805d945982db709f2a517015cd2"
     sha256 cellar: :any,                 big_sur:        "a2d1eeb52e59366b77b50d16ec49aa0dc65d03315bde893248d982dca7d8b06f"
     sha256 cellar: :any,                 catalina:       "d7e3121dc97fdd10cc498e78c60721777a9c17d686d07de769c157d1bf9ed7e1"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "ed1d458eca9ab9055f4f373151ea86682a2f6cb8d8bfed507afc8d3f0dc7f8f1"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "e7459ca5ab6d29337f341de7af38ce53bbc007974bfd57e5be4d9b4ad66ba69a"
   end
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
   depends_on "libtool" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
 
   depends_on "cairo"
   depends_on "jpeg-turbo"
@@ -51,7 +54,7 @@ class LibsvgCairo < Formula
       <svg xmlns:svg="http://www.w3.org/2000/svg" height="72pt" width="144pt" viewBox="0 -20 144 72"><text font-size="12" text-anchor="left" y="0" x="0" font-family="Times New Roman" fill="green">sample text here</text></svg>
     EOS
 
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <stdio.h>
       #include "svg-cairo.h"
 
@@ -112,7 +115,7 @@ class LibsvgCairo < Formula
           printf("SUCCESS\\n");
           return 0;
       }
-    EOS
+    C
 
     cairo = Formula["cairo"]
     system ENV.cc, "test.c", "-I#{include}", "-I#{cairo.opt_include}/cairo", "-L#{lib}", "-lsvg-cairo", "-o", "test"

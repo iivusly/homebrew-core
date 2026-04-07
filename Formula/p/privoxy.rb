@@ -1,8 +1,8 @@
 class Privoxy < Formula
   desc "Advanced filtering web proxy"
   homepage "https://www.privoxy.org/"
-  url "https://downloads.sourceforge.net/project/ijbswa/Sources/3.0.34%20%28stable%29/privoxy-3.0.34-stable-src.tar.gz"
-  sha256 "e6ccbca1656f4e616b4657f8514e33a70f6697e9d7294356577839322a3c5d2c"
+  url "https://downloads.sourceforge.net/project/ijbswa/Sources/4.1.0%20%28stable%29/privoxy-4.1.0-stable-src.tar.gz"
+  sha256 "23e4686e5848c74cb680c09c2811f0357739ecfe641f9c4072ee42399092c97b"
   license "GPL-2.0-or-later"
 
   livecheck do
@@ -11,34 +11,29 @@ class Privoxy < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "2d271db67276295a3c0a95713d1bef904015c7729615380ada8f9228196b2632"
-    sha256 cellar: :any,                 arm64_ventura:  "9e9553d35f57d1857a1518216b4263eb9ffce10cf9e93da7a38f688f23606610"
-    sha256 cellar: :any,                 arm64_monterey: "1b0028627cbd63a818a043537b4357b7bb0105fb56ba0b4d92efe3300cc953f9"
-    sha256 cellar: :any,                 arm64_big_sur:  "583123f742ab84d72e189867ec920940e7ecada0cd4bec3dbb7c2784b51e2b9e"
-    sha256 cellar: :any,                 sonoma:         "5d97667b9c9fbb87ca967ae879c8ae53bda5e56d9870580e3ad04baa6c6f9537"
-    sha256 cellar: :any,                 ventura:        "6dbe6c6a8868cf03772a719adfd6c49bfd7da372067147994c56a9c629c7ff0e"
-    sha256 cellar: :any,                 monterey:       "317d73bfe1c16bf887be0627f7aa27f543aa61dc8d1c9748cac74b11abbc0b14"
-    sha256 cellar: :any,                 big_sur:        "46df2df9e4dcaf3f16ba6540fdc8432db8395d5fd03fc9a6fe51c9629e216be2"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "a4b3fcb5f8fd5f5479462ae9db4fb99a300dab2005b3f383b78f13cb6a8eed4f"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "c0ae969ac878ba8034f22bc56240e5994bd9a042116fc7e7d23fa788fe1e484e"
+    sha256 cellar: :any,                 arm64_sequoia: "82c2364535cd0c530fd02bf4082021445c4fe23b68fa2cb509ff801a37f6ef43"
+    sha256 cellar: :any,                 arm64_sonoma:  "c480bbb71e9cdac494396bd35a155410a2970989c7e1557f9b4727e262b4d052"
+    sha256 cellar: :any,                 sonoma:        "65fe313f31698cef56c5537b4edc8b475ea94b23cbd46e8e598e02d2644a4dd8"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "38b56a0785bf29774bfe49fc96a7746b5b1434075aeef27f089fdd9ed47b2a95"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "71ec0d7dd8b9eaa5d3729dfda746c25ae91eba7dfc3d28ef35861778b3dbf003"
   end
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
   depends_on "libtool" => :build
-  depends_on "pcre"
+  depends_on "pcre2"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
-    # Find Homebrew's libpcre
-    ENV.append "LDFLAGS", "-L#{HOMEBREW_PREFIX}/lib"
-
-    # No configure script is shipped with the source
-    system "autoreconf", "-i"
-
-    system "./configure", "--disable-debug",
-                          "--disable-dependency-tracking",
-                          "--prefix=#{prefix}",
-                          "--sysconfdir=#{etc}/privoxy",
-                          "--localstatedir=#{var}"
+    system "autoreconf", "--force", "--install", "--verbose"
+    system "./configure", "--sysconfdir=#{pkgetc}",
+                          "--localstatedir=#{var}",
+                          *std_configure_args
     system "make"
     system "make", "install"
   end
@@ -53,14 +48,14 @@ class Privoxy < Formula
   test do
     bind_address = "127.0.0.1:#{free_port}"
     (testpath/"config").write("listen-address #{bind_address}\n")
+    pid = spawn sbin/"privoxy", "--no-daemon", testpath/"config"
     begin
-      server = IO.popen("#{sbin}/privoxy --no-daemon #{testpath}/config")
-      sleep 1
-      assert_match "HTTP/1.1 200 Connection established",
-                   shell_output("/usr/bin/curl -I -x #{bind_address} https://github.com")
+      sleep 5
+      output = shell_output("curl --head --proxy #{bind_address} https://github.com")
+      assert_match "HTTP/1.1 200 Connection established", output
     ensure
-      Process.kill("SIGINT", server.pid)
-      Process.wait(server.pid)
+      Process.kill("SIGINT", pid)
+      Process.wait(pid)
     end
   end
 end

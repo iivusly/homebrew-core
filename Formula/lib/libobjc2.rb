@@ -1,26 +1,28 @@
 class Libobjc2 < Formula
   desc "Objective-C runtime library intended for use with Clang"
   homepage "https://github.com/gnustep/libobjc2"
-  url "https://github.com/gnustep/libobjc2/archive/refs/tags/v2.2.1.tar.gz"
-  sha256 "768ea8c5bd0999a29b5d15781125494f986456c1dc5c51d370fb31852cd31ea1"
+  url "https://github.com/gnustep/libobjc2/archive/refs/tags/v2.3.tar.gz"
+  sha256 "5ead2276b42a534ac40437ce53b2231320b985539dc325453d93874be8d92869"
   license "MIT"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "7b71a49e26e6f376aea15f25c584ba70da3ea0c4cfbb7eaa0e66a52eb300ccb9"
+    sha256 cellar: :any_skip_relocation, arm64_linux:  "f3555edab456c1bc62c1d549893f3bf913382b7e3b8ab56b367d3d3d4ce212b9"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "c6d20fc9b954bab4b841f4249bf92440214685726aa61033b866791898b4e8d1"
   end
 
   depends_on "cmake" => :build
   # While libobjc2 is built with clang, it does not use any LLVM runtime libraries.
   depends_on "llvm" => [:build, :test]
   depends_on "robin-map" => :build
-  depends_on "pkg-config" => :test
+  depends_on "pkgconf" => :test
   # Clang explicitly forbids building Mach-O binaries of libobjc2.
   # https://reviews.llvm.org/D46052
   # macOS provides an equivalent Objective-C runtime.
   depends_on :linux
 
-  # Clang must be used on Linux because GCC Objective-C support is insufficient.
-  fails_with :gcc
+  fails_with :gcc do
+    cause "GCC Objective-C support is insufficient"
+  end
 
   def install
     system "cmake", "-S", ".", "-B", "build", *std_cmake_args
@@ -33,22 +35,19 @@ class Libobjc2 < Formula
   end
 
   test do
-    # ENV.cc returns llvm_clang, which does not work in a test block.
-    ENV["CC"] = Formula["llvm"].opt_bin/"clang"
-
     # Copy over test library and header and runtime test.
     cp pkgshare/"Test/Test.h", testpath
     cp pkgshare/"Test/Test.m", testpath
     cp pkgshare/"Test/RuntimeTest.m", testpath
 
     # First build test shared library and then link it to RuntimeTest.
-    pkg_config_flags = Utils.safe_popen_read("pkg-config", "--cflags", "--libs", "libobjc").chomp.split
-    system ENV.cc, "Test.m", "-fobjc-runtime=gnustep-2.0", *pkg_config_flags,
+    flags = shell_output("pkgconf --cflags --libs libobjc").chomp.split
+    system ENV.cc, "Test.m", "-fobjc-runtime=gnustep-2.0", *flags,
                    "-fPIC", "-shared", "-o", "libTest.so"
-    system ENV.cc, "RuntimeTest.m", "-fobjc-runtime=gnustep-2.0", *pkg_config_flags, "-Wl,-rpath,#{lib}",
+    system ENV.cc, "RuntimeTest.m", "-fobjc-runtime=gnustep-2.0", *flags, "-Wl,-rpath,#{lib}",
                    "-L#{testpath}", "-Wl,-rpath,#{testpath}", "-lTest", "-o", "RuntimeTest"
 
     # RuntimeTest deliberately throws a test exception and outputs this to stderr.
-    assert_match "testExceptions() ran", shell_output("#{testpath}/RuntimeTest 2>&1")
+    assert_match "testExceptions() ran", shell_output("./RuntimeTest 2>&1")
   end
 end

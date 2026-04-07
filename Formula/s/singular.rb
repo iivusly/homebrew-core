@@ -1,10 +1,11 @@
 class Singular < Formula
   desc "Computer algebra system for polynomial computations"
   homepage "https://www.singular.uni-kl.de/"
-  url "https://www.singular.uni-kl.de/ftp/pub/Math/Singular/SOURCES/4-4-0/singular-4.4.0p5.tar.gz"
-  version "4.4.0p5"
-  sha256 "f240c210d2f5a7ba30a35f43ffb3c926decb103f3b9ff4a35ad4baee093a41df"
+  url "https://www.singular.uni-kl.de/ftp/pub/Math/Singular/SOURCES/4-4-1/singular-4.4.1p5.tar.gz"
+  version "4.4.1p5"
+  sha256 "bce5a40bd10b6e9fe991de97e6284f62cdb566c8aef4b2836b4d1307eb7d9edf"
   license "GPL-2.0-or-later"
+  revision 1
 
   livecheck do
     url "https://www.singular.uni-kl.de/ftp/pub/Math/Singular/SOURCES/"
@@ -36,13 +37,12 @@ class Singular < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "213c26d2539833cec4b70570e7bc35b5c7f18b478030fd2c645a120f31f9900d"
-    sha256 arm64_ventura:  "1899af2cbde7043f6bc04832a856bb93a3845cd308f03c7d122d12f8e82cdce3"
-    sha256 arm64_monterey: "064ea698eeeb50c06ccea50856bd0ef4fba7ca3981024b5dfed6265fdcdc7020"
-    sha256 sonoma:         "6e83032edb0986907ac2958c14f5bf33d6a0e8d29a8628756949b291a314cd0c"
-    sha256 ventura:        "6ca2b2b9fa561c9ba85d99983cab8b22d7c307296b42eefbe65126bd80e48d0c"
-    sha256 monterey:       "ec9cbb4300fd88c4499fd406d389a4107b9a1f46f934078ba8ebedb84021f7e6"
-    sha256 x86_64_linux:   "e2ee20821ab2b0b03a8bffefad953f7e45b8cc0a83a098b717dcb1ab599ce5c7"
+    sha256 arm64_tahoe:   "531f23bff6faf97c1138bf8cdab032b443ca29ff9da7fdb216edcf1725325c6b"
+    sha256 arm64_sequoia: "e635137a9da900f3aacf0c857b368e0aa518f19a1b75876c47388647d99a120f"
+    sha256 arm64_sonoma:  "2242a315a91da65df1732af79728adcb0c725a654ea26e09210570709b6bef76"
+    sha256 sonoma:        "b42e668e2d9fec7d3b177b4301d6cb4f8fd656a45873860355d8c7dce58e72b4"
+    sha256 arm64_linux:   "5073d73746fabf41d5c4a54c4a905476e2092b8eb178245e9170f3575d779422"
+    sha256 x86_64_linux:  "b5afffd6561c4d392f53700e22de548aa57d4e417891bb0bcee8a2e748cdf3a9"
   end
 
   head do
@@ -53,18 +53,19 @@ class Singular < Formula
     depends_on "libtool" => :build
   end
 
+  depends_on "flint"
   depends_on "gmp"
   depends_on "mpfr"
   depends_on "ntl"
-  depends_on "python@3.12"
+  depends_on "python@3.14"
   depends_on "readline"
 
   def install
     system "./autogen.sh" if build.head?
-    system "./configure", *std_configure_args,
-                          "--disable-silent-rules",
-                          "--with-python=#{which("python3.12")}",
-                          "CXXFLAGS=-std=c++11"
+    system "./configure", "--disable-silent-rules",
+                          "--with-python=#{which("python3.14")}",
+                          "CXXFLAGS=-std=c++11",
+                          *std_configure_args
     system "make", "install"
   end
 

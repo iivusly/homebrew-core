@@ -17,9 +17,11 @@ class PariGalpol < Formula
     end
   end
 
+  no_autobump! because: :incompatible_version_format
+
   bottle do
-    rebuild 2
-    sha256 cellar: :any_skip_relocation, all: "e025e273d014cf89f901fd09c2fc60bf7d1e48650f930d6072bc33330e5ced97"
+    rebuild 3
+    sha256 cellar: :any_skip_relocation, all: "4ebe913118141c4a65980a4c7f80106939b7ae2d7f1d0471535f7edcc36b24af"
   end
 
   depends_on "pari"
@@ -34,7 +36,7 @@ class PariGalpol < Formula
   end
 
   test do
-    assert_equal "5", pipe_output(Formula["pari"].opt_bin/"gp -q", "galoisgetpol(8)").chomp
-    assert_equal "\"C3 : C4\"", pipe_output(Formula["pari"].opt_bin/"gp -q", "galoisgetname(12,1)").chomp
+    assert_equal "5", pipe_output("#{Formula["pari"].opt_bin}/gp -q", "galoisgetpol(8)").chomp
+    assert_equal "\"C3 : C4\"", pipe_output("#{Formula["pari"].opt_bin}/gp -q", "galoisgetname(12,1)").chomp
   end
 end

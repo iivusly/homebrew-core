@@ -1,18 +1,18 @@
 class Tig < Formula
   desc "Text interface for Git repositories"
   homepage "https://jonas.github.io/tig/"
-  url "https://github.com/jonas/tig/releases/download/tig-2.5.10/tig-2.5.10.tar.gz"
-  sha256 "f655cc1366fc10058a2bd505bb88ca78e653ff7526c1b81774c44b9d841210e3"
+  url "https://github.com/jonas/tig/releases/download/tig-2.6.0/tig-2.6.0.tar.gz"
+  sha256 "99d4a0fdd3d93547ebacfe511195cb92e4f75b91644c06293c067f401addeb3e"
   license "GPL-2.0-or-later"
+  compatibility_version 1
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "372a23df16908a4ee4675c4dfdb9cd53f95968f6b62244e0e10bd84cb13ad660"
-    sha256 cellar: :any,                 arm64_ventura:  "8fafbc01320019683b4bb381cd95543d788408bcd217286422ab54e3180d2ee8"
-    sha256 cellar: :any,                 arm64_monterey: "7004415dce168189e7f459081d68baadfb8aa781733ae3a858307f0489ae939e"
-    sha256 cellar: :any,                 sonoma:         "e175be4f0484d331b148f01e8868f637b1e71969cafe0007bb6525c9d1e87598"
-    sha256 cellar: :any,                 ventura:        "13140511436346fbef6d45f20e5fffd4858f911601f1a50397fb9f34dbfb1599"
-    sha256 cellar: :any,                 monterey:       "c1a13170d288f0c098e1d5b6703ebbc807dfe32f4d5228f5b6b1c69524aefa08"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "a2922e2c8f02dd9b87674969802439d113b62f6bb6af4ff2acd185bb35f3198b"
+    sha256 cellar: :any,                 arm64_tahoe:   "5464963cbef880b886995cebc53ba6465f96a360a08ab04a0652b98a691d7de2"
+    sha256 cellar: :any,                 arm64_sequoia: "8e4dfb08982c3aa19fab2a11c5f9d0c9ba4bc84f31be5b6eb1949f550330b947"
+    sha256 cellar: :any,                 arm64_sonoma:  "6aef8066f91d46c4ce81efdad40d741f89ea45fa6b3e9f324f7a4f2aebe430e3"
+    sha256 cellar: :any,                 sonoma:        "0a3dd5d81806bac10f99984b1e84d5d89c857a706207ddee9ca82ea00c0eb15f"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "4281d358afb993ded992ad26db2c21c1f08c1389b88bb2732e26e204c001439b"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "dfe9453ea284cf1c2a94073e7da2f52b0d1f645a620b3401d4a39b3ba4bd697a"
   end
 
   head do
@@ -24,6 +24,7 @@ class Tig < Formula
     depends_on "xmlto" => :build
   end
 
+  depends_on "pkgconf" => :build
   # https://github.com/jonas/tig/issues/1210
   depends_on "ncurses"
   depends_on "pcre2"

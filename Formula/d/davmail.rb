@@ -1,9 +1,9 @@
 class Davmail < Formula
   desc "POP/IMAP/SMTP/Caldav/Carddav/LDAP exchange gateway"
   homepage "https://davmail.sourceforge.net/"
-  url "https://downloads.sourceforge.net/project/davmail/davmail/6.2.2/davmail-6.2.2-3546.zip"
-  version "6.2.2"
-  sha256 "e39a5a1b2e927d41572babd8f0be2d1c56228a8d7fe5a87dbd3c86226760c072"
+  url "https://downloads.sourceforge.net/project/davmail/davmail/6.5.1/davmail-6.5.1-3873.zip"
+  version "6.5.1"
+  sha256 "dcd9b9643b8c2e5657284f6765df2f22eb0dd1c323764915e1fc24e116604792"
   license "GPL-2.0-or-later"
 
   livecheck do
@@ -11,8 +11,10 @@ class Davmail < Formula
     regex(%r{url=.*?/davmail[._-]v?(\d+(?:\.\d+)+)(?:-\d+)?\.(?:t|zip)}i)
   end
 
+  no_autobump! because: :incompatible_version_format
+
   bottle do
-    sha256 cellar: :any_skip_relocation, all: "c55c26e3679337482c014409c4fec1ba607af4e644a47063c3d81785f30bf3b0"
+    sha256 cellar: :any_skip_relocation, all: "432242b2d490bc649d6e15a485613330c3e4734cfe876f9bcf37de05adf68fcb"
   end
 
   depends_on "openjdk"
@@ -30,8 +32,8 @@ class Davmail < Formula
     interval 300
     keep_alive false
     environment_variables PATH: std_service_path_env
-    log_path "/dev/null"
-    error_log_path "/dev/null"
+    log_path File::NULL
+    error_log_path File::NULL
   end
 
   test do
@@ -53,10 +55,7 @@ class Davmail < Formula
       davmail.smtpPort=#{smtp_port}
     EOS
 
-    fork do
-      exec bin/"davmail", testpath/"davmail.properties"
-    end
-
+    spawn bin/"davmail", testpath/"davmail.properties"
     sleep 10
 
     system "nc", "-z", "localhost", caldav_port

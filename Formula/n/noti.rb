@@ -1,20 +1,19 @@
 class Noti < Formula
   desc "Trigger notifications when a process completes"
-  homepage "https://github.com/variadico/noti"
-  url "https://github.com/variadico/noti/archive/refs/tags/3.7.0.tar.gz"
-  sha256 "f970a4dd242e6b58edf51320aa237bb20d689bbc8fd0f7d0db5aa1980a2dc269"
+  homepage "https://codeberg.org/roble/noti"
+  url "https://codeberg.org/roble/noti/archive/3.8.0.tar.gz"
+  sha256 "40939b83ee80f84ea2516ff205a961ddc0c4ec66af4f29319cdc41fce87eb332"
   license "MIT"
+  head "https://codeberg.org/roble/noti.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "3c61bfcfc68cbce95932c5defef0f61f180acddb95a64b9c205dae59cb0e5a2e"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "fc237b7b1e28e0974312a7b154dd06b8bc5cdde57f7dd197e008b7e1450d9ffd"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "e93a4812623537c4f636b81238d48049c2aa74920c4b34945d317b0001714e11"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "00bbb0435c2d8478f994220e4b209561428a535bb36b9b298f169e51f8abfe9f"
-    sha256 cellar: :any_skip_relocation, sonoma:         "fd6f284fbde2693d59cafed00f83c1d8f997578f05b46856d757efb5beb28bbc"
-    sha256 cellar: :any_skip_relocation, ventura:        "d0a210912a499f329ee9709b5544147df22ccb09544c323f1ecdde4dcbbfe956"
-    sha256 cellar: :any_skip_relocation, monterey:       "468ea5232ab7fb8acd9818fe0c285a38f2b16eb23bb66b1d57dedc5c572f443a"
-    sha256 cellar: :any_skip_relocation, big_sur:        "32a52ff508147b1ff62967f173391b14c7f865dc1a56163b243e71c3d38f2bdf"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "01035f395f9d150621351e73a6f87091dd10d2af579ffc1c1b636990f6d937e8"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "9df5cb0595eeccab3df88d19535d8c4959ddb31edebd05ebdaab5f256698a528"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "a9ce62a753d38d76f7a0da4cd1ab463085f72ccd18a5322f285ed0fda14f31b3"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "6c6d37577bbc6a96195d28e194a129490f2d87b9afc15639bc80418f60ff598e"
+    sha256 cellar: :any_skip_relocation, sonoma:        "9f755675d0005c92a27b5505e203225dfe64b9bf6715b49bb7840850454c5546"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "d00980419a447dfbf768ee6cbe98155fe6359b77a860cbfd05977b9d07fb515e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "57b3aa7759166c18af61e9a49704e7673f7b9f439eb562447d4bf12c3d6baaec"
   end
 
   depends_on "go" => :build
@@ -27,6 +26,8 @@ class Noti < Formula
     system "go", "build", *std_go_args(ldflags:), "cmd/noti/main.go"
     man1.install "docs/man/dist/noti.1"
     man5.install "docs/man/dist/noti.yaml.5"
+
+    generate_completions_from_executable(bin/"noti", shell_parameter_format: :cobra)
   end
 
   test do

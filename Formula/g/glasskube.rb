@@ -1,19 +1,19 @@
 class Glasskube < Formula
   desc "Missing Package Manager for Kubernetes"
-  homepage "https://glasskube.dev/"
-  url "https://github.com/glasskube/glasskube/archive/refs/tags/v0.18.1.tar.gz"
-  sha256 "102db8120514f7cc3dde93169f2eef1d29aac03babb5ac801ea756a253d6b6f2"
+  homepage "https://glasskube.dev/products/package-manager/docs/"
+  url "https://github.com/glasskube/glasskube/archive/refs/tags/v0.26.1.tar.gz"
+  sha256 "c044187e49683b39aa89c26bc02dab38781578c24b6ab277c0a58ae811066996"
   license "Apache-2.0"
   head "https://github.com/glasskube/glasskube.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "c2b0de6ead3359e1529fab9ea0c48a8ddc17f07dc7a7136d98fd4f7c2e3e856a"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "c2b0de6ead3359e1529fab9ea0c48a8ddc17f07dc7a7136d98fd4f7c2e3e856a"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "c2b0de6ead3359e1529fab9ea0c48a8ddc17f07dc7a7136d98fd4f7c2e3e856a"
-    sha256 cellar: :any_skip_relocation, sonoma:         "029f95d4e2a85cfd2a11d8c2bb3a1f792bcb64037eb80a9c0eb664d5f6cb9251"
-    sha256 cellar: :any_skip_relocation, ventura:        "029f95d4e2a85cfd2a11d8c2bb3a1f792bcb64037eb80a9c0eb664d5f6cb9251"
-    sha256 cellar: :any_skip_relocation, monterey:       "029f95d4e2a85cfd2a11d8c2bb3a1f792bcb64037eb80a9c0eb664d5f6cb9251"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "a3ca6376031bc709caaf989b9d3f069308f980406c24880f436cc896631d38db"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "3babde1be2c32139d55c3d9d357e0dc0647acf1c51a7969c32fb219e01bf7671"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "3babde1be2c32139d55c3d9d357e0dc0647acf1c51a7969c32fb219e01bf7671"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "3babde1be2c32139d55c3d9d357e0dc0647acf1c51a7969c32fb219e01bf7671"
+    sha256 cellar: :any_skip_relocation, sonoma:        "12cdfcca0e5bbcc188c778493e12fc1f0062e737d6a59f4942192bf8cab55810"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "f060357190000ffc79417336afd8b6b0abcfec355015e4a9502ffca4ba7bdd3c"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "f74d440bd5ff5936c0ee805fa757c79f0891b65d4ba3c232da4caa69901264c4"
   end
 
   depends_on "go" => :build
@@ -30,7 +30,7 @@ class Glasskube < Formula
     system "make", "web"
     system "go", "build", *std_go_args(ldflags:), "./cmd/glasskube"
 
-    generate_completions_from_executable(bin/"glasskube", "completion")
+    generate_completions_from_executable(bin/"glasskube", shell_parameter_format: :cobra)
   end
 
   test do

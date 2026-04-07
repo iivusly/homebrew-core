@@ -1,8 +1,8 @@
 class Atlantis < Formula
   desc "Terraform Pull Request Automation tool"
   homepage "https://www.runatlantis.io/"
-  url "https://github.com/runatlantis/atlantis/archive/refs/tags/v0.29.0.tar.gz"
-  sha256 "e20ce010449fff88c2e57e3ca5e337a7f8704df7e6b2ac794019c4a720aeb659"
+  url "https://github.com/runatlantis/atlantis/archive/refs/tags/v0.41.0.tar.gz"
+  sha256 "6e6e6c2dedab1ad952f3a05142bd41246fb98cff94e7c330efa17f84fe0883b9"
   license "Apache-2.0"
   head "https://github.com/runatlantis/atlantis.git", branch: "main"
 
@@ -12,52 +12,51 @@ class Atlantis < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "fb70b97a570bcdb1503221115d2cd9820b25139649976ecbfc8a6c1fdd56b9a8"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "fb70b97a570bcdb1503221115d2cd9820b25139649976ecbfc8a6c1fdd56b9a8"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "fb70b97a570bcdb1503221115d2cd9820b25139649976ecbfc8a6c1fdd56b9a8"
-    sha256 cellar: :any_skip_relocation, sonoma:         "4cad55750a432f015ccbf7f82c72292ac093e298341faf702778f3d4594f78b7"
-    sha256 cellar: :any_skip_relocation, ventura:        "4cad55750a432f015ccbf7f82c72292ac093e298341faf702778f3d4594f78b7"
-    sha256 cellar: :any_skip_relocation, monterey:       "4cad55750a432f015ccbf7f82c72292ac093e298341faf702778f3d4594f78b7"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "577619d2cebda08108a8b6cb16f591f34420fed10bea6c39747400e5181b0511"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "72d45202e2ea012d7c23aac0206c78b89e7cdc2584b03ddac55ace1e34c9e214"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "72d45202e2ea012d7c23aac0206c78b89e7cdc2584b03ddac55ace1e34c9e214"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "72d45202e2ea012d7c23aac0206c78b89e7cdc2584b03ddac55ace1e34c9e214"
+    sha256 cellar: :any_skip_relocation, sonoma:        "19a512487e340522a06d1cfd2649c88afa290c6d0359b541b9db4825bbded9c2"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "745edc790f78e422b12721b788a1c5e777b2a3d148e6a841ba60a9c11326c297"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "01753fa3e5183f7d7f4b622e641fc43a8d9d80239a8d4743610e02b4eff84221"
   end
 
   depends_on "go" => :build
-
-  resource "terraform" do
-    # https://www.hashicorp.com/blog/hashicorp-adopts-business-source-license
-    # Do not update terraform, it switched to the BUSL license
-    # Waiting for https://github.com/runatlantis/atlantis/issues/3741
-    url "https://github.com/hashicorp/terraform/archive/refs/tags/v1.5.7.tar.gz"
-    sha256 "6742fc87cba5e064455393cda12f0e0241c85a7cb2a3558d13289380bb5f26f5"
-  end
+  depends_on "opentofu" => :test
 
   def install
-    resource("terraform").stage do
-      system "go", "build", *std_go_args(ldflags: "-s -w", output: libexec/"bin/terraform")
-    end
-
+    # The commit variable only displays 7 characters, so we can't use #{tap.user} or "Homebrew".
     ldflags = %W[
       -s -w
       -X main.version=#{version}
       -X main.commit=brew
       -X main.date=#{time.iso8601}
     ]
-    system "go", "build", *std_go_args(ldflags:, output: libexec/"bin/atlantis")
+    system "go", "build", *std_go_args(ldflags:)
 
-    (bin/"atlantis").write_env_script libexec/"bin/atlantis", PATH: libexec/"bin"
+    generate_completions_from_executable(bin/"atlantis", shell_parameter_format: :cobra)
   end
 
   test do
     assert_match version.to_s, shell_output("#{bin}/atlantis version")
+
     port = free_port
-    loglevel = "info"
-    gh_args = "--gh-user INVALID --gh-token INVALID --gh-webhook-secret INVALID --repo-allowlist INVALID"
-    command = bin/"atlantis server --atlantis-url http://invalid/ --port #{port} #{gh_args} --log-level #{loglevel}"
-    pid = Process.spawn(command)
-    system "sleep", "5"
-    output = `curl -vk# 'http://localhost:#{port}/' 2>&1`
+    args = %W[
+      --atlantis-url http://invalid/
+      --port #{port}
+      --gh-user INVALID
+      --gh-token INVALID
+      --gh-webhook-secret INVALID
+      --repo-allowlist INVALID
+      --log-level info
+      --default-tf-distribution opentofu
+      --default-tf-version #{Formula["opentofu"].version}
+    ]
+    pid = spawn(bin/"atlantis", "server", *args)
+    sleep 5
+    output = shell_output("curl -vk# 'http://localhost:#{port}/' 2>&1")
     assert_match %r{HTTP/1.1 200 OK}m, output
     assert_match "atlantis", output
+  ensure
     Process.kill("TERM", pid)
   end
 end

@@ -6,41 +6,45 @@ class Gecode < Formula
   license "MIT"
   revision 1
 
-  livecheck do
-    url "https://github.com/Gecode/gecode"
-  end
-
   bottle do
-    rebuild 2
-    sha256 cellar: :any,                 arm64_sonoma:   "fe7f8c7a62e4d933818fbf4a10c69ca85285639c8f362b7d8021c3d7516dfc92"
-    sha256 cellar: :any,                 arm64_ventura:  "d4034d14e93b5320709f5935ab5c338aa8944d6969a5641ac54533a38aec807d"
-    sha256 cellar: :any,                 arm64_monterey: "3d84e1de9c817d479b07246fe62a5496d59f236f04e10c20b435ebab144a26c0"
-    sha256 cellar: :any,                 arm64_big_sur:  "b1d5780bc5589bb71c73a14555df6fdb18ad4ae9f0a19a4741e4e687c15eaf4d"
-    sha256 cellar: :any,                 sonoma:         "0437629c9b922293f72705339f617324024d98ec8d82a09466b17e1a0086281f"
-    sha256 cellar: :any,                 ventura:        "fd1dbd0150d87c2f9362d9283d4ef65fb3fd5366e4386cac6d226b5b26e91ac9"
-    sha256 cellar: :any,                 monterey:       "13ce2759de416899038a4dbfd2c336ca30d09a4fe3fb3521d008bca1dcc277ab"
-    sha256 cellar: :any,                 big_sur:        "3d08807bdd49d5078706ca78b108a276d55a4e6e74b0478ce5b8579f8610e36e"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "65740a01de43a11491d8f6eefb60bf20670fa9e1d15ad8d79209324bb424a3fb"
+    rebuild 4
+    sha256 cellar: :any,                 arm64_tahoe:   "4bf3ed46450a9a436678fcf7bc2083d7ba8c9b4847e3846fa66b50423c4e273d"
+    sha256 cellar: :any,                 arm64_sequoia: "fcd5d80e9d1d6fada71c424647c5be7ed126831b83d57deece2b836fa44dfe58"
+    sha256 cellar: :any,                 arm64_sonoma:  "b7653b544c06145b4a39d83311a0583849d4d4cf2873b81c341cddd135bed39f"
+    sha256 cellar: :any,                 sonoma:        "313e206a83f8a8459519f23e0c1d6e96978791ec62b162118aa7f036204615e9"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "d0762e8669a3b0aff790ec8673ca1fc8dda25b741368d289c3c3cc5c2d559c0a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "829f38b21be0258bcc84402afb8b7cefa9272a8a59e36f94aee33b7d8ace7ac4"
   end
 
-  depends_on "qt@5"
+  depends_on "pkgconf" => :test
+  depends_on "qtbase"
 
-  fails_with gcc: "5"
+  # Backport support for Qt6 from release/6.3.0 branch
+  patch do
+    url "https://github.com/Gecode/gecode/commit/c0ca0e5f4406099be22f87236ea8547c2f31ded3.patch?full_index=1"
+    sha256 "233b266a943c0619b027b4cb19912e2a8c9d1f8e4323a3627765cb32b47c59fe"
+  end
 
   def install
+    # Backport parts of upstream commit[^1] and add workarounds to allow configure to build with Qt6
+    #
+    # [^1]: https://github.com/Gecode/gecode/commit/19b9ec3b938f52f5ef5feef15c6be417b5b27e36
+    inreplace "configure", "if test ${ac_gecode_qt_major} -eq 5;", "if test ${ac_gecode_qt_major} -ge 5;"
+    ENV["MOC"] = Formula["qtbase"].opt_share/"qt/libexec/moc"
+    ENV.append "CXXFLAGS", "-std=c++17"
+
     args = %W[
       --prefix=#{prefix}
       --disable-examples
       --disable-mpfr
       --enable-qt
     ]
-    ENV.cxx11
     system "./configure", *args
     system "make", "install"
   end
 
   test do
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include <gecode/driver.hh>
       #include <gecode/int.hh>
       #include <QtWidgets/QtWidgets>
@@ -72,34 +76,21 @@ class Gecode < Formula
         Script::run<Test, DFS, Options>(opt);
         return 0;
       }
-    EOS
+    CPP
 
-    args = %W[
-      -std=c++11
-      -fPIC
-      -I#{Formula["qt@5"].opt_include}
+    flags = %W[
       -I#{include}
+      -L#{lib}
       -lgecodedriver
       -lgecodesearch
       -lgecodeint
       -lgecodekernel
       -lgecodesupport
       -lgecodegist
-      -L#{lib}
-      -o test
     ]
-    if OS.linux?
-      args += %W[
-        -lQt5Core
-        -lQt5Gui
-        -lQt5Widgets
-        -lQt5PrintSupport
-        -L#{Formula["qt@5"].opt_lib}
-      ]
-      ENV.append_path "LD_LIBRARY_PATH", Formula["qt@5"].opt_lib
-    end
+    flags += shell_output("pkgconf --cflags --libs Qt6Widgets").chomp.split
 
-    system ENV.cxx, "test.cpp", *args
+    system ENV.cxx, "-std=c++17", "test.cpp", "-o", "test", *flags
     assert_match "{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}", shell_output("./test")
   end
 end

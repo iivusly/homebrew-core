@@ -3,8 +3,9 @@ class Thrax < Formula
 
   desc "Tools for compiling grammars into finite state transducers"
   homepage "https://www.openfst.org/twiki/bin/view/GRM/Thrax"
-  url "https://www.openfst.org/twiki/pub/GRM/ThraxDownload/thrax-1.3.9.tar.gz"
-  sha256 "1e6ed84a747d337c28f2064348563121a439438f5cc0c4de4b587ddf779f1ae3"
+  url "https://www.openfst.org/twiki/pub/GRM/ThraxDownload/thrax-1.3.10.tar.gz"
+  mirror "http://206.196.111.47/twiki/pub/GRM/ThraxDownload/thrax-1.3.10.tar.gz"
+  sha256 "78dedada58a0a8543b4ea90c77a36783ac82495cf5456bec5d83baafac74b764"
   license "Apache-2.0"
 
   livecheck do
@@ -13,13 +14,10 @@ class Thrax < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "9d668a3b488757d8586f0db1184f6f5df31f6bb9f2630b4115ab04fb17e07091"
-    sha256 cellar: :any,                 arm64_ventura:  "cc655cae62d5c58638cc40e1c3f32e9e9ad3ea8741120e4f16418be4f7add2cc"
-    sha256 cellar: :any,                 arm64_monterey: "20858036b8aae42f7a46f5829fbe4928d9f6c44058c466495b22ce922261d5db"
-    sha256 cellar: :any,                 sonoma:         "62258cde4a11efbf7c314f4df6b4814deeabf3011af0c77d85419ab54e69d9d5"
-    sha256 cellar: :any,                 ventura:        "bd252a98a59559a550c44a1119461e12b0aaa3a66047d74f68f137e3f9a67961"
-    sha256 cellar: :any,                 monterey:       "0229ee95400fd0ddfefa917c93819a58a51319fd9fcffe1fc03f40949270777d"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "3938dd9af9f3bc0e161abb79a313b49dec14ac03b056ec046cb5b335489628c6"
+    sha256 cellar: :any, arm64_tahoe:   "d21f145cc76bc57df426ef5693cc37018225c6756254a40f78a1e65a3de1f3f8"
+    sha256 cellar: :any, arm64_sequoia: "1d006e65d56ae1d4828fec2513300a9c6593a39930fd787a922c67e6f361ac0a"
+    sha256 cellar: :any, arm64_sonoma:  "da461f0ee541bae3f2801f9db92cb334227fb8f8ff3d1db35f572e0d43493733"
+    sha256 cellar: :any, sonoma:        "856ef28235ec1772a3b695f448fae21b7b9f65077b947555cd5e6c0ab006c174"
   end
 
   # Regenerate `configure` to avoid `-flat_namespace` bug.
@@ -28,10 +26,9 @@ class Thrax < Formula
   depends_on "automake" => :build
   depends_on "libtool" => :build
 
+  depends_on :macos
   depends_on "openfst"
-  uses_from_macos "python", since: :catalina
-
-  fails_with gcc: "5"
+  uses_from_macos "python"
 
   def install
     system "autoreconf", "--force", "--install", "--verbose"

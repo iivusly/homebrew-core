@@ -1,8 +1,8 @@
 class Byacc < Formula
   desc "(Arguably) the best yacc variant"
   homepage "https://invisible-island.net/byacc/"
-  url "https://invisible-mirror.net/archives/byacc/byacc-20240109.tgz"
-  sha256 "f2897779017189f1a94757705ef6f6e15dc9208ef079eea7f28abec577e08446"
+  url "https://invisible-mirror.net/archives/byacc/byacc-20260126.tgz"
+  sha256 "b618c5fb44c2f5f048843db90f7d1b24f78f47b07913c8c7ba8c942d3eb24b00"
   license :public_domain
 
   livecheck do
@@ -11,13 +11,12 @@ class Byacc < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "d9689a35e53bfb11647dfea27c9943f6356adec3aa435082b7c5b9160a62d3bb"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "ad323ecf849316b79f9647eaa7f8a07c93041c72fdb6b739c0ea21de9797194e"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "f692de26b32ba58379da96eea29f0f170d4fd86da51d975d595d7c3b0098f107"
-    sha256 cellar: :any_skip_relocation, sonoma:         "5e96b9b1fa077cc47b35ab745ac97e1b34b210a29bc44c0b041832dc9151f978"
-    sha256 cellar: :any_skip_relocation, ventura:        "ab3d92f531d410ea7deed110794c1e29ee188c87a1e6b7953587d18e54a745e0"
-    sha256 cellar: :any_skip_relocation, monterey:       "a2cc93a64020cbb540ab14080ec7bd5f0c07a56a4b93b1109953ad1916ea0c5c"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "d6ba6891c56da94c6f57029a29d01c4a0b7df2096683a571e1c19efacd4495a3"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "7b744045116e9ce0829c9c99ed2df820a8b35a56e92be4e8f714446e3bd5301d"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "d7e605969cf2f5dde984d0087c2b8929125ae22b1191f8d6f5b5c9e53334c153"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "5afd9bd2cb0d3f317178fb231f14e40e3a6c3d080b69cfc74b3e195eb53862f5"
+    sha256 cellar: :any_skip_relocation, sonoma:        "d9e73885e9af6a04b10c8c0690bb278798114afa308e16edf73f4cc4a6df2070"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "a1fdddc149a80df3d04ce5b80603a8845621e68bcac3dd6282c864944660f9af"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "135f6821d7a1c90f3d5ca46dec5d53baa5ed57435c83ec545480c7e0d318d1f0"
   end
 
   def install

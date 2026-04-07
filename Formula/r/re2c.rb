@@ -1,20 +1,17 @@
 class Re2c < Formula
   desc "Generate C-based recognizers from regular expressions"
-  homepage "https://re2c.org"
-  url "https://github.com/skvadrik/re2c/releases/download/3.1/re2c-3.1.tar.xz"
-  sha256 "0ac299ad359e3f512b06a99397d025cfff81d3be34464ded0656f8a96676c029"
+  homepage "https://re2c.org/"
+  url "https://github.com/skvadrik/re2c/releases/download/4.5.1/re2c-4.5.1.tar.xz"
+  sha256 "ffea067c11aa668bcb42885be6e6cd000302000b7747d2bb213299ec66b7864e"
   license :public_domain
 
   bottle do
-    sha256 arm64_sonoma:   "b5197fcd4db8b6811e9a72bca29fc08e35d0b0581bc1fa390d17f702fa9af87d"
-    sha256 arm64_ventura:  "c213025ac8f67d67c7de7b42b18f02423b9b969f95d01217b0eb082e18e42d02"
-    sha256 arm64_monterey: "1132b82eada9b28d6ae914619f6471603986c51490c8bd5c75f64e4a17af7393"
-    sha256 arm64_big_sur:  "95c681abedf2a1fa92e68003a76eeb31ecde2d3816a6bb3d01372194a3a86346"
-    sha256 sonoma:         "639a90433de77050197aa58c0428986893af29728d905c05718f57f37ce36c27"
-    sha256 ventura:        "9d8ed384c1173e7ee72aae6ebc11b2556a501932c33c7c0558f534c1854ce5ac"
-    sha256 monterey:       "b6ad0a47af09087b366226d20e9538260e56a80b70bb118bdaf472e82bad1af4"
-    sha256 big_sur:        "343c4174f501aaeea7c339fef350d36bd26faffd130d1f07fd778239375fc826"
-    sha256 x86_64_linux:   "a30c3862ed53d4e5465ae66cc177253f717a4f611fe5a7533391bd6ca4d0cd72"
+    sha256 arm64_tahoe:   "487a30e2e00d20a38b1aac7712f539b66622dea1023ec323457aac77b1fa546a"
+    sha256 arm64_sequoia: "ec48f3992aa27470291114b53b4642a37bdb731812019ee1ac7f74cc52810d1c"
+    sha256 arm64_sonoma:  "32ae2aebfbce16d7aee409fc41fd7fca04a0a6bface9d56a72d6b6428b9fbc09"
+    sha256 sonoma:        "71371b5a39e4f52e044f03e8fad0cd7003592e80c2e7714f83b7797a6ab74ce3"
+    sha256 arm64_linux:   "65b1998210ef8d466401539c0961839ef5e301cb4b2e6463c9d307c5c88711f6"
+    sha256 x86_64_linux:  "ab784e322c45193e3c13283466bd751d55d88f185682b993dd7c3b799b25c65c"
   end
 
   uses_from_macos "python" => :build
@@ -26,7 +23,7 @@ class Re2c < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       unsigned int stou (const char * s)
       {
       #   define YYCTYPE char
@@ -43,7 +40,7 @@ class Re2c < Formula
               */
           }
       }
-    EOS
+    C
     system bin/"re2c", "-is", testpath/"test.c"
   end
 end

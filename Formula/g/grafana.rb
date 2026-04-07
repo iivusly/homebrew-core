@@ -1,9 +1,8 @@
 class Grafana < Formula
   desc "Gorgeous metric visualizations and dashboards for timeseries databases"
   homepage "https://grafana.com"
-  # TODO: switch to use go1.23 when 11.3.0 is released
-  url "https://github.com/grafana/grafana/archive/refs/tags/v11.2.0.tar.gz"
-  sha256 "f1727b5e99183879e30d3ca8393e328f39f6bd8b5a11690e7b6e60081f99bbd9"
+  url "https://github.com/grafana/grafana/archive/refs/tags/v12.4.2.tar.gz"
+  sha256 "f3b5dbc39da14ba072dea00c2b2ec40743f753851e4ad8bd133a7a1441adeb76"
   license "AGPL-3.0-only"
   head "https://github.com/grafana/grafana.git", branch: "main"
 
@@ -13,52 +12,49 @@ class Grafana < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "284947cbafa943186e6119c1c1fb8747e934d7ab892be1b2db472d5ba9f5310e"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "9ab238b65f499ccbd852097e562ebc0f03c5b8c4c1b4cf98b2821184d29d973d"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "902f90003d932f350fb58645415e811dc6f8dcae641b023c5c9d0adb4be9579e"
-    sha256 cellar: :any_skip_relocation, sonoma:         "12387f6ee94b61e1a327ccec62ad668793fb9669fc09ef3c371776f1201a4fb7"
-    sha256 cellar: :any_skip_relocation, ventura:        "ebcd43744c90d19e495b874610dfa96dd3e324b4e756dbfe16e5ac3976121e74"
-    sha256 cellar: :any_skip_relocation, monterey:       "eb6e9df35d51470a2cd2c13f1d312c3d35cb5a1433afe8875526f240eaebc6a6"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "44b17ca1a0f64c04558baf6176dcfd71e1c35cd6dbf7779f9fd5e16c262c856b"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "f05020704fcaff9e3bfc95eee37486c59c454f81eae17d5df0fa1b2b8abd5441"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "eddb62b529b9fd0f345a0af0fb4c31216f5c92b1f27b6ba5c094facfb7bac2ec"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "b4e4900cfb920b8317a83e8933d133423e15a4dcf741ecc8b266c3a9aabb450c"
+    sha256 cellar: :any_skip_relocation, sonoma:        "ff3f577f1fb4493ab662de17bedbda2ac3215359d2d6c04fab57aa0f9192df04"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "1a3096ceb6d2b1f01425c1d227222b7db86afc85b7a0954b818734a5ed1fb759"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "03a67a093c65b714e01fd5268cb088f2a9253e545d1a3b7f10c7caa5fefb361c"
   end
 
-  depends_on "corepack" => :build
-  depends_on "go@1.22" => :build
+  depends_on "go" => :build
   depends_on "node" => :build
+  depends_on "yarn" => :build
 
-  uses_from_macos "python" => :build, since: :catalina
-  uses_from_macos "zlib"
+  uses_from_macos "python" => :build
 
   on_linux do
+    # Workaround for old `node-gyp` that needs distutils.
+    # TODO: Remove when `node-gyp` is v10+
+    depends_on "python-setuptools" => :build
     depends_on "fontconfig"
     depends_on "freetype"
+    depends_on "zlib-ng-compat"
   end
 
-  # update yarn.lock
-  patch :DATA
-
   def install
+    ENV["COMMIT_SHA"] = tap.user
     ENV["NODE_OPTIONS"] = "--max-old-space-size=8000"
+    ENV["npm_config_build_from_source"] = "true"
+
     system "make", "gen-go"
     system "go", "run", "build.go", "build"
 
-    system "yarn", "install"
+    system "yarn", "install", "--immutable"
     system "yarn", "build"
 
     os = OS.kernel_name.downcase
     arch = Hardware::CPU.intel? ? "amd64" : Hardware::CPU.arch.to_s
-    bin.install "bin/#{os}-#{arch}/grafana"
-    bin.install "bin/#{os}-#{arch}/grafana-cli"
-    bin.install "bin/#{os}-#{arch}/grafana-server"
+    bin.install buildpath.glob("bin/#{os}-#{arch}/grafana{,-cli,-server}")
 
-    (etc/"grafana").mkpath
     cp "conf/sample.ini", "conf/grafana.ini.example"
-    etc.install "conf/sample.ini" => "grafana/grafana.ini"
-    etc.install "conf/grafana.ini.example" => "grafana/grafana.ini.example"
+    pkgetc.install "conf/sample.ini" => "grafana.ini"
+    pkgetc.install "conf/grafana.ini.example"
     pkgshare.install "conf", "public", "tools"
-  end
 
-  def post_install
     (var/"log/grafana").mkpath
     (var/"lib/grafana/plugins").mkpath
   end
@@ -78,79 +74,15 @@ class Grafana < Formula
   end
 
   test do
-    require "pty"
-    require "timeout"
+    assert_match version.to_s, shell_output("#{bin}/grafana --version")
+    assert_match version.to_s, shell_output("#{bin}/grafana server --version")
 
-    # first test
-    system bin/"grafana", "server", "-v"
-
-    # avoid stepping on anything that may be present in this directory
-    tdir = File.join(Dir.pwd, "grafana-test")
-    Dir.mkdir(tdir)
-    logdir = File.join(tdir, "log")
-    datadir = File.join(tdir, "data")
-    plugdir = File.join(tdir, "plugins")
-    [logdir, datadir, plugdir].each do |d|
-      Dir.mkdir(d)
-    end
-    Dir.chdir(pkgshare)
-
-    res = PTY.spawn(bin/"grafana", "server",
-      "cfg:default.paths.logs=#{logdir}",
-      "cfg:default.paths.data=#{datadir}",
-      "cfg:default.paths.plugins=#{plugdir}",
-      "cfg:default.server.http_port=50100")
-    r = res[0]
-    w = res[1]
-    pid = res[2]
-
-    listening = Timeout.timeout(10) do
-      li = false
-      r.each do |l|
-        if l.include?("HTTP Server Listen")
-          li = true
-          break
-        end
-      end
-      li
-    end
-
+    cp_r pkgshare.children, testpath
+    port = free_port
+    pid = spawn bin/"grafana", "server", "cfg:server.http_port=#{port}", "cfg:log.mode=file"
+    sleep 15
+    assert_equal "Ok", shell_output("curl --silent localhost:#{port}/healthz")
+  ensure
     Process.kill("TERM", pid)
-    w.close
-    r.close
-    listening
   end
 end
-
-__END__
-diff --git a/yarn.lock b/yarn.lock
-index 5f122101..b96cd364 100644
---- a/yarn.lock
-+++ b/yarn.lock
-@@ -3233,7 +3233,7 @@ __metadata:
-   languageName: unknown
-   linkType: soft
- 
--"@grafana/e2e-selectors@npm:11.2.0, @grafana/e2e-selectors@workspace:*, @grafana/e2e-selectors@workspace:packages/grafana-e2e-selectors":
-+"@grafana/e2e-selectors@npm:11.2.0, @grafana/e2e-selectors@npm:^11.0.0, @grafana/e2e-selectors@workspace:*, @grafana/e2e-selectors@workspace:packages/grafana-e2e-selectors":
-   version: 0.0.0-use.local
-   resolution: "@grafana/e2e-selectors@workspace:packages/grafana-e2e-selectors"
-   dependencies:
-@@ -3251,17 +3251,6 @@ __metadata:
-   languageName: unknown
-   linkType: soft
- 
--"@grafana/e2e-selectors@npm:^11.0.0":
--  version: 11.1.0
--  resolution: "@grafana/e2e-selectors@npm:11.1.0"
--  dependencies:
--    "@grafana/tsconfig": "npm:^1.3.0-rc1"
--    tslib: "npm:2.6.3"
--    typescript: "npm:5.4.5"
--  checksum: 10/010a32e8b562d0da83b008646b9928a96a79957096eed713aa67b227d8ad6055d22cc0ec26f87fd9839cfb28344d0012f49c3c823defc6e91f4ab05ed7d8c465
--  languageName: node
--  linkType: hard
--
- "@grafana/eslint-config@npm:7.0.0":
-   version: 7.0.0
-   resolution: "@grafana/eslint-config@npm:7.0.0"

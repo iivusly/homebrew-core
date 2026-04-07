@@ -9,25 +9,30 @@ class Fypp < Formula
   head "https://github.com/aradi/fypp.git", branch: "main"
 
   bottle do
-    rebuild 3
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "96ed097ad92dfefc28ccd5c4b31442da47a205a9c8cbab1d79a6a2bc17295893"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "9d9caddee587d281933e20dc009f96ab7ab04e856bde600dd0e92081f68e0ffb"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "9ae93051063f65a09473b0b447f68506731756ba2bff186985b972e1115f2352"
-    sha256 cellar: :any_skip_relocation, sonoma:         "775084b42575716d4c0d52f1f8ee66e78a6d716f5f240724f2c73acafb6e0d30"
-    sha256 cellar: :any_skip_relocation, ventura:        "bcbea4bd66d64e53f6362b45e6784399b80b569e08d431611988e5f2a97bb0e8"
-    sha256 cellar: :any_skip_relocation, monterey:       "5ba31221724cc36d5eb1b23f125361e83b6d20d0de6db0ca328c276d9c0ed2e4"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "d7ca5a9d4b1eb864aa5d7e0a5bdfc24afcae49900af8a4fde88b20630f89d6e3"
+    rebuild 6
+    sha256 cellar: :any_skip_relocation, all: "3de4ca648895c9fdec45f2a052785fb54b9b5db303574558d9ba5eb8d2f7940f"
   end
 
   depends_on "gcc" => :test
-  depends_on "python@3.12"
+  depends_on "python@3.14"
+
+  def python3
+    "python3.14"
+  end
 
   def install
-    virtualenv_install_with_resources
+    system python3, "-m", "pip", "install", *std_pip_args(build_isolation: true), "."
   end
 
   test do
     system bin/"fypp", "--version"
+
+    (testpath/"test_fypp.py").write <<~PYTHON
+      import fypp
+      print("fypp version:", fypp.VERSION)
+    PYTHON
+    system python3, testpath/"test_fypp.py"
+
     (testpath/"hello.F90").write <<~EOS
       program hello
       #:for val in [_SYSTEM_, _MACHINE_, _FILE_, _LINE_]
@@ -35,6 +40,7 @@ class Fypp < Formula
       #:endfor
       end
     EOS
+
     system bin/"fypp", testpath/"hello.F90", testpath/"hello.f90"
     ENV.fortran
     system ENV.fc, testpath/"hello.f90", "-o", testpath/"hello"

@@ -4,6 +4,7 @@ class Libnfnetlink < Formula
   url "https://www.netfilter.org/projects/libnfnetlink/files/libnfnetlink-1.0.2.tar.bz2"
   sha256 "b064c7c3d426efb4786e60a8e6859b82ee2f2c5e49ffeea640cfe4fe33cbc376"
   license "LGPL-2.1-or-later"
+  compatibility_version 1
 
   livecheck do
     url "https://www.netfilter.org/projects/libnfnetlink/downloads.html"
@@ -11,7 +12,9 @@ class Libnfnetlink < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "302c0c8f5d1b84aa7482b918d2b70a9c88eb0e794163342317b208feff242993"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_linux:  "29a3d3fc305c9252a22b3bce85447d2f895924c959185c00889cedc2d23fc78b"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "927f6b62c2f87ff79d92d07e52bb312d3fb24731e694cc804179730b08f15eae"
   end
 
   depends_on :linux
@@ -25,13 +28,13 @@ class Libnfnetlink < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <libnfnetlink/libnfnetlink.h>
 
       int main() {
         int i = NFNL_BUFFSIZE;
       }
-    EOS
+    C
 
     system ENV.cc, "test.c", "-I#{include}", "-L#{lib}", "-lnfnetlink", "-o", "test"
   end

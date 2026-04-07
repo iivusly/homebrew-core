@@ -1,42 +1,28 @@
 class Xdotool < Formula
   desc "Fake keyboard/mouse input and window management for X"
   homepage "https://www.semicomplete.com/projects/xdotool/"
-  url "https://github.com/jordansissel/xdotool/releases/download/v3.20211022.1/xdotool-3.20211022.1.tar.gz"
-  sha256 "96f0facfde6d78eacad35b91b0f46fecd0b35e474c03e00e30da3fdd345f9ada"
+  url "https://github.com/jordansissel/xdotool/archive/refs/tags/v4.20260303.1.tar.gz"
+  sha256 "c1f971a384da588eb99ca0755fc4300316d49c1e612537e3f1de52215e104fa3"
   license "BSD-3-Clause"
   head "https://github.com/jordansissel/xdotool.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "721402fc77e843c3c937fa049b72489a6212bd23ad8e6d60596755ee9c5ad7be"
-    sha256 cellar: :any,                 arm64_ventura:  "e97b772870557f47e08a218f6d5b799e4ed39ab167b5701c137f2219c1426275"
-    sha256 cellar: :any,                 arm64_monterey: "2e59d046b4cb7d97f989a022c0775cbf3ab9f5929cd05650d50a9eed62b162c2"
-    sha256 cellar: :any,                 arm64_big_sur:  "cdf3234a474044e88dcf18b5cb5e8da2c2af6da4d85eb04e8be737802baeae16"
-    sha256 cellar: :any,                 sonoma:         "2b5ff3fe92cfcd90ecdeb12e42e5ea65700b23a772f7349d12de97492d5d8590"
-    sha256 cellar: :any,                 ventura:        "3990de3d762214cd1a8c4f6c0412b745728e8ca3509e6cd62040c111e38a3ec9"
-    sha256 cellar: :any,                 monterey:       "ded3a6fc9f7ddc4e307a48744d2c25f2a60a752311628822c69d9f141d17ee34"
-    sha256 cellar: :any,                 big_sur:        "f33aa5be05e49f700d166a13a36ecf5a1f8da3059e36f67e0cc9d7f26c3bf088"
-    sha256 cellar: :any,                 catalina:       "21276c0386840d584e70f5425578b5184e56ef7649e6992f191a6c7a3cf8a30e"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "ffe41af3fe21135efdee19b3fabf9f459d850946dd592858a50b4cd46035f35e"
+    sha256 cellar: :any,                 arm64_tahoe:   "4dc22c5d97fd9b01c11953a9a784f41f4849c4e52e54fa9c816661cf9cb16ae5"
+    sha256 cellar: :any,                 arm64_sequoia: "4b72c6fa194946413cfac5a743f148ba85c0be73709e9d41be584c682f27a9dd"
+    sha256 cellar: :any,                 arm64_sonoma:  "0b27cc0c712adf4358f349aa4c0a5bca63e0bc11a967858cf7270d62bbf1c9b1"
+    sha256 cellar: :any,                 sonoma:        "8526ca0cc8cf13ac5bfe8123e67b1123a4501d7f0c934a636aa1abfd8acd9a4c"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "fb904245e32922033e2c12cb49aed5b602e373ba684f5dfb44bc2b70f9f66814"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "a3748e18cd55cf9d22483f03567a37b37b1ae94c7c98d326fe4fbfb738c274f2"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "libx11"
+  depends_on "libxi"
   depends_on "libxinerama"
   depends_on "libxkbcommon"
   depends_on "libxtst"
 
-  # Disable clock_gettime() workaround since the real API is available on macOS >= 10.12
-  # Note that the PR from this patch was actually closed originally because of problems
-  # caused on pre-10.12 environments, but that is no longer a concern.
-  patch do
-    url "https://github.com/jordansissel/xdotool/commit/dffc9a1597bd96c522a2b71c20301f97c130b7a8.patch?full_index=1"
-    sha256 "447fa42ec274eb7488bb4aeeccfaaba0df5ae747f1a7d818191698035169a5ef"
-  end
-
   def install
-    # Fix compile with newer Clang
-    ENV.append_to_cflags "-Wno-implicit-function-declaration" if DevelopmentTools.clang_build_version >= 1403
-
     system "make", "PREFIX=#{prefix}", "INSTALLMAN=#{man}", "install"
   end
 

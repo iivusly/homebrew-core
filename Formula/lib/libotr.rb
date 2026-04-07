@@ -4,6 +4,7 @@ class Libotr < Formula
   url "https://otr.cypherpunks.ca/libotr-4.1.1.tar.gz"
   sha256 "8b3b182424251067a952fb4e6c7b95a21e644fbb27fbd5f8af2b2ed87ca419f5"
   license all_of: ["LGPL-2.1-only", "GPL-2.0-only"]
+  compatibility_version 1
 
   livecheck do
     url :homepage
@@ -12,6 +13,8 @@ class Libotr < Formula
 
   bottle do
     rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:    "3b60c300a23960e3d70ba6fb0df3326ab6dd1236aecff5417bc55984b9510942"
+    sha256 cellar: :any,                 arm64_sequoia:  "5e6fdf2cd7cc293066a7875b10c684b7058b553ad85ff949e18045d0aca47b6d"
     sha256 cellar: :any,                 arm64_sonoma:   "1a9fee4f64cdd96f0c0d0594e03a8855c2f0936a0c1c1272c433e591bc82ad4d"
     sha256 cellar: :any,                 arm64_ventura:  "758ad5aecffe69404a6b32062bbdef4a7c6b89dab5d635b1f1f41b46f676e12f"
     sha256 cellar: :any,                 arm64_monterey: "fe41c2686379f8b67aafc307e703775ab8060fb074734561e67cdc958a912e45"
@@ -21,14 +24,19 @@ class Libotr < Formula
     sha256 cellar: :any,                 monterey:       "afa5f29cdb8a4a6618ecea8a75129679c6ade432cdae03f1e31caadeec8ddadd"
     sha256 cellar: :any,                 big_sur:        "f59b69aa5af8b636f8bea1511fa63fed116f9c9571864fb7b44c21655e8a099b"
     sha256 cellar: :any,                 catalina:       "8ecf904a816fc69adc5e8fe904ca2ef1b1d147090d2f6ee694ad6b5c07faa02c"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "62ee96a56e10ffa701daa578015edfd49d6a20b89d1fbbef3530795ccfde6899"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "9a88f909cde9e876f1f3a9ffe30d2ba483715ba3fc03c188f78bc07758a18491"
   end
 
   depends_on "libgcrypt"
 
+  on_macos do
+    depends_on "libgpg-error"
+  end
+
   # Fix -flat_namespace being used on Big Sur and later.
   patch do
-    url "https://raw.githubusercontent.com/Homebrew/formula-patches/03cf8088210822aa2c1ab544ed58ea04c897d9c4/libtool/configure-pre-0.4.2.418-big_sur.diff"
+    url "https://raw.githubusercontent.com/Homebrew/homebrew-core/1cf441a0/Patches/libtool/configure-pre-0.4.2.418-big_sur.diff"
     sha256 "83af02f2aa2b746bb7225872cab29a253264be49db0ecebb12f841562d9a2923"
   end
 

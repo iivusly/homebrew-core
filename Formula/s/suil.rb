@@ -1,10 +1,10 @@
 class Suil < Formula
   desc "Lightweight C library for loading and wrapping LV2 plugin UIs"
   homepage "https://drobilla.net/software/suil.html"
-  url "https://download.drobilla.net/suil-0.10.20.tar.xz"
-  sha256 "334a3ed3e73d5e17ff400b3db9801f63809155b0faa8b1b9046f9dd3ffef934e"
+  url "https://download.drobilla.net/suil-0.10.26.tar.xz"
+  sha256 "62808916602c47d201a1ec2d246323a8048243f2bf972f859f0db1db4662ee43"
   license "ISC"
-  head "https://gitlab.com/lv2/suil.git", branch: "master"
+  head "https://gitlab.com/lv2/suil.git", branch: "main"
 
   livecheck do
     url "https://download.drobilla.net/"
@@ -12,22 +12,34 @@ class Suil < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "3786a8f72e84d526393aacf88914e0e2c8846be83237c3583293a81a4501f172"
-    sha256 arm64_ventura:  "2ae1dceda234d02d9345dda24395ac7b3c23420821107aa95c919d73953ad159"
-    sha256 arm64_monterey: "cabdba5ebcc04aefab86262329a739b9fe072fe514294aba5188f5d48fc2988c"
-    sha256 sonoma:         "7774467a2d248fd6251bb32ff1ba996e8b1d14e53bf20b58bf7e0e4aed2719dc"
-    sha256 ventura:        "73c258d4b84425e3f4644c632bef762824481cf30b5ac2b5a6183f639d05cd9a"
-    sha256 monterey:       "5455af86ac9b03718c82f1b1d7b7c45060d7183dc5b186ac3dab29c46fa939b3"
-    sha256 x86_64_linux:   "cd685f9ad0942a691b83de434016e1363322bf0418fb8169778e81c81e4d05a5"
+    sha256 arm64_tahoe:   "adce2989ab987d21cf92671496284df3396f22dd113495c8ba44e2bbe90c22fb"
+    sha256 arm64_sequoia: "3465540e13410f3444375c0588c26c58d947aa1c5781801252f43f89406f8eff"
+    sha256 arm64_sonoma:  "4e500b8273217d5c1f0eccf6f3d8d34e8ff1845342c001c3ea95a104a206007a"
+    sha256 sonoma:        "6a071ed376235a2f02b4a7a085b8eba6af48835aeccec1f4d3a44dd874a0e543"
+    sha256 arm64_linux:   "f33735b4417b37962f04cc8f6d4f199037af19d6ff15d2273e5784fa98efbfd3"
+    sha256 x86_64_linux:  "96d50ae9d442fbc64791d9e12ea1fe44fb1aa0f3082bb37bcbff908e355c5e3f"
   end
 
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => :build
-  depends_on "python@3.12" => :build
-  depends_on "gtk+3"
+  depends_on "pkgconf" => :build
+  depends_on "libx11"
   depends_on "lv2"
-  depends_on "qt@5"
+
+  on_macos do
+    # Can undeprecate if new release with Qt 6 support is available.
+    # Alternatively can just build direct X11 wrapper (libsuil_x11.dylib)
+    # Issue ref: https://gitlab.com/lv2/suil/-/issues/11
+    deprecate! date: "2026-05-19", because: "needs end-of-life Qt 5"
+
+    depends_on "qt@5" # cocoa still needs Qt5
+  end
+
+  on_linux do
+    depends_on "glib"
+    depends_on "gtk+3"
+    depends_on "qtbase"
+  end
 
   def install
     system "meson", "setup", "build", *std_meson_args
@@ -36,14 +48,14 @@ class Suil < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <suil/suil.h>
 
       int main()
       {
         return suil_ui_supported("my-host", "my-ui");
       }
-    EOS
+    C
     lv2 = Formula["lv2"].opt_include
     system ENV.cc, "test.c", "-I#{lv2}", "-I#{include}/suil-0", "-L#{lib}", "-lsuil-0", "-o", "test"
     system "./test"

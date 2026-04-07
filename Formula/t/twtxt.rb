@@ -6,63 +6,69 @@ class Twtxt < Formula
   url "https://files.pythonhosted.org/packages/fc/4c/cff74642212dbca8d4d9059119555cd335324b3da0b52990a414a0257756/twtxt-1.3.1.tar.gz"
   sha256 "f15e580f8016071448b24048402b939b9e8dec07eabacd84b1f2878d751b71ff"
   license "MIT"
-  revision 4
+  revision 8
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "b55edaf636c32b5c806adc1281e0451f63b2ce2a8ef19c9f502886c18d7a13c0"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "563d8fc929eeaa496bfcf70ec65d615ffa2cc289a30551528743770b2d5a12ab"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "5f36e617ed25f620787eb17eda279fd462039c6474bca676fa6299c99291a8e3"
-    sha256 cellar: :any_skip_relocation, sonoma:         "52f3f107d5b7e9cc7fdd03fcd73a2c676cafdfc4814a6d37d60eee2623ff4dbc"
-    sha256 cellar: :any_skip_relocation, ventura:        "bcc88b4fa67d6d4703ada9263d1f07e751b32009fc32f177a691100a11c7a013"
-    sha256 cellar: :any_skip_relocation, monterey:       "c777bc38033da07f3a5aff2c91a2b21661cd5cdc0d0ebbd5f720bfd0fd861ce9"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "93b695f6af0ecac2009a6b38f785b9cb6f2c5a03d07416054842cad8418b0e58"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "364e25a8df67aaec1cd8df15d64ef8d188b9fb54e278f661e69db778ccd02270"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "aa31d3732dc8659fdb9ff344e0ec8386644c0bd90a118e68f7d4d4b7543a963b"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "9bf874e23df826b9a4bbdbd7b07aea82236bfbebb23fd72128d25302082a0e3a"
+    sha256 cellar: :any_skip_relocation, tahoe:         "879788c44f9eae0a0e4b849f2a575b7c7d27a2f655014a13811c62dbf57d534d"
+    sha256 cellar: :any_skip_relocation, sequoia:       "9d1235fdc5ad43c5755eb349cedaab271a39c0c0613bd7832e09335ce2fcc818"
+    sha256 cellar: :any_skip_relocation, sonoma:        "7d6be8158f7fe1ad25ed3406c1239bf50e0817bb2e9d42ac5f8b2f55cf37fe5a"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "26d140ebc1070fc659f5eeef9295fa0108c72a5d5b861d7fb0a87fc237453861"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "4c484d24b9b7a112aa0fe911080799a15bd311d732587559247b4581e3f40456"
   end
 
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   resource "aiohappyeyeballs" do
-    url "https://files.pythonhosted.org/packages/b7/c3/112f2f992aeb321de483754c1c5acab08c8ac3388c9c7e6f3e4f45ec1c42/aiohappyeyeballs-2.3.5.tar.gz"
-    sha256 "6fa48b9f1317254f122a07a131a86b71ca6946ca989ce6326fff54a99a920105"
+    url "https://files.pythonhosted.org/packages/26/30/f84a107a9c4331c14b2b586036f40965c128aa4fee4dda5d3d51cb14ad54/aiohappyeyeballs-2.6.1.tar.gz"
+    sha256 "c3f9d0113123803ccadfdf3f0faa505bc78e6a72d1cc4806cbd719826e943558"
   end
 
   resource "aiohttp" do
-    url "https://files.pythonhosted.org/packages/45/11/36ba898823ab19e49e6bd791d75b9185eadef45a46fc00d3c669824df8a0/aiohttp-3.10.2.tar.gz"
-    sha256 "4d1f694b5d6e459352e5e925a42e05bac66655bfde44d81c59992463d2897014"
+    url "https://files.pythonhosted.org/packages/77/9a/152096d4808df8e4268befa55fba462f440f14beab85e8ad9bf990516918/aiohttp-3.13.5.tar.gz"
+    sha256 "9d98cc980ecc96be6eb4c1994ce35d28d8b1f5e5208a23b421187d1209dbb7d1"
   end
 
   resource "aiosignal" do
-    url "https://files.pythonhosted.org/packages/ae/67/0952ed97a9793b4958e5736f6d2b346b414a2cd63e82d05940032f45b32f/aiosignal-1.3.1.tar.gz"
-    sha256 "54cd96e15e1649b75d6c87526a6ff0b6c1b0dd3459f43d9ca11d48c339b68cfc"
+    url "https://files.pythonhosted.org/packages/61/62/06741b579156360248d1ec624842ad0edf697050bbaf7c3e46394e106ad1/aiosignal-1.4.0.tar.gz"
+    sha256 "f47eecd9468083c2029cc99945502cb7708b082c232f9aca65da147157b251c7"
   end
 
   resource "attrs" do
-    url "https://files.pythonhosted.org/packages/fc/0f/aafca9af9315aee06a89ffde799a10a582fe8de76c563ee80bbcdc08b3fb/attrs-24.2.0.tar.gz"
-    sha256 "5cfb1b9148b5b086569baec03f20d7b6bf3bcacc9a42bebf87ffaaca362f6346"
+    url "https://files.pythonhosted.org/packages/9a/8e/82a0fe20a541c03148528be8cac2408564a6c9a0cc7e9171802bc1d26985/attrs-26.1.0.tar.gz"
+    sha256 "d03ceb89cb322a8fd706d4fb91940737b6642aa36998fe130a9bc96c985eff32"
   end
 
   resource "click" do
-    url "https://files.pythonhosted.org/packages/96/d3/f04c7bfcf5c1862a2a5b845c6b2b360488cf47af55dfa79c98f6a6bf98b5/click-8.1.7.tar.gz"
-    sha256 "ca9853ad459e787e2192211578cc907e7594e294c7ccc834310722b41b9ca6de"
+    url "https://files.pythonhosted.org/packages/3d/fa/656b739db8587d7b5dfa22e22ed02566950fbfbcdc20311993483657a5c0/click-8.3.1.tar.gz"
+    sha256 "12ff4785d337a1bb490bb7e9c2b1ee5da3112e94a8622f26a6c77f5d2fc6842a"
   end
 
   resource "frozenlist" do
-    url "https://files.pythonhosted.org/packages/cf/3d/2102257e7acad73efc4a0c306ad3953f68c504c16982bbdfee3ad75d8085/frozenlist-1.4.1.tar.gz"
-    sha256 "c037a86e8513059a2613aaba4d817bb90b9d9b6b69aace3ce9c877e8c8ed402b"
+    url "https://files.pythonhosted.org/packages/2d/f5/c831fac6cc817d26fd54c7eaccd04ef7e0288806943f7cc5bbf69f3ac1f0/frozenlist-1.8.0.tar.gz"
+    sha256 "3ede829ed8d842f6cd48fc7081d7a41001a56f1f38603f9d49bf3020d59a31ad"
   end
 
   resource "humanize" do
-    url "https://files.pythonhosted.org/packages/5d/b1/c8f05d5dc8f64030d8cc71e91307c1daadf6ec0d70bcd6eabdfd9b6f153f/humanize-4.10.0.tar.gz"
-    sha256 "06b6eb0293e4b85e8d385397c5868926820db32b9b654b932f57fa41c23c9978"
+    url "https://files.pythonhosted.org/packages/ba/66/a3921783d54be8a6870ac4ccffcd15c4dc0dd7fcce51c6d63b8c63935276/humanize-4.15.0.tar.gz"
+    sha256 "1dd098483eb1c7ee8e32eb2e99ad1910baefa4b75c3aff3a82f4d78688993b10"
   end
 
   resource "idna" do
-    url "https://files.pythonhosted.org/packages/21/ed/f86a79a07470cb07819390452f178b3bef1d375f2ec021ecfc709fc7cf07/idna-3.7.tar.gz"
-    sha256 "028ff3aadf0609c1fd278d8ea3089299412a7a8b9bd005dd08b9f8285bcb5cfc"
+    url "https://files.pythonhosted.org/packages/6f/6d/0703ccc57f3a7233505399edb88de3cbd678da106337b9fcde432b65ed60/idna-3.11.tar.gz"
+    sha256 "795dafcc9c04ed0c1fb032c2aa73654d8e8c5023a7df64a53f39190ada629902"
   end
 
   resource "multidict" do
-    url "https://files.pythonhosted.org/packages/f9/79/722ca999a3a09a63b35aac12ec27dfa8e5bb3a38b0f857f7a1a209a88836/multidict-6.0.5.tar.gz"
-    sha256 "f7e301075edaf50500f0b341543c41194d8df3ae5caf4702f2095f3ca73dd8da"
+    url "https://files.pythonhosted.org/packages/1a/c2/c2d94cbe6ac1753f3fc980da97b3d930efe1da3af3c9f5125354436c073d/multidict-6.7.1.tar.gz"
+    sha256 "ec6652a1bee61c53a3e5776b6049172c53b6aaba34f18c9ad04f82712bac623d"
+  end
+
+  resource "propcache" do
+    url "https://files.pythonhosted.org/packages/9e/da/e9fc233cf63743258bff22b3dfa7ea5baef7b5bc324af47a0ad89b8ffc6f/propcache-0.4.1.tar.gz"
+    sha256 "f48107a8c637e80362555f37ecf49abe20370e557cc4ab374f04ec4423c97c3d"
   end
 
   resource "python-dateutil" do
@@ -71,13 +77,13 @@ class Twtxt < Formula
   end
 
   resource "six" do
-    url "https://files.pythonhosted.org/packages/71/39/171f1c67cd00715f190ba0b100d606d440a28c93c7714febeca8b79af85e/six-1.16.0.tar.gz"
-    sha256 "1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"
+    url "https://files.pythonhosted.org/packages/94/e7/b2c673351809dca68a0e064b6af791aa332cf192da575fd474ed7d6f16a2/six-1.17.0.tar.gz"
+    sha256 "ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81"
   end
 
   resource "yarl" do
-    url "https://files.pythonhosted.org/packages/e0/ad/bedcdccbcbf91363fd425a948994f3340924145c2bc8ccb296f4a1e52c28/yarl-1.9.4.tar.gz"
-    sha256 "566db86717cf8080b99b58b083b773a908ae40f06681e87e589a976faf8246bf"
+    url "https://files.pythonhosted.org/packages/23/6e/beb1beec874a72f23815c1434518bfc4ed2175065173fb138c3705f658d4/yarl-1.23.0.tar.gz"
+    sha256 "53b1ea6ca88ebd4420379c330aea57e258408dd0df9af0992e5de2078dc9f5d5"
   end
 
   # Drop setuptools dep: https://github.com/buckket/twtxt/pull/178
@@ -89,19 +95,19 @@ class Twtxt < Formula
   def install
     virtualenv_install_with_resources
 
-    generate_completions_from_executable(bin/"twtxt", shells: [:fish, :zsh], shell_parameter_format: :click)
+    generate_completions_from_executable(bin/"twtxt", shell_parameter_format: :click)
   end
 
   test do
-    (testpath/"config").write <<~EOS
+    (testpath/"config").write <<~INI
       [twtxt]
       nick = homebrew
       twtfile = twtxt.txt
       [following]
       brewtest = https://example.org/alice.txt
-    EOS
+    INI
     assert_match "✓ You’ve unfollowed brewtest", shell_output("#{bin}/twtxt -c config unfollow brewtest")
 
-    assert_match version.to_s, shell_output(bin/"twtxt --version")
+    assert_match version.to_s, shell_output("#{bin}/twtxt --version")
   end
 end

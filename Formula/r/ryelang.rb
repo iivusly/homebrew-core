@@ -1,35 +1,50 @@
 class Ryelang < Formula
   desc "Rye is a homoiconic programming language focused on fluid expressions"
   homepage "https://ryelang.org/"
-  url "https://github.com/refaktor/rye/archive/refs/tags/v0.0.22.tar.gz"
-  sha256 "9cfdd55a027f2399d5a38e26f6766689e692476016c773ce0e5b2f2378dc18e8"
-  license "Apache-2.0"
+  url "https://github.com/refaktor/rye/archive/refs/tags/v0.2.5.tar.gz"
+  sha256 "545bacf885ffb407e39c7f121dba59429b721921e1213fdc61ed79c0f531caf0"
+  license "BSD-3-Clause"
   head "https://github.com/refaktor/rye.git", branch: "main"
 
+  livecheck do
+    url :stable
+    strategy :github_latest
+  end
+
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "e6a08a33a921b461e93bc12e8c266405dfde8e23fe80ce576b0053ab1af3d326"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "1b5ec1deed70a606e3c8344b01c9e8db03832672b6e9fd4def35411f2060d774"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "68752101d3a52ec8ecb47fd120f5f88ec57e0bd081e047adec29b19d16b8fdbb"
-    sha256 cellar: :any_skip_relocation, sonoma:         "a3b692f6571f5fd4ca8bbc73ab8c913b22fa8aed469add801be09554da79c6fb"
-    sha256 cellar: :any_skip_relocation, ventura:        "540daae8d42a6410ee0905e18a3077c2c4a2f6b4d02153c59eb3eeaef617d7d1"
-    sha256 cellar: :any_skip_relocation, monterey:       "27d04e6b26793d9fbb7f98364b668eed270ae5be5d98e36c390bf68db1db0f93"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "c7b9f0644b946267ee9983dc135cb91d71997faa290f22138abe715fded19781"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "9862f04a4c6a1434231ef02f576d53ad522e891e5e0c2fab173a125578194439"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "dc81f7f81f8f244ee43869aac398970999941ae51fc3ba75c0fcd354a0c2d1d4"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "2be650fdc7e1789e801759f3ff0f213ba4fbf60946c2ab10af03b209f3c35a08"
+    sha256 cellar: :any_skip_relocation, sonoma:        "e846332847e7aec01a092091e8c1134f41010db4fcbc0e88e949fa37f5230d57"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "03d7ca971f4d7e4b30491de6ef939a0299d30b156d7af3d829bf38d89a9cb08d"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "5b72af395efdeef25bb08c5350ba256dd1e3921754c1459f3b208cccc10b7bf5"
   end
 
   depends_on "go" => :build
 
+  conflicts_with "rye", because: "both install `rye` binaries"
+
   def install
     ENV["CGO_ENABLED"] = OS.mac? ? "1" : "0"
-    system "go", "build", *std_go_args(ldflags: "-s -w")
+
+    ldflags = %W[
+      -s -w
+      -X github.com/refaktor/rye/runner.Version=#{version}
+    ]
+
+    system "go", "build", *std_go_args(ldflags:, output: bin/"rye")
+    bin.install_symlink "rye" => "ryelang" # for backward compatibility
   end
 
   test do
+    assert_match version.to_s, shell_output("#{bin}/rye --version")
+
     (testpath/"hello.rye").write <<~EOS
       "Hello World" .replace "World" "Mars" |print
       "12 8 12 16 8 6" .load .unique .sum |print
     EOS
-    assert_predicate testpath/"hello.rye", :exist?
-    output = shell_output("#{bin}/ryelang hello.rye 2>&1")
-    assert_equal "Hello Mars\n42", output.strip
+    assert_path_exists testpath/"hello.rye"
+    output = shell_output("#{bin}/rye hello.rye 2>&1")
+    assert_match "Hello Mars\n42", output.strip
   end
 end

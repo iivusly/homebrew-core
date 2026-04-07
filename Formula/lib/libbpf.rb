@@ -1,18 +1,19 @@
 class Libbpf < Formula
   desc "Berkeley Packet Filter library"
   homepage "https://github.com/libbpf/libbpf"
-  url "https://github.com/libbpf/libbpf/archive/refs/tags/v1.4.6.tar.gz"
-  sha256 "d4cf3ee697d9bd959ad3c0f5c6757370a2559e54448761271e15a23c31c1082e"
+  url "https://github.com/libbpf/libbpf/archive/refs/tags/v1.7.0.tar.gz"
+  sha256 "7ab5feffbf78557f626f2e3e3204788528394494715a30fc2070fcddc2051b7b"
   license "BSD-2-Clause"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "ad5dbfb644e5d111281dcc478dc41e6500180bf1d51484ce76c1baefe2ae16a9"
+    sha256 cellar: :any_skip_relocation, arm64_linux:  "c568bbfccbfe4b8c0a9e4d10bce51e32bd0a016c99dcf74baf050e3cc73e1c2f"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "b097e3b166ab53800e559459b64a4167c8ebe57383f6e4cff627cf5ddbd14299"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "elfutils"
   depends_on :linux
-  depends_on "zlib"
+  depends_on "zlib-ng-compat"
 
   def install
     system "make", "-C", "src"
@@ -20,7 +21,7 @@ class Libbpf < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include "bpf/libbpf.h"
       #include <stdio.h>
 
@@ -28,7 +29,7 @@ class Libbpf < Formula
         printf("%s", libbpf_version_string());
         return(0);
       }
-    EOS
+    C
     system ENV.cc, "test.c", "-I#{include}", "-L#{lib}", "-lbpf", "-o", "test"
     system "./test"
   end

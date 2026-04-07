@@ -1,9 +1,21 @@
 class Gdal < Formula
   desc "Geospatial Data Abstraction Library"
-  homepage "https://www.gdal.org/"
-  url "https://github.com/OSGeo/gdal/releases/download/v3.9.2/gdal-3.9.2.tar.gz"
-  sha256 "c9767e79ca7245f704bfbcb47d771b2dc317d743536b78d648c3e92b95fbc21e"
+  homepage "https://gdal.org/en/stable/"
   license "MIT"
+  revision 1
+  compatibility_version 1
+
+  stable do
+    url "https://github.com/OSGeo/gdal/releases/download/v3.12.3/gdal-3.12.3.tar.gz"
+    sha256 "1fdfe51181d08b9b83037b611da4de4a7cf1fca69e6564945ac99d3f7d0367dd"
+
+    # Fix compatibility with new poppler version
+    # https://github.com/OSGeo/gdal/pull/14243
+    patch do
+      url "https://github.com/OSGeo/gdal/commit/0ad9529d5fd5e03880147221d56bfee08383d7dc.patch?full_index=1"
+      sha256 "fba9b0f6591f83b7837c3fc9e649e902b7490f877190a6d9535f969ea5fd87ab"
+    end
+  end
 
   livecheck do
     url "https://download.osgeo.org/gdal/CURRENT/"
@@ -11,13 +23,12 @@ class Gdal < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "ba208f2acb9007dae12e4b458599904d87badc6b5acb925caf3a4c672babaff8"
-    sha256 arm64_ventura:  "f13e22698304348823c2ba2c8bb44afdfae3c999653b69b88d080c770d1d755a"
-    sha256 arm64_monterey: "95066d4c79366656dfb7f088ef473b7314af15408c9032ebb479f35f33690934"
-    sha256 sonoma:         "c62abcab5c83e50d8f3832a71c8df4f379ce321ec9b9cf3fb58c52efa9a20181"
-    sha256 ventura:        "f9ea1d9afdd7feb0a202ba1bec27326217f9f75970937ca66ac5a4c300145255"
-    sha256 monterey:       "5349d6dc59f1b7fbd9f70a9e1705c919db764506864cdfb9dcf9f4924c9ade7d"
-    sha256 x86_64_linux:   "76dcf708838db8f957a789284b375c207300149e8f8e355f6bcaec19162793fe"
+    sha256 arm64_tahoe:   "da4988d3972da0188f0cd25dc1bae927b094bdb0ec3a9f2fde89504eb0651ab8"
+    sha256 arm64_sequoia: "97fb597a0b94044e239ec9ad27bdbdfe8a9086406174392a038a170f0ace0e98"
+    sha256 arm64_sonoma:  "3de6199757030217dc12fb9e3965463afd99281163717a647f856360fbc1a169"
+    sha256 sonoma:        "be7e148351b10e61d92108a861867a811b68735440966c280fda6217eb0cfc1a"
+    sha256 arm64_linux:   "119d5bf7d4dc729af9333d41a69f0977fa9e9c6e10167e2bf137b08d41dfc3c1"
+    sha256 x86_64_linux:  "d4a83643944948a56f8d1ce208a421651e37eb826f663f876ec82c0b7d7f9276"
   end
 
   head do
@@ -25,15 +36,15 @@ class Gdal < Formula
     depends_on "doxygen" => :build
   end
 
-  depends_on "boost" => :build # for `libkml`
+  depends_on "boost" => :build
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "python-setuptools" => :build
   depends_on "swig" => :build
   depends_on "apache-arrow"
+  depends_on "c-blosc"
   depends_on "cfitsio"
   depends_on "epsilon"
-  depends_on "expat"
   depends_on "freexl"
   depends_on "geos"
   depends_on "giflib"
@@ -44,6 +55,7 @@ class Gdal < Formula
   depends_on "json-c"
   depends_on "libaec"
   depends_on "libarchive"
+  depends_on "libdeflate"
   depends_on "libgeotiff"
   depends_on "libheif"
   depends_on "libkml"
@@ -62,8 +74,9 @@ class Gdal < Formula
   depends_on "pcre2"
   depends_on "poppler"
   depends_on "proj"
-  depends_on "python@3.12"
+  depends_on "python@3.14"
   depends_on "qhull"
+  depends_on "sfcgal"
   depends_on "sqlite"
   depends_on "unixodbc"
   depends_on "webp"
@@ -72,7 +85,7 @@ class Gdal < Formula
   depends_on "zstd"
 
   uses_from_macos "curl"
-  uses_from_macos "zlib"
+  uses_from_macos "expat"
 
   on_macos do
     depends_on "minizip"
@@ -81,26 +94,27 @@ class Gdal < Formula
 
   on_linux do
     depends_on "util-linux"
+    depends_on "zlib-ng-compat"
   end
 
   conflicts_with "avce00", because: "both install a cpl_conv.h header"
   conflicts_with "cpl", because: "both install cpl_error.h"
 
-  fails_with gcc: "5"
-
   def python3
-    "python3.12"
+    "python3.14"
+  end
+
+  # Work around superenv to avoid mixing `expat` usage in libraries across dependency tree.
+  # Brew `expat` usage in Python has low impact as it isn't loaded unless pyexpat is used.
+  # TODO: Consider adding a DSL for this or change how we handle Python's `expat` dependency
+  def remove_brew_expat
+    env_vars = %w[CMAKE_PREFIX_PATH HOMEBREW_INCLUDE_PATHS HOMEBREW_LIBRARY_PATHS PATH PKG_CONFIG_PATH]
+    ENV.remove env_vars, /(^|:)#{Regexp.escape(Formula["expat"].opt_prefix)}[^:]*/
+    ENV.remove "HOMEBREW_DEPENDENCIES", "expat"
   end
 
   def install
-    # Work around an Xcode 15 linker issue which causes linkage against LLVM's
-    # libunwind due to it being present in a library search path.
-    if DevelopmentTools.clang_build_version >= 1500
-      recursive_dependencies
-        .select { |d| d.name.match?(/^llvm(@\d+)?$/) }
-        .map { |llvm_dep| llvm_dep.to_formula.opt_lib }
-        .each { |llvm_lib| ENV.remove "HOMEBREW_LIBRARY_PATHS", llvm_lib }
-    end
+    remove_brew_expat if OS.mac? && MacOS.version < :sequoia
 
     site_packages = prefix/Language::Python.site_packages(python3)
     # Work around Homebrew's "prefix scheme" patch which causes non-pip installs
@@ -138,5 +152,7 @@ class Gdal < Formula
     system bin/"ogrinfo", "--formats"
     # Changed Python package name from "gdal" to "osgeo.gdal" in 3.2.0.
     system python3, "-c", "import osgeo.gdal"
+    # test for zarr blosc compressor
+    assert_match "BLOSC_COMPRESSORS", shell_output("#{bin}/gdalinfo --format Zarr")
   end
 end

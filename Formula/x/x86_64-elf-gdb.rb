@@ -1,9 +1,9 @@
 class X8664ElfGdb < Formula
   desc "GNU debugger for x86_64-elf cross development"
   homepage "https://www.gnu.org/software/gdb/"
-  url "https://ftp.gnu.org/gnu/gdb/gdb-15.1.tar.xz"
-  mirror "https://ftpmirror.gnu.org/gdb/gdb-15.1.tar.xz"
-  sha256 "38254eacd4572134bca9c5a5aa4d4ca564cbbd30c369d881f733fb6b903354f2"
+  url "https://ftpmirror.gnu.org/gnu/gdb/gdb-17.1.tar.xz"
+  mirror "https://ftp.gnu.org/gnu/gdb/gdb-17.1.tar.xz"
+  sha256 "14996f5f74c9f68f5a543fdc45bca7800207f91f92aeea6c2e791822c7c6d876"
   license "GPL-3.0-or-later"
   head "https://sourceware.org/git/binutils-gdb.git", branch: "master"
 
@@ -12,28 +12,40 @@ class X8664ElfGdb < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "84e2e9c2884955b6e25f6bd5ee7c5a2da6eaa99184cb54e8a33a392f51b9f444"
-    sha256 arm64_ventura:  "f08d41519aaa97d4deee3b0455788d90fddec1f09773054366f2f9adc93d6a57"
-    sha256 arm64_monterey: "9ddbf58dbfe0118dc3242d9411b4ed07ef4907b2ebf1d4bc8ce3f5b37329767f"
-    sha256 sonoma:         "c1cd75ed4c639df8d02c30ab1849e6c5fc7cd78c918ec290fdd284457e160d43"
-    sha256 ventura:        "8695cf80cd0b9cc541cf6b54c050fd0ac3351fa0fe1d2b1219d4fb856830ebfd"
-    sha256 monterey:       "2d029b12da2dd792a6f9f59d87b7764024bbd6cfd9e25d318a26d0585cd8ac30"
-    sha256 x86_64_linux:   "3cc4bea8f108fb221f12a03a931deebf13aaf7fdfff84733973d028f25005810"
+    rebuild 1
+    sha256 arm64_tahoe:   "ffc4d91060bee0a77349a4197c4693478b6633b423dfa0541ca0ff5667c1a0ee"
+    sha256 arm64_sequoia: "df1f80eeb99a9d22809f68670468532a4b80671817cc5673c30b1b269533d981"
+    sha256 arm64_sonoma:  "955b0c8f0b10163206ad3a889440f2f855b96357d875fca9779ec07d77508fd6"
+    sha256 sonoma:        "40968878872648a819ced969094383478b7dbfee0ce34a01420a2f616cda5f60"
+    sha256 arm64_linux:   "dfb0bc11911d42e039f52cd1014d59c612ce4a4427f2c58add1efd709c5d857f"
+    sha256 x86_64_linux:  "37d0aeaaf689eb0a90eb915f02cb99eea4c89d0009a932b12323f948449b86c7"
   end
 
+  depends_on "pkgconf" => :build
   depends_on "x86_64-elf-gcc" => :test
-
   depends_on "gmp"
   depends_on "mpfr"
-  depends_on "python@3.12"
+  depends_on "ncurses" # https://github.com/Homebrew/homebrew-core/issues/224294
+  depends_on "python@3.14"
+  depends_on "readline"
   depends_on "xz" # required for lzma support
+  depends_on "zstd"
 
-  uses_from_macos "expat"
-  uses_from_macos "ncurses"
-  uses_from_macos "zlib"
+  uses_from_macos "expat", since: :sequoia # minimum macOS due to python
+
+  # Workaround for https://github.com/Homebrew/brew/issues/19315
+  on_sequoia :or_newer do
+    on_intel do
+      depends_on "expat"
+    end
+  end
 
   on_system :linux, macos: :ventura_or_newer do
     depends_on "texinfo" => :build
+  end
+
+  on_linux do
+    depends_on "zlib-ng-compat"
   end
 
   def install
@@ -44,10 +56,16 @@ class X8664ElfGdb < Formula
       --includedir=#{include}/#{target}
       --infodir=#{info}/#{target}
       --mandir=#{man}
-      --with-lzma
-      --with-python=#{which("python3.12")}
-      --with-system-zlib
       --disable-binutils
+      --disable-nls
+      --enable-tui
+      --with-curses
+      --with-expat
+      --with-lzma
+      --with-python=#{which("python3.14")}
+      --with-system-readline
+      --with-system-zlib
+      --with-zstd
     ]
 
     mkdir "build" do
@@ -62,7 +80,7 @@ class X8664ElfGdb < Formula
 
   test do
     (testpath/"test.c").write "void _start(void) {}"
-    system "#{Formula["x86_64-elf-gcc"].bin}/x86_64-elf-gcc", "-g", "-nostdlib", "test.c"
+    system Formula["x86_64-elf-gcc"].bin/"x86_64-elf-gcc", "-g", "-nostdlib", "test.c"
 
     output = shell_output("#{bin}/x86_64-elf-gdb -batch -ex 'info address _start' a.out")
     assert_match "Symbol \"_start\" is a function at address 0x", output

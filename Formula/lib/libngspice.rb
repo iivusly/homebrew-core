@@ -1,38 +1,28 @@
 class Libngspice < Formula
   desc "Spice circuit simulator as shared library"
   homepage "https://ngspice.sourceforge.io/"
-  url "https://downloads.sourceforge.net/project/ngspice/ng-spice-rework/43/ngspice-43.tar.gz"
-  sha256 "14dd6a6f08531f2051c13ae63790a45708bd43f3e77886a6a84898c297b13699"
+  url "https://downloads.sourceforge.net/project/ngspice/ng-spice-rework/46/ngspice-46.tar.gz"
+  sha256 "a0d1699af1940b06649276dcd6ff5a566c8c0cad01b2f7b5e99dedbb4d64c19b"
   license :cannot_represent
+  head "https://git.code.sf.net/p/ngspice/ngspice.git", branch: "master"
 
   livecheck do
     formula "ngspice"
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "08d34caae24bf2e5922e21bf6cc069fc0104d6a91bec5df245b2c10eda161ea5"
-    sha256 cellar: :any,                 arm64_ventura:  "655107924c134dba8f4d014157a0dcd96a540e477cde0daf572e89606808ee5c"
-    sha256 cellar: :any,                 arm64_monterey: "796bc6f9713683e875d6f8ddf1c34b961269791fa8b3543a3056e49c1b05d819"
-    sha256 cellar: :any,                 sonoma:         "e0a25a456c4fbe11c600fa59edd984502cb26938da52b8a8f94bef8f139e2fbb"
-    sha256 cellar: :any,                 ventura:        "e82c34fa66368d3ad017e5fcb55a38aec99053a4b48181e5ef836c6a1672ac55"
-    sha256 cellar: :any,                 monterey:       "d5d137b9a286bef3d5ce8f9fa82c2886d2a68cc491ed6ddd39116c47116c8a17"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "b2f0e80dc6c18dade4045ecca05f3e2824d1eb6c220c26b055272ce9bcd2f75d"
-  end
-
-  head do
-    url "https://git.code.sf.net/p/ngspice/ngspice.git", branch: "master"
-
-    depends_on "autoconf" => :build
-    depends_on "automake" => :build
-    depends_on "libtool" => :build
+    sha256 cellar: :any,                 arm64_tahoe:   "00500b457ce45937b6ed298e71f282e31b88a58f6082940601ac4e1e209228b2"
+    sha256 cellar: :any,                 arm64_sequoia: "e1072848e25406c31fa5bb52ca1779c1ca4b256688c9dd6ce2625fb59e7c03a4"
+    sha256 cellar: :any,                 arm64_sonoma:  "a5822141038096046b13ddb18c8a2c6badd0e765f21374198b6b5a3980c3da37"
+    sha256 cellar: :any,                 sonoma:        "5369ab3a5cea69eefebac3568fcded61d1da1508db5d2748903bf4a23bdd5436"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "4c9b5419a1c2e220a96e88fd71a4e80937cd6a66647b2f4151ee9597ad81e11f"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "1f906342f487dc58e1d53652767a14e6d00181af13096446c4e09a19ed32f24f"
   end
 
   uses_from_macos "bison" => :build
   uses_from_macos "flex" => :build
 
   def install
-    system "./autogen.sh" if build.head?
-
     args = %w[
       --with-ngshared
       --enable-cider
@@ -47,7 +37,7 @@ class Libngspice < Formula
   end
 
   test do
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include <cstdlib>
       #include <ngspice/sharedspice.h>
       int ng_exit(int status, bool immediate, bool quitexit, int ident, void *userdata) {
@@ -56,7 +46,7 @@ class Libngspice < Formula
       int main() {
         return ngSpice_Init(NULL, NULL, ng_exit, NULL, NULL, NULL, NULL);
       }
-    EOS
+    CPP
     system ENV.cc, "test.cpp", "-I#{include}", "-L#{lib}", "-lngspice", "-o", "test"
     system "./test"
   end

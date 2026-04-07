@@ -7,6 +7,8 @@ class Dylibbundler < Formula
   head "https://github.com/auriamg/macdylibbundler.git", branch: "master"
 
   bottle do
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:    "00c51e669f0098b7a2a6271542b9b6be6909cb3634e2b458dfbc708357d6f9c8"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia:  "26795436a10e6ed4ff9114682bf35cde4ce4dc3c69f93d8b6d41b34010f60d2a"
     sha256 cellar: :any_skip_relocation, arm64_sonoma:   "f06d382fc981ab6ed57d9fd0257cb18481cb524128d88d3bd864c0720e435c91"
     sha256 cellar: :any_skip_relocation, arm64_ventura:  "8749638bc5670b6a9c6f6fba7f609b2d72352639cf14cf10b9bc59c3f9ca3972"
     sha256 cellar: :any_skip_relocation, arm64_monterey: "daba4f32451618f8bde33249c02d2e07a2a33080d4ce4e3f6b1085109e996a1a"
@@ -15,6 +17,7 @@ class Dylibbundler < Formula
     sha256 cellar: :any_skip_relocation, ventura:        "c564cf5d48edcaab9c2940d0820bc420b5c99621d359a2b681c7b3e68e413843"
     sha256 cellar: :any_skip_relocation, monterey:       "fec981eff597fa04d969914104bc997bebe8858f2bfaf5ec532910295ca43167"
     sha256 cellar: :any_skip_relocation, big_sur:        "7562a49bdaa12d85af55aa8843379179dbfd78d9d8d44f14b481ca22760d4df6"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "0aa6fe3ae7b295e016e05dd3ceefe4056166f9ce7b9f8633c14345106a135f84"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "b8c2ea435fa7ee838cc3fa07684b4f1b68ac5f65a224c7b5860b5bf06d254f50"
   end
 

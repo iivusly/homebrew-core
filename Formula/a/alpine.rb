@@ -15,6 +15,8 @@ class Alpine < Formula
 
   bottle do
     rebuild 2
+    sha256 arm64_tahoe:    "62301d0e5eb9290a24fb3ab3d9117f9dccc45160fbdee0ee7a176e9d02a21f2e"
+    sha256 arm64_sequoia:  "0299b3f80c9193359059909396ebf74078a263d0e0987e086741398bac68d566"
     sha256 arm64_sonoma:   "7ad58b222ed8fa4ef1a7609c1223796de0a349d3d5b408109c408793586dfee5"
     sha256 arm64_ventura:  "9b7a5da6cd88ce590ec0c1c2ef8dc45da8a4fa45d108eb976157ddd505cf2b2a"
     sha256 arm64_monterey: "b1c884c5cc1d84813284e85e74ae3c78db147b46da0d0b8d18ade4ff2ee550ac"
@@ -24,6 +26,7 @@ class Alpine < Formula
     sha256 monterey:       "5f289262fe8971acbe473b036316f73d7a17c8f9bbbcb7a966c2a2d5e7c06ee6"
     sha256 big_sur:        "8a5830644c5e7738ba52ad6687eebf493020c8e6d14a4d247b3372138cac37a3"
     sha256 catalina:       "0a9ccb4fa8aac9476933d439ee57c30c234a20c0b189cdab09dfceba2e19b00d"
+    sha256 arm64_linux:    "26792044eea71951e4a6236711a8f29cb7e52e68ee289cac3c809815bbd484be"
     sha256 x86_64_linux:   "3a326ae9048a1ea6fe4403478254a7bb403c1a565486b96d7224138f1b2e3072"
   end
 
@@ -37,7 +40,6 @@ class Alpine < Formula
     depends_on "linux-pam"
   end
 
-  conflicts_with "imap-uw", because: "both install `mailutil` binaries"
   conflicts_with "macpine", because: "both install `alpine` binaries"
 
   # patch for macOS obtained from developer; see git commit

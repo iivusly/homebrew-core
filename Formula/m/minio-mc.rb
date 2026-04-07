@@ -2,28 +2,28 @@ class MinioMc < Formula
   desc "Replacement for ls, cp and other commands for object storage"
   homepage "https://github.com/minio/mc"
   url "https://github.com/minio/mc.git",
-      tag:      "RELEASE.2024-08-26T10-49-58Z",
-      revision: "a55d9a8d17dae78d0373691ba676170172765883"
-  version "20240826104958"
+      tag:      "RELEASE.2025-08-13T08-35-41Z",
+      revision: "7394ce0dd2a80935aded936b09fa12cbb3cb8096"
+  version "2025-08-13T08-35-41Z"
   license "AGPL-3.0-or-later"
+  version_scheme 1
   head "https://github.com/minio/mc.git", branch: "master"
 
   livecheck do
     url :stable
     regex(/^(?:RELEASE[._-]?)?([\dTZ-]+)$/i)
-    strategy :github_latest do |json, regex|
-      json["tag_name"]&.scan(regex)&.map { |match| match[0].tr("TZ-", "") }
-    end
+    strategy :github_latest
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "794bb10c669560a13a5d18808b12e30bd4b11f567235f392b3896878a5041675"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "286b8b32b4a888e7130c1f6ede581bfaa880a7296a9e2f49b61260352e72cfeb"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "522c9d54494c17d0611f85aa6215305bae68e090cbab2f17dbf9b5b30ba8339a"
-    sha256 cellar: :any_skip_relocation, sonoma:         "7cd78fa77f5802acfc5284c5b991068cc48357cd409e5f298de4bd8eb8dcacff"
-    sha256 cellar: :any_skip_relocation, ventura:        "10a09f14ad9b3d9a63607933b8dbbc9c153ff35a2218aa52c047cc3ba2d02b5f"
-    sha256 cellar: :any_skip_relocation, monterey:       "0d931ebe59b4b8b116c80abca95eecafd1586faa1a7cf0aa1d78ce0d5c82d833"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "31e857a6bd88fc0d0d9d07be8721c9c61bad54ce4686dae77f0fc9bccb83e9bc"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "de6f7f9346bc488230a9ad97bf4e756b2705218246c89a88a75125d7827e6d66"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "2b4a41f0de492c2ac69846df380757be259e2d762219a1c5a80119ece845e487"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "4a2fe5e78c335c757898cb3574775c140c718bffe2ca4ba573df0a606944497c"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "7ce210974c0bd2f273e67c10970ae25923326b31b1e7823aaeaae4aad73e8f5f"
+    sha256 cellar: :any_skip_relocation, sonoma:        "06be6e6c3190957e688c8321892e4fe21118900564ad176ef24300bcb582853d"
+    sha256 cellar: :any_skip_relocation, ventura:       "6e4576ab9c04b1d7f4a593b5329e126e09fd604c0c710be75a90edb6b21beb9b"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "f02a6a7dbcdeed12b5ced2c2dc39d125181ab5cb75078ed9607d2378424b499b"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "2f8ddb10d84cbd05663a495bb04c778a3d5e4915b2b1c506cc98a6a2a1750dbd"
   end
 
   depends_on "go" => :build
@@ -32,29 +32,28 @@ class MinioMc < Formula
 
   def install
     if build.head?
-      system "go", "build", *std_go_args(output: bin/"mc")
+      system "go", "build", *std_go_args(ldflags: "-s -w", output: bin/"mc")
     else
       minio_release = stable.specs[:tag]
-      minio_version = minio_release.gsub("RELEASE.", "").chomp.gsub(/T(\d+)-(\d+)-(\d+)Z/, 'T\1:\2:\3Z')
+      minio_version = version.to_s.gsub(/T(\d+)-(\d+)-(\d+)Z/, 'T\1:\2:\3Z')
       proj = "github.com/minio/mc"
+
       ldflags = %W[
+        -s -w
         -X #{proj}/cmd.Version=#{minio_version}
         -X #{proj}/cmd.ReleaseTag=#{minio_release}
         -X #{proj}/cmd.CommitID=#{Utils.git_head}
+        -X #{proj}/cmd.CopyrightYear=#{version.major}
       ]
-      system "go", "build", *std_go_args(output: bin/"mc", ldflags:)
+      system "go", "build", *std_go_args(ldflags:, output: bin/"mc")
     end
   end
 
   test do
-    assert_equal version.to_s,
-                 shell_output("#{bin}/mc --version 2>&1")
-                   .match(/(?:RELEASE[._-]?)?([\dTZ-]+)/)
-                   .to_s
-                   .gsub(/[^\d]/, ""),
-                 "`version` is incorrect"
+    output = shell_output("#{bin}/mc --version 2>&1")
+    assert_equal version.to_s, output[/(?:RELEASE[._-]?)?([\dTZ-]+)/, 1], "`version` is incorrect"
 
     system bin/"mc", "mb", testpath/"test"
-    assert_predicate testpath/"test", :exist?
+    assert_path_exists testpath/"test"
   end
 end

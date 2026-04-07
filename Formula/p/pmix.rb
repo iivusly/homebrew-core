@@ -1,9 +1,20 @@
 class Pmix < Formula
   desc "Process Management Interface for HPC environments"
   homepage "https://openpmix.github.io/"
-  url "https://github.com/openpmix/openpmix/releases/download/v5.0.3/pmix-5.0.3.tar.bz2"
-  sha256 "3f779434ed59fc3d63e4f77f170605ac3a80cd40b1f324112214b0efbdc34f13"
   license "BSD-3-Clause"
+  revision 1
+  compatibility_version 1
+
+  stable do
+    url "https://github.com/openpmix/openpmix/releases/download/v5.0.10/pmix-5.0.10.tar.bz2"
+    sha256 "78663f6b932589d68e24feaf7f8a948d60be68d91965f3effbacb4cd88cf9a95"
+
+    # Fix -flat_namespace being used on Big Sur and later.
+    patch do
+      url "https://raw.githubusercontent.com/Homebrew/homebrew-core/1cf441a0/Patches/libtool/configure-big_sur.diff"
+      sha256 "35acd6aebc19843f1a2b3a63e880baceb0f5278ab1ace661e57a502d9d78c93c"
+    end
+  end
 
   livecheck do
     url :stable
@@ -11,13 +22,12 @@ class Pmix < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "1bb946832094eaf4ecd78549b1181a43951eb0c2ebf4c23af834263f3a39ff07"
-    sha256 arm64_ventura:  "b82da6ad74dcc27768c9d113e0999eade722e537ca917bfc6861bc68cc301c6e"
-    sha256 arm64_monterey: "5dd890f4c203eb25ed381d774e9a2f545ceffe931d8079a5a6b0315ac23123a0"
-    sha256 sonoma:         "22ea4e40253d3f2cf622ae00a807ac7b51a4a88e88ed733b91a3b8bda7634de3"
-    sha256 ventura:        "1a86b55384410e3e6c5ff8475c2a914edf129353703b3f57bb688585671a99e1"
-    sha256 monterey:       "0a674c9dd2072fe0ffdef3d8ae69eaa82bd7b06df49924080d8ed41f41cae5a8"
-    sha256 x86_64_linux:   "25efde60eb0f20026a88f62786eccb14b14260449fa5405922a3160cc83d3d96"
+    sha256 arm64_tahoe:   "5ae502e52b0701368cd61fd43b12f67df1c074bd2a6027bf5f1cbe1ef213817d"
+    sha256 arm64_sequoia: "2f1d03fa49fb8731e9e60c03b25670bfe10acbaeeafc20de491eab57bda31c26"
+    sha256 arm64_sonoma:  "6ff719706c1ace854d29922ddbe65a62a64f4f6f356b3af44d6eadcb7511e39e"
+    sha256 sonoma:        "d93205b42ae1181cbfd0b84ee6fe6697cb60f8c6472cfffddc16c6af10f4a174"
+    sha256 arm64_linux:   "d5c71a20e25fd1ad9d512dd40c882eef16c980a387a601e2617195913175c2b1"
+    sha256 x86_64_linux:  "93fd3b3e99b624b63f07fb8580d22684387aaacbcf8c3bf9a89536253b32ce09"
   end
 
   head do
@@ -32,7 +42,10 @@ class Pmix < Formula
   depends_on "libevent"
 
   uses_from_macos "python" => :build
-  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     # Avoid references to the Homebrew shims directory
@@ -54,7 +67,7 @@ class Pmix < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <stdio.h>
       #include <pmix.h>
 
@@ -65,7 +78,7 @@ class Pmix < Formula
 
         return 0;
       }
-    EOS
+    C
 
     system ENV.cc, "test.c", "-I#{include}", "-L#{lib}", "-lpmix", "-o", "test"
     system "./test"

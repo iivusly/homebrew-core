@@ -1,8 +1,8 @@
 class Dropbear < Formula
   desc "Small SSH server/client for POSIX-based system"
   homepage "https://matt.ucc.asn.au/dropbear/dropbear.html"
-  url "https://matt.ucc.asn.au/dropbear/releases/dropbear-2024.85.tar.bz2"
-  sha256 "86b036c433a69d89ce51ebae335d65c47738ccf90d13e5eb0fea832e556da502"
+  url "https://matt.ucc.asn.au/dropbear/releases/dropbear-2025.89.tar.bz2"
+  sha256 "0d1f7ca711cfc336dc8a85e672cab9cfd8223a02fe2da0a4a7aeb58c9e113634"
   license "MIT"
 
   livecheck do
@@ -11,13 +11,13 @@ class Dropbear < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "5b065409784d08f2f399e6825aeec939262bdf0f83b55de7b0116dec210215c3"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "1ccc4def7f687eefdf87d3a858be0b7a816f1125d0f65177c00e1ac2e089934d"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "8e9de7a77f87fe18ce1854b4fe9f44222ae44c8def0b5f0a4b5121e95a20809f"
-    sha256 cellar: :any_skip_relocation, sonoma:         "17249ee6fac027c1d89c516ca5df610788517670677c080bb2544ed837048f28"
-    sha256 cellar: :any_skip_relocation, ventura:        "724b8f22390efad2c3c37cf8fcb6b8955426fdd947c1133385d5cc9256f29baf"
-    sha256 cellar: :any_skip_relocation, monterey:       "4b9dba9e11a11b3cc9a26c6ef8e388c6e98b350ef1643204932ff2e20aab718c"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "415ec7081d0c72c66973224e1a8c49f0917b329a2ab54730162600fac88446ae"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "d84b94d96972aef2cae86efbd60cba209324849b8130885f047988323742d98b"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "0dca7fb55a145414f317ed95f4b3f9d4c2fe6831c9218f5630e4461ca4272554"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "02fb8242ae08d7273b317cc13536cf9b044cb79ab9fda1d2e98e678df432b402"
+    sha256 cellar: :any_skip_relocation, sonoma:        "ab1c015d6d4dc3772539b65ac6dc80a0cb36fc9cea44ab30f7befe35c2bae637"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "939dd6c49ffb11771864b2f7dea73b00b23b154e298e019ca1a248be3b2a63f6"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "a0f6f864ac0ba514aed819c711b34957e5d765bdca7644738720a98a62b8eee4"
   end
 
   head do
@@ -28,14 +28,24 @@ class Dropbear < Formula
   end
 
   uses_from_macos "libxcrypt"
-  uses_from_macos "zlib"
 
   on_linux do
     depends_on "linux-pam"
+    depends_on "zlib-ng-compat"
   end
 
   def install
     ENV.deparallelize
+
+    # It doesn't compile on macOS with these macros because of the missing `setresgid()` function
+    # There's no option to disable it via `./configure` flags and upstream suggests to fix it
+    # by changing `src/default_options.h` manually (see `CHANGES`)
+    if OS.mac?
+      inreplace "src/default_options.h" do |s|
+        s.gsub! "#define DROPBEAR_SVR_DROP_PRIVS DROPBEAR_SVR_MULTIUSER", ""
+        s.gsub! "#define DROPBEAR_SVR_LOCALSTREAMFWD 1", ""
+      end
+    end
 
     if build.head?
       system "autoconf"
@@ -54,6 +64,6 @@ class Dropbear < Formula
     testfile = testpath/"testec521"
     system bin/"dbclient", "-h"
     system bin/"dropbearkey", "-t", "ecdsa", "-f", testfile, "-s", "521"
-    assert_predicate testfile, :exist?
+    assert_path_exists testfile
   end
 end

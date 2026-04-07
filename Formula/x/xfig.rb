@@ -1,8 +1,8 @@
 class Xfig < Formula
   desc "Facility for interactive generation of figures"
   homepage "https://mcj.sourceforge.net/"
-  url "https://downloads.sourceforge.net/mcj/xfig-3.2.9.tar.xz"
-  sha256 "13ed9d04d1bbc2dec09da7ef49ceec278382d290f6cd926474c2f2d016fec2f7"
+  url "https://downloads.sourceforge.net/mcj/xfig-3.2.9a.tar.xz"
+  sha256 "bc572a1881e5e20987ac590158b041ab7803845a9691036d3ba5e982f66d9ca3"
   license "MIT"
 
   livecheck do
@@ -11,15 +11,15 @@ class Xfig < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "2ce377c656dab395b95d498c03b8b3b95a1153f63cef176c3039291c55760834"
-    sha256 arm64_ventura:  "ab1c86c5044e495596fe576e1c053478251d70a5faece3f221d165d29b9c3ee5"
-    sha256 arm64_monterey: "39f08a4ba5383fa90cb2a4b76d0b8b5d6929843f6fac04450249e85ef647ac43"
-    sha256 arm64_big_sur:  "7626ebc11c73a512392640c29e57a1579ef4cfc4bbfe1ec774cc42692c44554d"
-    sha256 sonoma:         "c147b060e3cafb4a5932294471a3b808faffc1c46dc321a50471e6e22b27e4a2"
-    sha256 ventura:        "680fc82cd8fb6aeb17cfc09c4de0d98eeec23a86e71d580757bebaf857fe0688"
-    sha256 monterey:       "18fff7f110a0e27f75e4a99c3116900af986814aa1dadd3fc7cb947bffca2852"
-    sha256 big_sur:        "0ff1ddc946b12ba65d183737b31678b6c4baedcb0cc012557bec0128f74b28f7"
-    sha256 x86_64_linux:   "b07b185ca2339fe988e5b4b379da797c1760874feead0d5029131953e4a78427"
+    rebuild 1
+    sha256 arm64_tahoe:   "c847f3f5d301242e39854aaa5a240f927fe20f54ea5122933de39b7fc67ce5e0"
+    sha256 arm64_sequoia: "161b47e43d5412e6277eff6ba8f2884e0a345c238db8ed1601ece4501f05ee5c"
+    sha256 arm64_sonoma:  "a8acd5f5d17d4bbef98332d6ece0de046b023c8485a1ce713bc183f10110db5e"
+    sha256 arm64_ventura: "e5ae9151e1f3e865317d32e0355445922d46e080e60d583b65df77591322b54b"
+    sha256 sonoma:        "9ed33c2acaeb19e8826d4e82057ffccd949e7de53334d924b3005a02b50baf78"
+    sha256 ventura:       "1cfeb80f07bbdd495c33c152b606f352e2785c421b50ba0816470ae99cc7676a"
+    sha256 arm64_linux:   "ffa26e011fab5d5d529bab92892b47c4911b9126bf1a0d8f7f62de152e6d7c56"
+    sha256 x86_64_linux:  "f4faa9ef548b215a82a5098c94bfcb09ad1acd51eebfa0539818f1a5fd20a112"
   end
 
   depends_on "fig2dev"
@@ -52,9 +52,19 @@ class Xfig < Formula
                           "--disable-silent-rules",
                           *std_configure_args
     system "make", "install-strip"
+
+    if OS.mac?
+      (etc/"X11/app-defaults/Fig").append_lines <<~X11_DEFAULTS
+        ! Disable internationalization to stop segfaults
+        ! https://github.com/Homebrew/homebrew-core/issues/221146
+        ! https://sourceforge.net/p/mcj/tickets/177/#7c23
+        Fig.international: False
+      X11_DEFAULTS
+    end
   end
 
   test do
     assert_equal "Xfig #{version}", shell_output("#{bin}/xfig -V 2>&1").strip
+    assert_equal "Error: Can't open display:", shell_output("DISPLAY= #{bin}/xfig 2>&1", 1).strip
   end
 end

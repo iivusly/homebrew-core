@@ -1,21 +1,10 @@
 class Ghostscript < Formula
   desc "Interpreter for PostScript and PDF"
   homepage "https://www.ghostscript.com/"
+  url "https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/download/gs10070/ghostpdl-10.07.0.tar.xz"
+  sha256 "ba1366006a93b91e615f74aad9c0905fae503d3f5b04078ce2ddbe360bd2f9df"
   license "AGPL-3.0-or-later"
-
-  stable do
-    url "https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/download/gs10031/ghostpdl-10.03.1.tar.xz"
-    sha256 "05eee45268f6bb2c6189f9a40685c4608ca089443a93f2af5f5194d83dc368db"
-
-    on_macos do
-      # 1. Prevent dependent rebuilds on minor version bumps.
-      # 2. Fix missing pointer dereference
-      # Reported upstream at:
-      #   https://bugs.ghostscript.com/show_bug.cgi?id=705907
-      #   https://bugs.ghostscript.com/show_bug.cgi?id=707649
-      patch :DATA
-    end
-  end
+  compatibility_version 1
 
   # The GitHub tags omit delimiters (e.g. `gs9533` for version 9.53.3). The
   # `head` repository tags are formatted fine (e.g. `ghostpdl-9.53.3`) but a
@@ -23,18 +12,20 @@ class Ghostscript < Formula
   # check the version from the first-party website instead.
   livecheck do
     url "https://www.ghostscript.com/json/settings.json"
-    regex(/["']GS_VER["']:\s*?["']v?(\d+(?:\.\d+)+)["']/i)
+    strategy :json do |json|
+      json["GS_VER"]
+    end
   end
 
+  no_autobump! because: :incompatible_version_format
+
   bottle do
-    rebuild 1
-    sha256 arm64_sonoma:   "b0d9503a7efa718b2c1c2994b442065e79cf3a7807402944e19d278391766077"
-    sha256 arm64_ventura:  "7bd21d992e534be507dd7d457c6a0b1cdf76ef1743976276c1eaa256bca2306c"
-    sha256 arm64_monterey: "ac3c82a2bccbea544614781dc85aa1400d1665d40e37f1df1de0986daa76e1f0"
-    sha256 sonoma:         "42ea47a742a77e6b96346d8989cbe9dbeed019537865aa38e61209fe73e28bc4"
-    sha256 ventura:        "1f4b9b7577337c6702d6891d1ad686cca240c9895135b917d3bc146c580a9d86"
-    sha256 monterey:       "ea25cdd4def41ef333c0503b3101d6baf6a47505cd585de55d1e0cba88426f53"
-    sha256 x86_64_linux:   "b2b04161201e1f17a9ca9511e0579ae97d65a40f4bc7d195865ac7f5d8c972f6"
+    sha256 arm64_tahoe:   "f0ad91f4bc1139f9c68bd1fa4ffdd2d9b9fcc1013df88e54b7850ee994260d9b"
+    sha256 arm64_sequoia: "927302f491a471b2d973b4e22c48591bfe008f68f200cc06ca61f8873b2b2a17"
+    sha256 arm64_sonoma:  "f4ea965a4fbb561fc0c7d4fa68c433e1ced5a354f02aebefe5dba73fdac278c2"
+    sha256 sonoma:        "8fa0a33626c3d1223f1fa8bec57d1337f2b9e6e1789080b6eebd7d1839858708"
+    sha256 arm64_linux:   "70c8e6aa211d92e9469f8dcb4e72aa722a55f04c880abbecf89101d1a15d6bc7"
+    sha256 x86_64_linux:  "0a622fa3b8f596c6cc6e5b7d5e88c7f1a453043640138c086e59ec64a48f2002"
   end
 
   head do
@@ -45,23 +36,28 @@ class Ghostscript < Formula
     depends_on "libtool" => :build
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "fontconfig"
   depends_on "freetype"
   depends_on "jbig2dec"
   depends_on "jpeg-turbo"
+  depends_on "leptonica"
+  depends_on "libarchive"
   depends_on "libidn"
   depends_on "libpng"
   depends_on "libtiff"
   depends_on "little-cms2"
   depends_on "openjpeg"
+  depends_on "tesseract"
 
   uses_from_macos "expat"
-  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   conflicts_with "gambit-scheme", because: "both install `gsc` binary"
-
-  fails_with gcc: "5"
+  conflicts_with "gerbil-scheme", because: "both install `gsc` binary"
 
   # https://sourceforge.net/projects/gs-fonts/
   resource "fonts" do
@@ -71,7 +67,7 @@ class Ghostscript < Formula
 
   def install
     # Delete local vendored sources so build uses system dependencies
-    libs = %w[expat freetype jbig2dec jpeg lcms2mt libpng openjpeg tiff zlib]
+    libs = %w[expat freetype jbig2dec jpeg lcms2mt leptonica libpng openjpeg tesseract tiff zlib]
     libs.each { |l| rm_r(buildpath/l) }
 
     configure = build.head? ? "./autogen.sh" : "./configure"
@@ -80,11 +76,16 @@ class Ghostscript < Formula
               --disable-cups
               --disable-gtk
               --with-system-libtiff
+              --without-versioned-path
               --without-x]
-    # Work around neon detection bug: https://bugs.ghostscript.com/show_bug.cgi?id=707993
-    odie "`--disable-neon` workaround should be removed!" if build.stable? && version > "10.03.1"
-    args << "--disable-neon" if DevelopmentTools.clang_build_version >= 1600
-    system configure, *std_configure_args, *args
+
+    # Set the correct library install names so that `brew` doesn't need to fix them up later.
+    ENV["DARWIN_LDFLAGS_SO_PREFIX"] = "#{opt_lib}/"
+    ENV.append_to_cflags "-fPIC" if OS.linux?
+    ENV["XCFLAGS"] = ENV.cflags
+    ENV["XCXXFLAGS"] = ENV.cxxflags
+
+    system configure, *args, *std_configure_args
 
     # Install binaries and libraries
     system "make", "install"
@@ -93,60 +94,15 @@ class Ghostscript < Formula
     (pkgshare/"fonts").install resource("fonts")
   end
 
+  def caveats
+    <<~CAVEATS
+      Ghostscript is now built `--without-versioned-path`. Temporary backwards
+      compatibility symlinks exist but will be removed with 10.07.0 release.
+    CAVEATS
+  end
+
   test do
     ps = test_fixtures("test.ps")
     assert_match "Hello World!", shell_output("#{bin}/ps2ascii #{ps}")
   end
 end
-
-__END__
-diff --git a/base/unix-dll.mak b/base/unix-dll.mak
-index 89dfa5a..c907831 100644
---- a/base/unix-dll.mak
-+++ b/base/unix-dll.mak
-@@ -100,10 +100,26 @@ GS_DLLEXT=$(DLL_EXT)
- 
- 
- # MacOS X
--#GS_SOEXT=dylib
--#GS_SONAME=$(GS_SONAME_BASE).$(GS_SOEXT)
--#GS_SONAME_MAJOR=$(GS_SONAME_BASE).$(GS_VERSION_MAJOR).$(GS_SOEXT)
--#GS_SONAME_MAJOR_MINOR=$(GS_SONAME_BASE).$(GS_VERSION_MAJOR).$(GS_VERSION_MINOR).$(GS_SOEXT)
-+GS_SOEXT=dylib
-+GS_SONAME=$(GS_SONAME_BASE).$(GS_SOEXT)
-+GS_SONAME_MAJOR=$(GS_SONAME_BASE).$(GS_VERSION_MAJOR).$(GS_SOEXT)
-+GS_SONAME_MAJOR_MINOR=$(GS_SONAME_BASE).$(GS_VERSION_MAJOR).$(GS_VERSION_MINOR).$(GS_SOEXT)
-+
-+PCL_SONAME=$(PCL_SONAME_BASE).$(GS_SOEXT)
-+PCL_SONAME_MAJOR=$(PCL_SONAME_BASE).$(GS_VERSION_MAJOR).$(GS_SOEXT)
-+PCL_SONAME_MAJOR_MINOR=$(PCL_SONAME_BASE).$(GS_VERSION_MAJOR).$(GS_VERSION_MINOR).$(GS_SOEXT)
-+
-+XPS_SONAME=$(XPS_SONAME_BASE).$(GS_SOEXT)
-+XPS_SONAME_MAJOR=$(XPS_SONAME_BASE).$(GS_VERSION_MAJOR).$(GS_SOEXT)
-+XPS_SONAME_MAJOR_MINOR=$(XPS_SONAME_BASE).$(GS_VERSION_MAJOR).$(GS_VERSION_MINOR).$(GS_SOEXT)
-+
-+PDF_SONAME=$(PDF_SONAME_BASE).$(GS_SOEXT)
-+PDF_SONAME_MAJOR=$(PDF_SONAME_BASE).$(GS_VERSION_MAJOR).$(GS_SOEXT)
-+PDF_SONAME_MAJOR_MINOR=$(PDF_SONAME_BASE).$(GS_VERSION_MAJOR).$(GS_VERSION_MINOR).$(GS_SOEXT)
-+
-+GPDL_SONAME=$(GPDL_SONAME_BASE).$(GS_SOEXT)
-+GPDL_SONAME_MAJOR=$(GPDL_SONAME_BASE).$(GS_VERSION_MAJOR).$(GS_SOEXT)
-+GPDL_SONAME_MAJOR_MINOR=$(GPDL_SONAME_BASE).$(GS_VERSION_MAJOR).$(GS_VERSION_MINOR).$(GS_SOEXT)
- #LDFLAGS_SO=-dynamiclib -flat_namespace
- #LDFLAGS_SO_MAC=-dynamiclib -install_name $(GS_SONAME_MAJOR_MINOR)
- #LDFLAGS_SO=-dynamiclib -install_name $(FRAMEWORK_NAME)
-diff --git a/pdf/pdf_sec.c b/pdf/pdf_sec.c
-index 565ae80ca..7e8f6719d 100644
---- a/pdf/pdf_sec.c
-+++ b/pdf/pdf_sec.c
-@@ -183,8 +183,8 @@ static int apply_sasl(pdf_context *ctx, char *Password, int Len, char **NewPassw
-          * this easy: the errors we want to ignore are the ones with
-          * codes less than 100. */
-         if ((int)err < 100) {
--            NewPassword = Password;
--            NewLen = Len;
-+            *NewPassword = Password;
-+            *NewLen = Len;
-             return 0;
-         }
- 

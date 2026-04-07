@@ -1,10 +1,12 @@
 class Luarocks < Formula
   desc "Package manager for the Lua programming language"
   homepage "https://luarocks.org/"
-  url "https://luarocks.org/releases/luarocks-3.11.1.tar.gz"
-  sha256 "c3fb3d960dffb2b2fe9de7e3cb004dc4d0b34bb3d342578af84f84325c669102"
+  url "https://luarocks.org/releases/luarocks-3.13.0.tar.gz"
+  sha256 "245bf6ec560c042cb8948e3d661189292587c5949104677f1eecddc54dbe7e37"
   license "MIT"
-  head "https://github.com/luarocks/luarocks.git", branch: "master"
+  revision 1
+  compatibility_version 1
+  head "https://github.com/luarocks/luarocks.git", branch: "main"
 
   livecheck do
     url :homepage
@@ -12,13 +14,7 @@ class Luarocks < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "db9ab021d46007aedf360de024d8a1741885aafa27cc9a2b65e41bed95f68783"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "db9ab021d46007aedf360de024d8a1741885aafa27cc9a2b65e41bed95f68783"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "db9ab021d46007aedf360de024d8a1741885aafa27cc9a2b65e41bed95f68783"
-    sha256 cellar: :any_skip_relocation, sonoma:         "3eeec01c328114fe26141a1fcd774098476d76fa39fc0b550203195aee28abdf"
-    sha256 cellar: :any_skip_relocation, ventura:        "3eeec01c328114fe26141a1fcd774098476d76fa39fc0b550203195aee28abdf"
-    sha256 cellar: :any_skip_relocation, monterey:       "3eeec01c328114fe26141a1fcd774098476d76fa39fc0b550203195aee28abdf"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "11447656d9da29a1cf229ee806fe34608ca99fb2c085e3b2d9245271eb89032d"
+    sha256 cellar: :any_skip_relocation, all: "abbbde9415cb2d4597c28d88f0f1f3a391be714f6f8e546ba5f01259c11ae040"
   end
 
   depends_on "luajit" => :test
@@ -34,8 +30,7 @@ class Luarocks < Formula
                           "--sysconfdir=#{etc}",
                           "--rocks-tree=#{HOMEBREW_PREFIX}"
     system "make", "install"
-
-    return if HOMEBREW_PREFIX.to_s == "/usr/local"
+    generate_completions_from_executable(bin/"luarocks", "completion")
 
     # Make bottles uniform to make an `:all` bottle
     luaversion = Formula["lua"].version.major_minor
@@ -43,12 +38,9 @@ class Luarocks < Formula
       cmd/config
       cmd/which
       core/cfg
-      core/path
       deps
-      loader
     ].map { |file| share/"lua"/luaversion/"luarocks/#{file}.lua" }
     inreplace inreplace_files, "/usr/local", HOMEBREW_PREFIX
-    generate_completions_from_executable(bin/"luarocks", "completion")
   end
 
   test do
@@ -66,28 +58,24 @@ class Luarocks < Formula
       ENV["LUA_PATH"] = "#{testpath}/share/lua/#{luaversion}/?.lua"
       ENV["LUA_CPATH"] = "#{testpath}/lib/lua/#{luaversion}/?.so"
 
-      system bin/"luarocks", "install",
-                                "luafilesystem",
-                                "--tree=#{testpath}",
-                                "--lua-dir=#{lua.opt_prefix}"
-
+      system bin/"luarocks", "install", "luafilesystem", "--tree=#{testpath}", "--lua-dir=#{lua.opt_prefix}"
       system luaexec, "-e", "require('lfs')"
 
       case luaversion
       when "5.1"
-        (testpath/"lfs_#{luaversion}test.lua").write <<~EOS
+        (testpath/"lfs_#{luaversion}test.lua").write <<~LUA
           require("lfs")
           lfs.mkdir("blank_space")
-        EOS
+        LUA
 
         system luaexec, "lfs_#{luaversion}test.lua"
         assert_predicate testpath/"blank_space", :directory?,
           "Luafilesystem failed to create the expected directory"
       else
-        (testpath/"lfs_#{luaversion}test.lua").write <<~EOS
+        (testpath/"lfs_#{luaversion}test.lua").write <<~LUA
           require("lfs")
           print(lfs.currentdir())
-        EOS
+        LUA
 
         assert_match testpath.to_s, shell_output("#{luaexec} lfs_#{luaversion}test.lua")
       end

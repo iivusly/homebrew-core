@@ -1,18 +1,18 @@
 class Crystalline < Formula
   desc "Language Server Protocol implementation for Crystal"
   homepage "https://github.com/elbywan/crystalline"
-  url "https://github.com/elbywan/crystalline/archive/refs/tags/v0.13.1.tar.gz"
-  sha256 "20e8cb266de5fd09db592846f695f30317792e923f2a2a4b03924e8ae97afd2e"
+  url "https://github.com/elbywan/crystalline/archive/refs/tags/v0.17.1.tar.gz"
+  sha256 "3e8f4c3f41830092300219ef91c3d03e15536774ef18a5395ff6a9fffc27be5b"
   license "MIT"
+  revision 2
 
   bottle do
-    sha256 arm64_sonoma:   "938ea9cbfd93bd3125a7a8cc33dbffee72c4a3da123046a0a062c01f30417cec"
-    sha256 arm64_ventura:  "ba4e112f794bf5db29221fed0ed9cb707325edcd4811f0b93f9573f446adbe5f"
-    sha256 arm64_monterey: "c1fec8db57b45f5e32bef38f4201ee372f0265a96fd09751c1276888b1036ce6"
-    sha256 sonoma:         "67239639fbecbdbe632cc6828cbc96d055404891332a1d834b8c35f4a172dfb6"
-    sha256 ventura:        "4429a7b544f4bafa107846d396beb6c2f38471296abad9ff0e708a9387f92cdd"
-    sha256 monterey:       "d690f9519c1209784578d901db8ddb665ccf2a3cfd4d182332a20747a78ecdb0"
-    sha256 x86_64_linux:   "61f2a2ec2189e4aaf9738b7d804b54996a27305395b02c53b8d90817a6e661c5"
+    sha256 arm64_tahoe:   "7647fb168c313d4d25f4b21888b3afcb144986451952f8d621b2f1b4381065df"
+    sha256 arm64_sequoia: "c384d158cd61e22df961c05b010996766679faf30cbfcfa06da965d678976b74"
+    sha256 arm64_sonoma:  "d5557e7ef3522dac04fb85b186cbde0348ab7dbbb8f14f1093d3680843767791"
+    sha256 sonoma:        "347bad1d0b85a7387eabfc33429a74d7eb983667940b569f5f4fc3c36f63337a"
+    sha256 arm64_linux:   "263005d3911af92e69ab2f818d0d0d65bfee6fc805cbb7a6be6a3f9466fbcd7c"
+    sha256 x86_64_linux:  "92b9d14b44b3d4af23b559024db819723f34a0d491e839ceae54a237e2357cb4"
   end
 
   depends_on "bdw-gc"
@@ -34,7 +34,7 @@ class Crystalline < Formula
   end
 
   test do
-    payload = <<~LSP_PAYLOAD
+    payload = <<~JSON
       {
         "jsonrpc": "2.0",
         "id": 1,
@@ -47,7 +47,7 @@ class Crystalline < Formula
           "workspaceFolders": null
         }
       }
-    LSP_PAYLOAD
+    JSON
 
     request = <<~LSP_REQUEST
       Content-Length: #{payload.size}

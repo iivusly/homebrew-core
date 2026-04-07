@@ -1,11 +1,9 @@
 class Supertux < Formula
   desc "Classic 2D jump'n run sidescroller game"
   homepage "https://www.supertux.org/"
-  url "https://github.com/SuperTux/supertux/releases/download/v0.6.3/SuperTux-v0.6.3-Source.tar.gz"
-  sha256 "f7940e6009c40226eb34ebab8ffb0e3a894892d891a07b35d0e5762dd41c79f6"
+  url "https://github.com/SuperTux/supertux/releases/download/v0.7.0/SuperTux-v0.7.0-Source.tar.gz"
+  sha256 "32fc5b99b9994ed58e58341d6f21de925764b381256e108591136de53bc31da5"
   license "GPL-3.0-or-later"
-  revision 9
-  head "https://github.com/SuperTux/supertux.git", branch: "master"
 
   livecheck do
     url :stable
@@ -13,45 +11,52 @@ class Supertux < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "0e94fb77138b727f154c9dbb8ad6bafa6b0f5d0558f99b4ab0381b5241c9300c"
-    sha256 cellar: :any,                 arm64_ventura:  "5dde9e8355c08783ce8e120e29386139dcb625dac4eea60c293f74d94a0c9c0d"
-    sha256 cellar: :any,                 arm64_monterey: "3ee3e444f0ae273969dcffb6d4b2854cbcad4d3a13ecbe5485ed493c2df9b718"
-    sha256 cellar: :any,                 sonoma:         "e8b8f690bda931e2a87a285c296cc6e445ec689ae7f9c6c154949642ba12b37a"
-    sha256 cellar: :any,                 ventura:        "e6105c9ff04aedf7a60b21b42e5ec772aa8a3702422123eea5edd8887823d785"
-    sha256 cellar: :any,                 monterey:       "6c022c0e53b1cb0454412dd1f2e9a5d34cf08c23f4967ce3e6ac16533d981f7b"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "91a815ea74c91611c4ba47b4201bc38b42e13d1ee4e7039724dd2c7a75d9224c"
+    sha256 cellar: :any,                 arm64_tahoe:   "90e8bb806543bea14b1ff9a90c12b18d1366a92b172f5d48186f245ef82729be"
+    sha256 cellar: :any,                 arm64_sequoia: "11bb1bad9aafae4445904c65eb9b4e18812bcedc1714699bc1f79f234e0209ef"
+    sha256 cellar: :any,                 arm64_sonoma:  "caa57067cd1dfa66e3d39669e7d89ca92c158b54f9b1fc85b88acd626ba2587d"
+    sha256 cellar: :any,                 sonoma:        "25124eaad411fdc607c923d4a79afe0b5e29e19a3a58b61ef58481b6844d0ffb"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "dd46b29b85232c359dd1d6cb4964190d01a3be01d51579b58299313a699e8c1e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "0c8498d5a9d604d055d87358da12507286ba6954153b1f202f5c552b3e89ecde"
+  end
+
+  head do
+    url "https://github.com/SuperTux/supertux.git", branch: "master"
+
+    depends_on "fmt"
+    depends_on "openal-soft"
   end
 
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
-  depends_on "boost"
+  depends_on "pkgconf" => :build
+  depends_on "fmt"
   depends_on "freetype"
   depends_on "glew"
   depends_on "glm"
   depends_on "libogg"
   depends_on "libpng"
   depends_on "libvorbis"
+  depends_on "openal-soft"
   depends_on "physfs"
   depends_on "sdl2"
   depends_on "sdl2_image"
 
   uses_from_macos "curl"
-  uses_from_macos "zlib"
 
   on_linux do
     depends_on "mesa"
-    depends_on "openal-soft"
+    depends_on "zlib-ng-compat"
   end
 
   def install
-    ENV.cxx11
+    args = [
+      "-DINSTALL_SUBDIR_BIN=bin",
+      "-DINSTALL_SUBDIR_SHARE=share/supertux",
+      # Without the following option, Cmake intend to use the library of MONO framework.
+      "-DPNG_PNG_INCLUDE_DIR=#{Formula["libpng"].opt_include}",
+      "-DCMAKE_INSTALL_RPATH=#{rpath}",
+    ]
 
-    args = std_cmake_args
-    args << "-DINSTALL_SUBDIR_BIN=bin"
-    args << "-DINSTALL_SUBDIR_SHARE=share/supertux"
-    # Without the following option, Cmake intend to use the library of MONO framework.
-    args << "-DPNG_PNG_INCLUDE_DIR=#{Formula["libpng"].opt_include}"
-    system "cmake", "-S", ".", "-B", "build", *args
+    system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
 

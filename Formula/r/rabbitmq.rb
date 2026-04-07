@@ -1,17 +1,18 @@
 class Rabbitmq < Formula
   desc "Messaging and streaming broker"
   homepage "https://www.rabbitmq.com"
-  url "https://github.com/rabbitmq/rabbitmq-server/releases/download/v3.13.7/rabbitmq-server-generic-unix-3.13.7.tar.xz"
-  sha256 "45e5423c43f15c9d2b6ee5947f8e4f256fcfa0c1e7743e60c473cd006954e1fa"
+  url "https://github.com/rabbitmq/rabbitmq-server/releases/download/v4.2.5/rabbitmq-server-generic-unix-4.2.5.tar.xz"
+  sha256 "1cfce9374e37c56e4efd3831e90c5508a511bae87dbaa95f7bdddd36f71e27aa"
   license "MPL-2.0"
 
   livecheck do
     url :stable
     regex(/^v?(\d+(?:\.\d+)+)$/i)
+    strategy :github_latest
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, all: "f550fb2da56eda0b1fbfff1db7ce3e6c969615f8643686a2b9786b2f3dba1e09"
+    sha256 cellar: :any_skip_relocation, all: "c01ab05fa12c5f9e90356076a46a334265ab520a002f7b03a159d108589b4253"
   end
 
   depends_on "erlang"
@@ -50,10 +51,16 @@ class Rabbitmq < Formula
                                  "rabbitmq_mqtt,rabbitmq_stream]."
     end
 
-    sbin.install prefix/"plugins/rabbitmq_management-#{version}/priv/www/cli/rabbitmqadmin"
+    rabbitmqadmin = prefix.glob("plugins/rabbitmq_management-*/priv/www/cli/rabbitmqadmin")
+    if (rabbitmqadmin_count = rabbitmqadmin.count) > 1
+      odie "Expected only one `rabbitmqadmin`, got #{rabbitmqadmin_count}"
+    end
+
+    sbin.install rabbitmqadmin
     (sbin/"rabbitmqadmin").chmod 0755
-    generate_completions_from_executable(sbin/"rabbitmqadmin", "--bash-completion", shells: [:bash],
-                                         base_name: "rabbitmqadmin", shell_parameter_format: :none)
+    generate_completions_from_executable(sbin/"rabbitmqadmin", "--bash-completion",
+                                         shells:                 [:bash],
+                                         shell_parameter_format: :none)
   end
 
   def caveats
@@ -84,9 +91,19 @@ class Rabbitmq < Formula
 
   test do
     ENV["RABBITMQ_MNESIA_BASE"] = testpath/"var/lib/rabbitmq/mnesia"
-    pid = fork { exec sbin/"rabbitmq-server" }
+    ENV["RABBITMQ_CONFIG_FILE"] = testpath/"rabbitmq.conf"
+
+    mqtt_port = free_port
+    (testpath/"rabbitmq.conf").write <<~CONF
+      mqtt.listeners.tcp.default=#{mqtt_port}
+    CONF
+
+    pid = spawn sbin/"rabbitmq-server"
     system sbin/"rabbitmq-diagnostics", "wait", "--pid", pid
     system sbin/"rabbitmqctl", "status"
     system sbin/"rabbitmqctl", "stop"
+  ensure
+    Process.kill("TERM", pid)
+    Process.wait(pid)
   end
 end

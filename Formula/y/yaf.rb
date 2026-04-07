@@ -1,8 +1,8 @@
 class Yaf < Formula
   desc "Yet another flowmeter: processes packet data from pcap(3)"
   homepage "https://tools.netsa.cert.org/yaf/"
-  url "https://tools.netsa.cert.org/releases/yaf-2.15.0.tar.gz"
-  sha256 "3743d2f7b9bac3ac2ee2017dc26f6d7c5775dfdf95062ef7fa29c8c793e9472f"
+  url "https://tools.netsa.cert.org/releases/yaf-2.18.3.tar.gz"
+  sha256 "4cee46b11371fc5b7b76044c7efadb1e30043e699eb0d8d1aa4f1ca6436e8cdd"
   license "GPL-2.0-only"
 
   # NOTE: This should be updated to check the main `/yaf/download.html`
@@ -13,27 +13,28 @@ class Yaf < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "f4c454dd111e81d96fe4b7a96ffd9e5206a81d4b43f7eb5d587ac790414db79a"
-    sha256 cellar: :any,                 arm64_ventura:  "2a412f316dad9f799eb94a6ace746fcea6de0a76f1283235470820f8d7d48dff"
-    sha256 cellar: :any,                 arm64_monterey: "fe779f22669ae77e31393122ff3f286d76d832361b05fcfc749610ae99a7112f"
-    sha256 cellar: :any,                 sonoma:         "ab2ba75307eab5e71027153bbc9cedcf6a40a6700f570e8b22690a6b1f18d0be"
-    sha256 cellar: :any,                 ventura:        "6a68fde3aab87006a0e9b77db3e54489bee1c9d50db666ab7873d4e40027296d"
-    sha256 cellar: :any,                 monterey:       "e1a127564d3362b3f95ffed00d2661c1ee21ecc5e85f89547de996d3959c2af0"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "95a12e2afcaa5a2746a4a56dd489b04905e60a5bd716ad6774a120928a4331d7"
+    sha256 cellar: :any,                 arm64_tahoe:   "fbdfcc645e3d97d078b53318943a5e44e86b6d2e3456180254057b16b577830e"
+    sha256 cellar: :any,                 arm64_sequoia: "55475eea5c3d1e4a10c92fa824a2a57e8caaf884af0b1717391d8cfada89af61"
+    sha256 cellar: :any,                 arm64_sonoma:  "af7898289f5b90c1a57294de12bc58fca05dab477084388fee266bce5abfb496"
+    sha256 cellar: :any,                 sonoma:        "bd00807ff0368600337f5ef1a940928c828ffa39912a9281534d9eb034094629"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "9205bfd89e5f641d0d373e5a0efd86422a77a43319e10bd2bcbac84ea58b2fac"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "9f861e973c78e50d22b0eb7153af58bab716a480eaedc37b866d39734d5f7b64"
   end
 
-  depends_on "pkg-config" => :build
-  depends_on "gettext"
+  depends_on "pkgconf" => :build
   depends_on "glib"
   depends_on "libfixbuf"
   depends_on "libtool"
-  depends_on "pcre"
 
   uses_from_macos "libpcap"
-  uses_from_macos "zlib"
 
   on_macos do
+    depends_on "gettext"
     depends_on "openssl@3"
+  end
+
+  on_linux do
+    depends_on "zlib-ng-compat"
   end
 
   def install
@@ -44,10 +45,10 @@ class Yaf < Formula
 
   test do
     input = test_fixtures("test.pcap")
-    output = `#{bin}/yaf --in #{input} | #{bin}/yafscii`
-    expected = "2014-10-02 10:29:06.168 - 10:29:06.169 (0.001 sec) tcp " \
+    output = pipe_output("#{bin}/yafscii", shell_output("#{bin}/yaf --in #{input}"), 0)
+    expected = "2014-10-02 10:29:06.168497 - 10:29:06.169875 (0.001378 sec) tcp " \
                "192.168.1.115:51613 => 192.168.1.118:80 71487608:98fc8ced " \
-               "S/APF:AS/APF (7/453 <-> 5/578) rtt 0 ms"
+               "S/APF:AS/APF (7/453 <-> 5/578) rtt 451 us"
     assert_equal expected, output.strip
   end
 end

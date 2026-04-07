@@ -1,25 +1,26 @@
 class Kubeconform < Formula
   desc "FAST Kubernetes manifests validator, with support for Custom Resources!"
   homepage "https://github.com/yannh/kubeconform"
-  url "https://github.com/yannh/kubeconform/archive/refs/tags/v0.6.7.tar.gz"
-  sha256 "3d38b9f3f8c75a2ac5917ab2dda0a6a89a581a75ed755aec698e931611979223"
+  url "https://github.com/yannh/kubeconform/archive/refs/tags/v0.7.0.tar.gz"
+  sha256 "9cb00e6385346c9de21e8fe318a4ec9854a8c7165d08b10b20ed32e28faef9a8"
   license "Apache-2.0"
   head "https://github.com/yannh/kubeconform.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "9299dd255685b85b9a6c9e2230ce3a8e8370717a4a75c141dc6d7b26ab3951a7"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "1d6ddef665045d43c94cf2b8717ef072e161e614d42674648c181aac4d2987d6"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "e5e2b9ceed38c66246d80ff5e266a7da28cee09f07be700fe6c21fe0e22ef3e4"
-    sha256 cellar: :any_skip_relocation, sonoma:         "6ae62caf12452ef0e925d92a6081a6a5684a757b5575adff826021bfd154fc10"
-    sha256 cellar: :any_skip_relocation, ventura:        "ed5cf861eab09f6a297c8797fdec584555095d12a60439ed1ccbf8f0a7f11bcd"
-    sha256 cellar: :any_skip_relocation, monterey:       "25ff3e90617a97ebae91009127b3c71ba393554d4e7dd3f525f47c5cedeee713"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "161bdbd38289ca34e13dea30bc62d28875690f2f2a3546d3672dc4af392d9c1e"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "9fc0bd5fff9f4711f940b5e715bbd3a29bc6b95af8b03f93593c45cf35eb2e90"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "daf8891c42d9a174f5b407e5a54ad7a18ec39e1413386738ad44a7f4a0e66257"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "daf8891c42d9a174f5b407e5a54ad7a18ec39e1413386738ad44a7f4a0e66257"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "daf8891c42d9a174f5b407e5a54ad7a18ec39e1413386738ad44a7f4a0e66257"
+    sha256 cellar: :any_skip_relocation, sonoma:        "c4a2a5d5b68ca69d05ce2ead6c5e67e282c4a25bd31bee697ff0d8356ad38324"
+    sha256 cellar: :any_skip_relocation, ventura:       "c4a2a5d5b68ca69d05ce2ead6c5e67e282c4a25bd31bee697ff0d8356ad38324"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "be5bff53c729946857a4eeb647d3ec19ea7d40ef99365c3995dda6ac19e66034"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "2b430e93e88f9c3182f8e7a7c511c220e3e469564b4413d600815fc72d336bdb"
   end
 
   depends_on "go" => :build
 
   def install
-    system "go", "build", *std_go_args(ldflags: "-s -w"), "./cmd/kubeconform"
+    system "go", "build", *std_go_args(ldflags: "-s -w -X main.version=v#{version}"), "./cmd/kubeconform"
 
     (pkgshare/"examples").install Dir["fixtures/*"]
   end
@@ -32,5 +33,7 @@ class Kubeconform < Formula
 
     assert_match "ReplicationController bob is invalid",
       shell_output("#{bin}/kubeconform #{testpath}/invalid.yaml", 1)
+
+    assert_match version.to_s, shell_output("#{bin}/kubeconform -v")
   end
 end

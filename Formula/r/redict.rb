@@ -1,19 +1,18 @@
 class Redict < Formula
   desc "Distributed key/value database"
   homepage "https://redict.io/"
-  url "https://codeberg.org/redict/redict/archive/7.3.0.tar.gz"
-  sha256 "733880c043c04d6038c28e77f2e826143142929be9c4a68f82a4f66e7a0caf5c"
+  url "https://codeberg.org/redict/redict/archive/7.3.6.tar.gz"
+  sha256 "3d6aedad01f8137beeb2aabc74c128b4eec9a2d0d4433892b855fb2f4e6f39f2"
   license "LGPL-3.0-only"
   head "https://codeberg.org/redict/redict.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "8ca12acea855c46b02c65d36f63b9810aad63ed14ac83473fb498cfe0768ed4f"
-    sha256 cellar: :any,                 arm64_ventura:  "6ef318d2319f9b5f18cffd399f96dcbc035cf8cf3b75fa489cd9955e6ab1cf4d"
-    sha256 cellar: :any,                 arm64_monterey: "8b302580ed161bb8384e30bd0b50eadbe1047acb28e6bf6b5b38341e82395efe"
-    sha256 cellar: :any,                 sonoma:         "d25a7b2be916065e911a12c603f456ab0a4c1989657c0a3771def4bc3b37d4da"
-    sha256 cellar: :any,                 ventura:        "dcdb052b3a407a79dac689eb75e2717244262dee5dffe5f960cca18f7098bf19"
-    sha256 cellar: :any,                 monterey:       "0dc52fb15437fabbf7751b6af6d08821abb7ace122be254dff821da411ee31d1"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "8d93edbb84f2a3a547296b8a8afa0c33f9d5687ddf0ae8b2699207df9ddb8f65"
+    sha256 cellar: :any,                 arm64_tahoe:   "cbfd75594013a1049c135b3d0175339033ae49b805707876505700b0d2fd0244"
+    sha256 cellar: :any,                 arm64_sequoia: "f4bb5f1a67a1255171d99aeb8f4257e95cbe32f256f59f830ad3439a0692f981"
+    sha256 cellar: :any,                 arm64_sonoma:  "0b854006776e9bd8aec252b1363075dac7e41a3d5886f0b203d94aea2238705b"
+    sha256 cellar: :any,                 sonoma:        "4b983424da0a10236d0afc57a2a76aa009a883760f80a482880b6060cd77c7bd"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "0599c6e40122c402656b72c5762babea440c71e4c32a89d593704c3be2ce07a6"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "708796b8af5a02da1959552fb065bd81218b0f2ebfb649d345e0ae86b3db363f"
   end
 
   depends_on "openssl@3"
@@ -44,6 +43,6 @@ class Redict < Formula
 
   test do
     system bin/"redict-server", "--test-memory", "2"
-    %w[run db/redict log].each { |p| assert_predicate var/p, :exist?, "#{var/p} doesn't exist!" }
+    %w[run db/redict log].each { |p| assert_path_exists var/p, "#{var/p} doesn't exist!" }
   end
 end

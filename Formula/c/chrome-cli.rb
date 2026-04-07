@@ -1,18 +1,18 @@
 class ChromeCli < Formula
   desc "Control Google Chrome from the command-line"
   homepage "https://github.com/prasmussen/chrome-cli"
-  url "https://github.com/prasmussen/chrome-cli/archive/refs/tags/1.10.0.tar.gz"
-  sha256 "d8ff25fb608ca4145d4af688e999ea106128e75b95fb1edc6861499133e9bb8c"
+  url "https://github.com/prasmussen/chrome-cli/archive/refs/tags/1.11.0.tar.gz"
+  sha256 "e719cf5342f907cb06811c39c7a6ca087e584d08d1185e2eded9953dd218d918"
   license "MIT"
   head "https://github.com/prasmussen/chrome-cli.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "6dbfcf2110ce0c98549762695f3f1ea7a9d4d2b6858151607cadf5ed13bc981b"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "6423c14b6452d94b9f79ebcc3a71c8e0b6158c12810f57c9efc1be57d1ab2169"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "63ae694a49b249cfeca26389f5c201417ea4b7d56c0db46669856993a67f5702"
-    sha256 cellar: :any_skip_relocation, sonoma:         "d34831217ca47d2f91e19643307e7dba5c8b31a136380ceabc469ce8f13ce730"
-    sha256 cellar: :any_skip_relocation, ventura:        "a5094b212f9f4d9edc5af49a0df72a8046605ab450b7c72d9aa13fd593305880"
-    sha256 cellar: :any_skip_relocation, monterey:       "bd67692c870bc96c11800fdddeac4db57fbe6abc5bc01e2d1e82464320f8eaa8"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "d551c02cfc196db2d8e930c9c58c6aa6c397ad2cddd4990a6b368db465b3a467"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "628f12ae25a466c35328cd1578c6428ece0942416f07e5df663919edf68d1c6c"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "807ae024d63682ce4573ea99c27172c606f370b96a21cff8a4626ba3aee8018b"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "d06011bc7b3936bbcb44f2f4ab49b4749000af5c325d29afd85090148c8481ad"
+    sha256 cellar: :any_skip_relocation, sonoma:        "390e82e1ed87e9d5882ae863c68f7cdc2baad2cde72f862fc5efca511a4743c9"
+    sha256 cellar: :any_skip_relocation, ventura:       "46815e7636eaca21c421825509183052781caf166ba76957eb13aa74c6e8fc5d"
   end
 
   depends_on xcode: :build

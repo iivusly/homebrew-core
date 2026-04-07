@@ -1,26 +1,24 @@
 class CargoRelease < Formula
   desc "Cargo subcommand `release`: everything about releasing a rust crate"
   homepage "https://github.com/crate-ci/cargo-release"
-  url "https://github.com/crate-ci/cargo-release/archive/refs/tags/v0.25.10.tar.gz"
-  sha256 "3db220c865caa9820bf2d66c0c5a5ad5a3c7be7ec91c27c623c0f62c3754ea8b"
+  url "https://github.com/crate-ci/cargo-release/archive/refs/tags/v1.1.2.tar.gz"
+  sha256 "7121921bfd2bb03ef99e70296d672d2d6838b32c7407d50f9915c5d4ee28461a"
   license any_of: ["Apache-2.0", "MIT"]
-  revision 1
   head "https://github.com/crate-ci/cargo-release.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "7c07e9e50acaa437102d150c19438010639926e59ff6c019aa2f7524f5235a8d"
-    sha256 cellar: :any,                 arm64_ventura:  "ea281a383b6e283e47acda901f22dc9f7fd2d78bcec6b551678e35bd263596f9"
-    sha256 cellar: :any,                 arm64_monterey: "4a952080706c1ab23784bac97e4365a190e35c6beaa033d44c06d64d6dabbdd4"
-    sha256 cellar: :any,                 sonoma:         "13761de7169bb047880108b98bfb9521af814e32fbf84269dee694f994ad32aa"
-    sha256 cellar: :any,                 ventura:        "6d9ab36ca7496a7cfae490b0c9e8d39dd6cf5c3ee3c2487f989dc1f9c92ee9be"
-    sha256 cellar: :any,                 monterey:       "c8b71de7ff3f3c64074c92d8d8d28dde44a927434efd922bd2ce066e447261ee"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "e52e3ace6dbc23d858818dbefd0c351ffa13b6c4bb78a66b5f1ef8fe74abb061"
+    sha256 cellar: :any,                 arm64_tahoe:   "c834f40c75a5bb29d2f0abd1ade85f9bf28bef15aadf7a3f38e95404f3f1fe9f"
+    sha256 cellar: :any,                 arm64_sequoia: "d7d6c2b6e9e1d0ee610d5be134adbbdeb27f574abf803083d163d5267ca7e94d"
+    sha256 cellar: :any,                 arm64_sonoma:  "8da7ca9e8d700f761590f6a5b53d50219f871801d2fadc4903a0f349b422a748"
+    sha256 cellar: :any,                 sonoma:        "9155960fc4db70389d95227247e5a67bbf9937b3209b78350895a36208b19fe8"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "17a1f513fe5f9c04cc2941ed39e17646458f0a12ba9671f9aa59cd8f04de3710"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "94364844f0438fc1e0fd8a031780a0f662a79bf4fd1b1ccb52dcfa7fb9c8bd43"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "rust" => :build
   depends_on "rustup" => :test
-  depends_on "libgit2@1.7"
+  depends_on "libgit2"
 
   def install
     ENV["LIBGIT2_NO_VENDOR"] = "1"
@@ -28,20 +26,14 @@ class CargoRelease < Formula
     system "cargo", "install", "--no-default-features", *std_cargo_args
   end
 
-  def check_binary_linkage(binary, library)
-    binary.dynamically_linked_libraries.any? do |dll|
-      next false unless dll.start_with?(HOMEBREW_PREFIX.to_s)
-
-      File.realpath(dll) == File.realpath(library)
-    end
-  end
-
   test do
+    require "utils/linkage"
+
     # Show that we can use a different toolchain than the one provided by the `rust` formula.
     # https://github.com/Homebrew/homebrew-core/pull/134074#pullrequestreview-1484979359
     ENV.prepend_path "PATH", Formula["rustup"].bin
-    system "rustup", "default", "beta"
     system "rustup", "set", "profile", "minimal"
+    system "rustup", "default", "beta"
 
     system "cargo", "new", "hello_world", "--bin"
     cd "hello_world" do
@@ -49,9 +41,9 @@ class CargoRelease < Formula
     end
 
     [
-      Formula["libgit2@1.7"].opt_lib/shared_library("libgit2"),
+      Formula["libgit2"].opt_lib/shared_library("libgit2"),
     ].each do |library|
-      assert check_binary_linkage(bin/"cargo-release", library),
+      assert Utils.binary_linked_to_library?(bin/"cargo-release", library),
              "No linkage with #{library.basename}! Cargo is likely using a vendored version."
     end
   end

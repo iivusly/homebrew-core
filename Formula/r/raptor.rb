@@ -4,6 +4,8 @@ class Raptor < Formula
   url "https://download.librdf.org/source/raptor2-2.0.16.tar.gz"
   sha256 "089db78d7ac982354bdbf39d973baf09581e6904ac4c92a98c5caadb3de44680"
   license any_of: ["LGPL-2.1-or-later", "GPL-2.0-or-later", "Apache-2.0"]
+  revision 1
+  compatibility_version 1
 
   livecheck do
     url :homepage
@@ -11,19 +13,23 @@ class Raptor < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "40dcde53bea22c1f9f190517ffb52d13fc1bd8cb2ee91cf7f9439718cf491ef4"
-    sha256 cellar: :any,                 arm64_ventura:  "04bcb31c9be96a4763e3ea34843a0be60d5b4051fb89d65f0a8e63880d2256f7"
-    sha256 cellar: :any,                 arm64_monterey: "1d0120b0dbca92597a7fe305a13ae1f3532fc5521ba7c61f26748d387240aab4"
-    sha256 cellar: :any,                 arm64_big_sur:  "9cdd4d2a5c7cc9888072bbd8e6062ee1645b9b7e4ca371391fdbdd95a0a20f9d"
-    sha256 cellar: :any,                 sonoma:         "7f1de091c7c497a3206f19766aae47a892668bfd4c551a3ccb10c936fcc193dd"
-    sha256 cellar: :any,                 ventura:        "6e1542f6b1550034210dec5ce87896ef4be236e60ac6b4a21136b7029b7c2dc5"
-    sha256 cellar: :any,                 monterey:       "d91142c6c8c5057b57a334ad8c8a856e620303cf4fefc4e9bc95a9715f9d338f"
-    sha256 cellar: :any,                 big_sur:        "ba5e405a3c7b6f8f89e91474e1ebe98370a592ba3a2c8b506577c8e7197cd859"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "15e86d1b093c1984b4d6296466470f879edd31763d16b75130389046ca2cb4ec"
+    sha256 cellar: :any,                 arm64_tahoe:   "1bfb13b805a48dff3dabd1424ffdccda68a6862eb2b245f544e8cf9b1a02c0d8"
+    sha256 cellar: :any,                 arm64_sequoia: "d912659b927b80b53f507ae55e23bd3761c500f1e93d076b150f07b4b72ab9c9"
+    sha256 cellar: :any,                 arm64_sonoma:  "7ac8f488fd862d5430615e09904b0557067827f5295609a7c1484362bac6f0f8"
+    sha256 cellar: :any,                 sonoma:        "3497318f771ce19a3c8184d9497ddee0e20fd9255507a7004d4d48c47c48c096"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "3a740a47101fb3c218cb991c1e0a17171d581fe40065550ba25f50c325466e3f"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ef7db540be1c6410ffe3fe285641fa07a3eb71f81908de7f36f801c16484f333"
   end
 
   uses_from_macos "curl"
   uses_from_macos "libxml2"
+
+  # Fix compilation with libxml2 2.11.0 or later. Patch is already applied upstream, remove on next release.
+  # https://github.com/dajobe/raptor/pull/58
+  patch do
+    url "https://github.com/dajobe/raptor/commit/ac914399b9013c54572833d4818e6ce008136dc9.patch?full_index=1"
+    sha256 "d527fb9ad94f22acafcec9f3b626fb876b7fb1b722e6999cf46a158172bb0992"
+  end
 
   def install
     system "./configure", *std_configure_args
@@ -31,6 +37,9 @@ class Raptor < Formula
   end
 
   test do
-    system bin/"rapper", "--output", "ntriples", "https://planetrdf.com/guide/rss.rdf"
+    test_url = "https://raw.githubusercontent.com/dajobe/raptor/" \
+               "b5e91dfdf7e1ea5ca5a5f7b48c428dd3da1219e0/tests/feeds/test01.rdf"
+    output = shell_output("#{bin}/rapper --output ntriples #{test_url}")
+    assert_match '_:genid2 <http://purl.org/dc/elements/1.1/title> "Example"', output
   end
 end

@@ -1,25 +1,25 @@
 class Openvi < Formula
   desc "Portable OpenBSD vi for UNIX systems"
   homepage "https://github.com/johnsonjh/OpenVi"
-  url "https://github.com/johnsonjh/OpenVi/archive/refs/tags/7.5.29.tar.gz"
-  sha256 "3be3eff39561ea5b2edd5e2883a8d9c32e2ba8d999bfdb9fb77c85c8cbd65d4c"
+  url "https://github.com/johnsonjh/OpenVi/archive/refs/tags/7.7.32.tar.gz"
+  sha256 "3378f371b7446708b5d909dcbf8608a74d771f2660f06014888da2163a77af81"
   license "BSD-3-Clause"
   head "https://github.com/johnsonjh/OpenVi.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "5bef581722715b0623333ce952d97101af9cee85b242affb1962cdf6c29568b3"
-    sha256 cellar: :any,                 arm64_ventura:  "e4166622c59476eeae8c62392a4c9d774d83320b56a2e332e92492bd0997e91d"
-    sha256 cellar: :any,                 arm64_monterey: "3336c1d08bf7bcc8eb17934cddcc378c6ced58b08e4ed51eb52a0988a6002317"
-    sha256 cellar: :any,                 sonoma:         "3f0e38ad3d57c2fb7705c2e2ab4838c5ffdde36bdf520fed8ddfd5cdedd02955"
-    sha256 cellar: :any,                 ventura:        "de9079fcc430c57ffd6bb5221f8fc42e989e9ba88ba40b84cc0aa74020e4af7d"
-    sha256 cellar: :any,                 monterey:       "3d6d07e7f259896f28b5458ee58453d808c9b192a01555440f99e7db0de388f0"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "bbb2d2887df0b007137773ac437f93117ea09463a03d65fa4d604fa7946c978f"
+    sha256 cellar: :any,                 arm64_tahoe:   "7f9f98c1766d28f774755c5504a4e0009aa9075d0810dac96a43f670543d0836"
+    sha256 cellar: :any,                 arm64_sequoia: "21592b330f84b246945cb28063a11879f1eefe50df87ac000693362cc6cbe882"
+    sha256 cellar: :any,                 arm64_sonoma:  "812ae5e06f44b6adccb233053f542332536be62b4d4dcb6d75c52aa4636ec213"
+    sha256 cellar: :any,                 sonoma:        "ab51a0599172f446d17f61bf0a1c93816100854d58bf6875fb1ae1635d97d662"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "72b16c18985eafe024d7cfe55047850f7e36375d0ca6aa42e84f2dc0b701eb36"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "070f50496b0c46cc89f50bc2884e227658778557f745a8f061cdebfe5e2c94a0"
   end
 
+  depends_on "pkgconf" => :build
   depends_on "ncurses" # https://github.com/johnsonjh/OpenVi/issues/32
 
   def install
-    system "make", "install", "CHOWN=true", "LTO=1", "PREFIX=#{prefix}"
+    system "make", "install", "CURSESLIB=-lncurses", "CHOWN=true", "LTO=1", "PREFIX=#{prefix}"
   end
 
   test do

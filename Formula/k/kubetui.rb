@@ -1,25 +1,31 @@
 class Kubetui < Formula
   desc "TUI tool for monitoring and exploration of Kubernetes resources"
   homepage "https://github.com/sarub0b0/kubetui"
-  url "https://github.com/sarub0b0/kubetui/archive/refs/tags/v1.5.3.tar.gz"
-  sha256 "6cf993dd0960e3a7d62ddb62819827e0a5e97b4efb84e9df0f0637b65204e846"
+  url "https://github.com/sarub0b0/kubetui/archive/refs/tags/v1.12.1.tar.gz"
+  sha256 "ded42ad435fdbf0c6f74f426de1cf30b816099c09ab10a4292c5384bb0c53c68"
   license "MIT"
   head "https://github.com/sarub0b0/kubetui.git", branch: "main"
 
+  livecheck do
+    url :stable
+    strategy :github_latest
+  end
+
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "c9bb18b65662c2b1be75ef3f9386cce60f5ccfc9382f240583131988b917b8e7"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "f3746e023cb48704d5e11dcbd1975998ad17a0682d92915605838b64f94b174f"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "a8314b787782eec4f5168260f2f9ce69ca69cd4f570bc043a9c01e198a78100b"
-    sha256 cellar: :any_skip_relocation, sonoma:         "af582c10687f2d4397c629feafa61b3624b4b38781738dde5ff54817ee47ee1a"
-    sha256 cellar: :any_skip_relocation, ventura:        "1f8d55aaad0ef367362f66bd00770d26010632f3d52f43d30bda2041a7cff1f2"
-    sha256 cellar: :any_skip_relocation, monterey:       "c67ca077c75f3df1d17f08ba936c77badd52864398919d4ca3861937cc9401cf"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "ad41a4f507ccf98475638ce311984c68e34edff0b68505217f8524cd1323dc4c"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "3b9305fca8648e75f022caf8dbec07371fa22d71cd629c374db95b9b06bb5842"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "201fc4c226e69bee11237fc50df623c765fa5397adcab905a4c4b87310857250"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "1bb67e9a6bf8bd8f9bd6c04f5f9776bcc8545ea07f24a8fca6281d169456c0ec"
+    sha256 cellar: :any_skip_relocation, sonoma:        "eece04566a08188048e98504734454ca6702bdde056ddc686ea5326a15d60c4a"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "b9beca1a79a2f7870bc0ff2416270af1462da71e2dcbb4e381c7506fc8e05040"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "79a460dcbe770cc5b81653be2f241b0a229075749c71e350281d197129ea7f95"
   end
 
   depends_on "rust" => :build
 
   def install
     system "cargo", "install", *std_cargo_args
+
+    generate_completions_from_executable(bin/"kubetui", "completion", shells: [:bash, :zsh])
   end
 
   test do

@@ -1,19 +1,18 @@
 class CargoAuditable < Formula
   desc "Make production Rust binaries auditable"
   homepage "https://github.com/rust-secure-code/cargo-auditable"
-  url "https://github.com/rust-secure-code/cargo-auditable/archive/refs/tags/v0.6.4.tar.gz"
-  sha256 "3e3f4134d81b47277d34c44bc1169c9b0356612977651f8e98e2ba1a470b69a2"
+  url "https://github.com/rust-secure-code/cargo-auditable/archive/refs/tags/v0.7.4.tar.gz"
+  sha256 "4ce3fefc10d704db496c8701d8b2c8623abfbf5af1c673ff607fd1afa6c68052"
   license any_of: ["Apache-2.0", "MIT"]
   head "https://github.com/rust-secure-code/cargo-auditable.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "daa0ebf98a6d2f0ad0b5efd539e019f97e99906031e2086e6bfb7a1b7f8f510e"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "86a1584f39b8240505f34461d6fbc3b4e00c0a8216d323c37fe819b99e670c6e"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "14e054bd291ca7775ff27020e04cdaa1c5a12882dda873b5255e4d6919dee761"
-    sha256 cellar: :any_skip_relocation, sonoma:         "01c1feb99c94e58ce2d46d39efb512945ea13a9922bb2b9fba032ee8667e2f38"
-    sha256 cellar: :any_skip_relocation, ventura:        "df4b5e2d0ac6d4867f0442ce9c547d31ca41cbb65f6c00cde09376d1d0421911"
-    sha256 cellar: :any_skip_relocation, monterey:       "879f0a4d5db1b78e6c47cfa3b63e364b9a4865c5518828bbb2a91f9a16745f8e"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "96e9f6c04bd5c980ebd7c4e686b12f9e5d4f6cbf8eae9e9bf1744b3f39f6ffd5"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "f3fce86e8db8ffe764d2ba4316d86dd1ee8ae2947f581e29e43c0a2730e09359"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "c27346d4bcda316d8618b7e7b88ca673ba24d2df3c0c96c30360af2c2f61417b"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "a9748e63e96fe055d2eac69a31e1117269f69be8052f09e71969802543e47deb"
+    sha256 cellar: :any_skip_relocation, sonoma:        "5bd3dbb96e21148f93e8f20fa136ab151c325bc850d2e776c2e9781015f625da"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "df75796af0beced442d90fcf41d5849174d05acabf8b9c282b29ba48aa3d52a9"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "4e1c83ef6cd06c3df7d29e57937050e2779c90d08d18ff316c422f08a05d4edf"
   end
 
   depends_on "rust" => :build
@@ -28,25 +27,25 @@ class CargoAuditable < Formula
     # Show that we can use a different toolchain than the one provided by the `rust` formula.
     # https://github.com/Homebrew/homebrew-core/pull/134074#pullrequestreview-1484979359
     ENV.prepend_path "PATH", Formula["rustup"].bin
-    system "rustup", "default", "beta"
     system "rustup", "set", "profile", "minimal"
+    system "rustup", "default", "beta"
 
     crate = testpath/"demo-crate"
     mkdir crate do
-      (crate/"src/main.rs").write <<~EOS
+      (crate/"src/main.rs").write <<~RUST
         fn main() {
           println!("Hello BrewTestBot!");
         }
-      EOS
-      (crate/"Cargo.toml").write <<~EOS
+      RUST
+      (crate/"Cargo.toml").write <<~TOML
         [package]
         name = "demo-crate"
         version = "0.1.0"
         license = "MIT"
-      EOS
+      TOML
 
       system "cargo", "auditable", "build", "--release"
-      assert_predicate crate/"target/release/demo-crate", :exist?
+      assert_path_exists crate/"target/release/demo-crate"
       output = shell_output("./target/release/demo-crate")
       assert_match "Hello BrewTestBot!", output
     end

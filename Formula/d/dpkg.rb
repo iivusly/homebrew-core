@@ -4,9 +4,10 @@ class Dpkg < Formula
   # Please use a mirror as the primary URL as the
   # dpkg site removes tarballs regularly which means we get issues
   # unnecessarily and older versions of the formula are broken.
-  url "https://deb.debian.org/debian/pool/main/d/dpkg/dpkg_1.22.11.tar.xz"
-  sha256 "f318eb949b8e7ecd802b17b1a7e7cf4b17094c9577e1060653e9b838cdd31d80"
+  url "https://deb.debian.org/debian/pool/main/d/dpkg/dpkg_1.23.7.tar.xz"
+  sha256 "60fe2be72e5f0a4bb0ac7baff3b1697ebc5cfaac1885f66649521571a97440ad"
   license "GPL-2.0-only"
+  compatibility_version 1
 
   livecheck do
     url "https://deb.debian.org/debian/pool/main/d/dpkg/"
@@ -14,29 +15,29 @@ class Dpkg < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "04254678226ca3ead8f4b54a575cfb9fbb7cdffaaf88b142ca32b20bd50d8f2b"
-    sha256 arm64_ventura:  "17e4f6e7ab267206354c7510faef21b95381fcf400896f7210ae7962f11d48f8"
-    sha256 arm64_monterey: "90073e1eb0d904942d72f4345cc26f60cb59131492faa0f48681b9d26223a3b9"
-    sha256 sonoma:         "a12b3a07225e4d2942cd167e959229960036d39fe05a3398bac21622e66b2aba"
-    sha256 ventura:        "cee1baa5c095a9c2b9caaf3a4dcd286c1395913de390c353d75c0c5119f0b976"
-    sha256 monterey:       "7cdba20b144378fc51930a184f8d36dcd75a874aac59854c0449a1e6633defa5"
-    sha256 x86_64_linux:   "3a16719f2fabf68e87664c86bf8aefc32a3f92abadaea2bb87770b5d01ea7bc0"
+    sha256 arm64_tahoe:   "119444a13bf9104f7c894e711634e74c1350b998ecd97e74d3d7b57d74bf3bb4"
+    sha256 arm64_sequoia: "6bb9bc20f0df7d28acd926afebb3c2c2993b5b33777c23a0bc05f3aee91adc20"
+    sha256 arm64_sonoma:  "2ac0841e52075bfb1ef8b08fe3ded6a733df307afec11f079e55fb31f86f7c38"
+    sha256 sonoma:        "895d9265c24b7011e3ed1f31ba8450b01a2310b41e3257d02bd871f7e290e151"
+    sha256 arm64_linux:   "ba5ae6349e29398b69e90746b5efd8ce4c2beeea84a6e44ecd7f5db07be2771f"
+    sha256 x86_64_linux:  "e20026502a0053e8e3284745c5d3263d6ab157fd16fdb5104bc78e7f5f02139e"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "po4a" => :build
   depends_on "gettext"
   depends_on "gnu-tar"
   depends_on "gpatch"
   depends_on "libmd" # for md5.h
-  depends_on "perl"
+  depends_on "perl" # perl >= 5.36.0
   depends_on "xz" # For LZMA
 
   uses_from_macos "bzip2"
-  uses_from_macos "zlib"
 
   on_linux do
-    keg_only "not linked to prevent conflicts with system dpkg"
+    keg_only "it conflicts with system dpkg"
+
+    depends_on "zlib-ng-compat"
   end
 
   patch :DATA
@@ -53,7 +54,11 @@ class Dpkg < Formula
     # Since 1.18.24 dpkg mandates the use of GNU patch to prevent occurrences
     # of the CVE-2017-8283 vulnerability.
     # https://www.openwall.com/lists/oss-security/2017/04/20/2
-    ENV["PATCH"] = Formula["gpatch"].opt_bin/"patch"
+    ENV["PATCH"] = if OS.mac?
+      Formula["gpatch"].opt_bin/"gpatch"
+    else
+      Formula["gpatch"].opt_bin/"patch"
+    end
 
     # Theoretically, we could reinsert a patch here submitted upstream previously
     # but the check for PERL_LIB remains in place and incompatible with Homebrew.
@@ -62,13 +67,12 @@ class Dpkg < Formula
     ENV["PERL_LIBDIR"] = libexec/"lib/perl5"
     ENV.prepend_create_path "PERL5LIB", libexec/"lib/perl5"
 
-    system "./configure", "--disable-dependency-tracking",
+    system "./configure", "--disable-dselect",
                           "--disable-silent-rules",
-                          "--prefix=#{libexec}",
+                          "--disable-start-stop-daemon",
                           "--sysconfdir=#{etc}",
                           "--localstatedir=#{var}",
-                          "--disable-dselect",
-                          "--disable-start-stop-daemon"
+                          *std_configure_args(prefix: libexec)
     system "make"
     system "make", "install"
 
@@ -78,11 +82,8 @@ class Dpkg < Formula
     bin.env_script_all_files(libexec/"bin", PERL5LIB: ENV["PERL5LIB"])
 
     (buildpath/"dummy").write "Vendor: dummy\n"
-    (etc/"dpkg/origins").install "dummy"
-    (etc/"dpkg/origins").install_symlink "dummy" => "default"
-  end
-
-  def post_install
+    (pkgetc/"origins").install "dummy"
+    (pkgetc/"origins").install_symlink "dummy" => "default"
     (var/"lib/dpkg").mkpath
     (var/"log").mkpath
   end
@@ -107,11 +108,11 @@ class Dpkg < Formula
 
     EOS
     system bin/"dpkg", "-b", testpath/"test", "test.deb"
-    assert_predicate testpath/"test.deb", :exist?
+    assert_path_exists testpath/"test.deb"
 
     rm_r("test")
     system bin/"dpkg", "-x", "test.deb", testpath
-    assert_predicate testpath/"data/homebrew.txt", :exist?
+    assert_path_exists testpath/"data/homebrew.txt"
   end
 end
 

@@ -1,8 +1,8 @@
 class Tfsec < Formula
   desc "Static analysis security scanner for your terraform code"
   homepage "https://aquasecurity.github.io/tfsec/latest/"
-  url "https://github.com/aquasecurity/tfsec/archive/refs/tags/v1.28.10.tar.gz"
-  sha256 "7eb194c8e489f198126a3e322e8b4a43226a50e544c43b6aefb6f6c4ae836e21"
+  url "https://github.com/aquasecurity/tfsec/archive/refs/tags/v1.28.14.tar.gz"
+  sha256 "61fe8ee670cceaf45d85c2789da66616d0045f8dbba4ec2b9db453436f9b9804"
   license "MIT"
   head "https://github.com/aquasecurity/tfsec.git", branch: "master"
 
@@ -12,13 +12,14 @@ class Tfsec < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "c9c3afb8500bd7b93914ddf71316e71954c9924fdd80b8d23c52cc9f2bbc9249"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "bee5f56ad1fc4f957dff2bf5fa780ecea9b0103a86f50aa768bba30301d2a41e"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "861101574abb59e17a3cb3a09105c8464bce4014ab9372ea97e711a64c802cae"
-    sha256 cellar: :any_skip_relocation, sonoma:         "4e28088877b39af2ade96049c670531c1456d1f131ced357a8b0bf03e15f4d5a"
-    sha256 cellar: :any_skip_relocation, ventura:        "d2e3867d8acd7eb535af42712bb8f1650c0f30fd28543952b5f92f2eb3c785ca"
-    sha256 cellar: :any_skip_relocation, monterey:       "853aeb62467d9086ca58b03bf479ba8c3f13f6b11dcc77ba0d28d0c5df7bb690"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "2878538074d6a1902143d6d25c12ee8a04c3ad99208f7494edf6a7dfe3f1e0e3"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "eb1908905eba53c4bc447ab6b45f55e8993f2baa1e5b0a6633185ce20087df9a"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "8cf695583885541d5458402c40342efa2beebee6ad5cfce832c738bfc5b8a2c9"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "95f94624c56f21064b7621e9d01c9cc78a60186864119a7f738b62d9fb97727b"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "4c3fed3af871e78aa8129120ee048064e4f6bfc8a8d44a8aff8582a0e48732c9"
+    sha256 cellar: :any_skip_relocation, sonoma:        "181f6a3acfe91948ad4482b079d602bc1c03ad5c415c916f2dba42d590eed863"
+    sha256 cellar: :any_skip_relocation, ventura:       "d7384e0c097b2e9668cd12a696f4b5bd6ae8df1832051fcafa32e6583b715057"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "3ba4ea5c30dc01b827abd7f4f8719806a1a76ecda0ff3096a6a170a3461b4c82"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "dde3909cdd3d6c5e799ad913a640ba9d2ba2af6e7112254ab4d280335dda52cf"
   end
 
   depends_on "go" => :build
@@ -29,19 +30,19 @@ class Tfsec < Formula
   end
 
   test do
-    (testpath/"good/brew-validate.tf").write <<~EOS
+    (testpath/"good/brew-validate.tf").write <<~HCL
       resource "aws_alb_listener" "my-alb-listener" {
         port     = "443"
         protocol = "HTTPS"
       }
-    EOS
-    (testpath/"bad/brew-validate.tf").write <<~EOS
+    HCL
+    (testpath/"bad/brew-validate.tf").write <<~HCL
       resource "aws_security_group_rule" "world" {
         description = "A security group triggering tfsec AWS006."
         type        = "ingress"
         cidr_blocks = ["0.0.0.0/0"]
       }
-    EOS
+    HCL
 
     good_output = shell_output("#{bin}/tfsec #{testpath}/good")
     assert_match "No problems detected!", good_output

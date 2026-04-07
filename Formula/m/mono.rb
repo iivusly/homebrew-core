@@ -1,46 +1,60 @@
 class Mono < Formula
   desc "Cross platform, open source .NET development framework"
   homepage "https://www.mono-project.com/"
-  url "https://github.com/mono/mono.git",
-      tag:      "mono-6.12.0.206",
-      revision: "0cbf0e290c31adb476f9de0fa44b1d8829affa40"
-  license "MIT"
+  url "https://dl.winehq.org/mono/sources/mono/mono-6.14.1.tar.xz"
+  sha256 "3024c97c0bc8cbcd611c401d5f994528704108ceb31f31b28dea4783004d0820"
+  license "Apache-2.0"
+  compatibility_version 1
+  head "https://gitlab.winehq.org/mono/mono.git", branch: "main"
 
   livecheck do
-    url "https://www.mono-project.com/download/stable/"
-    regex(/href=.*?(\d+(?:\.\d+)+)[._-]macos/i)
+    url :head
+    regex(/^mono[._-]v?(\d+(?:\.\d+)+)$/i)
   end
 
   bottle do
-    rebuild 1
-    sha256 arm64_sonoma:   "9fee41ae69ff582e63f5f7aadbcafd151e904739f9402d12f9b774a5fae87eb0"
-    sha256 arm64_ventura:  "ee4c4db59ad92b5414af6ddb44e21f46b32be19245dba35c184f15adef6d589a"
-    sha256 arm64_monterey: "788b47ba1b9b6f5ed463913fe0aebedf944004c114a7d29a3b7f779de366998a"
-    sha256 sonoma:         "c245b5d70a6e0b5176c6dc35058797ca1945900a1c9b791dadb01a6df1020744"
-    sha256 ventura:        "1b11efe11ce0f4d943f58dfe23a966941c46639520d0f07257c2f1142098846d"
-    sha256 monterey:       "bd04c2a52a00ad941de846f0f30e979a374460e0c850c63f7585cfb8c89d1657"
-    sha256 x86_64_linux:   "d5a14ba095473a74d4105976fbe1bca5054cc4ae3e1324b879e63f05ab4dcd99"
+    rebuild 2
+    sha256 arm64_tahoe:   "2859f9fc32324373e145969a201a90621c1443001d454d8b0c48ce349356f725"
+    sha256 arm64_sequoia: "ada6e9683f3e1c9c4f0dc372680250252cfca61ac77c1f8f6299ad3b8452cfd8"
+    sha256 arm64_sonoma:  "66ab0b66299f71ab5f37ad15ac0282b7628af0e9daf210df43120118cb4bc8e4"
+    sha256 sonoma:        "42ea1aab95e1cdb360e600e2ef1d0b868a91fa8aba7d0d1e6d437d7388b39d3d"
+    sha256 arm64_linux:   "bf35bf67b10fa9755014d6efb0bbe5b882309675846ffce33bf2c9fc824e7453"
+    sha256 x86_64_linux:  "a2671d691010f3649f86ef822be69121d1bcb7071f1c04b1959d4b05a4ad7a96"
   end
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
   depends_on "cmake" => :build
   depends_on "libtool" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
 
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   uses_from_macos "unzip" => :build
   uses_from_macos "krb5"
-  uses_from_macos "zlib"
+
+  on_macos do
+    if DevelopmentTools.clang_build_version >= 1600
+      depends_on "llvm" => :build
+
+      fails_with :clang do
+        cause <<~EOS
+          Got a segv while executing native code. This usually indicates
+          a fatal error in the mono runtime or one of the native libraries
+          used by your application.
+        EOS
+      end
+    end
+  end
 
   on_linux do
     depends_on "ca-certificates"
+    depends_on "zlib-ng-compat"
   end
 
   conflicts_with "xsd", because: "both install `xsd` binaries"
   conflicts_with cask: "mono-mdk"
-  conflicts_with cask: "homebrew/cask-versions/mono-mdk-for-visual-studio"
+  conflicts_with cask: "mono-mdk-for-visual-studio"
   conflicts_with "chicken", because: "both install `csc`, `csi` binaries"
   conflicts_with "pedump", because: "both install `pedump` binaries"
 
@@ -63,10 +77,6 @@ class Mono < Formula
       man/mozroots.1
     ]
     inreplace inreplace_files, %r{/usr/share(?=[/"])}, pkgshare
-
-    # Remove use of -flat_namespace. Upstreamed at
-    # https://github.com/mono/mono/pull/21257
-    inreplace "mono/profiler/Makefile.am", "-Wl,suppress -Wl,-flat_namespace", "-Wl,dynamic_lookup"
 
     system "./autogen.sh", "--disable-nls",
                            "--disable-silent-rules",
@@ -92,7 +102,7 @@ class Mono < Formula
   test do
     test_str = "Hello Homebrew"
     test_name = "hello.cs"
-    (testpath/test_name).write <<~EOS
+    (testpath/test_name).write <<~CSHARP
       public class Hello1
       {
          public static void Main()
@@ -100,7 +110,7 @@ class Mono < Formula
             System.Console.WriteLine("#{test_str}");
          }
       }
-    EOS
+    CSHARP
     shell_output("#{bin}/mcs #{test_name}")
     output = shell_output("#{bin}/mono hello.exe")
     assert_match test_str, output.strip

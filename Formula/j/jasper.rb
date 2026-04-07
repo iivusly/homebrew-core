@@ -1,9 +1,10 @@
 class Jasper < Formula
   desc "Library for manipulating JPEG-2000 images"
   homepage "https://ece.engr.uvic.ca/~frodo/jasper/"
-  url "https://github.com/jasper-software/jasper/releases/download/version-4.2.4/jasper-4.2.4.tar.gz"
-  sha256 "6a597613d8d84c500b5b83bf0eec06cd3707c23d19957f70354ac2394c9914e7"
+  url "https://github.com/jasper-software/jasper/releases/download/version-4.2.9/jasper-4.2.9.tar.gz"
+  sha256 "f71cf643937a5fcaedcfeb30a22ba406912948ad4413148214df280afc425454"
   license "JasPer-2.0"
+  compatibility_version 1
 
   livecheck do
     url :stable
@@ -11,51 +12,51 @@ class Jasper < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "a9c32c908bdf797743a22d851efd4c28b6abf6ad132bcececfb83de354383f72"
-    sha256 cellar: :any,                 arm64_ventura:  "c3215fa4215361e882b4701ac82da30bf175d3f13e9e34ebc375c1406f6ab1b4"
-    sha256 cellar: :any,                 arm64_monterey: "180626f41ecce9cec96f869ac6efc0106cd7442eb887a00809f3fedf82db4a89"
-    sha256 cellar: :any,                 sonoma:         "ccc68dcf709d995ef9f91ab109a2dcabbc9aba82c475a9d32309545df18f155e"
-    sha256 cellar: :any,                 ventura:        "18d3d583cb960f8e4872ffc5b2181b6282f95d2c1ebd3a659d0e0b3edf55bc10"
-    sha256 cellar: :any,                 monterey:       "09c601a2f468798fe0746f56a47a9ba3d3642c9da9b08a3cc57a4b99ab7105bf"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "e8a209bbc3755e5ae06cf4c7ab8040e079b0202635555ea4c75e8e36d8137c74"
+    sha256 cellar: :any,                 arm64_tahoe:   "bc734fadc3ec13b979742b8be1aec388ae7ff06f514057253397af67f302ff96"
+    sha256 cellar: :any,                 arm64_sequoia: "ff2667bbb901e39492d5e814f13d435ddc04dde4344e507cac25161c8797626b"
+    sha256 cellar: :any,                 arm64_sonoma:  "2e320a3cb0f577443687d560be32f8a82a8656a639d9048a3f5a330aced98566"
+    sha256 cellar: :any,                 sonoma:        "3405ea02f8b961bc9e3ffbe4129b3d357c8040a7290f29944d5dc875ffffd6fc"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "55dd397df06c897cd1809379a46a825266001fc180ed5543014c30aaa4d0564e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "42e56bdae47308719c6a31f311c8b5a0ffd11cb4d98e69e7a81309ab0245562d"
   end
 
   depends_on "cmake" => :build
   depends_on "jpeg-turbo"
 
   def install
-    mkdir "tmp_cmake" do
-      args = std_cmake_args
-      args << "-DJAS_ENABLE_DOC=OFF"
+    args = %w[
+      -DJAS_ENABLE_DOC=OFF
+      -DJAS_ENABLE_AUTOMATIC_DEPENDENCIES=OFF
+    ]
 
-      if OS.mac?
-        # Make sure macOS's GLUT.framework is used, not XQuartz or freeglut
-        # Reported to CMake upstream 4 Apr 2016 https://gitlab.kitware.com/cmake/cmake/issues/16045
-        glut_lib = "#{MacOS.sdk_path}/System/Library/Frameworks/GLUT.framework"
-        args << "-DGLUT_glut_LIBRARY=#{glut_lib}"
-      else
-        args << "-DJAS_ENABLE_OPENGL=OFF"
-      end
-
-      system "cmake", "..",
-        "-DJAS_ENABLE_AUTOMATIC_DEPENDENCIES=false",
-        "-DJAS_ENABLE_SHARED=ON",
-        *args
-      system "make"
-      system "make", "install"
-      system "make", "clean"
-
-      system "cmake", "..",
-        "-DJAS_ENABLE_SHARED=OFF",
-        *args
-      system "make"
-      lib.install "src/libjasper/libjasper.a"
+    args << if OS.mac?
+      # Make sure macOS's GLUT.framework is used, not XQuartz or freeglut
+      # Reported to CMake upstream 4 Apr 2016 https://gitlab.kitware.com/cmake/cmake/issues/16045
+      glut_lib = "#{MacOS.sdk_path}/System/Library/Frameworks/GLUT.framework"
+      "-DGLUT_glut_LIBRARY=#{glut_lib}"
+    else
+      "-DJAS_ENABLE_OPENGL=OFF"
     end
+
+    # Build in the parent of `buildpath` to avoid errors from upstream's in-source build detection.
+    system "cmake", "-S", ".", "-B", "../build-shared", "-DJAS_ENABLE_SHARED=ON", *args, *std_cmake_args
+    system "cmake", "--build", "../build-shared"
+    system "cmake", "--install", "../build-shared"
+
+    system "cmake", "-S", ".", "-B", "../build-static", "-DJAS_ENABLE_SHARED=OFF", *args, *std_cmake_args
+    system "cmake", "--build", "../build-static"
+    lib.install "../build-static/src/libjasper/libjasper.a"
+
+    # Move the build directories into `buildpath` so Homebrew captures log files properly.
+    buildpath.install ["../build-shared", "../build-static"]
+
+    # Avoid rebuilding dependents that hard-code the prefix.
+    inreplace lib/"pkgconfig/jasper.pc", prefix, opt_prefix
   end
 
   test do
     system bin/"jasper", "--input", test_fixtures("test.jpg"),
                          "--output", "test.bmp"
-    assert_predicate testpath/"test.bmp", :exist?
+    assert_path_exists testpath/"test.bmp"
   end
 end

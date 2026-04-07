@@ -1,27 +1,32 @@
 class Utf8proc < Formula
   desc "Clean C library for processing UTF-8 Unicode data"
   homepage "https://juliastrings.github.io/utf8proc/"
-  url "https://github.com/JuliaStrings/utf8proc/archive/refs/tags/v2.9.0.tar.gz"
-  sha256 "18c1626e9fc5a2e192311e36b3010bfc698078f692888940f1fa150547abb0c1"
+  url "https://github.com/JuliaStrings/utf8proc/archive/refs/tags/v2.11.3.tar.gz"
+  sha256 "abfed50b6d4da51345713661370290f4f4747263ee73dc90356299dfc7990c78"
   license all_of: ["MIT", "Unicode-DFS-2015"]
+  compatibility_version 1
   head "https://github.com/JuliaStrings/utf8proc.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "cde8cdd879129b6e34ced18440c8149e180175ef74c42c560d8139382971aeb9"
-    sha256 cellar: :any,                 arm64_ventura:  "fb2efcc310a7627642f9dc0e617e6f311b53b286dd8c5bcfbf630ee19525b804"
-    sha256 cellar: :any,                 arm64_monterey: "9bedbdf0984e79f7a47a21c5299e9e564e91e0819ef65314b6697f40974ef83c"
-    sha256 cellar: :any,                 sonoma:         "f7628ae1bf35bb9ebeb4cc23dad23ecdb2657e6a08fad466749f1a88859772ee"
-    sha256 cellar: :any,                 ventura:        "9bf2ae6ade6a7c5c873d8e4947e3511edd209c092cf0ad8c0c4246311a4ba76d"
-    sha256 cellar: :any,                 monterey:       "ec9ae8d290f855575f8d756ab08ca28eba8d151182ec14fd6daa8cd102655853"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "5ab616bad52f9ad576dfc6d3ea4048a146999e53d810ba10a99c2244c518a0de"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "f3b03f1fb1f7da91b28d6b7edb0a8ff056378b689e5c904877dfb6d1cb9da5fc"
+    sha256 cellar: :any,                 arm64_sequoia: "3e044d7b72b8fbf7d260cd9a1145cccc32e5f1ad4c93ff7d3cb0e4bd04fa5b37"
+    sha256 cellar: :any,                 arm64_sonoma:  "3943b2f6243a92d060a0d1fe867e14ef062db81604488013a0868683c812413c"
+    sha256 cellar: :any,                 sonoma:        "ca594194ca639a162e078a88fd0da6d22d0ec8c588f12e3b32545455851aff6e"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "33be13d215561053302eb151cae47d9e3656af6b3869b6a6ca0f044dcf9050e2"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "c44de6245cc5167aa4ec1b8c56d2d2e60378e421db4768a9842283a7602d2561"
   end
 
+  depends_on "cmake" => :build
+
   def install
-    system "make", "install", "prefix=#{prefix}"
+    system "cmake", "-S", ".", "-B", "build", "-DBUILD_SHARED_LIBS=ON", *std_cmake_args
+    system "cmake", "--build", "build"
+    system "cmake", "--install", "build"
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <string.h>
       #include <utf8proc.h>
 
@@ -29,7 +34,7 @@ class Utf8proc < Formula
         const char *version = utf8proc_version();
         return strnlen(version, sizeof("1.3.1-dev")) > 0 ? 0 : -1;
       }
-    EOS
+    C
 
     system ENV.cc, "test.c", "-I#{include}", "-L#{lib}", "-lutf8proc", "-o", "test"
     system "./test"

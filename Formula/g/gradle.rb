@@ -1,25 +1,20 @@
 class Gradle < Formula
   desc "Open-source build automation tool based on the Groovy and Kotlin DSL"
   homepage "https://www.gradle.org/"
-  url "https://services.gradle.org/distributions/gradle-8.10-all.zip"
-  sha256 "682b4df7fe5accdca84a4d1ef6a3a6ab096b3efd5edf7de2bd8c758d95a93703"
+  url "https://services.gradle.org/distributions/gradle-9.4.1-all.zip"
+  sha256 "708d2c6ecc97ca9a11838ef64a6c2301151b8dd10387e22dc1a12c30557cab5b"
   license "Apache-2.0"
 
   livecheck do
-    url "https://gradle.org/install/"
+    url "https://gradle.org/releases/"
     regex(/href=.*?gradle[._-]v?(\d+(?:\.\d+)+)-all\.(?:zip|t)/i)
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "76efc1a8a88b3b7bcfa34e464deab59ab120ab630a950d4ebf9b202a535c4e01"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "76efc1a8a88b3b7bcfa34e464deab59ab120ab630a950d4ebf9b202a535c4e01"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "76efc1a8a88b3b7bcfa34e464deab59ab120ab630a950d4ebf9b202a535c4e01"
-    sha256 cellar: :any_skip_relocation, sonoma:         "c5b4d9a4e299179c513419ff0bd1658c9f47da9454a9b276f1b08fe77b2fd2aa"
-    sha256 cellar: :any_skip_relocation, ventura:        "c5b4d9a4e299179c513419ff0bd1658c9f47da9454a9b276f1b08fe77b2fd2aa"
-    sha256 cellar: :any_skip_relocation, monterey:       "c5b4d9a4e299179c513419ff0bd1658c9f47da9454a9b276f1b08fe77b2fd2aa"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "76efc1a8a88b3b7bcfa34e464deab59ab120ab630a950d4ebf9b202a535c4e01"
+    sha256 cellar: :any_skip_relocation, all: "21af8e92a414771d90d20dcc60dede096b38f0566f01bb079fe8a891ba469be7"
   end
 
+  depends_on "gradle-completion"
   # https://github.com/gradle/gradle/blob/master/platforms/documentation/docs/src/docs/userguide/releases/compatibility.adoc
   depends_on "openjdk"
 
@@ -34,9 +29,9 @@ class Gradle < Formula
     assert_match version.to_s, shell_output("#{bin}/gradle --version")
 
     (testpath/"settings.gradle").write ""
-    (testpath/"build.gradle").write <<~EOS
+    (testpath/"build.gradle").write <<~GRADLE
       println "gradle works!"
-    EOS
+    GRADLE
     gradle_output = shell_output("#{bin}/gradle build --no-daemon")
     assert_includes gradle_output, "gradle works!"
   end

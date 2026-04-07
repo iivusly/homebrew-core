@@ -1,22 +1,22 @@
 class QalculateGtk < Formula
   desc "Multi-purpose desktop calculator"
   homepage "https://qalculate.github.io/"
-  url "https://github.com/Qalculate/qalculate-gtk/releases/download/v5.2.0/qalculate-gtk-5.2.0.tar.gz"
-  sha256 "1a917fe5d5ca03e21a97308bac31f013d5459edd090ba20717eaf56259270dbd"
+  url "https://github.com/Qalculate/qalculate-gtk/releases/download/v5.10.0/qalculate-gtk-5.10.0.tar.gz"
+  sha256 "310875ae42d4af3bef46bb5f0405496c26e8e8abe218caeb1270cde176c02691"
   license "GPL-2.0-or-later"
 
   bottle do
-    sha256 arm64_sonoma:   "645b694a80851f8b67fd45baf9b24cdcb4420c07b2807309eebf0ec14d778c07"
-    sha256 arm64_ventura:  "bf666fb4d35cf60fd4bbbee812bfb6561b7b1a4269cb8f91af5ee57d6bc6d581"
-    sha256 arm64_monterey: "e7b0e16b885d55ff247f2c03cb08df66874edeed05306fdae968b6d4c01f9d3c"
-    sha256 sonoma:         "e77f877ba1e0ff2251b984add05a071ea1e027a4ffdaee6c8dc215f76b1491ef"
-    sha256 ventura:        "f5978b9950674544b136c42cde24f4cc1fade12378e63064e8263a50961bb93d"
-    sha256 monterey:       "5bc3ca14a97963521c4ec0a0b55aa6f3ac09843dff6379cb50511299e3f54e65"
-    sha256 x86_64_linux:   "d8367367da463d8abb883fe8d6feae317dc755a304f6291e88038f2cf3208bb7"
+    sha256 arm64_tahoe:   "958727ab7c13a897ede3acf494a62ec24fcdea14c8701f8412a11b3eae7c9706"
+    sha256 arm64_sequoia: "4020a8c0863a66b6672070e7d75383ad26d55be1b5670e9a121ce6b8f3779915"
+    sha256 arm64_sonoma:  "928fb2158b741ed69717b345d0ba556c61fa77ceae2e0c4fb1719f86f1767298"
+    sha256 sonoma:        "4a9ecb61d73152b9f50db61867c0aeca7365c1a85757325829578f7558e26def"
+    sha256 arm64_linux:   "e1d2f26a06f738d15ec465abbe519eb191a300295bb215351d6368cb4733cfa8"
+    sha256 x86_64_linux:  "424e2335a8b2caff244937fef8feb536419cd6bf3df98811de76f76e5c0aa72b"
   end
 
+  depends_on "gettext" => :build
   depends_on "intltool" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
 
   depends_on "adwaita-icon-theme"
   depends_on "cairo"
@@ -31,6 +31,7 @@ class QalculateGtk < Formula
   on_macos do
     depends_on "at-spi2-core"
     depends_on "gettext"
+    depends_on "gtk-mac-integration"
     depends_on "harfbuzz"
   end
 
@@ -39,9 +40,13 @@ class QalculateGtk < Formula
   end
 
   def install
+    if OS.mac?
+      ENV.append_to_cflags "-I#{Formula["gtk-mac-integration"].opt_include/"gtkmacintegration"}"
+      ENV.append "LDFLAGS", "-L#{Formula["gtk-mac-integration"].opt_lib} -lgtkmacintegration-gtk3"
+    end
     ENV.prepend_path "PERL5LIB", Formula["perl-xml-parser"].libexec/"lib/perl5" unless OS.mac?
 
-    system "./configure", *std_configure_args.reject { |s| s["--disable-debug"] }
+    system "./configure", *std_configure_args
     system "make", "install"
   end
 

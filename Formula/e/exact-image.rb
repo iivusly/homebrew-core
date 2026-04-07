@@ -1,8 +1,8 @@
 class ExactImage < Formula
   desc "Image processing library"
   homepage "https://exactcode.com/opensource/exactimage/"
-  url "https://dl.exactcode.de/oss/exact-image/exact-image-1.0.2.tar.bz2"
-  sha256 "0694c66be5dec41377acead475de69b3d7ffb42c702402f8b713f8b44cdc2791"
+  url "https://dl.exactcode.de/oss/exact-image/exact-image-1.2.1.tar.bz2"
+  sha256 "7843cf35db40f3a2caed3d0b11256e226ef16169244ca2dc1c89af86ac8a148a"
   license "GPL-2.0-only"
 
   livecheck do
@@ -11,28 +11,29 @@ class ExactImage < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "6080a2fb1a62a57b5593cb549a93c038aa4eab44175a534e1ed4878d9ee2f804"
-    sha256 cellar: :any,                 arm64_ventura:  "20317cde1b2c2c9478ee7dd8b35a68f1d3b3360b36362af190a3323cb5429cd8"
-    sha256 cellar: :any,                 arm64_monterey: "a11e0789738c798fc3cf6785353e023e4e27b0328aa7ccb5dd63c39b988a0691"
-    sha256                               arm64_big_sur:  "47aa8c7861a759d66f553bc8960ba09c14a3b5acf86e2c0f22779379716cac5f"
-    sha256 cellar: :any,                 sonoma:         "1f640bf2ae0c16e93e12b56fbc4b0610bbaabe01305ba238921fbb90dc494c99"
-    sha256 cellar: :any,                 ventura:        "29bb418280be9364ad49399820156acbd0a17b2aa15d0aaa90ce0ecc1c76a6b1"
-    sha256 cellar: :any,                 monterey:       "39352ff44276b4d207a58999302b32fa3e6a1918a955c6c3e1d3235ee4654634"
-    sha256                               big_sur:        "9b3619df825bd01981c7a7b6fd1b6f88346d7d0fbbb7f9ed8fc30f9fef41cab0"
-    sha256                               catalina:       "78a802b0edd2c27640aa2e6be381c146a7fa05bd6dd584ace90b1dfa0e426291"
-    sha256                               mojave:         "942bfd38bf5fd52613c936077eee5d5f71530325c7337e9db84e44e0b6c643a0"
-    sha256                               high_sierra:    "b182c3fa086d336ee9e6688bb341ea3df8ace70cac451fb757e88ba15c925365"
-    sha256                               sierra:         "1a9fc0dbba69ee471deabc6759ca52f3d669a535e021ef2defa33321261010ca"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "8938ff048627f994a89bd563e5372f3d15de40865cd2eb7ac4793599c81ecd49"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "3408ea3e3e84443be2c9f8c30c93f1968a623030872acda7cc6b8a3523e4b99b"
+    sha256 cellar: :any,                 arm64_sequoia: "1088bf426db191ce01896d0f6bee7d239125996016df7886c596b6c10c91bf93"
+    sha256 cellar: :any,                 arm64_sonoma:  "0b541496b7eb11daff86b7c6c6cf91727636b2bf3b199e756c07693fd5b98a4e"
+    sha256 cellar: :any,                 sonoma:        "161474f6a91e5c07983fda9445d7d2e35ca02c1eb027fee8ebbcf34ffeabd749"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "b2b45b0d415e3306f409c1668bc6a00d76270fb66e92d28f9cbafc5e2bd704b9"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "9694f083c00dc18913396ea49410cd410b598035718cdd1512c883cfeace46e7"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "libagg"
 
   uses_from_macos "expat"
-  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
+    ENV.cxx11
+    # Workaround to fix build on Linux
+    inreplace "Makefile", /^CFLAGS := /, "\\0-fpermissive " if OS.linux?
+
     system "./configure", "--prefix=#{prefix}"
     system "make", "install"
   end

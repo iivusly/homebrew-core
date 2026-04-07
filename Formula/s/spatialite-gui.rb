@@ -4,7 +4,7 @@ class SpatialiteGui < Formula
   url "https://www.gaia-gis.it/gaia-sins/spatialite-gui-sources/spatialite_gui-2.1.0-beta1.tar.gz"
   sha256 "ba48d96df18cebc3ff23f69797207ae1582cce62f4596b69bae300ca3c23db33"
   license "GPL-3.0-or-later"
-  revision 6
+  revision 15
 
   livecheck do
     url "https://www.gaia-gis.it/gaia-sins/spatialite-gui-sources/"
@@ -12,16 +12,15 @@ class SpatialiteGui < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "0649947cd3ee27dbd8009fea92317300ff1a1cf99adca0f5fb35977911017ba9"
-    sha256 cellar: :any,                 arm64_ventura:  "0bbeebf05576a7ece01e1fd84a315ea034bbdc16ede877d4f2d6dc7ef59fad4c"
-    sha256 cellar: :any,                 arm64_monterey: "e7b2e65f58e68771704984b1f30601bda64ec97a21fda6ca1c61c7880a6fe10f"
-    sha256 cellar: :any,                 sonoma:         "5212c9c045b11de0a9b3b88eea709089ae08c7fd07d443cc30a084b00520df37"
-    sha256 cellar: :any,                 ventura:        "96461fc3eb291d99c50b1d4ad5ce7fdd19f2935decb5a34c48fb3b28b27c881a"
-    sha256 cellar: :any,                 monterey:       "025447d2713be26e6a753dcf8215727df83b5b1bb9ac94f9242fea39ee1b4fb6"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "4da054619064fa91a7f6c55002b6d2d08eef58ac63040a469dfed8e7358ad746"
+    sha256 cellar: :any,                 arm64_tahoe:   "0575abdec10abefd35c1f3a62fe8037f2dfbd0da69a1da730803d5c2ece3f14c"
+    sha256 cellar: :any,                 arm64_sequoia: "e77cf85404843dc7d2ea822f7a6713f3b8a4a987d245ef2b5e770a1cd8a7d396"
+    sha256 cellar: :any,                 arm64_sonoma:  "2255cfbb7a945b8b853d7f2a7c9a7ae35f95a46d1bb3dced7a170a885b198efa"
+    sha256 cellar: :any,                 sonoma:        "828feb23aba3c8bffebd7dfc0773f7e9fa02452b99d00abe200e63371c7e5bb4"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "90c82be8576e934ad0bef353308cd730e5b485ec0c94aa73b92bf8db132e57ee"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "258ba73a7c8997fb824839620cb3a60ad045f911713bdc6eb1f482e0b69c7828"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "freexl"
   depends_on "geos"
   depends_on "libpq"
@@ -38,23 +37,17 @@ class SpatialiteGui < Formula
   depends_on "sqlite"
   depends_on "virtualpg"
   depends_on "webp"
-  depends_on "wxwidgets"
+  depends_on "wxwidgets@3.2"
   depends_on "xz"
   depends_on "zstd"
 
   uses_from_macos "curl"
-  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
-    # Work around an Xcode 15 linker issue which causes linkage against LLVM's
-    # libunwind due to it being present in a library search path.
-    if DevelopmentTools.clang_build_version >= 1500
-      recursive_dependencies
-        .select { |d| d.name.match?(/^llvm(@\d+)?$/) }
-        .map { |llvm_dep| llvm_dep.to_formula.opt_lib }
-        .each { |llvm_lib| ENV.remove "HOMEBREW_LIBRARY_PATHS", llvm_lib }
-    end
-
     # Link flags for sqlite don't seem to get passed to make, which
     # causes builds to fatally error out on linking.
     # https://github.com/Homebrew/homebrew/issues/44003
@@ -62,8 +55,13 @@ class SpatialiteGui < Formula
     ENV.prepend "LDFLAGS", "-L#{sqlite.opt_lib} -lsqlite3"
     ENV.prepend "CFLAGS", "-I#{sqlite.opt_include}"
 
-    system "./configure", "--prefix=#{prefix}",
-                          "--with-wxconfig=#{Formula["wxwidgets"].opt_bin}/wx-config"
+    wxwidgets = deps.find { |dep| dep.name.match?(/^wxwidgets(@\d+(\.\d+)*)?$/) }.to_formula
+    wx_config = wxwidgets.opt_bin/"wx-config-#{wxwidgets.version.major_minor}"
+    args = ["--with-wxconfig=#{wx_config}"]
+    # Help old config scripts identify arm64 linux
+    args << "--build=aarch64-unknown-linux-gnu" if OS.linux? && Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
+
+    system "./configure", *args, *std_configure_args
     system "make", "install"
   end
 end

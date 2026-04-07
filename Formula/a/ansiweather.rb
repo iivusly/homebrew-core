@@ -7,13 +7,12 @@ class Ansiweather < Formula
   head "https://github.com/fcambus/ansiweather.git", branch: "master"
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, all: "038fbe9d452985ee47b312d1c9cfcab030622d4d4e9e803e7062f0c7f2bb42c8"
+    rebuild 2
+    sha256 cellar: :any_skip_relocation, all: "1d6a9dc83687c62774d4adb2da6302dac16f29a985a0eca62cb2a7fcc564a594"
   end
 
-  depends_on "jq"
-
-  uses_from_macos "bc"
+  uses_from_macos "bc-gh"
+  uses_from_macos "jq", since: :sequoia
 
   def install
     bin.install "ansiweather"

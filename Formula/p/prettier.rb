@@ -1,21 +1,20 @@
 class Prettier < Formula
   desc "Code formatter for JavaScript, CSS, JSON, GraphQL, Markdown, YAML"
   homepage "https://prettier.io/"
-  url "https://registry.npmjs.org/prettier/-/prettier-3.3.3.tgz"
-  sha256 "2f1ecb0ab57a588e0d4d40d3d45239e71ebd8f0190199d0d3f87fe2283639f46"
+  url "https://registry.npmjs.org/prettier/-/prettier-3.8.1.tgz"
+  sha256 "5531dc6006ad06b642d5342438909f85dc53e87c50556753c908229b213fb4f4"
   license "MIT"
   head "https://github.com/prettier/prettier.git", branch: "main"
 
   bottle do
-    rebuild 2
-    sha256 cellar: :any_skip_relocation, all: "34c3eb047777201bc1fd28e71876301232bdecf8ee36d35787e621a412244be3"
+    sha256 cellar: :any_skip_relocation, all: "ae3a9762963b4ccae39ca06809d1a1aa6698d503d0a947f441c1fc56d0063672"
   end
 
   depends_on "node"
 
   def install
     system "npm", "install", *std_npm_args
-    bin.install_symlink Dir["#{libexec}/bin/*"]
+    bin.install_symlink libexec.glob("bin/*")
   end
 
   test do

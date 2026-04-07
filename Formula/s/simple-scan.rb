@@ -1,25 +1,24 @@
 class SimpleScan < Formula
   desc "GNOME document scanning application"
   homepage "https://gitlab.gnome.org/GNOME/simple-scan"
-  url "https://download.gnome.org/sources/simple-scan/46/simple-scan-46.0.tar.xz"
-  sha256 "c16e6590142fe563be5143122b3bbb53f6b00a7da9d952f61c47fa26f7b4f0a9"
+  url "https://download.gnome.org/sources/simple-scan/50/simple-scan-50.0.tar.xz"
+  sha256 "cc32b561ae227182d31a94466632e311723756e3ac90538c3c7e2a2c9aaa4a09"
   license "GPL-3.0-or-later"
 
   bottle do
-    sha256 arm64_sonoma:   "1a630e40d1d5dd033d1797fbfc747b536565e025afff4d389983550a73541faf"
-    sha256 arm64_ventura:  "710b448ae8e62de98dd11cbac8b58338fbef90f0fe7a7b7c288b01bd73885c6d"
-    sha256 arm64_monterey: "bfb59ff1bb224ef61826a2015949a870abd29ff3ad0b62ef79d51dbdf41be9f7"
-    sha256 sonoma:         "f5eb28ebc19c028cda3c385f7f56ac31aaf59a31cef9399e11df3806f2030654"
-    sha256 ventura:        "b0e2cefa0b2f040a784328ea91b952ecaab721e90cede5d59e3631444ef425cd"
-    sha256 monterey:       "cd024056d7d2adb8de0ba6a4bd6bc7bc1371671b056f75f355942bcbb5d9329d"
-    sha256 x86_64_linux:   "877a4b7d0279114908c924bd91e6e0e7062ecfdcf2323d205754fcf38ae3f0f1"
+    sha256 arm64_tahoe:   "a869b0d7b8904def7e1054b7dce454df9415cd0fdf6bab2df7d9d3e53a9c1a35"
+    sha256 arm64_sequoia: "deec11bead0cda8b1de5cbf92549a2837207ec94c58c5539e4c18590063c0f4a"
+    sha256 arm64_sonoma:  "140753330f6fb9150a48ee983da40c620fa6d0c4755716d1c4dcdd8b804ec59b"
+    sha256 sonoma:        "14d80b1475f30ae41a55c686f493d05abfd02a3d9df8be916ee75061519139b6"
+    sha256 arm64_linux:   "3b07c5ccdde6168b3f39e0be2e8fb73cee7841c64542387f2664e19fac653e0d"
+    sha256 x86_64_linux:  "69cd72385ad10852e92f4f3195ba6d52a8ca6c080c892d148a986a89f28ddd58"
   end
 
   depends_on "gettext" => :build # for msgfmt
   depends_on "itstool" => :build
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "vala" => :build
 
   depends_on "cairo"
@@ -31,10 +30,12 @@ class SimpleScan < Formula
   depends_on "sane-backends"
   depends_on "webp"
 
-  uses_from_macos "zlib"
-
   on_macos do
     depends_on "gettext"
+  end
+
+  on_linux do
+    depends_on "zlib-ng-compat"
   end
 
   def install
@@ -54,9 +55,6 @@ class SimpleScan < Formula
   end
 
   test do
-    # Errors with `Cannot open display`
-    return if OS.linux? && ENV["HOMEBREW_GITHUB_ACTIONS"].present?
-
     system bin/"simple-scan", "-v"
   end
 end

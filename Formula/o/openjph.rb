@@ -1,19 +1,19 @@
 class Openjph < Formula
   desc "Open-source implementation of JPEG2000 Part-15 (or JPH or HTJ2K)"
   homepage "https://github.com/aous72/OpenJPH"
-  url "https://github.com/aous72/OpenJPH/archive/refs/tags/0.15.0.tar.gz"
-  sha256 "36601fbd3b4e1fe54eef5e6fa51ac0eca7be94b2a3d7c0967e3c8da66687ff2c"
+  url "https://github.com/aous72/OpenJPH/archive/refs/tags/0.26.3.tar.gz"
+  sha256 "29de006da7f1e8cf0cd7c3ec424cf29103e465052c00b5a5f0ccb7e1f917bb3f"
   license "BSD-2-Clause"
+  compatibility_version 1
   head "https://github.com/aous72/OpenJPH.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "30c92c986c302abea2566fb8650332b9350ea9c1e545cdefdcc845e286950b98"
-    sha256 cellar: :any,                 arm64_ventura:  "e0e99c8a7c30d8bf35589afad352f70db9a745d676a0700f16f8a039ca1447ab"
-    sha256 cellar: :any,                 arm64_monterey: "b2622725fd82b5b74cf56c895136384c1f4e4d0a27c6914e86a819328e6ad4ab"
-    sha256 cellar: :any,                 sonoma:         "eed618cf53db8fc3f4fb6e6c2abbdaaee8998b79d51459a8f42fc7c3a7666ee9"
-    sha256 cellar: :any,                 ventura:        "cdcd26be914661a3c733a8a6dc5c288ccff3bff21bd249e5f70ccc6986fcc829"
-    sha256 cellar: :any,                 monterey:       "f51346472aa3f336c9e6c12e7b1c0164e884cd4897cd6cbffa4a3747b1569f2f"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "ecba32ca325dbcb3529e7576a6855ee7d1f1c10713af1853708ba785e29fc98e"
+    sha256 cellar: :any,                 arm64_tahoe:   "dc7045e2b5da873c8781254f85d6250ebb7b0ab5ec8f902a61dc9179df844218"
+    sha256 cellar: :any,                 arm64_sequoia: "9a6542c5e21ee7a60068cacb990c27123a296dd77f2aca24ca59f5527e0602ca"
+    sha256 cellar: :any,                 arm64_sonoma:  "8a561213ba7b2fa6b12b0035fa277b02e3777272e64ed55f76b98b23956e48b3"
+    sha256 cellar: :any,                 sonoma:        "ebd94aa41c6b9594e664d03fc250ea072f7b7215d637ba370ed8e2fcaa2bc1b0"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "93e70ec1c12812d89ff711e33a65a2c71ef06c11b2b6b5c44a3c31504bb45df6"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "910bdc71e4e57374b781e3851becd131b5eea146908b8c34b24dfe917359d03a"
   end
 
   depends_on "cmake" => :build
@@ -40,6 +40,6 @@ class Openjph < Formula
 
     system bin/"ojph_compress", "-i", "Malamute.ppm", "-o", "homebrew.j2c"
     system bin/"ojph_expand", "-i", "homebrew.j2c", "-o", "homebrew.ppm"
-    assert_predicate testpath/"homebrew.ppm", :exist?
+    assert_path_exists testpath/"homebrew.ppm"
   end
 end

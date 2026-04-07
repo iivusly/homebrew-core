@@ -17,6 +17,8 @@ class Tmate < Formula
   end
 
   bottle do
+    sha256 cellar: :any,                 arm64_tahoe:    "e05c861a81f5b44cf1c246ef007a24de34c6499c7c6b1fdf97ccfb9f9d43f3d4"
+    sha256 cellar: :any,                 arm64_sequoia:  "b27b6f267188c6bd851cf061dc7fabf97a127c7930a57070cb46caf0333ef71f"
     sha256 cellar: :any,                 arm64_sonoma:   "1d2e440f793063b6f35862278723efe92afdbe5bab8a23bff6bf122b3f6a61f9"
     sha256 cellar: :any,                 arm64_ventura:  "8dd348850ee2dcc734eb9d148495406df82136ddec0d8e50ebef480128db3f10"
     sha256 cellar: :any,                 arm64_monterey: "0b067f5ce9b9019b93dccf8447cab6c7c6a3dac573ce914c9534079fea180d01"
@@ -26,15 +28,17 @@ class Tmate < Formula
     sha256 cellar: :any,                 monterey:       "b914a728ce6481c4379668b5cac0db712f78d37cc922f97786369fcb8be232fb"
     sha256 cellar: :any,                 big_sur:        "215c8724caffc137265dc5fa565bed563b5bd8d046b0e54addcf1628d60a9268"
     sha256 cellar: :any,                 catalina:       "a278bcb401068bed2434ec48bfb059a86d793a6daa4877574ac0ed7168cb1ebc"
-    sha256 cellar: :any,                 mojave:         "7e5158460b898422b4c6e84390d0e8446e2ad52789a30f9942288c5c32acc8a1"
-    sha256 cellar: :any,                 high_sierra:    "0f4f06d0ab7715adc7f6d33cf7d3c08fd057e7f038a666b360ac4ad6a3449ad9"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "d32cec664457d6e17deecc2f05a9b8fae500e5621473679789e413a453f0032c"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "6b3b3d87ea67d6ee52e3775578b7f37d46cca673aae9f412484439d10e9de620"
   end
+
+  deprecate! date: "2025-12-11", because: :unmaintained
+  disable! date: "2026-12-11", because: :unmaintained
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
   depends_on "libtool" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "libevent"
   depends_on "libssh"
   depends_on "msgpack"
@@ -45,9 +49,7 @@ class Tmate < Formula
     system "sh", "autogen.sh"
 
     ENV.append "LDFLAGS", "-lresolv"
-    system "./configure", "--disable-dependency-tracking",
-                          "--prefix=#{prefix}",
-                          "--sysconfdir=#{etc}"
+    system "./configure", "--sysconfdir=#{etc}", *std_configure_args
     system "make", "install"
   end
 

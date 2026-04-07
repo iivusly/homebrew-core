@@ -1,19 +1,21 @@
 class Sleef < Formula
   desc "SIMD library for evaluating elementary functions"
   homepage "https://sleef.org"
-  url "https://github.com/shibatch/sleef/archive/refs/tags/3.6.1.tar.gz"
-  sha256 "441dcf98c0f22e5d5e553d007f3b93e89eb58e4c66e340da8af5e7f67d1dc24c"
+  url "https://github.com/shibatch/sleef/archive/refs/tags/3.9.0.tar.gz"
+  sha256 "af60856abac08a3b5e72a8d156dd71fec1f7ac23de8ee67793f45f9edcdf0908"
   license "BSL-1.0"
+  compatibility_version 1
   head "https://github.com/shibatch/sleef.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "57b897afdfdb7f9d55a4e9923cc54c8ebac403941369e1c32dc21e8ecfd7b0b5"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "3529a62931aa034cf06c291013d11ab3c1daf0990b2998843f67fa468c806ca3"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "d2f235034b6168198c72fdb8ffff3de8faac3c30f7dad4f69e307dbbb87c1d8f"
-    sha256 cellar: :any_skip_relocation, sonoma:         "30eb6efcc98f1749e2b86f92c640b2d64cd6c4d05c96c40e2607fe4ea1d44ee1"
-    sha256 cellar: :any_skip_relocation, ventura:        "e682ffd594eef018494ad0b424bfba7b5aa61585071e77e463a916e5c28f807b"
-    sha256 cellar: :any_skip_relocation, monterey:       "67210cb8265cce9f713b1fec464c01106187ff3909847d89795a506205414f8f"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "bd22be8fbabf7cbe764a07b5cdb59deb4b0ae02f92409802d9b4b3b790cb172d"
+    sha256 cellar: :any,                 arm64_tahoe:   "6fe0e3a672461f15dd47162c7ba32505c6b81c41886524687a59c7690c16f0ea"
+    sha256 cellar: :any,                 arm64_sequoia: "10bd5e568d4abc431b8a8b604c5c3745106ba980dc71e1d22b607587e336bbf9"
+    sha256 cellar: :any,                 arm64_sonoma:  "ae22110074bfadf5d5d11ccebb7b211ddfed87724d79fe232c1ba551702747e8"
+    sha256 cellar: :any,                 arm64_ventura: "1dde65a699a3ec906047a473eab08828adac8f3592f91d87be5d6acab66f626c"
+    sha256 cellar: :any,                 sonoma:        "a26d81be375d9034c487372812dcd426c2573843173b610142214415cd635be7"
+    sha256 cellar: :any,                 ventura:       "aa5605545499143c1c1724ecb336205418686bcbed39080bca464794c8a0d924"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "ffe74cf398e3979d201cba4686213e9719d71b2a0c24d9bdb1046d130b87e3be"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "c160ff9688e9d6f8c98f84d380c667e351f9ea9d0726d121f7b423e9a70ccf02"
   end
 
   depends_on "cmake" => :build
@@ -21,6 +23,7 @@ class Sleef < Formula
   def install
     system "cmake", "-S", ".", "-B", "build",
                     "-DSLEEF_BUILD_INLINE_HEADERS=TRUE",
+                    "-DSLEEF_BUILD_SHARED_LIBS=ON",
                     "-DSLEEF_BUILD_TESTS=OFF",
                     "-DCMAKE_INSTALL_RPATH=#{rpath}",
                     *std_cmake_args
@@ -29,7 +32,7 @@ class Sleef < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <stdio.h>
       #include <math.h>
       #include <sleef.h>
@@ -38,7 +41,7 @@ class Sleef < Formula
           double a = M_PI / 6;
           printf("%.3f\\n", Sleef_sin_u10(a));
       }
-    EOS
+    C
     system ENV.cc, "test.c", "-o", "test", "-I#{include}", "-L#{lib}", "-lsleef"
     assert_equal "0.500\n", shell_output("./test")
   end

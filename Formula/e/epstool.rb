@@ -11,6 +11,8 @@ class Epstool < Formula
   end
 
   bottle do
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:    "29ea3ebb0169c4f25d1fae90b5abacf77cda82f3da47c9052d02427521a98535"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia:  "f50774d3fb87855e6cb3819a97739d3f5e45806a51a79b69dbcb7d1f966738a2"
     sha256 cellar: :any_skip_relocation, arm64_sonoma:   "18eb00ef0339393d5e9ab683d8d57856779b2ce7805dc5035a940aecf8ba86ef"
     sha256 cellar: :any_skip_relocation, arm64_ventura:  "d6ebd99646c7f6f83b21a714cb9253c3777623618b60de83e371413e64f38abe"
     sha256 cellar: :any_skip_relocation, arm64_monterey: "0c02048b19a57ec12e0cda38782ba8d062cd929730e92852c19785eec5e7fb52"
@@ -20,8 +22,7 @@ class Epstool < Formula
     sha256 cellar: :any_skip_relocation, monterey:       "fcb5f275da1cf6dd20e206d443e6d5265ca595d3193d925189f5c9af0e631b97"
     sha256 cellar: :any_skip_relocation, big_sur:        "a743d9856f51f4f2405adc5c692784897a78ecbdaa9361390b84c5630c077021"
     sha256 cellar: :any_skip_relocation, catalina:       "3ef026d6cc575da86e43741df6a9f5419269bea22e8db6c6296811112678c690"
-    sha256 cellar: :any_skip_relocation, mojave:         "497608077aea90c569aab7929a8a9ea19d91ba70f4743d982bcb63c1d3a48d7b"
-    sha256 cellar: :any_skip_relocation, high_sierra:    "47ab226f0e5d93a3b91b43d519de370d046410946e280958ef9106fdbc4ef115"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "7b2d8922bd4f7430e4b83f6fd98b4ce1555b30aa5a9db62606d9c0bf358a3e95"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "7c42db9d44c6ab04a5a969520692384bfe13b3c7c8e93d0fd47fae36b8cb59eb"
   end
 
@@ -36,6 +37,6 @@ class Epstool < Formula
 
   test do
     system bin/"epstool", "--add-tiff-preview", "--device", "tiffg3", test_fixtures("test.eps"), "test2.eps"
-    assert_predicate testpath/"test2.eps", :exist?
+    assert_path_exists testpath/"test2.eps"
   end
 end

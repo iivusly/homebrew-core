@@ -2,32 +2,28 @@ class Hashlink < Formula
   desc "Virtual machine for Haxe"
   homepage "https://hashlink.haxe.org/"
   license "MIT"
+  revision 1
   head "https://github.com/HaxeFoundation/hashlink.git", branch: "master"
 
   stable do
-    url "https://github.com/HaxeFoundation/hashlink/archive/refs/tags/1.14.tar.gz"
-    sha256 "7def473c8fa620011c7359dc36524246c83d0b6a25d495d421750ecb7182cc99"
+    url "https://github.com/HaxeFoundation/hashlink/archive/refs/tags/1.15.tar.gz"
+    sha256 "3c3e3d47ed05139163310cbe49200de8fb220cd343a979cd1f39afd91e176973"
 
-    # Backport support for mbedtls 3.x
+    # Backport fix for arm64 linux, https://github.com/HaxeFoundation/hashlink/pull/765
     patch do
-      url "https://github.com/HaxeFoundation/hashlink/commit/5406694b010f30a244d28626c8fd93fc335adcec.patch?full_index=1"
-      sha256 "4bf2739b2e1177e6ad325829dcd5e4e2b600051549773efbb1b01a53349365a6"
-    end
-    patch do
-      url "https://github.com/HaxeFoundation/hashlink/commit/54e97e34f29e80bcdccdb69af8ccd02bd7c0bc3a.patch?full_index=1"
-      sha256 "d5c1cd0a1aed504b01eee275459cc54d219092265f71f505a5491cced6e0061b"
+      url "https://github.com/HaxeFoundation/hashlink/commit/6794cdbe4407d26f405e5978890de67d4d42a96d.patch?full_index=1"
+      sha256 "fe885f32e89831a3269cb0da738316843af8ee80f55dc859c97a9cfb1725e7d8"
     end
   end
 
   bottle do
     rebuild 2
-    sha256 cellar: :any,                 arm64_sonoma:   "49c5e4244cc628ab69ce7dad3d7908dff8d61035d9f6c2f8298574ef35341a4e"
-    sha256 cellar: :any,                 arm64_ventura:  "fd29a416c322068567b89dce7ea79f2d8977bbf87fadb3546fd2bcd253b36ba4"
-    sha256 cellar: :any,                 arm64_monterey: "17054886a8d100e481b845a4a977a0aa5e5a354a4145f5911aeb837e14fae5b4"
-    sha256 cellar: :any,                 sonoma:         "f30c155da0e4809aaaf95f42f70e975a669ab1cca3acbcb2da9adc0c7144cbf5"
-    sha256 cellar: :any,                 ventura:        "b5d824577be90d958356a8b91ad3caee21db129bd0595cfa2d9d792fe583bba8"
-    sha256 cellar: :any,                 monterey:       "9053a0d1ff26dc49ded63dac843e01ab4f5e3df43cadb99631e1596289d5ccfc"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "286beb90726c27f47fc2f27280ac1b682ccfde139bf669d628958a9b6df85746"
+    sha256 cellar: :any,                 arm64_tahoe:   "63eb38d4dbc69ab9f8c71ecfd3c8b1f81673ddf015454e0141289747c0ac4269"
+    sha256 cellar: :any,                 arm64_sequoia: "f81bd39b0a2962b274cad50e95190e5c86d4f9da5cbd27b8b5a7a3c807e3af00"
+    sha256 cellar: :any,                 arm64_sonoma:  "454fec90a208dd51f0a65bb848be96e8f343c2c1b038c7f26a7805cae6c74dbb"
+    sha256 cellar: :any,                 sonoma:        "8e5ebb95cd5752506bef4698f51e476d7de12aa64ed962a0664a48ffc63d60d8"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "48372fc177336412549a92467756268d1da1ca27718ef3b68b2b4824bee10a8e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "2d7d71f666e42bc1e991d8376470e7755653ec6b1629b4d080e2a5d3bb541b4d"
   end
 
   depends_on "haxe" => :test
@@ -36,16 +32,16 @@ class Hashlink < Formula
   depends_on "libpng"
   depends_on "libuv"
   depends_on "libvorbis"
-  depends_on "mbedtls"
+  depends_on "mbedtls@3"
   depends_on "openal-soft"
   depends_on "sdl2"
 
   uses_from_macos "sqlite"
-  uses_from_macos "zlib"
 
   on_linux do
     depends_on "mesa"
     depends_on "mesa-glu"
+    depends_on "zlib-ng-compat"
   end
 
   def install
@@ -53,20 +49,14 @@ class Hashlink < Formula
     # These appear to be renamed shared libraries specifically used by HashLink.
     args = ["PREFIX=#{prefix}"]
 
-    if OS.mac?
-      # make file doesn't set rpath on mac yet
-      args << "EXTRA_LFLAGS=-Wl,-rpath,#{rpath}"
-    else
+    if OS.linux?
+      args << "ARCH=arm64" if Hardware::CPU.arm?
       # On Linux, also set RPATH in LIBFLAGS, so that the linker will also add the RPATH to .hdll files.
       inreplace "Makefile", "LIBFLAGS =", "LIBFLAGS = -Wl,-rpath,${INSTALL_LIB_DIR}"
     end
 
     system "make", *args
     system "make", "install", *args
-    return if Hardware::CPU.intel?
-
-    # JIT only supports x86 and x86-64 processors
-    rm(bin/"hl")
   end
 
   def caveats

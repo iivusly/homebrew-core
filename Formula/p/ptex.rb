@@ -1,8 +1,8 @@
 class Ptex < Formula
   desc "Texture mapping system"
   homepage "https://ptex.us/"
-  url "https://github.com/wdas/ptex/archive/refs/tags/v2.4.3.tar.gz"
-  sha256 "435aa2ee1781ff24859bd282b7616bfaeb86ca10604b13d085ada8aa7602ad27"
+  url "https://github.com/wdas/ptex/archive/refs/tags/v2.5.1.tar.gz"
+  sha256 "6b4b55f562a0f9492655fcb7686ecc335a2a4dacc1de9f9a057a32f3867a9d9e"
   license "BSD-3-Clause"
 
   livecheck do
@@ -11,22 +11,25 @@ class Ptex < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "834009b39e2e8421eacc189691afe5fdfc87d1dcba237739fc88879d60c87338"
-    sha256 cellar: :any,                 arm64_ventura:  "3c9c6e31882c6401c1cd08d446cec4a6ba90d1f8199230559bac04627263b8ce"
-    sha256 cellar: :any,                 arm64_monterey: "8ad7824e9c1423c89c1106c9e4d5b1867c7b0bb0682ed8205520d1d5fc615d6b"
-    sha256 cellar: :any,                 sonoma:         "0a99144782115f4b8d93e31f64b2002a1f40968b559514eaad1fc0667471964f"
-    sha256 cellar: :any,                 ventura:        "ed39908c137c16838470243879af1d6ae1ef3441e79d30b16bf11dbb6e366dd3"
-    sha256 cellar: :any,                 monterey:       "7103ad329a193ad7354dc88ca5c2292190b380c2ab133a4bb49cbbbdae29943d"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "9088f4aef6f14b8a9b0ff49f5d36d18e725463e48e918ef3d7eee20b2a14618d"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "180dc89f0792317b8800689587ccbcb1b36e0d2316f8811467323361cd7152c4"
+    sha256 cellar: :any,                 arm64_sequoia: "31009fa3315b845913d355b230e40a2cbc321fe3b250fd7c6149e78827d0cb09"
+    sha256 cellar: :any,                 arm64_sonoma:  "25cfb86f4efe5aaa92239bf7b862d852ce5fef2a228bf81494b6b3ca10f674ae"
+    sha256 cellar: :any,                 sonoma:        "95017074b589ede0043a7974a045faeb7e6a7945400e44bce17a400ccf811949"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "1dbcf9a26c757d9404ae835e3e35903ca65adc10f76d23bc9fea920d3a608b5f"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "893722f8de667f5d9fdbf20d04b89868e5d9d05484272f68f16dfd20afc50aee"
   end
 
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
+  depends_on "libdeflate"
 
-  uses_from_macos "zlib"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
-    system "cmake", "-S", ".", "-B", "build", *std_cmake_args
+    system "cmake", "-S", ".", "-B", "build", "-DCMAKE_CXX_STANDARD=17", *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
   end

@@ -2,47 +2,49 @@ class Xonsh < Formula
   include Language::Python::Virtualenv
 
   desc "Python-powered, cross-platform, Unix-gazing shell language and command prompt"
-  homepage "https://xon.sh/"
-  url "https://files.pythonhosted.org/packages/73/82/c39c24a07daf22877f2ffa0c53dca5cd7c84ccc2d647b6fd6cd134d7f022/xonsh-0.18.3.tar.gz"
-  sha256 "e57630d3f7e77e083618751402bf486bef51d2c42ed2abf3e0f4db388a50795f"
+  homepage "https://xon.sh"
+  url "https://files.pythonhosted.org/packages/99/d7/269a167722c8cea95204add643664a7dcb445ef50f5810a924ca7fd3e3f2/xonsh-0.22.8.tar.gz"
+  sha256 "5eedf7822f1655eb4f29a7c3916b0dcc7b8fe548b4b83001afe79f3bd39be28c"
   license "BSD-2-Clause-Views"
+  revision 1
   head "https://github.com/xonsh/xonsh.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "530d7aa3f66275f62bdf7cdd1fae836c2712a86204bb1e6e94587136a6f64a13"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "326b317f207cab511c114353c3b31ed5dbb32e70829038108efcfc003801658e"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "d49bec68ed44bf429d1d88f9188a4d2b6119fc4a8ba21c2b8b6e4825451497b5"
-    sha256 cellar: :any_skip_relocation, sonoma:         "041c3bcc60a0d18e80b2aa984d3978bc20485522cd2e35b36573476f127e3aaa"
-    sha256 cellar: :any_skip_relocation, ventura:        "a43ed7ecd0fba5b4bd05ceefbc12d3100c35769e87e6bdc15cc0238d459d052b"
-    sha256 cellar: :any_skip_relocation, monterey:       "df71476647c8b2ca52623077e08c470b7f62272e76923e51f50b8ddf4c9f4a7d"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "4990f83b56501a22ba516f2722e1084b5157f1ac1a1efa8fc56ee33fc9184051"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "dcccf913ccad7b3bc26c8714207c4fcfc966a34ebaee8174fc8b01fa1b50ef5e"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "86a57ef41000ced4a0ddf09505bac4897db5b62c91cd6026cb127192cc0a1b55"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "6c658c36c57e131cbe0f091858e12181c4a1519a8499494256e961cfb196621d"
+    sha256 cellar: :any_skip_relocation, sonoma:        "5f882ea5a2daf7f832933896501f7f58e4502179481e291aa4cbe96a4fcce83e"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "ad4533c9c8f2ad62a381d925289ddc2c3507c8783cb687d697e36a9f8a928764"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "00513aa360a4966604881aab7caba0b69b8aab2fcd13c9582628fe7400f99f12"
   end
 
-  depends_on "python@3.12"
+  depends_on "python@3.14"
+
+  pypi_packages package_name: "xonsh[ptk,pygments,proctitle]"
 
   resource "prompt-toolkit" do
-    url "https://files.pythonhosted.org/packages/47/6d/0279b119dafc74c1220420028d490c4399b790fc1256998666e3a341879f/prompt_toolkit-3.0.47.tar.gz"
-    sha256 "1e1b29cb58080b1e69f207c893a1a7bf16d127a5c30c9d17a25a5d77792e5360"
+    url "https://files.pythonhosted.org/packages/a1/96/06e01a7b38dce6fe1db213e061a4602dd6032a8a97ef6c1a862537732421/prompt_toolkit-3.0.52.tar.gz"
+    sha256 "28cde192929c8e7321de85de1ddbe736f1375148b02f2e17edd840042b1be855"
   end
 
   resource "pygments" do
-    url "https://files.pythonhosted.org/packages/8e/62/8336eff65bcbc8e4cb5d05b55faf041285951b6e80f33e2bff2024788f31/pygments-2.18.0.tar.gz"
-    sha256 "786ff802f32e91311bff3889f6e9a86e81505fe99f2735bb6d60ae0c5004f199"
+    url "https://files.pythonhosted.org/packages/c3/b2/bc9c9196916376152d655522fdcebac55e66de6603a76a02bca1b6414f6c/pygments-2.20.0.tar.gz"
+    sha256 "6757cd03768053ff99f3039c1a36d6c0aa0b263438fcab17520b30a303a82b5f"
   end
 
   resource "pyperclip" do
-    url "https://files.pythonhosted.org/packages/30/23/2f0a3efc4d6a32f3b63cdff36cd398d9701d26cda58e3ab97ac79fb5e60d/pyperclip-1.9.0.tar.gz"
-    sha256 "b7de0142ddc81bfc5c7507eea19da920b92252b548b96186caf94a5e2527d310"
+    url "https://files.pythonhosted.org/packages/e8/52/d87eba7cb129b81563019d1679026e7a112ef76855d6159d24754dbd2a51/pyperclip-1.11.0.tar.gz"
+    sha256 "244035963e4428530d9e3a6101a1ef97209c6825edab1567beac148ccc1db1b6"
   end
 
   resource "setproctitle" do
-    url "https://files.pythonhosted.org/packages/ff/e1/b16b16a1aa12174349d15b73fd4b87e641a8ae3fb1163e80938dbbf6ae98/setproctitle-1.3.3.tar.gz"
-    sha256 "c913e151e7ea01567837ff037a23ca8740192880198b7fbb90b16d181607caae"
+    url "https://files.pythonhosted.org/packages/8d/48/49393a96a2eef1ab418b17475fb92b8fcfad83d099e678751b05472e69de/setproctitle-1.3.7.tar.gz"
+    sha256 "bc2bc917691c1537d5b9bca1468437176809c7e11e5694ca79a9ca12345dcb9e"
   end
 
   resource "wcwidth" do
-    url "https://files.pythonhosted.org/packages/6c/63/53559446a878410fc5a5974feb13d31d78d752eb18aeba59c7fef1af7598/wcwidth-0.2.13.tar.gz"
-    sha256 "72ea0c06399eb286d978fdedb6923a9eb47e1c486ce63e9b4e64fc18303972b5"
+    url "https://files.pythonhosted.org/packages/35/a2/8e3becb46433538a38726c948d3399905a4c7cabd0df578ede5dc51f0ec2/wcwidth-0.6.0.tar.gz"
+    sha256 "cdc4e4262d6ef9a1a57e018384cbeb1208d8abbc64176027e2c2455c81313159"
   end
 
   def install

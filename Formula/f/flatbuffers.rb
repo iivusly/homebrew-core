@@ -1,8 +1,8 @@
 class Flatbuffers < Formula
   desc "Serialization library for C++, supporting Java, C#, and Go"
   homepage "https://google.github.io/flatbuffers"
-  url "https://github.com/google/flatbuffers/archive/refs/tags/v24.3.25.tar.gz"
-  sha256 "4157c5cacdb59737c5d627e47ac26b140e9ee28b1102f812b36068aab728c1ed"
+  url "https://github.com/google/flatbuffers/archive/refs/tags/v25.12.19.tar.gz"
+  sha256 "f81c3162b1046fe8b84b9a0dbdd383e24fdbcf88583b9cb6028f90d04d90696a"
   license "Apache-2.0"
   head "https://github.com/google/flatbuffers.git", branch: "master"
 
@@ -12,13 +12,12 @@ class Flatbuffers < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "90e5222fe1fa49beff198a81085dcdf91767a9219fcf110db25d266d826284be"
-    sha256 cellar: :any,                 arm64_ventura:  "c90b3e2eed62af7b9a4b7a2988e1d932af1bafeb13a56d49a5cb784d7dffb26a"
-    sha256 cellar: :any,                 arm64_monterey: "8a5bf9c0f50d3f05e7e7758c9f75fb31fd794f9278c0ffd78cc34b6ab83a48e6"
-    sha256 cellar: :any,                 sonoma:         "9ab97400e8b6418b64cc5b3a78059106160f26961d3c8f68e61522e5e7d89d41"
-    sha256 cellar: :any,                 ventura:        "557e248c8c2d42f33827a2456fb0bb87ddadbee71aeaade663df51e8af76565b"
-    sha256 cellar: :any,                 monterey:       "950ec2ace2073968a4b6cd1b1fb6b9277204ed4a0d1d3f30755fab6fa64b8bd8"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "9bb0221b1fb16b3ad4a88aad4078452c8a51e318ee8927c3c1d82fb44c68b053"
+    sha256 cellar: :any,                 arm64_tahoe:   "27884d2b962c0f736d434e0cd7bff42c4d4b73aee40fc304af19aa687e392249"
+    sha256 cellar: :any,                 arm64_sequoia: "a0bec168703354b47325a5a9cb2b8340e33d549a6daca48589563401235c4d89"
+    sha256 cellar: :any,                 arm64_sonoma:  "8a8253232ef44f875c6787363e96a6c8219939e370836688d29c9ff0179345a9"
+    sha256 cellar: :any,                 sonoma:        "08403eb4b28bda3d8ee89003b743f5554e18b08e08c6a8f4b48207fa13fe320a"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "1a3a907efeb6111e32a828aae08a2b235f62cfe89b37468337449bc799633246"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "3f3cb57c7d5d16d51d47439a7ab56a3a9e275d9912094eba581609003be526ac"
   end
 
   depends_on "cmake" => :build

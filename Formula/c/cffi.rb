@@ -1,25 +1,30 @@
 class Cffi < Formula
   desc "C Foreign Function Interface for Python"
   homepage "https://cffi.readthedocs.io/en/latest/"
-  url "https://files.pythonhosted.org/packages/1e/bf/82c351342972702867359cfeba5693927efe0a8dd568165490144f554b18/cffi-1.17.0.tar.gz"
-  sha256 "f3157624b7558b914cb039fd1af735e5e8049a87c817cc215109ad1c8779df76"
+  url "https://files.pythonhosted.org/packages/eb/56/b1ba7935a17738ae8453301356628e8147c79dbb825bcbc73dc7401f9846/cffi-2.0.0.tar.gz"
+  sha256 "44d1b5909021139fe36001ae048dbdde8214afa20200eda0f64c068cac5d5529"
   license "MIT"
+  revision 1
+  compatibility_version 1
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "3b3167c9f29f076d8baf690bfc58b6bbcd4c1834106fbe9d6c6f05f388a9574b"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "f4e8350cdebb16d6ed4d585543f2456603750e1c6efb4b3b9b6653810fbcbd0a"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "ba6d90d2de71fa80aca3a95a5e6926161e411baf383200487161105db2cac135"
-    sha256 cellar: :any_skip_relocation, sonoma:         "d7adee31ade8f4338f9e31469ee1ce3a8a63970d4fad66119fab50f8b00ae989"
-    sha256 cellar: :any_skip_relocation, ventura:        "02f428835ad5ca182e3a336574b63da07ad91f47f634d475376585a31d321c27"
-    sha256 cellar: :any_skip_relocation, monterey:       "fb4d0d901e2d9aeb97ffb5953caf5ec7b8d9be055d2d67ea2355fe0f1c4a0704"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "a360ac0299d1890fc98f74289dd15863ba6d5bb585d41580d90998304d1e8eff"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "04b0f56120f37b235dc1a8063149e279bad1cc9132727b25158393db8c930c2c"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "f0c87ffc33c6042cf8c12508099ccbed120d6b76ecef0e0745d728960d48e13b"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "5d588e61a2f80a3c6609fe497c391fc01dc24e2af1fcae3a520a353af32bc827"
+    sha256 cellar: :any_skip_relocation, tahoe:         "1252a16612b1585b96a870ac5c1d0af6beb31c1cfa76449e6599f87b5ec81698"
+    sha256 cellar: :any_skip_relocation, sequoia:       "050dfb668072267e2bb9e2eb03a02b31f6d15ecbce1c823ab0af521da3f05223"
+    sha256 cellar: :any_skip_relocation, sonoma:        "76c34aa7a07dff752819c015de41f2ba14d42441cc07cd7e4a4be7fd8baa8083"
+    sha256                               arm64_linux:   "cb50ba60bbd5cb6b2da0637c3f3090d07d3a68665076c5f553c65bfb061b1734"
+    sha256                               x86_64_linux:  "bad3335bd82f947b8283832392a0c37035e500e5732dd63b0f9878dcaf05d639"
   end
 
-  depends_on "python@3.11" => [:build, :test]
-  depends_on "python@3.12" => [:build, :test]
+  depends_on "python@3.13" => [:build, :test]
+  depends_on "python@3.14" => [:build, :test]
   depends_on "pycparser"
 
   uses_from_macos "libffi"
+
+  pypi_packages exclude_packages: "pycparser"
 
   def pythons
     deps.map(&:to_formula)
@@ -35,9 +40,9 @@ class Cffi < Formula
 
   test do
     assert_empty resources, "This formula should not have any resources!"
-    (testpath/"sum.c").write <<~EOS
+    (testpath/"sum.c").write <<~C
       int sum(int a, int b) { return a + b; }
-    EOS
+    C
 
     libsum = testpath/shared_library("libsum")
     system ENV.cc, "-shared", "sum.c", "-o", libsum

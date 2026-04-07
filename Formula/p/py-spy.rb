@@ -1,50 +1,42 @@
 class PySpy < Formula
   desc "Sampling profiler for Python programs"
   homepage "https://github.com/benfred/py-spy"
+  url "https://github.com/benfred/py-spy/archive/refs/tags/v0.4.1.tar.gz"
+  sha256 "6abc303d4e2db30d472997838f83d547a990df7747e1d327249a757863ee9225"
   license "MIT"
   head "https://github.com/benfred/py-spy.git", branch: "master"
 
-  stable do
-    url "https://github.com/benfred/py-spy/archive/refs/tags/v0.3.14.tar.gz"
-    sha256 "c01da8b74be0daba79781cfc125ffcd3df3a0d090157fe0081c71da2f6057905"
-
-    # Use `llvm@15` to work around build failure with LLVM Clang 16 (Apple Clang 15)
-    # described in https://github.com/rust-lang/rust-bindgen/issues/2312.
-    # TODO: Remove in the next release
-    depends_on "llvm@15" => :build if DevelopmentTools.clang_build_version >= 1500
-  end
-
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "4e312bcb385abab9511b9e96b4575180ee43734ba88293102b7a26f5a1a102f5"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "6640d4124619c0e3d007cb0284f2fb33d393c279baee741432d586c28e48f612"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "4c9528218834611e0d11368cd892d576887fa0c614cda521203b9c665b000785"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "0cbeb6a465786ff60f02816f708b1184612fbb27a3142cdf9731cc70f6b5ec59"
-    sha256 cellar: :any_skip_relocation, sonoma:         "c9fa48e910c4b7df321fa6096f1af1f24bd8894b54a643af861c917be940a928"
-    sha256 cellar: :any_skip_relocation, ventura:        "633076498c9549f079573bf14bd52590fa001929e36136047f99369e2cf86f84"
-    sha256 cellar: :any_skip_relocation, monterey:       "e4e51038926d8e3e375f02c0e1511c7eb8274a40dfb4509f8d0d36e5a4ee1ff0"
-    sha256 cellar: :any_skip_relocation, big_sur:        "411fd9ea3515958e15d197598cfe7e39cc9087cb86c2fd13db6e5af8dbb78864"
-    sha256 cellar: :any_skip_relocation, catalina:       "9e03831868de123c9a3b9b42c6d954cedfe1241bf8c4dc5c234adca1a9ffa871"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "5c57da0e3df21cd321b23697cf85e673332e3117f65884b36dd3878c6220d493"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "5ddf6302d7bbcf54e77d35b76010be52f915621d4c3eb3a8457d4ee0fdd4723d"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "7ab14c15a32b71c5b79c38adf7cc9ac1e433d64f7a52f3e1f9ea0360d8d9af08"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "a444ad8b9393d62f247af02a176e0f852e6a34a3add46f0e787b5e8b3da30747"
+    sha256 cellar: :any_skip_relocation, sonoma:        "a40ac52cfac0d14364a85f73c76a908c70c0d218e4014081c6751eecae51164f"
+    sha256 cellar: :any_skip_relocation, ventura:       "7d5ffaff6bf0881536f31ba00b04acbd770e5947a6c583d5eb246475879e8bef"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "45f6a6fa9597398cf748e685d1edef0c898f84319213a3ebdfdc1186945a0680"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "3a7074dd2174a4cd2980518b33cb54e59883a7a90e4c04553dae7a5cc5dcba1b"
   end
 
   depends_on "rust" => :build
-  depends_on "python@3.12" => :test
 
   on_linux do
+    depends_on "python@3.13" => :test # https://github.com/benfred/py-spy/issues/750
     depends_on "libunwind"
   end
 
   def install
-    odie "Check if `llvm@15` dependency can be removed!" if build.stable? && version > "0.3.14"
-    ENV.remove "HOMEBREW_LIBRARY_PATHS", Formula["llvm@15"].opt_lib
-
     system "cargo", "install", *std_cargo_args
-
     generate_completions_from_executable(bin/"py-spy", "completions")
   end
 
   test do
-    python = Formula["python@3.12"].opt_bin/"python3.12"
-    output = shell_output("#{bin}/py-spy record #{python} 2>&1", 1)
-    assert_match "Try running again with elevated permissions by going", output
+    if OS.mac?
+      output = shell_output("#{bin}/py-spy record python3 2>&1", 1)
+      assert_match "Try running again with elevated permissions by going", output
+    else
+      python = "python3.13"
+      output = shell_output("#{bin}/py-spy record -- #{python} -c 'import time; time.sleep(1)' 2>&1")
+      assert_match(/Samples: \d+ Errors: 0/, output)
+    end
   end
 end

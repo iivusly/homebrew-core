@@ -1,28 +1,23 @@
 class Archivemount < Formula
   desc "File system for accessing archives using libarchive"
-  homepage "https://github.com/cybernoid/archivemount"
-  url "https://slackware.uk/~urchlay/src/archivemount-0.9.1.tar.gz"
-  sha256 "c529b981cacb19541b48ddafdafb2ede47a40fcaf16c677c1e2cd198b159c5b3"
+  homepage "https://git.sr.ht/~nabijaczleweli/archivemount-ng"
+  url "https://git.sr.ht/~nabijaczleweli/archivemount-ng/archive/1b.tar.gz"
+  version "1b"
+  sha256 "de10cfee3bff8c1dd2b92358531d3c0001db36a99e1098ed0c9d205d110e903d"
   license "LGPL-2.0-or-later"
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "ac01adc4cf171af9509390a108469579aaaccb9eada8a57e54c10419ad239b3e"
+    sha256 cellar: :any_skip_relocation, arm64_linux:  "1b2c37826bee586ebbcf04b697dbd60f4056e87893597e26ac429091f99eb13b"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "aa0cc94db21b3b5cb29a330a8aab4b0fb5612f2b3fac6476fc298d99ca26b9d0"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "libarchive"
-  depends_on "libfuse@2"
+  depends_on "libfuse"
   depends_on :linux # on macOS, requires closed-source macFUSE
 
   def install
-    ENV.append_to_cflags "-I/usr/local/include/osxfuse"
-    system "./configure", "--disable-debug",
-                          "--disable-dependency-tracking",
-                          "--disable-silent-rules",
-                          "--prefix=#{prefix}"
-
-    system "make", "install"
+    system "make", "PREFIX=#{prefix}", "install"
   end
 
   test do

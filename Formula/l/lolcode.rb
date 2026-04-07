@@ -3,26 +3,18 @@ class Lolcode < Formula
   homepage "http://www.lolcode.org/"
   # NOTE: 0.10.* releases are stable, 0.11.* is dev. We moved over to
   # 0.11.x accidentally, should move back to stable when possible.
-  url "https://github.com/justinmeza/lci/archive/refs/tags/v0.11.2.tar.gz"
-  sha256 "cb1065936d3a7463928dcddfc345a8d7d8602678394efc0e54981f9dd98c27d2"
+  url "https://github.com/justinmeza/lci/archive/refs/tags/v1.3.tar.gz"
+  sha256 "56a77f8a19e6284868e609dad0e4f1d7c9fe59a61398e338726b58016c1eecef"
   license "GPL-3.0-or-later"
-  head "https://github.com/justinmeza/lci.git", branch: "master"
+  head "https://github.com/justinmeza/lci.git", branch: "future"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "41bf236e028b388c85213b0e45f10fa83aea6c4b283c96f86426313646424a52"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "f7bf8def14baaebde0558f5a5d7355d41dc46c1d62ad00fe36bf33b40735c3ed"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "65cf3b809d4ad69918a45976eb04f22f93c785638336e2ae1ba862ef8eeade4a"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "3da1a3ea810fb481b1a6e3e62f81fa5a24ce593b2f69630d6b523a63449531c8"
-    sha256 cellar: :any_skip_relocation, sonoma:         "3a28a3eac2937e9e8a36e92f3fd592b53efd1c9aa65965986603e5b90f0dc2cc"
-    sha256 cellar: :any_skip_relocation, ventura:        "6d050e28b462cc3d4466fd98cb7160e589e1efa9c3e163084c16660c8777557a"
-    sha256 cellar: :any_skip_relocation, monterey:       "147cc9048722688b7b2744f316db94899843959e1d9a94ce91593087a3e6f1a3"
-    sha256 cellar: :any_skip_relocation, big_sur:        "0fe2dd80ac746019da7ebba97a43f010c54ac64fcdff6d87dffffd1e06b43dd3"
-    sha256 cellar: :any_skip_relocation, catalina:       "546e86a771457249146ea07ff5669f0e19bd26b3d3e3818ed33925497ae6cfda"
-    sha256 cellar: :any_skip_relocation, mojave:         "766522d1d3730e62d1a05e54962b0493db19d62a3cd7ce66328861630508c4ee"
-    sha256 cellar: :any_skip_relocation, high_sierra:    "e6cb7d51d26fe4b54f41a14bf183216bb9ca87a6d0b8db25ebf55e64227ac5aa"
-    sha256 cellar: :any_skip_relocation, sierra:         "47b268e8334d901868a6498738772b1c776fe34ab249befa702658489e53dff9"
-    sha256 cellar: :any_skip_relocation, el_capitan:     "74920cea828644c7ad0fe3b12ee5c9a4c06a46ec37c2826280327e37e30f5513"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "eb5c917e5a669e5fa18ee60946f30fd1bcbd4a257489e440ba694444f9beaf1d"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "2a103e4121ee76d588ecb6a4a7c157c316e6f2068a91d2a43a7ef44fe56c90e1"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "e012c9667cdf06c3dcec8959484ef8360dae7eff0a990956afc3e1355ba40154"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "3fcbe3313bf9f5484ded64c50fa0036f11b83e12467a96c40636ef33aeac5d24"
+    sha256 cellar: :any_skip_relocation, sonoma:        "572f3bbd7b11caafc7634441abe9951fdf0a74a399cf8cf30f750c4b120c92e0"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "0b11c7827b71720dc4095a5cf8246a57dcd94aafd1c9010ac05f71dca6a8c063"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "fa3c6be395ffbf5dab1a5f65be4334889511c5ef765d5f06b0fad50000327725"
   end
 
   depends_on "cmake" => :build
@@ -34,10 +26,11 @@ class Lolcode < Formula
   conflicts_with "lci", because: "both install `lci` binaries"
 
   def install
-    system "cmake", ".", *std_cmake_args
-    system "make"
+    system "cmake", "-S", ".", "-B", "build", *std_cmake_args
+    system "cmake", "--build", "build"
+
     # Don't use `make install` for this one file
-    bin.install "lci"
+    bin.install "build/lci"
   end
 
   test do

@@ -3,10 +3,11 @@ class Netpbm < Formula
   homepage "https://netpbm.sourceforge.net/"
   # Maintainers: Look at https://sourceforge.net/p/netpbm/code/HEAD/tree/
   # for stable versions and matching revisions.
-  url "https://svn.code.sf.net/p/netpbm/code/stable", revision: "4908"
-  version "11.02.09"
+  url "https://svn.code.sf.net/p/netpbm/code/stable", revision: "5175"
+  version "11.02.23"
   license "GPL-3.0-or-later"
   version_scheme 1
+  compatibility_version 1
   head "https://svn.code.sf.net/p/netpbm/code/trunk"
 
   livecheck do
@@ -15,26 +16,45 @@ class Netpbm < Formula
     strategy :page_match
   end
 
+  no_autobump! because: :incompatible_version_format
+
   bottle do
-    sha256 arm64_sonoma:   "a69bee1c788f8d179de7894db0080b7b1905398ef1f546c1469ca9c110455f69"
-    sha256 arm64_ventura:  "8965992a26392b43e184dea4579b611117a18645b326000a5d4ec38b53c59ac0"
-    sha256 arm64_monterey: "8147f72fa44fcd2584f248e76996da0a50f13ea1268383bf7b64267bead54f84"
-    sha256 sonoma:         "503cf09c16e6d274e7627c814a78cff13c79d1603687b3d8666252cad0327390"
-    sha256 ventura:        "1eb8e095b030db593891e7ccd136d035f16f3555b29d97f6df470032f2f92c3a"
-    sha256 monterey:       "ef9ff5af0d5ad8d54c81008758936c5a72e924e11bb588ddc777690e6b73f87b"
-    sha256 x86_64_linux:   "0d770e45c84acf2e16e7d16ed8144e35960304c18a63235826adcc17884142df"
+    sha256 arm64_tahoe:   "9e1d26b1727bc4ebae91c3548b6c86c7834147816f9d57365262dd9b6d088ec7"
+    sha256 arm64_sequoia: "52ae7ab2ca13d4aa982c4d0967266a4fe2ea80d591147fc2eb5e22db379139a5"
+    sha256 arm64_sonoma:  "66056550ea849f60574e93ea65b4d3bcbda942e5c0fdfa8968ed9e74ce77f87f"
+    sha256 sonoma:        "85941e1440bb2be9ef240d164b5f2e5161daef73a4ecb6f277e88bd78bc49487"
+    sha256 arm64_linux:   "ef62b175b3168a6a263a6b366e1a2dcc2a5cebe7568d75aba59bcc7da058d797"
+    sha256 x86_64_linux:  "4a74682213e8d51885fd91fa2b107669ebbe06ee3f872ccd9d92208571457992"
   end
 
+  depends_on "pkgconf" => :build
   depends_on "jasper"
   depends_on "jpeg-turbo"
   depends_on "libpng"
   depends_on "libtiff"
 
   uses_from_macos "flex" => :build
+  uses_from_macos "python" => :build
   uses_from_macos "libxml2"
-  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   conflicts_with "jbigkit", because: "both install `pbm.5` and `pgm.5` files"
+
+  resource "html" do
+    # Rolling release, latest revision also documents previous software versions
+    # NOTE: Keep "revision" and "version" in sync
+    url "https://svn.code.sf.net/p/netpbm/code/userguide", revision: "5177"
+    version "5177"
+
+    livecheck do
+      url "https://sourceforge.net/p/netpbm/code/HEAD/log/?path=/userguide"
+      regex(/\[r?(\d+)\]/i)
+      strategy :page_match
+    end
+  end
 
   def install
     cp "config.mk.in", "config.mk"
@@ -58,6 +78,7 @@ class Netpbm < Formula
         s.change_make_var! "CFLAGS_SHLIB", "-fPIC"
       end
     end
+    inreplace "buildtools/manpage.mk", "python", "python3"
 
     ENV.deparallelize
 
@@ -79,17 +100,28 @@ class Netpbm < Formula
       (lib/"pkgconfig").install "pkgconfig_template" => "netpbm.pc"
     end
 
-    # We don't run `make install`, so an unversioned library symlink is never generated.
-    # FIXME: Check whether we can call `make install` instead of creating this manually.
+    # Generate unversioned library symlink (upstream does not do this)
     libnetpbm = lib.glob(shared_library("libnetpbm", "*")).reject(&:symlink?).first.basename
     lib.install_symlink libnetpbm => shared_library("libnetpbm")
+
+    resource("html").stage buildpath/"userguide"
+    make_args = %W[
+      USERGUIDE=#{buildpath}/userguide
+      -f
+      #{buildpath}/buildtools/manpage.mk
+    ]
+    mkdir buildpath/"netpbmdoc" do
+      system "make", *make_args, "manpages"
+      [man1, man3, man5].map(&:mkpath)
+      system "make", "MANDIR=#{man}", *make_args, "installman"
+    end
   end
 
   test do
     fwrite = shell_output("#{bin}/pngtopam #{test_fixtures("test.png")} -alphapam")
     (testpath/"test.pam").write fwrite
     system bin/"pamdice", "test.pam", "-outstem", testpath/"testing"
-    assert_predicate testpath/"testing_0_0.pam", :exist?
+    assert_path_exists testpath/"testing_0_0.pam"
     (testpath/"test.xpm").write <<~EOS
       /* XPM */
       static char * favicon_xpm[] = {

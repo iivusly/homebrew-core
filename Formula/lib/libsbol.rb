@@ -4,23 +4,25 @@ class Libsbol < Formula
   url "https://github.com/SynBioDex/libSBOL/archive/refs/tags/v2.3.2.tar.gz"
   sha256 "c85de13b35dec40c920ff8a848a91c86af6f7c7ee77ed3c750f414bbbbb53924"
   license "Apache-2.0"
-  revision 2
+  revision 3
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "c896cb97e12ea65a08e1be38e5f8b48d249445338069cb3f22bf4db3f5f8adef"
-    sha256 cellar: :any,                 arm64_ventura:  "729d76ef1e1d5e94eafdc91d985e51dfa2d71f5d65c972b64c72c64e136759fb"
-    sha256 cellar: :any,                 arm64_monterey: "424c45f889a942cdf2a91db6a0e27fcefed1b6300dfe2715c77971a0bb63ae6f"
-    sha256 cellar: :any,                 arm64_big_sur:  "abe3ed20d3307039f2518d0ada34a5410f808cef2cb7d7f48c0b8547b37bce92"
-    sha256 cellar: :any,                 sonoma:         "2597336431f9610f1f3e2cdf932a0e9e5d31e6aedfa8f4db76c081361403959f"
-    sha256 cellar: :any,                 ventura:        "e3a3301d2e33f394d3ab874f7f42ce8a155e94e219970f92c70dfd8873314103"
-    sha256 cellar: :any,                 monterey:       "1b3317cfc73dc8930c89754110b46f33f32c13950bf4e0606bb7d17618808ec1"
-    sha256 cellar: :any,                 big_sur:        "fd852551cf8ecc596eeb82fa82922307d1ea710b96bbe25fd769acb57d6c5db8"
-    sha256 cellar: :any,                 catalina:       "fa4fabe7e100011c6a0d48e6286c509bc66680a631e52ae5dd7a2163d732486b"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "0b6876a8bc254eb892a4def5c2d6c1c4d4875407dbf235b607c675aa9b3aefb4"
+    sha256 cellar: :any,                 arm64_tahoe:   "e1691af94f34be58995e9226038f9c446fc50a2f8222825df323085c1a7200a9"
+    sha256 cellar: :any,                 arm64_sequoia: "b09a89a225eb9340d711c26788bc531b1ca5e3f37fc7be1dcc1419124210fd7f"
+    sha256 cellar: :any,                 arm64_sonoma:  "751b7e6d933a55e321f83d57b1bd7a9035530bba45ff8e30e497ff52a539d359"
+    sha256 cellar: :any,                 arm64_ventura: "82dca670a8ca74e4f974727a4b895a2664dbf74601a79e59c657fa1fbfd8f546"
+    sha256 cellar: :any,                 sonoma:        "ee16f7b504002ebc4845c479d3b6abf3858deabc1ff9f0671b100f7a58c85af4"
+    sha256 cellar: :any,                 ventura:       "34f6fef82f97d5be5834994ce870e42a643b3334e9b4c0539b7a922edcdc7e6a"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "e6c5e5965c77dd8dc497af89ddbc8fea4542ccd551c57422967d19a42a8b87e0"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "2ef4f70407b40a1c4791f08309df2075a15cac5a038f0085ecfa23ff0d460258"
   end
 
+  # Last release on 2019-07-06
+  deprecate! date: "2026-03-01", because: :unmaintained
+  disable! date: "2027-03-01", because: :unmaintained
+
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "jsoncpp"
   depends_on "raptor"
   depends_on "rasqal"
@@ -28,14 +30,33 @@ class Libsbol < Formula
   uses_from_macos "curl"
   uses_from_macos "libxslt"
 
+  on_macos do
+    # Fails with Apple Clang 1700+ / LLVM Clang 19+
+    # include/sbol/property.h:135:71: error: member access into incomplete type 'SBOLObject'
+    # And cannot use GCC as has C++ dependencies so need to use libc++
+    depends_on "llvm@18" => [:build, :test] if DevelopmentTools.clang_build_version >= 1700
+  end
+
+  fails_with :llvm_clang do
+    cause "include/sbol/property.h:135:71: error: member access into incomplete type 'SBOLObject'"
+  end
+
   def install
+    if ENV.compiler == :clang && DevelopmentTools.clang_build_version >= 1700
+      inreplace "source/CMakeLists.txt", 'set(CMAKE_OSX_ARCHITECTURES "x86_64")', ""
+      ENV["CC"] = Formula["llvm@18"].opt_bin/"clang"
+      ENV["CXX"] = Formula["llvm@18"].opt_bin/"clang++"
+    end
+
     # upstream issue: https://github.com/SynBioDex/libSBOL/issues/215
     inreplace "source/CMakeLists.txt", "measure.h", "measurement.h"
 
-    args = std_cmake_args
-    args << "-DSBOL_BUILD_SHARED=TRUE"
-    args << "-DRAPTOR_INCLUDE_DIR=#{Formula["raptor"].opt_include}/raptor2"
-    args << "-DRASQAL_INCLUDE_DIR=#{Formula["rasqal"].opt_include}"
+    args = %W[
+      -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+      -DSBOL_BUILD_SHARED=ON
+      -DRAPTOR_INCLUDE_DIR=#{Formula["raptor"].opt_include}/raptor2
+      -DRASQAL_INCLUDE_DIR=#{Formula["rasqal"].opt_include}
+    ]
 
     if OS.mac? && (sdk = MacOS.sdk_path_if_needed)
       args << "-DCURL_LIBRARY=#{sdk}/usr/lib/libcurl.tbd"
@@ -43,12 +64,17 @@ class Libsbol < Formula
       args << "-DLIBXSLT_LIBRARIES=#{sdk}/usr/lib/libxslt.tbd"
     end
 
-    system "cmake", ".", *args
-    system "make", "install"
+    system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
+    system "cmake", "--build", "build"
+    system "cmake", "--install", "build"
   end
 
   test do
-    (testpath/"test.cpp").write <<~EOS
+    if ENV.compiler == :clang && DevelopmentTools.clang_build_version >= 1700
+      ENV["CXX"] = Formula["llvm@18"].opt_bin/"clang++"
+    end
+
+    (testpath/"test.cpp").write <<~CPP
       #include "sbol/sbol.h"
 
       using namespace sbol;
@@ -58,9 +84,8 @@ class Libsbol < Formula
         doc.write("test.xml");
         return 0;
       }
-    EOS
+    CPP
     system ENV.cxx, "test.cpp", "-o", "test", "-std=c++11",
-                    "-I/System/Library/Frameworks/Python.framework/Headers",
                     "-I#{Formula["raptor"].opt_include}/raptor2",
                     "-I#{include}", "-L#{lib}",
                     "-L#{Formula["jsoncpp"].opt_lib}",

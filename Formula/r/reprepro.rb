@@ -1,8 +1,8 @@
 class Reprepro < Formula
   desc "Debian package repository manager"
   homepage "https://salsa.debian.org/debian/reprepro"
-  url "https://deb.debian.org/debian/pool/main/r/reprepro/reprepro_5.3.1.orig.tar.xz"
-  sha256 "5a6d48bf1f60cfd3c32eae05b535b334972c1e9d4e62ed886dd54e040e9c1cda"
+  url "https://deb.debian.org/debian/pool/main/r/reprepro/reprepro_5.4.8.orig.tar.xz"
+  sha256 "f25409cf50acfc8b01a8e1e7c4e176292107763beedb058b42d7bf8e56a8e9c2"
   license "GPL-2.0-only"
 
   livecheck do
@@ -11,13 +11,13 @@ class Reprepro < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "6ae8f574c8fbfa13776901135cf93d2764d7fc039d7ab6727c959310785769b6"
-    sha256 cellar: :any,                 arm64_ventura:  "074ecc0f03f9b65eee888d3c80da0b236267cea25fdca49f6a77f25da6bbcb45"
-    sha256 cellar: :any,                 arm64_monterey: "4bd034f17d9a86c6e85173977ad58cbb2affa18678bd471b35216337be0f050f"
-    sha256 cellar: :any,                 sonoma:         "4b6b3e4d96f54fefc29c8708115b720aed7af8390a11e4527a09adf7d1613512"
-    sha256 cellar: :any,                 ventura:        "bb3fdf9b10d2edc35f84e82a851cb819aa1a1ba9cba1694ee98c17ef9c5a8e51"
-    sha256 cellar: :any,                 monterey:       "57d484a17dd70a259e33c8f6b74abba671f6fc689fc09ef8c8c00df1ee83f271"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "a79848562e65bd88dce7a8753728ac529fd080a20b36e40a1a58cccbc6f110f1"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "6172bb6e3ed24a3262ba0347cd673cff1c21aa9070a19e19fd0080a824249827"
+    sha256 cellar: :any,                 arm64_sequoia: "3e5e78adbbf2fe3b280ad12b0c0280cc111cdbbe969d2f8d351e38a1ceb2d898"
+    sha256 cellar: :any,                 arm64_sonoma:  "71cb5d6c6c730747893a2824d488915df53b9ab2363db85151fffeb988e23d35"
+    sha256 cellar: :any,                 sonoma:        "f6c637c7a806b7593e34aabe0fd9a48e325c0badf49bc4ee832fa7e6daa0d94f"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "e597daa3f957ba29c07f0d49e3248304498da424db9a412f52786a8a59b16a0e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "3cc1062a1b192a2454bcde2ed80996bebba8d6561382b19309b2e307fcb30786"
   end
 
   depends_on "autoconf" => :build
@@ -30,10 +30,13 @@ class Reprepro < Formula
   depends_on "zstd"
 
   uses_from_macos "bzip2"
-  uses_from_macos "zlib"
 
   on_macos do
     depends_on "gcc"
+  end
+
+  on_linux do
+    depends_on "zlib-ng-compat"
   end
 
   fails_with :clang do
@@ -52,7 +55,7 @@ class Reprepro < Formula
   end
 
   test do
-    (testpath/"conf"/"distributions").write <<~EOF
+    (testpath/"conf/distributions").write <<~EOF
       Codename: test_codename
       Architectures: source
       Components: main

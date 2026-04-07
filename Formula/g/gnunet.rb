@@ -1,22 +1,23 @@
 class Gnunet < Formula
   desc "Framework for distributed, secure and privacy-preserving applications"
   homepage "https://gnunet.org/"
-  url "https://ftp.gnu.org/gnu/gnunet/gnunet-0.22.0.tar.gz"
-  mirror "https://ftpmirror.gnu.org/gnunet/gnunet-0.22.0.tar.gz"
-  sha256 "fd39730b904b9933f78d3b4b8e81da3239d4796ca105e4644739c67e4be071d9"
+  url "https://ftpmirror.gnu.org/gnu/gnunet/gnunet-0.27.0.tar.gz"
+  mirror "https://ftp.gnu.org/gnu/gnunet/gnunet-0.27.0.tar.gz"
+  sha256 "9dd8feb3f3b8d0993766a49ab618f80bb93017f3bc795b6dda84697397302a07"
   license "AGPL-3.0-or-later"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "1e60d8636826acde9f320cb0212c6da18007766b52d9b98dfeb924fd1fd83af2"
-    sha256 cellar: :any,                 arm64_ventura:  "73466ecf7e8e712da3d2674ccfc3ea6dc3dcefeec0066cdb0fb3dc97da8954da"
-    sha256 cellar: :any,                 arm64_monterey: "e51463b2a06a6d1e2b1b8c7c916886f6c3edb419facfe82a8580c1d23cf54524"
-    sha256 cellar: :any,                 sonoma:         "9b02c6eedb4a5426eb02b11860c07c479ef8dabb1ba4e99e71d89ced7bf41ac4"
-    sha256 cellar: :any,                 ventura:        "fcfb6f4880cf37d7d010af900c19c8fbea5ac29fb0a516ee120037651399db41"
-    sha256 cellar: :any,                 monterey:       "1791816def9991d6f99736aca39b1ee0adfc9737e7565a664d36c36af2aff787"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "73a209bb6456389d530979b995a1fb64479ed50881523719369cd0fc6fafb356"
+    sha256 cellar: :any, arm64_tahoe:   "056d46173e490e99d20a9a745bc5aa663f9848cc06131ad6ecfa9b04b6ac6f59"
+    sha256 cellar: :any, arm64_sequoia: "4ea40d021709b5effb91c1599c92cc61ed38db01c4ad9e20a99a2fb5ceddad12"
+    sha256 cellar: :any, arm64_sonoma:  "39dffccef2f229ea2ee723bdaf15f9c35ca5ac97046bc302479a2b74c5a02fce"
+    sha256 cellar: :any, sonoma:        "29c2c40b192f09055ce531bdf0959a570739cd0c2b704a4fcc6f6cb5385e92cf"
+    sha256               arm64_linux:   "1af534f987e8bb580f89808a4e273da007d7d69baea284cb64d8ef278ea37273"
+    sha256               x86_64_linux:  "2e09b29bffd50dc8efbb3c5c2a191ca72a6101a99f233c449b049aec20d7af95"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "meson" => :build
+  depends_on "ninja" => :build
+  depends_on "pkgconf" => :build
   depends_on "gettext"
   depends_on "gmp"
   depends_on "gnutls"
@@ -31,17 +32,23 @@ class Gnunet < Formula
 
   uses_from_macos "curl", since: :ventura # needs curl >= 7.85.0
   uses_from_macos "sqlite"
-  uses_from_macos "zlib"
 
   on_macos do
     depends_on "libgpg-error"
   end
 
-  def install
-    ENV.deparallelize if OS.linux?
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
-    system "./configure", "--disable-documentation", *std_configure_args
-    system "make", "install"
+  def install
+    # Workaround for htobe64 added to macOS 26 SDK until upstream updates
+    # https://git.gnunet.org/gnunet.git/plain/src/include/gnunet_common.h
+    ENV.append_to_cflags "-include sys/endian.h" if OS.mac? && MacOS.version >= :tahoe
+
+    system "meson", "setup", "build", *std_meson_args
+    system "meson", "compile", "-C", "build", "--verbose"
+    system "meson", "install", "-C", "build"
   end
 
   test do

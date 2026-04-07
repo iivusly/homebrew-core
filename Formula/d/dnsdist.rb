@@ -1,10 +1,11 @@
 class Dnsdist < Formula
+  include Language::Python::Virtualenv
+
   desc "Highly DNS-, DoS- and abuse-aware loadbalancer"
   homepage "https://www.dnsdist.org/"
-  url "https://downloads.powerdns.com/releases/dnsdist-1.9.6.tar.bz2"
-  sha256 "f6c48d95525693fea6bd9422f3fdf69a77c75b06f02ed14ff0f42072f72082c9"
+  url "https://downloads.powerdns.com/releases/dnsdist-2.0.3.tar.xz"
+  sha256 "a229250b819c40d55173afa7202ef1ef2a6b728f85c7506897a1f1ca6ab57149"
   license "GPL-2.0-only"
-  revision 1
 
   livecheck do
     url "https://downloads.powerdns.com/releases/"
@@ -12,31 +13,47 @@ class Dnsdist < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "f7f89d8ad3ddc39d685647806e6e7fdc27598d88482d03f6cbe7e8c46fa70086"
-    sha256 cellar: :any,                 arm64_ventura:  "f1c2b1824b1d93d70ea9b0f2a4136f2175f07978e3fb2285168f12ed9c91e054"
-    sha256 cellar: :any,                 arm64_monterey: "eb84c592e200e31311a0e21d3a2571126254a21df238c2db1264cf99de7a0879"
-    sha256 cellar: :any,                 sonoma:         "1ff1e1c1902cf165e9ff4ff2a904f0ce558450a2174162f4587e000dacfaf59b"
-    sha256 cellar: :any,                 ventura:        "4b38254b5be1090d4cfc3144c679319a4343a4c32112391d5dbce055095ee4a3"
-    sha256 cellar: :any,                 monterey:       "b305717021c135e7ca43b9a92199a486792bf7cb553a0b6adcc2cba52c58b1e8"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "aeeab87e8d305be4de7b99c159e9422070b47ce4e4bd74e382f97229b6ded5c9"
+    sha256 arm64_tahoe:   "02d3190231960bb459cac4e6ffa9c56a58183f4738c6d0af9fac96b32c31398a"
+    sha256 arm64_sequoia: "3f3e09fcc8094f2bfe0684a44e0b47825ac3932d6ea3a637671202f85a47ad1f"
+    sha256 arm64_sonoma:  "8bf8482514d6c6c921127be77e58bb2d02025eeee2691d9949246a0fa57298a3"
+    sha256 sonoma:        "83a61615d1583d6c108680b8dae0e47fe30a71a4cc5c937f13fe22d87f22ab0d"
+    sha256 arm64_linux:   "b235618c08aed30dbfcbda5bdcffda7c9a7d5ec7e71a4f5364826d20cd20c1ae"
+    sha256 x86_64_linux:  "2b375de6178b9acb4f9f93d1b189138c9219ca3c7436c2c973191dfe8fa4eea2"
   end
 
   depends_on "boost" => :build
-  depends_on "pkg-config" => :build
-  depends_on "tinycdb" => :build # TODO: make runtime dependency when `tinycdb` formula has a shared library
-  depends_on "abseil"
+  depends_on "libyaml" => :build # for PyYaml
+  depends_on "pkgconf" => :build
+  depends_on "python@3.14" => :build
   depends_on "fstrm"
   depends_on "libnghttp2"
   depends_on "libsodium"
   depends_on "luajit"
   depends_on "openssl@3"
   depends_on "re2"
+  depends_on "tinycdb"
 
   uses_from_macos "libedit"
 
-  fails_with gcc: "5"
+  pypi_packages package_name:   "",
+                extra_packages: "pyyaml"
+
+  resource "pyyaml" do
+    url "https://files.pythonhosted.org/packages/05/8e/961c0007c59b8dd7729d542c61a4d537767a59645b82a0b521206e1e25c2/pyyaml-6.0.3.tar.gz"
+    sha256 "d76623373421df22fb4cf8817020cbb7ef15c725b9d5e45f17e189bfc384190f"
+  end
 
   def install
+    # Fix to error: use of undeclared identifier 'vinfolog'
+    inreplace "dnsdist-protobuf.cc", '#include "dnsdist-protobuf.hh"', "\\0\n#include \"dolog.hh\""
+
+    venv = virtualenv_create(buildpath/"bootstrap", "python3")
+    venv.pip_install resources
+    ENV.prepend_path "PATH", venv.root/"bin"
+
+    # Avoid over-linkage to `abseil`.
+    ENV.append "LDFLAGS", "-Wl,-dead_strip_dylibs" if OS.mac?
+
     system "./configure", "--disable-silent-rules",
                           "--without-net-snmp",
                           "--enable-dns-over-tls",

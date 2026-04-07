@@ -4,25 +4,32 @@ class BoostAT185 < Formula
   url "https://github.com/boostorg/boost/releases/download/boost-1.85.0/boost-1.85.0-b2-nodocs.tar.xz"
   sha256 "09f0628bded81d20b0145b30925d7d7492fd99583671586525d5d66d4c28266a"
   license "BSL-1.0"
+  revision 3
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "12e44a16737f9336bec87c239bb520f25fd1d11a143e9587b453bb2807b64711"
-    sha256 cellar: :any,                 arm64_ventura:  "ba055d2da17d143e361321e89bc8e550e1d0c30e0543773d239936b6e124deed"
-    sha256 cellar: :any,                 arm64_monterey: "f0c595c7fba3daebbe62cb53ed0d979a528b60cea000e3c8283c9828611b8ccb"
-    sha256 cellar: :any,                 sonoma:         "da02f713a6ab5ed95d331bdfc6f552990ca8685dce822e344a0a009f657e7457"
-    sha256 cellar: :any,                 ventura:        "cfd001c1d9447d6730f712960ae3ed124255f638e08f929872f5d03b4f4944ef"
-    sha256 cellar: :any,                 monterey:       "5b4de1f3f1b5590dc38dc986697ef48631cdd8f0ddf07794759aaa3e5617bb07"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "121b8a642ad4b8ef81e4bb9094e7ae879cbf7846badc2cb563e6a9369c992d53"
+    rebuild 2
+    sha256                               arm64_tahoe:   "8ebc8c02aee17d821fb71e08dc2df9cece6f9c27920a08afb77e987949cd6a9f"
+    sha256                               arm64_sequoia: "86f1d77d5e7aaf72aea541bfe5b3846ecd7ecba66c810eba4282a96ec5365598"
+    sha256                               arm64_sonoma:  "fe46b68ddc038313a967ed74ea32daf49dc247bc42cf552ff89f7f62bb444510"
+    sha256 cellar: :any,                 sonoma:        "770617eb0d409303c0b96cb73abfcfb1af7ab6397ef3f0d69f6d031e51d48c6a"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "7bb9de4627dfb79f061a64bee88fbd9123ea114caa362ee91b6c1ef94af57fcb"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "c3733808e2e612773e6c06b8fd75777c98f1c3acbd831de85c600e64a1582a30"
   end
 
   keg_only :versioned_formula
 
-  depends_on "icu4c"
+  deprecate! date: "2025-04-05", because: :versioned_formula
+  disable! date: "2026-04-05", because: :versioned_formula
+
+  depends_on "icu4c@78"
   depends_on "xz"
   depends_on "zstd"
 
   uses_from_macos "bzip2"
-  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     # Force boost to compile with the desired compiler
@@ -35,11 +42,12 @@ class BoostAT185 < Formula
     end
 
     # libdir should be set by --prefix but isn't
-    icu4c_prefix = Formula["icu4c"].opt_prefix
+    icu4c = deps.find { |dep| dep.name.match?(/^icu4c(@\d+)?$/) }
+                .to_formula
     bootstrap_args = %W[
       --prefix=#{prefix}
       --libdir=#{lib}
-      --with-icu=#{icu4c_prefix}
+      --with-icu=#{icu4c.opt_prefix}
     ]
 
     # Handle libraries that will not be built.
@@ -64,10 +72,17 @@ class BoostAT185 < Formula
       link=shared,static
     ]
 
-    # Boost is using "clang++ -x c" to select C compiler which breaks C++14
-    # handling using ENV.cxx14. Using "cxxflags" and "linkflags" still works.
-    args << "cxxflags=-std=c++14"
+    # Boost is using "clang++ -x c" to select C compiler which breaks C++
+    # handling in superenv. Using "cxxflags" and "linkflags" still works.
+    # C++17 is due to `icu4c`.
+    args << "cxxflags=-std=c++17"
     args << "cxxflags=-stdlib=libc++" << "linkflags=-stdlib=libc++" if ENV.compiler == :clang
+
+    # Workaround mentioned in build error:
+    # > Define `BOOST_STACKTRACE_LIBCXX_RUNTIME_MAY_CAUSE_MEMORY_LEAK` to
+    # > suppress this error if the library would not be used with libc++ runtime
+    # > (for example, it would be only used with GCC runtime)
+    args << "define=BOOST_STACKTRACE_LIBCXX_RUNTIME_MAY_CAUSE_MEMORY_LEAK" if OS.linux? && Hardware::CPU.arm?
 
     system "./bootstrap.sh", *bootstrap_args
     system "./b2", "headers"
@@ -75,7 +90,7 @@ class BoostAT185 < Formula
   end
 
   test do
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include <boost/algorithm/string.hpp>
       #include <boost/iostreams/device/array.hpp>
       #include <boost/iostreams/device/back_inserter.hpp>
@@ -121,9 +136,9 @@ class BoostAT185 < Formula
 
         return 0;
       }
-    EOS
-    system ENV.cxx, "test.cpp", "-std=c++14", "-o", "test", "-L#{lib}", "-lboost_iostreams",
-                    "-L#{Formula["zstd"].opt_lib}", "-lzstd"
+    CPP
+    system ENV.cxx, "test.cpp", "-std=c++14", "-o", "test", "-I#{include}",
+                    "-L#{lib}", "-lboost_iostreams", "-L#{Formula["zstd"].opt_lib}", "-lzstd"
     system "./test"
   end
 end

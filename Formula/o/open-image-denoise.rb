@@ -1,53 +1,43 @@
 class OpenImageDenoise < Formula
   desc "High-performance denoising library for ray tracing"
   homepage "https://openimagedenoise.github.io"
-  url "https://github.com/OpenImageDenoise/oidn/releases/download/v2.3.0/oidn-2.3.0.src.tar.gz"
-  sha256 "cce3010962ec84e0ba1acd8c9055a3d8de402fedb1b463517cfeb920a276e427"
+  url "https://github.com/RenderKit/oidn/releases/download/v2.4.1/oidn-2.4.1.src.tar.gz"
+  sha256 "9c7c77ae0d57e004479cddb7aaafd405c2cc745153bed4805413c21be610e17b"
   license "Apache-2.0"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "fc3c4ba67d53d8e2fa8bb99ed1c69cc307bb89c06557d711dee97901f45364a5"
-    sha256 cellar: :any,                 arm64_ventura:  "01ce7b7dd522c6393a12889fcd12219d0a55b64b1acfa8d9fa825876bdff202a"
-    sha256 cellar: :any,                 arm64_monterey: "b0c477236d04837d0b49d84e9704eba22a17d539bcef29755809964b6f39dab5"
-    sha256 cellar: :any,                 sonoma:         "3eeffedc9f75b74c36a2a1f714abc363bf978112870a2c26377414afd7a4af3c"
-    sha256 cellar: :any,                 ventura:        "5b18013ad5adc8291c15201537c5a0eaddef36dedb0dc58d07b330640292152b"
-    sha256 cellar: :any,                 monterey:       "73919cbd7bd7ad3827cb362cbe262301edc58c613be4b094fbfc9fe222082436"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "8d2a4435f06185707e8a6706f21444a11c93fdb1bf3257d7a15f36b9bbda7ee0"
+    sha256 cellar: :any,                 arm64_tahoe:   "d95bf70457651d34cf5332b662c167b9dbc8e4f27678b7252e4aa7262ce62098"
+    sha256 cellar: :any,                 arm64_sequoia: "cbb4ea3a39c5e5b64a4a335e8c1971f0da2cffd9136955b0011d96e12b17745d"
+    sha256 cellar: :any,                 arm64_sonoma:  "287e948aa84160719b9d6e92ce4c4466ec6423629e2b3d5a7bd7572c62812bdc"
+    sha256 cellar: :any,                 sonoma:        "fa836c9d2fffa3e005bc4d57ed16ac62b2c6f3e9244a974beba6f5f053876f1c"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "4bd0407c5f6e91debe6c129737804d4de434029c0244a9a1777708b9be6a9ad4"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "3cc9345944f34aac48dfe6e2b38c0f79d0a586ecf424f291f1fe829073878a43"
   end
 
   depends_on "cmake" => :build
   depends_on "ispc" => :build
-  depends_on "python@3.12" => :build
-  # clang: error: unknown argument: '-fopenmp-simd'
-  # https://github.com/OpenImageDenoise/oidn/issues/35
-  depends_on macos: :high_sierra
   depends_on "tbb"
 
-  # fix compile error when using old libc++ (e.g. from macOS 12 SDK)
-  patch do
-    url "https://github.com/RenderKit/oidn/commit/e5e52d335c58365b6cbd91f9a8a6f9ee9a085bf5.patch?full_index=1"
-    sha256 "e5e42bb52b9790bbce3c8f82413986d5a23d389e1488965b738810b0d9fb0d2a"
-  end
+  uses_from_macos "python" => :build
 
   def install
     # Fix arm64 build targeting iOS
     inreplace "cmake/oidn_ispc.cmake", 'set(ISPC_TARGET_OS "--target-os=ios")', ""
 
-    mkdir "build" do
-      system "cmake", *std_cmake_args, ".."
-      system "make", "install"
-    end
+    system "cmake", "-S", ".", "-B", "build", *std_cmake_args
+    system "cmake", "--build", "build"
+    system "cmake", "--install", "build"
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <OpenImageDenoise/oidn.h>
       int main() {
         OIDNDevice device = oidnNewDevice(OIDN_DEVICE_TYPE_DEFAULT);
         oidnCommitDevice(device);
         return oidnGetDeviceError(device, 0);
       }
-    EOS
+    C
     system ENV.cc, "-I#{include}", "test.c", "-L#{lib}", "-lOpenImageDenoise"
     system "./a.out"
   end

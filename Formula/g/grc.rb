@@ -7,14 +7,14 @@ class Grc < Formula
   sha256 "a7b10d4316b59ca50f6b749f1d080cea0b41cb3b7258099c3eb195659d1f144f"
   license "GPL-2.0-or-later"
   revision 1
-  head "https://github.com/garabik/grc.git", branch: "devel"
+  head "https://github.com/garabik/grc.git", branch: "master"
 
   bottle do
-    rebuild 3
-    sha256 cellar: :any_skip_relocation, all: "248bf7dd11e0b16b2737d4abd34a2f199983f360d38a5e1a20574d45aa3d6a38"
+    rebuild 5
+    sha256 cellar: :any_skip_relocation, all: "7a9655993b72c5fa50ecd3e530cdb69ab9da8c0fc4f9352786b10c9529d26cc8"
   end
 
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   def install
     # fix non-standard prefix installs

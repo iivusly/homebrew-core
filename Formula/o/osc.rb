@@ -3,40 +3,34 @@ class Osc < Formula
 
   desc "Command-line interface to work with an Open Build Service"
   homepage "https://openbuildservice.org"
-  url "https://github.com/openSUSE/osc/archive/refs/tags/1.9.1.tar.gz"
-  sha256 "2a9a466908190bd65bab047180abb372e30ac1ca06ef2488087d14e36edf1388"
+  url "https://files.pythonhosted.org/packages/8b/c3/a26a714867981cdbb8753545ea74be2a9dcf6b5363b6fefc64220efea0f2/osc-1.26.0.tar.gz"
+  sha256 "33c646683f9550aa4262bef662a05cf0acd9c51371dbea8fcab1bdc3406ecaf8"
   license "GPL-2.0-or-later"
   head "https://github.com/openSUSE/osc.git", branch: "master"
 
-  livecheck do
-    url :stable
-    regex(/^v?(\d+(?:\.\d+)+)$/i)
-  end
-
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "32fdf1b9d5de5626e133db03159e5a6a4c06357dc9faf3c1f4bbc8997fe9576d"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "32fdf1b9d5de5626e133db03159e5a6a4c06357dc9faf3c1f4bbc8997fe9576d"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "32fdf1b9d5de5626e133db03159e5a6a4c06357dc9faf3c1f4bbc8997fe9576d"
-    sha256 cellar: :any_skip_relocation, sonoma:         "b440ae8843b0300dfd814393075b27463847bc66a699338134b3fe81b365dd4c"
-    sha256 cellar: :any_skip_relocation, ventura:        "b440ae8843b0300dfd814393075b27463847bc66a699338134b3fe81b365dd4c"
-    sha256 cellar: :any_skip_relocation, monterey:       "b440ae8843b0300dfd814393075b27463847bc66a699338134b3fe81b365dd4c"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "32fdf1b9d5de5626e133db03159e5a6a4c06357dc9faf3c1f4bbc8997fe9576d"
+    sha256 cellar: :any_skip_relocation, all: "b50f658592f809fe16db92bbed13a3a919bafd6aeb683b5375e7952c2291eb18"
   end
 
-  depends_on "cryptography"
-  depends_on "python@3.12"
+  depends_on "cryptography" => :no_linkage
+  depends_on "python@3.14"
+  depends_on "rpm"
 
   uses_from_macos "curl"
   uses_from_macos "libffi"
 
-  resource "rpm" do
-    url "https://files.pythonhosted.org/packages/44/1b/ef44b5e2fae8e398bfc58f38c25a6f0a10ea147e3e4970b7e66154017d1d/rpm-0.2.0.tar.gz"
-    sha256 "b92285f65c9ddf77678cb3e51aa67827426408fac34cdd8d537d8c14e3eaffbf"
+  pypi_packages package_name:     "",
+                extra_packages:   %w[ruamel-yaml urllib3],
+                exclude_packages: "cryptography"
+
+  resource "ruamel-yaml" do
+    url "https://files.pythonhosted.org/packages/c7/3b/ebda527b56beb90cb7652cb1c7e4f91f48649fbcd8d2eb2fb6e77cd3329b/ruamel_yaml-0.19.1.tar.gz"
+    sha256 "53eb66cd27849eff968ebf8f0bf61f46cdac2da1d1f3576dd4ccee9b25c31993"
   end
 
   resource "urllib3" do
-    url "https://files.pythonhosted.org/packages/43/6d/fa469ae21497ddc8bc93e5877702dca7cb8f911e337aca7452b5724f1bb6/urllib3-2.2.2.tar.gz"
-    sha256 "dd505485549a7a552833da5e6063639d0d177c04f23bc3864e41e5dc5f612168"
+    url "https://files.pythonhosted.org/packages/c7/24/5f1b3bdffd70275f6661c76461e25f024d5a38a46f04aaca912426a2b1d3/urllib3-2.6.3.tar.gz"
+    sha256 "1b62b6884944a57dbe321509ab94fd4d3b307075e0c2eae991ac71ee15ad38ed"
   end
 
   def install
@@ -47,7 +41,7 @@ class Osc < Formula
     test_config = testpath/"oscrc"
     ENV["OSC_CONFIG"] = test_config
 
-    test_config.write <<~EOS
+    test_config.write <<~INI
       [general]
       apiurl = https://api.opensuse.org
 
@@ -55,10 +49,10 @@ class Osc < Formula
       credentials_mgr_class=osc.credentials.TransientCredentialsManager
       user=brewtest
       pass=
-    EOS
+    INI
 
     output = shell_output("#{bin}/osc status 2>&1", 1).chomp
-    assert_match "Directory '.' is not a working copy", output
+    assert_match "Directory '.' is not a Git SCM working copy", output
     assert_match "Please specify a command", shell_output("#{bin}/osc 2>&1", 2)
   end
 end

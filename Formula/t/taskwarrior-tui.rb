@@ -1,8 +1,8 @@
 class TaskwarriorTui < Formula
   desc "Terminal user interface for taskwarrior"
-  homepage "https://github.com/kdheepak/taskwarrior-tui"
-  url "https://github.com/kdheepak/taskwarrior-tui/archive/refs/tags/v0.26.3.tar.gz"
-  sha256 "76f053e2e3c9e71b8106e3fc3c18fd4400a98c09a8cde5972305e0eeaecc08d3"
+  homepage "https://kdheepak.com/taskwarrior-tui/"
+  url "https://github.com/kdheepak/taskwarrior-tui/archive/refs/tags/v0.26.10.tar.gz"
+  sha256 "7b78c15ff8f5e565b8928e63942c2ca207b65ea0b327bf4df00d0e1e3679bb9c"
   license "MIT"
   head "https://github.com/kdheepak/taskwarrior-tui.git", branch: "main"
 
@@ -12,22 +12,30 @@ class TaskwarriorTui < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "f2b2901f32b3544122323c26da892e08f87823454f705cce01d14d232476fdfe"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "3afa62a7d9b37f1cc56aeb18eccdddb7aab80f02a29bd25c549ebd45238b6257"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "49c0710b58e19d0ed0ca8bfba08e702edaa52c133127485de4b9fd5bb5f07e33"
-    sha256 cellar: :any_skip_relocation, sonoma:         "3abc297d8fe7d9408808eebd2e06d7a915072bd58b8945d5a19bd5ee9220aa72"
-    sha256 cellar: :any_skip_relocation, ventura:        "4ec417f8de4e491903ff7c5cb9283f32577a6984259b1ff2d828121492cf5ba6"
-    sha256 cellar: :any_skip_relocation, monterey:       "24252080f7e54af6aa0f953f65701677b12478c1936764cb8862751e83bd5c1c"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "8cd9e4bead169a07fa797b7a9025c50abbd881ff0f0aa95d5be400ed41fecb9b"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "8a17a4abc24a415b9e1ade5ac4f71a6e9127611bba58425d66125fbbd6c426f2"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "f39584c14a6d34c65bfda37b507314aca590659e9b5fe967d35d324ee7390425"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "5ffbb5b723a040eca15b2e19aa33538446a3b57ffa7a24edfcc8f2d1fbfbecd2"
+    sha256 cellar: :any_skip_relocation, sonoma:        "4290b8070faeaa1834414887c8ba6beb87b54598b0d6f2809d011038f1af6587"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "625a42fa3d043198ac1b34e875cd2e248a2fdcdbdf62d21b9c727e4dead27d3b"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "da7c5d3afc3eaefc21d5dbe7c5a4772ca5b5fe7d3047baa7bf62338691973946"
   end
 
+  depends_on "pandoc" => :build
   depends_on "rust" => :build
   depends_on "task"
 
   def install
     system "cargo", "install", *std_cargo_args
-    man1.install "docs/taskwarrior-tui.1"
-    bash_completion.install "completions/taskwarrior-tui.bash"
+
+    args = %w[
+      --standalone
+      --from=markdown
+      --to=man
+    ]
+    system "pandoc", *args, "packaging/man/taskwarrior-tui.1.md", "-o", "taskwarrior-tui.1"
+    man1.install "taskwarrior-tui.1"
+
+    bash_completion.install "completions/taskwarrior-tui.bash" => "taskwarrior-tui"
     fish_completion.install "completions/taskwarrior-tui.fish"
     zsh_completion.install "completions/_taskwarrior-tui"
   end

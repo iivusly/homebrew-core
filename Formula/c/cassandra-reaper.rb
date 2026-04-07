@@ -1,16 +1,20 @@
 class CassandraReaper < Formula
   desc "Management interface for Cassandra"
   homepage "https://cassandra-reaper.io/"
-  url "https://github.com/thelastpickle/cassandra-reaper/releases/download/3.6.1/cassandra-reaper-3.6.1-release.tar.gz"
-  sha256 "8e5004692d031e2abe47c26c066d853fb1f841b23833edd66d58ff54bef82399"
+  url "https://github.com/thelastpickle/cassandra-reaper/releases/download/4.2.1/cassandra-reaper-4.2.1-release.tar.gz"
+  sha256 "04f5ae21a7914756688ddfff2f3467d1731435466e3a229b849f0ad8fe88c512"
   license "Apache-2.0"
 
-  bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, all: "d3600523c5e7a0f11954710872d7a2b5d1ae39240779ccf37e6e762f683e5feb"
+  livecheck do
+    url :stable
+    strategy :github_latest
   end
 
-  depends_on "openjdk@11"
+  bottle do
+    sha256 cellar: :any_skip_relocation, all: "5ab84b8bf47c86bced3471334993f0e24f3ef4aec87eb60181ef7ee2617ea262"
+  end
+
+  depends_on "openjdk"
 
   def install
     inreplace Dir["resource/*.yaml"], " /var/log", " #{var}/log"
@@ -23,7 +27,7 @@ class CassandraReaper < Formula
     share.install "server/target" => "cassandra-reaper"
 
     (bin/"cassandra-reaper").write_env_script libexec/"cassandra-reaper",
-      Language::Java.overridable_java_home_env("11")
+                                              Language::Java.overridable_java_home_env
   end
 
   service do
@@ -34,6 +38,11 @@ class CassandraReaper < Formula
   end
 
   test do
+    ENV["REAPER_AUTH_USER"] = "admin"
+    ENV["REAPER_AUTH_PASSWORD"] = "admin"
+    ENV["REAPER_READ_USER"] = ""
+    ENV["REAPER_READ_USER_PASSWORD"] = ""
+
     cp etc/"cassandra-reaper/cassandra-reaper.yaml", testpath
     port = free_port
     inreplace "cassandra-reaper.yaml" do |s|
@@ -42,9 +51,7 @@ class CassandraReaper < Formula
       s.gsub! "storageType: memory", "storageType: memory\npersistenceStoragePath: #{testpath}/persistence"
     end
 
-    fork do
-      exec bin/"cassandra-reaper", testpath/"cassandra-reaper.yaml"
-    end
+    spawn bin/"cassandra-reaper", testpath/"cassandra-reaper.yaml"
     sleep 40
     assert_match "200 OK", shell_output("curl -Im3 -o- http://localhost:#{port}/webui/login.html")
   end

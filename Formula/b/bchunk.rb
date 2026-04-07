@@ -1,8 +1,8 @@
 class Bchunk < Formula
   desc "Convert CD images from .bin/.cue to .iso/.cdr"
   homepage "http://he.fi/bchunk/"
-  url "http://he.fi/bchunk/bchunk-1.2.2.tar.gz"
-  sha256 "e7d99b5b60ff0b94c540379f6396a670210400124544fb1af985dd3551eabd89"
+  url "https://github.com/hessu/bchunk/archive/refs/tags/release/1.2.2.tar.gz"
+  sha256 "48dd464d8547f368e6e3434e3e2d53e7b1a7748b4ecc2c8a423d614b0b1f7fc4"
   license "GPL-2.0-or-later"
   head "https://github.com/hessu/bchunk.git", branch: "master"
 
@@ -12,6 +12,8 @@ class Bchunk < Formula
   end
 
   bottle do
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:    "3277369df1cbf1eee5bff5521a3c471311ac476f7bbc9deb3aebebe0d2f1ed06"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia:  "22c3f5e3b6a740a91ac5ddd9b384efc9fd9d399a9356f2bb5e0eabad6df25b97"
     sha256 cellar: :any_skip_relocation, arm64_sonoma:   "68a57a42fd8bc5ba39762d9b0731fd2ade2a6ec3862e2d2179daee64d60593b7"
     sha256 cellar: :any_skip_relocation, arm64_ventura:  "577174425847ab641ddbd3dd9001c596c2dbcc69ad54272c412a0d338c0ddd68"
     sha256 cellar: :any_skip_relocation, arm64_monterey: "c361f431e4d301b9a0805db04d500f73c4247d06067aba3ec74944525bc7855c"
@@ -21,10 +23,7 @@ class Bchunk < Formula
     sha256 cellar: :any_skip_relocation, monterey:       "cbfaaf81653c53be4dbc62fe7eb6e13071ad9961b18d5f0369bd8f003cded841"
     sha256 cellar: :any_skip_relocation, big_sur:        "bf3ec0f873db02e0234790bc8b700e4f1b989877742cf1560854e7b561698f4b"
     sha256 cellar: :any_skip_relocation, catalina:       "b9f7bc758711585d7a016b7b3ddefe3256a368c00b21c51691481c7fbfc2823a"
-    sha256 cellar: :any_skip_relocation, mojave:         "232935a7e7291016af594df742848d851ceca12ff9c06e183485c6a184c1df38"
-    sha256 cellar: :any_skip_relocation, high_sierra:    "d6183607b5b987345ee3380263819f1d5e12f2f3cc9f6fd55accfbf92c26d5ef"
-    sha256 cellar: :any_skip_relocation, sierra:         "95ef5fddc2234902187dde834690fb5957bd99ce11403e3d0f8881a705bb8f27"
-    sha256 cellar: :any_skip_relocation, el_capitan:     "665af973709071e982939f37ba39c79c6e41f7f18277d65670475ba9d8315f94"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "cb5ff1ac028a138667c1d1dae887d33348e009b44f4a9a042d7d10c7387b5d37"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "97b11f40a695dccaf6033a9911a9377984ffa7d3ed59bc1272fce7b3a0958edf"
   end
 
@@ -44,6 +43,6 @@ class Bchunk < Formula
     touch testpath/"foo.bin"
 
     system bin/"bchunk", "foo.bin", "foo.cue", "foo"
-    assert_predicate testpath/"foo01.iso", :exist?
+    assert_path_exists testpath/"foo01.iso"
   end
 end

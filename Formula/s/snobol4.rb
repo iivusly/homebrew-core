@@ -1,8 +1,8 @@
 class Snobol4 < Formula
   desc "String oriented and symbolic programming language"
   homepage "https://www.regressive.org/snobol4/"
-  url "https://ftp.regressive.org/snobol/snobol4-2.3.2.tar.gz"
-  sha256 "41e301e9dd180d70117d64f3694f9dd54f9ed909a36a32587c8bed85ab68ac15"
+  url "https://ftp.regressive.org/snobol/snobol4-2.3.3.tar.gz"
+  sha256 "bfd53071d69283776f5b2764f7865d354b89d372569854a18878e59f57388ed2"
   license "BSD-2-Clause"
 
   livecheck do
@@ -11,13 +11,13 @@ class Snobol4 < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "7baa9cfb9bdbb89ec8f1817fccc3f4a3531e56822617a3bab083459029a6457a"
-    sha256 arm64_ventura:  "bab2633cd719743f5648b6a5fa32dae630ad6b7bc4400417747f834226c860e6"
-    sha256 arm64_monterey: "90e3d3102cb1b10ad1578aad8f4fcaec31c2960a4ad54e54983f4778b5646a97"
-    sha256 sonoma:         "c4576d539a10c904408404d64fde008b7939d8fbcddf2e739738b38c9fe613bd"
-    sha256 ventura:        "c8c5b13e46532544bdc4fa93d3670fa5b648d5a9aa9593758a9e83bd9d72f897"
-    sha256 monterey:       "e4d3d40f4b8bd51e49b1c99de9590e79f00876fadb28c13cf98070525106a5ea"
-    sha256 x86_64_linux:   "c555c7e31212c27a251d42ebf6b166ee1ac59c6d306c60327a8e1e429d1a7f7a"
+    rebuild 1
+    sha256 arm64_tahoe:   "386f57258d19733bba9f79839743634ccdc0902fffe86afa9e0e8bf37b7fd035"
+    sha256 arm64_sequoia: "be80dab2b55d9f5cdfe7048659aa67ed87b0e64819d2d8c213db3a897b7f8651"
+    sha256 arm64_sonoma:  "8d6f1601dec1dd71250698920a2f3f51a4029da00408233459ce2dde4001fff5"
+    sha256 sonoma:        "4afab736c1e01614e1d6d305fc65c9d17e2352cd50cb99473f0b8a573f428360"
+    sha256 arm64_linux:   "5b19a3df62c11519f9fa0f4100fb82cfb9d97445f881f786de15764b3de37e60"
+    sha256 x86_64_linux:  "04420e3ce73484c4ca3ee3115d30b9db317def98bf1ec831188385639f49d445"
   end
 
   depends_on "openssl@3"
@@ -25,10 +25,10 @@ class Snobol4 < Formula
   uses_from_macos "m4" => :build
   uses_from_macos "libffi"
   uses_from_macos "sqlite"
-  uses_from_macos "zlib"
 
   on_linux do
     depends_on "readline"
+    depends_on "zlib-ng-compat"
   end
 
   conflicts_with "sdb", because: "both install `sdb` binaries"

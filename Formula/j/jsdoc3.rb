@@ -1,25 +1,23 @@
 class Jsdoc3 < Formula
   desc "API documentation generator for JavaScript"
   homepage "https://jsdoc.app/"
-  url "https://registry.npmjs.org/jsdoc/-/jsdoc-4.0.3.tgz"
-  sha256 "853e0a2d2f32b8bf3b5f7a5730e23ec1cb138a616e066bb2bc658d13c349da57"
+  url "https://registry.npmjs.org/jsdoc/-/jsdoc-4.0.5.tgz"
+  sha256 "a590c432d7a190fea72445db6b3e2f8d1f457832caa88e617dbb24984141f971"
   license "Apache-2.0"
-  head "https://github.com/jsdoc3/jsdoc.git", branch: "main"
 
   bottle do
-    rebuild 2
-    sha256 cellar: :any_skip_relocation, all: "c2c7d9acd73491e16332fe27a05c15006ec39e8f8f53408f155fc72d56b2103f"
+    sha256 cellar: :any_skip_relocation, all: "8d86f3f9bc538cb7fa6038821e62cf8aa0bfff3a057799f3aab176894a6c8b21"
   end
 
   depends_on "node"
 
   def install
     system "npm", "install", *std_npm_args
-    bin.install_symlink Dir["#{libexec}/bin/*"]
+    bin.install_symlink libexec.glob("bin/*")
   end
 
   test do
-    (testpath/"test.js").write <<~EOS
+    (testpath/"test.js").write <<~JS
       /**
        * Represents a formula.
        * @constructor
@@ -27,7 +25,7 @@ class Jsdoc3 < Formula
        * @param {string} version - the version of the formula.
        **/
       function Formula(name, version) {}
-    EOS
+    JS
 
     system bin/"jsdoc", "--verbose", "test.js"
   end

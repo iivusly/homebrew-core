@@ -12,38 +12,38 @@ class KyotoTycoon < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "53cb82d8fa4502c0041623ae8cfbb609b37625963c1eea87e43e48c0b0a1d4dc"
-    sha256 arm64_ventura:  "29d41775017c933fc6c6298daf48ea1d0e6c5b7158fb323f461e42672549ccc6"
-    sha256 arm64_monterey: "887e108eab14901d52e4e0a8b6553bc9a4bf8dc04ae7814e0aa25da08492fec4"
-    sha256 arm64_big_sur:  "244a150072e722f1ee861425fdfd1cb12a6a09ee27899b998b0794bd01cd1f12"
-    sha256 sonoma:         "37f40428e931a8c134cc731d14cc0234ca4356aede7ce80629be3cf539ae15e4"
-    sha256 ventura:        "147129037cdc09136b01f8dc8ca155c968ba9a4a9b9b0e980bc65b4df970a556"
-    sha256 monterey:       "01ea2b5572500293e6d2be3fc51d8852a3be3e0a6a0a918f11224a39d5e0d133"
-    sha256 big_sur:        "30c5a805f4e4f672814b210a28567424b23af490a8d9555286dae17ee41506c4"
-    sha256 catalina:       "575c025f8a4479503833b3d90c8054ed3b67e8f4a14a96978ec585a76bbf7963"
-    sha256 mojave:         "aafcc936bd17bade9714e200c0e713ec4cd6ddc8f38a08d258cbf09437adec75"
-    sha256 x86_64_linux:   "bb1a1af50e64ab1cf5d39182e0ea8ef10869ecf4f995fd7b6fc31969dab97c9b"
+    rebuild 1
+    sha256 arm64_tahoe:   "409039aba15f91854558024a2b4b4e7238164950a0f9aaecd576c0414c9b225b"
+    sha256 arm64_sequoia: "8b2c6c299276fdc723900da83356a6fcdad858b663efa0e62b58e82270ea9c1b"
+    sha256 arm64_sonoma:  "7558ae59191b5f274713d90d4125549d13731f3565ec4d695a90e2fa6d61c152"
+    sha256 sonoma:        "0124e888f1cf8dd1384369bd9d0679cff458c2e6c317655cd36f92ed41191e16"
+    sha256 arm64_linux:   "566a096ee78096abada9b56c8589a5a5a5a780e36887ba87fce266925d412499"
+    sha256 x86_64_linux:  "2c980249e288c8d49296641182d32f63233d5da165f3a5a70e0d6fff82621385"
   end
 
   depends_on "lua" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "kyoto-cabinet"
 
-  uses_from_macos "zlib"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   # Build patch (submitted upstream)
   patch do
-    url "https://raw.githubusercontent.com/Homebrew/formula-patches/955ce09/kyoto-tycoon/0.9.56.patch"
+    url "https://raw.githubusercontent.com/Homebrew/homebrew-core/1cf441a0/Patches/kyoto-tycoon/0.9.56.patch"
     sha256 "7a5efe02a38e3f5c96fd5faa81d91bdd2c1d2ffeb8c3af52878af4a2eab3d830"
   end
 
   # Homebrew-specific patch to support testing with ephemeral ports (submitted upstream)
   patch do
-    url "https://raw.githubusercontent.com/Homebrew/formula-patches/9925c07/kyoto-tycoon/ephemeral-ports.patch"
+    url "https://raw.githubusercontent.com/Homebrew/homebrew-core/1cf441a0/Patches/kyoto-tycoon/ephemeral-ports.patch"
     sha256 "736603b28e9e7562837d0f376d89c549f74a76d31658bf7d84b57c5e66512672"
   end
 
   def install
+    ENV.append_to_cflags "-fpermissive" if OS.linux?
+    ENV.append "CXXFLAGS", "-std=c++98"
     system "./configure", "--prefix=#{prefix}",
                           "--with-kc=#{Formula["kyoto-cabinet"].opt_prefix}",
                           "--with-lua=#{Formula["lua"].opt_prefix}"
@@ -52,7 +52,7 @@ class KyotoTycoon < Formula
   end
 
   test do
-    (testpath/"test.lua").write <<~EOS
+    (testpath/"test.lua").write <<~LUA
       kt = __kyototycoon__
       db = kt.db
       -- echo back the input data as the output data
@@ -62,13 +62,11 @@ class KyotoTycoon < Formula
          end
          return kt.RVSUCCESS
       end
-    EOS
+    LUA
     port = free_port
 
-    fork do
-      exec bin/"ktserver", "-port", port.to_s, "-scr", testpath/"test.lua"
-    end
-    sleep 5
+    spawn bin/"ktserver", "-port", port.to_s, "-scr", testpath/"test.lua"
+    sleep 10
 
     assert_match "Homebrew\tCool", shell_output("#{bin}/ktremotemgr script -port #{port} echo Homebrew Cool 2>&1")
   end

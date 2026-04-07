@@ -3,6 +3,7 @@ name: CI
 on:
   push:
     branches:
+      - main
       - master
   pull_request:
   merge_group:
@@ -14,10 +15,15 @@ env:
   HOMEBREW_NO_INSTALL_FROM_API: 1
   HOMEBREW_TEST_BOT_ANALYTICS: 1
   HOMEBREW_ENFORCE_SBOM: 1
+  HOMEBREW_NO_BUILD_ERROR_ISSUES: 1
   GH_REPO: ${{github.repository}}
   GH_NO_UPDATE_NOTIFIER: 1
   GH_PROMPT_DISABLED: 1
   SCRIPTS_PATH: .github/workflows/scripts
+
+defaults:
+  run:
+    shell: bash -xeuo pipefail {0}
 
 concurrency:
   group: "tests-${{ github.ref }}"
@@ -33,36 +39,35 @@ jobs:
       matrix:
         stable: [false, true]
     name: tap_syntax${{ matrix.stable && ' (stable)' || '' }}
-    runs-on: ubuntu-22.04
-    continue-on-error: ${{ matrix.stable }}
+    runs-on: ubuntu-latest
+    continue-on-error: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'CI-no-fail-fast-syntax') }}
     container:
-      image: ghcr.io/homebrew/ubuntu22.04:${{ matrix.stable && 'latest' || 'master'}}
+      image: ghcr.io/homebrew/brew:${{ matrix.stable && 'latest' || 'main'}}
     env:
       HOMEBREW_SIMULATE_MACOS_ON_LINUX: 1
     steps:
       - name: Set up Homebrew
         id: set-up-homebrew
-        uses: Homebrew/actions/setup-homebrew@master
+        uses: Homebrew/actions/setup-homebrew@main
         with:
           core: true
           cask: false
-          test-bot: true
           stable: ${{ matrix.stable }}
 
       - name: Cache style cache
-        uses: actions/cache@v4
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         with:
           path: /home/linuxbrew/.cache/Homebrew/style
-          key: style-cache-${{ matrix.stable && 'stable-' || 'master-' }}${{ github.sha }}
-          restore-keys: style-cache-${{ matrix.stable && 'stable-' || 'master-' }}
+          key: style-cache-${{ matrix.stable && 'stable-' || 'main-' }}${{ github.sha }}
+          restore-keys: style-cache-${{ matrix.stable && 'stable-' || 'main-' }}
 
       - run: brew test-bot --only-tap-syntax ${{ matrix.stable && '--stable' || '' }}
 
   formulae_detect:
     if: github.repository_owner == 'Homebrew' && github.event_name != 'push'
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     container:
-      image: ghcr.io/homebrew/ubuntu22.04:master
+      image: ghcr.io/homebrew/brew:main
     outputs:
       testing_formulae: ${{ steps.formulae-detect.outputs.testing_formulae }}
       added_formulae: ${{ steps.formulae-detect.outputs.added_formulae }}
@@ -70,11 +75,10 @@ jobs:
     steps:
       - name: Set up Homebrew
         id: set-up-homebrew
-        uses: Homebrew/actions/setup-homebrew@master
+        uses: Homebrew/actions/setup-homebrew@main
         with:
           core: true
           cask: false
-          test-bot: true
 
       - run: brew test-bot --only-formulae-detect
         id: formulae-detect
@@ -83,13 +87,13 @@ jobs:
         if: >
           github.event_name == 'merge_group' ||
           (contains(github.event.pull_request.labels.*.name, 'CI-published-bottle-commits') &&
-           github.base_ref != 'master')
+           github.base_ref != 'master' && github.base_ref != 'main')
         env:
           TESTING_FORMULAE: ${{ steps.formulae-detect.outputs.formulae_to_fetch }}
         run: brew test-bot --only-bottles-fetch --testing-formulae="$TESTING_FORMULAE"
 
   report_analytics:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     needs: formulae_detect
     if: github.repository_owner == 'Homebrew' && github.event_name == 'pull_request'
     steps:
@@ -128,7 +132,7 @@ jobs:
     permissions:
       pull-requests: read
     if: github.repository_owner == 'Homebrew' && github.event_name == 'pull_request'
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-slim
     needs: formulae_detect
     outputs:
       syntax-only: ${{ steps.check-labels.outputs.syntax-only }}
@@ -138,12 +142,15 @@ jobs:
       long-timeout: ${{ steps.check-labels.outputs.long-timeout }}
       test-bot-formulae-args: ${{ steps.check-labels.outputs.test-bot-formulae-args }}
       test-bot-dependents-args: ${{ steps.check-labels.outputs.test-bot-dependents-args }}
+      download-concurrency: ${{ steps.check-labels.outputs.download-concurrency }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Check for CI labels
         id: check-labels
-        uses: actions/github-script@v7
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         env:
           TESTING_FORMULAE: ${{needs.formulae_detect.outputs.testing_formulae}}
           ADDED_FORMULAE: ${{needs.formulae_detect.outputs.added_formulae}}
@@ -172,9 +179,9 @@ jobs:
     if: >
       github.event_name == 'pull_request' &&
       !fromJson(needs.setup_tests.outputs.syntax-only)
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     container:
-      image: ghcr.io/homebrew/ubuntu22.04:master
+      image: ghcr.io/homebrew/brew:main
     outputs:
       runners: ${{steps.determine-runners.outputs.runners}}
       runners_present: ${{steps.determine-runners.outputs.runners_present}}
@@ -186,18 +193,17 @@ jobs:
     steps:
       - name: Set up Homebrew
         id: set-up-homebrew
-        uses: Homebrew/actions/setup-homebrew@master
+        uses: Homebrew/actions/setup-homebrew@main
         with:
           core: true
           cask: false
-          test-bot: false
 
       - name: Determine runners to use for tests job
         id: determine-runners
         run: brew determine-test-runners "$TESTING_FORMULAE" "$DELETED_FORMULAE"
 
   tests:
-    needs: [tap_syntax, setup_tests, setup_runners]
+    needs: [tap_syntax, formulae_detect, setup_tests, setup_runners]
     if: >
       github.event_name == 'pull_request' &&
       !fromJson(needs.setup_tests.outputs.syntax-only) &&
@@ -212,7 +218,7 @@ jobs:
     timeout-minutes: ${{ matrix.timeout }}
     defaults:
       run:
-        shell: /bin/bash -e {0}
+        shell: /bin/bash -xeuo pipefail {0}
         working-directory: ${{matrix.workdir || github.workspace}}
     env:
       GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
@@ -220,18 +226,30 @@ jobs:
       BOTTLES_DIR: ${{matrix.workdir || github.workspace}}/bottles
     steps:
       - name: Pre-test steps
-        uses: Homebrew/actions/pre-build@master
+        uses: Homebrew/actions/pre-build@main
         with:
           bottles-directory: ${{ env.BOTTLES_DIR }}
           cleanup: ${{ matrix.cleanup }}
 
-      - run: brew test-bot ${{ needs.setup_tests.outputs.test-bot-formulae-args }}
+      - name: Test formulae
         id: brew-test-bot-formulae
+        run: |
+          xargs -t brew test-bot \
+            --testing-formulae="$TESTING_FORMULAE" \
+            --added-formulae="$ADDED_FORMULAE" \
+            --deleted-formulae="$DELETED_FORMULAE" \
+            <<<"$TEST_BOT_FORMULAE_ARGS"
+        env:
+          HOMEBREW_DOWNLOAD_CONCURRENCY: ${{ needs.setup_tests.outputs.download-concurrency }}
+          TEST_BOT_FORMULAE_ARGS: ${{ needs.setup_tests.outputs.test-bot-formulae-args }}
+          TESTING_FORMULAE: ${{ needs.formulae_detect.outputs.testing_formulae }}
+          ADDED_FORMULAE: ${{ needs.formulae_detect.outputs.added_formulae }}
+          DELETED_FORMULAE: ${{ needs.formulae_detect.outputs.deleted_formulae }}
         working-directory: ${{ env.BOTTLES_DIR }}
 
       - name: Post-build steps
         if: always()
-        uses: Homebrew/actions/post-build@master
+        uses: Homebrew/actions/post-build@main
         with:
           runner: ${{ matrix.runner }}
           cleanup: ${{ matrix.cleanup }}
@@ -242,7 +260,7 @@ jobs:
     permissions:
       pull-requests: read
     if: github.repository_owner == 'Homebrew' && github.event_name == 'pull_request'
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-slim
     needs: [setup_tests, formulae_detect]
     outputs:
       syntax-only: ${{ steps.check-labels.outputs.syntax-only }}
@@ -252,12 +270,15 @@ jobs:
       long-timeout: ${{ steps.check-labels.outputs.long-timeout }}
       test-bot-formulae-args: ${{ steps.check-labels.outputs.test-bot-formulae-args }}
       test-bot-dependents-args: ${{ steps.check-labels.outputs.test-bot-dependents-args }}
+      download-concurrency: ${{ steps.check-labels.outputs.download-concurrency }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Check for CI labels
         id: check-labels
-        uses: actions/github-script@v7
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         env:
           TESTING_FORMULAE: ${{needs.formulae_detect.outputs.testing_formulae}}
           ADDED_FORMULAE: ${{needs.formulae_detect.outputs.added_formulae}}
@@ -287,9 +308,9 @@ jobs:
       github.event_name == 'pull_request' &&
       !fromJson(needs.setup_dep_tests.outputs.syntax-only) &&
       fromJson(needs.setup_dep_tests.outputs.test-dependents)
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     container:
-      image: ghcr.io/homebrew/ubuntu22.04:master
+      image: ghcr.io/homebrew/brew:main
     outputs:
       runners: ${{steps.determine-dependent-runners.outputs.runners}}
       runners_present: ${{steps.determine-dependent-runners.outputs.runners_present}}
@@ -300,18 +321,18 @@ jobs:
     steps:
       - name: Set up Homebrew
         id: set-up-homebrew
-        uses: Homebrew/actions/setup-homebrew@master
+        uses: Homebrew/actions/setup-homebrew@main
         with:
           core: true
           cask: false
-          test-bot: false
 
       - name: Determine runners to use for test_deps job
         id: determine-dependent-runners
         run: brew determine-test-runners --dependents --eval-all "$TESTING_FORMULAE"
 
   test_deps:
-    needs: [tap_syntax, setup_dep_tests, setup_dep_runners, tests]
+    needs:
+      [tap_syntax, formulae_detect, setup_dep_tests, setup_dep_runners, tests]
     if: >
       (success() ||
       (failure() &&
@@ -331,26 +352,36 @@ jobs:
     timeout-minutes: ${{ matrix.timeout }}
     defaults:
       run:
-        shell: /bin/bash -e {0}
+        shell: /bin/bash -xeuo pipefail {0}
         working-directory: ${{matrix.workdir || github.workspace}}
     env:
       GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
       HOMEBREW_GITHUB_API_TOKEN: ${{secrets.GITHUB_TOKEN}}
       BOTTLES_DIR: ${{matrix.workdir || github.workspace}}/bottles
+      TESTING_FORMULAE: ${{matrix.testing_formulae}}
     steps:
       - name: Pre-test steps
-        uses: Homebrew/actions/pre-build@master
+        uses: Homebrew/actions/pre-build@main
         with:
           bottles-directory: ${{ env.BOTTLES_DIR }}
           cleanup: ${{ matrix.cleanup }}
           download-bottles: true
 
-      - run: brew test-bot ${{ needs.setup_dep_tests.outputs.test-bot-dependents-args }}
+      - name: Test dependents
+        run: |
+          xargs -t brew test-bot \
+            --testing-formulae="$TESTING_FORMULAE" \
+            --tested-formulae="$TESTED_FORMULAE" \
+            <<<"$TEST_BOT_DEPENDENTS_ARGS"
+        env:
+          HOMEBREW_DOWNLOAD_CONCURRENCY: ${{ needs.setup_dep_tests.outputs.download-concurrency }}
+          TEST_BOT_DEPENDENTS_ARGS: ${{ needs.setup_dep_tests.outputs.test-bot-dependents-args }}
+          TESTED_FORMULAE: ${{ needs.formulae_detect.outputs.testing_formulae }}
         working-directory: ${{ env.BOTTLES_DIR }}
 
       - name: Steps summary and cleanup
         if: always()
-        uses: Homebrew/actions/post-build@master
+        uses: Homebrew/actions/post-build@main
         with:
           runner: ${{ runner.os == 'Linux' && format('{0}-deps', matrix.runner) || matrix.runner }}
           cleanup: ${{ matrix.cleanup }}
@@ -361,11 +392,16 @@ jobs:
   conclusion:
     needs: [tests, test_deps, setup_tests, setup_runners]
     if: always() && github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
       - name: Check `tests` result
+        env:
+          TESTS_RESULT: ${{ needs.tests.result }}
+          DEPS_TESTS_RESULT: ${{ needs.test_deps.result }}
+          RUNNERS_PRESENT: ${{ needs.setup_runners.outputs.runners_present }}
+          SYNTAX_ONLY: ${{ needs.setup_tests.outputs.syntax-only }}
         run: |
-          result='${{ needs.tests.result }}'
+          result="${TESTS_RESULT}"
           # Silence lint error about backtick usage inside single quotes.
           # shellcheck disable=SC2016
           printf '::notice ::`tests` job status: %s\n' "$result"
@@ -378,7 +414,7 @@ jobs:
             # shellcheck disable=SC2016
             printf '::error ::`tests` job %s.\n' "$result"
 
-            deps_result='${{ needs.test_deps.result }}'
+            deps_result="${DEPS_TESTS_RESULT}"
             if [[ "$deps_result" = "skipped" ]]
             then
               # Silence lint error about backtick usage inside single quotes.
@@ -389,8 +425,8 @@ jobs:
             exit 1
           fi
 
-          runners_present='${{ needs.setup_runners.outputs.runners_present }}'
-          syntax_only='${{ needs.setup_tests.outputs.syntax-only }}'
+          runners_present="${RUNNERS_PRESENT-}"
+          syntax_only="${SYNTAX_ONLY-}"
 
           # The tests job can be skipped only if the PR is syntax-only
           # or no runners were assigned.

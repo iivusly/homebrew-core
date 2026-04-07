@@ -1,8 +1,8 @@
 class Quilt < Formula
   desc "Work with series of patches"
   homepage "https://savannah.nongnu.org/projects/quilt"
-  url "https://download.savannah.gnu.org/releases/quilt/quilt-0.68.tar.gz"
-  sha256 "fe8c09de03c106e85b3737c8f03ade147c956b79ed7af485a1c8a3858db38426"
+  url "https://download.savannah.gnu.org/releases/quilt/quilt-0.69.tar.gz"
+  sha256 "555ddffde22da3c86d1caf5a9c1fb8a152ac2b84730437bd39cc08849c9f4852"
   license "GPL-2.0-or-later"
   head "https://git.savannah.gnu.org/git/quilt.git", branch: "master"
 
@@ -12,13 +12,14 @@ class Quilt < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "502671863bf107d3681e09299effd69c594f030f82aa44213efc142c63ac826d"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "af866881737fac5051ef085909b232d15486658dd38312db8c22a01c3756ca20"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "367878f8dd8271300992bb0f1d0477e72ed4d0ce6803b05b30c85fbbc8d0acbb"
-    sha256 cellar: :any_skip_relocation, sonoma:         "8e935a3ddbba6609ab5cebc2d17d93350decaf956c79c08364f92cfb697fb037"
-    sha256 cellar: :any_skip_relocation, ventura:        "af866881737fac5051ef085909b232d15486658dd38312db8c22a01c3756ca20"
-    sha256 cellar: :any_skip_relocation, monterey:       "367878f8dd8271300992bb0f1d0477e72ed4d0ce6803b05b30c85fbbc8d0acbb"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "fa56add5a120e209251cc06d9e9f08d742fd011d8d590bd65c9cfee13c81d87b"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "93979fd118d49801525b0d28a8572a055893d3e3169ee9eff1bca64e69d9ccc2"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "93979fd118d49801525b0d28a8572a055893d3e3169ee9eff1bca64e69d9ccc2"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "93979fd118d49801525b0d28a8572a055893d3e3169ee9eff1bca64e69d9ccc2"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "93979fd118d49801525b0d28a8572a055893d3e3169ee9eff1bca64e69d9ccc2"
+    sha256 cellar: :any_skip_relocation, sonoma:        "93979fd118d49801525b0d28a8572a055893d3e3169ee9eff1bca64e69d9ccc2"
+    sha256 cellar: :any_skip_relocation, ventura:       "93979fd118d49801525b0d28a8572a055893d3e3169ee9eff1bca64e69d9ccc2"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "f0aadd65237093e1356cf63eef91a5ab80f8cba26bc8e034d05de7c3095dd64c"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "f0aadd65237093e1356cf63eef91a5ab80f8cba26bc8e034d05de7c3095dd64c"
   end
 
   depends_on "coreutils"
@@ -39,7 +40,7 @@ class Quilt < Formula
       args << "--with-stat=/usr/bin/stat" # on macOS, quilt expects BSD stat
       if MacOS.version >= :ventura
         args << "--with-diff=#{Formula["diffutils"].opt_bin}/diff"
-        args << "--with-patch=#{Formula["gpatch"].opt_bin}/patch"
+        args << "--with-patch=#{Formula["gpatch"].opt_bin}/gpatch"
       end
     else
       args << "--with-sed=#{Formula["gnu-sed"].opt_bin}/sed"

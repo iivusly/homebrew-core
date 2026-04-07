@@ -7,24 +7,24 @@ class Derby < Formula
   license "Apache-2.0"
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, all: "687e0c8f8bfbcd850af4ef20e9588aa7b6a0ff52087896b3e05f2505abefa70e"
+    rebuild 2
+    sha256 cellar: :any_skip_relocation, all: "a4ec775f18dc3de32bd09a237f3ed1eba99aa4b137cf4eedb529232a03e85201"
   end
+
+  # Project is retired and will have no further releases
+  # See https://db.apache.org/derby/#Derby+Retired
+  deprecate! date: "2026-01-03", because: :unsupported
+  disable! date: "2027-01-03", because: :unsupported
 
   depends_on "openjdk"
 
   def install
+    env = Language::Java.java_home_env.merge(DERBY_INSTALL: libexec, DERBY_HOME: libexec)
     rm_r(Dir["bin/*.bat"])
     libexec.install %w[lib test index.html LICENSE NOTICE RELEASE-NOTES.html
                        KEYS docs javadoc demo]
     bin.install Dir["bin/*"]
-    bin.env_script_all_files libexec/"bin",
-                             JAVA_HOME:     Formula["openjdk"].opt_prefix,
-                             DERBY_INSTALL: libexec,
-                             DERBY_HOME:    libexec
-  end
-
-  def post_install
+    bin.env_script_all_files libexec/"bin", env
     (var/"derby").mkpath
   end
 
@@ -35,16 +35,12 @@ class Derby < Formula
   end
 
   test do
-    assert_match "libexec/lib/derby.jar] #{version}",
-                 shell_output("#{bin}/sysinfo")
+    assert_match "libexec/lib/derby.jar] #{version}", shell_output(bin/"sysinfo")
 
-    pid = fork do
-      exec "#{bin}/startNetworkServer"
-    end
-
+    pid = spawn bin/"startNetworkServer"
     begin
       sleep 12
-      exec "#{bin}/stopNetworkServer"
+      system bin/"stopNetworkServer"
     ensure
       Process.wait(pid)
     end

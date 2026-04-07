@@ -1,8 +1,8 @@
 class Luit < Formula
   desc "Filter run between arbitrary application and UTF-8 terminal emulator"
   homepage "https://invisible-island.net/luit/"
-  url "https://invisible-mirror.net/archives/luit/luit-20240102.tgz"
-  sha256 "a07aea28cdcec50ef225d8c96d3944c3ef6401a913b0d78a84ddc85191ebc082"
+  url "https://invisible-mirror.net/archives/luit/luit-20250912.tgz"
+  sha256 "46958060e66f35bcb8a51ba22da1c13d726d28a86c1cf520511bcf7914bef39e"
   license "MIT"
 
   livecheck do
@@ -11,16 +11,18 @@ class Luit < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "1a8d91585f05372d9846049870a8dd8740b326e76db237e5007d5af066719add"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "2110ba862fe470907867a8e543d85bd2a253a0c91f68fe2e96236cb34241ea38"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "f8903ea10c050374da17f4a0a6546fe4714ed67b6cbab8340c1381014238c76a"
-    sha256 cellar: :any_skip_relocation, sonoma:         "aae1e950ee3f182fe3ff1b8c10b4f2a4ae9efd271798826387f1463b3e6aff18"
-    sha256 cellar: :any_skip_relocation, ventura:        "38bbb736ecac2d362875a345f5e08cc3bb047343c373a2a7f70903a20a135901"
-    sha256 cellar: :any_skip_relocation, monterey:       "8d0379d4d5cf04e4089dbc60677e7adb605bd2a782035db43dc4a4f2023a256a"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "0cbc50eeb192059963ebd0f5fa6d0339697b328b5761c2149e448f8e33efd72e"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "34fe7ef5c7484db64581c5f869a42e054a74996177ce74c93a2623dd9695d345"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "8e538cd9ca308afad3716482ee10e7f623ffd90ab8f4917700c8dd102c029525"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "07c6106341ee4be787dfac58149cb8bced04babe0832f4baa86eab5ef11c57f0"
+    sha256 cellar: :any_skip_relocation, sonoma:        "5a0508f2e99339bb372a134092c562a6f5bd83b2b5187cf303c31d77f6849c82"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "81f95c06decc5fba417ef18968914855efd095abbbb57a71e999fa9ff91d10b5"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "32a25f291b796b14cd3885b2007fb54efc12d256ba1e44705986bbcae7a5708c"
   end
 
-  uses_from_macos "zlib"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     system "./configure", "--without-x",

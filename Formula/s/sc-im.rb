@@ -1,22 +1,22 @@
 class ScIm < Formula
   desc "Spreadsheet program for the terminal, using ncurses"
   homepage "https://github.com/andmarti1424/sc-im"
-  url "https://github.com/andmarti1424/sc-im/archive/refs/tags/v0.8.4.tar.gz"
-  sha256 "ebb1f10006fe49f964a356494f96d86a4f06eb018659e3b9bde63b25c03abdf0"
+  url "https://github.com/andmarti1424/sc-im/archive/refs/tags/v0.8.5.tar.gz"
+  sha256 "49adb76fc55bc3e6ea8ee414f41428db4aef947e247718d9210be8d14a6524bd"
   license "BSD-4-Clause"
+  revision 4
   head "https://github.com/andmarti1424/sc-im.git", branch: "main"
 
   bottle do
-    sha256 arm64_sonoma:   "cbd1e873c3488d61e71d3d3f320f196be3b52a60b225a3cbd34bac86417fa867"
-    sha256 arm64_ventura:  "3f7989b3e41a89308b432e6f8f7ce85ef2665899f6c628db9b27f11da9496dcd"
-    sha256 arm64_monterey: "26e8c661c4ce9a3ef7f34f6050a7558eb6a9d6140aaa6620ce9ba71ebddffdd9"
-    sha256 sonoma:         "f8fd4583452db9f3c10bbd37358d6bb0f605d7902d148e7da38528a8ebb54b53"
-    sha256 ventura:        "cbfbccfcb5ca3ecc692e4f6140a1e989ba2ada089038ba865eeac10281bb7c76"
-    sha256 monterey:       "4e5aeef147a8a57070ca71919eaa2d07a55bd140c549278a87613f9735870d85"
-    sha256 x86_64_linux:   "a597c79ce61df47871de641099781406f41918f54aa7572f5ebd34ee8cffcd78"
+    sha256 arm64_tahoe:   "1cc0a6f1c2ceaed2882bdfc320acff02e3aeca823226cffad9f9b53e5184d206"
+    sha256 arm64_sequoia: "6ca2186448913062e28c3304d76e7c8394b590c4a5452f7d7262dd4abf9c3fda"
+    sha256 arm64_sonoma:  "01c63cfb4dd104e85ba0c9bd08aaa3e603b07dfff6eb307723e56b402d3aaa5c"
+    sha256 sonoma:        "9335efab4aba90b13bdef0d33547d82115a5f2ef08b1cfa3a2583bf10e7be3ca"
+    sha256 arm64_linux:   "396e61cf946e7cf03a9f0712a9154589ca12bb6617f16b999e737988136a2a31"
+    sha256 x86_64_linux:  "7c24185e644c1c3e654b8006f7aae4b9d62cfac6cac39f7b8d7dae27583bb43a"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "libxls"
   depends_on "libxlsxwriter"
   depends_on "libxml2"

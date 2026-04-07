@@ -1,8 +1,8 @@
 class Webkitgtk < Formula
   desc "GTK interface to WebKit"
   homepage "https://webkitgtk.org"
-  url "https://webkitgtk.org/releases/webkitgtk-2.44.3.tar.xz"
-  sha256 "dc82d042ecaca981a4852357c06e5235743319cf10a94cd36ad41b97883a0b54"
+  url "https://webkitgtk.org/releases/webkitgtk-2.52.0.tar.xz"
+  sha256 "b31c55f18194ac83ba08c9b93bbeffef57a7ecff7f41c874d17a9e7853dca19f"
   license "GPL-3.0-or-later"
 
   livecheck do
@@ -11,35 +11,44 @@ class Webkitgtk < Formula
   end
 
   bottle do
-    sha256 x86_64_linux: "05b04683c47fdb271742630657b1ce895ad718b0f5b9abdd363a109766ffd6ac"
+    sha256 arm64_linux:  "bf37a14a173c393fd875f484ae7012928a54a41f6d614deb597552b848807ad0"
+    sha256 x86_64_linux: "c6fc37543e4d6021dc1eb74b9e802e496c3b8707c5be86ff1a5fc4e2bcf3a9ef"
   end
 
   depends_on "cmake" => :build
+  depends_on "gettext" => :build
   depends_on "gobject-introspection" => :build
   depends_on "gperf" => :build
   depends_on "perl" => :build
-  depends_on "pkg-config" => [:build, :test]
-  depends_on "python@3.12" => :build
+  depends_on "pkgconf" => [:build, :test]
+  depends_on "python@3.14" => :build
   depends_on "ruby" => :build
   depends_on "unifdef" => :build
+  depends_on "at-spi2-core"
   depends_on "cairo"
   depends_on "enchant"
+  depends_on "expat"
   depends_on "fontconfig"
   depends_on "freetype"
+  depends_on "gdk-pixbuf"
   depends_on "glib"
   depends_on "gstreamer"
   depends_on "gtk+3"
   depends_on "harfbuzz"
-  depends_on "icu4c"
+  depends_on "icu4c@78"
   depends_on "jpeg-turbo"
   depends_on "jpeg-xl"
   depends_on "libavif"
+  depends_on "libdrm"
+  depends_on "libepoxy"
   depends_on "libgcrypt"
   depends_on "libnotify"
   depends_on "libpng"
   depends_on "libsecret"
   depends_on "libsoup"
+  depends_on "libtasn1"
   depends_on "libwpe"
+  depends_on "libx11"
   depends_on "libxcomposite"
   depends_on "libxml2"
   depends_on "libxslt"
@@ -48,25 +57,15 @@ class Webkitgtk < Formula
   depends_on "little-cms2"
   depends_on "mesa"
   depends_on "openjpeg"
+  depends_on "pango"
   depends_on "sqlite"
+  depends_on "sysprof"
   depends_on "systemd"
+  depends_on "wayland"
   depends_on "webp"
   depends_on "woff2"
   depends_on "wpebackend-fdo"
-  depends_on "zlib"
-
-  on_linux do
-    depends_on "at-spi2-core"
-    depends_on "gdk-pixbuf"
-    depends_on "libdrm"
-    depends_on "libepoxy"
-    depends_on "libtasn1"
-    depends_on "libx11"
-    depends_on "pango"
-    depends_on "wayland"
-  end
-
-  fails_with gcc: "5"
+  depends_on "zlib-ng-compat"
 
   def install
     args = %W[
@@ -75,12 +74,13 @@ class Webkitgtk < Formula
       -DENABLE_DOCUMENTATION=OFF
       -DENABLE_GAMEPAD=OFF
       -DENABLE_MINIBROWSER=ON
+      -DENABLE_SPEECH_SYNTHESIS=OFF
       -DUSE_AVIF=ON
       -DUSE_GTK4=OFF
       -DUSE_JPEGXL=ON
       -DUSE_LIBBACKTRACE=OFF
       -DUSE_LIBHYPHEN=OFF
-      -DPython_EXECUTABLE=#{which("python3.12")}
+      -DPython_EXECUTABLE=#{which("python3.14")}
     ]
 
     system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
@@ -89,7 +89,7 @@ class Webkitgtk < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <gtk/gtk.h>
       #include <webkit2/webkit2.h>
 
@@ -142,9 +142,9 @@ class Webkitgtk < Formula
           gtk_widget_destroy(window);
           return TRUE;
       }
-    EOS
+    C
 
-    pkg_config_flags = shell_output("pkg-config --cflags --libs gtk+-3.0 webkit2gtk-4.1").chomp.split
+    pkg_config_flags = shell_output("pkgconf --cflags --libs gtk+-3.0 webkit2gtk-4.1").chomp.split
     system ENV.cc, "test.c", *pkg_config_flags, "-o", "test"
     # While we cannot open a browser window in CI, we can make sure that the test binary runs
     # and produces the expected warning.

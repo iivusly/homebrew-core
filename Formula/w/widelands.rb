@@ -1,8 +1,8 @@
 class Widelands < Formula
   desc "Free real-time strategy game like Settlers II"
   homepage "https://www.widelands.org/"
-  url "https://github.com/widelands/widelands/archive/refs/tags/v1.2.tar.gz"
-  sha256 "c6bed3717c541276fbed8a33adce230a2637297588c719268fcb963e076210e2"
+  url "https://github.com/widelands/widelands/archive/refs/tags/v1.3.1.tar.gz"
+  sha256 "e6f3e8f4fcafd367962dbacde80e26fc63afad38cfe26fadba9c92d4a01bd687"
   license "GPL-2.0-or-later"
   version_scheme 1
 
@@ -12,23 +12,22 @@ class Widelands < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "49df0bbc341c148bb09064dfdf41be0216f9c026e4cf78c803d5d58b15031028"
-    sha256 arm64_ventura:  "5286091b56fb4c2bbd15841ac7074e07933bc75d4e1699d959e7da2eeabf5b45"
-    sha256 arm64_monterey: "8b6883a14cd5732b4d71e423573a48da53f05329552f581775ac06ddb3f6bea5"
-    sha256 sonoma:         "07ea532a734d18fbb7d1cb08ad4fad5c5c2c742ab25b28ba597c10af765d821c"
-    sha256 ventura:        "8be55a2c96d0782a1195c0beae0221f52d52938af570835268fccc6339ffe205"
-    sha256 monterey:       "18ad1a1c68b547c4a7079cd546b7d9f07f0a9a75a04eeb9d1f1a85dbf9eeb402"
-    sha256 x86_64_linux:   "9cb4ef5b7a47e801e43e43c3b848fceaf2cdc510e94d9cbc00afc27bdcc4e518"
+    sha256 arm64_tahoe:   "e61c9fed2f752bd87cfae05918936c9c14f34cf1c23d2ebe42d7d858cb57a70a"
+    sha256 arm64_sequoia: "7e17bf998e0c713eb41e7431d04d1934e9e13072ae8e015940c38305ec54c5b6"
+    sha256 arm64_sonoma:  "2b1b4a6c64156b8b5b74031e165a71eb386877ba7b962376b59b6152a5ca3a73"
+    sha256 sonoma:        "36eb4c3ee035cebae44213d5c6a76a57b13714c47b70f6aaea44f46badf00295"
+    sha256 arm64_linux:   "5d0a8eb18082b2e40898313d7c83f94e06e33c9587037a10ff74130e476847d5"
+    sha256 x86_64_linux:  "eced0f3c4f891673c94286a75b9cf31fdcacc2a370db7045b9983f48ba960bc7"
   end
 
   depends_on "asio" => :build
   depends_on "cmake" => :build
   depends_on "doxygen" => :build
   depends_on "gettext" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
 
   depends_on "glew"
-  depends_on "icu4c"
+  depends_on "icu4c@78"
   depends_on "libpng"
   depends_on "lua"
   depends_on "minizip"
@@ -38,7 +37,6 @@ class Widelands < Formula
   depends_on "sdl2_ttf"
 
   uses_from_macos "python" => :build
-  uses_from_macos "zlib"
 
   on_macos do
     depends_on "gettext"
@@ -46,6 +44,7 @@ class Widelands < Formula
 
   on_linux do
     depends_on "mesa"
+    depends_on "zlib-ng-compat"
   end
 
   def install
@@ -56,7 +55,7 @@ class Widelands < Formula
                     "-DOPTION_BUILD_CODECHECK=OFF",
                     "-DOPTION_BUILD_TESTS=OFF",
                     "-DOPTION_BUILD_WEBSITE_TOOLS=OFF",
-                    "-DPYTHON_EXECUTABLE=#{which("python3") || which("python")}",
+                    "-DPYTHON_EXECUTABLE=#{which("python3")}",
                     *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"

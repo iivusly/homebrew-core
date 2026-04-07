@@ -7,9 +7,15 @@ class Ext2fuse < Formula
   revision 2
 
   bottle do
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "cf8a8ab7893e4703857cc93f41853567140bb2713e90dffd0db844d916d83ce9"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "fe9d3ea0a65c95de091aecb536ee498015bdc07b7c12e4367617cf9e78c76941"
   end
 
+  # Last release on 2008-06-26. Needs `libfuse@2` and patches to build
+  deprecate! date: "2025-03-06", because: :unmaintained
+  disable! date: "2026-03-06", because: :unmaintained
+
+  depends_on arch: :x86_64
   depends_on "e2fsprogs"
   depends_on "libfuse@2"
   depends_on :linux # on macOS, requires closed-source macFUSE

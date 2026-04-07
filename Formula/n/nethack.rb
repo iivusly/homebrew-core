@@ -25,7 +25,11 @@ class Nethack < Formula
     regex(%r{href=.*?/v?(\d+(?:\.\d+)+)/?["' >]}i)
   end
 
+  no_autobump! because: :incompatible_version_format
+
   bottle do
+    sha256 arm64_tahoe:    "9266431ce0bd0980d82d8a6a0a899d1e31ad90236598706d79600b6acf76cdef"
+    sha256 arm64_sequoia:  "4bd7bdd2aa9ce9dae7f450ffaeda07c1279f597ef35ee3bd7ee52086b54160e1"
     sha256 arm64_sonoma:   "ce30c296e474a239cb110c54a7b16950de538e9782414718290606a8cc9424d1"
     sha256 arm64_ventura:  "e51292f937dbfdb68feb969552da8ab484a8728d5fb85fc6e389cdfd0ed57922"
     sha256 arm64_monterey: "f546283d68a22ff79a4a382a05fb9f7c1949b8057e52f478c8cead4300d424b4"
@@ -34,6 +38,7 @@ class Nethack < Formula
     sha256 ventura:        "a2ca955b4f528e11d3d5baceeb8bb9783914f595a1a010e12ce23cc5206e85ef"
     sha256 monterey:       "0fad9d74cfab3770167a0de3de5228f2ec5c079e94d6956c140f820b3b8e2097"
     sha256 big_sur:        "9478349296901830cee4abfeecbca729453a87732753603216e6a7ca8b31695a"
+    sha256 arm64_linux:    "d4278220da343d3dcd08254e40c10167c03e6fc83af8634433f241ab9c3e9b0c"
     sha256 x86_64_linux:   "e8904c482b7915880b90dd409d7a66d74b46524d07071f3eb720aa870cf78a83"
   end
 
@@ -49,7 +54,7 @@ class Nethack < Formula
     ENV.O0
 
     cd "sys/unix" do
-      hintfile = if OS.mac? && MacOS.version >= :mojave
+      hintfile = if OS.mac?
         build.head? ? "macOS.370" : "macosx10.14"
       else
         build.head? ? "macosx.sh" : "macosx10.10"

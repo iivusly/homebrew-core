@@ -13,6 +13,8 @@ class RmImproved < Formula
 
   bottle do
     rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:    "359402f5080c82f120e5acc163d030297d937245584604c5f0a8b4a7c55b6f33"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia:  "45fb60809e7c4e6c71f683aa81087c2985f92347819adbadad6d736a65efd62c"
     sha256 cellar: :any_skip_relocation, arm64_sonoma:   "6083f4ee2469cd0f33a01815804822cf30f3b0184e62b4c3d256040aec36b51d"
     sha256 cellar: :any_skip_relocation, arm64_ventura:  "2294e77a9e860f573daf64e25bc53b6e2b32b6a565e0c727aa26321bb883c924"
     sha256 cellar: :any_skip_relocation, arm64_monterey: "afd393bdf6a0c370043d56d35787e4cc3f1d022bf4108a9f0684ba170586bebb"
@@ -22,10 +24,13 @@ class RmImproved < Formula
     sha256 cellar: :any_skip_relocation, monterey:       "a7f0bf8bd18d8408cf671da609422a5a8fa683f876ab641082b07933f7770756"
     sha256 cellar: :any_skip_relocation, big_sur:        "3a80043be18665c37508e3f028ceeb0ec68cfba556ce5461d4f6575ec6b50076"
     sha256 cellar: :any_skip_relocation, catalina:       "91894b6d16374218d42457f7aa30a9a95572206e71328b52eaed159a51df0d15"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "e56ee338ef4aa487f6faccb3d08025df5ed64f60e25fc0137aeb2eb1d4b852cf"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "944efe35afd78abf0184654d4fbcc84b081d38c704021b5e964292016c917593"
   end
 
   depends_on "rust" => :build
+
+  conflicts_with "rip2", because: "both install `rip` binaries"
 
   def install
     system "cargo", "install", *std_cargo_args
@@ -41,9 +46,9 @@ class RmImproved < Formula
 
     system bin/"rip", source_file
     assert_match deleted_file.to_s, shell_output("#{bin}/rip -s")
-    assert_predicate deleted_file, :exist?
+    assert_path_exists deleted_file
 
     system bin/"rip", "-u", deleted_file
-    assert_predicate source_file, :exist?
+    assert_path_exists source_file
   end
 end

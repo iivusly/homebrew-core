@@ -8,26 +8,21 @@ class Osmfilter < Formula
   head "https://gitlab.com/osm-c-tools/osmctools.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "864446d5bf53f85f504188be4f59c5f1fc1b902a647a1666de49bf467fa0fd0a"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "06e67f6d61cc209499475b010c4bfe2375d5e3dcb4429e89485d6b03454322c6"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "daf330073a0fdad514305d1a2af9333705cc946c3bc8e52da4856ae2d0bba094"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "4b37db3c9ebe77673bbd83fb7d2e6c215760450987df2ded64044eccf6f34d3b"
-    sha256 cellar: :any_skip_relocation, sonoma:         "a9c1a36fc64e71d69d5b8f118f195dba1d0ca2ad34e43db54c5ba157eb46f74a"
-    sha256 cellar: :any_skip_relocation, ventura:        "b89f9122cd15cd5da3e03fac3b4a1c33ecd2efb325f98918c7e9e494b3bf130b"
-    sha256 cellar: :any_skip_relocation, monterey:       "806b9fb45a9369e43e4b7f6903cc9a3b98b55c385e7e8828e6aaef556e31b620"
-    sha256 cellar: :any_skip_relocation, big_sur:        "5647d8f3a704bd126e2b5f24237febb50989798b425147baf1d1ce1a08fbdaaa"
-    sha256 cellar: :any_skip_relocation, catalina:       "5e2b755a970b7432fb076d787cb1777df18861832d0e4d45132fd84e4d7aea20"
-    sha256 cellar: :any_skip_relocation, mojave:         "470532603de299b9073f5511b8be798558d430f86ba4f37b330a497ec9fdae48"
-    sha256 cellar: :any_skip_relocation, high_sierra:    "b2e2d4190462b0b0e473da4a50ab5e25da007aca21db898d2d359e9e9eb2cde7"
-    sha256 cellar: :any_skip_relocation, sierra:         "d7a8285fe18af71d0093b89e9b5613a4fe30ceb4978e07f61ad1974e734d7f50"
-    sha256 cellar: :any_skip_relocation, el_capitan:     "6a0fd608e0bc8094f08edb6f86a51b45745506d3ef84e0454ef1498dd77f61b0"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "55e3476d7bcb3d9a71fc2d192812526ad3497f17647c9d08daac16b5cbdcfea6"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "64388c3368efe673234fd5d7990c0f791df04fb1622c27f347332e56d3fc44ea"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "e09d876529de57fa2b1a1ad7409e5247e800d47bc0d78b1e4b8ed8ee9191c8be"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "32b130a827813abb0f08be6192ca91c886935172279932f0f3b7906ac4e846a0"
+    sha256 cellar: :any_skip_relocation, sonoma:        "ce176d1a39ea1d4ef3807e937f6ade079256b6925db43c1474f0a3cedf3c917c"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "22da060bca2c2eb0dacadf143c8152c9722b1b2f15418483e51c8f48390fa85d"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "aa55d22946aab558581f444b82e9695ce06f3fe7e550da005447ccf1de942078"
   end
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
 
-  uses_from_macos "zlib"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   resource "pbf" do
     url "https://download.gisgraphy.com/openstreetmap/pbf/AD.tar.bz2"
@@ -35,8 +30,8 @@ class Osmfilter < Formula
   end
 
   def install
-    system "autoreconf", "-v", "-i"
-    system "./configure", "--prefix=#{prefix}"
+    system "autoreconf", "--force", "--install", "--verbose"
+    system "./configure", *std_configure_args
     system "make", "install"
   end
 

@@ -2,8 +2,8 @@ class Flyctl < Formula
   desc "Command-line tools for fly.io services"
   homepage "https://fly.io"
   url "https://github.com/superfly/flyctl.git",
-      tag:      "v0.2.125",
-      revision: "19c7e647cdb47a0673e1e523d6445651961a5a84"
+      tag:      "v0.4.30",
+      revision: "e436c72867129bea1fc1c48f61ea6245975403a2"
   license "Apache-2.0"
   head "https://github.com/superfly/flyctl.git", branch: "master"
 
@@ -18,13 +18,12 @@ class Flyctl < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "54bfeca205000c73e6b4642f78acd49c24abb60e532189ed0549eec31c36f142"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "54bfeca205000c73e6b4642f78acd49c24abb60e532189ed0549eec31c36f142"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "54bfeca205000c73e6b4642f78acd49c24abb60e532189ed0549eec31c36f142"
-    sha256 cellar: :any_skip_relocation, sonoma:         "a335cf7168b566f0d7fb67a1f954bdcde0c03df38e49787b5b73efdc5f6acd26"
-    sha256 cellar: :any_skip_relocation, ventura:        "a335cf7168b566f0d7fb67a1f954bdcde0c03df38e49787b5b73efdc5f6acd26"
-    sha256 cellar: :any_skip_relocation, monterey:       "a335cf7168b566f0d7fb67a1f954bdcde0c03df38e49787b5b73efdc5f6acd26"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "b61a528c47f2c3712619a73cbbec7d5be15980b5bee0ac712faac559b4c57877"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "05117ca2dba0b95b73ebce1639d81b099453b307d2ca6d4919dac8da0cd46480"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "05117ca2dba0b95b73ebce1639d81b099453b307d2ca6d4919dac8da0cd46480"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "05117ca2dba0b95b73ebce1639d81b099453b307d2ca6d4919dac8da0cd46480"
+    sha256 cellar: :any_skip_relocation, sonoma:        "072f820eb62f6f179171cb5de2b24e43670649e5757cd3ec2a877253049babfe"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "3f759960595662f457e132696773f9d51e88e148bb228c1abb277a1b2fbadc9a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "3d5d5b5f646d4f5c59b1e7b645fe6439497abe1512311663cfc974d53192c390"
   end
 
   depends_on "go" => :build
@@ -37,17 +36,26 @@ class Flyctl < Formula
       -X github.com/superfly/flyctl/internal/buildinfo.buildVersion=#{version}
       -X github.com/superfly/flyctl/internal/buildinfo.commit=#{Utils.git_short_head}
     ]
-    system "go", "build", *std_go_args(ldflags:), "-tags", "production"
+    system "go", "build", *std_go_args(ldflags:, tags: "production")
 
     bin.install_symlink "flyctl" => "fly"
 
-    generate_completions_from_executable(bin/"flyctl", "completion")
+    %w[flyctl fly].each do |cmd|
+      generate_completions_from_executable(bin/cmd, shell_parameter_format: :cobra)
+    end
   end
 
   test do
     assert_match "flyctl v#{version}", shell_output("#{bin}/flyctl version")
 
     flyctl_status = shell_output("#{bin}/flyctl status 2>&1", 1)
-    assert_match "Error: No access token available. Please login with 'flyctl auth login'", flyctl_status
+    assert_match "Error: no access token available. Please login with 'flyctl auth login'\n", flyctl_status
+
+    json = <<~JSON
+      {"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26"}}
+      {"jsonrpc":"2.0","id":2,"method":"tools/list"}
+    JSON
+
+    assert_match "Create a new Fly.io app", pipe_output("#{bin}/flyctl mcp server", json, 0)
   end
 end

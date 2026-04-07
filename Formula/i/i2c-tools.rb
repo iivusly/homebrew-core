@@ -1,10 +1,9 @@
 class I2cTools < Formula
   desc "Heterogeneous set of I2C tools for Linux"
   homepage "https://i2c.wiki.kernel.org/index.php/I2C_Tools"
-  url "https://mirrors.edge.kernel.org/pub/software/utils/i2c-tools/i2c-tools-4.3.tar.xz"
-  sha256 "1f899e43603184fac32f34d72498fc737952dbc9c97a8dd9467fadfdf4600cf9"
+  url "https://mirrors.edge.kernel.org/pub/software/utils/i2c-tools/i2c-tools-4.4.tar.xz"
+  sha256 "8b15f0a880ab87280c40cfd7235cfff28134bf14d5646c07518b1ff6642a2473"
   license all_of: ["GPL-2.0-or-later", "LGPL-2.1-or-later"]
-  revision 1
 
   livecheck do
     url "https://mirrors.edge.kernel.org/pub/software/utils/i2c-tools/"
@@ -12,15 +11,16 @@ class I2cTools < Formula
   end
 
   bottle do
-    rebuild 3
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "50f114c6aab816ca269b90179312df767300694b400d59b1f1d204266b9f8bb9"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_linux:  "8f6ac4fca0fb5e2bb8dd2cc1891c75021b6af50de8e3e66cef13131a67e4bfee"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "5adf339cef451fb12532d73760ad36036d22367f32ef951fbfaecf882d2b642e"
   end
 
-  depends_on "python@3.12" => [:build, :test]
+  depends_on "python@3.14" => [:build, :test]
   depends_on :linux
 
   def python3
-    "python3.12"
+    "python3.14"
   end
 
   def install

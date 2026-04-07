@@ -1,8 +1,8 @@
 class Scrcpy < Formula
   desc "Display and control your Android device"
   homepage "https://github.com/Genymobile/scrcpy"
-  url "https://github.com/Genymobile/scrcpy/archive/refs/tags/v2.6.1.tar.gz"
-  sha256 "4948474f1494fdff852a0a7fa823a0b3c25d3ea0384acdaf46c322e34b13e449"
+  url "https://github.com/Genymobile/scrcpy/archive/refs/tags/v3.3.4.tar.gz"
+  sha256 "03b72d1f71ca7783cff2995ca7cd8c67b9b75038a3cc35e443a1913e951b49dd"
   license "Apache-2.0"
 
   livecheck do
@@ -11,27 +11,28 @@ class Scrcpy < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "2a611dde83725f361b2bcba85156a37c872353e602afc24b363ae9ba4c9650df"
-    sha256 arm64_ventura:  "2470c7ec01faf6fc3aee531abbb916fa8a042363050ce267a1d3df9fbad0431f"
-    sha256 arm64_monterey: "b30584bbb426a7544684a0a8791f914424f08de59bdba0ec1a5f48ae19e9e028"
-    sha256 sonoma:         "ba1cfef97e9f9390cf6f81e5ca05a28522f2fabb144e6b7b62b80b6d276d9cc2"
-    sha256 ventura:        "2a90d0436c33d2569a1fc47022f03359b39518273ba4f3595fe9efb0ef721336"
-    sha256 monterey:       "7df647ca2269e1ad8ad68da2d52b4ee21b6497395fd4b5c823eacb32674ea6c4"
-    sha256 x86_64_linux:   "174bcbe00d23a459721fcfcfc99b7155380e679bdcbb966b6e3b91195300084e"
+    sha256 arm64_tahoe:   "9443d43f86e690c1cd6babffbd0b0e7f507e34e7c1ca919a8ad0c1b5ceae8e52"
+    sha256 arm64_sequoia: "aa0e53d450dfa866e8103ace0712e89a4e93dfb7cee7dcd3e938fbcdacf0f206"
+    sha256 arm64_sonoma:  "0fc90d7bb5990eee08aa1dc6a1391dd896502108779cce9afc7c227c196d9608"
+    sha256 sonoma:        "163a29c09b6c139e7ed5641d348e80ff589e944a244f3ed266753df881c2b2fa"
+    sha256 arm64_linux:   "5631757dff00cc6b78cc96495e123a971cb1b414b7465db3cc4cca8016acea5d"
+    sha256 x86_64_linux:  "a1128139c2508f754e0f94133e1630c54366fd3019f5966e3876baca11f887eb"
   end
 
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "ffmpeg"
   depends_on "libusb"
   depends_on "sdl2"
 
-  fails_with gcc: "5"
-
   resource "prebuilt-server" do
-    url "https://github.com/Genymobile/scrcpy/releases/download/v2.6.1/scrcpy-server-v2.6.1", using: :nounzip
-    sha256 "ca7ab50b2e25a0e5af7599c30383e365983fa5b808e65ce2e1c1bba5bfe8dc3b"
+    url "https://github.com/Genymobile/scrcpy/releases/download/v3.3.4/scrcpy-server-v3.3.4", using: :nounzip
+    sha256 "8588238c9a5a00aa542906b6ec7e6d5541d9ffb9b5d0f6e1bc0e365e2303079e"
+
+    livecheck do
+      formula :parent
+    end
   end
 
   def install
@@ -67,7 +68,7 @@ class Scrcpy < Formula
     # However, exiting on $3 = shell didn't work properly, so instead
     # fakeadb exits on $3 = reverse
 
-    fakeadb.write <<~EOS
+    fakeadb.write <<~SH
       #!/bin/sh
       echo "$@" >> #{testpath/"fakeadb.log"}
 
@@ -79,14 +80,14 @@ class Scrcpy < Formula
       if [ "$3" = "reverse" ]; then
         exit 42
       fi
-    EOS
+    SH
 
     fakeadb.chmod 0755
     ENV["ADB"] = fakeadb
 
     # It's expected to fail after adb reverse step because fakeadb exits
     # with code 42
-    out = shell_output("#{bin}/scrcpy --no-display --record=file.mp4 -p 1337 2>&1", 1)
+    out = shell_output("#{bin}/scrcpy --no-window --record=file.mp4 -p 1337 2>&1", 1)
     assert_match(/ 42/, out)
 
     log_content = File.read(testpath/"fakeadb.log")

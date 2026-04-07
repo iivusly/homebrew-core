@@ -1,19 +1,19 @@
 class Porter < Formula
   desc "App artifacts, tools, configs, and logic packaged as distributable installer"
   homepage "https://porter.sh"
-  url "https://github.com/getporter/porter/archive/refs/tags/v1.1.0.tar.gz"
-  sha256 "eb5451b85e50e4033a50101171f8c6372ffd2600361bd34fa2d1166a8d062742"
+  url "https://github.com/getporter/porter/archive/refs/tags/v1.4.0.tar.gz"
+  sha256 "1021cbe8a0aa8dc7d8ca82cb37aab8b44e24218fe03a26b3f9f6c7b10e694c51"
   license "Apache-2.0"
   head "https://github.com/getporter/porter.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "5132b84b398bfa7cc1fcc82143d0dca926be611cd13180c33cd3708e7c73e5df"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "a77917b1ac5dca92cd823dc31a63763bfbf03640adb813642aa1eaebacff193f"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "2add51a382760271a7cec976bf34b3f9e596a70b98dfb9bb7b2b089898db2e93"
-    sha256 cellar: :any_skip_relocation, sonoma:         "8eb3135d2dd15c03051302285658430822eb16157d833257b48a27fc5ac84fdb"
-    sha256 cellar: :any_skip_relocation, ventura:        "f5515c1f5876d71b62b3675313ad0db8f15aa01bba867f78d93b288708b9f10f"
-    sha256 cellar: :any_skip_relocation, monterey:       "290d638c58363ed55db7839cde4b611ac4ec4e7ca1a3ad66ba5dedbbaf70f763"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "00ae7c88b62c0519bd245b0374555acd50542e884995915ba39919384629f536"
+    rebuild 2
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "9d2e6cd91af0e966c8a821789017b81a0f22cfc0e8c9cf4a255ed92f7c852286"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "3cb4bc83342ce948dba842220f49a0c6ad2ce8a968942d86a8bb3e80006e86b1"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "c727323f0731e8c18a28e7af6861bce624fd58b173cc34b2acbbbeb00b75a319"
+    sha256 cellar: :any_skip_relocation, sonoma:        "a08aa9a85a9ba314cdf72d562d4a696146d10f3fa25847a4064a14feb10cdae3"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "7db333f4042ce5cbd45a23cc16d9fecfbd532989d70b4b63cfcb36a68fc43226"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "69bfc2a23597a0050b2f267d0bb0f2183a599ed65e79f3a49ac89f282063f412"
   end
 
   depends_on "go" => :build
@@ -26,13 +26,13 @@ class Porter < Formula
     ]
 
     system "go", "build", *std_go_args(ldflags:), "./cmd/porter"
-    generate_completions_from_executable(bin/"porter", "completion")
+    generate_completions_from_executable(bin/"porter", shell_parameter_format: :cobra)
   end
 
   test do
     assert_match "porter #{version}", shell_output("#{bin}/porter --version")
 
     system bin/"porter", "create"
-    assert_predicate testpath/"porter.yaml", :exist?
+    assert_path_exists testpath/"porter.yaml"
   end
 end

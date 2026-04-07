@@ -1,18 +1,18 @@
 class FuncE < Formula
   desc "Easily run Envoy"
   homepage "https://func-e.io"
-  url "https://github.com/tetratelabs/func-e/archive/refs/tags/v1.1.4.tar.gz"
-  sha256 "f8829bde3201960edbea764002c16ade4d68e0a7ddc453d042cd1fb5bba3f6d5"
+  url "https://github.com/tetratelabs/func-e/archive/refs/tags/v1.4.0.tar.gz"
+  sha256 "d6e93b3bfe2ea00da45b858cbd9393a8213c1f5be115870b642214dc86323d3c"
   license "Apache-2.0"
+  head "https://github.com/tetratelabs/func-e.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "2f10e2f358de4c6352aa82ad4e2c67fde677a6463e6cf05bebff2058136da34f"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "83588b07dd168fdf5138e2b55d5388423b8f4c138a18f7de3186fd512f23bdbe"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "c2969bb7e8054052b3736688519486280031fa0224a9d4a9de20394bce7ce514"
-    sha256 cellar: :any_skip_relocation, sonoma:         "8ffd03b70a406cdd742c0d12b183401b13e66d1facb57b613d4dc2474aac0d13"
-    sha256 cellar: :any_skip_relocation, ventura:        "d00c61a8a944fcf6b8aa3338d755a9534f0cf1379ad94d870c93dc7b203f3b46"
-    sha256 cellar: :any_skip_relocation, monterey:       "ecfeb425d1362879536b073f154b3f8957c889288495e5f533a367d1bee3e0e3"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "9271ead514ec571869cb59f8f6eef82935489654b33b25497ce72aa12baff3df"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "50312b58ab29066d403d2223ee4984ca03bfc44e96e3e3e2b9a6848b9c6fb4b6"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "6ba95e1ba41daa04ed7162604a23cf2eb49813093f4b0644c4ccc513d863ab16"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "23f3725f16951e27c77cf1d560a7353122fc6820cdaa70c4f49f9d2f2c6298e5"
+    sha256 cellar: :any_skip_relocation, sonoma:        "159edb37bc2a32ee7cb161335fb98fec97c14606aae75b4db9e10591ce4e60be"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "37abe96369388aa7a44b7fbcc53ee09ae2a523f94c090a420ff5533b8f7d0472"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "7fdbe813a99dcfa62b20860c1e349000a3cb88c9e60982cbae35c3cf952286a8"
   end
 
   depends_on "go" => :build
@@ -25,7 +25,7 @@ class FuncE < Formula
       -s -w
       -X main.version=#{version}
     ]
-    system "go", "build", *std_go_args(ldflags:)
+    system "go", "build", *std_go_args(ldflags:), "./cmd/func-e"
   end
 
   test do

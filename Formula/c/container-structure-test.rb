@@ -1,19 +1,18 @@
 class ContainerStructureTest < Formula
   desc "Validate the structure of your container images"
   homepage "https://github.com/GoogleContainerTools/container-structure-test"
-  url "https://github.com/GoogleContainerTools/container-structure-test/archive/refs/tags/v1.19.1.tar.gz"
-  sha256 "b56a53fb7734f93216b60f8cdd3b98fbbd767e9f412c061d4fa4798e579c4971"
+  url "https://github.com/GoogleContainerTools/container-structure-test/archive/refs/tags/v1.22.1.tar.gz"
+  sha256 "186bb1493ebb3c597e53b2a7abd5460c683c63d404e44a64223d26bb3315841d"
   license "Apache-2.0"
-  head "https://github.com/GoogleContainerTools/container-structure-test.git", branch: "master"
+  head "https://github.com/GoogleContainerTools/container-structure-test.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "b5b16ad54b7ecddf8af7c53b55cf96ff1f015ed7766f2c2029d91fb999c10b75"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "724947ff2d136017419342489b46518fd1cda905bb244c56f26cbd2e63f5d42c"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "18ae4d7d3d74533e2e2e2173eec4df779710eaf9b1bf6ac964a24004313873b2"
-    sha256 cellar: :any_skip_relocation, sonoma:         "57c09a7d40144ee1d734270f610330a9b255991b79e18f1ee1f7064305acd1b4"
-    sha256 cellar: :any_skip_relocation, ventura:        "abc03ff1cd41400d83e24cb564f75eb7924644673be453067933cbaa6b5b642a"
-    sha256 cellar: :any_skip_relocation, monterey:       "2c7bd833f7eb40d84758f596c29dca3377ac4f10851839db921b7deb934231bc"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "df6f87970813e9d98d617a37e22e8638aa5bd808cee04cbfa9bb2d0b5cd4805a"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "ffadb4b8e066a730a44df161a8994706c19299d4b2016e1f6446c4b87f4300d7"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "ffadb4b8e066a730a44df161a8994706c19299d4b2016e1f6446c4b87f4300d7"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "ffadb4b8e066a730a44df161a8994706c19299d4b2016e1f6446c4b87f4300d7"
+    sha256 cellar: :any_skip_relocation, sonoma:        "9e1bbe8f1cf6043c62b4108fca2107d9e967138b2bc064bb39a23a4f4762f607"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "dcac556f58434bb4a0886090be35ee58c844b20507704c679a30043680c36cce"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "0a5370012785c55e9fec1d69ccc950b88e84a36d4f6de86f322ba9a3919c3099"
   end
 
   depends_on "go" => :build
@@ -35,7 +34,7 @@ class ContainerStructureTest < Formula
       sha256 "ab5088c314316f39ff1d1a452b486141db40813351731ec8d5300db3eb35a316"
     end
 
-    (testpath/"test.yml").write <<~EOF
+    (testpath/"test.yml").write <<~YAML
       schemaVersion: "2.0.0"
 
       fileContentTests:
@@ -49,7 +48,7 @@ class ContainerStructureTest < Formula
           path: /bin/test
           shouldExist: yes
           permissions: '-rwxr-xr-x'
-    EOF
+    YAML
 
     args = %w[
       --driver tar

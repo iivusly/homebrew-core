@@ -1,30 +1,24 @@
 class Varnish < Formula
   desc "High-performance HTTP accelerator"
   homepage "https://www.varnish-cache.org/"
-  url "https://varnish-cache.org/_downloads/varnish-7.5.0.tgz"
-  mirror "https://fossies.org/linux/www/varnish-7.5.0.tgz"
-  sha256 "fca61b983139e1aac61c4546d12a1a3ab9807dbb1d8314571e3148c93ff72b5d"
+  url "https://github.com/varnish/varnish/releases/download/varnish-9.0.0/varnish-9.0.0.tar.gz"
+  sha256 "c943862cb18c430a0f8fe0688991d581593736063158ca5be76eca178aa7f149"
   license "BSD-2-Clause"
 
-  livecheck do
-    url "https://varnish-cache.org/releases/"
-    regex(/href=.*?varnish[._-]v?(\d+(?:\.\d+)+)\.t/i)
-  end
-
   bottle do
-    sha256 arm64_sonoma:   "19ea14064a64f0f97aafd32d9cbd8d491175361a542d1da53cded4f1ce619e2b"
-    sha256 arm64_ventura:  "86ca31bfa2855001c34ad80d64fb06bb6ca3ba2f61ad7426e5aa3dac447fc6e3"
-    sha256 arm64_monterey: "cba487b284034122c28f984717523ee7fd49331578891be98d2c4be44ea1c9ff"
-    sha256 sonoma:         "93db247c7ed7a724317e9c603042513de0c46d9b30f20427e8792fb15e3b0a02"
-    sha256 ventura:        "16716f5f300c79f909135864e574ef83c6c7950b5730555d20d02a00292621ab"
-    sha256 monterey:       "94ea6bff5a64531d33f9f8a968999ecaf8d88b5b5a8f3f2b27a8ac087d4397f2"
-    sha256 x86_64_linux:   "f01edf98aaf303d8b9c62d2fbcd89093cb810d1580995c37db6135f288037422"
+    sha256 arm64_tahoe:   "e50d44672c5f0519f1dec0c0c4cbf53b5107328bec67adb3f976311f10d4b401"
+    sha256 arm64_sequoia: "5deb140bc414198043621ad7b440f5186869ad090171342dc978a54818beb397"
+    sha256 arm64_sonoma:  "dec0bc74ff3fce0d7473b39aafa25075a5c69f8cf8b28f7da030d507d7330192"
+    sha256 sonoma:        "8f9e7bb52a3fc36576dd64742c7df6e36afca0d60c677008dcfbc7a7b61f700f"
+    sha256 arm64_linux:   "a3a161859af067276b101ed3cc6cd9b78c1717dcf39f8e72ff004d92e1fd6481"
+    sha256 x86_64_linux:  "3560def55797a986a90850a95b54924b802ed674fc402033b09b1d3ae30aef87"
   end
 
   depends_on "docutils" => :build
   depends_on "graphviz" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "sphinx-doc" => :build
+  depends_on "openssl@3"
   depends_on "pcre2"
 
   uses_from_macos "python" => :build
@@ -32,9 +26,7 @@ class Varnish < Formula
   uses_from_macos "ncurses"
 
   def install
-    system "./configure", "--disable-dependency-tracking",
-                          "--prefix=#{prefix}",
-                          "--localstatedir=#{var}"
+    system "./configure", "--localstatedir=#{var}", *std_configure_args
 
     # flags to set the paths used by varnishd to load VMODs and VCL,
     # pointing to the ${HOMEBREW_PREFIX}/ shared structure so other packages
@@ -50,13 +42,13 @@ class Varnish < Formula
     (etc/"varnish").install "etc/example.vcl" => "default.vcl"
     (var/"varnish").mkpath
 
-    (pkgshare/"tests").install buildpath.glob("bin/varnishtest/tests/*.vtc")
+    (pkgshare/"tests").install buildpath.glob("bin/vinyltest/tests/*.vtc")
     (pkgshare/"tests/vmod").install buildpath.glob("vmod/tests/*.vtc")
   end
 
   service do
     run [opt_sbin/"varnishd", "-n", var/"varnish", "-f", etc/"varnish/default.vcl", "-s", "malloc,1G", "-T",
-         "127.0.0.1:2000", "-a", "0.0.0.0:8080", "-F"]
+         "127.0.0.1:2000", "-a", "127.0.0.1:8080", "-F"]
     keep_alive true
     working_dir HOMEBREW_PREFIX
     log_path var/"varnish/varnish.log"
@@ -75,9 +67,35 @@ class Varnish < Formula
     timeout_tests = [
       testpath/"m00000.vtc",
       testpath/"b00047.vtc",
+      testpath/"b00084.vtc",
+      testpath/"b00086.vtc",
       testpath/"u00008.vtc",
     ]
-    tests = testpath.glob("[bmu]*.vtc") - timeout_tests
+
+    # test suites need libvmod_debug.so, see discussions in https://github.com/varnishcache/varnish-cache/issues/4393
+    debug_tests = [
+      testpath/"b00040.vtc",
+      testpath/"b00070.vtc",
+      testpath/"b00085.vtc",
+      testpath/"b00092.vtc",
+      testpath/"m00019.vtc",
+      testpath/"m00021.vtc",
+      testpath/"m00023.vtc",
+      testpath/"m00022.vtc",
+      testpath/"b00060.vtc",
+      testpath/"m00025.vtc",
+      testpath/"m00027.vtc",
+      testpath/"m00048.vtc",
+      testpath/"m00049.vtc",
+      testpath/"m00054.vtc",
+      testpath/"m00053.vtc",
+      testpath/"m00051.vtc",
+      testpath/"m00052.vtc",
+      testpath/"m00059.vtc",
+      testpath/"m00060.vtc",
+      testpath/"m00061.vtc",
+    ]
+    tests = testpath.glob("[bmu]*.vtc") - timeout_tests - debug_tests
     # -j: run the tests (using up to half the cores available)
     # -q: only report test failures
     # varnishtest will exit early if a test fails (use -k to continue and find all failures)

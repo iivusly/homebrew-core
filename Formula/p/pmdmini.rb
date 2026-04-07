@@ -6,6 +6,8 @@ class Pmdmini < Formula
   license "GPL-2.0-or-later"
 
   bottle do
+    sha256 cellar: :any,                 arm64_tahoe:    "f8e542c127cf51bbdc497e778ab932849fdc4d88e49ee9d7b0e127eaf5d74242"
+    sha256 cellar: :any,                 arm64_sequoia:  "d3d140be8d8be65eaa695bb6e2b83964e989e141cfdd7ab8d2c9e05d81b55f54"
     sha256 cellar: :any,                 arm64_sonoma:   "a7f473c3f27a8a2e781391b383060545cfd8af27425b2c5eca4e18a2821ee2ff"
     sha256 cellar: :any,                 arm64_ventura:  "40b0b5792363acec17804091d52164083487b90a027f4fe2bdf05ca5a7045ba6"
     sha256 cellar: :any,                 arm64_monterey: "27137c3e0caeb62401f16ff188ab94c629935342615a97be38e2a12e77877f33"
@@ -15,6 +17,7 @@ class Pmdmini < Formula
     sha256 cellar: :any,                 monterey:       "b84f6ad8b040a1b193b753e8d9934045d605b7ba37a547acab95302aea802a77"
     sha256 cellar: :any,                 big_sur:        "149cbae3b8b5b93ad8b5e55590e87b96120aa5c4fa729f142d2ab62ea3758d4a"
     sha256 cellar: :any,                 catalina:       "32eaf2e42986d019c891e922a4c6744abdc243c7d927210f65a26c4b363aa569"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "42e14c83af0230e2c74fd9b47f6c9b2c55f8df98f8c55971f949c7c701068643"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "40d7b0addf0328bbb2bd4ab80af954ce4feaa11d57fb76aecc21da90b522cf9e"
   end
 
@@ -33,7 +36,7 @@ class Pmdmini < Formula
     # Add -fPIC on Linux
     # Upstreamed here: https://github.com/mistydemeo/pmdmini/pull/3
     inreplace "mak/general.mak", "CFLAGS = -O2", "CFLAGS = -fPIC -O2 -fpermissive"
-    system "make", "CC=#{ENV.cc}", "CXX=#{ENV.cxx}", "LD=#{ENV.cxx}"
+    system "make", "CC=#{ENV.cc}", "CXX=#{ENV.cxx} -std=c++03", "LD=#{ENV.cxx}"
 
     # Makefile doesn't build a dylib
     flags = if OS.mac?
@@ -54,7 +57,7 @@ class Pmdmini < Formula
 
   test do
     resource("test_song").stage testpath
-    (testpath/"pmdtest.c").write <<~EOS
+    (testpath/"pmdtest.c").write <<~C
       #include <stdio.h>
       #include "libpmdmini/pmdmini.h"
 
@@ -64,12 +67,11 @@ class Pmdmini < Formula
           pmd_init();
           pmd_play(argv[1], argv[2]);
           pmd_get_title(title);
-          printf("%s\\n", title);
+          printf("%s", title);
       }
-    EOS
+    C
     system ENV.cc, "pmdtest.c", "-L#{lib}", "-lpmdmini", "-o", "pmdtest"
-    result = `#{testpath}/pmdtest #{testpath}/dd06.m #{testpath}`.chomp
-    assert_equal "mus #06", result
+    assert_equal "mus #06", shell_output("#{testpath}/pmdtest #{testpath}/dd06.m #{testpath}")
   end
 end
 

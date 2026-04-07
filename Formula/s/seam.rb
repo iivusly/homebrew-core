@@ -1,26 +1,24 @@
 class Seam < Formula
   desc "This utility lets you control Seam resources"
   homepage "https://github.com/seamapi/seam-cli"
-  url "https://registry.npmjs.org/seam-cli/-/seam-cli-0.0.58.tgz"
-  sha256 "4c9c7989f02506e241d0921921859b7b0774b6fed9ed3fe90983f9f877248e76"
+  url "https://registry.npmjs.org/seam-cli/-/seam-cli-0.0.61.tgz"
+  sha256 "64135eb8de1ddbc5190379088a34f87927b2e803a9bb71ce47cf1d873b1d94a0"
   license "MIT"
 
   bottle do
     rebuild 1
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "7af7bf5604302bd96ca405f8a0c87899dcfb28b5a2ec42683056bd927e35e014"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "7af7bf5604302bd96ca405f8a0c87899dcfb28b5a2ec42683056bd927e35e014"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "7af7bf5604302bd96ca405f8a0c87899dcfb28b5a2ec42683056bd927e35e014"
-    sha256 cellar: :any_skip_relocation, sonoma:         "e1bd4461658238c02a202e46eced58172c0bf36840fade819102da0f246dcdf2"
-    sha256 cellar: :any_skip_relocation, ventura:        "e1bd4461658238c02a202e46eced58172c0bf36840fade819102da0f246dcdf2"
-    sha256 cellar: :any_skip_relocation, monterey:       "1b6030d3be6465d7850db0bc306026c1d21d7d23c7cf12948cbf5a68aa402cbc"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "ce4c220ea57c03eaa23b1789b72ab2b02b1e2b6f3bec9a563631e358302926c0"
+    sha256 cellar: :any_skip_relocation, all: "e78f5c486295d6805811e6a48f3f0a1443706bc5d98430f3f860fc3ae84d8c99"
   end
 
   depends_on "node"
 
   def install
     system "npm", "install", *std_npm_args
-    bin.install_symlink Dir["#{libexec}/bin/*"]
+    bin.install_symlink libexec.glob("bin/*")
+
+    # Build an `:all` bottle by removing workflow files
+    node_modules = libexec/"lib/node_modules"
+    rm_r node_modules/"seam-cli/ldid/.github"
   end
 
   test do

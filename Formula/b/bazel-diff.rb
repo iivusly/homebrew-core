@@ -1,19 +1,38 @@
 class BazelDiff < Formula
   desc "Performs Bazel Target Diffing between two revisions in Git"
   homepage "https://github.com/Tinder/bazel-diff/"
-  url "https://github.com/Tinder/bazel-diff/releases/download/7.1.1/bazel-diff_deploy.jar"
-  sha256 "ed5410288bd7ec5b49b556103f561fb15e4c82f13f12cb41be128d447ecc2d46"
+  url "https://github.com/Tinder/bazel-diff/archive/refs/tags/v18.0.0.tar.gz"
+  sha256 "bb661fcdca7be40f2d7ac21d0e51452fc209d92d7440d49dbee89ca35d47e08f"
   license "BSD-3-Clause"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, all: "8d98f878efcadd8adf21f163e4a89c630258e3e7c8e79f43ef0ce305493bd6c2"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "795e0e868692550cfa9888c76b547469792346609b4537132272cb86e77de576"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "795e0e868692550cfa9888c76b547469792346609b4537132272cb86e77de576"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "795e0e868692550cfa9888c76b547469792346609b4537132272cb86e77de576"
+    sha256 cellar: :any_skip_relocation, sonoma:        "795e0e868692550cfa9888c76b547469792346609b4537132272cb86e77de576"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "f4b75086e934598fa9ede44947e0340b6ab857678888b14da4798d9fd509b795"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "f4b75086e934598fa9ede44947e0340b6ab857678888b14da4798d9fd509b795"
   end
 
-  depends_on "bazel" => :test
+  depends_on "bazel" => [:build, :test]
   depends_on "openjdk"
 
   def install
-    libexec.install "bazel-diff_deploy.jar"
+    ENV["JAVA_HOME"] = Formula["openjdk"].opt_prefix
+    rm ".bazelversion"
+
+    extra_bazel_args = %w[
+      -c opt
+      --@protobuf//bazel/toolchains:prefer_prebuilt_protoc
+      --enable_bzlmod
+      --java_runtime_version=local_jdk
+      --tool_java_runtime_version=local_jdk
+      --repo_contents_cache=
+    ]
+
+    system "bazel", "build", *extra_bazel_args, "//cli:bazel-diff_deploy.jar"
+
+    libexec.install "bazel-bin/cli/bazel-diff_deploy.jar"
     bin.write_jar_script libexec/"bazel-diff_deploy.jar", "bazel-diff"
   end
 

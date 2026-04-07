@@ -1,17 +1,21 @@
 class Orientdb < Formula
   desc "Graph database"
-  homepage "https://orientdb.org/"
-  url "https://search.maven.org/remotecontent?filepath=com/orientechnologies/orientdb-community/3.2.33/orientdb-community-3.2.33.zip"
-  sha256 "efb79852e7a9a718868a307c131a4378e36f33004e7697e56eb14ae587d0004d"
+  homepage "https://github.com/orientechnologies/orientdb/"
+  url "https://search.maven.org/remotecontent?filepath=com/orientechnologies/orientdb-community/3.2.51/orientdb-community-3.2.51.zip"
+  sha256 "2d22a6e3c095a9b19c5d4c2a58dd90e0118998fe57441e93c25c23a865fb9dfa"
   license "Apache-2.0"
 
+  # The GitHub release description contains links to files on Maven.
   livecheck do
-    url "https://orientdb.org/download"
-    regex(/href=.*?orientdb(?:-community)?[._-]v?(\d+(?:\.\d+)+)\.zip/i)
+    url :homepage
+    regex(/orientdb-community[._-]v?(\d+(?:\.\d+)+)\.zip/i)
+    strategy :github_latest do |json, regex|
+      json["body"]&.scan(regex)&.map { |match| match[0] }
+    end
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, all: "dbc675faa564627da4f47b191e74350da9391e65e4847605bee9e696cf0a8110"
+    sha256 cellar: :any_skip_relocation, all: "a3b7d9fa2bd883ff0b3554aded829ec2f2aae3cfd528a3e8dc29ae326f18fc86"
   end
 
   depends_on "maven" => :build
@@ -67,7 +71,7 @@ class Orientdb < Formula
   service do
     run opt_libexec/"bin/server.sh"
     keep_alive true
-    working_dir var
+    working_dir var/"orientdb"
     log_path var/"log/orientdb/sout.log"
     error_log_path var/"log/orientdb/serror.log"
   end

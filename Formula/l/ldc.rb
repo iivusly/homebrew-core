@@ -1,8 +1,8 @@
 class Ldc < Formula
   desc "Portable D programming language compiler"
   homepage "https://wiki.dlang.org/LDC"
-  url "https://github.com/ldc-developers/ldc/releases/download/v1.39.0/ldc-1.39.0-src.tar.gz"
-  sha256 "839bac36f6073318e36f0b163767e03bdbd3f57d99256b97494ac439b59a4562"
+  url "https://github.com/ldc-developers/ldc/releases/download/v1.42.0/ldc-1.42.0-src.tar.gz"
+  sha256 "9bb0f628f869f7fc7b53c381a79742d29c17552c6f1a56b0a02aa289e65a0e3b"
   license "BSD-3-Clause"
   head "https://github.com/ldc-developers/ldc.git", branch: "master"
 
@@ -12,42 +12,38 @@ class Ldc < Formula
   end
 
   bottle do
-    sha256                               arm64_sonoma:   "b8c30a4ac033e903d377e07d94b3ed095f2691b56bd99d27a76d48ff665a93d4"
-    sha256                               arm64_ventura:  "99251ae8e6f5bdcd6f6eb66b3999d7c4ea6960a009dfe633da27d9f75c659bc0"
-    sha256                               arm64_monterey: "44ac5441951ba752a05850a2cf1bdd2ce43081a8e0734ee61ea15cbd93f4b910"
-    sha256                               sonoma:         "9651940f505ace172f4655a03d11ce880055cc40bd4b2fee52b0603ad144ec98"
-    sha256                               ventura:        "24dc413bca528d23a5664683c1c37d975be5e5222805cc0f8bb51a4380015342"
-    sha256                               monterey:       "de03f99ea9eab85b3e3f7676848043ccff79d5a193f0dd03e633f7f642798da6"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "4e6ce62025173793a521b2186cbf741e135ba60d61819cef73f112810057c1de"
+    sha256                               arm64_tahoe:   "d991984a75a3d4e16e768ac1696cc01c65893a07f226b70160900ef280e5f2ae"
+    sha256                               arm64_sequoia: "b16cde9d20ef2b46b10a7469e87ef397ce0cd6182510671ef530d692233900b9"
+    sha256                               arm64_sonoma:  "81c19ed1da2c4bc40d5b97143bbcdcb8d54dfb082ff3cd67851573cc4323035c"
+    sha256                               sonoma:        "e89dbaa17a1734c3de7d83c21c9e830db35a2a65316f19dec04f14258359d598"
+    sha256                               arm64_linux:   "fcd364ba774b8952ca6e37217a458079a381cf2f3e585eefb73c20afc59e808b"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "64399cdbbf80a94468e00ab0ea0377b835776da4513307b8e2b3d9f6afaa5a7d"
   end
 
   depends_on "cmake" => :build
-  depends_on "libconfig" => :build
-  depends_on "pkg-config" => :build
-  depends_on "llvm"
-  depends_on "zstd"
-
-  uses_from_macos "libxml2" => :build
+  depends_on "pkgconf" => :build
+  depends_on "lld@21" => :test
+  depends_on "llvm@21"
 
   resource "ldc-bootstrap" do
     on_macos do
       on_arm do
-        url "https://github.com/ldc-developers/ldc/releases/download/v1.39.0/ldc2-1.39.0-osx-arm64.tar.xz"
-        sha256 "4f0285d6ab0f335f97a8cae1ebc951eb5e68face0645f2b791b8d5399689ad95"
+        url "https://github.com/ldc-developers/ldc/releases/download/v1.41.0/ldc2-1.41.0-osx-arm64.tar.xz"
+        sha256 "157267042f10b047210619314aa719b4f0bf887601e93b1c634aa1ecb3c546e4"
       end
       on_intel do
-        url "https://github.com/ldc-developers/ldc/releases/download/v1.39.0/ldc2-1.39.0-osx-x86_64.tar.xz"
-        sha256 "751ebe8c744fa3375a08dfb67d80569e985944f3fb7f551affa5d5052117beb6"
+        url "https://github.com/ldc-developers/ldc/releases/download/v1.41.0/ldc2-1.41.0-osx-x86_64.tar.xz"
+        sha256 "5bcff48b63c56a45dbaacdb0c5bddc8ea6be86d4a0c7b2c7c8318e047f721181"
       end
     end
     on_linux do
       on_arm do
-        url "https://github.com/ldc-developers/ldc/releases/download/v1.39.0/ldc2-1.39.0-linux-aarch64.tar.xz"
-        sha256 "bafba183432dc8c277d07880d6dd17b4b1b3050808bef0be07875a41cda6dfcf"
+        url "https://github.com/ldc-developers/ldc/releases/download/v1.41.0/ldc2-1.41.0-linux-aarch64.tar.xz"
+        sha256 "1c4b950a13d53379ed4f564366c27ec56d6261e21686880d70c7486b3e8c7ba8"
       end
       on_intel do
-        url "https://github.com/ldc-developers/ldc/releases/download/v1.39.0/ldc2-1.39.0-linux-x86_64.tar.xz"
-        sha256 "f50cdacd11c923b96e57edab15cacff6a30c7ebff4b7e495fc684eed0a27ae17"
+        url "https://github.com/ldc-developers/ldc/releases/download/v1.41.0/ldc2-1.41.0-linux-x86_64.tar.xz"
+        sha256 "4a439457f0fe59e69d02fd6b57549fc3c87ad0f55ad9fb9e42507b6f8e327c8f"
       end
     end
   end
@@ -59,20 +55,13 @@ class Ldc < Formula
   end
 
   def install
-    ENV.cxx11
-    # Fix ldc-bootstrap/bin/ldmd2: error while loading shared libraries: libxml2.so.2
-    ENV.prepend_path "LD_LIBRARY_PATH", Formula["libxml2"].opt_lib if OS.linux?
-    # Work around LLVM 16+ build failure due to missing -lzstd when linking lldELF
-    # Issue ref: https://github.com/ldc-developers/ldc/issues/4478
-    inreplace "CMakeLists.txt", " -llldELF ", " -llldELF -lzstd "
-
     (buildpath/"ldc-bootstrap").install resource("ldc-bootstrap")
 
     args = %W[
-      -DLLVM_ROOT_DIR=#{llvm.opt_prefix}
-      -DINCLUDE_INSTALL_DIR=#{include}/dlang/ldc
-      -DD_COMPILER=#{buildpath}/ldc-bootstrap/bin/ldmd2
       -DCMAKE_INSTALL_RPATH=#{rpath}
+      -DD_COMPILER=#{buildpath}/ldc-bootstrap/bin/ldmd2
+      -DINCLUDE_INSTALL_DIR=#{include}/dlang/ldc
+      -DLLVM_ROOT_DIR=#{llvm.opt_prefix}
     ]
 
     system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
@@ -81,19 +70,16 @@ class Ldc < Formula
   end
 
   test do
-    # Don't set CC=llvm_clang since that won't be in PATH,
-    # nor should it be used for the test.
-    ENV.method(DevelopmentTools.default_compiler).call
-
-    (testpath/"test.d").write <<~EOS
+    (testpath/"test.d").write <<~D
       import std.stdio;
       void main() {
         writeln("Hello, world!");
       }
-    EOS
+    D
     system bin/"ldc2", "test.d"
     assert_match "Hello, world!", shell_output("./test")
-    with_env(PATH: "#{Formula["llvm"].opt_bin}:#{ENV["PATH"]}") do
+    lld = deps.map(&:to_formula).find { |f| f.name.match?(/^lld(@\d+(\.\d+)*)?$/) }
+    with_env(PATH: "#{lld.opt_bin}:#{ENV["PATH"]}") do
       system bin/"ldc2", "-flto=thin", "--linker=lld", "test.d"
       assert_match "Hello, world!", shell_output("./test")
       system bin/"ldc2", "-flto=full", "--linker=lld", "test.d"

@@ -1,19 +1,19 @@
 class Signmykey < Formula
   desc "Automated SSH Certificate Authority"
-  homepage "https://signmykey.io"
-  url "https://github.com/signmykeyio/signmykey/archive/refs/tags/v0.8.7.tar.gz"
-  sha256 "d9697c1d289280395188caaa8b2e10a23cc4c94ca33a493ae398c3a6be500155"
+  homepage "https://signmykey.io/"
+  url "https://github.com/signmykeyio/signmykey/archive/refs/tags/v0.8.9.tar.gz"
+  sha256 "106a3a3d07aa2841d280ab378ce382a2bfca10101080936e2b02c4cc4e7d7392"
   license "MIT"
   head "https://github.com/signmykeyio/signmykey.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "ff65fdb76925458ec0c53567cff1b0458f0d62257e69fe2b014fc50a91566335"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "a826af57759023e9b57e6e4401c47e9b49b6c3f442a85d806c751554fce0c5d9"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "d42cd9fc8f60f8e2a602a50f425d1e384c8c50dfd2724a59c38912e171ad0683"
-    sha256 cellar: :any_skip_relocation, sonoma:         "03fbaf48b6ca79e26781e669986ce031c78d0b6af4d7445f6da63365ff3054c6"
-    sha256 cellar: :any_skip_relocation, ventura:        "920fe34b74df9c70fe6bc87ff58892d4607d4a6a6f49f710e87dff7f6e9b4461"
-    sha256 cellar: :any_skip_relocation, monterey:       "92804d80c023e5b070a98582c3a3c52a7c4722e8956a1663926a0e9216b61e8e"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "88d4ae72b3b6068fa679a8daf35b7770fb18295aa5326f3829f9902c43d88bab"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "90a3fa84385d0929c68ee02274431316e4084865eb5ad9dbb7cb060be7a7b354"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "90a3fa84385d0929c68ee02274431316e4084865eb5ad9dbb7cb060be7a7b354"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "90a3fa84385d0929c68ee02274431316e4084865eb5ad9dbb7cb060be7a7b354"
+    sha256 cellar: :any_skip_relocation, sonoma:        "7ea74b2812543ca3d79a381359f2412bed177bd86cc3208dd4afad608781fb82"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "0fabc7ade5f371c73f57886c343c2aba945fe667eb0b2ee8c6cd21522e4a1fd4"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "c5234e51f91e4299f1792be2cab5ec37bd1c669830851af5488dba303537edf6"
   end
 
   depends_on "go" => :build
@@ -25,7 +25,7 @@ class Signmykey < Formula
     ]
     system "go", "build", *std_go_args(ldflags:)
 
-    generate_completions_from_executable(bin/"signmykey", "completion")
+    generate_completions_from_executable(bin/"signmykey", shell_parameter_format: :cobra)
   end
 
   test do

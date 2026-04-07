@@ -1,19 +1,19 @@
 class Guile < Formula
   desc "GNU Ubiquitous Intelligent Language for Extensions"
   homepage "https://www.gnu.org/software/guile/"
-  url "https://ftp.gnu.org/gnu/guile/guile-3.0.10.tar.xz"
-  mirror "https://ftpmirror.gnu.org/guile/guile-3.0.10.tar.xz"
-  sha256 "bd7168517fd526333446d4f7ab816527925634094fbd37322e17e2b8d8e76388"
+  url "https://ftpmirror.gnu.org/gnu/guile/guile-3.0.11.tar.xz"
+  mirror "https://ftp.gnu.org/gnu/guile/guile-3.0.11.tar.xz"
+  sha256 "818c79d236657a7fa96fb364137cc7b41b3bdee0d65c6174ca03769559579460"
   license "LGPL-3.0-or-later"
+  compatibility_version 1
 
   bottle do
-    sha256 arm64_sonoma:   "e7f65709dffaf55c7ace2e1c8f6553aebc56a17674b7ab57421c1f22bbf7798a"
-    sha256 arm64_ventura:  "8e47adc1f7238e67c3af7712ff0e57c1d0b1b79a86950f0e0370944f1a69c960"
-    sha256 arm64_monterey: "d58266c28fa037d004ddcd50f5da744a7232303455139523f61a83a3d36ce5e6"
-    sha256 sonoma:         "4b8013bda989e3215cbe659f8e0786408f8e71a56777c1533a882246e986cdf8"
-    sha256 ventura:        "48cf5388ba5c114888987ae31a6620d640ed94c72e22076df491c33a88a35deb"
-    sha256 monterey:       "2716185a062154262f1b160358fa955bf31bbdae5d0b08f4d0c38e3bf6ff066c"
-    sha256 x86_64_linux:   "fd3f68416f1b61d67641e43ce42a3a4b88ad5a010533b572b42e69fa8e4ef434"
+    sha256 arm64_tahoe:   "badcd01f64dd30d067e31fa2658b3d12760c13b897616200c6e6154e946b3515"
+    sha256 arm64_sequoia: "2dec620b6eaf36a87eff83f35bf926145cc8ae8067b0d5469570c4f09bbe4ace"
+    sha256 arm64_sonoma:  "efd9a224d852b9378594099290cb21e973c92404bf4f24835e7167b51e3055ed"
+    sha256 sonoma:        "253c9d486cccc6e6a9447c484625f7498329cbf16a7c0f28c7beafdd66a24b5a"
+    sha256 arm64_linux:   "e9277ab2de50eec2a837d1d0d51456bff3a47737e787e7966df1220ba2b24b74"
+    sha256 x86_64_linux:  "be5c49d28eb86b89484e9a5dc33dc4097d9af484b67bde26aae77bf5841771b9"
   end
 
   head do
@@ -34,11 +34,11 @@ class Guile < Formula
   depends_on "gmp"
   depends_on "libtool"
   depends_on "libunistring"
-  depends_on "pkg-config" # guile-config is a wrapper around pkg-config.
+  depends_on "pkgconf" # guile-config is a wrapper around pkg-config.
   depends_on "readline"
 
   uses_from_macos "gperf"
-  uses_from_macos "libffi", since: :catalina
+  uses_from_macos "libffi"
   uses_from_macos "libxcrypt"
 
   def install
@@ -46,14 +46,14 @@ class Guile < Formula
     ENV.append "LDFLAGS", "-Wl,-rpath,#{HOMEBREW_PREFIX}/lib"
 
     # Avoid superenv shim
-    inreplace "meta/guile-config.in", "@PKG_CONFIG@", Formula["pkg-config"].opt_bin/"pkg-config"
+    inreplace "meta/guile-config.in", "@PKG_CONFIG@", Formula["pkgconf"].opt_bin/"pkg-config"
 
     system "./autogen.sh" unless build.stable?
 
-    system "./configure", *std_configure_args,
+    system "./configure", "--disable-nls",
                           "--with-libreadline-prefix=#{Formula["readline"].opt_prefix}",
                           "--with-libgmp-prefix=#{Formula["gmp"].opt_prefix}",
-                          "--disable-nls"
+                          *std_configure_args
     system "make", "install"
 
     # A really messed up workaround required on macOS --mkhl
@@ -67,7 +67,7 @@ class Guile < Formula
     # of opt_prefix usage everywhere.
     inreplace lib/"pkgconfig/guile-3.0.pc" do |s|
       s.gsub! Formula["bdw-gc"].prefix.realpath, Formula["bdw-gc"].opt_prefix
-      s.gsub! Formula["libffi"].prefix.realpath, Formula["libffi"].opt_prefix if !OS.mac? || MacOS.version < :catalina
+      s.gsub! Formula["libffi"].prefix.realpath, Formula["libffi"].opt_prefix unless OS.mac?
     end
 
     (share/"gdb/auto-load").install Dir["#{lib}/*-gdb.scm"]
@@ -96,10 +96,10 @@ class Guile < Formula
 
   test do
     hello = testpath/"hello.scm"
-    hello.write <<~EOS
+    hello.write <<~SCHEME
       (display "Hello World")
       (newline)
-    EOS
+    SCHEME
 
     ENV["GUILE_AUTO_COMPILE"] = "0"
 

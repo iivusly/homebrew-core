@@ -1,19 +1,13 @@
 class Rbenv < Formula
   desc "Ruby version manager"
   homepage "https://rbenv.org"
-  url "https://github.com/rbenv/rbenv/archive/refs/tags/v1.3.0.tar.gz"
-  sha256 "7e49e529ce0c876748fa75a61efdd62efa2634906075431a1818b565825eb758"
+  url "https://github.com/rbenv/rbenv/archive/refs/tags/v1.3.2.tar.gz"
+  sha256 "e2104f6472d7a8477409c46d4de39562b4d01899148a3dbed73c1d99a0b4bb2a"
   license "MIT"
   head "https://github.com/rbenv/rbenv.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "6a9437cf6a6933473161ddcfcc9f9f8214ccbf8b1fcbf35e21662712dcfb80f3"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "6a9437cf6a6933473161ddcfcc9f9f8214ccbf8b1fcbf35e21662712dcfb80f3"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "6a9437cf6a6933473161ddcfcc9f9f8214ccbf8b1fcbf35e21662712dcfb80f3"
-    sha256 cellar: :any_skip_relocation, sonoma:         "75461707772b43f2f3037a2176b820d9fe3039fb9255487f7d8d1f8e88a051f9"
-    sha256 cellar: :any_skip_relocation, ventura:        "75461707772b43f2f3037a2176b820d9fe3039fb9255487f7d8d1f8e88a051f9"
-    sha256 cellar: :any_skip_relocation, monterey:       "75461707772b43f2f3037a2176b820d9fe3039fb9255487f7d8d1f8e88a051f9"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "494c38f6026ed28e4fce71a2a75b2f4a612fa99711a5bd0d4dcc37c233bcbec4"
+    sha256 cellar: :any_skip_relocation, all: "8158fb1f059c1316523b2cc9074c5c041b3944828dc3b76cb032f893e754f013"
   end
 
   depends_on "ruby-build"
@@ -21,9 +15,8 @@ class Rbenv < Formula
   uses_from_macos "ruby" => :test
 
   def install
-    inreplace "libexec/rbenv" do |s|
-      s.gsub! ":/usr/local/etc/rbenv.d", ":#{HOMEBREW_PREFIX}/etc/rbenv.d\\0" if HOMEBREW_PREFIX.to_s != "/usr/local"
-    end
+    # Build an `:all` bottle.
+    inreplace "libexec/rbenv", "/usr/local", HOMEBREW_PREFIX
 
     if build.head?
       # Record exact git revision for `rbenv --version` output
@@ -32,6 +25,7 @@ class Rbenv < Formula
                                            %Q(\\1"\\2-g#{git_revision}")
     end
 
+    # bash completion handled by rbenv-init
     zsh_completion.install "completions/_rbenv" => "_rbenv"
     prefix.install ["bin", "completions", "libexec", "rbenv.d"]
     man1.install "share/man/man1/rbenv.1"

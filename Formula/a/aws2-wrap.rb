@@ -8,21 +8,22 @@ class Aws2Wrap < Formula
   license "GPL-3.0-only"
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "7c2df355539ff6a5a97dc6576094fdf500f880d7943bc98d18bdd1bb05eb7a2f"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "1ea2d064799ec9632c9ec0550c5adf25b7f729281a69ab8f9ef3f0bf08d9d0d2"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "7e8245761543dba5a8c40024e84c3f4804231dd5ae4017fa8e661bf82d53005a"
-    sha256 cellar: :any_skip_relocation, sonoma:         "3586cb80290225eb4ca995f8adf04bd4823d436c27c2329721954887b7e77ba8"
-    sha256 cellar: :any_skip_relocation, ventura:        "83c88c4352544d1ae1de1d10d5d2df6fce10d0e84fa3b484d90ef679575da4d6"
-    sha256 cellar: :any_skip_relocation, monterey:       "3563f2e6d3584c99437b9d0e1af6703c3f2a7ebcb8157a35bd3e58d987420270"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "4a9f4369e5f248a94f80ef4cec4efe6990f2386a31014de607e764f9a564490d"
+    rebuild 3
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "3268822bfc1e7e701d18bdc33ab3e1da2dbade82654349196575813f596fa2ef"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "4273b2ffc121cdec548f58a6fe95ee8b48ec81302d2aeaffc7988d480c74b487"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "162278b196ec4ea96fa0c358d6375ee2728591d89dd577aa619097fe897bf9c9"
+    sha256 cellar: :any_skip_relocation, sonoma:        "b2ea3565616d3ae6d2242997f570c236bd9b0f2bc9df70c5a4963ff78f0ba027"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "bce412d5705b5db7d2bd526f20e9da030b4c4c0404bab9a9d7c3de6608ebbbb6"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "cadb8097812a3729fb1ae6d91eec08399280c4096cc4d4d79423ce3924b445b5"
   end
 
-  depends_on "python@3.12"
+  deprecate! date: "2025-10-02", because: :repo_archived
+
+  depends_on "python@3.14"
 
   resource "psutil" do
-    url "https://files.pythonhosted.org/packages/90/c7/6dc0a455d111f68ee43f27793971cf03fe29b6ef972042549db29eec39a2/psutil-5.9.8.tar.gz"
-    sha256 "6be126e3225486dff286a8fb9a06246a5253f4c7c53b475ea5f5ac934e64194c"
+    url "https://files.pythonhosted.org/packages/b3/31/4723d756b59344b643542936e37a31d1d3204bcdc42a7daa8ee9eb06fb50/psutil-7.1.0.tar.gz"
+    sha256 "655708b3c069387c8b77b072fc429a57d0e214221d01c0a772df7dfedcb3bcd2"
   end
 
   def install
@@ -33,7 +34,7 @@ class Aws2Wrap < Formula
     mkdir testpath/".aws"
     touch testpath/".aws/config"
     ENV["AWS_CONFIG_FILE"] = testpath/".aws/config"
-    assert_match "Cannot find profile 'default'",
-      shell_output("#{bin}/aws2-wrap 2>&1", 1).strip
+
+    assert_match "Cannot find profile 'default'", shell_output("#{bin}/aws2-wrap 2>&1", 1).strip
   end
 end

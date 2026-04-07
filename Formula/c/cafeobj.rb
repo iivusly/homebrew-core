@@ -1,8 +1,8 @@
 class Cafeobj < Formula
   desc "New generation algebraic specification and programming language"
   homepage "https://cafeobj.org/"
-  url "https://github.com/CafeOBJ/cafeobj/archive/refs/tags/v1.6.1.tar.gz"
-  sha256 "12780724a2b63ee45b12b79fd574ea1dc2870b59a4964ae51d9acc47dbbcff3d"
+  url "https://github.com/CafeOBJ/cafeobj/archive/refs/tags/v1.6.2.tar.gz"
+  sha256 "b5ea4267b7b4ff3d85a970b6330f706b81ef872968230608005c9b3d168b0065"
   license all_of: [
     "BSD-2-Clause",
     :public_domain, # comlib/let-over-lambda.lisp
@@ -16,32 +16,55 @@ class Cafeobj < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "5e0f6023e2d9a5b48533e89e09aeca6d7d5c7d5c3c5f91e106e755c6114ca168"
-    sha256 arm64_ventura:  "4be3e504840ca27a601164e8bca0f8edaf6c6f6cda044f7c50736041957e8492"
-    sha256 arm64_monterey: "795c8a702f4db1bdb7e64c100f5959cfdbdeacefe813f4acbbd09fb38460eef3"
-    sha256 arm64_big_sur:  "0a68da082b8adb250f4041991f1f7a9b61e8f9a93012b9cd15e9c1b80b27680b"
-    sha256 sonoma:         "9ba935326d5f03c78822dbbdfe922fd0546e775d0b8e22c3e2582a8d60ea4556"
-    sha256 ventura:        "09a50d00fb9193709372416b990d34e74beb4ff09b8ae9ea280d238363cd356b"
-    sha256 monterey:       "afad90131b9fb0a6566817ddc18dc9d98be0170eb3e6071f457fa31bf81a868e"
-    sha256 big_sur:        "f4337d1c194cc66630e2ea78b2d532b59971ec19ad422a11ea515d23cad46f3c"
-    sha256 x86_64_linux:   "30bf501217fe13524dcfc5667bb149a6ddcd3523916e04a86fc5b1dd06649240"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "dce62a3729ca96afc0a108ddd59600066e98b82282fd448f3af759660d112537"
+    sha256 cellar: :any,                 arm64_sequoia: "f09b8ca7dd1989923e0c4655ea33c8a42a0c1d11bfbf42565abaccc48d0b530f"
+    sha256 cellar: :any,                 arm64_sonoma:  "259398f625fe7637f8a2858d3ef6527afc3f37f6ca5ad6c981f531ac9d39fa90"
+    sha256 cellar: :any,                 sonoma:        "04d7d82a328ad96e7dcf8fa3d9afabb1f84b0d386c1beed9eef271737ab9ac56"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "7f9e673420ee0cba67dc62168fc40be7d88e685929420bd0bc80ea7eba80fdc9"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "fefc0da02032b0c3f03aee866a9e6db0fbc3b9bcee757a71f5a682703e12ff0b"
   end
 
-  depends_on "sbcl"
+  depends_on "sbcl" => :build
   depends_on "zstd"
 
+  # Does not build with SBCL 2.5: https://github.com/CafeOBJ/cafeobj/issues/8
+  resource "sbcl" do
+    url "https://downloads.sourceforge.net/project/sbcl/sbcl/2.4.11/sbcl-2.4.11-source.tar.bz2"
+    sha256 "4f03e5846f35834c10700bbe232da41ba4bdbf81bdccacb1d4de24297657a415"
+  end
+
   def install
+    resource("sbcl").stage do
+      ENV["SBCL_MACOSX_VERSION_MIN"] = MacOS.version.to_s if OS.mac?
+      system "sh", "make.sh", "--prefix=#{buildpath}/sbcl", "--with-sb-core-compression", "--with-sb-thread"
+      system "sh", "install.sh"
+      ENV.prepend_path "PATH", buildpath/"sbcl/bin"
+    end
+
     # Exclude unrecognized options
     args = std_configure_args.reject { |s| s["--disable-debug"] || s["--disable-dependency-tracking"] }
 
-    system "./configure", "--with-lisp=sbcl", "--with-lispdir=#{share}/emacs/site-lisp/cafeobj", *args
+    system "./configure", "--with-lisp=sbcl", "--with-lispdir=#{elisp}", *args
     system "make", "install"
+
+    # Work around patchelf corrupting the SBCL core which is appended to binary
+    # TODO: Find a better way to handle this in brew, either automatically or via DSL
+    if OS.linux? && build.bottle? && build.stable?
+      cp lib/"cafeobj-#{version.major_minor}/sbcl/cafeobj.sbcl", prefix
+      Utils::Gzip.compress(prefix/"cafeobj.sbcl")
+    end
+  end
+
+  def post_install
+    if (prefix/"cafeobj.sbcl.gz").exist?
+      system "gunzip", prefix/"cafeobj.sbcl.gz"
+      (prefix/"cafeobj.sbcl").chmod (lib/"cafeobj-#{version.major_minor}/sbcl/cafeobj.sbcl").lstat.mode
+      (lib/"cafeobj-#{version.major_minor}/sbcl").install prefix/"cafeobj.sbcl"
+    end
   end
 
   test do
-    # Fails in Linux CI with "Can't find sbcl.core"
-    return if OS.linux? && ENV["HOMEBREW_GITHUB_ACTIONS"]
-
     system bin/"cafeobj", "-batch"
   end
 end

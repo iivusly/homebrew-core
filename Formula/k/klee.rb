@@ -4,49 +4,49 @@ class Klee < Formula
 
   desc "Symbolic Execution Engine"
   homepage "https://klee-se.org"
-  url "https://github.com/klee/klee/archive/refs/tags/v3.1.tar.gz"
-  sha256 "ae3d97209fa480ce6498ffaa7eaa7ecbbe22748c739cb7b2389391d0d9c940f7"
+  url "https://github.com/klee/klee/archive/refs/tags/v3.2.tar.gz"
+  sha256 "83d9b9ce0ba187e48c0e55623bf1a68b5eb61376da7ce82551c9d885715a21dd"
   license "NCSA"
-  revision 1
+  revision 2
   head "https://github.com/klee/klee.git", branch: "master"
 
   bottle do
-    sha256 arm64_sonoma:   "bf28322223d706f98283cdfb4b13c78aa0618a07d05f40e182be4ba8132cff1f"
-    sha256 arm64_ventura:  "097ba050132ae174c3a58168f05e6073aa822a45de959ccdbb5f2aec8caad405"
-    sha256 arm64_monterey: "fdb0f24f5c1a5fd4c3e44eebd50a754d803aeb0595319c80b3e46c9960914a77"
-    sha256 sonoma:         "69bfbed571b514d88c7bb32cec071074346ac807ae206bdcdd2946ee10322f14"
-    sha256 ventura:        "d7779014ed216f5c966c00179766ea6892a9b3fbd7930df33bd9397cb6ba36a6"
-    sha256 monterey:       "f8d3398a2292163f6468aeda5e3a3c497adef2dc370c0797b875794e016ee48d"
-    sha256 x86_64_linux:   "27f8ee812fc340d82871cdd27e40c2cc260dcbad6aed79dc5f79b9e01a301529"
+    sha256 arm64_tahoe:   "203c689927268d04179ff379f721d67f07ed0891740c6bb594b320537e0c87bc"
+    sha256 arm64_sequoia: "fce18a6e0a204338ffab96d595a1970732f87c36f6fe5399c438da9ddee9375e"
+    sha256 arm64_sonoma:  "aec64589dcd505701a20bec26fd753302044077cb312f605c149d7d92a94748a"
+    sha256 sonoma:        "f421ee878c444e10d0baef47e564b9a4bd57172f9fbc022743c2d5aa7c98729d"
+    sha256 x86_64_linux:  "13447a3a22f6de2d472b98c971b193ed8dd89396b370c8f5184c4e1dc96cd908"
   end
 
   depends_on "cmake" => :build
 
+  depends_on "cryptominisat"
   depends_on "gperftools"
-  depends_on "llvm@14" # LLVM 16 PR: https://github.com/klee/klee/pull/1664
-  depends_on "python@3.12"
+  depends_on "llvm@16" # LLVM 17+ issue: https://github.com/klee/klee/issues/1754
+  depends_on "python@3.14"
   depends_on "sqlite"
   depends_on "stp"
   depends_on "wllvm"
   depends_on "z3"
 
-  uses_from_macos "zlib"
-
   on_macos do
     depends_on "cryptominisat"
+    depends_on "gmp"
     depends_on "minisat"
   end
 
   on_linux do
-    depends_on "python-setuptools" => :build # Remove with LLVM 15+
+    # klee seems to stall when run on arm64. May not be supported yet:
+    # * https://github.com/klee/klee/issues/1670
+    # * https://github.com/klee/klee/issues/1767
+    depends_on arch: :x86_64
+    depends_on "zlib-ng-compat"
   end
-
-  fails_with gcc: "5"
 
   # klee needs a version of libc++ compiled with wllvm
   resource "libcxx" do
-    url "https://github.com/llvm/llvm-project/releases/download/llvmorg-14.0.6/llvm-project-14.0.6.src.tar.xz"
-    sha256 "8b3cfd7bc695bd6cea0f37f53f0981f34f87496e79e2529874fd03a2f9dd3a8a"
+    url "https://github.com/llvm/llvm-project/releases/download/llvmorg-16.0.6/llvm-project-16.0.6.src.tar.xz"
+    sha256 "ce5e71081d17ce9e86d7cbcfa28c4b04b9300f8fb7e78422b1feb6bc52c3028e"
   end
 
   resource "tabulate" do
@@ -66,8 +66,10 @@ class Klee < Formula
     # Use build configuration at
     # https://github.com/klee/klee/blob/v#{version}/scripts/build/p-libcxx.inc
     libcxx_args = std_cmake_args(install_prefix: libcxx_install_dir) + %W[
-      -DCMAKE_INSTALL_RPATH=#{rpath}
-      -DLLVM_ENABLE_PROJECTS=libcxx;libcxxabi
+      -DRUNTIMES_CMAKE_ARGS=-DCMAKE_INSTALL_RPATH=#{rpath}
+      -DLLVM_ENABLE_RUNTIMES=libcxx;libcxxabi
+      -DLLVM_ENABLE_PROJECTS=
+      -DLLVM_ENABLE_PROJECTS_USED:BOOL=ON
       -DLLVM_ENABLE_THREADS:BOOL=OFF
       -DLLVM_ENABLE_EH:BOOL=OFF
       -DLLVM_ENABLE_RTTI:BOOL=OFF
@@ -84,8 +86,8 @@ class Klee < Formula
       LLVM_COMPILER_PATH: llvm.opt_bin,
     ) do
       system "cmake", "-S", libcxx_src_dir/"llvm", "-B", "libcxx_build", *libcxx_args
-      system "cmake", "--build", "libcxx_build", "--target", "cxx"
-      system "cmake", "--build", "libcxx_build/projects", "--target", "install"
+      system "cmake", "--build", "libcxx_build", "--target", "runtimes"
+      system "cmake", "--install", "libcxx_build/runtimes"
     end
 
     libcxx_libs = libcxx_install_dir.glob("lib/{#{shared_library("*")},*.a}").reject(&:symlink?)
@@ -124,7 +126,7 @@ class Klee < Formula
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
 
-    venv = virtualenv_create(libexec/"venv", "python3.12")
+    venv = virtualenv_create(libexec/"venv", "python3.14")
     venv.pip_install resource("tabulate")
     rewrite_shebang python_shebang_rewrite_info(venv.root/"bin/python"), *bin.children
   end
@@ -132,7 +134,7 @@ class Klee < Formula
   # Test adapted from
   # http://klee.github.io/tutorials/testing-function/
   test do
-    (testpath/"get_sign.c").write <<~EOS
+    (testpath/"get_sign.c").write <<~C
       #include "klee/klee.h"
 
       int get_sign(int x) {
@@ -149,7 +151,7 @@ class Klee < Formula
         klee_make_symbolic(&a, sizeof(a), "a");
         return get_sign(a);
       }
-    EOS
+    C
 
     ENV["CC"] = llvm.opt_bin/"clang"
 
@@ -157,7 +159,7 @@ class Klee < Formula
                     "-c", "-g", "-O0", "-Xclang", "-disable-O0-optnone",
                     testpath/"get_sign.c"
 
-    total_instructions = 33
+    total_instructions = 32
     expected_output = <<~EOS
       KLEE: done: total instructions = #{total_instructions}
       KLEE: done: completed paths = 3
@@ -165,7 +167,7 @@ class Klee < Formula
       KLEE: done: generated tests = 3
     EOS
     assert_match expected_output, shell_output("#{bin}/klee get_sign.bc 2>&1")
-    assert_predicate testpath/"klee-out-0", :exist?
+    assert_path_exists testpath/"klee-out-0"
 
     assert_match "['get_sign.bc']", shell_output("#{bin}/ktest-tool klee-last/test000001.ktest")
 

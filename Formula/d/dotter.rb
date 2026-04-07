@@ -1,18 +1,19 @@
 class Dotter < Formula
   desc "Dotfile manager and templater written in rust"
   homepage "https://github.com/SuperCuber/dotter"
-  url "https://github.com/SuperCuber/dotter/archive/refs/tags/v0.13.2.tar.gz"
-  sha256 "a62f2d55e48e5e9a84417960e8bdf0f2a9c3ce730dfd759e0f927055feb12e35"
+  url "https://github.com/SuperCuber/dotter/archive/refs/tags/v0.13.4.tar.gz"
+  sha256 "46135bcae1940cb22284308bd2cf75d78bb06a748136d835f29db978521fd45a"
   license "Unlicense"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "5307fb4e60f7cb831ed7f8089534b4b7cd84b72c96e0e6099161ef39c28a9ea6"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "185964ae1b8a33314762d1dff177b8d9eee3d517ac1ecbd6593e37fe92370c76"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "1d946b97a58101cfc7e0050b7c820b6a7d3dd4662ed415a3363eb8b78cc0e27d"
-    sha256 cellar: :any_skip_relocation, sonoma:         "a4af36f25c81f8ce899186039e473be1965bb8e22cfc539ef86d8599b330c95d"
-    sha256 cellar: :any_skip_relocation, ventura:        "3a7bb2148d065ea6496c47ada4870bb7bf5382c6545cc28cdd574e50465735cf"
-    sha256 cellar: :any_skip_relocation, monterey:       "dbfd42d7fb7353665f59561a6a19897cd0e27867e2298da15b45d5af5c19daaa"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "44c4b1e3a7c37e55b65364fd3b965d31805019e695b940b89dcabf41076758cf"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "36a6ed7c7532d987ee58325e854956607c4fc604de98e430f1e69cea774a3c02"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "74c671258a4621c806cf9ae2acd68aed779fc3f2871f8af5b7a8d91c41476504"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "17167d23e44c100fc9f47e5c6c00eb49ec6ab31ef03df5a618f224f9371b4756"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "8cf2736586332347c9dd11acb187963352aa43b14daccbd1287d700546aa153b"
+    sha256 cellar: :any_skip_relocation, sonoma:        "97555d05db08fefdf290b69152bf1c7ccd408e0a49a409709836067688a32a99"
+    sha256 cellar: :any_skip_relocation, ventura:       "a627706f9e7d8aa47cf4b23b0415313636599b912c3df693d82d3fe8b58d9c79"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "518f20fa7c86be27c630e4be9d018176c0af69c43a9e228761ffb8bce53a8a98"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "38f63b924590be43e9dc62a39de04c621247bc23820fba6de6e63c32caa3cd56"
   end
 
   depends_on "rust" => :build
@@ -24,13 +25,13 @@ class Dotter < Formula
 
   test do
     (testpath/"xxx.conf").write("12345678")
-    (testpath/".dotter/local.toml").write <<~EOS
+    (testpath/".dotter/local.toml").write <<~TOML
       packages = ["xxx"]
-    EOS
-    (testpath/".dotter/global.toml").write <<~EOS
+    TOML
+    (testpath/".dotter/global.toml").write <<~TOML
       [xxx.files]
       "xxx.conf" = "yyy.conf"
-    EOS
+    TOML
 
     system bin/"dotter", "deploy"
     assert_match "12345678", File.read("yyy.conf")

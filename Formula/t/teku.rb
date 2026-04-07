@@ -2,22 +2,21 @@ class Teku < Formula
   desc "Java Implementation of the Ethereum 2.0 Beacon Chain"
   homepage "https://docs.teku.consensys.net/"
   url "https://github.com/ConsenSys/teku.git",
-      tag:      "24.8.0",
-      revision: "777c9dc7bbaa2f563e870b5fa277e48472e234ae"
+      tag:      "26.4.0",
+      revision: "c5add450714feaf941dc666ab7bb35ad544e56fd"
   license "Apache-2.0"
   head "https://github.com/ConsenSys/teku.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "ccb08b9036dfc702713e9bb30a635e81855abd6a129de6349e835aae21d19162"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "ccb08b9036dfc702713e9bb30a635e81855abd6a129de6349e835aae21d19162"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "ccb08b9036dfc702713e9bb30a635e81855abd6a129de6349e835aae21d19162"
-    sha256 cellar: :any_skip_relocation, sonoma:         "a51ab84a805a6c1d87e13d9c83e910a278e00538ba115e4f507e07a9251af9d0"
-    sha256 cellar: :any_skip_relocation, ventura:        "a51ab84a805a6c1d87e13d9c83e910a278e00538ba115e4f507e07a9251af9d0"
-    sha256 cellar: :any_skip_relocation, monterey:       "a51ab84a805a6c1d87e13d9c83e910a278e00538ba115e4f507e07a9251af9d0"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "b78332832f5939a67aa448c14927a0723c6d7752afd07ad025bf13f098042654"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "ffd8afb5660a42d31c79a06659f7a63e9e40298e7f9607b49c557ca66ae16752"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "ffd8afb5660a42d31c79a06659f7a63e9e40298e7f9607b49c557ca66ae16752"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "ffd8afb5660a42d31c79a06659f7a63e9e40298e7f9607b49c557ca66ae16752"
+    sha256 cellar: :any_skip_relocation, sonoma:        "ffd8afb5660a42d31c79a06659f7a63e9e40298e7f9607b49c557ca66ae16752"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "1f3cd3bfcd0468bccd927dce2310a62544bd22d6785e9e8e3a05149f27363e6d"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "1f3cd3bfcd0468bccd927dce2310a62544bd22d6785e9e8e3a05149f27363e6d"
   end
 
-  depends_on "gradle" => :build
+  depends_on "gradle@8" => :build
   depends_on "openjdk"
 
   def install
@@ -33,16 +32,15 @@ class Teku < Formula
 
     rest_port = free_port
     test_args = %W[
-      --ee-endpoint=http://127.0.0.1
-      --ignore-weak-subjectivity-period-enabled
+      --network=minimal
+      --Xinterop-enabled
+      --Xinterop-number-of-validators=8
       --rest-api-enabled
       --rest-api-port=#{rest_port}
       --p2p-enabled=false
-
+      --data-path=#{testpath}
     ]
-    fork do
-      exec bin/"teku", *test_args
-    end
+    spawn bin/"teku", *test_args
     sleep 15
 
     output = shell_output("curl -sS -XGET http://127.0.0.1:#{rest_port}/eth/v1/node/syncing")

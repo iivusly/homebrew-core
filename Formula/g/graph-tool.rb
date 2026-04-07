@@ -3,11 +3,10 @@ class GraphTool < Formula
 
   desc "Efficient network analysis for Python 3"
   homepage "https://graph-tool.skewed.de/"
-  # TODO: Update build for matplotlib>=3.9.0 to use `--config-settings=setup-args=...` for system dependencies
-  url "https://downloads.skewed.de/graph-tool/graph-tool-2.77.tar.bz2"
-  sha256 "9aeffaaf5528f37e994f1b882f751db0abee533f87d45658f58dd96c404ad0b4"
+  url "https://downloads.skewed.de/graph-tool/graph-tool-2.98.tar.bz2"
+  sha256 "eef1948b937f5f043749eee75fe0c6d7e8f036551d945e9d55e37870b06cc527"
   license "LGPL-3.0-or-later"
-  revision 1
+  revision 3
 
   livecheck do
     url "https://downloads.skewed.de/graph-tool/"
@@ -15,31 +14,30 @@ class GraphTool < Formula
   end
 
   bottle do
-    sha256                               arm64_sonoma:   "22ac8b89dbaddf57816affedae8faa1ab86f4180b52c87648440f053aa422db8"
-    sha256                               arm64_ventura:  "30713edb77a93022dbed787f6a1989c2f2ce7cd457a80910a73eeb008d381324"
-    sha256                               arm64_monterey: "0e93407bad579c8b8956e5f59d35a6860db7c9db23cfa31479a1ae7700766d3d"
-    sha256                               sonoma:         "aa93dda610588664edd12c4fc92a09bea19447c62d5c2d36f33976c117c4eec4"
-    sha256                               ventura:        "27f3eaf816a566e020dcfe1be23d5e841867782deba9041017069e39bc7741c4"
-    sha256                               monterey:       "ec09730d7e1b426181b99c0f0b885f31b51e9168478b4628b42b8cd4f2c47f57"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "65a547b6ed9f3394f0a5221438e2d6c3e3af94cea56991e8dcfc1a95d7a53227"
+    sha256                               arm64_tahoe:   "4f29bcc01c4eff82e4bad1ff01b17f512c53fe032939130c501984ffb225eae5"
+    sha256                               arm64_sequoia: "032459297a538e297adb29dd32c5b570d2df9b39ac0db8b5ebae20a541d7dc60"
+    sha256                               arm64_sonoma:  "0271c7776f6e9ef728ea435e0669d23a6e0cf8c6522b79395496556c021490d6"
+    sha256                               sonoma:        "9586b5dd993162ca9f75d43bf9a4332767d7ff3f3913fb055b519eca96d8c06e"
+    sha256                               arm64_linux:   "18b2deaf9d659b762afcc9dd52742f0b6ee6ccde95ac3ccc491476b8b2683074"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "9fec27dacb1c465b41f64a08336c45dc1e8320521068b4ac0990bf54b4ef806a"
   end
 
+  depends_on "google-sparsehash" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
+
   depends_on "boost"
   depends_on "boost-python3"
   depends_on "cairomm@1.14"
   depends_on "cgal"
   depends_on "freetype"
   depends_on "gmp"
-  depends_on "google-sparsehash"
   depends_on "gtk+3"
-  depends_on macos: :mojave # for C++17
   depends_on "numpy"
   depends_on "pillow"
   depends_on "py3cairo"
   depends_on "pygobject3"
-  depends_on "python@3.12"
+  depends_on "python@3.14"
   depends_on "qhull"
   depends_on "scipy"
   depends_on "zstd"
@@ -48,6 +46,7 @@ class GraphTool < Formula
 
   on_macos do
     depends_on "cairo"
+    depends_on "libomp"
     depends_on "libsigc++@2"
   end
 
@@ -55,9 +54,13 @@ class GraphTool < Formula
     depends_on "patchelf" => :build
   end
 
+  pypi_packages package_name:     "",
+                exclude_packages: %w[numpy pillow],
+                extra_packages:   %w[matplotlib setuptools zstandard]
+
   resource "contourpy" do
-    url "https://files.pythonhosted.org/packages/8d/9e/e4786569b319847ffd98a8326802d5cf8a5500860dbfc2df1f0f4883ed99/contourpy-1.2.1.tar.gz"
-    sha256 "4d8908b3bee1c889e547867ca4cdc54e5ab6be6d3e078556814a22457f49423c"
+    url "https://files.pythonhosted.org/packages/58/01/1253e6698a07380cd31a736d248a3f2a50a7c88779a1813da27503cadc2a/contourpy-1.3.3.tar.gz"
+    sha256 "083e12155b210502d0bca491432bb04d56dc3432f95a979b429f2848c3dbe880"
   end
 
   resource "cycler" do
@@ -66,28 +69,28 @@ class GraphTool < Formula
   end
 
   resource "fonttools" do
-    url "https://files.pythonhosted.org/packages/c6/cb/cd80a0da995adde8ade6044a8744aee0da5efea01301cadf770f7fbe7dcc/fonttools-4.53.1.tar.gz"
-    sha256 "e128778a8e9bc11159ce5447f76766cefbd876f44bd79aff030287254e4752c4"
+    url "https://files.pythonhosted.org/packages/33/f9/0e84d593c0e12244150280a630999835a64f2852276161b62a0f98318de0/fonttools-4.61.0.tar.gz"
+    sha256 "ec520a1f0c7758d7a858a00f090c1745f6cde6a7c5e76fb70ea4044a15f712e7"
   end
 
   resource "kiwisolver" do
-    url "https://files.pythonhosted.org/packages/b9/2d/226779e405724344fc678fcc025b812587617ea1a48b9442628b688e85ea/kiwisolver-1.4.5.tar.gz"
-    sha256 "e57e563a57fb22a142da34f38acc2fc1a5c864bc29ca1517a88abc963e60d6ec"
+    url "https://files.pythonhosted.org/packages/5c/3c/85844f1b0feb11ee581ac23fe5fce65cd049a200c1446708cc1b7f922875/kiwisolver-1.4.9.tar.gz"
+    sha256 "c3b22c26c6fd6811b0ae8363b95ca8ce4ea3c202d3d0975b2914310ceb1bcc4d"
   end
 
   resource "matplotlib" do
-    url "https://files.pythonhosted.org/packages/27/c3/b4dbf9ed2a024a5514fa8a2606867a3716c9adfd457d138865145a940a65/matplotlib-3.9.1.post1.tar.gz"
-    sha256 "c91e585c65092c975a44dc9d4239ba8c594ba3c193d7c478b6d178c4ef61f406"
+    url "https://files.pythonhosted.org/packages/ae/e2/d2d5295be2f44c678ebaf3544ba32d20c1f9ef08c49fe47f496180e1db15/matplotlib-3.10.7.tar.gz"
+    sha256 "a06ba7e2a2ef9131c79c49e63dad355d2d878413a0376c1727c8b9335ff731c7"
   end
 
   resource "packaging" do
-    url "https://files.pythonhosted.org/packages/51/65/50db4dda066951078f0a96cf12f4b9ada6e4b811516bf0262c0f4f7064d4/packaging-24.1.tar.gz"
-    sha256 "026ed72c8ed3fcce5bf8950572258698927fd1dbda10a5e981cdf0ac37f4f002"
+    url "https://files.pythonhosted.org/packages/a1/d4/1fc4078c65507b51b96ca8f8c3ba19e6a61c8253c72794544580a7b6c24d/packaging-25.0.tar.gz"
+    sha256 "d443872c98d677bf60f6a1f2f8c1cb748e8fe762d2bf9d3148b5599295b0fc4f"
   end
 
   resource "pyparsing" do
-    url "https://files.pythonhosted.org/packages/46/3a/31fd28064d016a2182584d579e033ec95b809d8e220e74c4af6f0f2e8842/pyparsing-3.1.2.tar.gz"
-    sha256 "a1bac0ce561155ecc3ed78ca94d3c9378656ad4c94c1270de543f621420f94ad"
+    url "https://files.pythonhosted.org/packages/f2/a5/181488fc2b9d093e3972d2a472855aae8a03f000592dbfce716a512b3359/pyparsing-3.2.5.tar.gz"
+    sha256 "2df8d5b7b2802ef88e8d016a2eb9c7aeaa923529cd251ed0fe4608275d4105b6"
   end
 
   resource "python-dateutil" do
@@ -96,51 +99,71 @@ class GraphTool < Formula
   end
 
   resource "setuptools" do
-    url "https://files.pythonhosted.org/packages/5e/11/487b18cc768e2ae25a919f230417983c8d5afa1b6ee0abd8b6db0b89fa1d/setuptools-72.1.0.tar.gz"
-    sha256 "8d243eff56d095e5817f796ede6ae32941278f542e0f941867cc05ae52b162ec"
+    url "https://files.pythonhosted.org/packages/18/5d/3bf57dcd21979b887f014ea83c24ae194cfcd12b9e0fda66b957c69d1fca/setuptools-80.9.0.tar.gz"
+    sha256 "f36b47402ecde768dbfafc46e8e4207b4360c654f1f3bb84475f0a28628fb19c"
   end
 
   resource "six" do
-    url "https://files.pythonhosted.org/packages/71/39/171f1c67cd00715f190ba0b100d606d440a28c93c7714febeca8b79af85e/six-1.16.0.tar.gz"
-    sha256 "1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"
+    url "https://files.pythonhosted.org/packages/94/e7/b2c673351809dca68a0e064b6af791aa332cf192da575fd474ed7d6f16a2/six-1.17.0.tar.gz"
+    sha256 "ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81"
   end
 
   resource "zstandard" do
-    url "https://files.pythonhosted.org/packages/ed/f6/2ac0287b442160a89d726b17a9184a4c615bb5237db763791a7fd16d9df1/zstandard-0.23.0.tar.gz"
-    sha256 "b2d8c62d08e7255f68f7a740bae85b3c9b8e5466baa9cbf7f57f1cde0ac6bc09"
+    url "https://files.pythonhosted.org/packages/fd/aa/3e0508d5a5dd96529cdc5a97011299056e14c6505b678fd58938792794b1/zstandard-0.25.0.tar.gz"
+    sha256 "7713e1179d162cf5c7906da876ec2ccb9c3a9dcbdffef0cc7f70c3667a205f0b"
   end
 
   def python3
-    "python3.12"
+    "python3.14"
   end
 
+  # remove obsolete pointer_traits workaround for older libstdc++
+  patch :DATA
+
   def install
-    # https://github.com/matplotlib/matplotlib/blob/v3.8.3/doc/users/installing/dependencies.rst
-    ENV["MPLSETUPCFG"] = buildpath/"mplsetup.cfg"
-    (buildpath/"mplsetup.cfg").write <<~EOS
-      [libs]
-      system_freetype = true
-      system_qhull = true
-    EOS
+    # Work around superenv to avoid mixing `expat` usage in libraries across dependency tree.
+    # Brew `expat` usage in Python has low impact as it isn't loaded unless pyexpat is used.
+    # TODO: Consider adding a DSL for this or change how we handle Python's `expat` dependency
+    if OS.mac? && MacOS.version < :sequoia
+      env_vars = %w[CMAKE_PREFIX_PATH HOMEBREW_INCLUDE_PATHS HOMEBREW_LIBRARY_PATHS PATH PKG_CONFIG_PATH]
+      ENV.remove env_vars, /(^|:)#{Regexp.escape(Formula["expat"].opt_prefix)}[^:]*/
+      ENV.remove "HOMEBREW_DEPENDENCIES", "expat"
+    end
 
     site_packages = Language::Python.site_packages(python3)
     xy = Language::Python.major_minor_version(python3)
+    skipped = ["matplotlib", "zstandard"]
     venv = virtualenv_create(libexec, python3)
-    venv.pip_install resources.reject { |r| r.name == "zstandard" }
+    venv.pip_install resources.reject { |r| skipped.include? r.name }
+    python = venv.root/"bin/python"
+
+    resource("matplotlib").stage do
+      system python, "-m", "pip", "install", "--config-settings=setup-args=-Dsystem-freetype=true",
+                                             "--config-settings=setup-args=-Dsystem-qhull=true",
+                                             *std_pip_args(prefix: false, build_isolation: true), "."
+    end
+
     resource("zstandard").stage do
-      system_zstd_arg = "--config-settings=--build-option=--system-zstd"
-      system venv.root/"bin/python3", "-m", "pip", "install", system_zstd_arg, *std_pip_args, "."
+      system python, "-m", "pip", "install", "--config-settings=--build-option=--system-zstd",
+                                             *std_pip_args(prefix: false), "."
     end
 
     # Linux build is not thread-safe.
     ENV.deparallelize unless OS.mac?
 
+    # Enable openmp
+    if OS.mac?
+      ENV.append_to_cflags "-Xpreprocessor -fopenmp"
+      ENV.append "LDFLAGS", "-L#{Formula["libomp"].opt_lib} -lomp"
+      ENV.append "CPPFLAGS", "-I#{Formula["libomp"].opt_include}"
+    end
+
     args = %W[
-      PYTHON=#{venv.root}/bin/python
+      PYTHON=#{python}
       --with-python-module-path=#{prefix/site_packages}
-      --with-boost-python=boost_python#{xy.to_s.delete(".")}-mt
+      --with-boost-python=boost_python#{xy.to_s.delete(".")}
       --with-boost-libdir=#{Formula["boost"].opt_lib}
-      --with-boost-coroutine=boost_coroutine-mt
+      --with-boost-coroutine=boost_coroutine
       --disable-silent-rules
     ]
     args << "PYTHON_LIBS=-undefined dynamic_lookup" if OS.mac?
@@ -159,7 +182,7 @@ class GraphTool < Formula
   end
 
   test do
-    (testpath/"test.py").write <<~EOS
+    (testpath/"test.py").write <<~PYTHON
       import graph_tool.all as gt
       g = gt.Graph()
       v1 = g.add_vertex()
@@ -167,9 +190,36 @@ class GraphTool < Formula
       e = g.add_edge(v1, v2)
       assert g.num_edges() == 1
       assert g.num_vertices() == 2
-    EOS
+    PYTHON
     assert_match "Graph drawing will not work", shell_output("#{python3} test.py 2>&1")
     ENV["PYTHONPATH"] = libexec/Language::Python.site_packages(python3)
     refute_match "Graph drawing will not work", shell_output("#{python3} test.py 2>&1")
   end
 end
+
+__END__
+diff --git a/src/boost-workaround/boost/container/vector_old.hpp b/src/boost-workaround/boost/container/vector_old.hpp
+index c4152c8..f72e646 100644
+--- a/src/boost-workaround/boost/container/vector_old.hpp
++++ b/src/boost-workaround/boost/container/vector_old.hpp
+@@ -3167,20 +3167,6 @@ struct has_trivial_destructor_after_move<boost::container::vector<T, Allocator,
+
+ }
+
+-//See comments on vec_iterator::element_type to know why is this needed
+-#ifdef BOOST_GNU_STDLIB
+-
+-BOOST_MOVE_STD_NS_BEG
+-
+-template <class Pointer, bool IsConst>
+-struct pointer_traits< boost::container::vec_iterator<Pointer, IsConst> >
+-   : public boost::intrusive::pointer_traits< boost::container::vec_iterator<Pointer, IsConst> >
+-{};
+-
+-BOOST_MOVE_STD_NS_END
+-
+-#endif   //BOOST_GNU_STDLIB
+-
+ #endif   //#ifndef BOOST_CONTAINER_DOXYGEN_INVOKED
+
+ #include <boost/container/detail/config_end.hpp>

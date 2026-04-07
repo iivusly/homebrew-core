@@ -1,10 +1,9 @@
 class Mupen64plus < Formula
   desc "Cross-platform plugin-based N64 emulator"
   homepage "https://www.mupen64plus.org/"
-  url "https://github.com/mupen64plus/mupen64plus-core/releases/download/2.5/mupen64plus-bundle-src-2.5.tar.gz"
-  sha256 "9c75b9d826f2d24666175f723a97369b3a6ee159b307f7cc876bbb4facdbba66"
+  url "https://github.com/mupen64plus/mupen64plus-core/releases/download/2.6.0/mupen64plus-bundle-src-2.6.0.tar.gz"
+  sha256 "297e17180cd76a7b8ea809d1a1be2c98ed5c7352dc716965a80deb598b21e131"
   license "GPL-2.0-or-later"
-  revision 9
 
   livecheck do
     url :stable
@@ -12,104 +11,62 @@ class Mupen64plus < Formula
   end
 
   bottle do
-    sha256 sonoma:       "c230208074feda97c361199781940d50f7918419802ec903eec833d3ff2c0af0"
-    sha256 ventura:      "2c6365b16dbb1c3e70acd5068dfeab479f0742d8c9ae8df40df40af5524b119d"
-    sha256 monterey:     "81ce3aecfc6b2f110322459cbdde89176590fe8e445d75ca7136dfec520c7f4d"
-    sha256 x86_64_linux: "e4140dea7a57faf9c5f5adcd2a5b8803f7e19ba989c7f375c73d84a2d3459010"
+    rebuild 1
+    sha256 arm64_tahoe:   "73a594a4179e8c405898e24d23a3de66e3476734fe4d6271229a65ad9d94d143"
+    sha256 arm64_sequoia: "2ac11668fdeba8ca47b221e7e35fa0a7c1388644144673ea2981dd282214bdd6"
+    sha256 arm64_sonoma:  "1ba75f761d4a6c9520ff61d79fe13e08d2d0c72b039f4f40bc8ba35bd1dbcc86"
+    sha256 sonoma:        "7af6a82beaa3bcd3f82e86abab6f473836a542f2e6a35daa1795b2ae88e791e4"
+    sha256 arm64_linux:   "0b6dc156754e78588093434bd7d0a8729704b3425d3241887ce84d59b986131c"
+    sha256 x86_64_linux:  "53ffc3a9f022ab20a782517db83e4b69cd4722e998cfe4ac41d10c49ab2a513a"
   end
 
-  depends_on "pkg-config" => :build
-  depends_on arch: :x86_64
-  depends_on "boost"
+  depends_on "pkgconf" => :build
   depends_on "freetype"
   depends_on "libpng"
   depends_on "sdl2"
 
-  uses_from_macos "zlib"
-
   on_linux do
     depends_on "mesa"
+    depends_on "vulkan-loader"
+    depends_on "zlib-ng-compat"
   end
 
-  resource "rom" do
-    url "https://github.com/mupen64plus/mupen64plus-rom/raw/76ef14c876ed036284154444c7bdc29d19381acc/m64p_test_rom.v64"
-    sha256 "b5fe9d650a67091c97838386f5102ad94c79232240f9c5bcc72334097d76224c"
+  on_intel do
+    depends_on "nasm" => :build
+  end
+
+  # Backport fix to avoid macOS app bundle path
+  patch do
+    url "https://github.com/mupen64plus/mupen64plus-ui-console/commit/1cab2e6dfe46d5fbc4c23e1e7fbb4502a4e57981.patch?full_index=1"
+    sha256 "a6e80f36b65406d31f3611f88e695e5c079db52b6f68daa8eb01307f5447194c"
+    directory "source/mupen64plus-ui-console"
   end
 
   def install
-    # Work around build failure with `boost` 1.85.0
-    # Issue ref: https://github.com/mupen64plus/mupen64plus-video-glide64mk2/issues/128
-    wpath_files = %w[
-      source/mupen64plus-video-glide64mk2/src/GlideHQ/TxCache.cpp
-      source/mupen64plus-video-glide64mk2/src/GlideHQ/TxHiResCache.cpp
-      source/mupen64plus-video-glide64mk2/src/GlideHQ/TxHiResCache.h
-      source/mupen64plus-video-glide64mk2/src/GlideHQ/TxTexCache.cpp
-    ]
-    inreplace wpath_files, /\bboost::filesystem::wpath\b/, "boost::filesystem::path"
-    inreplace "source/mupen64plus-video-glide64mk2/src/GlideHQ/TxHiResCache.cpp",
-              "->path().leaf().", "->path().filename()."
-
     # Prevent different C++ standard library warning
     if OS.mac?
-      inreplace Dir["source/mupen64plus-**/projects/unix/Makefile"],
+      inreplace Dir["source/mupen64plus-*/projects/unix/Makefile"],
                 /(-mmacosx-version-min)=\d+\.\d+/,
                 "\\1=#{MacOS.version}"
     end
 
-    # Fix build with Xcode 9 using upstream commit:
-    # https://github.com/mupen64plus/mupen64plus-video-glide64mk2/commit/5ac11270
-    # Remove in next version
-    inreplace "source/mupen64plus-video-glide64mk2/src/Glide64/3dmath.cpp",
-              "__builtin_ia32_storeups", "_mm_storeu_ps"
+    args = ["PREFIX=#{prefix}", "SHAREDIR=#{pkgshare}", "NO_SRC=1", "NO_SPEEX=1", "V=1"]
+    args << "USE_GLES=1" if OS.linux?
 
-    if OS.linux?
-      ENV.append "CFLAGS", "-fcommon"
-      ENV.append "CFLAGS", "-fpie"
-    end
-
-    args = ["install", "PREFIX=#{prefix}", "COREDIR=#{lib}/"]
-    args << if OS.mac?
-      "INSTALL_STRIP_FLAG=-S"
-    else
-      "USE_GLES=1"
-    end
-
-    cd "source/mupen64plus-core/projects/unix" do
-      system "make", *args
-    end
-
-    cd "source/mupen64plus-audio-sdl/projects/unix" do
-      system "make", *args, "NO_SRC=1", "NO_SPEEX=1"
-    end
-
-    cd "source/mupen64plus-input-sdl/projects/unix" do
-      system "make", *args
-    end
-
-    cd "source/mupen64plus-rsp-hle/projects/unix" do
-      system "make", *args
-    end
-
-    cd "source/mupen64plus-video-glide64mk2/projects/unix" do
-      system "make", *args
-    end
-
-    cd "source/mupen64plus-video-rice/projects/unix" do
-      system "make", *args
-    end
-
-    cd "source/mupen64plus-ui-console/projects/unix" do
-      system "make", *args, "PIE=1"
-    end
+    system "./m64p_build.sh", *args
+    system "./m64p_install.sh", *args
   end
 
   test do
-    # Disable test in Linux CI because it hangs because a display is not available.
-    return if OS.linux? && ENV["HOMEBREW_GITHUB_ACTIONS"]
+    # Disable test in Tahoe CI because it hangs because a display is not available.
+    return if OS.mac? && MacOS.version == :tahoe && ENV["HOMEBREW_GITHUB_ACTIONS"]
 
-    resource("rom").stage do
-      system bin/"mupen64plus", "--testshots", "1",
-             "m64p_test_rom.v64"
+    resource "rom" do
+      url "https://github.com/mupen64plus/mupen64plus-rom/raw/76ef14c876ed036284154444c7bdc29d19381acc/m64p_test_rom.v64"
+      sha256 "b5fe9d650a67091c97838386f5102ad94c79232240f9c5bcc72334097d76224c"
     end
+
+    resource("rom").stage(testpath)
+    system bin/"mupen64plus", "--testshots", "1", "m64p_test_rom.v64"
   end
 end

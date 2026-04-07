@@ -9,37 +9,40 @@ class Redo < Formula
   revision 2
 
   bottle do
-    rebuild 4
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "d8b48f458241e4a50346dfd5b317794688a2af43c7bdc00c18e16466846b26a6"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "d8b48f458241e4a50346dfd5b317794688a2af43c7bdc00c18e16466846b26a6"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "d8b48f458241e4a50346dfd5b317794688a2af43c7bdc00c18e16466846b26a6"
-    sha256 cellar: :any_skip_relocation, sonoma:         "d8b48f458241e4a50346dfd5b317794688a2af43c7bdc00c18e16466846b26a6"
-    sha256 cellar: :any_skip_relocation, ventura:        "d8b48f458241e4a50346dfd5b317794688a2af43c7bdc00c18e16466846b26a6"
-    sha256 cellar: :any_skip_relocation, monterey:       "d8b48f458241e4a50346dfd5b317794688a2af43c7bdc00c18e16466846b26a6"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "dfa4beea88424e7b19d7938c44499dadec311a123cdb3a532db55a26b3ad5561"
+    rebuild 7
+    sha256 cellar: :any_skip_relocation, all: "fb1815e2abd0a29b23eb4fe2111213fa1942ec1e48bb53d40601a5a06e7ccb26"
   end
 
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   conflicts_with "goredo", because: "both install `redo` and `redo-*` binaries"
 
+  # Build dependencies for https://github.com/apenwarr/redo/blob/main/docs/md2man.py
+  pypi_packages package_name:   "",
+                extra_packages: %w[beautifulsoup4 markdown]
+
   resource "beautifulsoup4" do
-    url "https://files.pythonhosted.org/packages/b3/ca/824b1195773ce6166d388573fc106ce56d4a805bd7427b624e063596ec58/beautifulsoup4-4.12.3.tar.gz"
-    sha256 "74e3d1928edc070d21748185c46e3fb33490f22f52a3addee9aee0f4f7781051"
+    url "https://files.pythonhosted.org/packages/c3/b0/1c6a16426d389813b48d95e26898aff79abbde42ad353958ad95cc8c9b21/beautifulsoup4-4.14.3.tar.gz"
+    sha256 "6292b1c5186d356bba669ef9f7f051757099565ad9ada5dd630bd9de5fa7fb86"
   end
 
   resource "markdown" do
-    url "https://files.pythonhosted.org/packages/11/28/c5441a6642681d92de56063fa7984df56f783d3f1eba518dc3e7a253b606/Markdown-3.5.2.tar.gz"
-    sha256 "e1ac7b3dc550ee80e602e71c1d168002f062e49f1b11e26a36264dafd4df2ef8"
+    url "https://files.pythonhosted.org/packages/2b/f4/69fa6ed85ae003c2378ffa8f6d2e3234662abd02c10d216c0ba96081a238/markdown-3.10.2.tar.gz"
+    sha256 "994d51325d25ad8aa7ce4ebaec003febcce822c3f8c911e3b17c52f7f589f950"
   end
 
   resource "soupsieve" do
-    url "https://files.pythonhosted.org/packages/ce/21/952a240de1c196c7e3fbcd4e559681f0419b1280c617db21157a0390717b/soupsieve-2.5.tar.gz"
-    sha256 "5663d5a7b3bfaeee0bc4372e7fc48f9cff4940b3eec54a6451cc5299f1097690"
+    url "https://files.pythonhosted.org/packages/7b/ae/2d9c981590ed9999a0d91755b47fc74f74de286b0f5cee14c9269041e6c4/soupsieve-2.8.3.tar.gz"
+    sha256 "3267f1eeea4251fb42728b6dfb746edc9acaffc4a45b27e19450b676586e8349"
+  end
+
+  resource "typing-extensions" do
+    url "https://files.pythonhosted.org/packages/72/94/1a15dd82efb362ac84269196e94cf00f187f7ed21c242792a923cdb1c61f/typing_extensions-4.15.0.tar.gz"
+    sha256 "0cea48d173cc12fa28ecabc3b837ea3cf6f38c6d1136f85cbaaf598984861466"
   end
 
   def install
-    python3 = "python3.12"
+    python3 = "python3.14"
     # Prevent system Python 2 from being detected
     inreplace "redo/whichpython.do", " python python3 python2 python2.7;", " #{python3};"
 
@@ -53,28 +56,32 @@ class Redo < Formula
     ENV["DESTDIR"] = ""
     ENV["PREFIX"] = prefix
     system "./do", "install"
+
+    # Ensure this symlink is the same across all our bottles,
+    # otherwise the Linux bottle points to `/usr/bin/dash`.
+    ln_sf "/bin/dash", lib/"redo/sh"
   end
 
   test do
     assert_equal version.to_s, shell_output("#{bin}/redo --version").strip
     # Make sure man pages were generated and installed
-    assert_predicate man1/"redo.1", :exist?
+    assert_path_exists man1/"redo.1"
 
     # Test is based on https://redo.readthedocs.io/en/latest/cookbook/hello/
-    (testpath/"hello.c").write <<~EOS
+    (testpath/"hello.c").write <<~C
       #include <stdio.h>
 
       int main() {
         printf("Hello, world!\\n");
         return 0;
       }
-    EOS
+    C
     (testpath/"hello.do").write <<~EOS
       redo-ifchange hello.c
       cc -o $3 hello.c -Wall
     EOS
     assert_match "redo  hello", shell_output("#{bin}/redo hello 2>&1").strip
-    assert_predicate testpath/"hello", :exist?
+    assert_path_exists testpath/"hello"
     assert_equal "Hello, world!\n", shell_output("./hello")
     assert_match "redo  hello", shell_output("#{bin}/redo hello 2>&1").strip
     refute_match "redo", shell_output("#{bin}/redo-ifchange hello 2>&1").strip

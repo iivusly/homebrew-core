@@ -11,23 +11,18 @@ class Dvanalyzer < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "cd458167da95107a9a0e3c31bf676a44d1fa64789f92d9ed2c7aeeea8cdef306"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "499a358163cb7361ca01a66f258e5544f7facf0d6394d3608fc06c2d42aedf71"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "2a5505972404a52e27d0b958ca01f6d0b4776b9698e158edb3408a08f57b9627"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "2c3394dede8aedd03611a44ab7f0e9c0cf65de9343eea185575234571da63b76"
-    sha256 cellar: :any_skip_relocation, sonoma:         "fb85daa7321c24dd1467de0ba27fa74de80c65ba80495c277d2ee1a2d302061d"
-    sha256 cellar: :any_skip_relocation, ventura:        "056655cdb3b17dd0ea0aceede196aa68533a91a361ea5db0e532f92715d1a767"
-    sha256 cellar: :any_skip_relocation, monterey:       "3b6827ba646ecac89cfb7437785df9586bfe1df4a4129b418fb7fb58ba2d6078"
-    sha256 cellar: :any_skip_relocation, big_sur:        "c82268f8073ce66058329a7f3e17a8dffba0d811f82c1eb33a6a45144693bf17"
-    sha256 cellar: :any_skip_relocation, catalina:       "1e9397fde0dde748e89f06dabbcabce109fef89914a436b71b754bd32f179e8a"
-    sha256 cellar: :any_skip_relocation, mojave:         "d688b087bb74bacc39b805a35b7db02c1291502003eb4904ef5ddbf3063b7c1e"
-    sha256 cellar: :any_skip_relocation, high_sierra:    "59667b7174026e959f123ebbf8f8e30559dabb70814565f8bec8316c4b9c02b1"
-    sha256 cellar: :any_skip_relocation, sierra:         "fb066074dde3b6e94ba30bf37bc85c2e17ef30a7e2b8f874b1a09f3aca2275f7"
-    sha256 cellar: :any_skip_relocation, el_capitan:     "0e138c105a1f4604dbb4b7c911e83c660f2078cb24af6ba0ba12564a6e93d9c0"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "439d718775ff2f2f2ae7f076c4cf120298b116b6a6fb0afdc4236823387948f0"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "e8bb414e0719a71fcc95ea8c1351f983fa7df1d0a3c350182c9be47b8064fefc"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "92eda7b054009d95d846a8a4cebf111bd26eb9b4340d5548489ed4645b6fd667"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "6ea8f647c562fd62ed7acc15cb685dc8445b90168ddbb6013199e8feb8337738"
+    sha256 cellar: :any_skip_relocation, sonoma:        "309bb248ed85a89a2a03562dabb9b3e97c2c24b3f0a81dd8f51cf2511c1e380a"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "f25ff17a0c20c42a7b826e116d5c5687354980a75c403026c2b732f27180b597"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "a381c4467638323d1c9ab03fca279140ee97c76c99a3894c59b10757bfe1c711"
   end
 
-  uses_from_macos "zlib"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     cd "ZenLib/Project/GNU/Library" do
@@ -53,6 +48,10 @@ class Dvanalyzer < Formula
   end
 
   test do
-    pipe_output("#{bin}/dvanalyzer --Header", test_fixtures("test.mp3"))
+    test_mp3 = test_fixtures("test.mp3")
+    output = shell_output("#{bin}/dvanalyzer --Header #{test_mp3}")
+    assert_match test_mp3.to_s, output
+
+    assert_match version.to_s, shell_output("#{bin}/dvanalyzer --Version")
   end
 end

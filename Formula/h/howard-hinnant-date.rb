@@ -1,37 +1,38 @@
 class HowardHinnantDate < Formula
   desc "C++ library for date and time operations based on <chrono>"
   homepage "https://github.com/HowardHinnant/date"
-  url "https://github.com/HowardHinnant/date/archive/refs/tags/v3.0.1.tar.gz"
-  sha256 "7a390f200f0ccd207e8cff6757e04817c1a0aec3e327b006b7eb451c57ee3538"
+  url "https://github.com/HowardHinnant/date/archive/refs/tags/v3.0.4.tar.gz"
+  sha256 "56e05531ee8994124eeb498d0e6a5e1c3b9d4fccbecdf555fe266631368fb55f"
   license "MIT"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "160efb4eb4cc989a1758b491e9b4d5765e23f21acdfdead97ff65fbf41fe7e57"
-    sha256 cellar: :any,                 arm64_ventura:  "c883e4cb240a19756b28270cfde1fb71adf879e2aefb380f6c01ff0b4b6b8989"
-    sha256 cellar: :any,                 arm64_monterey: "52811eb710a07d879d153a65bc6c771a8ff801f990a6bd2f968d1238c6000b03"
-    sha256 cellar: :any,                 arm64_big_sur:  "deff47e2027f805ef5cd430d0700470cf8bada0cde442e8674ae6a832e3b9888"
-    sha256 cellar: :any,                 sonoma:         "a0ecdebbd7b92fd87090a4051c096955170a4ce255f2f71e9ed4afa0377e2a5f"
-    sha256 cellar: :any,                 ventura:        "372312fabb0cbb4e07ae4bc2f8cdf36ae6128a6bfea018f342f8b8fab211a9c8"
-    sha256 cellar: :any,                 monterey:       "0098680dad7ff5cb5854d04ab0aff279641892d1c8c3079658bfe2762bb1b6f9"
-    sha256 cellar: :any,                 big_sur:        "b8fc90e684f2d3b711fcb405c082f8ad637eac8f6c5816b746284c911950eb5a"
-    sha256 cellar: :any,                 catalina:       "bebf754666baa69673a77fb5eeb3c0ebe9931b7aa2d3991a3f6fa235a439d11b"
-    sha256 cellar: :any,                 mojave:         "d140b4b590c5ef8c25e80abaa8466dbcb6f10a95ca0dec551de7fb0e213171b4"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "2361559d178154d8e6f69b1da915838ab17271a61d3ff808db1ed2ca8ce7091f"
+    sha256 cellar: :any,                 arm64_tahoe:   "a6e3a0832d810528b3b0199ad47d10e1f026e0de3559a66312f3343da396a26e"
+    sha256 cellar: :any,                 arm64_sequoia: "fa799d065c7607f2e6997dfcb9d381de6b988b491a11b2d8ec78cafbc48e6914"
+    sha256 cellar: :any,                 arm64_sonoma:  "28b75e11d6e62d271cc828016689daf84f05dcc804abd5652e3de61c8a3ea4f4"
+    sha256 cellar: :any,                 arm64_ventura: "4c9f4bd167d09b5c525e7fca5ffff153a4d61496c22f75fa0455bb6d2e79d929"
+    sha256 cellar: :any,                 sonoma:        "87f1f12799f3987a0f5fbb8d192124596a5e367a403160d39e24cfc2775be2e3"
+    sha256 cellar: :any,                 ventura:       "17e09adc1f5575bd819e4cc6c42e4113b149da4531fd826923cca2b1626fe2e0"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "cfdca01d3aa4278c4c1a99428cdc1de38a7c3f15a172a2e157facc5e9b4b9930"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "f8fa6eff9c09d59e6e764b436f1354ef2821be373f44adb97ac158d6562b69fa"
   end
 
   depends_on "cmake" => :build
 
   def install
-    system "cmake", ".", *std_cmake_args,
-                         "-DENABLE_DATE_TESTING=OFF",
-                         "-DUSE_SYSTEM_TZ_DB=ON",
-                         "-DBUILD_SHARED_LIBS=ON",
-                         "-DBUILD_TZ_LIB=ON"
-    system "make", "install"
+    args = %w[
+      -DENABLE_DATE_TESTING=OFF
+      -DUSE_SYSTEM_TZ_DB=ON
+      -DBUILD_SHARED_LIBS=ON
+      -DBUILD_TZ_LIB=ON
+    ]
+
+    system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
+    system "cmake", "--build", "build"
+    system "cmake", "--install", "build"
   end
 
   test do
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include "date/tz.h"
       #include <iostream>
 
@@ -39,7 +40,7 @@ class HowardHinnantDate < Formula
         auto t = date::make_zoned(date::current_zone(), std::chrono::system_clock::now());
         std::cout << t << std::endl;
       }
-    EOS
+    CPP
     system ENV.cxx, "test.cpp", "-std=c++1y", "-L#{lib}", "-ldate-tz", "-o", "test"
     system "./test"
   end

@@ -1,9 +1,10 @@
 class Exiv2 < Formula
   desc "EXIF and IPTC metadata manipulation library and tools"
   homepage "https://exiv2.org/"
-  url "https://github.com/Exiv2/exiv2/archive/refs/tags/v0.28.3.tar.gz"
-  sha256 "1315e17d454bf4da3cc0edb857b1d2c143670f3485b537d0f946d9ed31d87b70"
+  url "https://github.com/Exiv2/exiv2/archive/refs/tags/v0.28.8.tar.gz"
+  sha256 "ea51b0609f58a9afa063b60daa1539948b62247721e154f4fff0ad3aec9f9756"
   license "GPL-2.0-or-later"
+  compatibility_version 1
   head "https://github.com/Exiv2/exiv2.git", branch: "main"
 
   livecheck do
@@ -12,30 +13,29 @@ class Exiv2 < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "efb8f139466e2367005371ce2651b1c78b2784ddf42d884b25fc2a05880a0d92"
-    sha256 cellar: :any,                 arm64_ventura:  "9339cce8f0f45db0fa6be3d4f80253d1665ff9aba1c72a6e32364e6bcf2232cc"
-    sha256 cellar: :any,                 arm64_monterey: "5fdaac94277da85f2fe3546dabcab241043bd21a81e70ca2d23d010a7b231b06"
-    sha256 cellar: :any,                 sonoma:         "f905dda4c2efceabd830390a2ad5e97d6c7a059a4b073564ff1347d6ddc56ca5"
-    sha256 cellar: :any,                 ventura:        "1bd1c799d30eceaa6920e73f93246db621349186409b4e4a6e0577cf273e05e4"
-    sha256 cellar: :any,                 monterey:       "5f4fbc4b711ec127204a8751be6d13219807b527ff059817b92a073576281ca1"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "b13959b5dc142dce2c9770abaebaaf3c7de2fa355c388a797f4a480c3d8ea5b5"
+    sha256 cellar: :any,                 arm64_tahoe:   "cb8893ed6691191316d9a49d154225d21de757100cba6ee4a4c7085ff42b4265"
+    sha256 cellar: :any,                 arm64_sequoia: "e3203c49dce1e55609cd9d5f4d31e6cdf884b705b087082a2a0d8f76b2e4db5b"
+    sha256 cellar: :any,                 arm64_sonoma:  "10cccfbeebc55c69140eb1d6649d7011696f349006ccaa05811d51c244067a8e"
+    sha256 cellar: :any,                 sonoma:        "f14d137e2dd33f271cfa714f180451f32eb6a7d3f9391b71ae8a374e96e538af"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "189b9457b0482eff75f5896e5494649796d576b6b723707360acd328b17b8ea6"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "dce70243b7ae3edfb4b097810add3ec263dbec8254bcb1210445728f4af4edd2"
   end
 
   depends_on "cmake" => :build
+  depends_on "gettext" => :build # for msgmerge
   depends_on "brotli"
   depends_on "inih"
   depends_on "libssh"
 
   uses_from_macos "curl"
   uses_from_macos "expat"
-  uses_from_macos "zlib"
 
   on_macos do
     depends_on "gettext"
   end
 
   on_linux do
-    depends_on "gettext" => :build # for msgmerge
+    depends_on "zlib-ng-compat"
   end
 
   def install

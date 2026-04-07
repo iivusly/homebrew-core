@@ -1,8 +1,8 @@
 class E2fsprogs < Formula
   desc "Utilities for the ext2, ext3, and ext4 file systems"
   homepage "https://e2fsprogs.sourceforge.net/"
-  url "https://downloads.sourceforge.net/project/e2fsprogs/e2fsprogs/v1.47.1/e2fsprogs-1.47.1.tar.gz"
-  sha256 "9afcd201f39429d2db2492aeb13dba5e75d6cc50682b732dca35643bd5f092e3"
+  url "https://downloads.sourceforge.net/project/e2fsprogs/e2fsprogs/v1.47.4/e2fsprogs-1.47.4.tar.gz"
+  sha256 "2cec05f39c20ee621f14926195664e66e6017190ac8e4bbdb16d86082e43c5da"
   license all_of: [
     "GPL-2.0-or-later",
     "LGPL-2.0-or-later", # lib/ex2fs
@@ -10,6 +10,7 @@ class E2fsprogs < Formula
     "BSD-3-Clause",      # lib/uuid
     "MIT",               # lib/et, lib/ss
   ]
+  compatibility_version 1
   head "https://git.kernel.org/pub/scm/fs/ext2/e2fsprogs.git", branch: "master"
 
   livecheck do
@@ -18,24 +19,25 @@ class E2fsprogs < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "98368d23728fb485ff67766148c8aee4bbeee3c542ba0d5c200cb608aedb8e1a"
-    sha256 arm64_ventura:  "2226708887d3d43427d39d355a75b2367d7ecf5145621de5dae2749dd4f130e4"
-    sha256 arm64_monterey: "942b459a0a9bc92157d4afa5e0f71d3f14d5ddccb0b8d652c4e70416d6d32cc4"
-    sha256 sonoma:         "248320615070b5b3f32ee4c581c46a4e9e74e51c4765624d253aa74a2cc44469"
-    sha256 ventura:        "85f74a6d50a82f4e2f2c29e0569cd102034a127e81d0fdef83c15411aa240042"
-    sha256 monterey:       "07e61dc2625c27caa877ce698f5c3f5cd2f7aaee3cba6da22d865db7224105ae"
-    sha256 x86_64_linux:   "eb63ea295700e11246a09b546f36a360db3c56c227deb4a30e12450e2c76dbab"
+    sha256 arm64_tahoe:   "f8024861ae8b5a645374d7960a5b5e3c41576c792712925d55deb186a74a1d06"
+    sha256 arm64_sequoia: "753c95aef34725e1bc3a4778a6c3073596b8b3a2b32bb18ec4f361fce747813b"
+    sha256 arm64_sonoma:  "c2c812d2da0ef0aa70a6f4962c832fd6636efad99344941ce0654173e7c8a297"
+    sha256 sonoma:        "5985432543778c6ebd6358ecaa2f9fb508c1a9cc6393117597d505b489d8a7a3"
+    sha256 arm64_linux:   "7dc8e4683b77882347b8dcd2cc2b82f2943fca8c30db51795bf33d2f260fd7f5"
+    sha256 x86_64_linux:  "28c57ec49ba06d7c371755737e6ab04a23fa733ef82a83b05a9da2871e8f8215"
   end
 
-  keg_only "this installs several executables which shadow macOS system commands"
+  keg_only :shadowed_by_macos
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
 
   on_macos do
     depends_on "gettext"
   end
 
   on_linux do
+    keg_only "it conflicts with the bundled copy in `krb5`"
+
     depends_on "util-linux"
   end
 

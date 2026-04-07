@@ -1,20 +1,23 @@
 class Incus < Formula
   desc "CLI client for interacting with Incus"
   homepage "https://linuxcontainers.org/incus"
-  url "https://linuxcontainers.org/downloads/incus/incus-6.4.tar.xz"
-  sha256 "6748a61f4a066bcd807c38ca13693f7ede1903d9b44825f1b5bcea4220edeee7"
+  url "https://linuxcontainers.org/downloads/incus/incus-6.23.tar.xz"
+  sha256 "a84880e138db0e7497bd0ee62806a8c5299566dada5c725e65e86afd7fe71fa6"
   license "Apache-2.0"
   head "https://github.com/lxc/incus.git", branch: "main"
 
+  livecheck do
+    url "https://linuxcontainers.org/incus/downloads/"
+    regex(/href=.*?incus[._-]v?(\d+(?:\.\d+)+)\.t/i)
+  end
+
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "9f4182d138a3c690323cd3a41c918adc74070bff430fec89c3982ae90299c9a7"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "9f4182d138a3c690323cd3a41c918adc74070bff430fec89c3982ae90299c9a7"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "9f4182d138a3c690323cd3a41c918adc74070bff430fec89c3982ae90299c9a7"
-    sha256 cellar: :any_skip_relocation, sonoma:         "3655349c15f631735c5354ffbf8a81d16a2efa22f7d13028eea5646b2ac75786"
-    sha256 cellar: :any_skip_relocation, ventura:        "3655349c15f631735c5354ffbf8a81d16a2efa22f7d13028eea5646b2ac75786"
-    sha256 cellar: :any_skip_relocation, monterey:       "3655349c15f631735c5354ffbf8a81d16a2efa22f7d13028eea5646b2ac75786"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "7949a48b1091acd47f41d0e2c29e7c57f491c7845bd90cb7d5f96d26aaf9696a"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "aaeb3b22fc665ce65f2edc0da2a4762c28c1da1421771842065cdb52c94a8bf4"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "aaeb3b22fc665ce65f2edc0da2a4762c28c1da1421771842065cdb52c94a8bf4"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "aaeb3b22fc665ce65f2edc0da2a4762c28c1da1421771842065cdb52c94a8bf4"
+    sha256 cellar: :any_skip_relocation, sonoma:        "48c038d55a72beae26dc5870406315b5bf64ee66ce8257d2288461d57b350582"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "d0e75bd67f9e1d691e76a902f071f9f10a238d0c475c15266a39b163f5a04cf6"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "d777300bb20bc5b0222ae451418340976aed8c0bb41ad6cbfd601e77450d2a85"
   end
 
   depends_on "go" => :build
@@ -22,7 +25,7 @@ class Incus < Formula
   def install
     system "go", "build", *std_go_args(ldflags: "-s -w"), "./cmd/incus"
 
-    generate_completions_from_executable(bin/"incus", "completion")
+    generate_completions_from_executable(bin/"incus", shell_parameter_format: :cobra)
   end
 
   test do

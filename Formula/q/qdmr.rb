@@ -1,23 +1,26 @@
 class Qdmr < Formula
   desc "Codeplug programming tool for DMR radios"
   homepage "https://dm3mat.darc.de/qdmr/"
-  url "https://github.com/hmatuschek/qdmr/archive/refs/tags/v0.12.0.tar.gz"
-  sha256 "309854ba81c7b59a748e42958eb0acbd4b5efbd956790ffdf04886c9abc6c588"
+  url "https://github.com/hmatuschek/qdmr/archive/refs/tags/v0.14.0.tar.gz"
+  sha256 "26f808352edaf3ad3fbba86b4d45e8e085c9d27e7cb2b78eaf548a4c763382bc"
   license "GPL-3.0-or-later"
 
   bottle do
-    sha256 arm64_sonoma:   "c61719e66046cf2dc2995949e48c56fbc9b8e7aa1687fee3fc2dd279f7639eb5"
-    sha256 arm64_ventura:  "76f4b08ec605a1e316c08c7f99eb82280ee9a6bdad2f13e4ad846d7eb7aa1551"
-    sha256 arm64_monterey: "205f2098198e0c5e861bf5612c6f5d227baad54f63fd950e98fe92d485dc3196"
-    sha256 sonoma:         "18c109314f78f38164ae6bf00eeff1b7f98183c371e3d301da6e0cea13114dd5"
-    sha256 ventura:        "9fa82f7039cc7b94b645db9d7031a73faee2316785a4960bdf75329f308dabd8"
-    sha256 monterey:       "22b7f99b5fcb8b06744c3a97ea85d86f7abf51682f7988b236e7391dbf5c41ec"
-    sha256 x86_64_linux:   "774c8c6089066641a4abd1f5fc28d563feac0a1fc66aedcb192f636a8135b3b4"
+    sha256 cellar: :any,                 arm64_tahoe:   "9c6160045a19e7b2515227379587deb10368b64ca90c3f1103f267c2104bf3b8"
+    sha256 cellar: :any,                 arm64_sequoia: "ce8540450dd832f0b634e5a257106fab0064ba3dd997662717d3f465a39d17e6"
+    sha256 cellar: :any,                 arm64_sonoma:  "6ce52cad9b7d702fe5d7d08e29f8418bd8bfb9ba4f5c8cf9430d78462461be01"
+    sha256 cellar: :any,                 sonoma:        "e344c3818d279f9a31bb060ce204fa1f938bea33f736361f6af0d0259e09fbc9"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "06e4da3589fce5c735c673a4d084c1e3fa7b4d217b2f0127ec0b18debba95b9f"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "0be4a1758a9c7e63bc60b33c622a626f434d4358ed8eae0681558a3146da435e"
   end
 
   depends_on "cmake" => :build
+  depends_on "librsvg"
   depends_on "libusb"
-  depends_on "qt@5"
+  depends_on "qtbase"
+  depends_on "qtpositioning"
+  depends_on "qtserialport"
+  depends_on "qttools"
   depends_on "yaml-cpp"
 
   def install
@@ -27,7 +30,7 @@ class Qdmr < Formula
   end
 
   test do
-    (testpath/"config.yaml").write <<~EOS
+    (testpath/"config.yaml").write <<~YAML
       radioIDs:
         - dmr: {id: id1, name: DM3MAT, number: 2621370}
 
@@ -38,7 +41,7 @@ class Qdmr < Formula
             rxFrequency: 123.456780   # <- Up to 10Hz precision
             txFrequency: 1234.567890
 
-    EOS
+    YAML
     system bin/"dmrconf", "--radio=d878uv2", "encode", "config.yaml", "config.dfu"
   end
 end

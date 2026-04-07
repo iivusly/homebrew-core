@@ -7,26 +7,27 @@ class Ki < Formula
   head "https://github.com/Kotlin/kotlin-interactive-shell.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "ce1c2bff302746a72187c41054af8a7918291d8a60b14eb9e5382a85e6854739"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "48be2a1031fc2bf7fdac348fb639a7d2feb6f4cf0c357b77a750d8c2c3fac901"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "14cbfb27e03216a1e02e9058a30bc2ff3523fc2f29b00790a7fc3eb13b7148c9"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "14cbfb27e03216a1e02e9058a30bc2ff3523fc2f29b00790a7fc3eb13b7148c9"
-    sha256 cellar: :any_skip_relocation, sonoma:         "2f47a123067722562c4d81197f0898bb4ba5abb8975ede38060ecf5eea135804"
-    sha256 cellar: :any_skip_relocation, ventura:        "cd8ade77bdf44028519583eb08717c28cabeaed469f70abb75f0458170525474"
-    sha256 cellar: :any_skip_relocation, monterey:       "f218424013a975e865931fcc3b045a01665ce88345fe257e38e84c655cffd728"
-    sha256 cellar: :any_skip_relocation, big_sur:        "2c2eb51ed8339eb71d19bb9ed6a8ac3bd30056f2efd33a74d8078808079ae59f"
-    sha256 cellar: :any_skip_relocation, catalina:       "137ed3bd1905cc0a60ef1d5433b9baed66ed36fdd0bbb60d2da6956c58bd00e5"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "07c1f7055c425eef58c5a15b1b838d54e15d7b4347ac2e85a28eeb7e42fcee46"
+    rebuild 2
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "26acde25faed2e7f5f8758b91265387d3aafdcaba302ea74b67c87b390ff345a"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "b9f8535c44f8e69f9295957a28022182ca753a5a59eef6a1b0b9351c09cecc6b"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "18939db349bc95a0caa3a38cdc577cdaf3e72ac19222847d0abc84026cfaac0f"
+    sha256 cellar: :any_skip_relocation, sonoma:        "da784f7cb6571cf655f53473e34d2056781727a9bd31d05eb809faa9a31461ff"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "01b42754a3d9e0548aed51278026c7375b8dccdcd5b0ee9c84f9211363be3e79"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "5fef66e2012700f86ed7c3bf130320fdc58d1362a0b681fe88862af169a8d42e"
   end
 
+  # not compatible with kotlin 2.0+, https://github.com/Kotlin/kotlin-interactive-shell/issues/131
+  deprecate! date: "2025-10-26", because: :unmaintained
+
   depends_on "maven" => :build
-  depends_on "openjdk@11"
+  depends_on "openjdk@21"
 
   def install
-    ENV["JAVA_HOME"] = Formula["openjdk@11"].opt_prefix
+    ENV["JAVA_HOME"] = Language::Java.java_home("21")
+
     system "mvn", "-DskipTests", "package"
     libexec.install "lib/ki-shell.jar"
-    bin.write_jar_script libexec/"ki-shell.jar", "ki", java_version: "11"
+    bin.write_jar_script libexec/"ki-shell.jar", "ki", java_version: "21"
   end
 
   test do

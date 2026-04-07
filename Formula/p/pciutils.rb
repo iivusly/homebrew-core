@@ -1,16 +1,17 @@
 class Pciutils < Formula
   desc "PCI utilities"
   homepage "https://github.com/pciutils/pciutils"
-  url "https://github.com/pciutils/pciutils/archive/refs/tags/v3.13.0.tar.gz"
-  sha256 "861fc26151a4596f5c3cb6f97d6c75c675051fa014959e26fb871c8c932ebc67"
+  url "https://github.com/pciutils/pciutils/archive/refs/tags/v3.15.0.tar.gz"
+  sha256 "06f467642057599acf396bc17340452fac3308f1e08be19e0c32587e42d7017b"
   license "GPL-2.0-or-later"
 
   bottle do
-    sha256 x86_64_linux: "8642b280a07552b6b9e2d4a887963900158155ea00b5cd85558b0f481e8204a8"
+    sha256 arm64_linux:  "363c0403500443312c609f1030b16e089f78dd7470ae6446efd4c875d463911d"
+    sha256 x86_64_linux: "7c95c0b0a9eb96b489dd2e772e6fa7e1e195fa5a5b679fdeea457b4b9fa8a583"
   end
 
-  depends_on :linux
-  depends_on "zlib"
+  depends_on :linux # arm64 macOS is not supported: https://github.com/pciutils/pciutils/issues/111
+  depends_on "zlib-ng-compat"
 
   def install
     args = ["ZLIB=yes", "DNS=yes", "SHARED=yes", "PREFIX=#{prefix}", "MANDIR=#{man}"]
@@ -21,6 +22,6 @@ class Pciutils < Formula
 
   test do
     assert_match "lspci version", shell_output("#{bin}/lspci --version")
-    assert_match "Host bridge:", shell_output("#{bin}/lspci")
+    assert_match(/Host bridge:|controller:/, shell_output("#{bin}/lspci"))
   end
 end

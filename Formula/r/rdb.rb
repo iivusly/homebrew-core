@@ -1,21 +1,27 @@
 class Rdb < Formula
   desc "Redis RDB parser"
   homepage "https://github.com/HDT3213/rdb/"
-  url "https://github.com/HDT3213/rdb/archive/refs/tags/v1.0.18.tar.gz"
-  sha256 "028e1bc6e6f4a71a6355676e290f5ad035019814af8b867e4f59c67a6bac154e"
+  url "https://github.com/HDT3213/rdb/archive/refs/tags/v1.3.1.tar.gz"
+  sha256 "3e495081d7ec5ad3cd35c7edcc6d2f0841601ca976eb281628c8a51ef9e1dbbe"
   license "Apache-2.0"
+  head "https://github.com/HDT3213/rdb.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "88c0e4faa32ed73f89369445ce46f2d25b83a4e5a3356ca91d061af9a9d4d382"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "88c0e4faa32ed73f89369445ce46f2d25b83a4e5a3356ca91d061af9a9d4d382"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "88c0e4faa32ed73f89369445ce46f2d25b83a4e5a3356ca91d061af9a9d4d382"
-    sha256 cellar: :any_skip_relocation, sonoma:         "b696a5e5d687b9578ca5520779c971ad824eaf56fd070ac9f8800a67fe560893"
-    sha256 cellar: :any_skip_relocation, ventura:        "b696a5e5d687b9578ca5520779c971ad824eaf56fd070ac9f8800a67fe560893"
-    sha256 cellar: :any_skip_relocation, monterey:       "b696a5e5d687b9578ca5520779c971ad824eaf56fd070ac9f8800a67fe560893"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "247da86f4c3b6a03604995d7d07e1fba8561f6908fc8e0d7d68ab3bd55d6db08"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "4f5ffd5e87034dc38de93619379833c4485b483d9893deea5c61e89ab7eaa146"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "4f5ffd5e87034dc38de93619379833c4485b483d9893deea5c61e89ab7eaa146"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "4f5ffd5e87034dc38de93619379833c4485b483d9893deea5c61e89ab7eaa146"
+    sha256 cellar: :any_skip_relocation, sonoma:        "0e6696e7c2f03d501eeb2238beff5369e8d9b3c671babf3afe1d5ee3a3a427e5"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "00d611e19ee3327a89f231a0763af90ef961c5fe59190cbd85f44e7a6ce9588b"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "e09d6b470d8ad19e3131d841d5d21f042c6b62c1e52eb34e2c78943073923b6d"
   end
 
   depends_on "go" => :build
+
+  # Support Go 1.26: https://github.com/HDT3213/rdb/pull/63
+  patch do
+    url "https://github.com/HDT3213/rdb/commit/d78c0fab284c3fd9633f8eb9966cc3bdf3af7100.patch?full_index=1"
+    sha256 "ef2cbc68c285b82a1e11d344df4f4450ab77abbd71e028d867360e3226f66aba"
+  end
 
   def install
     system "go", "build", *std_go_args(ldflags: "-s -w")

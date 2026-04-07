@@ -3,20 +3,20 @@ class GitFilterRepo < Formula
 
   desc "Quickly rewrite git repository history"
   homepage "https://github.com/newren/git-filter-repo"
-  url "https://github.com/newren/git-filter-repo/releases/download/v2.45.0/git-filter-repo-2.45.0.tar.xz"
-  sha256 "430a2c4a5d6f010ebeafac6e724e3d8d44c83517f61ea2b2d0d07ed8a6fc555a"
+  url "https://github.com/newren/git-filter-repo/releases/download/v2.47.0/git-filter-repo-2.47.0.tar.xz"
+  sha256 "4662cbe5918196a9f1b5b3e1211a32e61cff1812419c21df4f47c5439f09e902"
   license "MIT"
 
   bottle do
     rebuild 1
-    sha256 cellar: :any_skip_relocation, all: "8f7071f5bf8c0c81c00c7c3f543e8e1c80e2f4dc7351dc8b190d22eacaa15abc"
+    sha256 cellar: :any_skip_relocation, all: "774b68744bca239b25b7e82693204f198c6ab1224ded38d8dd33ec1c23c245d8"
   end
 
-  depends_on "python@3.12"
-  uses_from_macos "git", since: :catalina # git 2.22.0+ is required
+  uses_from_macos "git"
+  uses_from_macos "python"
 
   def install
-    rewrite_shebang detected_python_shebang, "git-filter-repo"
+    rewrite_shebang detected_python_shebang(use_python_from_path: true), "git-filter-repo"
     bin.install "git-filter-repo"
     man1.install "Documentation/man1/git-filter-repo.1"
   end
@@ -36,6 +36,6 @@ class GitFilterRepo < Formula
     # (expected freshly packed repo)
     system bin/"git-filter-repo", "--path-rename=foo:bar", "--force"
 
-    assert_predicate testpath/"bar", :exist?
+    assert_path_exists testpath/"bar"
   end
 end

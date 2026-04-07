@@ -1,37 +1,32 @@
 class Opentofu < Formula
   desc "Drop-in replacement for Terraform. Infrastructure as Code Tool"
   homepage "https://opentofu.org/"
-  url "https://github.com/opentofu/opentofu/archive/refs/tags/v1.8.1.tar.gz"
-  sha256 "849f20c1f700910842c42fbf76730fabd4df82b0d0879d4bd9a88abe3d275b2a"
+  url "https://github.com/opentofu/opentofu/archive/refs/tags/v1.11.5.tar.gz"
+  sha256 "450f962f262d9f484ad1fb73454650740cdce0d83a854ad8b6c183cc5822eb09"
   license "MPL-2.0"
   head "https://github.com/opentofu/opentofu.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "c156643b67fc852ef39ed3de5094519d6b2815aee9a3dd060efbaec055e38afd"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "391372e854e5c1783d3723b32ef9763c220a8da2c7c9992e3d2a0573de755c7b"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "b634f1f64c75e187e9b3d1024f98642d1f1a6d4395fde5e3db55496ff821d157"
-    sha256 cellar: :any_skip_relocation, sonoma:         "a913020b7f7d41a8fc658e81bd371ed74e2b4f08f57766777f1df9f2c3420a9f"
-    sha256 cellar: :any_skip_relocation, ventura:        "01e490b0740dc867a1f6349ee80f836a0ced7a093a8de54fbcac4adc3775f38a"
-    sha256 cellar: :any_skip_relocation, monterey:       "2b6fdd3026489b8920ecc87b273c25da671ff143314585245042f74b89db8c1c"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "7746031903fca201f5fbb3a1704a56fd15b538fc9808183654ff1f3605ec9f87"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "4a156a503029c70691decb8a0f9ff36eef23be324af98004d64497e132d31cb6"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "8d3f4048993cb38563d203a5659cd89261529419b0de29c59379aa1062c49675"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "88334c8fa4c9e9350037be4cb2933a1eb63a635a191651e1525d4a7c66a3ea14"
+    sha256 cellar: :any_skip_relocation, sonoma:        "80241dc55015d424562f945655215868b185b17fe4e7f20b956a7b83ae878fa4"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "7e23c2fdba1b90e3ca25cf2d4de7bacc3b65b6db431e09aa5c649fcfa3cccd51"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "4628d141c87a864476319106ef800ae0ef5b2ebcd7a745edb3d286f832a080d6"
   end
 
   depends_on "go" => :build
 
   conflicts_with "tenv", "tofuenv", because: "both install tofu binary"
 
-  # Needs libraries at runtime:
-  # /usr/lib/x86_64-linux-gnu/libstdc++.so.6: version `GLIBCXX_3.4.29' not found (required by node)
-  fails_with gcc: "5"
-
   def install
+    ENV["CGO_ENABLED"] = OS.mac? ? "1" : "0"
     ldflags = "-s -w -X github.com/opentofu/opentofu/version.dev=no"
     system "go", "build", *std_go_args(output: bin/"tofu", ldflags:), "./cmd/tofu"
   end
 
   test do
-    minimal = testpath/"minimal.tf"
-    minimal.write <<~EOS
+    (testpath/"minimal.tf").write <<~HCL
       variable "aws_region" {
         default = "us-west-2"
       }
@@ -57,7 +52,7 @@ class Opentofu < Formula
         ami           = var.aws_amis[var.aws_region]
         count         = 4
       }
-    EOS
+    HCL
 
     system bin/"tofu", "init"
     system bin/"tofu", "graph"

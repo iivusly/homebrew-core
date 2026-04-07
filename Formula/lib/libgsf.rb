@@ -1,18 +1,18 @@
 class Libgsf < Formula
   desc "I/O abstraction library for dealing with structured file formats"
   homepage "https://gitlab.gnome.org/GNOME/libgsf"
-  url "https://download.gnome.org/sources/libgsf/1.14/libgsf-1.14.52.tar.xz"
-  sha256 "9181c914b9fac0e05d6bcaa34c7b552fe5fc0961d3c9f8c01ccc381fb084bcf0"
+  url "https://download.gnome.org/sources/libgsf/1.14/libgsf-1.14.56.tar.xz"
+  sha256 "9d21d30df1d12feaf03e181afd6067f65e3048ab69cb6ad174a3c5b72b92d297"
   license "LGPL-2.1-only"
+  compatibility_version 1
 
   bottle do
-    sha256 arm64_sonoma:   "f57e82c2967d687328a10ab88c8316cf7ee315df438f45cf8783300c6a850024"
-    sha256 arm64_ventura:  "cfd187b4a37a683fecead4d876c6ddee733b6cfa2c2d693669f643146909c2a7"
-    sha256 arm64_monterey: "444717a56a10de924edf4b0c1011ef817fdce2792b60ddb7ab8b737a004bdcfe"
-    sha256 sonoma:         "0694ed2751960fed7e4b2600638c03bef76c5df2a984e9a6a4dff21990da6457"
-    sha256 ventura:        "ac6805d35cdacf2d2c58e84994e7ee4819ec6d63bbe2b2d57de948b250408ec7"
-    sha256 monterey:       "9354391263dac31467977f4ae0e08de9979fc5ff6845601a06b97198dfa8ac86"
-    sha256 x86_64_linux:   "831615975bae111b9a88f8f59ce99a80953a3ca72f7c655ab29ffa2fafc6c1df"
+    sha256 arm64_tahoe:   "93bba7ab89f824f8f5254b51a359c552882657829eb61abc8c06d163ced310ac"
+    sha256 arm64_sequoia: "6ae4e73e0dc930dfe01d2276853ad7270f3fb708610b68a879e8543e290a5819"
+    sha256 arm64_sonoma:  "89e7f6755007e7f994fdaf3232b2ac49b4da158ddf70efd04abaddabb9aa3a9d"
+    sha256 sonoma:        "a96ac3b911a2530e51bff3b5860b0aae49aa2b0fffc31285ae80919e41be55c3"
+    sha256 arm64_linux:   "17e0396ea0417f85e39b927851ebe16cb36252bf4c594de26973bb898d600e10"
+    sha256 x86_64_linux:  "e60809d6c79421276882cef126c23d64aa0cc7c84978b5e4f26aeaf995077eea"
   end
 
   head do
@@ -24,26 +24,29 @@ class Libgsf < Formula
     depends_on "libtool" => :build
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "glib"
 
   uses_from_macos "bzip2"
   uses_from_macos "libxml2"
-  uses_from_macos "zlib"
 
   on_macos do
     depends_on "gettext"
   end
 
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
+
   def install
     configure = build.head? ? "./autogen.sh" : "./configure"
-    system configure, *std_configure_args, "--disable-silent-rules"
+    system configure, "--disable-silent-rules", *std_configure_args
     system "make", "install"
   end
 
   test do
     system bin/"gsf", "--help"
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <gsf/gsf-utils.h>
       int main()
       {
@@ -51,11 +54,11 @@ class Libgsf < Formula
           gsf_init (void);
           return 0;
       }
-    EOS
-    system ENV.cc, "-I#{include}/libgsf-1",
+    C
+    system ENV.cc, "test.c", "-o", "test",
+           "-I#{include}/libgsf-1",
            "-I#{Formula["glib"].opt_include}/glib-2.0",
-           "-I#{Formula["glib"].opt_lib}/glib-2.0/include",
-           testpath/"test.c", "-o", testpath/"test"
+           "-I#{Formula["glib"].opt_lib}/glib-2.0/include"
     system "./test"
   end
 end

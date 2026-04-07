@@ -3,22 +3,16 @@ class Isort < Formula
 
   desc "Sort Python imports automatically"
   homepage "https://pycqa.github.io/isort/"
-  url "https://files.pythonhosted.org/packages/87/f9/c1eb8635a24e87ade2efce21e3ce8cd6b8630bb685ddc9cdaca1349b2eb5/isort-5.13.2.tar.gz"
-  sha256 "48fdfcb9face5d58a4f6dde2e72a1fb8dcaf8ab26f95ab49fab84c2ddefb0109"
+  url "https://files.pythonhosted.org/packages/ef/7c/ec4ab396d31b3b395e2e999c8f46dec78c5e29209fac49d1f4dace04041d/isort-8.0.1.tar.gz"
+  sha256 "171ac4ff559cdc060bcfff550bc8404a486fee0caab245679c2abe7cb253c78d"
   license "MIT"
   head "https://github.com/PyCQA/isort.git", branch: "main"
 
-  livecheck do
-    url :stable
-    regex(%r{href=.*?/packages.*?/isort[._-]v?(\d+(?:\.\d+)*(?:[a-z]\d+)?)\.t}i)
-  end
-
   bottle do
-    rebuild 2
-    sha256 cellar: :any_skip_relocation, all: "a491e2da01cf99435dcf1357bf1cae158f6c57377a25ff3c4f0e3cfd60dcd189"
+    sha256 cellar: :any_skip_relocation, all: "1189562f00b3e1f484d1132ac5d99f11bf6e3003e0fbcec9f11115cd2fa83d3f"
   end
 
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   def install
     virtualenv_install_with_resources
@@ -26,10 +20,10 @@ class Isort < Formula
 
   test do
     ENV["LC_ALL"] = "en_US.UTF-8"
-    (testpath/"isort_test.py").write <<~EOS
+    (testpath/"isort_test.py").write <<~PYTHON
       from third_party import lib
       import os
-    EOS
+    PYTHON
     system bin/"isort", "isort_test.py"
     assert_equal "import os\n\nfrom third_party import lib\n", (testpath/"isort_test.py").read
   end

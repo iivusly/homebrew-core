@@ -1,8 +1,8 @@
 class ClosureCompiler < Formula
   desc "JavaScript optimizing compiler"
   homepage "https://developers.google.com/closure/compiler"
-  url "https://search.maven.org/remotecontent?filepath=com/google/javascript/closure-compiler/v20240317/closure-compiler-v20240317.jar"
-  sha256 "6b1250ac21c05bdd209dc515d9b6037b30b5555a284dd741ff0591a82848b7ce"
+  url "https://search.maven.org/remotecontent?filepath=com/google/javascript/closure-compiler/v20260405/closure-compiler-v20260405.jar"
+  sha256 "d714224b015508359ce15f4adf37efe7eadb64f90293db9683a847f28fbb90dc"
   license "Apache-2.0"
 
   livecheck do
@@ -11,7 +11,7 @@ class ClosureCompiler < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, all: "7d507b2634755deabd1a99b0ed889df752b3a887bea0cbe1c0dd65c42066e949"
+    sha256 cellar: :any_skip_relocation, all: "75a14bf89ceac1a376a169ab064f55e0573c8c092ec16abd4ee750d0306b349d"
   end
 
   depends_on "openjdk"
@@ -22,12 +22,12 @@ class ClosureCompiler < Formula
   end
 
   test do
-    (testpath/"test.js").write <<~EOS
+    (testpath/"test.js").write <<~JS
       (function(){
         var t = true;
         return t;
       })();
-    EOS
+    JS
     system bin/"closure-compiler",
            "--js", testpath/"test.js",
            "--js_output_file", testpath/"out.js"

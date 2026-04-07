@@ -1,8 +1,8 @@
 class Pgbouncer < Formula
   desc "Lightweight connection pooler for PostgreSQL"
   homepage "https://www.pgbouncer.org/"
-  url "https://www.pgbouncer.org/downloads/files/1.23.1/pgbouncer-1.23.1.tar.gz"
-  sha256 "1963b497231d9a560a62d266e4a2eae6881ab401853d93e5d292c3740eec5084"
+  url "https://www.pgbouncer.org/downloads/files/1.25.1/pgbouncer-1.25.1.tar.gz"
+  sha256 "6e566ae92fe3ef7f6a1b9e26d6049f7d7ca39c40e29e7b38f6d5500ae15d8465"
   license "ISC"
 
   livecheck do
@@ -11,13 +11,12 @@ class Pgbouncer < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "054274d58e1129965296edcb1867b22829c2bc9a5a8d40c855817a262a0278f0"
-    sha256 cellar: :any,                 arm64_ventura:  "07895230a7f4541ef17ed81c0ca645e66fa6a5a33ea9649bbc3de5339c02ec0b"
-    sha256 cellar: :any,                 arm64_monterey: "742bc9d8abb46d62003003543a79e6b25b34d5bbb036d72cbc51ac01680e1e41"
-    sha256 cellar: :any,                 sonoma:         "6478a0ce1e3651c8043c3ef6cda60a1aafa0c93128b26e4b99dbc41b7d04928e"
-    sha256 cellar: :any,                 ventura:        "e5f91830338d0a52d66db8d287163f303c09d00d2d71304b7f9a37a25b283841"
-    sha256 cellar: :any,                 monterey:       "933cae41059f7198a05d9c73af6f7f522be5af0ac8f7e50797b028e42dd095f1"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "5509640fed151b1d1378d8ce25ce4f054e4af9bea5522028897537490365217b"
+    sha256 cellar: :any,                 arm64_tahoe:   "f5a3fc3c60b6965b84c3726d7a2ba38abc650ccbe07a57c96de83d9b6fd330d1"
+    sha256 cellar: :any,                 arm64_sequoia: "6be837ec94647a38dd17d202a3694adf258ab90e78e5afdae17b345201dac64a"
+    sha256 cellar: :any,                 arm64_sonoma:  "b90669ff9c33f12172c202a805aad612aff2c0c29d3085165c5bb7b42750922f"
+    sha256 cellar: :any,                 sonoma:        "ca92fc4e84e84654b20e3696eedf19fc5ef394cae7ce74ffe111a43317eb90e7"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "5a4786998a1c81f0a7f5080626e4133800cc8f013431e9c3e350040c15db6f87"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "8f8526ad5bf46f76b9b8821dd240a512452a1502020dee3ad3d0c1a7c5f99e11"
   end
 
   head do
@@ -26,12 +25,14 @@ class Pgbouncer < Formula
     depends_on "autoconf" => :build
     depends_on "automake" => :build
     depends_on "libtool" => :build
-    depends_on "pandoc" => :build
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pandoc" => :build
+  depends_on "pkgconf" => :build
   depends_on "libevent"
   depends_on "openssl@3"
+
+  uses_from_macos "python" => :build
 
   def install
     system "./autogen.sh" if build.head?
@@ -44,9 +45,7 @@ class Pgbouncer < Formula
       s.gsub!(/auth_file = .*/, "auth_file = #{etc}/userlist.txt")
     end
     etc.install %w[etc/pgbouncer.ini etc/userlist.txt]
-  end
 
-  def post_install
     (var/"log").mkpath
     (var/"run").mkpath
   end

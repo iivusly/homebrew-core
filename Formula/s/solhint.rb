@@ -1,44 +1,38 @@
 class Solhint < Formula
   desc "Linter for Solidity code"
   homepage "https://protofire.github.io/solhint/"
-  url "https://registry.npmjs.org/solhint/-/solhint-5.0.3.tgz"
-  sha256 "dd26c50bb8c53e6869b424107012fcd20e109718fd40e9bbc15c6efa8c5863df"
+  url "https://registry.npmjs.org/solhint/-/solhint-6.2.1.tgz"
+  sha256 "c03af35a767db998ffd042c72d679909ae043372f5ff27e50e5de8390af55ec7"
   license "MIT"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "5bcf8c9119a06cc86fa904103605f918a4f5c53a3ad14452c6d8eae2710223f8"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "5bcf8c9119a06cc86fa904103605f918a4f5c53a3ad14452c6d8eae2710223f8"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "5bcf8c9119a06cc86fa904103605f918a4f5c53a3ad14452c6d8eae2710223f8"
-    sha256 cellar: :any_skip_relocation, sonoma:         "c61c21de99312d1f161f29e0d5fe723ac206cfe0850d0a75b71a04b3d50e67ce"
-    sha256 cellar: :any_skip_relocation, ventura:        "c61c21de99312d1f161f29e0d5fe723ac206cfe0850d0a75b71a04b3d50e67ce"
-    sha256 cellar: :any_skip_relocation, monterey:       "c61c21de99312d1f161f29e0d5fe723ac206cfe0850d0a75b71a04b3d50e67ce"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "5bcf8c9119a06cc86fa904103605f918a4f5c53a3ad14452c6d8eae2710223f8"
+    sha256 cellar: :any_skip_relocation, all: "5f94115be9ee1c31997864b953ce2821e92169564e29345f35d6b10fdfa2d225"
   end
 
   depends_on "node"
 
   def install
     system "npm", "install", *std_npm_args
-    bin.install_symlink Dir["#{libexec}/bin/*"]
+    bin.install_symlink libexec.glob("bin/*")
   end
 
   test do
     test_config = testpath/".solhint.json"
-    test_config.write <<~EOS
+    test_config.write <<~JSON
       {
         "rules": {
           "no-empty-blocks": "error"
         }
       }
-    EOS
+    JSON
 
-    (testpath/"test.sol").write <<~EOS
+    (testpath/"test.sol").write <<~SOLIDITY
       pragma solidity ^0.4.0;
       contract Test {
         function test() {
         }
       }
-    EOS
+    SOLIDITY
     assert_match "error  Code contains empty blocks  no-empty-blocks",
       shell_output("#{bin}/solhint --config #{test_config} test.sol 2>&1", 1)
   end

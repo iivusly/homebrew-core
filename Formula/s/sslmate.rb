@@ -1,14 +1,9 @@
-require "language/perl"
-
 class Sslmate < Formula
-  include Language::Perl::Shebang
-
   desc "Buy SSL certs from the command-line"
   homepage "https://sslmate.com"
-  url "https://packages.sslmate.com/other/sslmate-1.9.1.tar.gz"
-  sha256 "179b331a7d5c6f0ed1de51cca1c33b6acd514bfb9a06a282b2f3b103ead70ce7"
+  url "https://packages.sslmate.com/other/sslmate-1.10.0.tar.gz"
+  sha256 "ca378afc28c54a38f29ab8956f8d405b2d12489e66c0fa7a4fe6acc8769e5f91"
   license "MIT"
-  revision 1
 
   livecheck do
     url "https://packages.sslmate.com/other/"
@@ -16,22 +11,22 @@ class Sslmate < Formula
   end
 
   bottle do
-    rebuild 5
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "c52eea8ffcdd759de0bb3cb1d6cd8d540b7b7923e13c1fec0a41c8bddb1f6f1f"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "c52eea8ffcdd759de0bb3cb1d6cd8d540b7b7923e13c1fec0a41c8bddb1f6f1f"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "c52eea8ffcdd759de0bb3cb1d6cd8d540b7b7923e13c1fec0a41c8bddb1f6f1f"
-    sha256 cellar: :any_skip_relocation, sonoma:         "1099c1cd94fa37d7eba861e8b1ef68b3bdf13f6d5750c6d15e82736e7333109c"
-    sha256 cellar: :any_skip_relocation, ventura:        "1099c1cd94fa37d7eba861e8b1ef68b3bdf13f6d5750c6d15e82736e7333109c"
-    sha256 cellar: :any_skip_relocation, monterey:       "1099c1cd94fa37d7eba861e8b1ef68b3bdf13f6d5750c6d15e82736e7333109c"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "c4ec200b4bec7150dba1b0d590dabee471de7683ccf7281e9612ca549a8edd7c"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "606285c1406a2e5dce609201742f8308849268d7374493e6293d00382ba73dbf"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "606285c1406a2e5dce609201742f8308849268d7374493e6293d00382ba73dbf"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "606285c1406a2e5dce609201742f8308849268d7374493e6293d00382ba73dbf"
+    sha256 cellar: :any_skip_relocation, tahoe:         "606285c1406a2e5dce609201742f8308849268d7374493e6293d00382ba73dbf"
+    sha256 cellar: :any_skip_relocation, sequoia:       "606285c1406a2e5dce609201742f8308849268d7374493e6293d00382ba73dbf"
+    sha256 cellar: :any_skip_relocation, sonoma:        "606285c1406a2e5dce609201742f8308849268d7374493e6293d00382ba73dbf"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "ce71bcc850c75c1fbeb6f4cb3ae7bdba4ba0999fa29f7205db5e90dca9ad0a63"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "95bf782697993d0df50f7cb2ab865b07262ab8b1d0b8828cdfda97ef29e44be5"
   end
 
   uses_from_macos "perl"
 
   on_linux do
     resource "URI::Escape" do
-      url "https://cpan.metacpan.org/authors/id/O/OA/OALDERS/URI-5.21.tar.gz"
-      sha256 "96265860cd61bde16e8415dcfbf108056de162caa0ac37f81eb695c9d2e0ab77"
+      url "https://cpan.metacpan.org/authors/id/O/OA/OALDERS/URI-5.34.tar.gz"
+      sha256 "de64c779a212ff1821896c5ca2bb69e74767d2674cee411e777deea7a22604a8"
     end
 
     resource "Term::ReadKey" do
@@ -41,21 +36,21 @@ class Sslmate < Formula
   end
 
   def install
-    ENV.prepend_create_path "PERL5LIB", libexec/"vendor/lib/perl5"
+    if OS.linux?
+      ENV.prepend_create_path "PERL5LIB", libexec/"vendor/lib/perl5"
 
-    resources.each do |r|
-      r.stage do
-        system "perl", "Makefile.PL", "INSTALL_BASE=#{libexec}/vendor"
-        system "make"
-        system "make", "install"
+      resources.each do |r|
+        r.stage do
+          system "perl", "Makefile.PL", "INSTALL_BASE=#{libexec}/vendor"
+          system "make"
+          system "make", "install"
+        end
       end
     end
 
     system "make", "PREFIX=#{prefix}"
     system "make", "install", "PREFIX=#{prefix}"
-
-    bin.env_script_all_files libexec/"bin", PERL5LIB: ENV["PERL5LIB"]
-    rewrite_shebang detected_perl_shebang, libexec/"bin/sslmate"
+    bin.env_script_all_files(libexec/"bin", PERL5LIB: ENV["PERL5LIB"]) if OS.linux?
   end
 
   test do

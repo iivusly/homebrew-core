@@ -1,35 +1,50 @@
 class Gom < Formula
   desc "GObject wrapper around SQLite"
   homepage "https://wiki.gnome.org/Projects/Gom"
-  url "https://download.gnome.org/sources/gom/0.4/gom-0.4.tar.xz"
-  sha256 "68d08006aaa3b58169ce7cf1839498f45686fba8115f09acecb89d77e1018a9d"
+  url "https://download.gnome.org/sources/gom/0.5/gom-0.5.6.tar.xz"
+  sha256 "4d7a5e268698c8e7e40603e36e9e3a2b76133931ce1b637c1136301491b54cc3"
   license "LGPL-2.1-or-later"
-  revision 3
 
-  bottle do
-    rebuild 2
-    sha256 cellar: :any, arm64_sonoma:   "7739014948192b14ae5c9de59e4a084fb90c1e77344e98758ff91e4380388d4d"
-    sha256 cellar: :any, arm64_ventura:  "d143d27a4e26d5f294f82821fd44abb9e9c52b6b5ebdee505b53a40dc88e3c09"
-    sha256 cellar: :any, arm64_monterey: "338326e04cdc74b498710c1e70ba56426766f72af7b408437cd619c9418f9c28"
-    sha256 cellar: :any, sonoma:         "a9815d6dfa43929208561f932997fa22cda9494722880f1af03435652731af54"
-    sha256 cellar: :any, ventura:        "1594e2a96cd9e5935dbaf0f211d32ccd92e6eeef7d2722f836269c6ac7a04ed8"
-    sha256 cellar: :any, monterey:       "f32dd6c31b283feabdc6c91025ebf1f4e6a769fd2c70db73854228f871313df2"
-    sha256               x86_64_linux:   "33c91d940b43a24d21cbb493be57d13f2285a74c44cced7aed47fe49f0a51957"
+  # We use a common regex because gom doesn't use GNOME's "even-numbered
+  # minor is stable" version scheme.
+  livecheck do
+    url :stable
+    regex(/gom[._-]v?(\d+(?:\.\d+)+)\.t/i)
   end
 
+  bottle do
+    sha256 cellar: :any, arm64_tahoe:   "511ed8f353a51336ea55364d8cd3fd626ecb5f6d04f91d7cfc0c23be3b0fb04b"
+    sha256 cellar: :any, arm64_sequoia: "4c93590b5956c317a7d2bc6a38aede4e0c047c9925e967ebc7884a6f4b77dbbc"
+    sha256 cellar: :any, arm64_sonoma:  "ea9dc8fd99c38aff11dd81cb0eebae01044ad73b6a6cffc4f117726edbf50ba0"
+    sha256 cellar: :any, sonoma:        "d560aa062fcbb20f4a5085682fa3f862b6dca8c30eb21b562418e7e83965634c"
+    sha256               arm64_linux:   "c1131eafb65f0da08a9e3d1d63ff1b00e9caaf801bbd1ed5ce94f6d3b840c79d"
+    sha256               x86_64_linux:  "028268f8e15073088bd20359757d2436a43e0b018d07f44b9ff3d25c6a6eeacc"
+  end
+
+  depends_on "gdk-pixbuf" => :build # https://gitlab.gnome.org/GNOME/gom/-/issues/18
   depends_on "gobject-introspection" => :build
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => :build
-  depends_on "python@3.12" => :build
-  depends_on "gdk-pixbuf"
-  depends_on "gettext"
+  depends_on "pkgconf" => [:build, :test]
+  depends_on "python@3.14" => :build
   depends_on "glib"
+  depends_on "sqlite" # indirect dependency via glib
 
-  uses_from_macos "sqlite"
+  # Help find `gdk-pixbuf` as superenv doesn't add dependencies of build dependencies
+  def gdk_pixbuf_add_pkgconfig_paths!
+    deps_set = Set.new
+    Formula["gdk-pixbuf"].recursive_dependencies do |_, dep|
+      Dependency.prune if !dep.required? || deps_set.include?(dep)
+
+      dep_f = dep.to_formula
+      ENV.append_path "PKG_CONFIG_PATH", dep_f.opt_lib/"pkgconfig" if (dep_f.opt_lib/"pkgconfig").exist?
+      ENV.append_path "PKG_CONFIG_PATH", dep_f.opt_share/"pkgconfig" if (dep_f.opt_share/"pkgconfig").exist?
+    end
+  end
 
   def install
-    site_packages = prefix/Language::Python.site_packages("python3.12")
+    site_packages = prefix/Language::Python.site_packages("python3.14")
+    gdk_pixbuf_add_pkgconfig_paths!
 
     system "meson", "setup", "build", "-Dpygobject-override-dir=#{site_packages}", *std_meson_args
     system "meson", "compile", "-C", "build", "--verbose"
@@ -37,29 +52,16 @@ class Gom < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <gom/gom.h>
 
       int main(int argc, char *argv[]) {
         GType type = gom_error_get_type();
         return 0;
       }
-    EOS
-    gettext = Formula["gettext"]
-    glib = Formula["glib"]
-    flags = %W[
-      -I#{gettext.opt_include}
-      -I#{glib.opt_include}/glib-2.0
-      -I#{glib.opt_lib}/glib-2.0/include
-      -I#{include}/gom-1.0
-      -L#{gettext.opt_lib}
-      -L#{glib.opt_lib}
-      -L#{lib}
-      -lglib-2.0
-      -lgobject-2.0
-      -lgom-1.0
-    ]
-    flags << "-lintl" if OS.mac?
+    C
+
+    flags = shell_output("pkgconf --cflags --libs gom-1.0").chomp.split
     system ENV.cc, "test.c", "-o", "test", *flags
     system "./test"
   end

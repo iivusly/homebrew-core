@@ -17,19 +17,18 @@ class Ponysay < Formula
   end
 
   bottle do
-    rebuild 2
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "1eca8b3e7cdcdcce01318a2d876e56ddbee396f5743a86505ebf10890495bfed"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "d372bd35d2c931e62724cd071813731b6d2b7ed218c2b97ea22d0ea3b21e270b"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "a04a741432a0b11230d1fd4a166e21124560fcbedd9d342871c7fe94262cef09"
-    sha256 cellar: :any_skip_relocation, sonoma:         "7ae64325c0fc4bcb425a922a9313ff2f965d79f8cb7f1efe3dfa3bd09866027f"
-    sha256 cellar: :any_skip_relocation, ventura:        "f5d7684b1337c8cbd02fb95bb5053fc7976dbedbce2af249fb7edb797e3fb7c1"
-    sha256 cellar: :any_skip_relocation, monterey:       "0bcb34fbf82236dc5e6fe5483c0e92920285e9bb9e8852ce23640281d1af6320"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "511bcb624a5d9ffe092b33037026376eb3fc2f93c221776efacf32a2a2d7fd54"
+    rebuild 4
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "436a1f52adab32d7d21c3ebe39dee39f8d2bec2cdcfe0c650973b47961aa3852"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "4f62fa211582ff29e9494cd2215609d16b6296ea0affb2582b1335db3270ee4a"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "5ce3e3d143f8164f2c88c4357e780ff8ba9b606892f88550aa6bb9bc00ffb57f"
+    sha256 cellar: :any_skip_relocation, sonoma:        "a4ed42c1e433ff890d69b8efd820ec6f95171904c8ec0af96da7c72701bf2369"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "6b029e23e21fd4ac75a4cd6d69a10b766cbff2199b342db7ccca88b33aacf26e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "eb8cc2a4ab043dbb08c57344164315a5653bbcb1f9dd36103d9e697eb010f2c1"
   end
 
   depends_on "gzip" => :build
   depends_on "coreutils"
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   on_system :linux, macos: :ventura_or_newer do
     depends_on "texinfo" => :build
@@ -41,7 +40,7 @@ class Ponysay < Formula
            "--prefix=#{prefix}",
            "--cache-dir=#{prefix}/var/cache",
            "--sysconf-dir=#{prefix}/etc",
-           "--with-custom-env-python=#{Formula["python@3.12"].opt_bin}/python3.12",
+           "--with-custom-env-python=#{Formula["python@3.14"].opt_bin}/python3.14",
            "install"
   end
 

@@ -12,14 +12,8 @@ class Yuicompressor < Formula
   end
 
   bottle do
-    rebuild 2
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "39a0c85d86b163e85204877c02dc2028d458aaa93822a9744bd3ce6cf883163b"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "39a0c85d86b163e85204877c02dc2028d458aaa93822a9744bd3ce6cf883163b"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "39a0c85d86b163e85204877c02dc2028d458aaa93822a9744bd3ce6cf883163b"
-    sha256 cellar: :any_skip_relocation, sonoma:         "a777992c7ffb05c413bcc9d2f7e6abafffc51af453be8300eb14944393b73c20"
-    sha256 cellar: :any_skip_relocation, ventura:        "a777992c7ffb05c413bcc9d2f7e6abafffc51af453be8300eb14944393b73c20"
-    sha256 cellar: :any_skip_relocation, monterey:       "a777992c7ffb05c413bcc9d2f7e6abafffc51af453be8300eb14944393b73c20"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "9ecbde7c5fb11f028b5bca5b4174f007370df1827ea1e83a603c89c522823855"
+    rebuild 3
+    sha256 cellar: :any_skip_relocation, all: "85fa9d1169b77f59259088ebe086f6611f7d14b87216c4e3ed0090f3c04f34cd"
   end
 
   depends_on "openjdk"
@@ -31,13 +25,12 @@ class Yuicompressor < Formula
 
   test do
     path = testpath/"test.js"
-    path.write <<~EOS
+    path.write <<~JAVASCRIPT
       var i = 1;      // foo
       console.log(i); // bar
-    EOS
+    JAVASCRIPT
 
-    output = `#{bin}/yuicompressor --nomunge --preserve-semi #{path}`.strip
+    output = shell_output("#{bin}/yuicompressor --nomunge --preserve-semi #{path}").strip
     assert_equal "var i=1;console.log(i);", output
-    assert_equal 0, $CHILD_STATUS.exitstatus
   end
 end

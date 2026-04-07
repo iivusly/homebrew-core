@@ -1,9 +1,9 @@
 class Ejabberd < Formula
   desc "XMPP application server"
   homepage "https://www.ejabberd.im"
-  url "https://github.com/processone/ejabberd/archive/refs/tags/24.07.tar.gz"
-  sha256 "c0fb746acba81a5db41de97c03968c1f681a13b1b6c1a895b7182e33820c18d9"
-  license "GPL-2.0-only"
+  url "https://github.com/processone/ejabberd/archive/refs/tags/26.03.tar.gz"
+  sha256 "584b9d43a1f67e929fdb08fa7429f359fabc022923aca311666b1073ed709a52"
+  license "GPL-2.0-or-later"
   head "https://github.com/processone/ejabberd.git", branch: "master"
 
   # There can be a notable gap between when a version is tagged and a
@@ -15,17 +15,17 @@ class Ejabberd < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "e79b2a45c9f6d51aed4f4776bbe927276431a86dd76c0f52a720eecf66b456ea"
-    sha256 cellar: :any,                 arm64_ventura:  "fe3919aa9fe2182145c76330e27a0cfe37f5e140994e199d89760275b3730105"
-    sha256 cellar: :any,                 arm64_monterey: "e6d14fc6089d0dce483bcc972b7c84418c4775aeb333cf76eb61aa143b0b53d0"
-    sha256 cellar: :any,                 sonoma:         "c5d49911266df35a8937f166b77277b69b4ddf2d6f27840c04cefdde5bd2a47f"
-    sha256 cellar: :any,                 ventura:        "a88d2df0fddc8dc859dc13a8adbc7fce624d15235392efa2ecef5c8ec8cfaff5"
-    sha256 cellar: :any,                 monterey:       "3485b3cb3788b82bf95a69cfea4ba936ca4db69517c5fc51c3c30d726bdca9a9"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "669a615d3280734af6a3563a091aded19b6e1db2380b12178102daca8fe8fe90"
+    sha256 cellar: :any,                 arm64_tahoe:   "b440c79f05b5cfa0bc7d6d855716cba0c2ae2a3605ac0ec2814d364a6aac7ded"
+    sha256 cellar: :any,                 arm64_sequoia: "8f224288b9a94c60615169c46fe162d2e6804831ba5f68ec5ba7e015abe91dd5"
+    sha256 cellar: :any,                 arm64_sonoma:  "bce339940797be51a1f1b0b94acc0e4205103870930f3a1417d54276fe30ca62"
+    sha256 cellar: :any,                 sonoma:        "6335a60927919311572936b8ac7b374a4545f9a3b734573fadd9b0278a132758"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "ebf0f8934a281d5ea9eac7cda328af2cd7f7fc5a503d2ba14bad156a12f94e6f"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "7edfd5b829a9e4db6d611eedb3e43e14b63d67f81019b1ce8b8b927a872bc3b3"
   end
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
+  depends_on "elixir" => :build
   depends_on "erlang"
   depends_on "gd"
   depends_on "libyaml"
@@ -33,8 +33,13 @@ class Ejabberd < Formula
 
   uses_from_macos "expat"
 
+  on_sonoma :or_older do
+    depends_on "coreutils" => :build # for sha256sum
+  end
+
   on_linux do
     depends_on "linux-pam"
+    depends_on "zlib-ng-compat"
   end
 
   conflicts_with "couchdb", because: "both install `jiffy` lib"
@@ -44,22 +49,29 @@ class Ejabberd < Formula
     ENV["MAN_DIR"] = man
     ENV["SBIN_DIR"] = sbin
 
-    args = ["--prefix=#{prefix}",
-            "--sysconfdir=#{etc}",
-            "--localstatedir=#{var}",
-            "--enable-pgsql",
-            "--enable-mysql",
-            "--enable-odbc",
-            "--enable-pam"]
+    args = %W[
+      --prefix=#{prefix}
+      --sysconfdir=#{etc}
+      --localstatedir=#{var}
+      --disable-debug
+      --enable-pgsql
+      --enable-mysql
+      --enable-odbc
+      --enable-pam
+      --enable-system-deps
+    ]
 
     system "./autogen.sh"
     system "./configure", *args
+
+    # 26.03 Makefile runs `invites-deps` targets in parallel, which can race
+    # on bootstrap zip extraction in non-interactive environments.
+    ENV.deparallelize
 
     # Set CPP to work around cpp shim issue:
     # https://github.com/Homebrew/brew/issues/5153
     system "make", "CPP=#{ENV.cc} -E"
 
-    ENV.deparallelize
     system "make", "install"
 
     (etc/"ejabberd").mkpath
@@ -95,6 +107,24 @@ class Ejabberd < Formula
   end
 
   test do
-    system sbin/"ejabberdctl", "ping"
+    node = "ejabberd_test_#{Process.pid}@localhost"
+
+    ENV["EJABBERD_BYPASS_WARNINGS"] = "true"
+    ENV["EJABBERD_CONFIG_PATH"] = testpath/"ejabberd.yml"
+    ENV["SPOOL_DIR"] = testpath/"spool"
+    ENV["LOGS_DIR"] = testpath/"log"
+
+    (testpath/"spool").mkpath
+    (testpath/"log").mkpath
+
+    cp etc/"ejabberd/ejabberd.yml", testpath/"ejabberd.yml"
+    inreplace testpath/"ejabberd.yml", "port: 1883", "port: #{free_port}"
+
+    pid = spawn(sbin/"ejabberdctl", "--node", node, "foreground", pgroup: true)
+    sleep 5
+    assert_equal "pong\n", shell_output("#{sbin}/ejabberdctl --node #{node} ping")
+  ensure
+    Process.kill "TERM", -pid
+    Process.wait pid
   end
 end

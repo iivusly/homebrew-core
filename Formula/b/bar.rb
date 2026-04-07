@@ -5,15 +5,12 @@ class Bar < Formula
   sha256 "8034c405b6aa0d474c75ef9356cde1672b8b81834edc7bd94fc91e8ae097033e"
   license "Zlib"
 
-  livecheck do
-    url :homepage
-    regex(/href=.*?bar[._-]v?(\d+(?:\.\d+)+)[._-]src\.t/i)
+  bottle do
+    rebuild 2
+    sha256 cellar: :any_skip_relocation, all: "0bfd47d83744c345b9d102b66f8f7f580757d90ec821789a76364ad8b1cb13eb"
   end
 
-  bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, all: "fa55cacca64ca91bdb24888d6ad36cff103aac0a461a8d2f32ae5b6e69d47980"
-  end
+  deprecate! date: "2026-01-05", because: "is not available via HTTPS"
 
   def install
     bin.install "bar"

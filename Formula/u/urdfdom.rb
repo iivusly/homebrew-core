@@ -1,10 +1,10 @@
 class Urdfdom < Formula
   desc "Unified Robot Description Format (URDF) parser"
   homepage "https://wiki.ros.org/urdf/"
-  url "https://github.com/ros/urdfdom/archive/refs/tags/4.0.0.tar.gz"
-  sha256 "9848d106dc88dc0b907d5667c09da3ca53241fbcf17e982d8c234fe3e0d6ddcc"
+  url "https://github.com/ros/urdfdom/archive/refs/tags/5.1.0.tar.gz"
+  sha256 "096478dc889fda2b375184304bd2511d4f33182ecd05732284c15978e2ef5d47"
   license "BSD-3-Clause"
-  revision 1
+  compatibility_version 1
 
   # Upstream uses Git tags (e.g. `1.0.0`) to indicate a new version. They
   # created a few releases on GitHub in the past but now they simply use tags.
@@ -15,30 +15,29 @@ class Urdfdom < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "23ef43afad8dc543b4160fce22b692cfcbf4cb720412dbc43116eb23a56ef6c9"
-    sha256 cellar: :any,                 arm64_ventura:  "662d33ada7489c772466fe72ab7efaf60aad3e05b8e083ef7e5519e948304287"
-    sha256 cellar: :any,                 arm64_monterey: "93c2592a0fe16506c95af1cf603e1011ac1d0ee49cb620ed9e2605a2af9d8589"
-    sha256 cellar: :any,                 sonoma:         "52347646204fb3ce2334a627162a120fcabbeb210f1663b3b4d0e2a5daa7246e"
-    sha256 cellar: :any,                 ventura:        "af0bd85409870501150192c1972fcff204702f82facb6a03ed8c149c05e2cad4"
-    sha256 cellar: :any,                 monterey:       "cd1914b68c197c8b4f67274a2d67d134fcc281404bb6809d6280147f6a8954fc"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "c0ed65ec038f541dcb4554b4e6f663efd8aca05e27fb6cab4146cf4a2928a3b9"
+    sha256 cellar: :any,                 arm64_tahoe:   "3e7d801dcf69b7583b0937419e403febbd75e7462e4f3626671d95e57dfde346"
+    sha256 cellar: :any,                 arm64_sequoia: "16c29cecd6d8318f838bd88b20fcc189fb39be46a2219c48affad7a73f39d688"
+    sha256 cellar: :any,                 arm64_sonoma:  "1c8f5ab5fc78f84581cb6094b286289bde80392f573b8d0a7744b78d9a49e042"
+    sha256 cellar: :any,                 sonoma:        "3b4bb1f78375fa6a416d597238a11892f4a1fdd8487736cab2c452654d41c9c6"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "0b980bae0bc61095fc6f6ec1d0f9ed0614c09c2965dceacbd126d05bae18abfc"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "567dfc0d2fefa4e90f8915abe3e142f5f2dd826b5a435915a417a4a5be98e40f"
   end
 
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :test
+  depends_on "pkgconf" => :test
   depends_on "console_bridge"
   depends_on "tinyxml2"
   depends_on "urdfdom_headers"
 
   def install
     ENV.cxx11
-    system "cmake", "-S", ".", "-B", "build", *std_cmake_args, "-DCMAKE_INSTALL_RPATH=#{rpath}"
+    system "cmake", "-S", ".", "-B", "build", "-DCMAKE_INSTALL_RPATH=#{rpath}", *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
   end
 
   test do
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include <string>
       #include <urdf_parser/urdf_parser.h>
       int main() {
@@ -50,13 +49,13 @@ class Urdfdom < Formula
         urdf::parseURDF(xml_string);
         return 0;
       }
-    EOS
+    CPP
     system ENV.cxx, "test.cpp", *shell_output("pkg-config --cflags urdfdom").chomp.split,
                     "-L#{lib}", "-lurdfdom_world",
                     "-std=c++11", "-o", "test"
     system "./test"
 
-    (testpath/"test.xml").write <<~EOS
+    (testpath/"test.xml").write <<~XML
       <robot name="test">
         <joint name="j1" type="fixed">
           <parent link="l1"/>
@@ -91,7 +90,7 @@ class Urdfdom < Formula
           </visual>
         </link>
       </robot>
-    EOS
+    XML
 
     system bin/"check_urdf", testpath/"test.xml"
   end

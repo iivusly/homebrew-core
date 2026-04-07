@@ -1,9 +1,10 @@
 class Libdap < Formula
   desc "Framework for scientific data networking"
   homepage "https://www.opendap.org/"
-  url "https://www.opendap.org/pub/source/libdap-3.21.0-27.tar.gz"
-  sha256 "b5b8229d3aa97fea9bba4a0b11b1ee1c6446bd5f7ad2cff591f86064f465eacf"
+  url "https://www.opendap.org/pub/source/libdap-3.21.1.tar.gz"
+  sha256 "1f6c084bdbf2686121f9b2f5e767275c1e37d9ccf67c8faabc762389f95a0c38"
   license "LGPL-2.1-or-later"
+  revision 1
 
   livecheck do
     url "https://www.opendap.org/pub/source/"
@@ -11,13 +12,12 @@ class Libdap < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "90d0cfdef210ceec132a9473e3bc8e76c45465048c26812d68028195d0e7f3e5"
-    sha256 arm64_ventura:  "cd3169f768274c0125ebee71b9d4ca50712fc2fab103e040ee792b4aea09d2df"
-    sha256 arm64_monterey: "e396f29602812683b393da1ae2a4e61da18a5d0586e7cb0012b8d9af22587a4a"
-    sha256 sonoma:         "ab456f52c3a3fd0f9bf7e6c212f776e55e59723e39d34b5255f11495e1d8a1da"
-    sha256 ventura:        "6649d7822c449061c9fdc3a55900d604e0002541f39d14bf30a5c18ab73a9d32"
-    sha256 monterey:       "290966591bfa6f0720ee307a9a1c578449c8b22e1f1930af9591a3539d660a86"
-    sha256 x86_64_linux:   "c5a8deb3817eedba2c16b4a380df6539e232a81f2c5d3ce9afc2813f13bd6248"
+    sha256 arm64_tahoe:   "d959fe3f680cc759bc8e6b5fc9ce3df87a0ba407fd8c121c7c0007b18a7391ed"
+    sha256 arm64_sequoia: "d4b73f03f75990e67798f996eed66c02b42066d37c43c6970ed1345838ea6e3c"
+    sha256 arm64_sonoma:  "c56bc527efd1a40a897de31f6f41876b6a4ca45ca6f642c2c1cfad52b92db9e2"
+    sha256 sonoma:        "7bf3eb33efc70d4ef302c32eb64031d193004aee353d7d14c66afc69185eb90f"
+    sha256 arm64_linux:   "b28520612f2942489d5fa1eb14051528d444558c63e3d04b4c14b028193577a3"
+    sha256 x86_64_linux:  "037920375d831bc140fd1bb65563045b7105abdcf57f6d3882b2e0680df18140"
   end
 
   head do
@@ -29,7 +29,7 @@ class Libdap < Formula
   end
 
   depends_on "bison" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "libxml2"
   depends_on "openssl@3"
 
@@ -39,25 +39,19 @@ class Libdap < Formula
   on_linux do
     depends_on "libtirpc"
     depends_on "util-linux"
+
+    on_arm do
+      # FIXME: illegal instruction in test_simple_3_error_1 with Ubuntu GCC
+      depends_on "gcc@12" => :build
+    end
   end
 
   def install
-    args = %W[
-      --prefix=#{prefix}
-      --disable-dependency-tracking
-      --disable-debug
-      --with-included-regex
-    ]
-
     system "autoreconf", "--force", "--install", "--verbose" if build.head?
-    system "./configure", *args
+    system "./configure", "--with-included-regex", *std_configure_args
     system "make"
     system "make", "check"
     system "make", "install"
-
-    # Ensure no Cellar versioning of libxml2 path in dap-config entries
-    xml2 = Formula["libxml2"]
-    inreplace bin/"dap-config", xml2.opt_prefix.realpath, xml2.opt_prefix
   end
 
   test do

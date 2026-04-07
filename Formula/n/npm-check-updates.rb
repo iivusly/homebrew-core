@@ -1,37 +1,31 @@
 class NpmCheckUpdates < Formula
   desc "Find newer versions of dependencies than what your package.json allows"
   homepage "https://github.com/raineorshine/npm-check-updates"
-  url "https://registry.npmjs.org/npm-check-updates/-/npm-check-updates-17.1.1.tgz"
-  sha256 "5e64b41ca51a915dd584c05ba4cd4e00d449419d81537775b3fadfe840c24924"
+  url "https://registry.npmjs.org/npm-check-updates/-/npm-check-updates-20.0.0.tgz"
+  sha256 "5bc3a51e72b520b235c3253c0a482aad8bcafec46715ae5707634af47256300b"
   license "Apache-2.0"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "37d68c93020ce8fa2605f1b7746e38de2286734d00e008b787b12d9df8e2ce15"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "37d68c93020ce8fa2605f1b7746e38de2286734d00e008b787b12d9df8e2ce15"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "37d68c93020ce8fa2605f1b7746e38de2286734d00e008b787b12d9df8e2ce15"
-    sha256 cellar: :any_skip_relocation, sonoma:         "ee23c3857ce6b8e15c7289df971d502deb255b23e2114dab045b6ab3a7e21ecb"
-    sha256 cellar: :any_skip_relocation, ventura:        "ee23c3857ce6b8e15c7289df971d502deb255b23e2114dab045b6ab3a7e21ecb"
-    sha256 cellar: :any_skip_relocation, monterey:       "ee23c3857ce6b8e15c7289df971d502deb255b23e2114dab045b6ab3a7e21ecb"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "37d68c93020ce8fa2605f1b7746e38de2286734d00e008b787b12d9df8e2ce15"
+    sha256 cellar: :any_skip_relocation, all: "40e180202f9c2a8b24b0ecca785937782d870f5ceae0e1661fdc97406c00f821"
   end
 
   depends_on "node"
 
   def install
     system "npm", "install", *std_npm_args
-    bin.install_symlink Dir["#{libexec}/bin/*"]
+    bin.install_symlink libexec.glob("bin/*")
   end
 
   test do
     test_package_json = testpath/"package.json"
-    test_package_json.write <<~EOS
+    test_package_json.write <<~JSON
       {
         "dependencies": {
           "express": "1.8.7",
           "lodash": "3.6.1"
         }
       }
-    EOS
+    JSON
 
     system bin/"ncu", "-u"
 

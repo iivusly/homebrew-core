@@ -1,32 +1,33 @@
 class BbftpClient < Formula
   desc "Secure file transfer software, optimized for large files"
-  homepage "http://software.in2p3.fr/bbftp/"
-  url "http://software.in2p3.fr/bbftp/dist/bbftp-client-3.2.1.tar.gz"
+  homepage "https://gitlab.in2p3.fr/cc-in2p3-hpss-service/bbftp"
+  url "https://pkg.freebsd.org/ports-distfiles/bbftp-client-3.2.1.tar.gz"
   sha256 "4000009804d90926ad3c0e770099874084fb49013e8b0770b82678462304456d"
   license "GPL-2.0-or-later"
   revision 3
+  head "https://gitlab.in2p3.fr/cc-in2p3-hpss-service/bbftp.git", branch: "master"
 
   livecheck do
-    url "http://software.in2p3.fr/bbftp/download.html"
-    regex(/href=.*?bbftp-client[._-]v?(\d+(?:\.\d+)+)\.t/i)
+    url :head
+    regex(/^(?:BBFTP|Version)[._-]v?(\d+(?:[._-]\d+)+[a-z]?)$/i)
+    strategy :git do |tags, regex|
+      tags.filter_map { |tag| tag[regex, 1]&.tr("_-", ".") }
+    end
   end
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "00799fab3efd0fd9c823854c0113ec44d2c4d13d7c191d79165e0ddc75ec71e0"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "2f99da3815fbef62edb3391bdf9dab41055ed1ace3f0b30cd69c45e719be6149"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "d429a71fe3b54e34d75efd1480062c322cee2a9b471628a671de3e9f1b91b201"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "bd7a47c27111d4dc064a7009f919a3283360738329dcfde7eb6522ee280e78fd"
-    sha256 cellar: :any_skip_relocation, sonoma:         "86903930a6e0fc3e443e2520b0cbaa595203e1bc4f2475d7cb714dc5e28611b9"
-    sha256 cellar: :any_skip_relocation, ventura:        "7808120a9bee27c473f0f59b5223c9d709add5ed8d8609992d51efb4288fb89c"
-    sha256 cellar: :any_skip_relocation, monterey:       "e50848489c6ad43604cbc0730d027939830ddc50d46fdd8d18dc6f729a910503"
-    sha256 cellar: :any_skip_relocation, big_sur:        "f30650734e1829a0c399153c78088ccd987f28ede25b8eb13ecde6b138d55076"
-    sha256 cellar: :any_skip_relocation, catalina:       "6d5bed31d69a0ff2f38f2642176cb3c3a4da34c4ea2740567d2698ca62519b7d"
-    sha256 cellar: :any_skip_relocation, mojave:         "bdb7c899dab18816b4cc1d573291ba4691f365c9ed1c9951e73f9225810a8557"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "be2f6db3c1cc87a51bab6a760cb1143747faeb3819f731192f09fceb3a658fbd"
+    rebuild 2
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "18d463140dea6d3abd1361442b054a2cd01020e40c55ca2e6046c5760944d689"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "58ae6876eec6565daf49ef57c1cc4663b2302ffb65d0acab11d8963ccbc0a42e"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "0ab14cc4e4e91fc506ca0b125d8d7ad3f5e84cc9019e2168a490f4da172ff481"
+    sha256 cellar: :any_skip_relocation, sonoma:        "449c785073c769955666ce4833bb442984a2714629facd2a7b33dc218e429f20"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "23e60edad50fab29170e6333b357a7e422bfe7798d190f2d0b21c8b72fbe4d1a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "b43e533d6799fb7e77c30bd1c8e6707925647d7220edd00edda2e30177298c47"
   end
 
-  uses_from_macos "zlib"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     # Workaround for Xcode 14.3

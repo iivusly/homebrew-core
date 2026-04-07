@@ -4,20 +4,18 @@ class LibjsonRpcCpp < Formula
   url "https://github.com/cinemast/libjson-rpc-cpp/archive/refs/tags/v1.4.1.tar.gz"
   sha256 "7a057e50d6203e4ea0a10ba5e4dbf344c48b177e5a3bf82e850eb3a783c11eb5"
   license "MIT"
-  revision 2
+  revision 4
   head "https://github.com/cinemast/libjson-rpc-cpp.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "237918e75ba97d474515ef9d3a532aa44d1d3a6c5736dc826f243fd4f195376d"
-    sha256 cellar: :any,                 arm64_ventura:  "c8bcae7683868e7ec575bcffd0040b2a349e38edb08351fea9338f7ee91fe7dc"
-    sha256 cellar: :any,                 arm64_monterey: "9cb86e8039e8e571b73ed1638c793f9b28592f892db42ce7279fbea76b729cc2"
-    sha256 cellar: :any,                 arm64_big_sur:  "0328e51375b19212c2a10d4d350f6a4cd70a4e971fdfc692917f49de8fed4ad2"
-    sha256 cellar: :any,                 sonoma:         "4a8eafebd5eb8305d728bd0eb046a24ef71697684165b559e5642ca0cf645750"
-    sha256 cellar: :any,                 ventura:        "ee599c61bbb42880d8312eadddf3ac23d2d4a0bd6b3db320c054b13e4158e7b4"
-    sha256 cellar: :any,                 monterey:       "8a4a0c85641f6bb3cb1f0a94f8848bfd91c96974afd90f37005e58b718677551"
-    sha256 cellar: :any,                 big_sur:        "ee8fe30830a557f91d0802ca338fa0d0953965ce09c6c3a61cceb05c053ec727"
-    sha256 cellar: :any,                 catalina:       "a7df384528a1aa939fc7292e6baf3229ce1fd4bde42def2bdd4ae7692f3792f4"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "c56cf094d5bc4ad8e7d3638d17d4e5c6120b8039f2889d89d5bf54286bed2910"
+    sha256 cellar: :any,                 arm64_tahoe:   "6dc9f12a9b6bf936881daefc66364df558d40e4daa5ef1327313619b91e8ebd1"
+    sha256 cellar: :any,                 arm64_sequoia: "437e579e259460e182a7a265ab31eda753c85860623d95fae1585c831ed26046"
+    sha256 cellar: :any,                 arm64_sonoma:  "3c31da615d72e5b0b7fa8563a2f20ba614ae2149eedbdcc5e7b1bbf2ec4cf485"
+    sha256 cellar: :any,                 arm64_ventura: "a50a022cd28c1afc756e6549255a779b0cc7e657de249492cee095c7414bf462"
+    sha256 cellar: :any,                 sonoma:        "1a06d33fb6dfb02a77dff103df8c5dccaf31732f57c5084894a6bb8a990fd40f"
+    sha256 cellar: :any,                 ventura:       "2b77b2e2ab126d3f5256ac54666ebc3bfaf0d039b9a204a94ccdf12e3adc2988"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "937c9426645552d0f435306f02dc4bea55498e2e6402c53d2bcbb5ab053c067c"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "3e81e47b0e548b539d9be3449e951c2f8fbdd9274acfef193ca9a89e6255b67e"
   end
 
   depends_on "cmake" => :build
@@ -29,9 +27,20 @@ class LibjsonRpcCpp < Formula
   uses_from_macos "curl"
 
   def install
-    system "cmake", ".", *std_cmake_args, "-DCOMPILE_EXAMPLES=OFF", "-DCOMPILE_TESTS=OFF"
-    system "make"
-    system "make", "install"
+    # Fix to Policy CMP0042 may not be set to OLD behavior
+    # because this version of CMake no longer supports it.
+    # Issue ref: https://github.com/cinemast/libjson-rpc-cpp/issues/334
+    inreplace "CMakeLists.txt", "cmake_policy(SET CMP0042 OLD)", ""
+    args = %W[
+      -DCOMPILE_EXAMPLES=OFF
+      -DCOMPILE_TESTS=OFF
+      -DCMAKE_INSTALL_RPATH=#{rpath}
+      -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+    ]
+
+    system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
+    system "cmake", "--build", "build"
+    system "cmake", "--install", "build"
   end
 
   test do

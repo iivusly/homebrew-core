@@ -1,9 +1,10 @@
 class Orc < Formula
   desc "Oil Runtime Compiler (ORC)"
-  homepage "https://gstreamer.freedesktop.org/projects/orc.html"
-  url "https://gstreamer.freedesktop.org/src/orc/orc-0.4.39.tar.xz"
-  sha256 "33ed2387f49b825fa1b9c3b0072e05f259141b895474ad085ae51143d3040cc0"
+  homepage "https://gstreamer.freedesktop.org/modules/orc.html"
+  url "https://gstreamer.freedesktop.org/src/orc/orc-0.4.42.tar.xz"
+  sha256 "7ec912ab59af3cc97874c456a56a8ae1eec520c385ec447e8a102b2bd122c90c"
   license all_of: ["BSD-2-Clause", "BSD-3-Clause"]
+  compatibility_version 1
 
   livecheck do
     url "https://gstreamer.freedesktop.org/src/orc/"
@@ -11,20 +12,19 @@ class Orc < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "4f3442b350f46d9a8ebfbcdf5c82582f4a2ada1a84fa68da9d3ad19159c97d04"
-    sha256 cellar: :any,                 arm64_ventura:  "c229e6d5bc16400788f57f76937e58b711b80d5005e548831ba23d9a80419779"
-    sha256 cellar: :any,                 arm64_monterey: "04be4fa75c493e4502473784a6389cccccf4d56cf9481b00b4f19cbf80d36f23"
-    sha256 cellar: :any,                 sonoma:         "6259f9bb3c048c8c657dae12a83dd9513fcc4b805d2e75eaf441e2e74f6dcbd7"
-    sha256 cellar: :any,                 ventura:        "f8463e64bfa4c2c204f3792c73e59b3f7984529781da1a65f96600b36e46e2b5"
-    sha256 cellar: :any,                 monterey:       "2091fd07f0328990472ff612edd54bfd73b72aa3085d98bfa4a6f660ef378a24"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "0047bf5ef440689f7fe75c904c7f51b0aefba7df91b78d294538258c2ea9999e"
+    sha256 cellar: :any, arm64_tahoe:   "a45340cf95a072f37cb00f9bcb8b1dfe31128fe4a9421957c9a57938a87341a1"
+    sha256 cellar: :any, arm64_sequoia: "7a0d9ba6e8e8279bc1c17502bb2384564ee63b8df3f0db9e2fdbc04084807713"
+    sha256 cellar: :any, arm64_sonoma:  "cdf97de8164961de85d7f7b18b07b725770c767bd8ebd0bb3ec88c0c31381bc6"
+    sha256 cellar: :any, sonoma:        "177f50d05d85775089fab59021fdbc7d483814f42558d170cd8f26d146512262"
+    sha256               arm64_linux:   "f8b2f804f9e7cac847bc8d375976f29d9a6f3a1a78e2bedf91ce677d1801b5a5"
+    sha256               x86_64_linux:  "f61c9e4d2bc4894d65d16c7ccedeba81ffaac9c07cbc337be00cd8d77d353c06"
   end
 
   depends_on "meson" => :build
   depends_on "ninja" => :build
 
   def install
-    system "meson", "setup", "build", "-Dgtk_doc=disabled", *std_meson_args
+    system "meson", "setup", "build", *std_meson_args
     system "meson", "compile", "-C", "build", "--verbose"
     system "meson", "install", "-C", "build"
   end
@@ -32,7 +32,7 @@ class Orc < Formula
   test do
     assert_match version.to_s, shell_output("#{bin}/orcc --version 2>&1")
 
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <orc/orc.h>
 
       int main(int argc, char *argv[]) {
@@ -41,7 +41,7 @@ class Orc < Formula
         }
         return 0;
       }
-    EOS
+    C
 
     system ENV.cc, "test.c", "-I#{include}/orc-0.4", "-L#{lib}", "-lorc-0.4", "-o", "test"
     system "./test"

@@ -1,24 +1,22 @@
 class Rtl433 < Formula
   desc "Program to decode radio transmissions from devices"
   homepage "https://github.com/merbanan/rtl_433"
-  url "https://github.com/merbanan/rtl_433/archive/refs/tags/23.11.tar.gz"
-  sha256 "1260c58400bf35832ac1b76cb3cccf3dc1335ffa2416909c63c7d7060c74663b"
+  url "https://github.com/merbanan/rtl_433/archive/refs/tags/25.12.tar.gz"
+  sha256 "d283ec7a41a02d398e8918b20b65df3bf684cf4478371830662004005dadcdd2"
   license "GPL-2.0-or-later"
-  revision 1
   head "https://github.com/merbanan/rtl_433.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "71a64b3bc46e45f9544e4b2c764c2cf329f4965b59701e897521aa3b53a117f8"
-    sha256 cellar: :any,                 arm64_ventura:  "12c177662b3019a2f15bacd8819eb3ca3b52c4540824c48536d947ecc0d8ab3b"
-    sha256 cellar: :any,                 arm64_monterey: "f7ea74abe442aef36c1edcb15cd7d4d3ea13b4da8c7cbc48afbb1c997273f430"
-    sha256 cellar: :any,                 sonoma:         "143e9c0e0dcbbb4a7bc71cc40f6e512abc5da84d64e42a5f2fc7fb47c398af05"
-    sha256 cellar: :any,                 ventura:        "a9064756df95ef0d25eb9f568c5f581e35692300aa9c1356af3fd18a5e491863"
-    sha256 cellar: :any,                 monterey:       "c12dacc2821a946d1418483cd3c01c2818535111077357ae7668e9f5ce5c7ce9"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "86592dfc6a02ae7867d13268f978d45ee86a762eeb4673a21dcf4c60fe466929"
+    sha256 cellar: :any,                 arm64_tahoe:   "22b43f0eb2c9899189e3c33d8bf75164d21b7165a7f31abad2067553df8a7a0f"
+    sha256 cellar: :any,                 arm64_sequoia: "c7d29dd8afb14227875759650c7ec1166462b452d9aa3f9749a354c050267d71"
+    sha256 cellar: :any,                 arm64_sonoma:  "b426f76e5b9664a781f6e80fa2fbfbb2178226343f10a635b1f78381759d1069"
+    sha256 cellar: :any,                 sonoma:        "922beeb4abc104f5e5b653ff83fca1412006b1debbab210a3013454f1e70fcbc"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "dba0bb785442b49492e69176003117025384dbea6e71e782c0138fdcde6abcfe"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "e4871e6bb7ec1b56935a8f99accef274a29bc2f90c9b2e7f54d06de9f1197073"
   end
 
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "librtlsdr"
   depends_on "libusb"
   depends_on "openssl@3"
@@ -37,7 +35,7 @@ class Rtl433 < Formula
 
     resource "homebrew-expected_json" do
       url "https://raw.githubusercontent.com/merbanan/rtl_433_tests/master/tests/oregon_scientific/uvr128/g001_433.92M_250k.json"
-      sha256 "5054c0f322030dd1ee3ca78261b64e691da832900a2c6e4d13cc22f0fbbfbbfa"
+      sha256 "08637818a2a268da4862bdb98c62a3afc9a4a0d751230451abbeacd47f58860c"
     end
 
     testpath.install resource("homebrew-test_cu8")

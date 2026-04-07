@@ -8,18 +8,17 @@ class SaltLint < Formula
   license "MIT"
 
   bottle do
-    rebuild 3
-    sha256 cellar: :any,                 arm64_sonoma:   "9afbe8489e6dfeb203516d6d2718bc2e85345a827e7398ee4b20bf3e496398d7"
-    sha256 cellar: :any,                 arm64_ventura:  "911415031fbc3be4a8af2ca1fe496318852a27ee1c79f0c9e7b3a29c2a7e8e92"
-    sha256 cellar: :any,                 arm64_monterey: "4493b79c24997b405f581ebf42d563688562fd3036f8689f8c5206f5f77d9a36"
-    sha256 cellar: :any,                 sonoma:         "cf61c07c497d94ffe41ffe80b0f71bdee68b74e35ba48594c1824123c16aa6ea"
-    sha256 cellar: :any,                 ventura:        "89e6e875355e67313d9c90791d8878045c364a04b8814ae8a4e2dae43d89b515"
-    sha256 cellar: :any,                 monterey:       "565749cea976e90f01e04b9638fca31205bcd8e466e29f4bd9a74829a52fbd4c"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "b56ab6bc3208c4ae59dce7fdf26b7c6b876d94516359752a4122960a14b3096b"
+    rebuild 5
+    sha256 cellar: :any,                 arm64_tahoe:   "b606364c1a88093ebede5792fbd635b2341e88be4445bcdd3df4e5a86311bf72"
+    sha256 cellar: :any,                 arm64_sequoia: "66e97e657e2f63d010ae22eca72be97f2852ff05c766875d979bed46d6c3a97a"
+    sha256 cellar: :any,                 arm64_sonoma:  "8a714043bf26e236545a4c7b14a80618eb192757176b632678e8c3077040798f"
+    sha256 cellar: :any,                 sonoma:        "c9f93105dae3ecb41c3536a5e462027915159283114ee79ce154e52eb6e491bd"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "cce0ed5262eb581bff74a9aadd2c4bb5f83f172d4c1a68d2c9685893aca0785e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "3406be26bba9f19eeda9236f526a0eba97654495365e78dc2226ce5910f8bcb3"
   end
 
   depends_on "libyaml"
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   resource "pathspec" do
     url "https://files.pythonhosted.org/packages/ca/bc/f35b8446f4531a7cb215605d100cd88b7ac6f44ab3fc94870c120ab3adbf/pathspec-0.12.1.tar.gz"
@@ -27,8 +26,8 @@ class SaltLint < Formula
   end
 
   resource "pyyaml" do
-    url "https://files.pythonhosted.org/packages/cd/e5/af35f7ea75cf72f2cd079c95ee16797de7cd71f29ea7c68ae5ce7be1eda0/PyYAML-6.0.1.tar.gz"
-    sha256 "bfdf460b1736c775f2ba9f6a92bca30bc2095067b8a9d77876d1fad6cc3b4a43"
+    url "https://files.pythonhosted.org/packages/05/8e/961c0007c59b8dd7729d542c61a4d537767a59645b82a0b521206e1e25c2/pyyaml-6.0.3.tar.gz"
+    sha256 "d76623373421df22fb4cf8817020cbb7ef15c725b9d5e45f17e189bfc384190f"
   end
 
   def install
@@ -36,11 +35,11 @@ class SaltLint < Formula
   end
 
   test do
-    (testpath/"test.sls").write <<~EOS
+    (testpath/"test.sls").write <<~YAML
       /tmp/testfile:
         file.managed:
             - source: salt://{{unspaced_var}}/example
-    EOS
+    YAML
     out = shell_output("#{bin}/salt-lint #{testpath}/test.sls", 2)
     assert_match "[206] Jinja variables should have spaces before and after: '{{ var_name }}'", out
   end

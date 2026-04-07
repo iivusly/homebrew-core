@@ -1,8 +1,8 @@
 class Exult < Formula
   desc "Recreation of Ultima 7"
   homepage "https://exult.sourceforge.io/"
-  url "https://github.com/exult/exult/archive/refs/tags/v1.8.tar.gz"
-  sha256 "dae6b7b08925d3db1dda3aca612bdc08d934ca04de817a008f305320e667faf9"
+  url "https://github.com/exult/exult/archive/refs/tags/v1.12.1.tar.gz"
+  sha256 "5e5113e31dd8010b8dfd00b6b08f76681dc1e88254d357c92f15c202f7ed7e1f"
   license "GPL-2.0-or-later"
   head "https://github.com/exult/exult.git", branch: "master"
 
@@ -12,33 +12,33 @@ class Exult < Formula
   end
 
   bottle do
-    sha256                               arm64_sonoma:   "f2cc3026130dc563675724c1ccff8a16005d53ea2c1de7d59e3d164c1fa3958e"
-    sha256                               arm64_ventura:  "0a7fc1d5718a8254b8adf9b7783ac85baa404d8bec3e7b490b2d7a46bb153802"
-    sha256                               arm64_monterey: "28380485157dd2a521e9c72ff3baa1f1e392694f636697478606c89eb7f0e179"
-    sha256                               arm64_big_sur:  "1ac2db0c3d8b26091435336777f22f72594b0474bdd4d13092886f4630a87479"
-    sha256                               sonoma:         "0a539d1b0bba11927ecd5963e096ba9c464ef09d7ea72a8173ee5b8e36941a88"
-    sha256                               ventura:        "b08b50df709734a618a49622be3e968aff067ef1be742190c355204b30c4a98a"
-    sha256                               monterey:       "5202bc6cd443aadfb76b48c6734f03b15c0b20d3cc13eeb7ff90e0233997ce73"
-    sha256                               big_sur:        "21159eb863130508a83690868d84c499789c12d4e84594a6156846074e97ef0d"
-    sha256                               catalina:       "fc44b27ff30145ab9647dd2336513a376fee5e2884c354697a98925b324788c8"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "8576be4d556f2f557252d541fd91efc5ca46e7d526cf014ba1a5a87d0a5a239b"
+    rebuild 1
+    sha256                               arm64_tahoe:   "a0dbfdb8bd78a5d0aad9492f99ce27f606410f32fb26d5d88b984b1f70d3d2a3"
+    sha256                               arm64_sequoia: "0eeb4d2fa5348ffff683b054760640c65aab531ac602fd842fa2ccfe642405d8"
+    sha256                               arm64_sonoma:  "52f8b804c1b411144b80b0f75c9b423cb82e929689fcf066b1c250f9078360ef"
+    sha256                               sonoma:        "8072faddf279e29551ca3c3c70991a257f6987e03debc6d4d214d4b0bd87ef9c"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "3fb86582c8e206293be0d6cca39b27a1d248912b5e50537a3f69c8368e60e209"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "11fa142c33631b28b7d65fa2adc30b3e795cf98a845ff7a2475acc4d0f3ee1e1"
   end
 
   depends_on "autoconf" => :build
+  depends_on "autoconf-archive" => :build
   depends_on "automake" => :build
   depends_on "libtool" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
 
   depends_on "libogg"
   depends_on "libvorbis"
   depends_on "sdl2"
 
-  uses_from_macos "zlib"
+  on_linux do
+    depends_on "alsa-lib"
+    depends_on "zlib-ng-compat"
+  end
 
   def install
-    system "./autogen.sh"
-
-    system "./configure", *std_configure_args.reject { |s| s["--disable-debug"] }
+    system "autoreconf", "--force", "--install", "--verbose"
+    system "./configure", *std_configure_args
     system "make", "EXULT_DATADIR=#{pkgshare}/data"
 
     if OS.mac?

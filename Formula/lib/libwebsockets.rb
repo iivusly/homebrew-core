@@ -1,9 +1,10 @@
 class Libwebsockets < Formula
   desc "C websockets server library"
   homepage "https://github.com/warmcat/libwebsockets"
-  url "https://github.com/warmcat/libwebsockets/archive/refs/tags/v4.3.3.tar.gz"
-  sha256 "6fd33527b410a37ebc91bb64ca51bdabab12b076bc99d153d7c5dd405e4bdf90"
+  url "https://github.com/warmcat/libwebsockets/archive/refs/tags/v4.5.8.tar.gz"
+  sha256 "b6ade658f4af3a823d0dc806ae5ef0623f0f4f5e2aeb895a0f77c4783840c30e"
   license "MIT"
+  compatibility_version 5
   head "https://github.com/warmcat/libwebsockets.git", branch: "main"
 
   livecheck do
@@ -12,21 +13,18 @@ class Libwebsockets < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "72f689227f1633f1b5e71cf03c85375ec946fd88de6f11a5f9801e7b141a869e"
-    sha256 arm64_ventura:  "577e551d2c2546b15a06ea63da365f64f9498d8087556b92bd2bf6571e198a8e"
-    sha256 arm64_monterey: "da25e134a7c8bf8d9c9c87f4cc6c264fc1f387bd7f8518735c07d337c6890fae"
-    sha256 sonoma:         "cef5f2e6af340223c19a5e59ee1469a8f5ffb677a7dce8201b23b554ff08bf1d"
-    sha256 ventura:        "ad87e6e2c204feb0b8cd809660c0febaca9d7fc69e14dc095fe587960af13b9d"
-    sha256 monterey:       "684e36d44f18efccb524ad8202740e465ece1a24e5d654954434c1caa0ccdb58"
-    sha256 x86_64_linux:   "e8cbe679ed2c4a909afd481b3de3c779669b91fe4f57ee0cdd6c9614a9b02e58"
+    sha256 arm64_tahoe:   "4746b71efdac824a21e1e872ba70250419d744536a74883481b1544b0506fd10"
+    sha256 arm64_sequoia: "acd80d40a6ab1175e1f6ab0b926c173d384cc069fbfa7e9e7ff7db1e41b41903"
+    sha256 arm64_sonoma:  "fed6b0f38cbdd21756c7e2be4fe4762f7896bc83e8254ef64aba9677a2d20b3b"
+    sha256 sonoma:        "122bd2962f1ac24e297e1bbd6309c6097366299c22413cd0f59be36f8c778705"
+    sha256 arm64_linux:   "722d9af7020d79568d3c2d45bf64d1d486868b8481e001698c0d372af85d3d8c"
+    sha256 x86_64_linux:  "9a6c6ca0b44531638b3b2c44c6002cbcf018a3a7a2d878891e9b83b3ab0ac03a"
   end
 
   depends_on "cmake" => :build
   depends_on "libevent"
   depends_on "libuv"
   depends_on "openssl@3"
-
-  uses_from_macos "zlib"
 
   def install
     system "cmake", "-S", ".", "-B", "build",
@@ -43,7 +41,7 @@ class Libwebsockets < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <openssl/ssl.h>
       #include <libwebsockets.h>
 
@@ -56,7 +54,7 @@ class Libwebsockets < Formula
         lws_context_destroy(context);
         return 0;
       }
-    EOS
+    C
     system ENV.cc, "test.c", "-I#{Formula["openssl@3"].opt_prefix}/include",
                    "-L#{lib}", "-lwebsockets", "-o", "test"
     system "./test"

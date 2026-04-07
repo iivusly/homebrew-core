@@ -1,39 +1,32 @@
 class Grype < Formula
   desc "Vulnerability scanner for container images and filesystems"
   homepage "https://github.com/anchore/grype"
-  url "https://github.com/anchore/grype/archive/refs/tags/v0.80.0.tar.gz"
-  sha256 "554b7e5fbc8c79e88475a77c47d1f4466d51880d922423cbffac132dd029fadd"
+  url "https://github.com/anchore/grype/archive/refs/tags/v0.110.0.tar.gz"
+  sha256 "3b0ddd75f0a7553e4f136a1eae585f542c5f769938c3b8d6a10908ef4b83b2b1"
   license "Apache-2.0"
   head "https://github.com/anchore/grype.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "88e4cbf2ea8d8d4bf56342b80e0c242cd94d83869c9cb77248fb5a19d0d44911"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "10ce1742a20669c6129a6935028f12c6b9c140c9bcdefc0bc543b604fde4301c"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "b571464d06221679db30d5a5744fdee3216beb0d08dcdecc122a18e1e35d2682"
-    sha256 cellar: :any_skip_relocation, sonoma:         "14015dd6ed19c4982bc74b23868c8a3b9db6c4ff80d9f68df4503a1e55fa292f"
-    sha256 cellar: :any_skip_relocation, ventura:        "a4d2a8c25cee34f425cc9a354f94350d23a092749181a1cfe8ee83356272aa5f"
-    sha256 cellar: :any_skip_relocation, monterey:       "284b09d77a5b8215fcd83d66338709817379edb96fc9b71eb247652005f55787"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "f5fcc24dc23846d6297a57e4ae1c4ea7e74f3308adb1501d833fd15ffc34d502"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "dd337f713fd8fe7a0237559b1919d703bf2c74341c5feaded6484c3e05b070f7"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "5abd7057c8227f6388b21013a1bbdc810fad46aa0f554f3d5aef2f4c4dfc9b44"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "162fba7c78b3d0145e4546fd801f337417bb60874d9b2e167182544e73b432c6"
+    sha256 cellar: :any_skip_relocation, sonoma:        "b732df4f7c1e2367592111ef1a2a0c960438332d3fef0d97ca5cfed0b15ff177"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "2cdfbf362201d476d7772a7887a2cb5c1dbed6ba3add733180c8600fca1c7c0a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "db346e4891b6a6eca79226c4adbdcadf140bc3120ed35e1f89b8cd2beb1d1c04"
   end
 
   depends_on "go" => :build
 
   def install
-    ldflags = %W[
-      -s -w
-      -X main.version=#{version}
-      -X main.gitCommit=brew
-      -X main.buildDate=#{time.iso8601}
-    ]
-
+    ldflags = "-s -w -X main.version=#{version} -X main.gitCommit=#{tap.user} -X main.buildDate=#{time.iso8601}"
     system "go", "build", *std_go_args(ldflags:), "./cmd/grype"
 
     generate_completions_from_executable(bin/"grype", "completion")
   end
 
   test do
-    assert_match "database metadata not found", shell_output("#{bin}/grype db status 2>&1", 1)
-    assert_match "Update available", shell_output("#{bin}/grype db check", 100)
+    assert_match "database does not exist", shell_output("#{bin}/grype db status 2>&1", 1)
+    assert_match "update to the latest db", shell_output("#{bin}/grype db check", 100)
     assert_match version.to_s, shell_output("#{bin}/grype version 2>&1")
   end
 end

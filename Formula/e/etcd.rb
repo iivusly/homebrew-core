@@ -2,19 +2,18 @@ class Etcd < Formula
   desc "Key value store for shared configuration and service discovery"
   homepage "https://github.com/etcd-io/etcd"
   url "https://github.com/etcd-io/etcd.git",
-      tag:      "v3.5.15",
-      revision: "9a5533382d84999e4e79642e1ec0f8bfa9b70ba8"
+      tag:      "v3.6.10",
+      revision: "db8d13a5421fcbd1c5825a148735b80c7d36cd2d"
   license "Apache-2.0"
   head "https://github.com/etcd-io/etcd.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "3b3f49d4bbb15b69232634a1a709f1bfcf970ebe8c410991eab8354956410554"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "3b3f49d4bbb15b69232634a1a709f1bfcf970ebe8c410991eab8354956410554"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "3b3f49d4bbb15b69232634a1a709f1bfcf970ebe8c410991eab8354956410554"
-    sha256 cellar: :any_skip_relocation, sonoma:         "9f56a47ec9ffefdbef662b1ce0a133aaa2ca785bb836a8182c866ddb237f8cc0"
-    sha256 cellar: :any_skip_relocation, ventura:        "9f56a47ec9ffefdbef662b1ce0a133aaa2ca785bb836a8182c866ddb237f8cc0"
-    sha256 cellar: :any_skip_relocation, monterey:       "9f56a47ec9ffefdbef662b1ce0a133aaa2ca785bb836a8182c866ddb237f8cc0"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "dcb246c6e89a91ae277284a27cae9de5dbdf78cc3638d32a48b62753647f9af6"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "2ec9cdf3d70bb68e9084320db09eb550d0dcdd6adab47a0527edcaedd9e76db2"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "2ec9cdf3d70bb68e9084320db09eb550d0dcdd6adab47a0527edcaedd9e76db2"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "2ec9cdf3d70bb68e9084320db09eb550d0dcdd6adab47a0527edcaedd9e76db2"
+    sha256 cellar: :any_skip_relocation, sonoma:        "f3d303cf4fb174e64df85f10be8d0aabaeeeffdc661fc8d953852b0331c88679"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "1a6a9d354808674b1b9cedf0bd2a216dfedad767a90bd834726245a87a56b1ce"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "fcb7a1266715ef25837f9a597de292993f6cbafd947a94dca515e0f6c6f485f4"
   end
 
   depends_on "go" => :build
@@ -34,33 +33,29 @@ class Etcd < Formula
 
   test do
     test_string = "Hello from brew test!"
-    etcd_pid = fork do
-      if OS.mac? && Hardware::CPU.arm?
-        # etcd isn't officially supported on arm64
-        # https://github.com/etcd-io/etcd/issues/10318
-        # https://github.com/etcd-io/etcd/issues/10677
-        ENV["ETCD_UNSUPPORTED_ARCH"]="arm64"
-      end
-
-      exec bin/"etcd",
-        "--enable-v2", # enable etcd v2 client support
-        "--force-new-cluster",
-        "--logger=zap", # default logger (`capnslog`) to be deprecated in v3.5
-        "--data-dir=#{testpath}"
-    end
-    # sleep to let etcd get its wits about it
+    etcd_pid = spawn bin/"etcd", "--force-new-cluster", "--logger=zap", "--data-dir=#{testpath}"
     sleep 10
 
-    etcd_uri = "http://127.0.0.1:2379/v2/keys/brew_test"
-    system "curl", "--silent", "-L", etcd_uri, "-XPUT", "-d", "value=#{test_string}"
-    curl_output = shell_output("curl --silent -L #{etcd_uri}")
+    key_base64 = Base64.strict_encode64("brew_test")
+    value_base64 = Base64.strict_encode64(test_string)
+
+    # PUT the key using the v3 API
+    put_payload = { key: key_base64, value: value_base64 }.to_json
+    system "curl", "-L", "http://127.0.0.1:2379/v3/kv/put", "-X", "POST", "-d", put_payload
+
+    # GET the key back
+    get_payload = { key: key_base64 }.to_json
+    curl_output = shell_output("curl -L http://127.0.0.1:2379/v3/kv/range -X POST -d '#{get_payload}'")
     response_hash = JSON.parse(curl_output)
-    assert_match(test_string, response_hash.fetch("node").fetch("value"))
+
+    retrieved_value_base64 = response_hash.dig("kvs", 0, "value")
+    retrieved_value = Base64.decode64(retrieved_value_base64)
+
+    assert_equal test_string, retrieved_value
 
     assert_equal "OK\n", shell_output("#{bin}/etcdctl put foo bar")
     assert_equal "foo\nbar\n", shell_output("#{bin}/etcdctl get foo 2>&1")
   ensure
-    # clean up the etcd process before we leave
     Process.kill("HUP", etcd_pid)
   end
 end

@@ -1,37 +1,28 @@
 class P11Kit < Formula
   desc "Library to load and enumerate PKCS#11 modules"
-  homepage "https://p11-glue.freedesktop.org"
-  url "https://github.com/p11-glue/p11-kit/releases/download/0.25.5/p11-kit-0.25.5.tar.xz"
-  sha256 "04d0a86450cdb1be018f26af6699857171a188ac6d5b8c90786a60854e1198e5"
+  homepage "https://p11-glue.github.io/p11-glue/p11-kit.html"
+  url "https://github.com/p11-glue/p11-kit/releases/download/0.26.2/p11-kit-0.26.2.tar.xz"
+  sha256 "09fd9f44da4813a3141e73d5e7cf7008e5660d0405f13d56c15e1da9dcecf828"
   license "BSD-3-Clause"
+  compatibility_version 1
+  head "https://github.com/p11-glue/p11-kit.git", branch: "master"
 
   bottle do
-    rebuild 1
-    sha256 arm64_sonoma:   "844c2f2f63155c6da1a6af44030866700c57981c974f71f4159a6d794e05fcfc"
-    sha256 arm64_ventura:  "97ccac96157529edec341b35d57e6ca9579fb25f42d62bb573a1013572101eed"
-    sha256 arm64_monterey: "aab401574960e088578df801ab10d600bfe6277f6d174bfc1bf90ea8348529e8"
-    sha256 sonoma:         "38423db237bdda5e2485a28e5f30c106f324c440d64a4e10bffb5fc997d91aa6"
-    sha256 ventura:        "ab67e4c145d61683447ef09ec9315bd22cc95efa699bbac9e2fc476104a579c0"
-    sha256 monterey:       "25fc56254568c72ad22c39c2768ca249992df53a9da2cbeee55ac221f67e1ae3"
-    sha256 x86_64_linux:   "65efc1a95ab97b86e0eb36f2e8782d3f6140d795f3bc33cb6e20267d5fee45f0"
-  end
-
-  head do
-    url "https://github.com/p11-glue/p11-kit.git", branch: "master"
-
-    depends_on "autoconf" => :build
-    depends_on "automake" => :build
-    depends_on "gettext" => :build
-    depends_on "libtool" => :build
+    sha256 arm64_tahoe:   "c814d01363bc8e35892432f19074e507d16b1bce3f88635478969050250079ba"
+    sha256 arm64_sequoia: "62a02e67a42d05aceb5653bd5d4be971172484fa9def96f066963a6fb4ca3f11"
+    sha256 arm64_sonoma:  "bee65fbab57c03c46620379593e7bc4865cce0bf2db794cf22bdfcc1eb564979"
+    sha256 sonoma:        "e1e808da48ab0eb63ff145b55a3407d0265501e09b4e627f8ba02ecc654c3663"
+    sha256 arm64_linux:   "1924836b8e56a59363d2e294f1c2ee40b62e1b4ffd6600e7c0de78d11b90fbbb"
+    sha256 x86_64_linux:  "52d46084406325d13f58712ee3afbec2f78eb7cab0b57acda36597b607800d85"
   end
 
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "ca-certificates"
   depends_on "libtasn1"
 
-  uses_from_macos "libffi", since: :catalina
+  uses_from_macos "libffi"
 
   def install
     # https://bugs.freedesktop.org/show_bug.cgi?id=91602#c1
@@ -40,14 +31,14 @@ class P11Kit < Formula
     args = %W[
       -Dsystem_config=#{etc}
       -Dmodule_config=#{etc}/pkcs11/modules
-      -Dtrust_paths=#{etc}/ca-certificates/cert.pem"
+      -Dtrust_paths=#{etc}/ca-certificates/cert.pem
       -Dsystemd=disabled
     ]
 
     system "meson", "setup", "_build", *args, *std_meson_args
     system "meson", "compile", "-C", "_build", "--verbose"
     # This formula is used with crypto libraries, so let's run the test suite.
-    system "meson", "test", "-C", "_build"
+    system "meson", "test", "-C", "_build", "--timeout-multiplier=2"
     system "meson", "install", "-C", "_build"
 
     # HACK: Work around p11-kit: couldn't load module: .../lib/pkcs11/p11-kit-trust.so

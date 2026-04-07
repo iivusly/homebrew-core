@@ -1,25 +1,23 @@
 class LxiTools < Formula
   desc "Open source tools for managing network attached LXI compatible instruments"
   homepage "https://github.com/lxi-tools/lxi-tools"
-  url "https://github.com/lxi-tools/lxi-tools/archive/refs/tags/v2.7.tar.gz"
-  sha256 "6196980e82be2d143aa7f52e8e4612866b570cfce225d7d61698d2eeb1bf8a00"
+  url "https://github.com/lxi-tools/lxi-tools/archive/refs/tags/v2.8.tar.gz"
+  sha256 "ef9d013189c9449f850d467dd35ac3840929e76a888cdb77e0edbce067da0b2d"
   license "BSD-3-Clause"
+  revision 1
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "75be3338f9fca193241c6abee6c540f5e1139deab210b0f9b383c9d8984c2186"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "1ca1f9223772ee912d686f6652c7b699324850fb4dccc03d5a77be23c66afcf3"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "b6090dd52015d0d7d17a705742793a8986b9339d5e2c9aed7595f0a9b142b992"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "f1531d09c7f93a01b13b413a708f076c05c08c828c6e42092cd8e670c8aca36c"
-    sha256 cellar: :any,                 sonoma:         "706944ebfca46a511b43ba0336cc1727ca21d61c90b06954d8c41655d2cd62a9"
-    sha256 cellar: :any_skip_relocation, ventura:        "69b704762e5a07d767978da9109a8980bcf86374c4d537b5eb034f7dbdd31413"
-    sha256 cellar: :any_skip_relocation, monterey:       "acd842a43b3b4c9e2476728f8e40884b701d31c6a85452559cb61a89adfbc0ce"
-    sha256 cellar: :any_skip_relocation, big_sur:        "b9bcbc6c149c2ca24dbcb1cae8f07b0ccba087cd1d6fe4c2ebe1b479b17fe842"
-    sha256                               x86_64_linux:   "4dd930cc0b1e29dbdbe11595e0112fd420729776cf0dedcdb76bc73d092a1df6"
+    sha256 cellar: :any, arm64_tahoe:   "fb9a2f4a9856de51cd7b6f14d9a81ceb995fcc8405f83349701068a428c653f0"
+    sha256 cellar: :any, arm64_sequoia: "3975c597f3477521ec7110dade8261a4c3ea66920e6054c3ffcd3dcb2ccbed3d"
+    sha256 cellar: :any, arm64_sonoma:  "d0415c9dcb1dddd63a53e6ec24d16b3a95d324aa8d6f319db75c7eb2871ef953"
+    sha256 cellar: :any, sonoma:        "00cef47683c1a2b249a1ee5fea163275d0c8f883f23434d6e8d23e3b35d457a8"
+    sha256               arm64_linux:   "5d9c0399c7871eab15d70272c56a636e8fbbf4c755107b7411957dc1c44e83be"
+    sha256               x86_64_linux:  "878f35d6506d8e5b11f207a6cfb2bbcc4a0e9c013a27b11a9f9990888d38b523"
   end
 
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
 
   depends_on "cairo"
   depends_on "desktop-file-utils"
@@ -36,22 +34,19 @@ class LxiTools < Formula
 
   on_macos do
     depends_on "gettext"
-    depends_on "graphene"
-    depends_on "harfbuzz"
-    depends_on "pango"
   end
 
   def install
+    ENV["DESTDIR"] = "/"
     system "meson", "setup", "build", *std_meson_args
     system "meson", "compile", "-C", "build", "--verbose"
     system "meson", "install", "-C", "build"
-
-    rm("#{share}/glib-2.0/schemas/gschemas.compiled")
   end
 
   def post_install
-    system "#{Formula["glib"].opt_bin}/glib-compile-schemas", "#{HOMEBREW_PREFIX}/share/glib-2.0/schemas"
-    system "#{Formula["gtk4"].opt_bin}/gtk4-update-icon-cache", "-f", "-t", "#{HOMEBREW_PREFIX}/share/icons/hicolor"
+    system Formula["glib"].opt_bin/"glib-compile-schemas", HOMEBREW_PREFIX/"share/glib-2.0/schemas"
+    system Formula["gtk4"].opt_bin/"gtk4-update-icon-cache", "-f", "-t", HOMEBREW_PREFIX/"share/icons/hicolor"
+    system Formula["desktop-file-utils"].opt_bin/"update-desktop-database", HOMEBREW_PREFIX/"share/applications"
   end
 
   test do

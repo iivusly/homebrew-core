@@ -1,19 +1,18 @@
 class Taskopen < Formula
   desc "Tool for taking notes and open urls with taskwarrior"
   homepage "https://github.com/jschlatow/taskopen"
-  url "https://github.com/jschlatow/taskopen/archive/refs/tags/v2.0.1.tar.gz"
-  sha256 "d6749ff4933393d2b4f7e9e222c19ba3cea546e4e74bdc96c7e4a31a76fd7861"
+  url "https://github.com/jschlatow/taskopen/archive/refs/tags/v2.0.3.tar.gz"
+  sha256 "fe16f839279e8baff96dcead55feb03997aebdaa3cee7a421dadc8e7cb8c1581"
   license "GPL-2.0-only"
   head "https://github.com/jschlatow/taskopen.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "04d6f502161c71985dff812e6982066a9e7c01598db1e2c5369289ef583b4d79"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "000cc5761a934d64c4898c38f12af4268d6b9e4ae4378a18f32e149d99d7b7dc"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "8c09373978bc107c459f01089e5b077ba52f1d0e8ea536358d66936e2bc335b4"
-    sha256 cellar: :any_skip_relocation, sonoma:         "d5b2b331014ff8389a4de1583532276ee67c8d7d9cba3d2c893afc71c0e50db3"
-    sha256 cellar: :any_skip_relocation, ventura:        "ec7a107ad125ab7bffe3741676c3830aa298fba8af48be31c709044068380e95"
-    sha256 cellar: :any_skip_relocation, monterey:       "7342cd21d4b7db947d0edfd896f3bacd9d1843dc9658682937034b16ad5f9dec"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "2f441e77e29f47176276825a3b92a2832a3628311f73cd8c237eaf3a03cae3af"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "88c6ca32bc458061057c90fa56237a7e0d0c7e7325a9b8f18e8750b6bb822b5f"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "f5ad079b35dabb3834b719543b3f3ec64373cd538bf9920a8c801543f43c408a"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "19ab00cba3ecabd049d3852c0dfed545462ccab1bce5072591eb4d27c5758071"
+    sha256 cellar: :any_skip_relocation, sonoma:        "7a0350d52c91cd2aa71a76feeb6197551d65a6eb3e9e2cd9150691742e0c6549"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "822855f8d7f1453c212863347f73a256b63f7939a9f32a03f6ff216816557d9a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "c58603d593ac29b6893b614cdde533fac5c6c3271383303698081e11e9fdc364"
   end
 
   depends_on "nim" => :build

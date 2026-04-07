@@ -1,12 +1,18 @@
 class Libabigail < Formula
   desc "ABI Generic Analysis and Instrumentation Library"
   homepage "https://sourceware.org/libabigail/"
-  url "https://mirrors.kernel.org/sourceware/libabigail/libabigail-2.5.tar.xz"
-  sha256 "7cfc4e9b00ae38d87fb0c63beabb32b9cbf9ce410e52ceeb5ad5b3c5beb111f3"
+  url "https://mirrors.kernel.org/sourceware/libabigail/libabigail-2.9.tar.xz"
+  sha256 "b4b86baa3105a28ada25091f1ef0535e7a60616d3d5d4cb1ee2aceaba341d738"
   license "Apache-2.0" => { with: "LLVM-exception" }
 
+  livecheck do
+    url "https://mirrors.kernel.org/sourceware/libabigail/"
+    regex(/href=.*?libabigail[._-]v?(\d+(?:\.\d+)+)\.t/i)
+  end
+
   bottle do
-    sha256 x86_64_linux: "290aa7b00f998aee8c38adee01016462fd4f13151915ec15078bc0b4eaf94e3b"
+    sha256 arm64_linux:  "f16a811a8930cd335c913c9c7757b68d12b5e21d246eac6f0bc5e8991b9c2a63"
+    sha256 x86_64_linux: "7dcc8580840ca683c97b467b61d78ef524c31bbb85029a0e3ffc65c2ec525d72"
   end
 
   head do
@@ -17,14 +23,16 @@ class Libabigail < Formula
     depends_on "libtool" => :build
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "elfutils"
   depends_on "libxml2"
   depends_on :linux
+  depends_on "xxhash"
+  depends_on "xz"
 
   def install
     system "autoreconf", "--force", "--install", "--verbose" if build.head?
-    system "./configure", *std_configure_args, "--disable-silent-rules"
+    system "./configure", "--disable-silent-rules", *std_configure_args
     system "make", "install"
   end
 

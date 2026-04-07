@@ -6,21 +6,25 @@ class Elm < Formula
   license "BSD-3-Clause"
 
   bottle do
-    rebuild 3
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "931f251316bf041c3f380e6f5701ddb6445fd0c2f4ef395fee1fab041d8e7f30"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "ff99c87ecd2cb25c5a86b1988ecdc8326c8257f02a93024c42a91ca3107eef43"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "85f72af4af1b44ea8bcd28947583173c7e857cbaa9f9bca31dd2544d8915bf54"
-    sha256 cellar: :any_skip_relocation, sonoma:         "114104b3a08b3d609c9fdbe01f0216c2b5e689ac0f36ba7ec9855e01e6e5412c"
-    sha256 cellar: :any_skip_relocation, ventura:        "57f7be542255990ab3f4f95c014ee98bd5943dd1c4af92cee1d1f994e55c513c"
-    sha256 cellar: :any_skip_relocation, monterey:       "bbf5b72f0ce8a8a15eec445e56702d983a955da17b05828f69c5634bfcc5ee5a"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "cbb29db68081d05284e41a32a2deb06c4696a3a6db0adea067754c44057d7af9"
+    rebuild 4
+    sha256 cellar: :any,                 arm64_tahoe:   "ec3ce79abe4bb3959d399450deb363f9b5923d9095f4004c242fc9cc82360fbc"
+    sha256 cellar: :any,                 arm64_sequoia: "f58530d4c64929c2966bab949d9ffdbebf8dfebf5e3226146715412f43490a4e"
+    sha256 cellar: :any,                 arm64_sonoma:  "a1e07dfaa0dd66ac5336102fd1dba224508993c8e84a7cb9699bc77a1106060b"
+    sha256 cellar: :any,                 sonoma:        "6c99fb8f3afbeaf136cda6f45534add032113307ec48aa15ca918b192b46eba4"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "cc5513922a45366dc5f46202bed2e6870cc319a9b666f49b31485b08efdfb26c"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "5aedc01216943882eec74e6a2e303e1ecae098cd7270deebe10b4748eecea59b"
   end
 
   depends_on "cabal-install" => :build
   depends_on "ghc" => :build
+  depends_on "gmp"
 
+  uses_from_macos "libffi"
   uses_from_macos "ncurses"
-  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   patch do
     # elm's tarball is not a proper cabal tarball, it contains multiple cabal files.
@@ -37,10 +41,15 @@ class Elm < Formula
   end
 
   def install
-    # Work around build failure due to incompatibility with newer `tls` package
-    # Ref: https://github.com/elm/compiler/pull/2325
-    args = ["--constraint=tls<2"]
-    odie "Check if `tls` constraint can be removed!" if version > "0.19.1"
+    # Workaround to build with GHC 9.14. Related issues:
+    # https://github.com/well-typed/cborg/issues/373
+    # https://github.com/haskellari/these/issues/211
+    args = %w[
+      --allow-newer=cborg:base,cborg:containers,serialise:base,serialise:containers
+      --allow-newer=these:base
+      --allow-newer=snap-server:containers
+      --constraint=tls>=2
+    ]
 
     system "cabal", "v2-update"
     system "cabal", "v2-install", *args, *std_cabal_v2_args
@@ -49,7 +58,7 @@ class Elm < Formula
   test do
     # create elm.json
     elm_json_path = testpath/"elm.json"
-    elm_json_path.write <<~EOS
+    elm_json_path.write <<~JSON
       {
         "type": "application",
         "source-directories": [
@@ -74,17 +83,17 @@ class Elm < Formula
             "indirect": {}
         }
       }
-    EOS
+    JSON
 
     src_path = testpath/"Hello.elm"
-    src_path.write <<~EOS
+    src_path.write <<~ELM
       module Hello exposing (main)
       import Html exposing (text)
       main = text "Hello, world!"
-    EOS
+    ELM
 
     out_path = testpath/"index.html"
     system bin/"elm", "make", src_path, "--output=#{out_path}"
-    assert_predicate out_path, :exist?
+    assert_path_exists out_path
   end
 end

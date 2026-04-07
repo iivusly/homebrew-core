@@ -1,18 +1,17 @@
 class Primecount < Formula
   desc "Fast prime counting function program and C/C++ library"
   homepage "https://github.com/kimwalisch/primecount"
-  url "https://github.com/kimwalisch/primecount/archive/refs/tags/v7.14.tar.gz"
-  sha256 "d867ac18cc52c0f7014682169988a76f39e4cd56f8ce78fb56e064499b1d66bb"
+  url "https://github.com/kimwalisch/primecount/archive/refs/tags/v8.4.tar.gz"
+  sha256 "c7bf47c041bfe4c3912a0d503ea44c1bb6c9003427c12574a6b497748b387612"
   license "BSD-2-Clause"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "9a6b060bf62b2c9efc9f733d24ed0cb1b31602450762d3388a62688fe1258a9b"
-    sha256 cellar: :any,                 arm64_ventura:  "1adc1d48af39ae242318f4e48b0888cfa8266b4643116f21b9330eeec76ed41d"
-    sha256 cellar: :any,                 arm64_monterey: "2290f29ada9966da1336ac63417339a24fc2ac42352dfe4e2284f5a551c28976"
-    sha256 cellar: :any,                 sonoma:         "92f587e93b15db1517b646be60900037ff091882d8021c2a84543fb35100265d"
-    sha256 cellar: :any,                 ventura:        "d4fb3e4d646e1a9127a3fef855e67f7aa5199a99d4f533858e0f9374a10a5e69"
-    sha256 cellar: :any,                 monterey:       "b54ec74fc1b3ab3b07ae89bb871c58a9ab409038ee921f9b2a8b8b430e96f56b"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "661f88d5c8155914a68aad5e50cc1b2e2f1db79adc3c708e1c10f10a25bd4726"
+    sha256 cellar: :any,                 arm64_tahoe:   "b2f6ac92bcaa736b8414858a9ebc856c3418a69e3c90434fe6c309a521890407"
+    sha256 cellar: :any,                 arm64_sequoia: "0dff8ce3b61cc644e23204b554e025f63cce8ae1550bd2cb1c05febc9a2b75c7"
+    sha256 cellar: :any,                 arm64_sonoma:  "41b2daae672ef831730f1cdd80ea7cb66a160592337f981bbaa600bfd7a4b821"
+    sha256 cellar: :any,                 sonoma:        "aaa36894f1d178c90903e920a77b199479cb90ef6b54baf42b7fa4b240dd2b31"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "0a6bd0e22856270c66e3c6ba47dcfab3accd5fd1ff7aedd0c2f65fbe7588df2a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "181deedaece6b18c7c70ab7c733a8f03a831d145f68c51e720fcf201efdc0e82"
   end
 
   depends_on "cmake" => :build

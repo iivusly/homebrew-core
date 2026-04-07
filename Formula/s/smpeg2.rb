@@ -18,6 +18,8 @@ class Smpeg2 < Formula
 
   bottle do
     rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:    "f577393854025f6e32304032a00a3f29a27af3e71a52502025315f86b44ae9fb"
+    sha256 cellar: :any,                 arm64_sequoia:  "dbbac559473f137fb4f16051e47fdab335581c72076ddab6535a9fba87c21749"
     sha256 cellar: :any,                 arm64_sonoma:   "d5228a92c9648cecb15aedbf8620e684f5b6b21d55b5e577f0c0564865211e46"
     sha256 cellar: :any,                 arm64_ventura:  "1287239a0f8877f88abba30316694f2e453be55143ab33748e850ea35ccdacce"
     sha256 cellar: :any,                 arm64_monterey: "f37c33bf42b5cbb9b849e4f2eba7484a3197a003d72d65e06ce663d803ed4ec2"
@@ -26,13 +28,14 @@ class Smpeg2 < Formula
     sha256 cellar: :any,                 ventura:        "94333f1da48b4cf080d29f3c87bd51df3c637d657f41d83eec7aa92ff4f503ee"
     sha256 cellar: :any,                 monterey:       "5d90c31b398b3d1bdf2ebcc1a10b4879804733f8335dc4a77998d38f8e976b79"
     sha256 cellar: :any,                 big_sur:        "4bec13f2819af5a5f3472481df37b7c6afdaa884fce40023057484936caad58c"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "21fa4f02887307bf5eb069733e06cb3931cad92ffefd27a8d2ebd49d6b9afb23"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "57ef23a33dcadc1871ad7e12fe7dfddaa7e6773704691af46616b03f8c9f83b7"
   end
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
   depends_on "libtool" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "sdl2"
 
   # Fix -flat_namespace being used on Big Sur and later.
@@ -40,12 +43,12 @@ class Smpeg2 < Formula
   patch :DATA
 
   def install
+    args = ["--with-sdl-prefix=#{Formula["sdl2"].opt_prefix}", "--disable-sdltest"]
+    # Help old config scripts identify arm64 linux
+    args << "--build=aarch64-unknown-linux-gnu" if OS.linux? && Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
+
     system "./autogen.sh"
-    system "./configure", "--prefix=#{prefix}",
-                          "--with-sdl-prefix=#{Formula["sdl2"].opt_prefix}",
-                          "--disable-dependency-tracking",
-                          "--disable-debug",
-                          "--disable-sdltest"
+    system "./configure", *args, *std_configure_args
     system "make"
     system "make", "install"
 
@@ -90,3 +93,30 @@ index 7dfd109..f8b1ac0 100644
      ;;
    esac
      if test "$lt_cv_apple_cc_single_mod" = "yes"; then
+diff --git a/audio/hufftable.cpp b/audio/hufftable.cpp
+index 6bc8e86..1ef2d7e 100644
+--- a/audio/hufftable.cpp
++++ b/audio/hufftable.cpp
+@@ -550,11 +550,11 @@ htd33[ 31][2]={{ 16,  1},{  8,  1},{  4,  1},{  2,  1},{  0,  0},{  0,  1},
+
+ const HUFFMANCODETABLE MPEGaudio::ht[HTN]=
+ {
+-  { 0, 0-1, 0-1, 0,  0, htd33},
++  { 0, 0u-1, 0u-1, 0,  0, htd33},
+   { 1, 2-1, 2-1, 0,  7,htd01},
+   { 2, 3-1, 3-1, 0, 17,htd02},
+   { 3, 3-1, 3-1, 0, 17,htd03},
+-  { 4, 0-1, 0-1, 0,  0, htd33},
++  { 4, 0u-1, 0u-1, 0,  0, htd33},
+   { 5, 4-1, 4-1, 0, 31,htd05},
+   { 6, 4-1, 4-1, 0, 31,htd06},
+   { 7, 6-1, 6-1, 0, 71,htd07},
+@@ -564,7 +564,7 @@ const HUFFMANCODETABLE MPEGaudio::ht[HTN]=
+   {11, 8-1, 8-1, 0,127,htd11},
+   {12, 8-1, 8-1, 0,127,htd12},
+   {13,16-1,16-1, 0,511,htd13},
+-  {14, 0-1, 0-1, 0,  0, htd33},
++  {14, 0u-1, 0u-1, 0,  0, htd33},
+   {15,16-1,16-1, 0,511,htd15},
+   {16,16-1,16-1, 1,511,htd16},
+   {17,16-1,16-1, 2,511,htd16},

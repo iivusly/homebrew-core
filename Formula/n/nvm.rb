@@ -1,17 +1,17 @@
 class Nvm < Formula
   desc "Manage multiple Node.js versions"
   homepage "https://github.com/nvm-sh/nvm"
-  url "https://github.com/nvm-sh/nvm/archive/refs/tags/v0.40.1.tar.gz"
-  sha256 "b1c750e61acfa6abe9f5ad504ba0e14a7f65c1f3afc69bf0e6051e4358f4a3df"
+  url "https://github.com/nvm-sh/nvm/archive/refs/tags/v0.40.4.tar.gz"
+  sha256 "5949b50e4640f2be2263f963952673d7f1a8745a83f05365e99f032fe78307fd"
   license "MIT"
   head "https://github.com/nvm-sh/nvm.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, all: "7579c8f8fcf63b576c78e58006075ed8bf53049491cb63ed64f0bab2bf5f2942"
+    sha256 cellar: :any_skip_relocation, all: "129cb55048c3be06d3f21eebf9c4dd2287b4f81fea5b4693070bd4d66b1fc18a"
   end
 
   def install
-    (prefix/"nvm.sh").write <<~EOS
+    (prefix/"nvm.sh").write <<~SH
       # $NVM_DIR should be "$HOME/.nvm" by default to avoid user-installed nodes destroyed every update
       [ -z "$NVM_DIR" ] && export NVM_DIR="$HOME/.nvm"
       \\. #{libexec}/nvm.sh
@@ -19,7 +19,7 @@ class Nvm < Formula
       [ -e "$NVM_DIR" ] || mkdir -p "$NVM_DIR"
       [ -e "$NVM_DIR/nvm.sh" ] || ln -s #{opt_libexec}/nvm.sh "$NVM_DIR/nvm.sh"
       [ -e "$NVM_DIR/nvm-exec" ] || ln -s #{opt_libexec}/nvm-exec "$NVM_DIR/nvm-exec"
-    EOS
+    SH
     libexec.install "nvm.sh", "nvm-exec"
     prefix.install_symlink libexec/"nvm-exec"
     bash_completion.install "bash_completion" => "nvm"

@@ -6,32 +6,24 @@ class Authoscope < Formula
   license "GPL-3.0-or-later"
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "f1c4c2802d4bf6e2d26ddea931e096a4ccc2bb3da7d8a43950853cd299bbb046"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "b6c02326d8bba708c177e946f59b3074609f27eb0250e74f52760a39360aff7c"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "c51d402bcb2a79225d442a5d291c1eb15d6899c0088704bf2ee7c919c2ade0e7"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "751047e5d1259f529ffb995c0199724dccb34a7892418e2ebd9fd9c60f16270c"
-    sha256 cellar: :any_skip_relocation, sonoma:         "d5f85fee01c0fd4966106bb442d4faf1ba971b3ea42f30e99abd71ea3bc038c5"
-    sha256 cellar: :any_skip_relocation, ventura:        "2bd8ef5edf11158e2db3f871e13c683654ae7137ca6384576f25bb6dc3014994"
-    sha256 cellar: :any_skip_relocation, monterey:       "cd8c5b3960c3474bc2ba1b404116d2e682ae733d699b87c41cc38cd95b5074b7"
-    sha256 cellar: :any_skip_relocation, big_sur:        "4e866a906027911bc7f543db28c38cb1ae952f30e51beab743e0b3243f1070ab"
-    sha256 cellar: :any_skip_relocation, catalina:       "977e84fb35259cfc01b4ba789bdf86270675c031bbc9b289034bd9974ca9d9b4"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "3cf7f5e3bc8dbe57cc22cd6bbdd5b62a7c69c54e1da1cc6ea7e1e19b0166c413"
+    rebuild 2
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "c6eaad5b4287b9e44492653bd7d5996f61c1b29d996e6ca4a045c6eb5019a10e"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "0a49139a43ce427a0b371ff1a5e2ab5859c0e79f3738acbe4b74c17dd4cb8024"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "ffc1b377f452c89e3e436f00298de7bfe6bef317b3787cb0b76e3aec5d320338"
+    sha256 cellar: :any_skip_relocation, sonoma:        "50c9f02093d86f2a5c7d957e28204eb5bd6f42f97cbe8b81d4186231d9ff9cdb"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "0c385626205475728c35fe60f4089c8167f54c4472dabed081391cc6c3801147"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "6a73ecf5bcb046d8f4083230f5f425cbe918b7a792f8474c3921f7d2f1075268"
   end
 
+  depends_on "pkgconf" => :build
   depends_on "rust" => :build
-
-  uses_from_macos "zlib"
 
   on_linux do
     depends_on "openssl@3" # Uses Secure Transport on macOS
+    depends_on "zlib-ng-compat"
   end
 
   def install
-    # Ensure that the `openssl` crate picks up the intended library.
-    # https://crates.io/crates/openssl#manual-configuration
-    ENV["OPENSSL_DIR"] = Formula["openssl@3"].opt_prefix if OS.linux?
-
     system "cargo", "install", *std_cargo_args
     man1.install "docs/authoscope.1"
 
@@ -39,13 +31,13 @@ class Authoscope < Formula
   end
 
   test do
-    (testpath/"true.lua").write <<~EOS
+    (testpath/"true.lua").write <<~LUA
       descr = "always true"
 
       function verify(user, password)
           return true
       end
-    EOS
+    LUA
     system bin/"authoscope", "run", "-vvx", testpath/"true.lua", "foo"
   end
 end

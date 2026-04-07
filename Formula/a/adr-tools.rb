@@ -6,8 +6,8 @@ class AdrTools < Formula
   license "CC-BY-4.0"
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, all: "76cb31e149dbe88de67cbb6911e3837f7fddda5d773b9abc3b8374f770bc309d"
+    rebuild 2
+    sha256 cellar: :any_skip_relocation, all: "893bca3baa1fdb9dfad37f81cc58ccc5d6e3c3b7b9c03336d5ac365700eeec10"
   end
 
   def install
@@ -15,11 +15,11 @@ class AdrTools < Formula
 
     # Unlink and re-write to matches homebrew's installation conventions
     config.unlink
-    config.write <<~EOS
+    config.write <<~SHELL
       #!/bin/bash
       echo 'adr_bin_dir="#{bin}"'
       echo 'adr_template_dir="#{prefix}"'
-    EOS
+    SHELL
 
     prefix.install Dir["src/*.md"]
     bin.install Dir["src/*"]

@@ -1,8 +1,8 @@
 class Kubefirst < Formula
   desc "GitOps Infrastructure & Application Delivery Platform for kubernetes"
-  homepage "https://kubefirst.io/"
-  url "https://github.com/konstructio/kubefirst/archive/refs/tags/v2.5.11.tar.gz"
-  sha256 "8ece781cfc3c218d9ea0b28e06c83135d69954c39886781b518ece9476bd6072"
+  homepage "https://kubefirst.konstruct.io/docs/"
+  url "https://github.com/konstructio/kubefirst/archive/refs/tags/v2.10.5.tar.gz"
+  sha256 "91112d5f07bdcfdb4f85a9da79968f6dc9c2d352d03a50b275f3fdd06b9f8364"
   license "MIT"
   head "https://github.com/konstructio/kubefirst.git", branch: "main"
 
@@ -14,13 +14,12 @@ class Kubefirst < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "131d55fdfa1335e869bceec534f12082691582770dd41489120851f2da06927c"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "44b2d28f6711a30d034b1cadc7cb861a13f4b7d68fe8592f5aa4c8fae0fcd6c3"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "e175283e81f737098f0d9b4a79e53a2c65315ce0b5f03aaf115fe00cf40ae925"
-    sha256 cellar: :any_skip_relocation, sonoma:         "9537fa1c474aef7f0da5f5c164e64ebe9ea7c8a6c370716a3a3d567c4dad507a"
-    sha256 cellar: :any_skip_relocation, ventura:        "f287a8c5e2695640e083025c7084b2c2272f84a6343ce436480ab293c308a360"
-    sha256 cellar: :any_skip_relocation, monterey:       "bbb1afb0443b6daa3133d2b2761a3fc8e0b130b1d9bdd8157cfb0f4b4d4d4452"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "552f57f7c0cc5bcd23bbcdfd0dd25ca84156ddf1288a38242d2a9917362d32be"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "a787be0dd2873b9245890777b5969bd8e8fe950a155b504d2bd2d53a25eb0a77"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "848d1c698cdaca90d400bafc245a0899d2fa47cf8b53bf917648476d0b8536b8"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "d5b274d84b093a3b7dcd1aa030c254ece32eeed200754eee6ffd8c0e34a88903"
+    sha256 cellar: :any_skip_relocation, sonoma:        "d789de6c70a00198a232377c35a740af086955918a02e2b2be3108657d3826fc"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "ebb9c7b8df316e084f36b9d94a7c23e0a97f4356a5cba7329aa1548d6b12c16c"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ed715b1c1e36cfbd51549035bcfbae683620dd91fe4ed22bdc9d672043e7b997"
   end
 
   depends_on "go" => :build
@@ -28,14 +27,16 @@ class Kubefirst < Formula
   def install
     ldflags = "-s -w -X github.com/konstructio/kubefirst-api/configs.K1Version=v#{version}"
     system "go", "build", *std_go_args(ldflags:)
+
+    generate_completions_from_executable(bin/"kubefirst", shell_parameter_format: :cobra)
   end
 
   test do
     system bin/"kubefirst", "info"
     assert_match "k1-paths:", (testpath/".kubefirst").read
-    assert_predicate testpath/".k1/logs", :exist?
+    assert_path_exists testpath/".k1/logs"
 
-    output = shell_output("#{bin}/kubefirst version")
+    output = shell_output("#{bin}/kubefirst version 2>&1")
     expected = if OS.linux? && ENV["HOMEBREW_GITHUB_ACTIONS"]
       ""
     else

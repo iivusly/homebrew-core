@@ -1,35 +1,32 @@
 class Rhit < Formula
   desc "Nginx log explorer"
   homepage "https://dystroy.org/rhit/"
-  url "https://github.com/Canop/rhit/archive/refs/tags/v2.0.1.tar.gz"
-  sha256 "b01b7207ca819e741b635e7751bbf9074c9eb9e97f0483c31e560f5e709a53b0"
+  url "https://github.com/Canop/rhit/archive/refs/tags/v2.0.4.tar.gz"
+  sha256 "3fe31159d6c32c90ec210e13285ae2e82a2b2cecd677c7bcd55363e90cd6103d"
   license "MIT"
   head "https://github.com/Canop/rhit.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "6630bf0ae32487ed028c5b2cf51a7ed4d884a68f1fd9f2eeeef76b272702cfbb"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "8e74b8d8039a32357066e4887048c907859e458d46627ffb14fe07da0b9a61b0"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "1e31f4ae2ca34dd47912e54975455dabf1bbadf4f7bb13bd3f41ce1f65315605"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "e7c8560d8b4137bd6d8f6cffada092d7e628f953a3de93b24db2aef9733f871c"
-    sha256 cellar: :any_skip_relocation, sonoma:         "f944360c238a8f95a80c248fa47736ef7862218b82d03fbda009830bc870062a"
-    sha256 cellar: :any_skip_relocation, ventura:        "b09347c0d07a9ffc2f1b21a36cf797570e73c13f94f217a073d7a17392654526"
-    sha256 cellar: :any_skip_relocation, monterey:       "85da3b37af4555c7ff57d9eea1a4825ba21e0de689383dd11763bafa864f9605"
-    sha256 cellar: :any_skip_relocation, big_sur:        "23d063bbd40867bfce15a154f218fc0d6e4c5228d44f6b911429eb41009f8dcd"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "d6a391656ce74dcdd2f75edf7b171be50e9c0097df70ca420e19bd5154bcf66b"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "41640d4eab9609fcca1400aafb160e29a169b2ed9e998bc18f8f744ce8628b5b"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "ae1251090b125845e64f46b9349f9f62458a37fef56999736b2bc21884daa942"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "a0d1d72c29e09fb78f019f616794738234c95fa27f9017aff402651d81a0e2b8"
+    sha256 cellar: :any_skip_relocation, sonoma:        "a89ddcc212da6c1480439637b6eb132f71dbe2632de9088f89d5a5eae0aaebe0"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "6799083eb9f48ce147a17a0c759b9c823405a6844f2dc9200c87bd59f88e63c9"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "51e27b0d43afd1bcde586fa8f4ab06a171764b98c385d6d8d7ec05eae03ef239"
   end
 
   depends_on "rust" => :build
-
-  resource "homebrew-testdata" do
-    url "https://raw.githubusercontent.com/Canop/rhit/c78d63b/test-data/access.log"
-    sha256 "e9ec07d6c7267ec326aa3f28a02a8140215c2c769ac2fe51b6294152644165eb"
-  end
 
   def install
     system "cargo", "install", *std_cargo_args
   end
 
   test do
+    resource "homebrew-testdata" do
+      url "https://raw.githubusercontent.com/Canop/rhit/c78d63b/test-data/access.log"
+      sha256 "e9ec07d6c7267ec326aa3f28a02a8140215c2c769ac2fe51b6294152644165eb"
+    end
+
     require "pty"
     require "io/console"
 

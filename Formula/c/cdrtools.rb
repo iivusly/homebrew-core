@@ -14,6 +14,8 @@ class Cdrtools < Formula
   end
 
   bottle do
+    sha256 arm64_tahoe:    "f288c36da4a1fb214eea796214193de02c0193d7e1237829114fe5b978e5e0f4"
+    sha256 arm64_sequoia:  "12e1334974f92d034d839c30e8d1c4ff5d8a5e7341ae9d2f4013cc6bd1b73859"
     sha256 arm64_sonoma:   "ed19c02f2ca445c89d139595e826a29bcfd41dba4c8e67c461b86deaa277af14"
     sha256 arm64_ventura:  "5bce367688103071cb34a38002f0c2dc767b3e55912c2605e27c705013ed3285"
     sha256 arm64_monterey: "954f46597d28f0a8ca1eca8de6ca79182a3904472944e484c7406663f7b6a95c"
@@ -23,7 +25,7 @@ class Cdrtools < Formula
     sha256 monterey:       "464dd4f91af02239f99ee4f67109ffd830efdd8eb51e409649e352fe4946e74a"
     sha256 big_sur:        "dd2f2609309ef54a2b9289ef79032222714f01c86ecb280d8d79ebc520488ae6"
     sha256 catalina:       "411c2dc1a6931d3c7c299d7c9d73129efbf45a39a421518158a3852de554fcaf"
-    sha256 mojave:         "4669f544745a05b8ef4ffd9bc1ea446ef7cda4c98f32b26279c81af803f1ab7e"
+    sha256 arm64_linux:    "a4ccf338b3311fd3f83255a94da5bc352d00e458deb031f311c26a7b1b48206d"
     sha256 x86_64_linux:   "4933b72c86f84c6378d621ecc1e5ac26621ef8b5b8e890b0841d389edc64db12"
   end
 
@@ -33,6 +35,10 @@ class Cdrtools < Formula
     because: "both dvdrtools and cdrtools install binaries by the same name"
 
   def install
+    # Fix for newer clang
+    ENV.append_to_cflags "-Wno-implicit-int" if DevelopmentTools.clang_build_version >= 1403
+    ENV.append_to_cflags "-Wno-implicit-function-declaration"
+
     # Speed-up the build by skipping the compilation of the profiled libraries.
     # This could be done by dropping each occurrence of *_p.mk from the definition
     # of MK_FILES in every lib*/Makefile. But it is much easier to just remove all
@@ -40,7 +46,7 @@ class Cdrtools < Formula
     rm(Dir["lib*/*_p.mk"])
     # CFLAGS is required to work around autoconf breakages as of 3.02a
     system "smake", "INS_BASE=#{prefix}", "INS_RBASE=#{prefix}",
-           "CFLAGS=-Wno-implicit-function-declaration",
+           "CFLAGS=#{ENV.cflags}",
            "install"
     # cdrtools tries to install some generic smake headers, libraries and
     # manpages, which conflict with the copies installed by smake itself
@@ -59,9 +65,9 @@ class Cdrtools < Formula
       (testpath/"subdir/testfile.txt").write(date)
       system bin/"mkisofs", "-r", "-o", "../test.iso", "."
     end
-    assert_predicate testpath/"test.iso", :exist?
+    assert_path_exists testpath/"test.iso"
     system bin/"isoinfo", "-R", "-i", "test.iso", "-X"
-    assert_predicate testpath/"testfile.txt", :exist?
+    assert_path_exists testpath/"testfile.txt"
     assert_equal date, File.read("testfile.txt")
   end
 end

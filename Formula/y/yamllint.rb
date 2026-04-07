@@ -3,33 +3,31 @@ class Yamllint < Formula
 
   desc "Linter for YAML files"
   homepage "https://github.com/adrienverge/yamllint"
-  url "https://files.pythonhosted.org/packages/da/06/d8cee5c3dfd550cc0a466ead8b321138198485d1034130ac1393cc49d63e/yamllint-1.35.1.tar.gz"
-  sha256 "7a003809f88324fd2c877734f2d575ee7881dd9043360657cc8049c809eba6cd"
+  url "https://files.pythonhosted.org/packages/28/a0/8fc2d68e132cf918f18273fdc8a1b8432b60d75ac12fdae4b0ef5c9d2e8d/yamllint-1.38.0.tar.gz"
+  sha256 "09e5f29531daab93366bb061e76019d5e91691ef0a40328f04c927387d1d364d"
   license "GPL-3.0-or-later"
   head "https://github.com/adrienverge/yamllint.git", branch: "master"
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any,                 arm64_sonoma:   "f4c04876473720910f72e135311c05d3fefe3208bba7d90e7904cbbc2f154051"
-    sha256 cellar: :any,                 arm64_ventura:  "55c913a5745760a8c12f537a3c67fa1e97dd8dbc8e8ceb4ef7bc87d27b116279"
-    sha256 cellar: :any,                 arm64_monterey: "2698561d2192e10a5566a2168f6ec3ded2bc5416970967b3667408d144b6e497"
-    sha256 cellar: :any,                 sonoma:         "b7b45b6cef591f8f02529e510315543830b33e4de4827fbffb1deed4c8e1c30c"
-    sha256 cellar: :any,                 ventura:        "9b3b376d46761939812fb46be383f62dda5370417a6968bef9043ea701dd8be9"
-    sha256 cellar: :any,                 monterey:       "abfd6d24311132e574b45598a59b44f07d48dc35f5e383eaad45f793fd49fc04"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "07a1c2f2e7b0f719576acf927daf06638605e873bc72ccc862ca3e0bf28faf64"
+    sha256 cellar: :any,                 arm64_tahoe:   "da7c942af5a8d2dd8dacb439539a21251a2ee82aa965a7de7cb47713665471fa"
+    sha256 cellar: :any,                 arm64_sequoia: "8e1afec98302dd31a2e7fb3d68e9a707a39a397fe2115b2f0dd9bbbf3b14d648"
+    sha256 cellar: :any,                 arm64_sonoma:  "31fe178c470660060b420dc1f114067e4fdb763cda30d55650ab2e786fec7794"
+    sha256 cellar: :any,                 sonoma:        "aea22a0b41c5319cf84793594d92825a8d6649cc41e62c984666a1ba5de35fab"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "93fd00ec0b1ceab422f20817ddba3e50e50f8ca69e0a026750dd036ed012d767"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "8775acbc37acdeafd89099399fd587cf0a73ef43cd8f552e265c10891586f3bc"
   end
 
   depends_on "libyaml"
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   resource "pathspec" do
-    url "https://files.pythonhosted.org/packages/ca/bc/f35b8446f4531a7cb215605d100cd88b7ac6f44ab3fc94870c120ab3adbf/pathspec-0.12.1.tar.gz"
-    sha256 "a482d51503a1ab33b1c67a6c3813a26953dbdc71c31dacaef9a838c4e29f5712"
+    url "https://files.pythonhosted.org/packages/4c/b2/bb8e495d5262bfec41ab5cb18f522f1012933347fb5d9e62452d446baca2/pathspec-1.0.3.tar.gz"
+    sha256 "bac5cf97ae2c2876e2d25ebb15078eb04d76e4b98921ee31c6f85ade8b59444d"
   end
 
   resource "pyyaml" do
-    url "https://files.pythonhosted.org/packages/cd/e5/af35f7ea75cf72f2cd079c95ee16797de7cd71f29ea7c68ae5ce7be1eda0/PyYAML-6.0.1.tar.gz"
-    sha256 "bfdf460b1736c775f2ba9f6a92bca30bc2095067b8a9d77876d1fad6cc3b4a43"
+    url "https://files.pythonhosted.org/packages/05/8e/961c0007c59b8dd7729d542c61a4d537767a59645b82a0b521206e1e25c2/pyyaml-6.0.3.tar.gz"
+    sha256 "d76623373421df22fb4cf8817020cbb7ef15c725b9d5e45f17e189bfc384190f"
   end
 
   def install
@@ -37,17 +35,17 @@ class Yamllint < Formula
   end
 
   test do
-    (testpath/"bad.yaml").write <<~EOS
+    (testpath/"bad.yaml").write <<~YAML
       ---
       foo: bar: gee
-    EOS
+    YAML
     output = shell_output("#{bin}/yamllint -f parsable -s bad.yaml", 1)
     assert_match "syntax error: mapping values are not allowed here", output
 
-    (testpath/"good.yaml").write <<~EOS
+    (testpath/"good.yaml").write <<~YAML
       ---
       foo: bar
-    EOS
-    assert_equal "", shell_output("#{bin}/yamllint -f parsable -s good.yaml")
+    YAML
+    assert_empty shell_output("#{bin}/yamllint -f parsable -s good.yaml")
   end
 end

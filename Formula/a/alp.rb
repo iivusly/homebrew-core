@@ -7,13 +7,13 @@ class Alp < Formula
   head "https://github.com/tkuchiki/alp.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "e947c50b3cfeb2580521b828119cf5e6e1590b3596415f93a5525fc6157c0765"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "c8f75372afd0b575d95b8f5d6f1f0cdda3dc9d7748974286aaa2823f3d98bc39"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "17f070fc807d0190a175d61ac599920e0af0b791d52f7831c28d6714263d0dbe"
-    sha256 cellar: :any_skip_relocation, sonoma:         "37d8da350c6ca544b05f4cf14e4a60037865958c73d6023e75f2f61000b3f572"
-    sha256 cellar: :any_skip_relocation, ventura:        "ba54691789ec295053d9a208d3ecae57fbdd176692ddee4cbbcdecbea570d0a8"
-    sha256 cellar: :any_skip_relocation, monterey:       "508bdbaf309ca746ed76d0fbc3028a5f3f8b1bacafa65ffd2a46282f1afe147a"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "0e1770f74c2881e2147f43cf2a182b4a5c60cd5c324120127d70c938459cd735"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "91314a180a6e144e0fc2e4d6d047c9f25b06143463961b42acf49dc625fa2660"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "91314a180a6e144e0fc2e4d6d047c9f25b06143463961b42acf49dc625fa2660"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "91314a180a6e144e0fc2e4d6d047c9f25b06143463961b42acf49dc625fa2660"
+    sha256 cellar: :any_skip_relocation, sonoma:        "a69566f9d09559ab696fdf61867d6e885a415689684402bad741ff209406c235"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "20a13083c36878ec80447a6a435651f11e3f1a6e135d1ccee55345cf007c16b5"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ea456ac8f3f0e0fe5f469436354ab388e558be059021a5e73acef44fcef04821"
   end
 
   depends_on "go" => :build
@@ -22,7 +22,7 @@ class Alp < Formula
     ldflags = "-s -w -X main.version=#{version}"
     system "go", "build", *std_go_args(ldflags:), "./cmd/alp"
 
-    generate_completions_from_executable(bin/"alp", "completion")
+    generate_completions_from_executable(bin/"alp", shell_parameter_format: :cobra)
   end
 
   test do
@@ -43,6 +43,6 @@ class Alp < Formula
       {"time":"2015-09-06T06:00:43+09:00","method":"GET","uri":"/req","status":200,"body_bytes":15,"response_time":"-", "request_time":0.321}
     EOS
     system bin/"alp", "json", "--file=#{testpath}/json_access.log", "--dump=#{testpath}/dump.yml"
-    assert_predicate testpath/"dump.yml", :exist?
+    assert_path_exists testpath/"dump.yml"
   end
 end

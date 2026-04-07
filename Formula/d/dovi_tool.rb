@@ -1,8 +1,8 @@
 class DoviTool < Formula
   desc "CLI tool for Dolby Vision metadata on video streams"
   homepage "https://github.com/quietvoid/dovi_tool/"
-  url "https://github.com/quietvoid/dovi_tool/archive/refs/tags/2.1.2.tar.gz"
-  sha256 "a905a8ddb47583d3d9a7571a736a44c76f3ebf0b5838aa01d401f5715825785a"
+  url "https://github.com/quietvoid/dovi_tool/archive/refs/tags/2.3.2.tar.gz"
+  sha256 "8e1ca50219a68ba27a200ea1dd4210a6ef232b5f66d1b6ffc4a8303c87fe16bf"
   license "MIT"
   head "https://github.com/quietvoid/dovi_tool.git", branch: "main"
 
@@ -12,25 +12,33 @@ class DoviTool < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "065bcde72257b4362ba1cd86cf0da0680154f8ddb2bef6f0cb509fd2e0fedc46"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "db397ea4ddefb2f62cfef824f20a5f37e262a13b448571c5539ef010afd7be89"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "617d076067b186d349e797276c514187da1568865d67a04cf4b2836440a23f91"
-    sha256 cellar: :any_skip_relocation, sonoma:         "4fd150b17d01d130ccae340316258ae7fc015c5f2928744c9cc7c8ada9aba8cb"
-    sha256 cellar: :any_skip_relocation, ventura:        "90d528f94c49fe96c3d6cce5ea48e2224a90986ce7eb97155ae6b77d613d830c"
-    sha256 cellar: :any_skip_relocation, monterey:       "b010afc7569973542305cb4fd7bff6320e39f6643f727994f087165720d1588b"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "c4454c7bc42639f5044ef71567528bc2dce813a12a7e915d4dfac533e2134f5a"
+    sha256 cellar: :any,                 arm64_tahoe:   "81c1c94dd315789c85def55bb8fcb7f297be401239e9132f2f4c22baf7009532"
+    sha256 cellar: :any,                 arm64_sequoia: "4fd138789438a2e488019d70154c52c9e41f31261baa99db926bd0b0ae65ab1a"
+    sha256 cellar: :any,                 arm64_sonoma:  "e08172d3ba5dbb923ba92b064377338c4d4be1ed9ad8503e5d9da1487281d432"
+    sha256 cellar: :any,                 sonoma:        "39f780763832297e81d97b3d729e4b8505876f10c2892974fc7e45ba2c26eff7"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "c986986476ecea0de572803691294ef2607bd8a963000f088f23ebf7a173fb05"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "97d80749c54d45aa4d0ec45a54ecdb421dd3005b106f86a4412ac23ec9c47bb4"
   end
 
+  depends_on "cargo-c" => :build
+  depends_on "pkgconf" => :build
   depends_on "rust" => :build
 
   on_linux do
-    depends_on "pkg-config" => :build
     depends_on "fontconfig"
+    depends_on "freetype"
   end
 
   def install
     system "cargo", "install", *std_cargo_args
     pkgshare.install "assets"
+
+    # Install the C library
+    cd "dolby_vision" do
+      system "cargo", "cinstall", "--jobs", ENV.make_jobs.to_s, "--release", "--locked",
+                      "--prefix", prefix, "--libdir", lib
+    end
+    pkgshare.install "dolby_vision/examples"
   end
 
   test do
@@ -44,5 +52,11 @@ class DoviTool < Formula
     EOS
 
     assert_match "dovi_tool #{version}", shell_output("#{bin}/dovi_tool --version")
+
+    cp_r "#{pkgshare}/examples", testpath
+    inreplace "examples/capi_rpu_file.c", "../../assets", "#{pkgshare}/assets"
+
+    system ENV.cc, "-o", "test", "examples/capi_rpu_file.c", "-I#{include}", "-L#{lib}", "-ldovi"
+    assert_match "Parsed RPU file: ", shell_output("./test")
   end
 end

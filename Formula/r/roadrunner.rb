@@ -1,19 +1,18 @@
 class Roadrunner < Formula
   desc "High-performance PHP application server, load-balancer and process manager"
-  homepage "https://roadrunner.dev/"
-  url "https://github.com/roadrunner-server/roadrunner/archive/refs/tags/v2024.2.0.tar.gz"
-  sha256 "b61dd97459b7d4bb88b6bd7e37552b5e84795442024fd78725ee1b3cc1bf887c"
+  homepage "https://docs.roadrunner.dev/docs"
+  url "https://github.com/roadrunner-server/roadrunner/archive/refs/tags/v2025.1.12.tar.gz"
+  sha256 "e74c7fcf0fc65e06d0640b9939d881e32f84af660e0204a6557dfbc648eadd2a"
   license "MIT"
   head "https://github.com/roadrunner-server/roadrunner.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "31fa4f816d9f762d22e259ae23c002b8b19d081a82f27032fac920e72e37ecca"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "06ee92483744ed1adb5c3a499fdffd1871185f0551230f7fd09eee72bfb09dcd"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "649ecbd926962bf15929127de9730ce5f292f9e09e7fcef25cd23b4e54f4a0b7"
-    sha256 cellar: :any_skip_relocation, sonoma:         "19caf60fba872795fbde1dc0c55af61d8af7c6eba0c96d80af2c827c14dedc06"
-    sha256 cellar: :any_skip_relocation, ventura:        "bf449a936e21ee37d97d2a1cfac0a28cde0d7e56fb6439624f3fd4faabfc87df"
-    sha256 cellar: :any_skip_relocation, monterey:       "87e819f2e9864f42c1c1cc9dece18916300d663d509f300ead6be797574a4841"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "a8b2a977676cfaa2a824bcbc9dbffaa8d088d5fba648c563584cfaf035480c7e"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "bbd25fd88df1db9fd18880e50bd6a002d9f4819ec6ea58926e8b5d811e8193bd"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "a2e2ecb4f7cc5e4b766bfab7c92bbbf647afadfb36c7bf69dbcf0136f4b6d393"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "6518aaddbdc7a911798794013b58f44c4366b3816f35c999007360f137355549"
+    sha256 cellar: :any_skip_relocation, sonoma:        "29ad015227c84485fd4c61c7d8328410be0dd00b69d2b57a8c6e787e657fc7db"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "c319dbb90655ce2cdf92aa30fe6d389bb9ccc0de221d92645a738064ac796657"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "34244543a4e4eef55eebaa904a5257b6a23026cecfed6c42cbcaaddac3d199b8"
   end
 
   depends_on "go" => :build
@@ -24,19 +23,19 @@ class Roadrunner < Formula
       -X github.com/roadrunner-server/roadrunner/v#{version.major}/internal/meta.version=#{version}
       -X github.com/roadrunner-server/roadrunner/v#{version.major}/internal/meta.buildTime=#{time.iso8601}
     ]
-    system "go", "build", "-tags", "aws", *std_go_args(ldflags:, output: bin/"rr"), "./cmd/rr"
+    system "go", "build", *std_go_args(ldflags:, tags: "aws", output: bin/"rr"), "./cmd/rr"
 
-    generate_completions_from_executable(bin/"rr", "completion")
+    generate_completions_from_executable(bin/"rr", shell_parameter_format: :cobra)
   end
 
   test do
     port = free_port
-    (testpath/".rr.yaml").write <<~EOS
+    (testpath/".rr.yaml").write <<~YAML
       # RR configuration version
       version: '3'
       rpc:
         listen: tcp://127.0.0.1:#{port}
-    EOS
+    YAML
 
     output = shell_output("#{bin}/rr jobs list 2>&1", 1)
     assert_match "connect: connection refused", output

@@ -6,25 +6,23 @@ class SimpleMtpfs < Formula
   license "GPL-2.0-or-later"
 
   bottle do
-    rebuild 2
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "0a3312b826ab7fd86c703b24855864bb86660bbcefde74ecb949ad8d09ff035e"
+    rebuild 3
+    sha256 cellar: :any_skip_relocation, arm64_linux:  "6af8a1b67540db583e256e6391410483d8480100ed0598e040bbaf59cda85de1"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "c194161a8dbd1095e449cceb1b21e7e64f68d6541ab32c63ff78092260df8d49"
   end
 
   depends_on "autoconf" => :build
   depends_on "autoconf-archive" => :build # required for AX_CXX_COMPILE_STDCXX_17
   depends_on "automake" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "libfuse@2"
   depends_on "libmtp"
+  depends_on "libusb"
   depends_on :linux # on macOS, requires closed-source macFUSE
-
-  fails_with gcc: "5"
 
   def install
     system "./autogen.sh"
-    system "./configure", "--prefix=#{prefix}",
-      "CPPFLAGS=-I/usr/local/include/osxfuse -I/usr/local/include/osxfuse/fuse",
-      "LDFLAGS=-L/usr/local/include/osxfuse"
+    system "./configure", "--disable-silent-rules", *std_configure_args
     system "make"
     system "make", "install"
   end

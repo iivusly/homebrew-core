@@ -11,6 +11,8 @@ class SigrokCli < Formula
   end
 
   bottle do
+    sha256 cellar: :any,                 arm64_tahoe:    "702bb4ee199576914bbcb83e20cfe4e4e960877ec8a9e1bc112910abc180efbb"
+    sha256 cellar: :any,                 arm64_sequoia:  "fd787456a3085648cbf83f56294acc9c37579a5dba2338d8d56c74710c03ee90"
     sha256 cellar: :any,                 arm64_sonoma:   "a5e82221775d890da9132fdc4326606838e1622c0e692248e2e2efd54839893e"
     sha256 cellar: :any,                 arm64_ventura:  "c829705552edd7e001c393e73954a4f95a3b50319994943897c05858e3734998"
     sha256 cellar: :any,                 arm64_monterey: "f097768e26c50de6aafacfb8e1e1db78837620683d42dd1cca848c0797794bd0"
@@ -20,6 +22,7 @@ class SigrokCli < Formula
     sha256 cellar: :any,                 monterey:       "c66c8195acaf4a1865d2df389b0295f9ccf6cca5f4cf6db78b3ad686c35bc3fd"
     sha256 cellar: :any,                 big_sur:        "5a02c04e5b3148c70995ca652850eb8146ab436d102c19f5c96b39a578c5b31e"
     sha256 cellar: :any,                 catalina:       "79af0118b674614921744d9f9a29c929e95ec0a5b60613ddbd31fa27f3fa18af"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "ba72045f4b14e589786904ff79dd12e08890d0379ede83f2454f75333d314e4d"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "9b58556d1098376a5d2f261f7e437a18bfa72b6cf8ba63deec1595422ee63c4f"
   end
 
@@ -31,7 +34,7 @@ class SigrokCli < Formula
     depends_on "libtool" => :build
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "glib"
   depends_on "libsigrok"
   depends_on "libsigrokdecode"

@@ -1,8 +1,8 @@
 class Byteman < Formula
   desc "Java bytecode manipulation tool for testing, monitoring and tracing"
   homepage "https://byteman.jboss.org/"
-  url "https://downloads.jboss.org/byteman/4.0.23/byteman-download-4.0.23-bin.zip"
-  sha256 "5b6dda957ba86d1ac83713a93d54956adb171f51ace31dd7fb857400bd77765b"
+  url "https://downloads.jboss.org/byteman/4.0.26/byteman-download-4.0.26-bin.zip"
+  sha256 "48375f14c7faa474b17e20666c730d0bdecf2b9b18bda4e6e9dacb0650c99479"
   license "LGPL-2.1-or-later"
   head "https://github.com/bytemanproject/byteman.git", branch: "main"
 
@@ -12,8 +12,7 @@ class Byteman < Formula
   end
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, all: "e65f5c3531d3c1f3de8fbbf2722d236c0bcc3dcf02e803587896ab6457ce619b"
+    sha256 cellar: :any_skip_relocation, all: "22f4e5ae52fca43d524b4cb9e71a119ed480359f78fc782216f61c1d31cefa48"
   end
 
   depends_on "openjdk"
@@ -33,15 +32,15 @@ class Byteman < Formula
   end
 
   test do
-    (testpath/"src/main/java/BytemanHello.java").write <<~EOS
+    (testpath/"src/main/java/BytemanHello.java").write <<~JAVA
       class BytemanHello {
         public static void main(String... args) {
           System.out.println("Hello, Brew!");
         }
       }
-    EOS
+    JAVA
 
-    (testpath/"brew.btm").write <<~EOS
+    (testpath/"brew.btm").write <<~BTM
       RULE trace main entry
       CLASS BytemanHello
       METHOD main
@@ -57,7 +56,7 @@ class Byteman < Formula
       IF true
       DO traceln("Exiting main")
       ENDRULE
-    EOS
+    BTM
 
     system "#{Formula["openjdk"].bin}/javac", "src/main/java/BytemanHello.java"
 

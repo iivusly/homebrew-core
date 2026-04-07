@@ -3,32 +3,36 @@ class ArcadeLearningEnvironment < Formula
 
   desc "Platform for AI research"
   homepage "https://github.com/Farama-Foundation/Arcade-Learning-Environment"
-  url "https://github.com/Farama-Foundation/Arcade-Learning-Environment/archive/refs/tags/v0.9.1.tar.gz"
-  sha256 "eaf60c7c3a6450decff3deee02b0c46224537d322cc2f77abed565a835f2d524"
+  url "https://github.com/Farama-Foundation/Arcade-Learning-Environment/archive/refs/tags/v0.11.2.tar.gz"
+  sha256 "d6ac9406690bb3533b37a99253bdfc59bc27779c5e1b6855c763d0b367bcbf96"
   license "GPL-2.0-only"
+  revision 3
   head "https://github.com/Farama-Foundation/Arcade-Learning-Environment.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "2c66ca8dc6877ca4ecd9406148f9966449e609d7b63987201623032fad2e962b"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "c47d6a2b25720585467ee85d20f01e5b858aa3a0af60e64ed170dd38bbb7689c"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "0ed8a7b7508464018414bf23e631fdaa3599769d9b35f3bc078388965da580e7"
-    sha256 cellar: :any_skip_relocation, sonoma:         "3819f81278dd9d54f34a0803c2d6e061f886848f06d3613fe2b26cb20d564753"
-    sha256 cellar: :any_skip_relocation, ventura:        "019a9596a7e5216ec35c0b0b6ae59a67c0e9148fd0ae6a8f0191c87a727ccce7"
-    sha256 cellar: :any_skip_relocation, monterey:       "a9fa5e4a90b2af1ee1d5d29dfc0a15a0db1ca155d346ba78c4a8aac99072bdc2"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "7a8b7a583376f261fd5e93ab4c185d8fce92c415117930938969646d0a66d30c"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "76355356efae81795ecaccb33fa80a2b4a4e91c2d9e3f41a38d857d0b3ad139b"
+    sha256 cellar: :any,                 arm64_sequoia: "0fab3be9388930353e91b7864ec6e63700e811c428c91d92052e4563c449cd1f"
+    sha256 cellar: :any,                 arm64_sonoma:  "17da271bcc589571ed4ede577c24429f1e536970c587f58b479dc898811e772c"
+    sha256 cellar: :any,                 sonoma:        "5434effd020431c4a6eeb795eff45fff2f7469ccd58d2b679367b4cf952a1f06"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "e21960f3aa4002f7060e68a54b3d389c5988e56bc9b8f5d3218571324bc80cc8"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "36d134126295238dbfaebbcdff48e0954ab769e11915df02c62f863eedcfb967"
   end
 
   depends_on "cmake" => :build
+  depends_on "ninja" => :build
   depends_on "pybind11" => :build
-  depends_on "python-setuptools" => :build
-  depends_on macos: :catalina # requires std::filesystem
   depends_on "numpy"
-  depends_on "python@3.12"
+  depends_on "opencv"
+  depends_on "python@3.14"
   depends_on "sdl2"
 
-  uses_from_macos "zlib"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
-  fails_with gcc: "5"
+  pypi_packages exclude_packages: "numpy",
+                extra_packages:   "gymnasium"
 
   # See https://github.com/Farama-Foundation/Arcade-Learning-Environment/blob/master/scripts/download_unpack_roms.sh
   resource "roms" do
@@ -36,8 +40,28 @@ class ArcadeLearningEnvironment < Formula
     sha256 "02ca777c16476a72fa36680a2ba78f24c3ac31b2155033549a5f37a0653117de"
   end
 
+  resource "cloudpickle" do
+    url "https://files.pythonhosted.org/packages/52/39/069100b84d7418bc358d81669d5748efb14b9cceacd2f9c75f550424132f/cloudpickle-3.1.1.tar.gz"
+    sha256 "b216fa8ae4019d5482a8ac3c95d8f6346115d8835911fd4aefd1a445e4242c64"
+  end
+
+  resource "farama-notifications" do
+    url "https://files.pythonhosted.org/packages/2e/2c/8384832b7a6b1fd6ba95bbdcae26e7137bb3eedc955c42fd5cdcc086cfbf/Farama-Notifications-0.0.4.tar.gz"
+    sha256 "13fceff2d14314cf80703c8266462ebf3733c7d165336eee998fc58e545efd18"
+  end
+
+  resource "gymnasium" do
+    url "https://files.pythonhosted.org/packages/b3/de/b923d09654df8f8ee29a3cc7ec7829ac057efd0d969cc3da0c8a7b219d59/gymnasium-1.2.1.tar.gz"
+    sha256 "4e6480273528523a90b3db99befb6111b13f15fa0866de88c4b675770495b66c"
+  end
+
+  resource "typing-extensions" do
+    url "https://files.pythonhosted.org/packages/72/94/1a15dd82efb362ac84269196e94cf00f187f7ed21c242792a923cdb1c61f/typing_extensions-4.15.0.tar.gz"
+    sha256 "0cea48d173cc12fa28ecabc3b837ea3cf6f38c6d1136f85cbaaf598984861466"
+  end
+
   def python3
-    "python3.12"
+    "python3.14"
   end
 
   def install
@@ -61,13 +85,22 @@ class ArcadeLearningEnvironment < Formula
       (buildpath/"src/python/roms").install pwd.glob("ROM/*/*.bin")
     end
 
-    # error: no member named 'signbit' in the global namespace
-    inreplace "setup.py", "cmake_args = [", "\\0\"-DCMAKE_OSX_SYSROOT=#{MacOS.sdk_path}\"," if OS.mac?
-    system python3, "-m", "pip", "install", *std_pip_args, "."
+    inreplace "setup.py" do |s|
+      # error: no member named 'signbit' in the global namespace
+      s.gsub! "cmake_args = [", "\\0\"-DCMAKE_OSX_SYSROOT=#{MacOS.sdk_path}\"," if OS.mac?
+      # Remove XLA support for now
+      s.gsub! "-DBUILD_VECTOR_XLA_LIB=ON", ""
+    end
+    # We build without XLA and jax has no sdists
+    inreplace "pyproject.toml", '"jax >= 0.4.31', "#"
+    venv = virtualenv_create(libexec, python3)
+    venv.pip_install resources.select { |r| r.url.start_with?("https://files.pythonhosted.org/") }
+    venv.pip_install_and_link Pathname.pwd
+    (prefix/Language::Python.site_packages(python3)/"homebrew-ale.pth").write venv.site_packages
 
     # Replace vendored `libSDL2` with a symlink to our own.
     libsdl2 = Formula["sdl2"].opt_lib/shared_library("libSDL2")
-    vendored_libsdl2_dir = prefix/Language::Python.site_packages(python3)/"ale_py"
+    vendored_libsdl2_dir = venv.site_packages/"ale_py"
     (vendored_libsdl2_dir/shared_library("libSDL2")).unlink
 
     # Use `ln_s` to avoid referencing a Cellar path.
@@ -75,14 +108,14 @@ class ArcadeLearningEnvironment < Formula
   end
 
   test do
-    (testpath/"roms.py").write <<~EOS
+    (testpath/"roms.py").write <<~PYTHON
       from ale_py.roms import get_all_rom_ids
       print(get_all_rom_ids())
-    EOS
+    PYTHON
     assert_match "adventure", shell_output("#{python3} roms.py")
 
     cp pkgshare/"tetris.bin", testpath
-    (testpath/"test.py").write <<~EOS
+    (testpath/"test.py").write <<~PYTHON
       from ale_py import ALEInterface, SDL_SUPPORT
       assert SDL_SUPPORT
 
@@ -90,7 +123,7 @@ class ArcadeLearningEnvironment < Formula
       ale.setInt("random_seed", 123)
       ale.loadROM("tetris.bin")
       assert len(ale.getLegalActionSet()) == 18
-    EOS
+    PYTHON
 
     output = shell_output("#{python3} test.py 2>&1")
     assert_match <<~EOS, output

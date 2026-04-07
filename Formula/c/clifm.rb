@@ -1,8 +1,8 @@
 class Clifm < Formula
   desc "Command-line Interface File Manager"
   homepage "https://github.com/leo-arch/clifm"
-  url "https://github.com/leo-arch/clifm/archive/refs/tags/v1.20.tar.gz"
-  sha256 "36f41d332985b9888a24a2ebb09ef837f40acea744b38498cd5e5313690ec10f"
+  url "https://github.com/leo-arch/clifm/archive/refs/tags/v1.27.1.tar.gz"
+  sha256 "a35cd1ccbb83f1261c3c5b14b5b4733cf0555be68579b3cb19fa8b36076a5339"
   license "GPL-2.0-or-later"
 
   # Upstream creates releases that use a stable tag (e.g., `v1.2.3`) but are
@@ -14,21 +14,23 @@ class Clifm < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "b4b1c5d192f9e2960d707df2a450feaf2cecc75a727bb76ef8e56382d96afdcc"
-    sha256 arm64_ventura:  "192e658b10de85f240075094c396a8b2eec9d0dbcdcf88184795a40def5cee48"
-    sha256 arm64_monterey: "64505fac0ad4c4a61e099d1509fa4245a02d9b39cb10266ffa442aed8afd1dd0"
-    sha256 sonoma:         "977541924f0acbd08dee453c4a142a4b465b9e06c27002720dde1511f72fe2e3"
-    sha256 ventura:        "64e063394e0a4c84bfef00564b004404815be32d91d9cfd8aa57e18ccb1fd407"
-    sha256 monterey:       "531c14ec05ca856b362e9f78ce0601b1daaf618725a290bf75fe0882065eff5c"
-    sha256 x86_64_linux:   "952ca3824865cf3240e85bef7c51a937c9d7240d77267fcd575de454e46bdf73"
+    sha256 arm64_tahoe:   "57b22f3e5ccc6a47ff0ae609316cb70e099ea9536cdc845b7f64435e926b9dba"
+    sha256 arm64_sequoia: "8a456c9d776ed4840f9861abf2ffd40fecf3023819ba836c1e0a5d429e0ada84"
+    sha256 arm64_sonoma:  "e56237bf0604fb80a5e236db4a9dabd999c1274251e7516f028295c47a0c2569"
+    sha256 sonoma:        "dab5a2b5bbfe40da5398a239c0577d82feea49ddf7b2a31b7d593c80b5e9ad6f"
+    sha256 arm64_linux:   "887bb3fe8a1292820efcd91ee00bc09fb4d130b54be2d3040d5b3210627e3523"
+    sha256 x86_64_linux:  "938a9debf2f00b7b72fb9f59e83b6c923278c89746352046367dfc9deee6be68"
   end
 
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
 
-  depends_on "gettext"
   depends_on "libmagic"
   depends_on "readline"
+
+  on_macos do
+    depends_on "gettext"
+  end
 
   on_linux do
     depends_on "acl"

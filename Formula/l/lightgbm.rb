@@ -1,19 +1,19 @@
 class Lightgbm < Formula
   desc "Fast, distributed, high performance gradient boosting framework"
-  homepage "https://github.com/microsoft/LightGBM"
-  url "https://github.com/microsoft/LightGBM.git",
-      tag:      "v4.5.0",
-      revision: "3f7e6081275624edfca1f9b3096bea7a81a744ed"
+  homepage "https://github.com/lightgbm-org/LightGBM"
+  url "https://github.com/lightgbm-org/LightGBM.git",
+      tag:      "v4.6.0",
+      revision: "d02a01ac6f51d36c9e62388243bcb75c3b1b1774"
   license "MIT"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "978165b249362451083befd02d5a896a162576adf9e3d43f1f21e9013ca42468"
-    sha256 cellar: :any,                 arm64_ventura:  "d045a7be5f3f48f88ce1b04c9c64c45c835110f4675f78f29d1302de708548b4"
-    sha256 cellar: :any,                 arm64_monterey: "522a7d56a64386fde0e8b7df39c1a59a9040833b4063246abf0a229ec2d74fb6"
-    sha256 cellar: :any,                 sonoma:         "db82709068ba820c02629798f393d08165c062a49747cdaccb33cbbc9e9cf187"
-    sha256 cellar: :any,                 ventura:        "d873dbe714ff9f81371a65a5986cacd36eb9330dd5afc969462064943a54bcfd"
-    sha256 cellar: :any,                 monterey:       "05623d0d1c032e242986788bb5f6a74b23b39165ac9f1c6abca0a9582205efb5"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "6d1a4895d4c9783ef4f1d218571ff677754a8c52cc6283d314e0d9d619c486a6"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "5f1ea9bad948745d1a776b3f6e22de75e68d2bd35b07cc8be5bf2708282edd75"
+    sha256 cellar: :any,                 arm64_sequoia: "941389cbcebba0522f6581f80743288967e6a88f804ae66293d8247278ba9c6c"
+    sha256 cellar: :any,                 arm64_sonoma:  "f5cb2cdb2cf8c0c0dae47767eabf872ae9d7689ec4871ec5137351bfc76c9c81"
+    sha256 cellar: :any,                 sonoma:        "28f87da7161377f42756c169baf7433cf748c06758dbfba1e5a19f151bc425ec"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "7560fb6a214227ee5280f19181941f792551ff06811616e21de8963ff80c5b44"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ef8b3d3e381a03b1f27596284a4c55f4b4939ad23f950a8559945201c7d4d469"
   end
 
   depends_on "cmake" => :build
@@ -23,7 +23,7 @@ class Lightgbm < Formula
   end
 
   def install
-    system "cmake", "-S", ".", "-B", "build", *std_cmake_args, "-DAPPLE_OUTPUT_DYLIB=ON"
+    system "cmake", "-S", ".", "-B", "build", *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
     pkgshare.install "examples"

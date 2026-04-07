@@ -1,23 +1,20 @@
 class Spglib < Formula
   desc "C library for finding and handling crystal symmetries"
-  homepage "https://spglib.readthedocs.io/"
-  url "https://github.com/spglib/spglib/archive/refs/tags/v2.5.0.tar.gz"
-  sha256 "b6026f5e85106c0c9ee57e54b9399890d0f29982e20e96ede0428b3efbe6b914"
+  homepage "https://spglib.readthedocs.io/en/latest/"
+  url "https://github.com/spglib/spglib/archive/refs/tags/v2.7.0.tar.gz"
+  sha256 "b22fc9abae9716c574fbc6d55cfc53ed654a714fccc5657a26ff5d18114bd8bd"
   license "BSD-3-Clause"
-  revision 1
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "8a2df8ea5096a46219d4cab39325fe79365a2dc68e9efc6a2dc2ea430b3f9efe"
-    sha256 cellar: :any,                 arm64_ventura:  "8ace7d08ecd61605d682f2a5b87fb4a4010ee819a87c0177be207f6a5a305b1c"
-    sha256 cellar: :any,                 arm64_monterey: "83311332c6f4685f7408c76ffedf5ae64644950cd011cfd371085f4f4022be85"
-    sha256 cellar: :any,                 sonoma:         "88724f0154cb402795766cea37785eae847871e85a419d7f82eaa06ff1fc4235"
-    sha256 cellar: :any,                 ventura:        "6051179af2cee2eaa4adfe74000b013ca7ab7b84e87e52cbc9906954f37b4175"
-    sha256 cellar: :any,                 monterey:       "ed1bb26d268f7ac936404d37c60d9f2cb9819b030076fe282a72eef1b9af790d"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "c462ceb42ed8e965c52f74e3b35500be3f9646a46a7fccba729f6272261986f5"
+    sha256 cellar: :any,                 arm64_tahoe:   "0ac52612168b066678114e398e0c280774a507fa7368dac07b1485b93c268846"
+    sha256 cellar: :any,                 arm64_sequoia: "98e08556202a78099fb3ef2677d981b9d45205f79ee5ec513c40585710fbfa08"
+    sha256 cellar: :any,                 arm64_sonoma:  "edecb2cca0fec6d88c7254a587a5a5d894d9780085614704cdb31d83cbb54e45"
+    sha256 cellar: :any,                 sonoma:        "b04a116c09270ca9d4a648abb13330250b7131eeb5927453780af847dd50903b"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "3af78dc77ef69efe7487239209ea4f4fb73d149dc03e8e140c89d71f91987b74"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "79a41e046b7f33096acbbc6018b0e23885cd732501dbc0083aa1c77ea5abfcce"
   end
 
   depends_on "cmake" => [:build, :test]
-  depends_on "gcc" # for gfortran
 
   def install
     # TODO: Fortran packaging is disabled for now because packaging does not pick it up properly
@@ -27,45 +24,47 @@ class Spglib < Formula
       -DSPGLIB_WITH_TESTS=OFF
     ]
     system "cmake", "-S", ".", "-B", "build_shared",
-                   *common_args, "-DSPGLIB_SHARED_LIBS=ON", *std_cmake_args
+                    "-DSPGLIB_SHARED_LIBS=ON",
+                    *common_args, *std_cmake_args
     system "cmake", "--build", "build_shared"
     system "cmake", "--install", "build_shared"
 
     system "cmake", "-S", ".", "-B", "build_static",
-                  *common_args, "-DSPGLIB_SHARED_LIBS=OFF", *std_cmake_args
+                    "-DSPGLIB_SHARED_LIBS=OFF",
+                    *common_args, *std_cmake_args
     system "cmake", "--build", "build_static"
     system "cmake", "--install", "build_static"
   end
 
   test do
-    (testpath / "test.c").write <<~EOS
+    (testpath / "test.c").write <<~C
       #include <stdio.h>
       #include <spglib.h>
       int main()
       {
         printf("%d.%d.%d", spg_get_major_version(), spg_get_minor_version(), spg_get_micro_version());
       }
-    EOS
+    C
 
-    (testpath / "CMakeLists.txt").write <<~EOS
-      cmake_minimum_required(VERSION 3.6)
+    (testpath / "CMakeLists.txt").write <<~CMAKE
+      cmake_minimum_required(VERSION 3.10)
       project(test_spglib LANGUAGES C)
       find_package(Spglib CONFIG REQUIRED COMPONENTS shared)
       add_executable(test_c test.c)
       target_link_libraries(test_c PRIVATE Spglib::symspg)
-    EOS
+    CMAKE
     system "cmake", "-B", "build_shared"
     system "cmake", "--build", "build_shared"
     system "./build_shared/test_c"
 
     (testpath / "CMakeLists.txt").delete
-    (testpath / "CMakeLists.txt").write <<~EOS
-      cmake_minimum_required(VERSION 3.6)
-      project(test_spglib LANGUAGES C Fortran)
+    (testpath / "CMakeLists.txt").write <<~CMAKE
+      cmake_minimum_required(VERSION 3.10)
+      project(test_spglib LANGUAGES C)
       find_package(Spglib CONFIG REQUIRED COMPONENTS static)
       add_executable(test_c test.c)
       target_link_libraries(test_c PRIVATE Spglib::symspg)
-    EOS
+    CMAKE
     system "cmake", "-B", "build_static"
     system "cmake", "--build", "build_static"
     system "./build_static/test_c"

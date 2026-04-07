@@ -1,25 +1,26 @@
 class Zellij < Formula
   desc "Pluggable terminal workspace, with terminal multiplexer as the base feature"
   homepage "https://zellij.dev"
-  url "https://github.com/zellij-org/zellij/archive/refs/tags/v0.40.1.tar.gz"
-  sha256 "1f0bfa13f2dbe657d76341a196f98a3b4caa47ac63abee06b39883a11ca220a8"
+  url "https://github.com/zellij-org/zellij/archive/refs/tags/v0.44.0.tar.gz"
+  sha256 "be413dc49d7bff1be6502a1998664b015b77ad55636d72e0497cfc66d4a4cdf6"
   license "MIT"
   head "https://github.com/zellij-org/zellij.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "2183f0c3592b2fb0c9874c94870a3e303c2901f28e2370fb8e71d89625e4ef4a"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "80d0688a3f2fa76ea9d9417bd9db0ecd95932e9280d34471de8937e184116988"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "1071a258de8cc07429de27543aae2906b6a84cef28cf35992f9c4cf09ceee350"
-    sha256 cellar: :any_skip_relocation, sonoma:         "9e32e1561b876067d7b022b50fdc69620dcd4d3697a765f9f5f352b215146139"
-    sha256 cellar: :any_skip_relocation, ventura:        "e3edbd1ce4233a65b7258cb4f6f21e51a055eeae09806ebcead11a3a92a5c0de"
-    sha256 cellar: :any_skip_relocation, monterey:       "d27b158af0acb038d5712603519e9ee8ebf322873a6cbd7c3f3c686059f9b08f"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "b21f2df5cc8c18fc9cdfc7b819c76b24a8a57710872dcee8a10e2c5a03e80712"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "3cbcca3b96b2fd6921131b268c6eda24d65ba0c8bedfccb3a46ef75b807fe6b3"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "ba199471fcabfc05ac8ba91846dd6d2104cd15889ed499a18f33ff066fa1a368"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "8a837f3eb4f66086c0e8ec8abd82f4820c4afa7e8fc8a18477467e391e362dc6"
+    sha256 cellar: :any_skip_relocation, sonoma:        "cc7144e7bd3e50f4e03ae6336bcb4e7ecc533c1caf93e74695eb37837dd3c65e"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "a1f48f98f3159d6091eb7fc3c40bf912956feb3f1adf74fdea6e8f801ddacf1d"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "1028ca00d14f72d262c84724cb3627e67908cefc25ccb0e9897c4269183b54e0"
   end
 
   depends_on "rust" => :build
   depends_on "openssl@3"
 
-  uses_from_macos "zlib"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     # Ensure that the `openssl` crate picks up the intended library.

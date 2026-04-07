@@ -8,19 +8,19 @@ class Asitop < Formula
   license "MIT"
 
   bottle do
-    rebuild 2
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "f8fa9deb82c11f613cc6355f14433abf6a23b98bf414c42b93eb8d105b8f7cc8"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "3a4be33923fd90e29181eb00164a1b5317e119de55529148b3bbff9134e7619c"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "21fee7bc3f0553f9481a591bb34933e9cc3087cacfe2a5a6a00154cfa6393f59"
+    rebuild 4
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "de255de46d14df3c89b457ed3e18d402a63a6a24b47da228084646a20e6b9db0"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "a40878e9b51a199368c3647e227773c8a8fa2413f64167630cb05e92fe3b4bb7"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "73ede524bcc50e849a3568afe14f6a2469e5a439f79dd284b21cc0a4b1f41ab5"
   end
 
   depends_on arch: :arm64
   depends_on :macos
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   resource "blessed" do
-    url "https://files.pythonhosted.org/packages/25/ae/92e9968ad23205389ec6bd82e2d4fca3817f1cdef34e10aa8d529ef8b1d7/blessed-1.20.0.tar.gz"
-    sha256 "2cdd67f8746e048f00df47a2880f4d6acbcdb399031b604e34ba8f71d5787680"
+    url "https://files.pythonhosted.org/packages/7c/51/a72df7730aa34a94bc43cebecb7b63ffa42f019868637dbeb45e0620d26e/blessed-1.22.0.tar.gz"
+    sha256 "1818efb7c10015478286f21a412fcdd31a3d8b94a18f6d926e733827da7a844b"
   end
 
   resource "dashing" do
@@ -29,18 +29,13 @@ class Asitop < Formula
   end
 
   resource "psutil" do
-    url "https://files.pythonhosted.org/packages/90/c7/6dc0a455d111f68ee43f27793971cf03fe29b6ef972042549db29eec39a2/psutil-5.9.8.tar.gz"
-    sha256 "6be126e3225486dff286a8fb9a06246a5253f4c7c53b475ea5f5ac934e64194c"
-  end
-
-  resource "six" do
-    url "https://files.pythonhosted.org/packages/71/39/171f1c67cd00715f190ba0b100d606d440a28c93c7714febeca8b79af85e/six-1.16.0.tar.gz"
-    sha256 "1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"
+    url "https://files.pythonhosted.org/packages/b3/31/4723d756b59344b643542936e37a31d1d3204bcdc42a7daa8ee9eb06fb50/psutil-7.1.0.tar.gz"
+    sha256 "655708b3c069387c8b77b072fc429a57d0e214221d01c0a772df7dfedcb3bcd2"
   end
 
   resource "wcwidth" do
-    url "https://files.pythonhosted.org/packages/6c/63/53559446a878410fc5a5974feb13d31d78d752eb18aeba59c7fef1af7598/wcwidth-0.2.13.tar.gz"
-    sha256 "72ea0c06399eb286d978fdedb6923a9eb47e1c486ce63e9b4e64fc18303972b5"
+    url "https://files.pythonhosted.org/packages/24/30/6b0809f4510673dc723187aeaf24c7f5459922d01e2f794277a3dfb90345/wcwidth-0.2.14.tar.gz"
+    sha256 "4d478375d31bc5395a3c55c40ccdf3354688364cd61c4f6adacaa9215d0b3605"
   end
 
   def install

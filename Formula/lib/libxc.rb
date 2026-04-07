@@ -1,19 +1,20 @@
 class Libxc < Formula
   desc "Library of exchange and correlation functionals for codes"
-  homepage "https://tddft.org/programs/libxc/"
-  url "https://gitlab.com/libxc/libxc/-/archive/6.2.2/libxc-6.2.2.tar.bz2"
-  sha256 "ec292de621e819b03a37db1f7a7365a9eaf423e30e2fd4553e6336eca534cc29"
+  homepage "https://libxc.gitlab.io/"
+  url "https://gitlab.com/libxc/libxc/-/archive/7.0.0/libxc-7.0.0.tar.bz2"
+  sha256 "e9ae69f8966d8de6b7585abd9fab588794ada1fab8f689337959a35abbf9527d"
   license "MPL-2.0"
+  compatibility_version 1
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any,                 arm64_sonoma:   "d3b7a181e48fbe340461e747e09de5b03463a42640ea7e3d17e70344e68a13fb"
-    sha256 cellar: :any,                 arm64_ventura:  "76e117d24f61975699724c178dc4ca067b3ac7894fe44b2ccbecbac4896531e4"
-    sha256 cellar: :any,                 arm64_monterey: "a17707ff2b6046f4b20246a3f4516d5c8dd025b42f1332b079d61c597e0d2acb"
-    sha256 cellar: :any,                 sonoma:         "4c172504c169ec73171e917fac317d4893d812e60f720fef5a475f5d543bbd8a"
-    sha256 cellar: :any,                 ventura:        "c549634c09e5a9f0688cf56a53923f257f465926fee68ff57486bab631d1b249"
-    sha256 cellar: :any,                 monterey:       "cd6a9789100cbb16589d41114a37b58f70deb902bdbb5cdd4294d057fb75f76b"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "ab8fde994c4cfb4c5bfb6095d4845c11f6a9947800d52b642198575050ae6fa3"
+    sha256 cellar: :any,                 arm64_tahoe:   "d099fdc57a95d85727f5c4b605f64253144ba64ae545439947684f065553ae9e"
+    sha256 cellar: :any,                 arm64_sequoia: "aa85b3a74a71bfa20b5298f35fef63fe1738a0c85a978ab1fbf94b56c1bf168c"
+    sha256 cellar: :any,                 arm64_sonoma:  "ba31c84f6c649d6b133a62d0c69a0b6c92fdb9d9e6ef959abd527fca75b43652"
+    sha256 cellar: :any,                 arm64_ventura: "8a8f6c2dedb5446e4e0dfb6eef6c38acb7a134a2559e3828c2b7bca7c6cff747"
+    sha256 cellar: :any,                 sonoma:        "6bcdc1b4b2820d7124c5b4c0b39566ff52cac816054945a960ef1c3a43838308"
+    sha256 cellar: :any,                 ventura:       "1f2419e77039100f1a1adc062484e54a0866944235db1695fda292a0ea024894"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "89f20334a32a623644fa01b73d2c7fb1e8ba63bb94aff2e52154b2fb794a0b01"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "bfd3bd380e66af839073487bcdb4934684b437f48b8880334cdc2afed1e4782c"
   end
 
   depends_on "cmake" => [:build, :test]
@@ -26,6 +27,8 @@ class Libxc < Formula
       -DDISABLE_LXC=OFF
       -DBUILD_SHARED_LIBS=ON
     ]
+    # Workaround to build with CMake 4
+    args << "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
 
     system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
     system "cmake", "--build", "build"
@@ -34,7 +37,7 @@ class Libxc < Formula
 
   test do
     # Common test files for both cmake and plain
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <stdio.h>
       #include <xc.h>
       int main()
@@ -43,14 +46,14 @@ class Libxc < Formula
         xc_version(&major, &minor, &micro);
         printf("%d.%d.%d", major, minor, micro);
       }
-    EOS
-    (testpath/"test.f90").write <<~EOS
+    C
+    (testpath/"test.f90").write <<~FORTRAN
       program lxctest
         use xc_f03_lib_m
       end program lxctest
-    EOS
+    FORTRAN
     # Simple cmake example
-    (testpath / "CMakeLists.txt").write <<~EOS
+    (testpath / "CMakeLists.txt").write <<~CMAKE
       cmake_minimum_required(VERSION 3.6)
       project(test_libxc LANGUAGES C Fortran)
       find_package(Libxc CONFIG REQUIRED)
@@ -58,7 +61,7 @@ class Libxc < Formula
       target_link_libraries(test_c PRIVATE Libxc::xc)
       add_executable(test_fortran test.f90)
       target_link_libraries(test_fortran PRIVATE Libxc::xcf03)
-    EOS
+    CMAKE
     # Test cmake build
     system "cmake", "-B", "build"
     system "cmake", "--build", "build"

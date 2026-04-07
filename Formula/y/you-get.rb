@@ -3,32 +3,27 @@ class YouGet < Formula
 
   desc "Dumb downloader that scrapes the web"
   homepage "https://you-get.org/"
-  url "https://files.pythonhosted.org/packages/09/1e/96540e807ec3b103625e9660e7a2c7a7eb9accb1b90bf85156ff50e2dfd3/you_get-0.4.1718.tar.gz"
-  sha256 "78560236a4d54ad6be200d172a828e39f49c0f07c867dcf1df670c66b5b7f096"
+  url "https://files.pythonhosted.org/packages/2d/85/f4a22b842bc0e0f57dc56ae54266dbc451547cee90bae9480131100ad92a/you_get-0.4.1743.tar.gz"
+  sha256 "cbc1250d577246ec9d422cef113882844c80d8729f32d3183a5fa76648a20741"
   license "MIT"
   head "https://github.com/soimort/you-get.git", branch: "develop"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "d25efad73bed5c8e4f9db2168a04091a3016eb250acd2b13ff70c609bbb8b49f"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "146364f8654a014b96a073ed0a1930952101a8879fa44c649b4e53e5081b9534"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "3fff144f83485ef99412b469080a382bb373f827021e75402867d7157789129a"
-    sha256 cellar: :any_skip_relocation, sonoma:         "7212a065dd2b2d973d3683e8694e62744b1c8383843f70c266596babec9376c1"
-    sha256 cellar: :any_skip_relocation, ventura:        "a3edbb32b61ed06db36dd323703a56988f9f8e56e03569148abc58016867e761"
-    sha256 cellar: :any_skip_relocation, monterey:       "39e8a008e755967a80cdf015c175be46e440f499866abd6896b98f103d051e84"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "5cc8917af8c27749dab9d801304b1cd7ab7b96bf8ceb9990ec21b2ec0973dccb"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "353172e5d59bb80ba8649ae0df6a338afdd45be4337da36d1361bd83a525d0c6"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "0ce30b54400af7fade21a7e10840f1a96908f42410410b89d9fec60fc4d577ea"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "d847407c34d58b17732d03aee26d1697cd0267b433c50a7a2e441bfbc5b22f2f"
+    sha256 cellar: :any_skip_relocation, sonoma:        "b9d7f293864afb731ac05e2459b3999f30e686ec0038df1424a3157690f2a29d"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "1ef649b713d146c3be808bdc771b6425b8f94fa242994add6b89a1cc9e562369"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "64940795ad6349d12f2b11f1f7657b10bc9471573f4858eb57f5dc9759392387"
   end
 
-  depends_on "python@3.12"
+  depends_on "python@3.14"
   depends_on "rtmpdump"
 
   resource "dukpy" do
-    url "https://files.pythonhosted.org/packages/d1/0b/402194ebcd92bb5a743106c0f4af8cf6fc75bcfeb441b90290accb197745/dukpy-0.4.0.tar.gz"
-    sha256 "677ec7102d1c1c511f7ef918078e8099778dbcea7caf3d6a2a2a72f72aa2d135"
-  end
-
-  resource "mutf8" do
-    url "https://files.pythonhosted.org/packages/ca/31/3c57313757b3a47dcf32d2a9bad55d913b797efc8814db31bed8a7142396/mutf8-1.0.6.tar.gz"
-    sha256 "1bbbefb67c2e5a57104750bb04b0912200b57b2fa9841be245279e83859cb346"
+    url "https://files.pythonhosted.org/packages/dd/fe/8cef39f269aed53e940c238bf9ceb3ca0f80d7f5be6df2c00a84d87ac5d8/dukpy-0.5.0.tar.gz"
+    sha256 "079fe2d65ac5e24df56806c6b4e1a26f92bb7f13dc764f4fb230a6746744c1ad"
   end
 
   def install
@@ -43,8 +38,7 @@ class YouGet < Formula
   end
 
   test do
-    system bin/"you-get", "--info", "https://youtu.be/he2a4xK8ctk"
-
     assert_match version.to_s, shell_output("#{bin}/you-get --version 2>&1")
+    assert_match "82 bytes", shell_output("#{bin}/you-get --info https://imgur.com/ZTZ6Xy1")
   end
 end

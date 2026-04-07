@@ -2,10 +2,13 @@ class Dbus < Formula
   # releases: even (1.12.x) = stable, odd (1.13.x) = development
   desc "Message bus system, providing inter-application communication"
   homepage "https://wiki.freedesktop.org/www/Software/dbus"
-  url "https://dbus.freedesktop.org/releases/dbus/dbus-1.14.10.tar.xz"
-  mirror "https://deb.debian.org/debian/pool/main/d/dbus/dbus_1.14.10.orig.tar.xz"
-  sha256 "ba1f21d2bd9d339da2d4aa8780c09df32fea87998b73da24f49ab9df1e36a50f"
+  url "https://dbus.freedesktop.org/releases/dbus/dbus-1.16.2.tar.xz"
+  mirror "https://deb.debian.org/debian/pool/main/d/dbus/dbus_1.16.2.orig.tar.xz"
+  sha256 "0ba2a1a4b16afe7bceb2c07e9ce99a8c2c3508e5dec290dbb643384bd6beb7e2"
   license any_of: ["AFL-2.1", "GPL-2.0-or-later"]
+  revision 1
+  compatibility_version 1
+  head "https://gitlab.freedesktop.org/dbus/dbus.git", branch: "main"
 
   livecheck do
     url "https://dbus.freedesktop.org/releases/dbus/"
@@ -13,65 +16,58 @@ class Dbus < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "f1435a361d873e109e1ca1d5ee6860afe9b1cfc2f8f34861ccbdd0072e1ee2c1"
-    sha256 arm64_ventura:  "16cb153287e8648faca1c3295230ee396e1bb673d8f02377f89e05543739d5c9"
-    sha256 arm64_monterey: "62820f7cd2eaa5f6740b545789d8e7c086bbf4bcbea8f9f4c80697093b44dfa3"
-    sha256 arm64_big_sur:  "044d1eb259c6839dd79eec4f8d16a857527bf208000796ac2b601dd95742aa34"
-    sha256 sonoma:         "49b5c4368f559f8babb1d20df4770eff544344fa54fec78eb79e48a449738f27"
-    sha256 ventura:        "6ed57658615731eac10b392a02031bd9e42025764bb806070c7acfea86bd8e5d"
-    sha256 monterey:       "16088446358af9272061f867619f705cbb53e1f50eae96698632a8ecbb0b4662"
-    sha256 big_sur:        "a1b4ecabee0fb8f2a28348cfc267bd805d40be8e27dd37ea1a8f2c7e988409ce"
-    sha256 x86_64_linux:   "9037402e48fc19b05f8b621e0e32efa3b4214513f0b4737894ef3d57704ce81d"
+    sha256 arm64_tahoe:   "708eed3cc7031e486c760cc9debe777b7e8de93faf74320b66d3bc42e27499c3"
+    sha256 arm64_sequoia: "5a51451acabb5ae56b5682e88a82dfa43cc6a2b653ca068198546bb72324bd0c"
+    sha256 arm64_sonoma:  "1be729814991108cc593bb8472e376947898f8bf94b73271c2238c329514a3ba"
+    sha256 arm64_ventura: "29098b5b3f154677a61c30b402b17fe2912e9efe1cd7917ee6ae754209fe1f29"
+    sha256 sonoma:        "438a1da22c323246b958e0fbc63c5e7405dba77e9274809ebd73ab8c886a19d7"
+    sha256 ventura:       "2f10ec74399e7ffb843022aa22bf11b088ab6b00d34da46d623fca78900f166b"
+    sha256 arm64_linux:   "f636ed77fc07ab232ec75012b8b5a69cee10f8f239d48b1d5622baa83d9d9d7e"
+    sha256 x86_64_linux:  "42841a5373f596cbccd52b4cf3eae4f3ec6a853309b14e36e869a7030fabd21a"
   end
 
-  head do
-    url "https://gitlab.freedesktop.org/dbus/dbus.git", branch: "master"
-
-    depends_on "autoconf" => :build
-    depends_on "autoconf-archive" => :build
-    depends_on "automake" => :build
-    depends_on "libtool" => :build
-  end
-
-  depends_on "pkg-config" => :build
+  depends_on "docbook" => :build
+  depends_on "docbook-xsl" => :build
+  depends_on "meson" => :build
+  depends_on "ninja" => :build
+  depends_on "pkgconf" => :build
   depends_on "xmlto" => :build
 
+  uses_from_macos "libxslt" => :build # for xsltproc
+  uses_from_macos "python" => :build
   uses_from_macos "expat"
 
-  # Patch applies the config templating fixed in https://bugs.freedesktop.org/show_bug.cgi?id=94494
-  # Homebrew pr/issue: 50219
-  patch do
-    on_macos do
-      url "https://raw.githubusercontent.com/Homebrew/formula-patches/0a8a55872e/d-bus/org.freedesktop.dbus-session.plist.osx.diff"
-      sha256 "a8aa6fe3f2d8f873ad3f683013491f5362d551bf5d4c3b469f1efbc5459a20dc"
-    end
-  end
+  # Remove deprecated keys from launchd plist.
+  # PR ref: https://gitlab.freedesktop.org/dbus/dbus/-/merge_requests/179
+  patch :DATA
 
   def install
     # Fix the TMPDIR to one D-Bus doesn't reject due to odd symbols
     ENV["TMPDIR"] = "/tmp"
     ENV["XML_CATALOG_FILES"] = "#{etc}/xml/catalog"
 
-    system "./autogen.sh", "--no-configure" if build.head?
-
-    args = [
-      "--disable-dependency-tracking",
-      "--prefix=#{prefix}",
-      "--localstatedir=#{var}",
-      "--sysconfdir=#{etc}",
-      "--enable-xml-docs",
-      "--disable-doxygen-docs",
-      "--without-x",
-      "--disable-tests",
+    args = %W[
+      -Dlocalstatedir=#{var}
+      -Dsysconfdir=#{etc}
+      -Dxml_docs=enabled
+      -Ddoxygen_docs=disabled
+      -Dmodular_tests=disabled
     ]
 
-    if OS.mac?
-      args << "--enable-launchd"
-      args << "--with-launchd-agent-dir=#{prefix}"
-    end
+    args << "-Dlaunchd_agent_dir=#{prefix}" << "-Ddbus_user=daemon" if OS.mac?
+    inreplace "bus/org.freedesktop.dbus-session.plist.in", "@DBUS_DAEMONDIR@", opt_bin
 
-    system "./configure", *args
-    system "make", "install"
+    # rpath is not set for meson build
+    ENV.append "LDFLAGS", "-Wl,-rpath,#{lib}"
+
+    system "meson", "setup", "build", *args, *std_meson_args
+    system "meson", "compile", "-C", "build", "--verbose"
+    system "meson", "install", "-C", "build"
+
+    # Manually create plist for system bus service
+    (prefix/"org.freedesktop.dbus-system.plist").write system_plist if OS.mac?
+    mkdir etc/"dbus-1/system.d"
+    mkdir etc/"dbus-1/session.d"
   end
 
   def post_install
@@ -79,11 +75,87 @@ class Dbus < Formula
     system bin/"dbus-uuidgen", "--ensure=#{var}/lib/dbus/machine-id"
   end
 
+  def caveats
+    on_macos do
+      <<~EOS
+        To start the session bus now and at login:
+
+          brew services start dbus
+
+        To start the system bus now and on boot, install and activate the included daemon:
+
+          sudo cp -f $(brew --prefix dbus)/org.freedesktop.dbus-system.plist /Library/LaunchDaemons
+          sudo launchctl bootstrap system /Library/LaunchDaemons/org.freedesktop.dbus-system.plist
+
+        If the daemon is already installed and running, restart it:
+
+          sudo launchctl kickstart -k system/org.freedesktop.dbus-system
+      EOS
+    end
+  end
+
   service do
     name macos: "org.freedesktop.dbus-session"
   end
 
+  def system_plist
+    <<~PLIST
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
+      <dict>
+        <key>Label</key>
+        <string>org.freedesktop.dbus-system</string>
+        <key>KeepAlive</key>
+        <dict>
+          <key>SuccessfulExit</key>
+          <false/>
+        </dict>
+        <key>ProgramArguments</key>
+        <array>
+          <string>#{opt_bin}/dbus-daemon</string>
+          <string>--nofork</string>
+          <string>--system</string>
+          <string>--nopidfile</string>
+        </array>
+        <key>Sockets</key>
+        <dict>
+          <key>unix_domain_listener</key>
+          <dict>
+            <key>SockPathName</key>
+            <string>#{var}/run/dbus/system_bus_socket</string>
+            <key>SockPathMode</key>
+            <integer>511</integer>
+          </dict>
+        </dict>
+      </dict>
+      </plist>
+    PLIST
+  end
+
   test do
-    system bin/"dbus-daemon", "--version"
+    assert_match version.to_s, shell_output("#{bin}/dbus-daemon --version")
   end
 end
+
+__END__
+diff --git a/bus/org.freedesktop.dbus-session.plist.in b/bus/org.freedesktop.dbus-session.plist.in
+index 40ff370..3c77fa9 100644
+--- a/bus/org.freedesktop.dbus-session.plist.in
++++ b/bus/org.freedesktop.dbus-session.plist.in
+@@ -5,15 +5,6 @@
+ 	<key>Label</key>
+ 	<string>org.freedesktop.dbus-session</string>
+ 
+-	<key>ServiceIPC</key>
+-	<true/>
+-
+-	<!-- Please uncomment on 10.4; OnDemand doesn't work properly there. -->
+-	<!--
+-	<key>OnDemand</key>
+-	<false />
+-	-->
+-
+ 	<key>ProgramArguments</key>
+ 	<array>
+ 		<string>@DBUS_DAEMONDIR@/dbus-daemon</string>

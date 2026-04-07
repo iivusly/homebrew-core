@@ -1,36 +1,41 @@
 class Pillow < Formula
   desc "Friendly PIL fork (Python Imaging Library)"
-  homepage "https://python-pillow.org"
-  url "https://files.pythonhosted.org/packages/cd/74/ad3d526f3bf7b6d3f408b73fde271ec69dfac8b81341a318ce825f2b3812/pillow-10.4.0.tar.gz"
-  sha256 "166c1cd4d24309b30d61f79f4a9114b7b2313d7450912277855ff5dfd7cd4a06"
+  homepage "https://python-pillow.github.io/"
+  url "https://files.pythonhosted.org/packages/8c/21/c2bcdd5906101a30244eaffc1b6e6ce71a31bd0742a01eb89e660ebfac2d/pillow-12.2.0.tar.gz"
+  sha256 "a830b1a40919539d07806aa58e1b114df53ddd43213d9c8b75847eee6c0182b5"
   license "HPND"
-  head "https://github.com/python-pillow/Pillow.git", branch: "master"
+  compatibility_version 1
+  head "https://github.com/python-pillow/Pillow.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any, arm64_sonoma:   "ccb180b86306c317c1bb86d0851af16db3cd9201ec73075a3f41de4ff45bf671"
-    sha256 cellar: :any, arm64_ventura:  "2c597522196c225fe2894826aeb6383dfc2238aed96434b9070c214f5957e97c"
-    sha256 cellar: :any, arm64_monterey: "ebe4315cc2b641f01e16b0935903ff67b468a6f9bef8d6e765a312f34429fc47"
-    sha256 cellar: :any, sonoma:         "144bb6d5a53ee094cd62bd3afb170e56a504b11f7473a09d66e8a3cb4a645bd8"
-    sha256 cellar: :any, ventura:        "b7a6bd36c51f17bdfa08b70e28043c17d03ce684c4b8386ff239c8a2d9d36051"
-    sha256 cellar: :any, monterey:       "e33f426090c7351563c784b9f7553e57d91648ae296d7240a0ae38592ee97f0d"
-    sha256               x86_64_linux:   "87f4aaed2277535ec83f77355fa3c3351c1b56ed688bd4225a87b2b54b1ef038"
+    sha256 cellar: :any, arm64_tahoe:   "6a1496db5f50e49e8b58127a4bbfdac444d7309ac18f51b4cd18301b48de3433"
+    sha256 cellar: :any, arm64_sequoia: "55149ea37a5ff3fe60129c1b9bc2b45b356f1a9802ab2ff8a81e07f17903b4c2"
+    sha256 cellar: :any, arm64_sonoma:  "797b3cb006116cd15ff08362d6b8452090519a6d2b55e5b22a6434967e91f750"
+    sha256 cellar: :any, sonoma:        "96237b57b45f02bcf8ca12873f171c4d3f57fee7061af6324336b801cd82a0da"
+    sha256               arm64_linux:   "7a656e113d98b8d928ad8bc41c95a1b568b41bd77b4ea54f04a28bc950bf856a"
+    sha256               x86_64_linux:  "fbc5cd28a3d00b3c107eaed67c20e2b4d934b5e4ba8da15a9789f31f3cfee022"
   end
 
-  depends_on "pkg-config" => :build
-  depends_on "python@3.11" => [:build, :test]
-  depends_on "python@3.12" => [:build, :test]
+  depends_on "cmake" => :build
+  depends_on "ninja" => :build
+  depends_on "pkgconf" => :build
+  depends_on "pybind11" => :build
+  depends_on "python@3.13" => [:build, :test]
+  depends_on "python@3.14" => [:build, :test]
   depends_on "freetype"
   depends_on "jpeg-turbo"
+  depends_on "libavif"
   depends_on "libimagequant"
   depends_on "libraqm"
   depends_on "libtiff"
   depends_on "libxcb"
   depends_on "little-cms2"
   depends_on "openjpeg"
-  depends_on "tcl-tk"
   depends_on "webp"
 
-  uses_from_macos "zlib"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def pythons
     deps.map(&:to_formula)
@@ -55,19 +60,56 @@ class Pillow < Formula
                      "-C", "lcms=enable",
                      "-C", "webp=enable",
                      "-C", "xcb=enable",
+                     "-C", "avif=enable",
                      "."
     end
   end
 
   test do
-    (testpath/"test.py").write <<~EOS
+    (testpath/"test.py").write <<~PYTHON
       from PIL import Image
       im = Image.open("#{test_fixtures("test.jpg")}")
       print(im.format, im.size, im.mode)
-    EOS
+    PYTHON
 
     pythons.each do |python|
       assert_equal "JPEG (1, 1) RGB", shell_output("#{python} test.py").chomp
+    end
+
+    # Test webp support
+    resource "test-webp" do
+      url "https://raw.githubusercontent.com/python-pillow/Pillow/refs/heads/main/Tests/images/flower.webp"
+      sha256 "af5bf1a0e420467c09d221fbfbb739646956c17f2b67f8280eacfacf87059a37"
+    end
+
+    testpath.install resource("test-webp")
+    test_webp = testpath/"flower.webp"
+    (testpath/"test_webp.py").write <<~PYTHON
+      from PIL import Image
+      im = Image.open("#{test_webp}")
+      print(im.format, im.size, im.mode)
+    PYTHON
+
+    pythons.each do |python|
+      assert_equal "WEBP (480, 360) RGB", shell_output("#{python} test_webp.py").chomp
+    end
+
+    # Test avif support
+    resource "test-avif" do
+      url "https://raw.githubusercontent.com/python-pillow/Pillow/refs/heads/main/Tests/images/avif/exif.avif"
+      sha256 "438dc63eb5aa722f4b23a93ac48cd0c19b7a575865c89e666c86b7ac363cff04"
+    end
+
+    testpath.install resource("test-avif")
+    test_avif = testpath/"exif.avif"
+    (testpath/"test_avif.py").write <<~PYTHON
+      from PIL import Image
+      im = Image.open("#{test_avif}")
+      print(im.format, im.size, im.mode)
+    PYTHON
+
+    pythons.each do |python|
+      assert_equal "AVIF (512, 512) RGB", shell_output("#{python} test_avif.py").chomp
     end
   end
 end

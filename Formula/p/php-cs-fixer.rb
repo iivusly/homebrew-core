@@ -1,12 +1,12 @@
 class PhpCsFixer < Formula
   desc "Tool to automatically fix PHP coding standards issues"
   homepage "https://cs.symfony.com/"
-  url "https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/releases/download/v3.64.0/php-cs-fixer.phar"
-  sha256 "7d67bbf0635df7239e0a09aef9999f6f91bbc7ef55541ee06aaed727453bfa5e"
+  url "https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/releases/download/v3.94.2/php-cs-fixer.phar"
+  sha256 "aaafc3a53b877c6741ddccac0a783f0fb73fff5f84fba5870d5dd306ee22dde0"
   license "MIT"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, all: "5e7bb7d7d6389d482cb7f639e9aa630bf194b2e8564b07bdab4156f571f584b1"
+    sha256 cellar: :any_skip_relocation, all: "0fd148bb9ffe19ac0d44b5457483177d220844b2c9399762887aaa9cbeb2e2cc"
   end
 
   depends_on "php"
@@ -14,21 +14,42 @@ class PhpCsFixer < Formula
   def install
     libexec.install "php-cs-fixer.phar"
 
-    (bin/"php-cs-fixer").write <<~EOS
+    (bin/"php-cs-fixer").write <<~PHP
       #!#{Formula["php"].opt_bin}/php
       <?php require '#{libexec}/php-cs-fixer.phar';
-    EOS
+    PHP
   end
 
   test do
-    (testpath/"test.php").write <<~EOS
+    (testpath/"composer.json").write <<~JSON
+      {
+        "require": {
+          "php": ">=8.0"
+        }
+      }
+    JSON
+    (testpath/"test.php").write <<~PHP
       <?php $this->foo(   'homebrew rox'   );
-    EOS
-    (testpath/"correct_test.php").write <<~EOS
+    PHP
+    (testpath/"correct_test.php").write <<~PHP
       <?php
 
       $this->foo('homebrew rox');
-    EOS
+    PHP
+
+    (testpath/".php-cs-fixer.dist.php").write <<~PHP
+      <?php
+
+      $finder = PhpCsFixer\\Finder::create()
+          ->in(__DIR__);
+
+      return (new PhpCsFixer\\Config())
+          ->setRiskyAllowed(false)
+          ->setRules([
+              '@PSR12' => true,
+          ])
+          ->setFinder($finder);
+    PHP
 
     system bin/"php-cs-fixer", "fix", "test.php"
     assert compare_file("test.php", "correct_test.php")

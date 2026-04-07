@@ -1,11 +1,9 @@
 class Proftpd < Formula
   desc "Highly configurable GPL-licensed FTP server software"
   homepage "http://www.proftpd.org/"
-  url "https://github.com/proftpd/proftpd/archive/refs/tags/v1.3.8b.tar.gz"
-  mirror "https://fossies.org/linux/misc/proftpd-1.3.8b.tar.gz"
-  mirror "https://ftp.osuosl.org/pub/blfs/conglomeration/proftpd/proftpd-1.3.8b.tar.gz"
-  version "1.3.8b"
-  sha256 "183ab7c6107de271a2959ff268f55c9b6c76b2cf0029e6584fccc019686601e0"
+  url "https://github.com/proftpd/proftpd/archive/refs/tags/v1.3.9.tar.gz"
+  mirror "https://fossies.org/linux/misc/proftpd-1.3.9.tar.gz/"
+  sha256 "4a5f13b666226813b4da0ade34535d325e204ab16cf8008c7353b1b5a972f74b"
   license "GPL-2.0-or-later"
 
   # Proftpd uses an incrementing letter after the numeric version for
@@ -18,42 +16,83 @@ class Proftpd < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "48a583547c7df3b834deccb641a235f8b0d562e0e2f27bc978b04dd3540a46ca"
-    sha256 arm64_ventura:  "a421f924d2ad5a50c4f5c05702449b09fa7c0f59a61eb61189bc43ba4f7b0625"
-    sha256 arm64_monterey: "759316ccf7c904a7d275df4b4729fd2f70c74f321352669c7e44a4ea4bd3870a"
-    sha256 sonoma:         "3093cf6430a010f08e2d9d0b532fe748af26894f2e89b48824e9b21a028a58ea"
-    sha256 ventura:        "b8c0a627557359dc1e034a717a37b788bf1d020b98a48501a6b047ed9eb0dd35"
-    sha256 monterey:       "29bbea5b246e883d1e9ff9cb2f799d6a85d1e8eb0325d64c88795a70f2c57f9b"
-    sha256 x86_64_linux:   "a979d3cf427cd3e56eaf0c71a110d7bb5ff5517d97d60ccabfd7bc8be25c7af2"
+    rebuild 1
+    sha256 arm64_tahoe:   "0403d12abcf2e2503d5a0cb195188de6ad4f9276d99b7f80b39da7c5fc815ccf"
+    sha256 arm64_sequoia: "4e369912c18c4ea78435f13a74ce45180e656d04290f20ff398443de3a68ee9b"
+    sha256 arm64_sonoma:  "12eff8d0547d82048f227c50da34717e7595a7a07ac784ae5c2978ce676b0328"
+    sha256 sonoma:        "294004644b0e2d4799b1e4753c2ef6cc44a93001b017a7d177be890cf79a647a"
+    sha256 arm64_linux:   "8d1a0954158c3c5fad4e736cf9ddb60802cf8e1fe8317d70ea3ba766b3ba2c30"
+    sha256 x86_64_linux:  "cf38eeacafb8c58b2a3e5e1bc2fb67426dfe0f65ce7d13d037edacd41f834f3e"
   end
+
+  depends_on "inetutils" => :test
 
   uses_from_macos "libxcrypt"
 
+  on_macos do
+    depends_on "gettext"
+  end
+
   def install
-    # fixes unknown group 'nogroup'
-    # http://www.proftpd.org/docs/faq/linked/faq-ch4.html#AEN434
-    inreplace "sample-configurations/basic.conf", "nogroup", "nobody"
+    install_user = ENV["USER"]
+    install_group = Utils.safe_popen_read("groups").split.first
+
+    # MacOS nobody/nogroup have negative uid/gid which causes errors when running service
+    # Linux also blame about uid e.g. unable to set UID to 65534, current UID: 1000
+    # So, we replace them with the user and group used for installation
+    inreplace "sample-configurations/basic.conf" do |s|
+      s.gsub! "nobody", install_user
+      s.gsub! "nogroup", install_group
+    end
 
     system "./configure", "--prefix=#{prefix}",
                           "--sbindir=#{sbin}",
                           "--sysconfdir=#{etc}",
-                          "--localstatedir=#{var}"
+                          "--localstatedir=#{var}",
+                          "--enable-nls"
     ENV.deparallelize
-    install_user = ENV["USER"]
-    install_group = Utils.safe_popen_read("groups").split.first
     system "make", "all"
     system "make", "INSTALL_USER=#{install_user}", "INSTALL_GROUP=#{install_group}", "install"
   end
 
   service do
-    run [opt_sbin/"proftpd"]
+    run [opt_sbin/"proftpd", "--nodaemon"]
     keep_alive false
     working_dir HOMEBREW_PREFIX
-    log_path "/dev/null"
-    error_log_path "/dev/null"
+    log_path File::NULL
+    error_log_path File::NULL
   end
 
   test do
-    assert_match "ProFTPD Version #{version}", shell_output("#{opt_sbin}/proftpd -v")
+    assert_match version.to_s, shell_output("#{opt_sbin}/proftpd --version")
+
+    port = free_port
+    install_user = ENV["USER"]
+    install_group = Utils.safe_popen_read("groups").split.first
+    (testpath/"proftpd.conf").write <<~EOS
+      ServerName      Homebrew-Test
+      ServerType      standalone
+      DefaultServer   on
+      Port            #{port}
+      UseIPv6         off
+      Umask           022
+      MaxInstances    3
+      User            #{install_user}
+      Group           #{install_group}
+      ScoreboardFile  #{testpath}/proftpd.scoreboard
+      PidFile         #{testpath}/proftpd.pid
+    EOS
+
+    pid = spawn sbin/"proftpd", "--config", testpath/"proftpd.conf", "--nodaemon"
+    sleep 2
+    output = pipe_output(
+      "#{Formula["inetutils"].opt_bin}/ftp --no-login --no-prompt --verbose",
+      "open 127.0.0.1 #{port}\nuser anonymous anonymous\nquit\n",
+      0,
+    )
+    assert_match "Connected to 127.0.0.1.\n220 ProFTPD Server (Homebrew-Test)", output
+  ensure
+    Process.kill "TERM", pid
+    Process.wait pid
   end
 end

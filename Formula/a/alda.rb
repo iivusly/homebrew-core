@@ -1,22 +1,22 @@
 class Alda < Formula
   desc "Music programming language for musicians"
   homepage "https://alda.io"
-  url "https://github.com/alda-lang/alda/archive/refs/tags/release-2.3.1.tar.gz"
-  sha256 "8136f4fe1c74344ad8b27d23329e23620fdea76fe8892565ff308bda3ceac8cd"
+  url "https://github.com/alda-lang/alda/archive/refs/tags/release-2.4.2.tar.gz"
+  sha256 "08b38d262970649a2a39b9f3c9044cf6be0da1459829ec057be8abed641cd7a9"
   license "EPL-2.0"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "f8569e28905afb0cbce78c191bed4a4f82919a5a4c33dbf90d1d1501f9c039b2"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "0ce57b03fecb0b4155c55b19281fabb971f3132b90e7a4bdb9323465d27b09a3"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "e870439ad6cdb59433ea8b3983a38b56aae62c83c4897b9d00f32098eb09bf3b"
-    sha256 cellar: :any_skip_relocation, sonoma:         "449cecf972dca30dee2e236c608b70f32c99071d792597e703bf21247f580b3b"
-    sha256 cellar: :any_skip_relocation, ventura:        "60bd98f1ca49d93de8feb9a7034951e5c8351011fe2ff78d76fd33bb0eb20eb4"
-    sha256 cellar: :any_skip_relocation, monterey:       "77bff4c2e20242de41cdb57f9b794f013d2f3a797bd474f36a5da289dfefbc3f"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "666e3c967b722e5433d5c9a24f0efa73289af18ea5700042f2e275b09eb8f741"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "a7b6b90a96d613fcacf7d527fbb1320348c6e18d46c8229e221f77cb4aecb0d4"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "a3a5a37ab38ce4dfbde1dd4c3a38e949c8039296e6e20e5d7d418b2f5b902df5"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "1f35d3b973cf1cf6ca203a5e9d65e5f7644c203977681b6a3892909d0aa58cb1"
+    sha256 cellar: :any_skip_relocation, sonoma:        "18ca9c1f936228079f8ca4a7dc88e52c855315670288577d888f932e343bfcfc"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "672cfb7c4cc1ef4595170c4c189b0aa47b694b48023475b9f47540babd7ba221"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "8e899e73ccd41f9a13d109c4853b42628fcc98c21627828eac517b2939df9938"
   end
 
   depends_on "go" => :build
-  depends_on "gradle" => :build
+  # Issue ref: https://github.com/alda-lang/alda/issues/510
+  depends_on "gradle@8" => :build
   depends_on "openjdk"
 
   def install
@@ -30,6 +30,8 @@ class Alda < Formula
       libexec.install "build/libs/alda-player-fat.jar"
       bin.write_jar_script libexec/"alda-player-fat.jar", "alda-player"
     end
+
+    generate_completions_from_executable(bin/"alda", shell_parameter_format: :cobra)
   end
 
   test do

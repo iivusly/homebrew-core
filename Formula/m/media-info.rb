@@ -1,9 +1,10 @@
 class MediaInfo < Formula
   desc "Unified display of technical and tag data for audio/video"
   homepage "https://mediaarea.net/"
-  url "https://mediaarea.net/download/binary/mediainfo/24.06/MediaInfo_CLI_24.06_GNU_FromSource.tar.bz2"
-  sha256 "4001264380c5f4ed224b542de2b6f6c517aa64b9364b194e2ab2939f355fbbfc"
+  url "https://mediaarea.net/download/binary/mediainfo/26.01/MediaInfo_CLI_26.01_GNU_FromSource.tar.xz"
+  sha256 "3e70f27783521c31d6e852bd1982cb8858b9633982b66967a56d5364fb856de3"
   license "BSD-2-Clause"
+  compatibility_version 1
   head "https://github.com/MediaArea/MediaInfo.git", branch: "master"
 
   livecheck do
@@ -12,20 +13,22 @@ class MediaInfo < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "24ab01c2d04ff3dfef9140f7fb1c4c08a40f11f83a2d073cb6d0d2a9299e3947"
-    sha256 cellar: :any,                 arm64_ventura:  "e6bb4bf566a600f98b90ffbd502baff4e4612b762225bfe54d0e747058caade4"
-    sha256 cellar: :any,                 arm64_monterey: "0de46f4d1f87a446d0564bf44c4ecd1c04304053c0b2481c7f4ee84ab04648ba"
-    sha256 cellar: :any,                 sonoma:         "c3a1f44a8369d15d65ba73097f43086eac1acdc487f4cb23324d0f96540ca136"
-    sha256 cellar: :any,                 ventura:        "984d8dc333983a7fe824a0af5a6e70ddd094fa800e5af63e50fe03204fd81657"
-    sha256 cellar: :any,                 monterey:       "e8eabd1e4388f0ab62f33accfac14840a66087449e738380efc26611cf9f05aa"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "5113125409dbbbf87d710bfe56592ff9593cde08412e220757e4ee9de3fdcefb"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "5b5d6d84888dccc491ecfda9b9087a1e6fa2ef28bdcec51f04299acf5f6e9784"
+    sha256 cellar: :any,                 arm64_sequoia: "dea2b4bca874c50ca15b8a72b87c64c85547b5fc140dad52a9b4605cdf4423d5"
+    sha256 cellar: :any,                 arm64_sonoma:  "12cb1ce62ccc9f7361ef4679096c8f05a192cc104605d0e4b7d08b59b8a227e3"
+    sha256 cellar: :any,                 sonoma:        "8ab936fe98aa53c1024b18f3ecf04cd2fdeecb1adbcc8c15217a1295e5a15862"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "5fb621fe32dd159771322e19da045f1a59edf870d5d23b77b3f8ab3e059facdc"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "3621a21d2d98ecdff68cec1e0cd313c001083e3069c20cc63491ef4a4baf6d6f"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "libmediainfo"
   depends_on "libzen"
 
-  uses_from_macos "zlib"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     cd "MediaInfo/Project/GNU/CLI" do

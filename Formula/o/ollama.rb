@@ -2,8 +2,8 @@ class Ollama < Formula
   desc "Create, run, and share large language models (LLMs)"
   homepage "https://ollama.com/"
   url "https://github.com/ollama/ollama.git",
-      tag:      "v0.3.9",
-      revision: "a1cef4d0a5f31280ea82b350605775931a6163cb"
+      tag:      "v0.20.2",
+      revision: "4589fa2cf5afd15fb19aca96c15b5fbf885d11cf"
   license "MIT"
   head "https://github.com/ollama/ollama.git", branch: "main"
 
@@ -16,26 +16,60 @@ class Ollama < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "ed0184c5d99bac1ddbe92009404af8b5b6bae6230a95a7a5b7dca6bae8b57875"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "7be4081d1b10cc8d1ab998eca7cda1a788c3cd548f27ac513e082de9ea1e0650"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "de1c22dbe45f62dcd9e6425e897cd767b293b9c086d971e2d6336d36cd344a18"
-    sha256 cellar: :any_skip_relocation, sonoma:         "3cb9d56cf374f9b502df166b1b6f0ac0be0bf25c83df41c22ffd112a5cc2b47a"
-    sha256 cellar: :any_skip_relocation, ventura:        "8cdb70b8d3f573ee365bdaf2df4af59a109ef0be81c9b8f05a7b7aa433942781"
-    sha256 cellar: :any_skip_relocation, monterey:       "277d34feef2e648cd7fed1d0a53836cf0286d247c8fb9ff720b4653acbbe2a4d"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "d6a665044d572520e302b4c79df100a572c46aafdad18dae5fa1fdc3ee606549"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "866dd250ceefefb7a13a14487a7c0c82d0066cded9d676ba47e21181b7d68774"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "5a61a544d14e06129c7937477e728491be4b5fafafe713716c581ddef0b97faa"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "ad19572014a8cbf16cb8e5db30282bb48908bea96acaabba29986cca82d26593"
+    sha256 cellar: :any_skip_relocation, sonoma:        "33cd2dd99427abf0febe059552dcf232492069d9b1ce09208d653200d3d8f1db"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "6dfb834bc3b7642d963de3b07c1ccefcc4d96133d4149b3406dedb0690b44390"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "5870a2c09a23f8947e47018d3d5729c89db1f96974f9cda362444a7c32780fd1"
   end
 
   depends_on "cmake" => :build
   depends_on "go" => :build
 
-  def install
-    # Fix build by setting SDKROOT
-    ENV["SDKROOT"] = MacOS.sdk_path if OS.mac?
-    # Fix "ollama --version"
-    inreplace "version/version.go", /var Version string = "[\d.]+"/, "var Version string = \"#{version}\""
+  on_macos do
+    on_arm do
+      depends_on "mlx-c" => :no_linkage
 
-    system "go", "generate", "./..."
-    system "go", "build", *std_go_args(ldflags: "-s -w")
+      # Fixes x/imagegen/mlx wrapper generation with system-installed mlx-c headers.
+      # upstream pr ref, https://github.com/ollama/ollama/pull/14201
+      if build.stable?
+        patch do
+          url "https://github.com/ollama/ollama/commit/c051122297824c223454b82f4af3afe94379e6dd.patch?full_index=1"
+          sha256 "a22665cd1acec84f6bb53c84dd9a40f7001f2b1cbe2253aed3967b4401cde6a0"
+        end
+      end
+    end
+  end
+
+  conflicts_with cask: "ollama-app"
+
+  def install
+    # Remove ui app directory
+    rm_r("app")
+
+    ENV["CGO_ENABLED"] = "1"
+
+    # Silence tens of thousands of SDK warnings
+    ENV["SDKROOT"] = MacOS.sdk_path if OS.mac?
+
+    ldflags = %W[
+      -s -w
+      -X github.com/ollama/ollama/version.Version=#{version}
+      -X github.com/ollama/ollama/server.mode=release
+    ]
+
+    mlx_args = []
+
+    # Flags for MLX (Apple silicon only)
+    if OS.mac? && Hardware::CPU.arm?
+      mlx_rpath = rpath(target: Formula["mlx-c"].opt_lib)
+      ldflags << "-extldflags '-Wl,-rpath,#{mlx_rpath}'"
+      mlx_args << "-tags=mlx"
+    end
+
+    system "go", "generate", *mlx_args, "./x/imagegen/mlx"
+    system "go", "build", *mlx_args, *std_go_args(ldflags:)
   end
 
   service do
@@ -44,18 +78,21 @@ class Ollama < Formula
     working_dir var
     log_path var/"log/ollama.log"
     error_log_path var/"log/ollama.log"
+    environment_variables OLLAMA_FLASH_ATTENTION: "1",
+                          OLLAMA_KV_CACHE_TYPE:   "q8_0"
   end
 
   test do
     port = free_port
     ENV["OLLAMA_HOST"] = "localhost:#{port}"
 
-    pid = fork { exec bin/"ollama", "serve" }
-    sleep 3
+    pid = spawn bin/"ollama", "serve"
     begin
+      sleep 3
       assert_match "Ollama is running", shell_output("curl -s localhost:#{port}")
     ensure
-      Process.kill "SIGTERM", pid
+      Process.kill "TERM", pid
+      Process.wait pid
     end
   end
 end

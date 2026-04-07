@@ -1,19 +1,18 @@
 class Cmctl < Formula
   desc "Command-line tool to manage cert-manager"
   homepage "https://cert-manager.io"
-  url "https://github.com/cert-manager/cmctl/archive/refs/tags/v2.1.0.tar.gz"
-  sha256 "f2bf7e2a14c6df8e8e2f0db3cb4f823f6efb4c83830daddc30a04ba84bbec308"
+  url "https://github.com/cert-manager/cmctl/archive/refs/tags/v2.4.1.tar.gz"
+  sha256 "70c9f5e1fbcf526c87c5a862afca663b816e3ec1eda2d55c7edf70e33fb00fe5"
   license "Apache-2.0"
   head "https://github.com/cert-manager/cmctl.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "3763898e4052a02acd7ac6e34d202be32d3e1d19eeaefcb21f41edef8fe2e7e1"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "db936289d395ba64420047543a9b6ce28723f5f105cbe09696ea1a02760a1d6f"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "2840292dc90ae29acd2f5e5c32f97fdf465b2eb452c248f31a74c1c1b79c62d0"
-    sha256 cellar: :any_skip_relocation, sonoma:         "3b22e3483206db05165f6bc2f94b139086ec940f278f9a2b324bbf591ed799c0"
-    sha256 cellar: :any_skip_relocation, ventura:        "5bbdd05d0a0ec426254141c92842cc2d8bebbaec731af29f6ff081a0eed666a8"
-    sha256 cellar: :any_skip_relocation, monterey:       "6e3e20cfd5c915f404b2f4b82f351b3c6e7d4795f7bcf19e95bfab74953829fb"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "9dee7c650ed318b051cfc304c8a7575768c34ea985603354c5d63c62c14eaee5"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "291b511a8c5fa486f5cf94358527770d4f0307563b221425a64c0a9a2c06a63d"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "5fc1d5ac986e39da4fa61785b9ce49db17292a37b61957d94e0fa25ce80bb174"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "b27b55bc9fdc8f36c7e7dd57412dd18959bfafb4e1910b793145129cce0a6646"
+    sha256 cellar: :any_skip_relocation, sonoma:        "f61491c8f73e2de22532677e52eb0987cf27a3a2b95ba5298c2a2984d29a8fc6"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "dd0970ba25aa60ad39e6546b58f92e7a90e15def9ac788c700f6fa19eb074a87"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "2648686a59c1ddaebd2b738b36e4ded146c5ff7e1393ec3f84c20b8acdb4f379"
   end
 
   depends_on "go" => :build
@@ -30,7 +29,7 @@ class Cmctl < Formula
 
     system "go", "build", *std_go_args(ldflags:)
 
-    generate_completions_from_executable(bin/"cmctl", "completion")
+    generate_completions_from_executable(bin/"cmctl", shell_parameter_format: :cobra)
   end
 
   test do
@@ -41,7 +40,7 @@ class Cmctl < Formula
     # we find the error about connecting
     assert_match "error: error finding the scope of the object", shell_output("#{bin}/cmctl check api 2>&1", 1)
     # The convert command *can* be tested locally.
-    (testpath/"cert.yaml").write <<~EOF
+    (testpath/"cert.yaml").write <<~YAML
       apiVersion: cert-manager.io/v1beta1
       kind: Certificate
       metadata:
@@ -52,13 +51,12 @@ class Cmctl < Formula
           name: test-issuer
           kind: Issuer
         commonName: example.com
-    EOF
+    YAML
 
-    expected_output = <<~EOF
+    expected_output = <<~YAML
       apiVersion: cert-manager.io/v1
       kind: Certificate
       metadata:
-        creationTimestamp: null
         name: test-certificate
       spec:
         commonName: example.com
@@ -67,7 +65,7 @@ class Cmctl < Formula
           name: test-issuer
         secretName: test
       status: {}
-    EOF
+    YAML
 
     assert_equal expected_output, shell_output("#{bin}/cmctl convert -f cert.yaml")
   end

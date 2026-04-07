@@ -1,14 +1,11 @@
 class Fdclone < Formula
   desc "Console-based file manager"
   homepage "https://hp.vector.co.jp/authors/VA012337/soft/fd/"
-  url "http://www.unixusers.net/src/fdclone/FD-3.01j.tar.gz"
+  url "https://deb.debian.org/debian/pool/main/f/fdclone/fdclone_3.01j.orig.tar.gz"
+  mirror "http://www.unixusers.net/src/fdclone/FD-3.01j.tar.gz"
+  version "3.01j"
   sha256 "fe5bb67eb670dcdb1f7368698641c928523e2269b9bee3d13b3b77565d22a121"
   license :cannot_represent
-
-  livecheck do
-    url :homepage
-    regex(%r{href=.*?\./FD[._-]v?(\d+(?:\.\d+)+[a-z]?)\.t}i)
-  end
 
   bottle do
     sha256 arm64_sonoma:   "78daa3983f98bea1071db92ef70b8c9a3ea5e01f1d36a32d093de1512b1a65d8"
@@ -20,11 +17,14 @@ class Fdclone < Formula
     sha256 monterey:       "6468c945d2556066eab41175891ea46918c319398a2f10767a0af4d4dc698c9f"
     sha256 big_sur:        "c1c2dcd4d0e97e717dd9444c9ac8b37d77810c8162a481106d68be3c54f999a9"
     sha256 catalina:       "6272d033132a7a2c355ab19629241021087c606de3114e2ebe4aa301e6bee840"
-    sha256 mojave:         "b3a56f6b62622696f4da6554a487557a57c0875c2aba28705e300b7207f6a8ce"
-    sha256 high_sierra:    "f894bed33d254c5c48341485e835f945b60e632a0ecbf484c818f12c61350122"
+    sha256 arm64_linux:    "f711ab13e2d255a899f98e9b4d1938dd8fd94236362c62a8fcdbcd3b9346dc54"
     sha256 x86_64_linux:   "b7a4047ede40d7981d2496e42cf32f2886a9bb182a2275f4697b70f20ec5f7f3"
   end
 
+  # Upstream homepage is gone and doesn't build on macOS Sequoia and later
+  deprecate! date: "2026-01-05", because: :repo_removed
+
+  depends_on maximum_macos: [:sonoma, :build]
   depends_on "nkf" => :build
 
   uses_from_macos "ncurses"
@@ -32,7 +32,7 @@ class Fdclone < Formula
   conflicts_with "fd", because: "both install `fd` binaries"
 
   patch do
-    url "https://raw.githubusercontent.com/Homebrew/formula-patches/86107cf/fdclone/3.01b.patch"
+    url "https://raw.githubusercontent.com/Homebrew/homebrew-core/1cf441a0/Patches/fdclone/3.01b.patch"
     sha256 "c4159db3052d7e4abec57ca719ff37f5acff626654ab4c1b513d7879dcd1eb78"
   end
 

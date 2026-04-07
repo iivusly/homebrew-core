@@ -1,24 +1,25 @@
 class Noseyparker < Formula
   desc "Finds secrets and sensitive information in textual data and Git history"
   homepage "https://github.com/praetorian-inc/noseyparker"
-  url "https://github.com/praetorian-inc/noseyparker/archive/refs/tags/v0.19.0.tar.gz"
-  sha256 "cfa74ef3e2e3472823ac712f384e4fbc99f84cc9a9752cf4d22266b4e93921ca"
+  url "https://github.com/praetorian-inc/noseyparker/archive/refs/tags/v0.24.0.tar.gz"
+  sha256 "df31128ec64c0bdb7e8c6917ad68a0c69fe4fe1bd4355332b94938ed08edc2ce"
   license "Apache-2.0"
   head "https://github.com/praetorian-inc/noseyparker.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "73451211b1237ce2225dbd5a9cae670157855bc01539e74a88530edd11450f09"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "03b0627b0dc3f78e9e7f9eb4c7ea59825ce5cdaba2238a672ba267f82ca73bf0"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "5bdb05e0bd2c3702f2f866f3c4ad3e9379995fb30c4bea806072d49719b77d32"
-    sha256 cellar: :any_skip_relocation, sonoma:         "f0df42f329e6028c4c041b521cf0db2733fbf2ba8f48f2c5e20ed568cb8d6cd4"
-    sha256 cellar: :any_skip_relocation, ventura:        "0e0651a8ca823494887e7b0d89f88355c21db86fc1d063d267ac9ea1a77ec63a"
-    sha256 cellar: :any_skip_relocation, monterey:       "e7f6d40fc849c8eb7ee88e2b046bf8e5708ea78a9b7606bb9f64140edba1f068"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "a00ef9f997cfd2e90f6d0414985ba9e75653918d77ae47e9fc66f3f8be466038"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "bbce92800f87da1efec15e48fadc645677ac1c690ee9d7d460d824bc088b5a18"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "b3d50cf968e60eff8c5e51bf937bfd8528a7d7cb89d5df6ad8467b50b6cc7893"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "17369ef3f870c5a18489e7baed30d33fb571fadcade62ec1091f6d54f00abe86"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "6ab5f7973f25bc569e1a79c7d978739a9428ce3954b4775efa76e20718e8e0d4"
+    sha256 cellar: :any_skip_relocation, sonoma:        "2aa6a8b34c8484d0fc36febad3e465ac48f53b71ff4f596490dfee97688ee008"
+    sha256 cellar: :any_skip_relocation, ventura:       "7be747e4d857c18ec1b1f4345d5f4745c65c54c782b2efc50bda45f1aa268d6d"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "d86b9a2d4377d12ec9783e9855bc8bbd8ba06270860ff85521c0adf507fd0448"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "99c219b6991576f9ee16f57cb2f08f5d2081dacb1f5ce8c61136ae8c7ffbf470"
   end
 
   depends_on "boost" => :build
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "rust" => :build
 
   on_linux do
@@ -29,7 +30,8 @@ class Noseyparker < Formula
     ENV["VERGEN_GIT_BRANCH"] = "main"
     ENV["VERGEN_GIT_COMMIT_TIMESTAMP"] = time.iso8601
     ENV["VERGEN_GIT_SHA"] = tap.user
-    system "cargo", "install", "--features", "release", *std_cargo_args(path: "crates/noseyparker-cli")
+
+    system "cargo", "install", *std_cargo_args(path: "crates/noseyparker-cli", features: "release")
     mv bin/"noseyparker-cli", bin/"noseyparker"
 
     generate_completions_from_executable(bin/"noseyparker", "generate", "shell-completions", "--shell")
@@ -38,7 +40,7 @@ class Noseyparker < Formula
   test do
     assert_match version.to_s, shell_output("#{bin}/noseyparker -V")
 
-    output = shell_output(bin/"noseyparker scan --git-url https://github.com/homebrew/.github")
+    output = shell_output("#{bin}/noseyparker scan --git-url https://github.com/homebrew/.github")
     assert_match "0/0 new matches", output
   end
 end

@@ -1,8 +1,8 @@
 class Omniorb < Formula
   desc "IOR and naming service utilities for omniORB"
   homepage "https://omniorb.sourceforge.io/"
-  url "https://downloads.sourceforge.net/project/omniorb/omniORB/omniORB-4.3.2/omniORB-4.3.2.tar.bz2"
-  sha256 "1c745330d01904afd7a1ed0a5896b9a6e53ac1a4b864a48503b93c7eecbf1fa8"
+  url "https://downloads.sourceforge.net/project/omniorb/omniORB/omniORB-4.3.4/omniORB-4.3.4.tar.bz2"
+  sha256 "79720d415d23cd8da99287a4ef4da0aa1bd34d3e4c7b1530715600adc5ed3dc3"
   license all_of: ["GPL-2.0-or-later", "LGPL-2.1-or-later"]
 
   livecheck do
@@ -11,32 +11,49 @@ class Omniorb < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "8f30cde3ccdad77bf9eab6b1479eddf61b5fac1720562b583fa2f299ef611d08"
-    sha256 cellar: :any,                 arm64_ventura:  "0c95065778587f6e4b405c7db738f2a08b5aeb7fffd8e9ad0ee106e256ecebf9"
-    sha256 cellar: :any,                 arm64_monterey: "f2a6a5138718643cfd16256f7cc46040a96cab9a4daf450ed1965bceac4eebb9"
-    sha256 cellar: :any,                 sonoma:         "c5f6d4a6d03750e64208d038da5448b17d5121331f96a2b8227cd16e2854ea27"
-    sha256 cellar: :any,                 ventura:        "d637dcdb67360e997a38e45136c77874ec49239853dc0e038c6723851967051c"
-    sha256 cellar: :any,                 monterey:       "e723599e651a6da612005e20ff8081f75cd6a259c3ee000e4eb27a81624eee34"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "7c6ed8ba241de3cc97f66834684d84262aadd78bf9f99436c7ad7a9f09255323"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "69b171103aff52ec76b37157af9cafc619a8ab5f65daa0676ac03a39f94b3fcd"
+    sha256 cellar: :any,                 arm64_sequoia: "be7ed7887d18f0c634f0a9a0fcf50e3baad81ac4dc19485a380ccef79b39c60f"
+    sha256 cellar: :any,                 arm64_sonoma:  "b7e79d9bd6cf2c3146ad1aae8fda733fab5fcb6977c10b8bf1e1f82779fc4f0d"
+    sha256 cellar: :any,                 sonoma:        "4dd41368f4fde967adde35d8839e3e20078e32b13e41baa1fd852c8e3afffe36"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "6fb616f204dc7acf360397e4aeea7d145d6c5eb32c27f152de10c771a042ac2b"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "7a82a3a9f22891f7155ca75558b834b0465338da0c4a03875648428527b64dcd"
   end
 
-  depends_on "pkg-config" => :build
-  depends_on "python@3.12"
+  depends_on "pkgconf" => :build
+  depends_on "openssl@3"
+  depends_on "python@3.14"
+  depends_on "zstd"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   resource "bindings" do
-    url "https://downloads.sourceforge.net/project/omniorb/omniORBpy/omniORBpy-4.3.2/omniORBpy-4.3.2.tar.bz2"
-    sha256 "cb5717d412a101baf430f598cac7d69231884dae4372d8e2adf3ddeebc5f7ebb"
+    url "https://downloads.sourceforge.net/project/omniorb/omniORBpy/omniORBpy-4.3.4/omniORBpy-4.3.4.tar.bz2"
+    sha256 "a709c3c77b9c6b08616e1c9e12a5a9b9d5ccc1f2dcf6f647f205018d77f819a7"
+
+    livecheck do
+      formula :parent
+    end
   end
 
   def install
     odie "bindings resource needs to be updated" if version != resource("bindings").version
 
-    ENV["PYTHON"] = python3 = which("python3.12")
+    # Help old config scripts identify arm64 linux
+    build_arg = []
+    build_arg << "--build=aarch64-unknown-linux-gnu" if OS.linux? && Hardware::CPU.arm64?
+
+    ENV["PYTHON"] = python3 = which("python3.14")
     xy = Language::Python.major_minor_version python3
     inreplace "configure",
               /am_cv_python_version=`.*`/,
               "am_cv_python_version='#{xy}'"
-    system "./configure", "--prefix=#{prefix}"
+    args = build_arg + ["--with-openssl"]
+    args << "--enable-cfnetwork" if OS.mac?
+
+    system "./configure", *args, *std_configure_args
     system "make"
     system "make", "install"
 
@@ -44,7 +61,7 @@ class Omniorb < Formula
       inreplace "configure",
                 /am_cv_python_version=`.*`/,
                 "am_cv_python_version='#{xy}'"
-      system "./configure", "--prefix=#{prefix}"
+      system "./configure", *build_arg, *std_configure_args
       ENV.deparallelize # omnipy.cc:392:44: error: use of undeclared identifier 'OMNIORBPY_DIST_DATE'
       system "make", "install"
     end

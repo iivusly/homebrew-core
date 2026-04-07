@@ -1,12 +1,13 @@
 class FfmpegAT6 < Formula
   desc "Play, record, convert, and stream audio and video"
   homepage "https://ffmpeg.org/"
-  url "https://ffmpeg.org/releases/ffmpeg-6.1.2.tar.xz"
-  sha256 "3b624649725ecdc565c903ca6643d41f33bd49239922e45c9b1442c63dca4e38"
+  url "https://ffmpeg.org/releases/ffmpeg-6.1.4.tar.xz"
+  sha256 "a231e3d5742c44b1cdaebfb98ad7b6200d12763e0b6db9e1e2c5891f2c083a18"
   # None of these parts are used by default, you have to explicitly pass `--enable-gpl`
   # to configure to activate them. In this case, FFmpeg's license changes to GPL v2+.
   license "GPL-2.0-or-later"
-  revision 1
+  revision 2
+  compatibility_version 1
 
   livecheck do
     url "https://ffmpeg.org/download.html"
@@ -14,18 +15,18 @@ class FfmpegAT6 < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "59a1fcc070a68cb00b4cc727ea94cc56d7f896234bd4113f2f1d1f9526a43636"
-    sha256 arm64_ventura:  "014ef7776c1cb8bd6b36ac9baebc4de35f0f5562920183e7eebe03535c328049"
-    sha256 arm64_monterey: "ca6907ffd75b4f3d6f19ffaa58c330f76ded2a36c3d5b85c5cf42631b9e25837"
-    sha256 sonoma:         "ae781df20eaa0f25f97d952c5afe41c992de3c283c1fbf97a47e1574f7b97ad9"
-    sha256 ventura:        "e0f37db5662325977108243edae749897e7ba34084a6e7b860d487aee9da5d54"
-    sha256 monterey:       "e9d189fc2bb954b554124894b1c0d6ed79761fc358adae73309c39ad5b1b9843"
-    sha256 x86_64_linux:   "e6a76d6257d26c5dbf43d8844c0abd28afad3d056bd7dfffc1b7bdf850a526fe"
+    rebuild 1
+    sha256 arm64_tahoe:   "84a5c1dfd385e95fffee6cdeac7823e60b497237ec57f371426b822cf24bbb38"
+    sha256 arm64_sequoia: "97d4006597c5496be65ae7b6cf422e7c061d0b2562ef44051738c76464cf7ab6"
+    sha256 arm64_sonoma:  "cde5b50ab3bbbf00e8814d47dff7d6e25686970442884d56f51bfb3ab13b584b"
+    sha256 sonoma:        "8a383f281a729d5b1a59d9bd8c4f865bbb7de6351b9d761ef61e09e1e3b2507b"
+    sha256 arm64_linux:   "7dbaeccd969ab606ba531071f3f9c471edd28fb8fd87ae9e9b75df75b6506f03"
+    sha256 x86_64_linux:  "da328811fe7eceb828a8afbba9801487ddb9b67269f5f5581d7e92dccd0c41d0"
   end
 
   keg_only :versioned_formula
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "aom"
   depends_on "aribb24"
   depends_on "dav1d"
@@ -49,7 +50,6 @@ class FfmpegAT6 < Formula
   depends_on "libxcb"
   depends_on "opencore-amr"
   depends_on "openjpeg"
-  depends_on "openvino"
   depends_on "opus"
   depends_on "rav1e"
   depends_on "rubberband"
@@ -70,38 +70,39 @@ class FfmpegAT6 < Formula
 
   uses_from_macos "bzip2"
   uses_from_macos "libxml2"
-  uses_from_macos "zlib"
 
   on_macos do
     depends_on "libarchive"
     depends_on "libogg"
     depends_on "libsamplerate"
-    depends_on "pugixml"
-    depends_on "tbb"
   end
 
   on_linux do
     depends_on "alsa-lib"
     depends_on "libxext"
     depends_on "libxv"
+    depends_on "zlib-ng-compat"
   end
 
   on_intel do
     depends_on "nasm" => :build
   end
 
-  fails_with gcc: "5"
-
-  # Fix for QtWebEngine, do not remove
-  # https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=270209
+  # Backport support for recent svt-av1 (3.0.0)
   patch do
-    url "https://gitlab.archlinux.org/archlinux/packaging/packages/ffmpeg/-/raw/5670ccd86d3b816f49ebc18cab878125eca2f81f/add-av_stream_get_first_dts-for-chromium.patch"
-    sha256 "57e26caced5a1382cb639235f9555fc50e45e7bf8333f7c9ae3d49b3241d3f77"
+    url "https://github.com/FFmpeg/FFmpeg/commit/d1ed5c06e3edc5f2b5f3664c80121fa55b0baa95.patch?full_index=1"
+    sha256 "0eb23ab90c0e5904590731dd3b81c86a4127785bc2b367267d77723990fb94a2"
+  end
+
+  # Backport support for svt-av1 4.x
+  patch do
+    url "https://git.ffmpeg.org/gitweb/ffmpeg.git/patch/a5d4c398b411a00ac09d8fe3b66117222323844c"
+    sha256 "1dbbc1a4cf9834b3902236abc27fefe982da03a14bcaa89fb90c7c8bd10a1664"
   end
 
   def install
     # The new linker leads to duplicate symbol issue https://github.com/homebrew-ffmpeg/homebrew-ffmpeg/issues/140
-    ENV.append "LDFLAGS", "-Wl,-ld_classic" if DevelopmentTools.clang_build_version >= 1500
+    ENV.append "LDFLAGS", "-Wl,-ld_classic" if DevelopmentTools.ld64_version.between?("1015.7", "1022.1")
 
     args = %W[
       --prefix=#{prefix}
@@ -148,7 +149,6 @@ class FfmpegAT6 < Formula
       --enable-libopencore-amrnb
       --enable-libopencore-amrwb
       --enable-libopenjpeg
-      --enable-libopenvino
       --enable-libspeex
       --enable-libsoxr
       --enable-libzmq
@@ -171,9 +171,14 @@ class FfmpegAT6 < Formula
   end
 
   test do
-    # Create an example mp4 file
+    # Create a 5 second test MP4
     mp4out = testpath/"video.mp4"
-    system bin/"ffmpeg", "-filter_complex", "testsrc=rate=1:duration=1", mp4out
-    assert_predicate mp4out, :exist?
+    system bin/"ffmpeg", "-filter_complex", "testsrc=rate=1:duration=5", mp4out
+    assert_match(/Duration: 00:00:05\.00,.*Video: h264/m, shell_output("#{bin}/ffprobe -hide_banner #{mp4out} 2>&1"))
+
+    # Re-encode it in HEVC/Matroska
+    mkvout = testpath/"video.mkv"
+    system bin/"ffmpeg", "-i", mp4out, "-c:v", "hevc", mkvout
+    assert_match(/Duration: 00:00:05\.00,.*Video: hevc/m, shell_output("#{bin}/ffprobe -hide_banner #{mkvout} 2>&1"))
   end
 end

@@ -1,30 +1,29 @@
 class Pivit < Formula
   desc "Sign and verify data using hardware (Yubikey) backed x509 certificates (PIV)"
   homepage "https://github.com/cashapp/pivit"
-  url "https://github.com/cashapp/pivit/archive/refs/tags/v0.9.1.tar.gz"
-  sha256 "717b4ffa8d74e1bb0d7f2f6248bc1b599f1d2f26535cf87d8d362b056527dbbe"
+  url "https://github.com/cashapp/pivit/archive/refs/tags/v0.9.3.tar.gz"
+  sha256 "ad52207e4962969a28aa298098b0a360ab6ffc61e4e075d9e0842adccbac4a29"
   license "MIT"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "5ae035fe7572033ac646c7def4bb127b88cf43ec0b5396f66ca90b20c062accb"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "1c3d2c932012082cb53c0c9fe0f623e766873aafc218b9e134f20a59e00f14b1"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "310d4a4a653caf261a9e90a1c5b7b43d5a27fc0c40732e796a2955313ad829f1"
-    sha256 cellar: :any_skip_relocation, sonoma:         "b446e7bb2ad55eacb7b6d782b589f2e53781d4b8db4d5fef07df2ad3238c77ce"
-    sha256 cellar: :any_skip_relocation, ventura:        "8bb6f0c211e41618b84df3d06e662daf61db730f8687a62450326a01f7f56bb1"
-    sha256 cellar: :any_skip_relocation, monterey:       "7e3bfac9227e169a051bdeaeb331abc24ea62aff5e1a9b284d9994b16d8fe839"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "7054a630abfaccfd742ea105a4122d390e19a5c866a3ff98d173e51793e379b9"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "c7f5d747e5dfa387783b29019ed02f78ef8622d71abcb851ecf519e010a2bea0"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "89f12db02ef6895b23cd60f5a6e401601c04484cca4d6be2d4a79e7541d9bd22"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "9d40cae5fe5369218a74a74f5abb473a11a867d2013333de2db720aacc735ef5"
+    sha256 cellar: :any_skip_relocation, sonoma:        "acc9b73454be913f494d087148ca8d72837da35ebf8b49d6a54d689de5eb6492"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "77ed67ed542f89456ab252694a290eaf2e9da1f8833300f048ad31a82258584d"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "64fab27f7aeb2ca8f09732a8e48eb090591a0840cf51106953e9774717230f17"
   end
 
   depends_on "go" => :build
+  depends_on "pkgconf" => :build
 
   on_linux do
-    depends_on "pkg-config" => :build
     depends_on "pcsc-lite"
   end
 
   def install
     ENV["CGO_ENABLED"] = "1"
-    system "go", "build", *std_go_args, "./cmd/pivit"
+    system "go", "build", *std_go_args(ldflags: "-s -w"), "./cmd/pivit"
   end
 
   test do

@@ -1,32 +1,25 @@
 class Re2 < Formula
   desc "Alternative to backtracking PCRE-style regular expression engines"
   homepage "https://github.com/google/re2"
-  url "https://github.com/google/re2/archive/refs/tags/2024-07-02.tar.gz"
-  version "20240702"
-  sha256 "eb2df807c781601c14a260a507a5bb4509be1ee626024cb45acbd57cb9d4032b"
+  url "https://github.com/google/re2/releases/download/2025-11-05/re2-2025-11-05.tar.gz"
+  sha256 "87f6029d2f6de8aa023654240a03ada90e876ce9a4676e258dd01ea4c26ffd67"
   license "BSD-3-Clause"
-  revision 1
+  version_scheme 1
+  compatibility_version 1
   head "https://github.com/google/re2.git", branch: "main"
 
-  # The `strategy` block below is used to massage upstream tags into the
-  # YYYYMMDD format used in the `version`. This is necessary for livecheck
-  # to be able to do proper `Version` comparison.
   livecheck do
     url :stable
-    regex(/^(\d{2,4}-\d{2}-\d{2})$/i)
-    strategy :git do |tags, regex|
-      tags.filter_map { |tag| tag[regex, 1]&.gsub(/\D/, "") }
-    end
+    regex(/^(\d{4}-\d{2}-\d{2})$/i)
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "9dc85bc8e5a00a1a642331e812871dc00ed4a272a8415ec523f278d0dbb1faab"
-    sha256 cellar: :any,                 arm64_ventura:  "5dd906163941f74bc6c69a3cfedd5ebc9c7dc46d7edae24ade05301d57213047"
-    sha256 cellar: :any,                 arm64_monterey: "f4605e85f6e65e78edc7235bcc3e94af9f14f085a917f1439eb1cdd925f21c43"
-    sha256 cellar: :any,                 sonoma:         "3a4ded074a9b16c0989fa50cad39ca056d58f97aabf7727842225b5842f6aeed"
-    sha256 cellar: :any,                 ventura:        "25f162c211fea6e9809c3bd9a8f629815dbc8210bc5a463f774b3adf5f1d630b"
-    sha256 cellar: :any,                 monterey:       "a5bad9ec8a9c26b3f5bfc8c1ef9427dd26323bd653a8283fdba5705a8cfca859"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "3e12fc1cd41b67cd68a6b8f4c1a925b1027eb8a6528ee2bb140477dcdc7ac445"
+    sha256 cellar: :any,                 arm64_tahoe:   "c3d8133e1af82433fd8491050aafc3cdf81e2728c1d171818e187001f5c5efb1"
+    sha256 cellar: :any,                 arm64_sequoia: "9dfd8e748444eb04b1180dfa861cef831d720588d016051c60bf1b9bc77bea4f"
+    sha256 cellar: :any,                 arm64_sonoma:  "2417787aad7998e86107097674b67fa1f32bed1eadc7a60261f6f1a024a1c55a"
+    sha256 cellar: :any,                 sonoma:        "336269669bfd8cab867b5ea69d99706e2b73dc0fa796ac987f5ad665010735cf"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "74f2417e6840a1af5020085db3513cdc047e5dbe24bf9213871eb388b2af6bcc"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "5d2b0fa3b0b1954bd06ca343641936d0d0833d0a80a7aa543eaca0a95332c055"
   end
 
   depends_on "cmake" => :build
@@ -50,7 +43,7 @@ class Re2 < Formula
   end
 
   test do
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include <re2/re2.h>
       #include <assert.h>
       int main() {
@@ -58,7 +51,7 @@ class Re2 < Formula
         assert(RE2::PartialMatch("hello", "e"));
         return 0;
       }
-    EOS
+    CPP
     system ENV.cxx, "-std=c++17", "test.cpp", "-o", "test",
                     "-I#{include}", "-L#{lib}", "-lre2"
     system "./test"

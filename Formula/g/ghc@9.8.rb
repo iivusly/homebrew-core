@@ -1,8 +1,8 @@
 class GhcAT98 < Formula
   desc "Glorious Glasgow Haskell Compilation System"
   homepage "https://haskell.org/ghc/"
-  url "https://downloads.haskell.org/~ghc/9.8.2/ghc-9.8.2-src.tar.xz"
-  sha256 "e2fb7a7dd7461237d22e8365a83edd9e1a77d2e15d045f3945396845a87781c9"
+  url "https://downloads.haskell.org/~ghc/9.8.4/ghc-9.8.4-src.tar.xz"
+  sha256 "17e8188f3c8a5c2f73fb4e35d01032e8dc258835ec876d52c8ad8ee3d24b2fc5"
   # We build bundled copies of libffi and GMP so GHC inherits the licenses
   license all_of: [
     "BSD-3-Clause",
@@ -11,25 +11,25 @@ class GhcAT98 < Formula
   ]
 
   livecheck do
-    url "https://www.haskell.org/ghc/download.html"
-    regex(/href=.*?download[._-]ghc[._-][^"' >]+?\.html[^>]*?>\s*?v?(9\.8(?:\.\d+)+)\s*?</i)
+    url "https://gitlab.haskell.org/ghc/ghc/-/wikis/GHC%20Status#all-released-ghc-versions"
+    regex(/v?(9\.8(?:\.\d+)+)[._-]notes/i)
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "9538c93711459a6e0e03edf3f3280ef3dbdff7c4e881cd21b757faea4043415e"
-    sha256 cellar: :any,                 arm64_ventura:  "db04b25fa4c03e5fb87ef23561d3700b79a5a5a9fd11cd8f04bb352785ef9351"
-    sha256 cellar: :any,                 arm64_monterey: "f363227d268cd379443875445d1a741e4faa3560e2bbfe85641eeeb086d34cd0"
-    sha256 cellar: :any,                 sonoma:         "5659aa07c99a0b47888883a36c8b860871527c630cdfcb6092dba25f82dbbbce"
-    sha256 cellar: :any,                 ventura:        "d89534d01926ae546d7520776eeb5558d0d515802fad42fb594ec9f85eac19ef"
-    sha256 cellar: :any,                 monterey:       "7c95a7417d9b7602a237bb1fb968ff5409158689024c8f9f0fa1a1e4c565d705"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "f94606b11d002a0711b919757443edfbf970da65c8be1c7dfc9b26b4715b1630"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "9480b6b54cbcaf29cd4ad8cae23cdb03bad48485186926d66685c40c90771fcf"
+    sha256 cellar: :any,                 arm64_sequoia: "489d55cbc7c039f9f97aaeb74ac050735ab3218739ed41805ef1b7a714d06e1a"
+    sha256 cellar: :any,                 arm64_sonoma:  "9ad0baffde0368e14afb9c9f01373c05842e5a30f4094064e4deb9e8e67192f1"
+    sha256 cellar: :any,                 sonoma:        "d7b1b0476f646594510a6eb2c13df4bec60427de75d00bd4c222cc4b05004b44"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "044c5e69056a613de86e94aa02eba4fd454408062504097c8c258765cf6afc31"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "76848d321a01d2edfbf175ce1df14d8b9764b9f416bc8596951c8f4e6c105805"
   end
 
   keg_only :versioned_formula
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
-  depends_on "python@3.12" => :build
+  depends_on "python@3.14" => :build
   depends_on "sphinx-doc" => :build
   depends_on "xz" => :build
 
@@ -99,9 +99,22 @@ class GhcAT98 < Formula
   end
 
   def install
-    ENV["CC"] = ENV["ac_cv_path_CC"] = ENV.cc
+    # ENV.cc and ENV.cxx return specific compiler versions on Ubuntu, e.g.
+    # gcc-11 and g++-11 on Ubuntu 22.04. Using such values effectively causes
+    # the bottle (binary package) to only run on systems where gcc-11 and g++-11
+    # binaries are available. This breaks on many systems including Arch Linux,
+    # Fedora and Ubuntu 24.04, as they provide g** but not g**-11 specifically.
+    #
+    # The workaround here is to hard-code both CC and CXX on Linux.
+    ENV["CC"] = ENV["ac_cv_path_CC"] = OS.linux? ? "cc" : ENV.cc
+    ENV["CXX"] = ENV["ac_cv_path_CXX"] = OS.linux? ? "c++" : ENV.cxx
     ENV["LD"] = "ld"
-    ENV["PYTHON"] = which("python3.12")
+    ENV["PYTHON"] = which("python3.14")
+
+    # Workaround for https://gitlab.haskell.org/ghc/ghc/-/issues/26166
+    if DevelopmentTools.ld64_version >= "1221.4"
+      inreplace "rts/rts.cabal.in", /("-Wl,-undefined,dynamic_lookup)"/, "\\1,-ld_classic\""
+    end
 
     binary = buildpath/"binary"
     resource("binary").stage do
@@ -135,6 +148,8 @@ class GhcAT98 < Formula
       -j#{ENV.make_jobs}
       --prefix=#{prefix}
       --flavour=release
+      --docs=no-haddocks
+      --docs=no-sphinx-html
       --docs=no-sphinx-pdfs
     ]
     # Work around linkage error due to RPATH in ghc-iserv-dyn-ghc

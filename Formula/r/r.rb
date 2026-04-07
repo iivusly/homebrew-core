@@ -1,9 +1,10 @@
 class R < Formula
   desc "Software environment for statistical computing"
   homepage "https://www.r-project.org/"
-  url "https://cran.r-project.org/src/base/R-4/R-4.4.1.tar.gz"
-  sha256 "b4cb675deaaeb7299d3b265d218cde43f192951ce5b89b7bb1a5148a36b2d94d"
+  url "https://cran.r-project.org/src/base/R-4/R-4.5.3.tar.gz"
+  sha256 "aa5c1ed4293c7271ac513d654670356ac0e8a6ad5e42be014365d11150b5b8f2"
   license "GPL-2.0-or-later"
+  compatibility_version 1
 
   livecheck do
     url "https://cran.rstudio.com/banner.shtml"
@@ -11,16 +12,15 @@ class R < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "a9e3b6d8ce9d2606b9f182d30145c530dfdd52803359729465b616f8dcae0847"
-    sha256 arm64_ventura:  "31534a8b13f93bbd484c6392792736ca9fdc91fe6a9e428747e9291fe49b6778"
-    sha256 arm64_monterey: "781dc303ccb6041cbee79a17a1dc3ae5ffbacd59b5d52a04983751256dd68ae4"
-    sha256 sonoma:         "2a65df982cbc7a23f7f69b6853dc402461fc99cb2d31b7771e50a4f3995ab7dc"
-    sha256 ventura:        "3f1da54c8747815a8047de3d393c7957fd3d58b411c6a00b2dab1d64a19be7d9"
-    sha256 monterey:       "8b7216892a5d60604fe4a909c2f096ce2ef78bec581fa00177eb7600451aa159"
-    sha256 x86_64_linux:   "3405da8715d5f8069e3c12842a2a3b2e22d554541a91bcd756802ed0f9cfaa3a"
+    sha256 arm64_tahoe:   "105e5063aac542e22cb7a719388b6dd561b0c78ac267559a86c6f06b23860c04"
+    sha256 arm64_sequoia: "e6f0ee355146c44928260519c57ebe2df2dc5989a35a8b759c8777a5657ecc91"
+    sha256 arm64_sonoma:  "683d06da1605257d59d4c73f8ebd554bae2ada95ab78514a6c3447d3eea430f5"
+    sha256 sonoma:        "3e0eda8d501baebbb69ca33c5acc5d338db7b27f31121adac1e983b5542061b3"
+    sha256 arm64_linux:   "41c89f763f71a180f6fc5044cd4a57eb413582d7b576159bf1798be84c52076b"
+    sha256 x86_64_linux:  "dce56d2b881ae1297a7502b0c5753577a6742aa8cdf6be14229244f24f968c26"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "cairo"
   depends_on "gcc" # for gfortran
   depends_on "gettext"
@@ -32,12 +32,11 @@ class R < Formula
   depends_on "readline"
   depends_on "tcl-tk"
   depends_on "xz"
+  depends_on "zstd"
 
   uses_from_macos "bzip2"
   uses_from_macos "curl"
-  uses_from_macos "icu4c"
-  uses_from_macos "libffi", since: :catalina
-  uses_from_macos "zlib"
+  uses_from_macos "libffi"
 
   on_macos do
     depends_on "fontconfig"
@@ -53,21 +52,18 @@ class R < Formula
   on_linux do
     depends_on "glib"
     depends_on "harfbuzz"
+    depends_on "icu4c@78"
     depends_on "libice"
     depends_on "libsm"
     depends_on "libtirpc"
     depends_on "libx11"
     depends_on "libxt"
     depends_on "pango"
+    depends_on "zlib-ng-compat"
   end
 
   # needed to preserve executable permissions on files without shebangs
   skip_clean "lib/R/bin", "lib/R/doc"
-
-  fails_with :gcc do
-    version "11"
-    cause "Unknown. FIXME."
-  end
 
   def install
     # `configure` doesn't like curl 8+, but convince it that everything is ok.
@@ -118,11 +114,9 @@ class R < Formula
       system "make", "install"
     end
 
-    cd "src/nmath/standalone" do
-      system "make"
-      ENV.deparallelize do
-        system "make", "install"
-      end
+    system "make", "-C", "src/nmath/standalone"
+    ENV.deparallelize do
+      system "make", "-C", "src/nmath/standalone", "install"
     end
 
     r_home = lib/"R"
@@ -138,10 +132,9 @@ class R < Formula
     lib.install_symlink Dir[r_home/"lib/*"]
 
     # avoid triggering mandatory rebuilds of r when gcc is upgraded
-    check_replace = OS.mac?
     inreplace lib/"R/etc/Makeconf", Formula["gcc"].prefix.realpath,
                                     Formula["gcc"].opt_prefix,
-                                    check_replace
+                                    audit_result: OS.mac?
   end
 
   def post_install
@@ -160,8 +153,7 @@ class R < Formula
     system bin/"Rscript", "-e", "if(!capabilities('cairo')) stop('cairo not available')"
 
     system bin/"Rscript", "-e", "install.packages('gss', '.', 'https://cloud.r-project.org')"
-    assert_predicate testpath/"gss/libs/gss.so", :exist?,
-                     "Failed to install gss package"
+    assert_path_exists testpath/"gss/libs/gss.so", "Failed to install gss package"
 
     winsys = "[1] \"aqua\""
     if OS.linux?

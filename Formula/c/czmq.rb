@@ -9,7 +9,7 @@ class Czmq < Formula
 
     # Fix -flat_namespace being used on Big Sur and later.
     patch do
-      url "https://raw.githubusercontent.com/Homebrew/formula-patches/03cf8088210822aa2c1ab544ed58ea04c897d9c4/libtool/configure-pre-0.4.2.418-big_sur.diff"
+      url "https://raw.githubusercontent.com/Homebrew/homebrew-core/1cf441a0/Patches/libtool/configure-pre-0.4.2.418-big_sur.diff"
       sha256 "83af02f2aa2b746bb7225872cab29a253264be49db0ecebb12f841562d9a2923"
     end
 
@@ -24,6 +24,8 @@ class Czmq < Formula
 
   bottle do
     rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:    "256774bf2e64754f05e01944246e707c92472656a9d9b7680962a0ecf6372ddf"
+    sha256 cellar: :any,                 arm64_sequoia:  "563fccc28279b87f02a5545f8e041090ead4e42f04f5df7e50b421abbb88f1eb"
     sha256 cellar: :any,                 arm64_sonoma:   "cce35246b601a70fecc64be08943a2c893d9ad2dd2567a3ec3c17a270a8a80b4"
     sha256 cellar: :any,                 arm64_ventura:  "e51e2cc5ccca8943ab12a1587eb9b6aa533603ea2575db6928827bdaa0d807d1"
     sha256 cellar: :any,                 arm64_monterey: "47bd6d29801b9d1a33d2d1e0655192e500e8c2a7698083d0838b178c068d5cd4"
@@ -32,6 +34,7 @@ class Czmq < Formula
     sha256 cellar: :any,                 ventura:        "67d8bb3b5214620f2e55a65b779e4d92affde8d6468ac25eccc5b4d1ac504ee8"
     sha256 cellar: :any,                 monterey:       "300244e12b2cc498876e3b6a346f8ad24ccf1a256d8dc84c4e00b594c71c4bce"
     sha256 cellar: :any,                 big_sur:        "d5abd045c165de80872c22ecf503132110c26e35d05b0b50c78dec97fd31e628"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "55340fbd1cbc1236fd899f432fcbf4501f9ec3761c7e3d141a0efd3e807fe75d"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "376bc4229fd95f09cf0fed87437a5b7ede0698f2846abd1199cde96aae7a86fe"
   end
 
@@ -44,7 +47,7 @@ class Czmq < Formula
   end
 
   depends_on "asciidoc" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "xmlto" => :build
   depends_on "lz4"
   depends_on "zeromq"
@@ -53,7 +56,7 @@ class Czmq < Formula
     ENV["XML_CATALOG_FILES"] = "#{etc}/xml/catalog"
 
     system "./autogen.sh" if build.head?
-    system "./configure", "--disable-dependency-tracking", "--prefix=#{prefix}"
+    system "./configure", *std_configure_args
     system "make"
     system "make", "ZSYS_INTERFACE=lo0", "check-verbose"
     system "make", "install"
@@ -61,7 +64,7 @@ class Czmq < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <czmq.h>
 
       int main(void)
@@ -79,7 +82,7 @@ class Czmq < Formula
 
         return 0;
       }
-    EOS
+    C
 
     flags = ENV.cflags.to_s.split + %W[
       -I#{include}

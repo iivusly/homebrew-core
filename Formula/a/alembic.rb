@@ -1,37 +1,37 @@
 class Alembic < Formula
   desc "Open computer graphics interchange framework"
-  homepage "http://alembic.io"
-  url "https://github.com/alembic/alembic/archive/refs/tags/1.8.6.tar.gz"
-  sha256 "c572ebdea3a5f0ce13774dd1fceb5b5815265cd1b29d142cf8c144b03c131c8c"
+  homepage "http://www.alembic.io/"
+  url "https://github.com/alembic/alembic/archive/refs/tags/1.8.11.tar.gz"
+  sha256 "ab299bb4b1894a6675c73fa29940522b54c81a91b1d691ca3470d86b7345ffce"
   license "BSD-3-Clause"
   head "https://github.com/alembic/alembic.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "2d570e9a98c50078372b7a61be5ecd48fcf17c6054ac50dfdf65a02cd96f5e36"
-    sha256 cellar: :any,                 arm64_ventura:  "08582785ae66e4582d2fae85c48399a9d6d3848324e7b91421bac090915ec59f"
-    sha256 cellar: :any,                 arm64_monterey: "d614a766f6b4a4cf06f5438e5247140341ac00bd39127cf1691642cd354e2f0d"
-    sha256 cellar: :any,                 sonoma:         "2c177245013d8f721bb622feb8991a7a3b8070ca4dc4aaed3c65321a17bd0ffb"
-    sha256 cellar: :any,                 ventura:        "03646ed6ecd641118dc5f2dd90cbedc964eb7e2f48a0b54dd71958e9f899865f"
-    sha256 cellar: :any,                 monterey:       "fdea051aa486e27e291cdc2326b9b010186668bb0c2444c321a6540badf0e057"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "3e4dddeb80ad2f92a034904f0407c10f2c344955eed55ba77430c4f2ac38c2d9"
+    sha256 cellar: :any,                 arm64_tahoe:   "e998ad08677ded32645d1c6760c18a6fe28d9498cb0c7d92b95f52afe0d18cfd"
+    sha256 cellar: :any,                 arm64_sequoia: "c6063967c5f8228950ee6fc37028a299995fadfe16df49dbf7822e9408a14110"
+    sha256 cellar: :any,                 arm64_sonoma:  "29c5928e08940c9d21732fd5bc5748a9d717775136a82fef23861c48982f802c"
+    sha256 cellar: :any,                 sonoma:        "d97e5d2e338e7b80b6cd9abcee30dcda081be9cafa5bf6ea08c67a3cd61ada64"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "cff7051b91258b01135979d371daab9202bbac592c8729cfcb28d402fb941526"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "30bb652271cc38b693c199281ae88c89944ad738212ae347d52f633ae20a2cd5"
   end
 
   depends_on "cmake" => :build
   depends_on "hdf5"
   depends_on "imath"
-  depends_on "libaec"
 
-  uses_from_macos "zlib"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
-    cmake_args = std_cmake_args + %w[
+    args = %w[
       -DUSE_PRMAN=OFF
       -DUSE_ARNOLD=OFF
       -DUSE_MAYA=OFF
       -DUSE_PYALEMBIC=OFF
       -DUSE_HDF5=ON
     ]
-    system "cmake", "-S", ".", "-B", "build", *cmake_args
+    system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
 

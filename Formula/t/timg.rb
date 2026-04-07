@@ -1,24 +1,22 @@
 class Timg < Formula
   desc "Terminal image and video viewer"
   homepage "https://timg.sh/"
-  url "https://github.com/hzeller/timg/archive/refs/tags/v1.6.0.tar.gz"
-  sha256 "9e1b99b4eaed82297ad2ebbde02e3781775e3bba6d3e298d7598be5f4e1c49af"
+  url "https://github.com/hzeller/timg/archive/refs/tags/v1.6.3.tar.gz"
+  sha256 "59c908867f18c81106385a43065c232e63236e120d5b2596b179ce56340d7b01"
   license "GPL-2.0-only"
-  revision 1
   head "https://github.com/hzeller/timg.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "f97d66cd02faf6dd2327e02ec3551c2c697388be68b368802be35c6fcad64035"
-    sha256 cellar: :any,                 arm64_ventura:  "7f31b2c44512515e976377d4fd697491b10ae79a2834c3c5a795d297ec02bb2a"
-    sha256 cellar: :any,                 arm64_monterey: "0166ae9896c4db5a02d71e66e6fc5f0af3436ecbd908a361ca7b8b1caf3fa1d6"
-    sha256 cellar: :any,                 sonoma:         "1a130b51bf0197035bcdaad8c6550b440fce44fe3d02e9b2d11a5dda9b4fc18d"
-    sha256 cellar: :any,                 ventura:        "6a2f343e80bc905eace4a7215b9d02f29cc49174ef3cc09a7296c01e3aafdaee"
-    sha256 cellar: :any,                 monterey:       "5b0c38c92e453255bc7e9f86a6da90442bc97670471cd6b92896445fa86890e8"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "4dc179e4ac7e3efe1bdbc03eb18cf011c7bcc8fb9e55e1f1e84f6e77188ed712"
+    sha256 cellar: :any,                 arm64_tahoe:   "29d6beebc4277ef79f9d14c083fa370a7b929b03a769d676ac9b2bb87964ed68"
+    sha256 cellar: :any,                 arm64_sequoia: "0c8ee925cc198a9795f2ff70674a1ef3cbc8bee913c5d9372babe3ab74120b54"
+    sha256 cellar: :any,                 arm64_sonoma:  "1e322a578c3f81fd6cbfcb27dd55dd5f9504525668abc56590ef155d0eaa65ba"
+    sha256 cellar: :any,                 sonoma:        "2bdef3af0e1ae32d4e893d6f8d5984bb1568b9f36e3d91276dbf87d40d7abe3e"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "318dbf7ec1b15f1e72f684b4d8b749ad81e777e3149d5f86a27956f46c79205f"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "83740c7f5cc8839d160a8c269e5c4a483e50c0869213a73dd82abecd0ab389bc"
   end
 
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "cairo"
   depends_on "ffmpeg"
   depends_on "glib"
@@ -37,8 +35,6 @@ class Timg < Formula
     depends_on "gdk-pixbuf"
     depends_on "gettext"
   end
-
-  fails_with gcc: "5" # rubberband is built with GCC
 
   def install
     system "cmake", "-S", ".", "-B", "build", *std_cmake_args

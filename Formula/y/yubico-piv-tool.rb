@@ -1,8 +1,8 @@
 class YubicoPivTool < Formula
   desc "Command-line tool for the YubiKey PIV application"
   homepage "https://developers.yubico.com/yubico-piv-tool/"
-  url "https://developers.yubico.com/yubico-piv-tool/Releases/yubico-piv-tool-2.6.0.tar.gz"
-  sha256 "80f4b7b7f5a85c86502f3286e2b4bef345a6709f4554088c745994f7027302c1"
+  url "https://developers.yubico.com/yubico-piv-tool/Releases/yubico-piv-tool-2.7.3.tar.gz"
+  sha256 "fcb25c42f54298ece8b20684fb3c581ed9195a162cbc55180a4161501be93181"
   license "BSD-2-Clause"
 
   livecheck do
@@ -11,24 +11,27 @@ class YubicoPivTool < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "ebe0a537fdad1083258d6d6e24f3c4a432e32f866c82f4cd1828551c64c526d1"
-    sha256 cellar: :any,                 arm64_ventura:  "96c67a93b88fe4b8599c5382c43d93fc75adac113266b8f0cedbd6863fa83c51"
-    sha256 cellar: :any,                 arm64_monterey: "e11fef559f07c9c4e8b2e9b7db016edb88848d90fa0247fe35545d8bd3457dbd"
-    sha256 cellar: :any,                 sonoma:         "65774cacf1cc7d1ab6e0b8ed3c19ebb0feacbd6aa9bf426706bc478e70b29453"
-    sha256 cellar: :any,                 ventura:        "2a61b2aff37264f0f2a8d14c7e5874c5e823c70f1df60a41eea50c4b1b8fc46d"
-    sha256 cellar: :any,                 monterey:       "bd36502b3e87fbcf978691aaf923095a2d492e51d878b48449f7fc2f3dd25830"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "ee448d6cedd87948f0eda339ce8ec1616c9e3583f42cb6b6c80f04dc636cc4d5"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "e333d0e9ab4d352ec6e6ceab61be769ef2c75bf2c3d71727b902ff636ae62a45"
+    sha256 cellar: :any,                 arm64_sequoia: "0a2c7096892f5466c58e8c882c38c89a972aa6679ad0ab54a483669eb5d29732"
+    sha256 cellar: :any,                 arm64_sonoma:  "9e5fa0af709675cfd39ed0e696e1eea9bc31ac039999a377b86e0b9bf555946e"
+    sha256 cellar: :any,                 sonoma:        "a54fe53dd00eac5705e8bca16907ad020e7616fdc5a180a3f4a9dc1f2755afd9"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "5d26838f59ec2946210ed9a5116fa68ff5dbc32ad909cf9e8faf401392f9beb7"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "6f7c8857568353e8e6429257d68babd45390b03dc9db2b6636a36c2ddec458af"
   end
 
   depends_on "check" => :build
   depends_on "cmake" => :build
   depends_on "gengetopt" => :build
   depends_on "help2man" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "openssl@3"
 
   uses_from_macos "pcsc-lite"
-  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     ENV.append_to_cflags "-I#{Formula["pcsc-lite"].opt_include}/PCSC" unless OS.mac?

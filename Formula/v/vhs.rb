@@ -1,19 +1,18 @@
 class Vhs < Formula
   desc "Your CLI home video recorder"
   homepage "https://github.com/charmbracelet/vhs"
-  url "https://github.com/charmbracelet/vhs/archive/refs/tags/v0.7.2.tar.gz"
-  sha256 "9be4b88a638336f6bba913f391b0300549280246e08d26cbd5053b63c60ee40c"
+  url "https://github.com/charmbracelet/vhs/archive/refs/tags/v0.11.0.tar.gz"
+  sha256 "c08b8502989fe7e9626c02938f3fc512c2a4ba21f839f455d20d7eb1da7bc39f"
   license "MIT"
   head "https://github.com/charmbracelet/vhs.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "adcae502f9388192760fefc485cd56218a269c33e5c68833d3252bed2f8d87aa"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "e971bf876422eaa6eb34d16eadeeabb2b1929ad7d346b30a94959ec2a6a7c148"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "d18878730922dacb972e4e99a3539e3d43c822b8b4b26a758487ef68453f6411"
-    sha256 cellar: :any_skip_relocation, sonoma:         "14a3c3f898d9e70a3f2c8d878ec82304981f60239b241cfa51b80d4f360f2ff4"
-    sha256 cellar: :any_skip_relocation, ventura:        "4079a5d4f18fe792aecce391e74a5d495ca3e43b94184d48e64c26c226e8d2cb"
-    sha256 cellar: :any_skip_relocation, monterey:       "9d5dacb36da25dbbc729a72f03aa43fc482771bb5b772b4b748a8bab79392841"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "2a31de78626c1fb21ee622e1a3fb658af4f161312af5da25313d126fba59ef83"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "0edf44b9c84f56fb39ae8982b9190380cc129c24a489d3fde161ab733d9219b4"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "0edf44b9c84f56fb39ae8982b9190380cc129c24a489d3fde161ab733d9219b4"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "0edf44b9c84f56fb39ae8982b9190380cc129c24a489d3fde161ab733d9219b4"
+    sha256 cellar: :any_skip_relocation, sonoma:        "1e57d7d0c7a2e44c65e7db0b344de2ba912362c648060b7ccd9f5de6bcec784d"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "cdc1dcb65b659c63f95e43f6347e2cb290744431c6f0ced771c25326d098155e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "15290cb92528067b54e83f001e151ff66e39b1b94bba44174e442bb803dccc70"
   end
 
   depends_on "go" => :build
@@ -25,15 +24,15 @@ class Vhs < Formula
 
     (man1/"vhs.1").write Utils.safe_popen_read(bin/"vhs", "man")
 
-    generate_completions_from_executable(bin/"vhs", "completion")
+    generate_completions_from_executable(bin/"vhs", shell_parameter_format: :cobra)
   end
 
   test do
-    (testpath/"test.tape").write <<-TAPE
-    Output test.gif
-    Type "Foo Bar"
-    Enter
-    Sleep 1s
+    (testpath/"test.tape").write <<~TAPE
+      Output test.gif
+      Type "Foo Bar"
+      Enter
+      Sleep 1s
     TAPE
 
     system bin/"vhs", "validate", "test.tape"

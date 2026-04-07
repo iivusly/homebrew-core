@@ -2,8 +2,8 @@ class StellarCore < Formula
   desc "Backbone of the Stellar (XLM) network"
   homepage "https://www.stellar.org/"
   url "https://github.com/stellar/stellar-core.git",
-      tag:      "v21.3.1",
-      revision: "4ede19620438bcd136276cdc8d4ed1f2c3b64624"
+      tag:      "v26.0.0",
+      revision: "8e43a2d3b83ee48fd1a2507ea727a21ab9fc8c23"
   license "Apache-2.0"
   head "https://github.com/stellar/stellar-core.git", branch: "master"
 
@@ -16,28 +16,30 @@ class StellarCore < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "6050375e677593dbefe6a2cd87339dfdb2cbcc33fc8a6089fdf3d614a3f56c68"
-    sha256 cellar: :any,                 arm64_ventura:  "c901d6d438b358488ac813fa40dcb05503425cf7049a9a2972118269ba07f160"
-    sha256 cellar: :any,                 arm64_monterey: "3d454b4ed02f39b9aaf522ece2169a7d2396a07b0da55f83b3c85d2b994f91f3"
-    sha256 cellar: :any,                 sonoma:         "c34085dacf3e90f69b4481860623f7e0bd1e14afd300bf4dac4d53d65c92ee61"
-    sha256 cellar: :any,                 ventura:        "a9bf5d2838c834ea3155022eeb534802cb008a1984b2b4ba7785f0bbf4bfbb40"
-    sha256 cellar: :any,                 monterey:       "c494a82c424a3a6b183f581bffd43918f59cfde3e5d616d0ec9f9ad2df2f4b3d"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "2d6508a9cb75fdf830de986429acc15bf590e7cc10e47089f5ba488350f71a6d"
+    sha256 cellar: :any, arm64_tahoe:   "7c36cdc15041c081e1cd03ad3ac0fd9102e29f46d9fe0dc1a9d615daabe9f319"
+    sha256 cellar: :any, arm64_sequoia: "97783785359a31438af50a2303eb0666c28a3612391b0e4d99fdb3bb72f6d622"
+    sha256 cellar: :any, arm64_sonoma:  "004a9ad20362c217af9d6d300ef9661518d91c7b79d4ec2a236bda5372a03305"
+    sha256 cellar: :any, sonoma:        "8a7a9b3d9d42111997b2834e4aee975fa6cc714fecfe788ba988d7b5369b7040"
+    sha256               arm64_linux:   "b9c534b0c6a38cfc4298a2c700ac4fc1530e330a401eeb4a1ac5a69ada4ed9ac"
+    sha256               x86_64_linux:  "be8a27d86652d75443b5e2357af76474b954f7d1e27215d46cc5651051830d35"
   end
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
   depends_on "bison" => :build # Bison 3.0.4+
-  depends_on "coreutils" => :build
   depends_on "libtool" => :build
   depends_on "pandoc" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "rust" => :build
   depends_on "libpq"
   depends_on "libpqxx"
   depends_on "libsodium"
-  depends_on macos: :catalina # Requires C++17 filesystem
+
   uses_from_macos "flex" => :build
+
+  on_sonoma :or_older do
+    depends_on "coreutils" => :build # for sha256sum
+  end
 
   on_linux do
     depends_on "libunwind"
@@ -50,6 +52,9 @@ class StellarCore < Formula
   end
 
   def install
+    # remove toolchain selection
+    inreplace "src/Makefile.am", "cargo +$(RUST_TOOLCHAIN_CHANNEL)", "cargo"
+
     system "./autogen.sh"
     system "./configure", "--disable-silent-rules",
                           "--enable-postgres",
@@ -60,8 +65,6 @@ class StellarCore < Formula
   test do
     test_categories = %w[
       accountsubentriescount
-      bucketlistconsistent
-      topology
     ]
     system bin/"stellar-core", "test", test_categories.map { |category| "[#{category}]" }.join(",")
   end

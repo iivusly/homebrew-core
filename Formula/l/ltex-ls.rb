@@ -7,30 +7,30 @@ class LtexLs < Formula
   head "https://github.com/valentjn/ltex-ls.git", branch: "develop"
 
   bottle do
-    rebuild 2
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "b5143777305e63064baf476660aa4f04193481555ec4f6064d7ab162609fae83"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "8451d3df1c2c862e0891378804e1b141ebcd796c956d95eb48a5f2da65d790f8"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "05ad45e1d55eff3ad2c3bcbd33b820b75d1c2591b13084a4b0a8fee9618dcbfe"
-    sha256 cellar: :any_skip_relocation, sonoma:         "cc962f2d453e6c73bf0f1212d5c238d5ef19d30fc744d6f785f68ae51ce02a70"
-    sha256 cellar: :any_skip_relocation, ventura:        "be324e4cc1e537cca541f829854e5cc0ccbf6b4e62f31c3e1c5cf870acb7133c"
-    sha256 cellar: :any_skip_relocation, monterey:       "6895ed3a2824794a968d4887408673d84d21de3d877c428c2eac6e3ddcd575aa"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "8ecb068a51e5bc4b26f0d64cd60feccf026f6c7b006c34e7a459cd901b1d05ed"
+    rebuild 4
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "5d2dc1612c126df0a99920f428ae300efea2ad97902c12246abb3dbb190ab487"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "38ab0f701ab7cfd6103f4dac187e48392fdabea07f476e02aae359c511ceec49"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "9d56ab0b8efa1e3209f83961586067573678919cf40f81fa4614f80768112717"
+    sha256 cellar: :any_skip_relocation, sonoma:        "a41867cfd4839ddf272fb8725ebcfd4c4614874dff3b41d4762ff1bd4b179f68"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "8f08e498833b5667fd9fb364169d817272f62dca9d1519da4d7c683c9f9cdc72"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "fba7ce38f22bf78b00f6c297436db4bf134b1d81c1e9d0fb6352b464dc38fc1f"
   end
 
   depends_on "maven" => :build
-  depends_on "python@3.12" => :build
-  depends_on "openjdk"
+  depends_on "python@3.14" => :build
+  # Do not bump, 25+ is not working with an error: java.lang.IllegalArgumentException: 25
+  depends_on "openjdk@21"
 
   def install
     # Fix build with `openjdk` 20.
     # Reported upstream at https://github.com/valentjn/ltex-ls/issues/244.
     inreplace "pom.xml", "<arg>-Werror</arg>", ""
 
-    ENV.prepend_path "PATH", Formula["python@3.12"].opt_libexec/"bin"
-    ENV["JAVA_HOME"] = Language::Java.java_home
+    ENV.prepend_path "PATH", Formula["python@3.14"].opt_libexec/"bin"
+    ENV["JAVA_HOME"] = Language::Java.java_home(Formula["openjdk@21"].version.major.to_s)
     ENV["TMPDIR"] = buildpath
 
-    system "python3.12", "-u", "tools/createCompletionLists.py"
+    system "python3.14", "-u", "tools/createCompletionLists.py"
 
     system "mvn", "-B", "-e", "-DskipTests", "package"
 
@@ -43,7 +43,12 @@ class LtexLs < Formula
       libexec.install Dir["ltex-ls-#{version}/*"]
     end
 
-    bin.env_script_all_files libexec/"bin", Language::Java.overridable_java_home_env
+    # Fix run with `openjdk` 24.
+    # Reported upstream at https://github.com/valentjn/ltex-ls/issues/322.
+    envs = Language::Java.overridable_java_home_env("21").merge({
+      "JAVA_OPTS" => "${JAVA_OPTS:--Djdk.xml.totalEntitySizeLimit=50000000}",
+    })
+    bin.env_script_all_files libexec/"bin", envs
   end
 
   test do

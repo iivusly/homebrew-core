@@ -1,8 +1,8 @@
 class BatsCore < Formula
   desc "Bash Automated Testing System"
   homepage "https://github.com/bats-core/bats-core"
-  url "https://github.com/bats-core/bats-core/archive/refs/tags/v1.11.0.tar.gz"
-  sha256 "aeff09fdc8b0c88b3087c99de00cf549356d7a2f6a69e3fcec5e0e861d2f9063"
+  url "https://github.com/bats-core/bats-core/archive/refs/tags/v1.13.0.tar.gz"
+  sha256 "a85e12b8828271a152b338ca8109aa23493b57950987c8e6dff97ba492772ff3"
   license "MIT"
 
   livecheck do
@@ -11,24 +11,30 @@ class BatsCore < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, all: "4293120beef503610e3d04ac371bbb96e6d4b0c86f405d0fe04e997ca7b6b106"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, all: "b1d947f6f436990be319ec03d9b147c58dd385d1c77c1f541410c1f0aa776fad"
   end
-
-  depends_on "coreutils"
-
-  uses_from_macos "bc" => :test
 
   def install
     system "./install.sh", prefix
   end
 
   test do
-    (testpath/"test.sh").write <<~EOS
-      @test "addition using bc" {
-        result="$(echo 2+2 | bc)"
-        [ "$result" -eq 4 ]
+    (testpath/"test.sh").write <<~SHELL
+      @test "no arguments prints message and usage instructions" {
+        run bats
+        [ $status -eq 1 ]
+        [ "${lines[0]}" == 'Error: Must specify at least one <test>' ]
+        [ "${lines[1]%% *}" == 'Usage:' ]
       }
+      @test "skipped test" {
+        skip
+      }
+    SHELL
+    assert_equal <<~EOS, shell_output("#{bin}/bats test.sh")
+      1..2
+      ok 1 no arguments prints message and usage instructions
+      ok 2 skipped test # skip
     EOS
-    assert_match "addition", shell_output("#{bin}/bats test.sh")
   end
 end

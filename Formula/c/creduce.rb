@@ -2,7 +2,7 @@ class Creduce < Formula
   desc "Reduce a C/C++ program while keeping a property of interest"
   homepage "https://github.com/csmith-project/creduce"
   license "BSD-3-Clause"
-  revision 4
+  revision 5
   head "https://github.com/csmith-project/creduce.git", branch: "master"
 
   # Remove when patches are no longer needed.
@@ -49,6 +49,16 @@ class Creduce < Formula
       url "https://github.com/csmith-project/creduce/commit/98baa64699aedb943520f175a5e731582df2806f.patch?full_index=1"
       sha256 "7a5a04ed394de464c09174997020a6cca0cc05154f58a3e855f20c8423fc8865"
     end
+
+    # More backports needed for updating LLVM
+    patch do
+      url "https://github.com/csmith-project/creduce/commit/4371cc2d77c771b8b88ded79b95176bac8dfbf09.patch?full_index=1"
+      sha256 "f7e88a13deb1db21933d0a81dfe328982beed283d49a66a59e6ef9c2220b1144"
+    end
+    patch do
+      url "https://github.com/csmith-project/creduce/commit/dff59dae1fc2d62cc1cd240761492587bab364be.patch?full_index=1"
+      sha256 "e4c531c73a8cd26cbf9175fa6f094f46a12cda00e5de3ac40e5c13aaf22c0b77"
+    end
   end
 
   livecheck do
@@ -57,18 +67,17 @@ class Creduce < Formula
   end
 
   bottle do
-    rebuild 2
-    sha256 cellar: :any,                 arm64_sonoma:   "a84e7830c2d4c2f038abf3bade992a13223b0f64ce7880f889938d791b207ce4"
-    sha256 cellar: :any,                 arm64_ventura:  "4ff607af8b4a7f7b713e58c660272d700ba6ea8ad004865342205aecf1aaec4b"
-    sha256 cellar: :any,                 arm64_monterey: "f2cd0d3b84053296246e0e226e80c4177da63c0a5d260fa44963c8e34ed26a59"
-    sha256 cellar: :any,                 sonoma:         "533902d5ef71e899ab1851933b694390929df4f4152762528334e374943c0b9d"
-    sha256 cellar: :any,                 ventura:        "b06ebf7952eb3abe4d34f800e85cc740df03a7739ee36a7b25f08f8c64dd51c5"
-    sha256 cellar: :any,                 monterey:       "4deb4eee650c1477905563c8424885dc51e430eb5ba53a25a7a706d0cfcfac6e"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "ac89ad126d791e4e7b3e30406b31656e9c383b82b93ac88742c2410320bb3899"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "94b893aac362ceca74c7d09acf19335865abf17e3f638db16167adf56865cd5e"
+    sha256 cellar: :any,                 arm64_sequoia: "5fadf5c8c719a221bb924142eae5abffe40dff151033a6166e5e02b2a61980f8"
+    sha256 cellar: :any,                 arm64_sonoma:  "70f95a86f0cada743b96616b58e8a55c6747c831af695947d02dc1a07132cd8b"
+    sha256 cellar: :any,                 sonoma:        "49319eb927f3b1f423b4176c525f89c4e3e55da53441c63ee4812cc3aece5c45"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "a75cd23590bf3bb096a62046b47589e1b03879cc7f98c354b469704083b89a71"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "6792f620f4a932cbbb518201e715cf09e9f90208a651e317aad521a6b8cd2a9f"
   end
 
   depends_on "astyle"
-  depends_on "llvm"
+  depends_on "llvm@20"
 
   uses_from_macos "flex" => :build
   uses_from_macos "perl"
@@ -100,6 +109,20 @@ class Creduce < Formula
     end
   end
 
+  # Apply open PR to support LLVM 19
+  # PR ref: https://github.com/csmith-project/creduce/pull/285
+  patch do
+    url "https://github.com/csmith-project/creduce/commit/30d433e5e49c6b5864e5ca7d8aa7cf30cf3191e2.patch?full_index=1"
+    sha256 "f0de5d3cf8a17405f4fce908a498feed3aa0d8594092bb3096624dba1ca5b74f"
+  end
+
+  # Apply open PR to support LLVM 20
+  # PR ref: https://github.com/csmith-project/creduce/pull/287
+  patch do
+    url "https://github.com/csmith-project/creduce/commit/62bd78d6d621faca246a1b2b659b75bf721aa184.patch?full_index=1"
+    sha256 "fe476690a81b3a6d9cda06058515fc49a250f1a0b6d9ecf30a9a9dc68ab7987d"
+  end
+
   def install
     ENV.prepend_create_path "PERL5LIB", libexec/"lib/perl5"
 
@@ -116,17 +139,9 @@ class Creduce < Formula
       end
     end
 
-    # Work around build failure seen on Apple Clang 13.1.6 by using LLVM Clang
-    # Undefined symbols for architecture x86_64:
-    #   "std::__1::basic_stringbuf<char, std::__1::char_traits<char>, ...
-    if DevelopmentTools.clang_build_version == 1316
-      ENV["CC"] = llvm.opt_bin/"clang"
-      ENV["CXX"] = llvm.opt_bin/"clang++"
-    end
-
-    system "./configure", *std_configure_args,
-                          "--disable-silent-rules",
-                          "--bindir=#{libexec}"
+    system "./configure", "--disable-silent-rules",
+                          "--bindir=#{libexec}",
+                          *std_configure_args
     system "make"
     system "make", "install"
 
@@ -134,16 +149,16 @@ class Creduce < Formula
   end
 
   test do
-    (testpath/"test1.c").write <<~EOS
+    (testpath/"test1.c").write <<~C
       int main() {
         printf("%d\n", 0);
       }
-    EOS
-    (testpath/"test1.sh").write <<~EOS
+    C
+    (testpath/"test1.sh").write <<~BASH
       #!/usr/bin/env bash
 
       #{ENV.cc} -Wall #{testpath}/test1.c 2>&1 | grep 'Wimplicit-function-declaration'
-    EOS
+    BASH
 
     chmod 0755, testpath/"test1.sh"
     system bin/"creduce", "test1.sh", "test1.c"

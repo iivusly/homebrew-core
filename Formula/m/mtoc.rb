@@ -1,21 +1,21 @@
 class Mtoc < Formula
   desc "Mach-O to PE/COFF binary converter"
   homepage "https://opensource.apple.com/"
-  url "https://github.com/apple-oss-distributions/cctools/archive/refs/tags/cctools-1010.6.tar.gz"
-  sha256 "19dadff2a4d23db17a50605a1fe7ad2d4b308fdf142d4dec0c94316e7678dc3f"
+  url "https://github.com/apple-oss-distributions/cctools/archive/refs/tags/cctools-1030.6.3.tar.gz"
+  sha256 "a43b0f7d5d7d2fb828f96318efb7b335dfbbdd5ee3b96716add1f509755f120a"
   license "APSL-2.0"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "9a2e0cff36af9f659bcbb7165d1f180ef4408a0423af23b85c2f4312db8806f6"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "eb9f6732da0297987d62d37c6f662a9679527fa7a3c80f45f7edf6c0ebda7b6b"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "18bf5ccdeeea52a6e5c0172e623b62142c8e52fca847720bbb88fa441c4f31c5"
-    sha256 cellar: :any_skip_relocation, sonoma:         "02c5fb90c5c4195d212cec400aaf85e629f367d42f5924624bc01b20d4850b0a"
-    sha256 cellar: :any_skip_relocation, ventura:        "9d99cef4e8e1bca0c12e33b574f18700f6492929ec302bbbcfc357ed0da27f67"
-    sha256 cellar: :any_skip_relocation, monterey:       "8a66535f89e326120675f1e809ca4c6e53bcc5b26c6616c169d598b1affeda8c"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "45bb1943f18afdc68144a47a8b41eb49b6c33ee7e1c2abf849c7cf4430956401"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "ca67d4a6ce13ea0c4d29cb2f40d225390c1c66c23099cd328a45ff3d1008564f"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "652f840b6cacf62d3c242baab4ffa8098657937d0d1aa6a6e53acfb461e3a3ae"
+    sha256 cellar: :any_skip_relocation, sonoma:        "cd38d1b84694e03fe9c4abf20746fb42bcd7a38023a681c3e6a1e98a23c10d44"
   end
 
   depends_on "llvm" => :build
+  depends_on xcode: :build
   depends_on :macos
+
   conflicts_with "ocmtoc", because: "both install `mtoc` binaries"
 
   patch do
@@ -41,9 +41,9 @@ class Mtoc < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       __attribute__((naked)) int start() {}
-    EOS
+    C
 
     args = %W[
       -nostdlib
@@ -54,7 +54,7 @@ class Mtoc < Formula
       #{testpath}/test.c
     ]
     system ENV.cc, *args
-    system bin/"mtoc", "#{testpath}/test", "#{testpath}/test.pe"
+    system bin/"mtoc", testpath/"test", testpath/"test.pe"
   end
 end
 

@@ -1,18 +1,17 @@
 class Zenity < Formula
   desc "GTK+ dialog boxes for the command-line"
-  homepage "https://wiki.gnome.org/Projects/Zenity"
-  url "https://download.gnome.org/sources/zenity/4.0/zenity-4.0.2.tar.xz"
-  sha256 "c16dcae46e29e22c2fa0b95e80e06c96b2aec93840161369c95c85ed9f093153"
+  homepage "https://gitlab.gnome.org/GNOME/zenity"
+  url "https://download.gnome.org/sources/zenity/4.2/zenity-4.2.2.tar.xz"
+  sha256 "019186a996096ef4fc356e21577b5673f5baa3a29ac8e3d608b753371c18018d"
   license "LGPL-2.1-or-later"
 
   bottle do
-    sha256 arm64_sonoma:   "324af3731f3817b139c002ff323090fc082a0fd98d62bf7111301a9bf6b6315f"
-    sha256 arm64_ventura:  "ced590fb6362f41d1ceb9783aa9ed4355991119d7775e13b5c7ca3a9ebc528b2"
-    sha256 arm64_monterey: "f8f09e214c8a87f2b4b123047657e12d355a14d2c95def2b9f52f9dd5fecc04e"
-    sha256 sonoma:         "90746002a9d277c8a59657a992f207cc3de2930ec3ad348883d1fc9d7f2f5bfb"
-    sha256 ventura:        "df30edd6cadf89bad689859f1109f3a600631ee7ddbbf1c897ddae880e01e6ac"
-    sha256 monterey:       "fb144d3c4bb1933b812a71e17a61f042c590134fe751f7be878e89187d540543"
-    sha256 x86_64_linux:   "3b1e00581cd9fb4b0fa0506018c864ba34cb5a4a5db6fd67dcd06b60c7ea88d0"
+    sha256 arm64_tahoe:   "2321c1402561eb6d0ec1f3af4fd3f67a185d6c46b77c592b33c3bd5c1ebbdcba"
+    sha256 arm64_sequoia: "f0d8890a0793c6d4b601a9f15b4b5d4a1f013259d9871c0ee161f08a537be304"
+    sha256 arm64_sonoma:  "922cb43d744d529e2c72efa70b676890eb1acef6f4a1889372b3820ccb1a9246"
+    sha256 sonoma:        "f347e55e1618ec44572b8646cc875180cce1ef003b77166c1d643ab0d32444c8"
+    sha256 arm64_linux:   "90306b1c235fa9621527f6c9cd86c245780aab336faf75b3ed132f00f5b16955"
+    sha256 x86_64_linux:  "be6ad7ce4ea3b7e74785d386c196c7cc2808efe951d2b9d13466162d8679545e"
   end
 
   depends_on "gettext" => :build
@@ -20,7 +19,7 @@ class Zenity < Formula
   depends_on "itstool" => :build
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
 
   depends_on "glib"
   depends_on "gtk4"
@@ -44,9 +43,6 @@ class Zenity < Formula
   end
 
   test do
-    # (zenity:30889): Gtk-WARNING **: 13:12:26.818: cannot open display
-    return if OS.linux? && ENV["HOMEBREW_GITHUB_ACTIONS"]
-
     system bin/"zenity", "--help"
   end
 end

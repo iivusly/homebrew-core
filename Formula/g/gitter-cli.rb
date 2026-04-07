@@ -6,21 +6,15 @@ class GitterCli < Formula
   license "MIT"
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "aa9eccb23942bcb3eb0178bba4d6855e5087343bf22750f3b932eb7e752f3a67"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "aa9eccb23942bcb3eb0178bba4d6855e5087343bf22750f3b932eb7e752f3a67"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "aa9eccb23942bcb3eb0178bba4d6855e5087343bf22750f3b932eb7e752f3a67"
-    sha256 cellar: :any_skip_relocation, sonoma:         "b9db9eac3088781fc38e0eb469a807562542d97a797986c7e7075f0eacf34c95"
-    sha256 cellar: :any_skip_relocation, ventura:        "b9db9eac3088781fc38e0eb469a807562542d97a797986c7e7075f0eacf34c95"
-    sha256 cellar: :any_skip_relocation, monterey:       "b9db9eac3088781fc38e0eb469a807562542d97a797986c7e7075f0eacf34c95"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "d362ab733091481c4aa4d761e1d533e1b4c470231f25eeee6ef5cef74cbe0a64"
+    rebuild 3
+    sha256 cellar: :any_skip_relocation, all: "fc3d9fc87869b22fb03bd8a53405527174c3a9cc910332d8c906dfd79b34ded5"
   end
 
   depends_on "node"
 
   def install
     system "npm", "install", *std_npm_args
-    bin.install_symlink libexec/"bin/gitter-cli"
+    bin.install_symlink libexec.glob("bin/*")
   end
 
   test do

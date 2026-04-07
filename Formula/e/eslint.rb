@@ -1,25 +1,20 @@
 class Eslint < Formula
   desc "AST-based pattern checker for JavaScript"
   homepage "https://eslint.org"
-  url "https://registry.npmjs.org/eslint/-/eslint-9.9.1.tgz"
-  sha256 "9330e387bf443fa545124abff4c746b10a88fc6f3236606b7f12cc2133256095"
+  url "https://registry.npmjs.org/eslint/-/eslint-10.2.0.tgz"
+  sha256 "e8ea67857abb364e2147486f645d600a3477d348813534e8945026330f680c8e"
   license "MIT"
+  head "https://github.com/eslint/eslint.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "ac20ca8ba59d55e7f6d4b5b78cf77b6308b0395c93564a72f4d6a4377128f79f"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "ac20ca8ba59d55e7f6d4b5b78cf77b6308b0395c93564a72f4d6a4377128f79f"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "ac20ca8ba59d55e7f6d4b5b78cf77b6308b0395c93564a72f4d6a4377128f79f"
-    sha256 cellar: :any_skip_relocation, sonoma:         "e42d574f3a5aa14763a611e5f6a45a7b70876ec84cf9fdcc578ae19e4131ef4d"
-    sha256 cellar: :any_skip_relocation, ventura:        "e42d574f3a5aa14763a611e5f6a45a7b70876ec84cf9fdcc578ae19e4131ef4d"
-    sha256 cellar: :any_skip_relocation, monterey:       "e42d574f3a5aa14763a611e5f6a45a7b70876ec84cf9fdcc578ae19e4131ef4d"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "ac20ca8ba59d55e7f6d4b5b78cf77b6308b0395c93564a72f4d6a4377128f79f"
+    sha256 cellar: :any_skip_relocation, all: "4802eb3a360f2d052c31232b797d1b6f1c62ad43aadf6a6dcec7b1a0b05bf207"
   end
 
   depends_on "node"
 
   def install
     system "npm", "install", *std_npm_args
-    bin.install_symlink Dir["#{libexec}/bin/*"]
+    bin.install_symlink libexec.glob("bin/*")
   end
 
   test do

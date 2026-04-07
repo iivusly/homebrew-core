@@ -3,37 +3,37 @@ class ScikitImage < Formula
 
   desc "Image processing in Python"
   homepage "https://scikit-image.org"
-  url "https://files.pythonhosted.org/packages/5d/c5/bcd66bf5aae5587d3b4b69c74bee30889c46c9778e858942ce93a030e1f3/scikit_image-0.24.0.tar.gz"
-  sha256 "5d16efe95da8edbeb363e0c4157b99becbd650a60b77f6e3af5768b66cf007ab"
+  url "https://files.pythonhosted.org/packages/a1/b4/2528bb43c67d48053a7a649a9666432dc307d66ba02e3a6d5c40f46655df/scikit_image-0.26.0.tar.gz"
+  sha256 "f5f970ab04efad85c24714321fcc91613fcb64ef2a892a13167df2f3e59199fa"
   license "BSD-3-Clause"
-  revision 1
   head "https://github.com/scikit-image/scikit-image.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "3aeefa1537ddfbf9c2a8dd2bc77853c333e8f99a71cce6d35daeb10e95107f5a"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "77a258de0568a6bc6405b67707dba97b25dffe1338dbe37b39fc63b5c4c78d3c"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "096478908be082b78050b357a271c440015be85e21961fb827345780b34baa21"
-    sha256 cellar: :any_skip_relocation, sonoma:         "6e28919721e67e5ec677e22851352097ec70c56e811aa1836d3d6a82bf36f477"
-    sha256 cellar: :any_skip_relocation, ventura:        "e1710b3af9a709a4a42144623a274766bda6736c69b5d17ab6b918c4557ca87a"
-    sha256 cellar: :any_skip_relocation, monterey:       "97cb05e332e4b5d31c1d09a44291cb2cce4938ec44a7834a9fb197201b89ec15"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "7a22e7dd8bb37445bc526d3f719e48738d53a46deddd6e088ada56e0663e5ef4"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "f92362bb9e8915f4663e1128f494955d8b2b9c2696ee10f6dcc8847e18dd3b4e"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "cf3ccc5a82af9515777cba387b399b8df00dab47b5718c0dbdbcfd7db628cb20"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "359b8d85b12902b35a37b340e59071a2ee973968dc142ced86417280d3e180a2"
+    sha256 cellar: :any_skip_relocation, sonoma:        "f4022877af97831db0e3a4c01055c1fb7911489a549a7a78c52bf51097d6c1c4"
+    sha256                               arm64_linux:   "f0c666448141861405ba8619e1d8c9f0e4fc0b3837a26ff62a5cfcf5b347691a"
+    sha256                               x86_64_linux:  "50f382f378a0ffc746827a9626da66979d0cd47db10be2647e50c2272b4b5ad7"
   end
 
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "numpy"
   depends_on "pillow"
-  depends_on "python@3.12"
+  depends_on "python@3.14"
   depends_on "scipy"
 
   on_linux do
     depends_on "patchelf" => :build
   end
 
+  pypi_packages exclude_packages: %w[numpy pillow scipy]
+
   resource "imageio" do
-    url "https://files.pythonhosted.org/packages/2c/f9/aa9f3a4eae46f4727902516dc7b365356c1e4e883156532b74d135a69887/imageio-2.34.1.tar.gz"
-    sha256 "f13eb76e4922f936ac4a7fec77ce8a783e63b93543d4ea3e40793a6cabd9ac7d"
+    url "https://files.pythonhosted.org/packages/a3/6f/606be632e37bf8d05b253e8626c2291d74c691ddc7bcdf7d6aaf33b32f6a/imageio-2.37.2.tar.gz"
+    sha256 "0212ef2727ac9caa5ca4b2c75ae89454312f440a756fcfc8ef1993e718f50f8a"
   end
 
   resource "lazy-loader" do
@@ -42,39 +42,37 @@ class ScikitImage < Formula
   end
 
   resource "networkx" do
-    url "https://files.pythonhosted.org/packages/04/e6/b164f94c869d6b2c605b5128b7b0cfe912795a87fc90e78533920001f3ec/networkx-3.3.tar.gz"
-    sha256 "0c127d8b2f4865f59ae9cb8aafcd60b5c70f3241ebd66f7defad7c4ab90126c9"
+    url "https://files.pythonhosted.org/packages/6a/51/63fe664f3908c97be9d2e4f1158eb633317598cfa6e1fc14af5383f17512/networkx-3.6.1.tar.gz"
+    sha256 "26b7c357accc0c8cde558ad486283728b65b6a95d85ee1cd66bafab4c8168509"
   end
 
   resource "packaging" do
-    url "https://files.pythonhosted.org/packages/51/65/50db4dda066951078f0a96cf12f4b9ada6e4b811516bf0262c0f4f7064d4/packaging-24.1.tar.gz"
-    sha256 "026ed72c8ed3fcce5bf8950572258698927fd1dbda10a5e981cdf0ac37f4f002"
+    url "https://files.pythonhosted.org/packages/a1/d4/1fc4078c65507b51b96ca8f8c3ba19e6a61c8253c72794544580a7b6c24d/packaging-25.0.tar.gz"
+    sha256 "d443872c98d677bf60f6a1f2f8c1cb748e8fe762d2bf9d3148b5599295b0fc4f"
   end
 
   resource "tifffile" do
-    url "https://files.pythonhosted.org/packages/8d/e5/c58f2dc22f6372516d1154ce1874c74cecf7c52892ad5f09bf3764b6b1b2/tifffile-2024.6.18.tar.gz"
-    sha256 "57e0d2a034bcb6287ea3155d8716508dfac86443a257f6502b57ee7f8a33b3b6"
+    url "https://files.pythonhosted.org/packages/31/b9/4253513a66f0a836ec3a5104266cf73f7812bfbbcda9d87d8c0e93b28293/tifffile-2025.12.12.tar.gz"
+    sha256 "97e11fd6b1d8dc971896a098c841d9cd4e6eb958ac040dd6fb8b332c3f7288b6"
   end
 
   def install
     virtualenv_install_with_resources
   end
 
-  # cleanup leftover .pyc files from previous installs which can cause problems
-  # see https://github.com/Homebrew/homebrew-python/issues/185#issuecomment-67534979
   def post_install
-    rm(Dir["#{HOMEBREW_PREFIX}/lib/python*.*/site-packages/skimage/**/*.pyc"])
+    HOMEBREW_PREFIX.glob("lib/python*.*/site-packages/skimage/**/*.pyc").map(&:unlink)
   end
 
   test do
-    (testpath/"test.py").write <<~EOS
+    (testpath/"test.py").write <<~PYTHON
       import skimage as ski
       import numpy
 
       cat = ski.data.chelsea()
       assert isinstance(cat, numpy.ndarray)
       assert cat.shape == (300, 451, 3)
-    EOS
+    PYTHON
     shell_output("#{libexec}/bin/python test.py")
   end
 end

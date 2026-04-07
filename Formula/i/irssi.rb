@@ -4,49 +4,56 @@ class Irssi < Formula
   url "https://github.com/irssi/irssi/releases/download/1.4.5/irssi-1.4.5.tar.xz"
   sha256 "72a951cb0ad622785a8962801f005a3a412736c7e7e3ce152f176287c52fe062"
   license "GPL-2.0-or-later" => { with: "openvpn-openssl-exception" }
+  revision 2
 
-  # This formula uses a file from a GitHub release, so we check the latest
-  # release version instead of Git tags.
   livecheck do
     url :stable
     strategy :github_latest
   end
 
   bottle do
-    sha256 arm64_sonoma:   "9376608f394ab71d9f3ed2f89f39fb26d6673626f49b931028f0368599113ddc"
-    sha256 arm64_ventura:  "46c6000387e22c3492210d205c60d371836a79070f4c9f28d1cba742bddb7c14"
-    sha256 arm64_monterey: "5fa2114a1ed6bcfb0e7c0236b3f8411cf5d6bcec87d352f0a50ba2ee89ed7a37"
-    sha256 sonoma:         "7ae1eee9a714ca68ee92db0cb1940b0f66631a444002303218b41fb2f3aca3e6"
-    sha256 ventura:        "2ee0a18af53baa8656b69a40163a44fb303c2d65378844812b30f56f25fa5df5"
-    sha256 monterey:       "7f006a852802e1b8e650b0e4a47bcce7814a5954eedf82e71f29a45ec2f9993d"
-    sha256 x86_64_linux:   "4e0e4585630510c4b4df61c02103c0018f2e7fb6f1f94c4861655dd73a2f3e00"
+    rebuild 2
+    sha256 arm64_tahoe:   "380f42555868ac5b61259d1dddcd47d94d15e3b86829b379b750beaf2a47c6c9"
+    sha256 arm64_sequoia: "6cda96f843ce728a0493321ca5b9003a37ff61013939697bd314b168b7fd9ebd"
+    sha256 arm64_sonoma:  "e7aef7fff21ebc2f2e6abe9dba1768307bf2eb454a1ddba7a085c166bcb599ad"
+    sha256 sonoma:        "83c6d196ae4f4ddd984ae7b056de427a0ffb59118c4e3a29261e2aab483b0aba"
+    sha256 arm64_linux:   "5b9b324500185f2ab9dd750ab8d32c8318ae26f7baf077ec6837ee273c648df4"
+    sha256 x86_64_linux:  "b304553e132ba3665e7a2b6daca8393da7c6a4ec4ef24141dd437c979edd33be"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "meson" => :build
+  depends_on "ninja" => :build
+  depends_on "pkgconf" => :build
   depends_on "glib"
   depends_on "openssl@3"
+  depends_on "perl"
 
   uses_from_macos "ncurses"
-  uses_from_macos "perl"
 
   on_macos do
     depends_on "gettext"
   end
 
   def install
+    perl_vendorarch = Utils.safe_popen_read("perl", "-MConfig", "-e", "print $Config{vendorarch}")
+
     args = %W[
-      --sysconfdir=#{etc}
-      --with-proxy
-      --enable-true-color
-      --with-socks=no
-      --with-perl=yes
-      --with-perl-lib=#{lib}/perl5/site_perl
+      -Dwith-proxy=yes
+      -Dwith-perl=yes
+      -Dwith-perl-lib=#{perl_vendorarch.sub(HOMEBREW_PREFIX, prefix)}
     ]
 
-    system "./configure", *args, *std_configure_args.reject { |s| s["--disable-debug"] }
-    # "make" and "make install" must be done separately on some systems
-    system "make"
-    system "make", "install"
+    # Add RPATH to Perl modules so Homebrew's audit can find libperl.so.
+    # The modules are loaded by Perl (which already has libperl), so this
+    # isn't strictly needed at runtime, but satisfies the linkage check.
+    if OS.linux?
+      perl_archlib = Utils.safe_popen_read("perl", "-MConfig", "-e", "print $Config{archlib}")
+      ENV.append "LDFLAGS", "-Wl,-rpath,#{perl_archlib}/CORE"
+    end
+
+    system "meson", "setup", "build", *args, *std_meson_args
+    system "meson", "compile", "-C", "build", "--verbose"
+    system "meson", "install", "-C", "build"
   end
 
   test do
@@ -57,12 +64,9 @@ class Irssi < Formula
     stdout, = PTY.spawn("#{bin}/irssi -c irc.freenode.net -n testbrew")
     assert_match "Terminal doesn't support cursor movement", stdout.readline
 
-    # This is not how you'd use Perl with Irssi but it is enough to be
-    # sure the Perl element didn't fail to compile, which is needed
-    # because upstream treats Perl build failures as non-fatal.
-    # To debug a Perl problem copy the following test at the end of the install
-    # block to surface the relevant information from the build warnings.
-    ENV["PERL5LIB"] = lib/"perl5/site_perl"
+    # Verify the Perl module compiled successfully. Upstream treats Perl
+    # build failures as non-fatal, so they can go unnoticed. To debug,
+    # move this test into the install block to surface build warnings.
     system "perl", "-e", "use Irssi"
   end
 end

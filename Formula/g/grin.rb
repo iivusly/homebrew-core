@@ -1,18 +1,17 @@
 class Grin < Formula
   desc "Minimal implementation of the Mimblewimble protocol"
   homepage "https://grin.mw/"
-  url "https://github.com/mimblewimble/grin/archive/refs/tags/v5.3.2.tar.gz"
-  sha256 "569b30fc1eb9ea895cb4f766cf32a759923f09cc4a9dc5eedb61f475ae25f091"
+  url "https://github.com/mimblewimble/grin/archive/refs/tags/v5.4.0.tar.gz"
+  sha256 "0e1f78b59cbb05d6e010bab8b7e7ac79cf796771dd9888083c23f99b5080fbc3"
   license "Apache-2.0"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "3e5b321bcc54efc69989848712f685467873e5450f0454876a0cff7a7059bd24"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "694371cd4468f6e20e871d336294c899da3bcb6dd5336b69e9508b7f60656234"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "a9eb4b86efe7b3cd9249382fb90745e15c6023754be316d69b9579174bcb2f90"
-    sha256 cellar: :any_skip_relocation, sonoma:         "3b876e26b367e993930bd19ead9388789d45e0abbbca260b81d412ca591f79e4"
-    sha256 cellar: :any_skip_relocation, ventura:        "f3d1c2c05e4529c7bf509d88fc7b38bedcbb82e932a63fb57d642285c334599b"
-    sha256 cellar: :any_skip_relocation, monterey:       "eb6d8b4b66bf4ab38866c7e9042aefadb2baf04c8ae2f9a1862cb2f0af8b0890"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "de037587292ec33ea496fe65c3b80c2911964e9ec07084407e27d386868fb19b"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "bc0fb83906434b132709f5adcce9e698b31d952325905dcf57134ee9c40f8fea"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "7b51faf9437847071fb9207d07769ed617ed02d032427fcc3c3ff96e12f4341f"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "747691be9c4f67f22aee54dc64df3db8061e464c871c9d332d1f98b94b1cf631"
+    sha256 cellar: :any_skip_relocation, sonoma:        "1e6abc496d862c084be4f22cb337758b284c30934620d261ae80d9693e0ce5de"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "9635e568f9f3e645241d35780e7b56a748545336b67cf15d8704b22c7f78ad3c"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "7c0583afa9eea22461074fe4847182493c3afec7f3558703fc33497ba2fb9dad"
   end
 
   depends_on "rust" => :build
@@ -26,6 +25,6 @@ class Grin < Formula
 
   test do
     system bin/"grin", "server", "config"
-    assert_predicate testpath/"grin-server.toml", :exist?
+    assert_path_exists testpath/"grin-server.toml"
   end
 end

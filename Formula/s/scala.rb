@@ -1,8 +1,8 @@
 class Scala < Formula
   desc "JVM-based programming language"
-  homepage "https://www.scala-lang.org/"
-  url "https://github.com/lampepfl/dotty/releases/download/3.5.0/scala3-3.5.0.tar.gz"
-  sha256 "bacad178623f1940dae7d75c54c75aaf53f14f07ae99803be730a1d7d51a612d"
+  homepage "https://scala-lang.org/"
+  url "https://github.com/scala/scala3/releases/download/3.8.3/scala3-3.8.3.tar.gz"
+  sha256 "ff62e827eb1ea17813d97e5fd5e0d2690110787173fe1e1e43d9dadcc3542fa7"
   license "Apache-2.0"
 
   livecheck do
@@ -11,20 +11,26 @@ class Scala < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, all: "10318ae0301e9a1f7aebce892c512c20c1df2678a1df297568769ec80ae31fe7"
+    sha256 cellar: :any_skip_relocation, all: "9c0aa8286ed3acd4d7e20a953806c5d794bb662f74131b4c8a14046be0ff5340"
   end
 
-  depends_on "openjdk"
-
-  conflicts_with "pwntools", because: "both install `common` binaries"
+  # JDK Compatibility: https://docs.scala-lang.org/overviews/jdk-compatibility/overview.html
+  depends_on "openjdk@17"
+  depends_on "scala-cli"
 
   def install
     rm Dir["bin/*.bat"]
-    libexec.install "lib"
-    libexec.install "maven2"
-    libexec.install "VERSION"
-    prefix.install "bin"
-    bin.env_script_all_files libexec/"bin", Language::Java.overridable_java_home_env
+    rm Dir["libexec/*.bat"]
+
+    libexec.install "lib", "maven2", "VERSION"
+    (libexec/"libexec").install "libexec/common", "libexec/common-shared", "libexec/cli-common-platform"
+
+    inreplace libexec/"libexec/cli-common-platform",
+              /SCALA_CLI_CMD_BASH=.*/,
+              "SCALA_CLI_CMD_BASH=(\"#{Formula["scala-cli"].opt_bin}/scala-cli\")"
+
+    bin.install "bin/scala", "bin/scalac", "bin/scaladoc"
+    bin.env_script_all_files libexec/"bin", Language::Java.overridable_java_home_env("17")
 
     # Set up an IntelliJ compatible symlink farm in 'idea'
     idea = prefix/"idea"
@@ -39,17 +45,23 @@ class Scala < Formula
   end
 
   test do
+    ENV["SCALA_CLI_HOME"] = testpath
+    ENV["COURSIER_CACHE"] = ENV["COURSIER_ARCHIVE_CACHE"] = testpath/".coursier_cache"
+
+    %w[scala scalac scaladoc].each do |cmd|
+      assert_match version.to_s, shell_output("#{bin}/#{cmd} --version")
+    end
+
     file = testpath/"Test.scala"
-    file.write <<~EOS
+    file.write <<~SCALA
       object Test {
         def main(args: Array[String]): Unit = {
           println(s"${2 + 2}")
         }
       }
-    EOS
+    SCALA
 
-    out = shell_output("#{bin}/scala #{file}").strip
-
+    out = shell_output("#{bin}/scala --server=false #{file}").chomp
     assert_equal "4", out
   end
 end

@@ -1,18 +1,17 @@
 class Osslsigncode < Formula
   desc "OpenSSL based Authenticode signing for PE/MSI/Java CAB files"
   homepage "https://github.com/mtrojnar/osslsigncode"
-  url "https://github.com/mtrojnar/osslsigncode/archive/refs/tags/2.9.tar.gz"
-  sha256 "3fe5488e442ad99f91410efeb7b029275366b5df9aa02371dcc89a8f8569ff55"
+  url "https://github.com/mtrojnar/osslsigncode/archive/refs/tags/2.13.tar.gz"
+  sha256 "ee95638b8bec0c019ddf28cb14988645abbd180dcd017536338b7d0d5eaaea96"
   license "GPL-3.0-or-later"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "917f9ac6b5ceaa7558b47929da67fa0aa3a7b3d6e4d2e7fb40f582c29bde91a2"
-    sha256 cellar: :any,                 arm64_ventura:  "3024c29dd0838b5fa7c57edab3ed3e2373515e65dd211421d8384fe9088642cb"
-    sha256 cellar: :any,                 arm64_monterey: "aa7c4c53ebf2aa83120b5883b0f8229e119fe1a4ac5bb97c1d3e9fcf141c1241"
-    sha256 cellar: :any,                 sonoma:         "6278aff15a055a409edbc6aa4a69176befc7777325b3980afc58cd71737cf11a"
-    sha256 cellar: :any,                 ventura:        "c09dfe8cb41d3af6327fb73695a7a5691c799b36f09331454b21a23e0e04ffbb"
-    sha256 cellar: :any,                 monterey:       "a329dc07e46683d428cd6f8d9fe9b2bd6c02fc03b3f5c86dfbed1e5fdb244913"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "e35630485849326c73bc6135118ccc391fdef8afd579371432207dd0aaec5f05"
+    sha256 cellar: :any,                 arm64_tahoe:   "e5a60ba4972ee5f6bd4652c556fb92a7d93577ecd73ec263d779b409fb939182"
+    sha256 cellar: :any,                 arm64_sequoia: "95dac23c9340dfb550aaf8a411cae92fa0f18dfffaef8e7db58531dcf54059c0"
+    sha256 cellar: :any,                 arm64_sonoma:  "804c471846f4477628c4364fb8d851be6aef87425f831c782f6afa7dba34125f"
+    sha256 cellar: :any,                 sonoma:        "f53ca1182dcce1fef94da4b4d3d2210ea23c14a0b5fb07690b35af901f0be035"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "7e01e10074189e7999e27450a1b0c0b228a0d10be7a49a568c0ba2e4d323b890"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "177c66a589a8f306468f9e2de500a1295b91d3f3ef5be4aafac1dd4f22ff8abb"
   end
 
   depends_on "cmake" => :build
@@ -20,7 +19,10 @@ class Osslsigncode < Formula
 
   uses_from_macos "curl"
   uses_from_macos "python"
-  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   # Fix permission issue when installing bash completionn
   patch :DATA

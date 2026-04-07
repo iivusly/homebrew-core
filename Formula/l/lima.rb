@@ -1,44 +1,59 @@
 class Lima < Formula
   desc "Linux virtual machines"
   homepage "https://lima-vm.io/"
-  url "https://github.com/lima-vm/lima/archive/refs/tags/v0.23.2.tar.gz"
-  sha256 "fc21295f78d717efc921f8f6d1ec22f64da82bfe685d0d2d505aee76c53da1ff"
+  url "https://github.com/lima-vm/lima/archive/refs/tags/v2.1.1.tar.gz"
+  sha256 "c1cb9f2a5d35715937bbf21566d58f89fc221ab285a42ddcc30fd6fdaab2c15a"
   license "Apache-2.0"
+  compatibility_version 1
   head "https://github.com/lima-vm/lima.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "be8e2b92961eca2f862f1a994dbef367e86d36705a705ebfa16d21c7f1366c35"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "d4bd7ae7921fbd9878b421ac8234e69ce04bbb73db04152c87a17514736dd032"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "3e1ad1c6e49a36e4a983070bec6c329b8dfd53713d301b5a44fe3781f9db1dba"
-    sha256 cellar: :any_skip_relocation, sonoma:         "c2e69a572afa3a3cf895643ede988c87dc0622dae4aebc539d5564d820845841"
-    sha256 cellar: :any_skip_relocation, ventura:        "08d6dc709086c26b7082ceb2303c96f4141ef27244e997e1944235d242fc57fd"
-    sha256 cellar: :any_skip_relocation, monterey:       "ca6ccd5bb69fe6616c813562e8cfe73f3009f78e83ae67ced098305442450609"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "741e9c7345e15f04b8feaf5034868f00fc3ff792226c485ab2e7679803411e0c"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "462f6900e8dc2b6f4390890ca6421773c566fc6b8a550ea83b4a9a048ca1765f"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "ece22d8fbab8b1699fa3cd2cbe2937ca7a1d40c9e61618fefa978a245a98d4e6"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "c5918d41acdba805a115daf0b1f5d453c11454d111cc34d42285eea31d082993"
+    sha256 cellar: :any_skip_relocation, sonoma:        "8b99753b1837b0b543a2dbc253cbad7ff10a0fb87d52dc44416262f49db58873"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "e18e339ebd27059a8ca8910707085c2eab77f66d002f4e19e39cc73bd08aac1f"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "efafb05f8d5813c49215291472c47951ec436711af53ac42d95c826afc2833cd"
   end
 
   depends_on "go" => :build
-  depends_on "qemu"
+
+  on_linux do
+    depends_on "qemu"
+  end
 
   def install
+    # make (default):              build everything
+    # make native:                 build core + native guest agent
+    # make additional-guestagents: build non-native guest agents
     if build.head?
-      system "make"
+      system "make", "native"
     else
       # VERSION has to be explicitly specified when building from tar.gz, as it does not contain git tags
-      system "make", "VERSION=#{version}"
+      system "make", "native", "VERSION=#{version}"
     end
 
     bin.install Dir["_output/bin/*"]
+    libexec.install Dir["_output/libexec/*"]
     share.install Dir["_output/share/*"]
 
     # Install shell completions
-    generate_completions_from_executable(bin/"limactl", "completion", base_name: "limactl")
+    generate_completions_from_executable(bin/"limactl", shell_parameter_format: :cobra)
+  end
+
+  def caveats
+    # since lima 1.1
+    <<~EOS
+      The guest agents for non-native architectures are now provided in a separate formula:
+        brew install lima-additional-guestagents
+    EOS
   end
 
   test do
     info = JSON.parse shell_output("#{bin}/limactl info")
     # Verify that the VM drivers are compiled in
     assert_includes info["vmTypes"], "qemu"
-    assert_includes info["vmTypes"], "vz" if OS.mac? && MacOS.version >= :ventura
+    assert_includes info["vmTypes"], "vz" if OS.mac?
     # Verify that the template files are installed
     template_names = info["templates"].map { |x| x["name"] }
     assert_includes template_names, "default"

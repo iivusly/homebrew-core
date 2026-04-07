@@ -1,19 +1,26 @@
 class Webp < Formula
   desc "Image format providing lossless and lossy compression for web images"
   homepage "https://developers.google.com/speed/webp/"
-  url "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.4.0.tar.gz"
-  sha256 "61f873ec69e3be1b99535634340d5bde750b2e4447caa1db9f61be3fd49ab1e5"
+  url "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.6.0.tar.gz"
+  sha256 "e4ab7009bf0629fd11982d4c2aa83964cf244cffba7347ecd39019a9e38c4564"
   license "BSD-3-Clause"
+  compatibility_version 1
   head "https://chromium.googlesource.com/webm/libwebp.git", branch: "main"
 
+  livecheck do
+    url "https://developers.google.com/speed/webp/docs/compiling"
+    regex(/libwebp[._-]v?(\d+(?:\.\d+)+)\.t/i)
+  end
+
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "1ba924051fcd614b0841d704d8302233611aad0e5981657424e0ac16f1cdd6f9"
-    sha256 cellar: :any,                 arm64_ventura:  "56b147b011c79a23b72746d5e8bf186e86e82a13799e473f6c72921b15ef4622"
-    sha256 cellar: :any,                 arm64_monterey: "c99036e412ed1c672a2be4805edfe156f1446255f7394e61a297bbc1589aff19"
-    sha256 cellar: :any,                 sonoma:         "600311045d5469c75d84d6b3aa7161c085bcc3c862c7e7421e7e157efeb3f5bf"
-    sha256 cellar: :any,                 ventura:        "a16422ec4d0f554a78e5d8ca08ee7b979770361772bbfd18d8a096d4bed8ad0c"
-    sha256 cellar: :any,                 monterey:       "dd492a06f46d931a677984e2663a62c70be6bb99b28f4a0bb8d573b3fe8259b0"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "689bc7cdc7b5468f779265c66b4140ad911ea6bac85dc1df33bb64a9b7fd0f26"
+    sha256 cellar: :any,                 arm64_tahoe:   "11a19ac5db13a8485d4d6f712d65d48531f99e8d7237407ab42718777eefacb3"
+    sha256 cellar: :any,                 arm64_sequoia: "ad74e4538a799bc21e85fb2899c2267f7b6c8761212d195ec3cb3583062ad19e"
+    sha256 cellar: :any,                 arm64_sonoma:  "2c0172632efa4d17103aad0d82dd27addce7db290b5cf52cd9afcbff3c39a497"
+    sha256 cellar: :any,                 arm64_ventura: "984de8caf92ff3492d12b9c0afabd97e07139f212222021a6813a2c99f66855d"
+    sha256 cellar: :any,                 sonoma:        "ea4e1ab3ff7e848a8b26a6e851e032887c0a5853d4586e77e98ca586b7f96a35"
+    sha256 cellar: :any,                 ventura:       "f5fa0476d932c52eedee49bdfc95d49514a6816f38c479cd8732a866e44ee3b3"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "4d8b90c79d3e912e86136a88e49295f76fe2b67803b299c5fbe7ab12f01f4faf"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "5520d52bce6d837491accd768420cb44e9c64b6bcd4063817668fd5245fc9cfc"
   end
 
   depends_on "cmake" => :build
@@ -32,11 +39,14 @@ class Webp < Formula
     system "cmake", "-S", ".", "-B", "static", *std_cmake_args, "-DBUILD_SHARED_LIBS=OFF", *args
     system "cmake", "--build", "static"
     lib.install buildpath.glob("static/*.a")
+
+    # Avoid rebuilding dependents that hard-code the prefix.
+    inreplace (lib/"pkgconfig").glob("*.pc"), prefix, opt_prefix
   end
 
   test do
     system bin/"cwebp", test_fixtures("test.png"), "-o", "webp_test.png"
     system bin/"dwebp", "webp_test.png", "-o", "webp_test.webp"
-    assert_predicate testpath/"webp_test.webp", :exist?
+    assert_path_exists testpath/"webp_test.webp"
   end
 end

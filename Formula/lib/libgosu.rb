@@ -7,6 +7,8 @@ class Libgosu < Formula
   head "https://github.com/gosu/gosu.git", branch: "master"
 
   bottle do
+    sha256 cellar: :any,                 arm64_tahoe:    "e0ecd1c01723e86606cf28780642bfe3992d3e8cf342715a13ec72ce563f30f9"
+    sha256 cellar: :any,                 arm64_sequoia:  "3a5fa70c9c6f1dcdb60fbeb50e8ec544b341c25f0c9d426d5f3982948a10a427"
     sha256 cellar: :any,                 arm64_sonoma:   "e212870f51bae367a0d9e2fe223ad8b6b69562efa3f368f7ca09ca554c9d83e3"
     sha256 cellar: :any,                 arm64_ventura:  "521365479b25946aab5db44d2672521ec732e5dc9d1fd80c23bad38f0d7756ed"
     sha256 cellar: :any,                 arm64_monterey: "fc8542f6a694357798be7e2280be1bc66b1ced40692806638f2ac7fc699bf189"
@@ -15,11 +17,12 @@ class Libgosu < Formula
     sha256 cellar: :any,                 ventura:        "9249cfa9a1cb2faa015c4b4d8c5a34e15d5d4c5623af8b5bd212b160f5b23869"
     sha256 cellar: :any,                 monterey:       "a06cbc49f0b79d5ce52875fbd2601e3e0acb1c4eec00b074d12809abc504e1e8"
     sha256 cellar: :any,                 big_sur:        "d06e787193c8f18a0696a64dbcb0a82ef7aeae666e2ef6b0470788ac0ebd65fa"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "48f8286f58619e5155092fe286194251c63398dbcc20bdfd17bfe6ac82b792ba"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "925189b43a69daaf38ec2011cdfa605d5f6f07aded7ca4828eb33570dee8f695"
   end
 
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "sdl2"
 
   on_linux do
@@ -29,16 +32,14 @@ class Libgosu < Formula
     depends_on "openal-soft"
   end
 
-  fails_with gcc: "5"
-
   def install
-    system "cmake", "-S", ".", "-B", "build", *std_cmake_args, "-DCMAKE_INSTALL_RPATH=#{rpath}"
+    system "cmake", "-S", ".", "-B", "build", "-DCMAKE_INSTALL_RPATH=#{rpath}", *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
   end
 
   test do
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include <stdlib.h>
       #include <Gosu/Gosu.hpp>
 
@@ -62,13 +63,9 @@ class Libgosu < Formula
           MyWindow window;
           window.show();
       }
-    EOS
+    CPP
 
     system ENV.cxx, "test.cpp", "-o", "test", "-L#{lib}", "-lgosu", "-I#{include}", "-std=c++17"
-
-    # Fails in Linux CI with "Could not initialize SDL Video: No available video device"
-    return if OS.linux? && ENV["HOMEBREW_GITHUB_ACTIONS"]
-
     system "./test"
   end
 end

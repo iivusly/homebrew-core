@@ -1,19 +1,18 @@
 class Chainsaw < Formula
   desc "Rapidly Search and Hunt through Windows Forensic Artefacts"
   homepage "https://github.com/WithSecureLabs/chainsaw"
-  url "https://github.com/WithSecureLabs/chainsaw/archive/refs/tags/v2.10.0.tar.gz"
-  sha256 "d43625f154c40a61e0253a300b1623c3e19c90ea0d6036d8190d3d854492962a"
+  url "https://github.com/WithSecureLabs/chainsaw/archive/refs/tags/v2.14.1.tar.gz"
+  sha256 "1706b4e73941e79776b9131f67c598b5165d011444bdc8bd0503efaf93547392"
   license "GPL-3.0-only"
   head "https://github.com/WithSecureLabs/chainsaw.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "f955ab08021e1bf3d8f9be4962fcbfaa21ad3f52eebff1d57bd03d8e0aebb150"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "1ed9867258ffcd9afc6f510f9db0e05209ec162c284e62b6dd84f7df1e4e1ad9"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "ff5ae553ce404df31971c7a6b1b88574d711be6bb1365a78e52267f903b12fae"
-    sha256 cellar: :any_skip_relocation, sonoma:         "f080ea6fd02cfd70608831f8c51577ed84c14d3f74bd7ba985adedf5c0e5e6fa"
-    sha256 cellar: :any_skip_relocation, ventura:        "a8b686f9f2f2826b15ba6b0ccbbb5bf6121723ad6c7207775ca5459bcb434021"
-    sha256 cellar: :any_skip_relocation, monterey:       "b7eab7f09afd4ec1c50f81285b787bdd9291808d4e2056c17ca09a22e984b897"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "83609bd624a4b434beca7ddad9f79a44a53d43a7400f467174b0885a26a4526e"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "bc824dca00e609d28135a05f9d538f28e1337f01f11df6e662c7d432a0dfca98"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "89166de0b4ba49c3c634bfe6730bd36677d1af7587e18560ec08509065d85dc9"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "f77849035ed31bde08e21dd8998081ea4bb3aaaf363598e302ceb6091b0b4cad"
+    sha256 cellar: :any_skip_relocation, sonoma:        "c37d0e01b535a21c9e3833bc852fd64c6069d58135ad4fe2e4070bd9d8818431"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "1e9055460ec73c0672e909be75ddb756b55de58a6c4a3d1234e5fe441023509f"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "5f7afd7f9fc0daeee1997a6a8d51ce76ee2da2f3f4cbe787bf214b68043c5f70"
   end
 
   depends_on "rust" => :build

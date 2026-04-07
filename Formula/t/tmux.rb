@@ -1,19 +1,10 @@
 class Tmux < Formula
   desc "Terminal multiplexer"
   homepage "https://tmux.github.io/"
+  url "https://github.com/tmux/tmux/releases/download/3.6a/tmux-3.6a.tar.gz"
+  sha256 "b6d8d9c76585db8ef5fa00d4931902fa4b8cbe8166f528f44fc403961a3f3759"
   license "ISC"
-  revision 1
-
-  stable do
-    url "https://github.com/tmux/tmux/releases/download/3.4/tmux-3.4.tar.gz"
-    sha256 "551ab8dea0bf505c0ad6b7bb35ef567cdde0ccb84357df142c254f35a23e19aa"
-
-    # Upstream fix for macOS 15 headers, remove in next version
-    patch do
-      url "https://github.com/tmux/tmux/commit/775789fbd5c4f3aa93061480cd64e61daf7fb689.patch?full_index=1"
-      sha256 "c1b61a1244f758480578888d3f89cac470271c376ea0879996b81e10b397cad0"
-    end
-  end
+  compatibility_version 1
 
   livecheck do
     url :stable
@@ -22,14 +13,12 @@ class Tmux < Formula
   end
 
   bottle do
-    rebuild 2
-    sha256 cellar: :any,                 arm64_sonoma:   "6b407b3351b79919c482d46134c9e83552f3e848f1c482a7deec65c36cf16d37"
-    sha256 cellar: :any,                 arm64_ventura:  "a5a47403c75e2d14370ff07641294bd361eceb8ca2dc65925e5eb7e41453d727"
-    sha256 cellar: :any,                 arm64_monterey: "2233d5fd7333fdf3da6dbe48157735c276f27cd7dd274d0e704985c9105e77b0"
-    sha256 cellar: :any,                 sonoma:         "2a085e0752332536a198aac71cd6b24a10f6feb0bf1825f90551cd6ef5e8c890"
-    sha256 cellar: :any,                 ventura:        "0648a51759f9c37ab98ff9b2558d30aa7ec07a7c7979a4107263e080382d0c0c"
-    sha256 cellar: :any,                 monterey:       "ec64b5ad6daf6bf6cb99cd2580fdf6cfee9830fcedc4971fa9be033710d1774a"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "05e737d00a0f331d48468c8f7f96f70e8879c5e9ffb9fcae9fb1fdae4f71bcd4"
+    sha256 cellar: :any,                 arm64_tahoe:   "36b24a92e268147bca7ef3e5df3a88affa06512d573e75f1cd1da28e724f4afd"
+    sha256 cellar: :any,                 arm64_sequoia: "9897a0d7b7e0159c1d09818d76e0ab88cc3fcdba8abd2bbbf349f84827ac87df"
+    sha256 cellar: :any,                 arm64_sonoma:  "089dc1f0f166cf72315528890052d4b9bc17cccce023a0449962a11098484300"
+    sha256 cellar: :any,                 sonoma:        "b0ca1f90384e487d2316bdcaef59ba4fdf63cb04fa561d424605f86935599563"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "d4d439bc36e2d3814323f14242249fb16b17bef657878ab2d407b3769822f55e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "b6b495ea4851f445eb947c60eb0fadaf87f872a0959b49b34303297d654bf81c"
   end
 
   head do
@@ -40,22 +29,12 @@ class Tmux < Formula
     depends_on "libtool" => :build
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "libevent"
   depends_on "ncurses"
+  depends_on "utf8proc"
 
   uses_from_macos "bison" => :build # for yacc
-
-  # Old versions of macOS libc disagree with utf8proc character widths.
-  # https://github.com/tmux/tmux/issues/2223
-  on_system :linux, macos: :sierra_or_newer do
-    depends_on "utf8proc"
-  end
-
-  resource "completion" do
-    url "https://raw.githubusercontent.com/imomaliev/tmux-bash-completion/8da7f797245970659b259b85e5409f197b8afddd/completions/tmux"
-    sha256 "4e2179053376f4194b342249d75c243c1573c82c185bfbea008be1739048e709"
-  end
 
   def install
     system "sh", "autogen.sh" if build.head?
@@ -63,26 +42,19 @@ class Tmux < Formula
     args = %W[
       --enable-sixel
       --sysconfdir=#{etc}
+      --enable-utf8proc
     ]
 
-    if OS.mac?
-      # tmux finds the `tmux-256color` terminfo provided by our ncurses
-      # and uses that as the default `TERM`, but this causes issues for
-      # tools that link with the very old ncurses provided by macOS.
-      # https://github.com/Homebrew/homebrew-core/issues/102748
-      args << "--with-TERM=screen-256color" if MacOS.version < :sonoma
-      args << "--enable-utf8proc" if MacOS.version >= :high_sierra
-    else
-      args << "--enable-utf8proc"
-    end
+    # tmux finds the `tmux-256color` terminfo provided by our ncurses
+    # and uses that as the default `TERM`, but this causes issues for
+    # tools that link with the very old ncurses provided by macOS.
+    # https://github.com/Homebrew/homebrew-core/issues/102748
+    args << "--with-TERM=screen-256color" if OS.mac? && MacOS.version < :sonoma
 
-    ENV.append "LDFLAGS", "-lresolv"
     system "./configure", *args, *std_configure_args
-
     system "make", "install"
 
     pkgshare.install "example_tmux.conf"
-    bash_completion.install resource("completion")
   end
 
   def caveats
@@ -98,10 +70,10 @@ class Tmux < Formula
     require "pty"
 
     socket = testpath/tap.user
-    PTY.spawn bin/"tmux", "-S", socket, "-f", "/dev/null"
+    PTY.spawn bin/"tmux", "-S", socket, "-f", File::NULL
     sleep 10
 
-    assert_predicate socket, :exist?
+    assert_path_exists socket
     assert_predicate socket, :socket?
     assert_equal "no server running on #{socket}", shell_output("#{bin}/tmux -S#{socket} list-sessions 2>&1", 1).chomp
   end

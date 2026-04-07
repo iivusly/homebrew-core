@@ -1,35 +1,37 @@
 class Nudoku < Formula
   desc "Ncurses based sudoku game"
   homepage "https://jubalh.github.io/nudoku/"
-  url "https://github.com/jubalh/nudoku/archive/refs/tags/5.0.0.tar.gz"
-  sha256 "ba60a99c9832b5c950a00a0a9d1e0938fddf2cef32765bca18041e770afc3c4a"
+  url "https://github.com/jubalh/nudoku/archive/refs/tags/7.0.0.tar.gz"
+  sha256 "91b41874cf5e323ca50a7e1fa15170aa3fb94591842df20ea394cce4a065ef9d"
   license "GPL-3.0-or-later"
   head "https://github.com/jubalh/nudoku.git", branch: "master"
 
   bottle do
-    sha256 arm64_sonoma:   "969ddf28f4eb7014b9c44cf6bac0106f2d00306fef670f08b8d57fa08873ca9f"
-    sha256 arm64_ventura:  "8e257d6a76e89ded708920215a7446a845c2ed74fe1cb31ee695de5f08129864"
-    sha256 arm64_monterey: "ad835249ee203dac6d4c7fdd7b95d1395e113f6aaa0ec7a4d2d14c9405e61cc3"
-    sha256 sonoma:         "d4f87f815b143cddae90e6bcf12bb8609a53e7f112cb19580585613e92a2fd49"
-    sha256 ventura:        "a58e28aa1ffac9ef8d792ef34190e7bd1605828aa2ae29550042e28740863023"
-    sha256 monterey:       "c208d8a2b1a5bbe9179a4969f284e2412ad354ee00da078f423552adc67698fa"
-    sha256 x86_64_linux:   "6050f8f3ab9a15cafee9cf73e62cfc236bd98f445015cbed8f2a48fb82de0efc"
+    sha256 cellar: :any, arm64_tahoe:   "ebda326741afc7c9870a625d27d5fee78100bf41c8f7033cd7a1280666171437"
+    sha256 cellar: :any, arm64_sequoia: "7072242cdfeafd41d7b2aa467e75a7a3c72676c9f142a2514437444bce479723"
+    sha256 cellar: :any, arm64_sonoma:  "c431abf175d457445a7291c328341ec64d9eb83d00968d1dc6fcc93d2971f496"
+    sha256 cellar: :any, sonoma:        "a2622caff993cd421972bed535b7eb9b66a8fca2ea09a660b8a6a48e5302321e"
+    sha256               arm64_linux:   "be9b1d9423b60780d7d59bcd8c1ad272b52bab3fd05457506562319c38f501e6"
+    sha256               x86_64_linux:  "07f783c023c9984a1722041757a98540205cb9a5d79f0df463d9e5a23bae2e54"
   end
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
-  depends_on "pkg-config" => :build
+  depends_on "gettext" => :build
+  depends_on "pkgconf" => :build
   depends_on "cairo"
-  depends_on "gettext"
 
   uses_from_macos "ncurses"
 
+  on_macos do
+    depends_on "gettext"
+  end
+
   def install
     system "autoreconf", "--force", "--install", "--verbose"
-    system "./configure", "--disable-dependency-tracking",
-                          "--disable-silent-rules",
+    system "./configure", "--disable-silent-rules",
                           "--enable-cairo",
-                          "--prefix=#{prefix}"
+                          *std_configure_args
     system "make", "install"
   end
 

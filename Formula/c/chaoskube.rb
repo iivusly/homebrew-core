@@ -1,19 +1,23 @@
 class Chaoskube < Formula
   desc "Periodically kills random pods in your Kubernetes cluster"
   homepage "https://github.com/linki/chaoskube"
-  url "https://github.com/linki/chaoskube/archive/refs/tags/v0.33.0.tar.gz"
-  sha256 "d41321fc6987a7f514ed7dda26e673de7ee2bebc67e9b5e2bddfbfbd8cc0065a"
+  url "https://github.com/linki/chaoskube/archive/refs/tags/v0.38.0.tar.gz"
+  sha256 "23000183a33e10bc39edc69515a92a1331ff8486a306814686336be7c10f33fc"
   license "MIT"
   head "https://github.com/linki/chaoskube.git", branch: "master"
 
+  livecheck do
+    url :stable
+    strategy :github_latest
+  end
+
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "5bde91f9966a68b60d943663727e754b4f8d2c4d3fa6870b1bd2187b4c1e3152"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "acd027bcd3b8c0491a71a6302acf621a10e256d5dabc56784cccc4b6306b9dc3"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "bd33586e2a57198e2ab3878b2a199457eb0fcd594488b7fd8fba58000afd46f8"
-    sha256 cellar: :any_skip_relocation, sonoma:         "d8dd1af39fca69a2f5742ecf2b4493e239f3cb4cefd5009d222a39aaf0110dc0"
-    sha256 cellar: :any_skip_relocation, ventura:        "0d0faa2d5c1c39701d996c9f9120294b777b3a6b880fed27fde651ce8b801bbd"
-    sha256 cellar: :any_skip_relocation, monterey:       "d86a512128cc9d89a884f8c0ec91f8e0edc695794f7ab2fdda493ecc914b5790"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "34b30206a384aca016c045209255ae8073e6f45b33081768eb1b43a17dd4890d"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "d404389a447a45098d2f299a545ae890a1cdd77c91ed5b55861049b9dc505bea"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "519ad2e84a0a72ee268170e9ec0752f6a761066b716eaa8143e23767424cbf1e"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "c00ec01eb256634fe6e10cfd6e9d303871060208adf01f8c17ccb7acfedaa77f"
+    sha256 cellar: :any_skip_relocation, sonoma:        "567d4ae913059c5244e5bce3460c648ffe17011302214be84af999525e576f3a"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "23eb82bb4a90ee62857f338fd688462f9c56a4242af2779d9c59fb404f819ab8"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "89bb317cd550675bf0151057430f10593963f428c0d210db21ce7c6f83b4a88e"
   end
 
   depends_on "go" => :build

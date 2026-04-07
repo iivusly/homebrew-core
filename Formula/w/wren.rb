@@ -11,6 +11,8 @@ class Wren < Formula
   end
 
   bottle do
+    sha256 cellar: :any,                 arm64_tahoe:    "8c4291a4d7ced18176f129c62108b7a2f0286501d05b23ba5f3edcc3016f69c9"
+    sha256 cellar: :any,                 arm64_sequoia:  "32ef27315c3c2718071ccbe516fbdc91934eb94d2a0e5f91ec63c215efb8aea0"
     sha256 cellar: :any,                 arm64_sonoma:   "a3100038802e99ce273976dec06b8cd2239cc9146523664938107d867ad9ba60"
     sha256 cellar: :any,                 arm64_ventura:  "a56a102a2a2e336cae95c2df5bec5ddc48dcb53dd7c922ae6f19380637f6c759"
     sha256 cellar: :any,                 arm64_monterey: "c3e1412d38068f8218c7753b55468289c1602c0bc60ab2d60f45fb2bb7547dbf"
@@ -20,7 +22,7 @@ class Wren < Formula
     sha256 cellar: :any,                 monterey:       "64f267fae9c817599741fa6f00121de14f18c1287df743b33c7c7567e2d5cda0"
     sha256 cellar: :any,                 big_sur:        "c54db478f8ec48d08dc4992bb8efe1308d478f20f3177513d0154460e26ad1f0"
     sha256 cellar: :any,                 catalina:       "afa48d4ceca7e0e2227bf6fd6204194de239c3b67436a46485a7563673fb4fed"
-    sha256 cellar: :any,                 mojave:         "f55d068b6db418338ba1f4622b75d5c36b2b3462e27f28c0844e32c980b6b881"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "33182bdc7645b09e96f4fdc1b7bc949b9b521e15bd6a3b78569966ba0ad132c4"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "e9129580dd56d4ad4ad66ac59e1d43533b54816936fc18d0216a445d576598e0"
   end
 
@@ -36,7 +38,7 @@ class Wren < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <assert.h>
       #include <stdio.h>
       #include "wren.h"
@@ -53,7 +55,7 @@ class Wren < Formula
         printf("1 + 2 = %d\\n", (int) wrenGetSlotDouble(vm, 0));
         wrenFreeVM(vm);
       }
-    EOS
+    C
     system ENV.cc, "test.c", "-I#{include}", "-L#{lib}", "-lwren", "-o", "test"
     assert_equal "1 + 2 = 3", shell_output("./test").strip
   end

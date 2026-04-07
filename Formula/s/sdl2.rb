@@ -1,24 +1,25 @@
 class Sdl2 < Formula
   desc "Low-level access to audio, keyboard, mouse, joystick, and graphics"
   homepage "https://www.libsdl.org/"
-  url "https://github.com/libsdl-org/SDL/releases/download/release-2.30.7/SDL2-2.30.7.tar.gz"
-  sha256 "2508c80438cd5ff3bbeb8fe36b8f3ce7805018ff30303010b61b03bb83ab9694"
+  url "https://github.com/libsdl-org/SDL/releases/download/release-2.32.10/SDL2-2.32.10.tar.gz"
+  sha256 "5f5993c530f084535c65a6879e9b26ad441169b3e25d789d83287040a9ca5165"
   license "Zlib"
+  compatibility_version 1
 
   livecheck do
     url :stable
-    regex(/release[._-](\d+(?:\.\d+)+)/i)
-    strategy :github_latest
+    regex(/^(?:release[._-])?v?(2(?:\.\d+)+)$/i)
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "4e63f83af8ccbf1cd9b261892dcbc588181d5443e7252447bd3db97f9a736ad3"
-    sha256 cellar: :any,                 arm64_ventura:  "ecccc1145afb6d7fc19941784454ea5dc019a6bec5e8480d88f754641010d71e"
-    sha256 cellar: :any,                 arm64_monterey: "cea3ad61d54f65d6084ad327584cfc1d6c530d2e9170fcc727f495feec4bdbaa"
-    sha256 cellar: :any,                 sonoma:         "1730e6eb3cf6ca85ec59e3716f61b9adfc1126ea797990f50ac6c1f57172ecdc"
-    sha256 cellar: :any,                 ventura:        "df0dc584b461220af4071c67dc5e311b7bd38105f65c4e90a053731ac4af6ed6"
-    sha256 cellar: :any,                 monterey:       "6afd60164b34aed560bba62e0c3a988d7606e074e4b6d3b5cdff95ccba76f4de"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "c538b4859944edc5341947814a92c381c80f612193f8f7969586d292a4c67f56"
+    sha256 cellar: :any,                 arm64_tahoe:   "d023e694d63e6d5adc1acb6110fc57e31fcd1cbcec974f51f4993e108ddc4f80"
+    sha256 cellar: :any,                 arm64_sequoia: "702b9e09ac8a7cc8a99ab4e9298803bbfcd3179d7b029883fe760ceecf98e526"
+    sha256 cellar: :any,                 arm64_sonoma:  "5dc1f9fda53f4189beea57bfeffb205012c72e223cef488f6c3fa6c7dd0ba40e"
+    sha256 cellar: :any,                 arm64_ventura: "865d7b096886d5d80425a1cfd7a3386056db8b8d4d7191ffc06f140b2785aa5e"
+    sha256 cellar: :any,                 sonoma:        "df04d6460b7ab3baefc14201d886a0e27e694a5ba11b075c5725402d8b143c15"
+    sha256 cellar: :any,                 ventura:       "5bb2ddf9a2403f7b76f9db786c017f9e38325ce1b6203b4b917afb23525ee04e"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "e050a5f8c665edb6a5afef282d9508355095a579484e92ea5dc69b26c5acc16c"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "e98bc16de311c00276a48d4424b86ddc32fa9f65438edfa0fe048cff9e15d2db"
   end
 
   head do
@@ -30,13 +31,17 @@ class Sdl2 < Formula
   end
 
   on_linux do
-    depends_on "pkg-config" => :build
-    depends_on "libice"
+    depends_on "mesa" => :build
+    depends_on "pkgconf" => :build
+    depends_on "alsa-lib"
+    depends_on "libx11"
     depends_on "libxcursor"
+    depends_on "libxext"
+    depends_on "libxfixes"
+    depends_on "libxi"
+    depends_on "libxrandr"
     depends_on "libxscrnsaver"
-    depends_on "libxxf86vm"
     depends_on "pulseaudio"
-    depends_on "xinput"
   end
 
   def install
@@ -61,7 +66,6 @@ class Sdl2 < Formula
         --enable-video-x11
         --enable-video-x11-scrnsaver
         --enable-video-x11-xcursor
-        --enable-video-x11-xinerama
         --enable-video-x11-xinput
         --enable-video-x11-xrandr
         --enable-video-x11-xshape

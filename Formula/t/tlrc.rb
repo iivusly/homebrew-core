@@ -1,19 +1,18 @@
 class Tlrc < Formula
   desc "Official tldr client written in Rust"
-  homepage "https://github.com/tldr-pages/tlrc"
-  url "https://github.com/tldr-pages/tlrc/archive/refs/tags/v1.9.3.tar.gz"
-  sha256 "5a103e9d77e5a5d02b4e7ef98a3ab8e5fb1e4a9a861ea0cd19ab3002daf89fed"
+  homepage "https://tldr.sh/tlrc/"
+  url "https://github.com/tldr-pages/tlrc/archive/refs/tags/v1.13.0.tar.gz"
+  sha256 "be72997481480d66560886d2ff7b1e1d8e086169885d85edee663c9091bd32f3"
   license "MIT"
   head "https://github.com/tldr-pages/tlrc.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "97c5f4c368464e2a079eb997db14556449c08f6dfb89858b6632bf788656c2b2"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "39e600c9bb0e372fb96fa13ad6d21b19a50e5a12b2f71a57ab75420dfa67b32f"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "c4cab0cdcad86b09de10562690684780df7ab386b8d6123ed5e6e62e1d44996d"
-    sha256 cellar: :any_skip_relocation, sonoma:         "9624494a35da5d9c819e8bc326df3c443b5764f9715a44ce65ff0f3ed87ba40d"
-    sha256 cellar: :any_skip_relocation, ventura:        "5703ac062d93becf3a675c73e580e40833352824b72af8eba542ab26840fc1b1"
-    sha256 cellar: :any_skip_relocation, monterey:       "43352a252db7eb809704ec9a6b5d51efaa3de8c9c45792106b321121eb5858ff"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "f434a74662a50b963fe7e58804f2d88aad7f637e041a95cd6e1001f4321c399b"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "fb3541b689da3b76db5bd4682a240c34d25b5d1c183856d0a75ff156a8389e08"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "8d2a1ac7501121a690c323b4d6eab28f33f9943566744adc757b0c7702bf6747"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "f1283ffdbd2f2c7a6971be0a29bde24aa624a227cb0811c7782713923a6b9c54"
+    sha256 cellar: :any_skip_relocation, sonoma:        "c608e7267500f1bdff26a8d5406b1c77523c0e187bae937329f94e01e4e7d041"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "98b06542d2f8b3da2b31739f95b2c26caef150b5dd0ef1d138860c723d14accd"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "400015d944ed322be4703d6bc7afa9d8c2f46d1fbdd4977751acff79ce633b1f"
   end
 
   depends_on "rust" => :build

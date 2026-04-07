@@ -1,22 +1,18 @@
 class Gjs < Formula
   desc "JavaScript Bindings for GNOME"
   homepage "https://gitlab.gnome.org/GNOME/gjs/wikis/Home"
-  # TODO: Move to latest `spidermonkey` on 1.82.x.
-  # Also set deprecation date on `spidermonkey@115`.
-  url "https://download.gnome.org/sources/gjs/1.80/gjs-1.80.2.tar.xz"
-  sha256 "135e39c5ac591096233e557cfe577d64093f5054411d47cb2e214bad7d4199bd"
+  url "https://download.gnome.org/sources/gjs/1.88/gjs-1.88.0.tar.xz"
+  sha256 "30a0b9f3317e8e60b1896db2903c70e8b0cd33df953c328755803a75191dc453"
   license all_of: ["LGPL-2.0-or-later", "MIT"]
-  revision 1
   head "https://gitlab.gnome.org/GNOME/gjs.git", branch: "master"
 
   bottle do
-    sha256 arm64_sonoma:   "307d4320f5578aa3c533d3a88225ee48b2e76bc11d86968588fa9b56868ec566"
-    sha256 arm64_ventura:  "174e50c45c543ca5a0c38c0f0cf91b54282789e7d61e0e915dcf81669908f1ab"
-    sha256 arm64_monterey: "340bd07ecaaae88d11557c1f279ef58f1ebd586d92815b6c8cd11ff573fa3864"
-    sha256 sonoma:         "d439ca01cec06fda0e44a89f18d4d1c1cdc34b09dd19c1e971bd1606456741bc"
-    sha256 ventura:        "897dbcdc07cc28f13120ad285101f3460876545923b4d0142498fe778d4cc048"
-    sha256 monterey:       "55382641f05e45a654fd48d2bba55701b8baca4e7521559e0d3c1facfd2577fe"
-    sha256 x86_64_linux:   "30705604f5ba1f63011f8fb269f56320e25d3d42b2c674717d8fcaab6139b62a"
+    sha256 arm64_tahoe:   "812b6a7f5c6131bc34c59ec5c31bb2fba45d74729b4062565ec8704cfee017fc"
+    sha256 arm64_sequoia: "4809c33460fed027d9fce6c63a5c4ff93733944b7e25eda3e54b5af293c36d71"
+    sha256 arm64_sonoma:  "85972643a8124ccdb5fcc2006029322b46dd1932b6809808b3a8e57457e64e91"
+    sha256 sonoma:        "77ef68855a431351639f441fe0bd1d9ea868df24a7e26e43df73e47f006eb418"
+    sha256 arm64_linux:   "0c39907f6fce1361e240a49a84f118bf9cfae1031cb5fac2e835d874ba84122b"
+    sha256 x86_64_linux:  "79b3c19b526140b65ff193f2710d5aed8c9e242e1dec065a6ca8fad482d4b8c6"
   end
 
   depends_on "meson" => :build
@@ -27,7 +23,7 @@ class Gjs < Formula
   depends_on "gobject-introspection"
   depends_on "libx11"
   depends_on "readline"
-  depends_on "spidermonkey@115"
+  depends_on "spidermonkey"
 
   uses_from_macos "libffi"
 
@@ -35,11 +31,12 @@ class Gjs < Formula
     depends_on "gettext"
   end
 
-  fails_with gcc: "5" # meson ERROR: SpiderMonkey sanity check: DID NOT COMPILE
-
   def install
     # ensure that we don't run the meson post install script
     ENV["DESTDIR"] = "/"
+
+    # work around "Failed to load shared library 'libgobject-2.0.0.dylib'"
+    ENV.append "LDFLAGS", "-Wl,-rpath,#{rpath(target: Formula["glib"].opt_lib)}" if OS.mac?
 
     args = %w[
       -Dprofiler=disabled
@@ -60,12 +57,12 @@ class Gjs < Formula
   end
 
   test do
-    (testpath/"test.js").write <<~EOS
+    (testpath/"test.js").write <<~JS
       #!/usr/bin/env gjs
       const GLib = imports.gi.GLib;
       if (31 != GLib.Date.get_days_in_month(GLib.DateMonth.JANUARY, 2000))
         imports.system.exit(1)
-    EOS
+    JS
     system bin/"gjs", "test.js"
   end
 end

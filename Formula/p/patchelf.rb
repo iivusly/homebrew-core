@@ -11,6 +11,8 @@ class Patchelf < Formula
   end
 
   bottle do
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:    "3eca59098dfb9987773befef12384065102f4d6e6ab03fc4e3543d9c45d81b80"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia:  "00f60cc5a6eda135bd0184aa3e4980da9017132553c2ab685b03842f4c196ea2"
     sha256 cellar: :any_skip_relocation, arm64_sonoma:   "25689776796afacaf452e8e74dd3805bf9ff129c00f3cc886c0857db9802c9db"
     sha256 cellar: :any_skip_relocation, arm64_ventura:  "37888c994e481e2b6a3a212c689195e2ca6dbeb681779845bbeda5a52262c1b5"
     sha256 cellar: :any_skip_relocation, arm64_monterey: "bd75a287bcecfb33a2ca07c92225435571804a8e73f30ecc4769a6a7443dc2d0"
@@ -19,6 +21,7 @@ class Patchelf < Formula
     sha256 cellar: :any_skip_relocation, ventura:        "6b230c2ad0a046653bb8f2b5652d069f4f9e7c6f17bdb4d4e9b6dc35a94a3693"
     sha256 cellar: :any_skip_relocation, monterey:       "37bd9ca1e04a76f8b160fdaf1f1f76c2f396a264f5d3af88670d3338c577638b"
     sha256 cellar: :any_skip_relocation, big_sur:        "0c12fe3723bc1b72e6635713ff2f6c12cf7f13e8e9533fb58360a2c163187d4f"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "e5ac0544c3916f7198d156d69a25d8f142905c694946ac1d430d5375f94f0bc1"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "fe8a76cdde4a5666cccbcdfc328bfb77f5d05b63a52ce103b487166be696ac6b"
   end
 
@@ -27,13 +30,6 @@ class Patchelf < Formula
 
     depends_on "autoconf" => :build
     depends_on "automake" => :build
-  end
-
-  fails_with gcc: "5" # Needs std::optional
-
-  resource "homebrew-helloworld" do
-    url "http://timelessname.com/elfbin/helloworld.tar.gz"
-    sha256 "d8c1e93f13e0b7d8fc13ce75d5b089f4d4cec15dad91d08d94a166822d749459"
   end
 
   def install
@@ -52,12 +48,11 @@ class Patchelf < Formula
   end
 
   test do
-    resource("homebrew-helloworld").stage do
-      assert_equal "/lib/ld-linux.so.2\n", shell_output("#{bin}/patchelf --print-interpreter chello")
-      assert_equal "libc.so.6\n", shell_output("#{bin}/patchelf --print-needed chello")
-      assert_equal "\n", shell_output("#{bin}/patchelf --print-rpath chello")
-      assert_equal "", shell_output("#{bin}/patchelf --set-rpath /usr/local/lib chello")
-      assert_equal "/usr/local/lib\n", shell_output("#{bin}/patchelf --print-rpath chello")
-    end
+    cp test_fixtures("elf/hello"), testpath
+    assert_equal "/lib64/ld-linux-x86-64.so.2\n", shell_output("#{bin}/patchelf --print-interpreter hello")
+    assert_equal "libc.so.6\n", shell_output("#{bin}/patchelf --print-needed hello")
+    assert_equal "\n", shell_output("#{bin}/patchelf --print-rpath hello")
+    assert_empty shell_output("#{bin}/patchelf --set-rpath /usr/local/lib hello")
+    assert_equal "/usr/local/lib\n", shell_output("#{bin}/patchelf --print-rpath hello")
   end
 end

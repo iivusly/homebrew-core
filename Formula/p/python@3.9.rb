@@ -1,31 +1,29 @@
 class PythonAT39 < Formula
   desc "Interpreted, interactive, object-oriented programming language"
   homepage "https://www.python.org/"
-  url "https://www.python.org/ftp/python/3.9.19/Python-3.9.19.tar.xz"
-  sha256 "d4892cd1618f6458cb851208c030df1482779609d0f3939991bd38184f8c679e"
+  url "https://www.python.org/ftp/python/3.9.25/Python-3.9.25.tar.xz"
+  sha256 "00e07d7c0f2f0cc002432d1ee84d2a40dae404a99303e3f97701c10966c91834"
   license "Python-2.0"
-  revision 1
-
-  livecheck do
-    url "https://www.python.org/ftp/python/"
-    regex(%r{href=.*?v?(3\.9(?:\.\d+)*)/?["' >]}i)
-  end
 
   bottle do
-    sha256 arm64_sonoma:   "57f58fe8682f4dbcf39f5f4f1cedb0c7ce6f75275d7325fb1b314f9574d4842f"
-    sha256 arm64_ventura:  "0cf6dafd4cd9dddf94cb283f4e7a481b2d1ec410b32ca511318330acaa2681ea"
-    sha256 arm64_monterey: "1170a572e201af538c79e5c0ab560365342137f589c763f7ab52baba0d2fb9c0"
-    sha256 sonoma:         "55236c9f34924d02f9a8d99b7dc40708c3d9c05ae6f201d03ff22f50d49f8371"
-    sha256 ventura:        "29cdf8efa709b1155cef284f72d1025ca61532de66dcbe3af2b9b03064f0a44d"
-    sha256 monterey:       "b49781b3aad464300201752503999ff31eb0071f0fc7b9cb25b76e1129b34bbb"
-    sha256 x86_64_linux:   "b066eb67ff2a7672da5f1949a19b1f33f5fef35eab15a92aacc56f6db044f673"
+    rebuild 1
+    sha256 arm64_tahoe:   "5dacd6c96b01ab87a5ea6112b9d90185ebaea6057d8fce7b8f4abc435a767830"
+    sha256 arm64_sequoia: "86e3f3b3e6661968121763e16e65af98631914c9fed3b6776313baae75910623"
+    sha256 arm64_sonoma:  "36ca5f187ed46be8f27b1607eeb5620c563a3deddd28f86daab972a136d274a4"
+    sha256 sonoma:        "1a1b49850f0a2ee6b9307f5edaf78a7b2bbd1f2303e7ac520cb6e9a5be236ea0"
+    sha256 arm64_linux:   "2f1119b3d9943ba00b4ff9057c9adc7312a3f7335f7743113990daa372023480"
+    sha256 x86_64_linux:  "90706d3e2fd0e65744c40d489e707adb4edace78859a1376f40705cd2999be68"
   end
 
   # setuptools remembers the build flags python is built with and uses them to
   # build packages later. Xcode-only systems need different flags.
   pour_bottle? only_if: :clt_installed
 
-  depends_on "pkg-config" => :build
+  # https://devguide.python.org/versions/#versions
+  deprecate! date: "2025-10-15", because: :deprecated_upstream
+  disable! date: "2026-10-15", because: :deprecated_upstream
+
+  depends_on "pkgconf" => :build
   depends_on "gdbm"
   depends_on "mpdecimal"
   depends_on "openssl@3"
@@ -35,35 +33,39 @@ class PythonAT39 < Formula
 
   uses_from_macos "bzip2"
   uses_from_macos "expat"
-  uses_from_macos "libffi", since: :catalina
+  uses_from_macos "libffi"
   uses_from_macos "libxcrypt"
   uses_from_macos "ncurses"
   uses_from_macos "unzip"
-  uses_from_macos "zlib"
 
   on_linux do
     depends_on "libnsl"
+    depends_on "libtirpc"
+    depends_on "zlib-ng-compat"
   end
+
+  pypi_packages package_name:   "",
+                extra_packages: %w[flit-core pip setuptools wheel]
 
   # Always update to latest release
   resource "flit-core" do
-    url "https://files.pythonhosted.org/packages/c4/e6/c1ac50fe3eebb38a155155711e6e864e254ce4b6e17fe2429b4c4d5b9e80/flit_core-3.9.0.tar.gz"
-    sha256 "72ad266176c4a3fcfab5f2930d76896059851240570ce9a98733b658cb786eba"
+    url "https://files.pythonhosted.org/packages/69/59/b6fc2188dfc7ea4f936cd12b49d707f66a1cb7a1d2c16172963534db741b/flit_core-3.12.0.tar.gz"
+    sha256 "18f63100d6f94385c6ed57a72073443e1a71a4acb4339491615d0f16d6ff01b2"
   end
 
   resource "pip" do
-    url "https://files.pythonhosted.org/packages/12/3d/d899257cace386bebb7bdf8a872d5fe3b935cc6381c3ddb76d3e5d99890d/pip-24.1.2.tar.gz"
-    sha256 "e5458a0b89f2755e0ee8c0c77613fe5273e05f337907874d64f13171a898a7ff"
+    url "https://files.pythonhosted.org/packages/fe/6e/74a3f0179a4a73a53d66ce57fdb4de0080a8baa1de0063de206d6167acc2/pip-25.3.tar.gz"
+    sha256 "8d0538dbbd7babbd207f261ed969c65de439f6bc9e5dbd3b3b9a77f25d95f343"
   end
 
   resource "setuptools" do
-    url "https://files.pythonhosted.org/packages/65/d8/10a70e86f6c28ae59f101a9de6d77bf70f147180fbf40c3af0f64080adc3/setuptools-70.3.0.tar.gz"
-    sha256 "f171bab1dfbc86b132997f26a119f6056a57950d058587841a0082e8830f9dc5"
+    url "https://files.pythonhosted.org/packages/18/5d/3bf57dcd21979b887f014ea83c24ae194cfcd12b9e0fda66b957c69d1fca/setuptools-80.9.0.tar.gz"
+    sha256 "f36b47402ecde768dbfafc46e8e4207b4360c654f1f3bb84475f0a28628fb19c"
   end
 
   resource "wheel" do
-    url "https://files.pythonhosted.org/packages/b8/d6/ac9cd92ea2ad502ff7c1ab683806a9deb34711a1e2bd8a59814e8fc27e69/wheel-0.43.0.tar.gz"
-    sha256 "465ef92c69fa5c5da2d1cf8ac40559a8c940886afcef87dcf14b9470862f1d85"
+    url "https://files.pythonhosted.org/packages/8a/98/2d9906746cdc6a6ef809ae6338005b3f21bb568bea3165cfc6a243fdc25c/wheel-0.45.1.tar.gz"
+    sha256 "661e1abd9198507b1409a20c02106d9670b2576e916d58f520316666abca6729"
   end
 
   # Link against libmpdec.so.3, update for mpdecimal.h symbol cleanup.
@@ -384,14 +386,13 @@ class PythonAT39 < Formula
                     Formula["sqlite"].opt_lib]
 
     cfg = lib_cellar/"distutils/distutils.cfg"
-
-    cfg.atomic_write <<~EOS
+    cfg.atomic_write <<~INI
       [install]
       prefix=#{HOMEBREW_PREFIX}
       [build_ext]
       include_dirs=#{include_dirs.join ":"}
       library_dirs=#{library_dirs.join ":"}
-    EOS
+    INI
 
     # setuptools 63.2.0+ breaks when used inside superenv.
     # https://github.com/pypa/distutils/pull/155
@@ -402,7 +403,7 @@ class PythonAT39 < Formula
   end
 
   def sitecustomize
-    <<~EOS
+    <<~PYTHON
       # This file is created by Homebrew and is executed on each python startup.
       # Don't print from here, or else python command line scripts may fail!
       # <https://docs.brew.sh/Homebrew-and-Python>
@@ -454,16 +455,16 @@ class PythonAT39 < Formula
       tkinter_prefix = "#{HOMEBREW_PREFIX}/opt/python-tk@#{version.major_minor}/libexec"
       if os.path.isdir(tkinter_prefix):
           sys.path.append(tkinter_prefix)
-    EOS
+    PYTHON
   end
 
   def caveats
     <<~EOS
-      Python has been installed as
+      Python is installed as
         #{HOMEBREW_PREFIX}/bin/python#{version.major_minor}
 
       Unversioned and major-versioned symlinks `python`, `python3`, `python-config`, `python3-config`, `pip`, `pip3`, etc. pointing to
-      `python#{version.major_minor}`, `python#{version.major_minor}-config`, `pip#{version.major_minor}` etc., respectively, have been installed into
+      `python#{version.major_minor}`, `python#{version.major_minor}-config`, `pip#{version.major_minor}` etc., respectively, are installed into
         #{opt_libexec}/bin
 
       You can install Python packages with
@@ -471,7 +472,7 @@ class PythonAT39 < Formula
       They will install into the site-package directory
         #{HOMEBREW_PREFIX}/lib/python#{version.major_minor}/site-packages
 
-      tkinter is no longer included with this formula, but it is available separately:
+      `idle#{version.major_minor}` requires tkinter, which is available separately:
         brew install python-tk@#{version.major_minor}
 
       If you do not need a specific version of Python, and always want Homebrew's `python3` in your PATH:
@@ -501,7 +502,7 @@ class PythonAT39 < Formula
                  shell_output("#{python3} -Sc 'import tkinter' 2>&1", 1)
 
     # Verify that the selected DBM interface works
-    (testpath/"dbm_test.py").write <<~EOS
+    (testpath/"dbm_test.py").write <<~PYTHON
       import dbm
 
       with dbm.ndbm.open("test", "c") as db:
@@ -510,7 +511,7 @@ class PythonAT39 < Formula
           assert list(db.keys()) == [b"foo \\xbd"]
           assert b"foo \\xbd" in db
           assert db[b"foo \\xbd"] == b"bar \\xbd"
-    EOS
+    PYTHON
     system python3, "dbm_test.py"
 
     system bin/"pip#{version.major_minor}", "list", "--format=columns"

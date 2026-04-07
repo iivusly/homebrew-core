@@ -1,10 +1,10 @@
 class Libidn2 < Formula
   desc "International domain name library (IDNA2008, Punycode and TR46)"
   homepage "https://www.gnu.org/software/libidn/#libidn2"
-  url "https://ftp.gnu.org/gnu/libidn/libidn2-2.3.7.tar.gz"
-  mirror "https://ftpmirror.gnu.org/libidn/libidn2-2.3.7.tar.gz"
-  mirror "http://ftp.gnu.org/gnu/libidn/libidn2-2.3.7.tar.gz"
-  sha256 "4c21a791b610b9519b9d0e12b8097bf2f359b12f8dd92647611a929e6bfd7d64"
+  url "https://ftpmirror.gnu.org/gnu/libidn/libidn2-2.3.8.tar.gz"
+  mirror "https://ftp.gnu.org/gnu/libidn/libidn2-2.3.8.tar.gz"
+  mirror "http://ftp.gnu.org/gnu/libidn/libidn2-2.3.8.tar.gz"
+  sha256 "f557911bf6171621e1f72ff35f5b1825bb35b52ed45325dcdee931e5d3c0787a"
   license all_of: [
     { any_of: ["GPL-2.0-or-later", "LGPL-3.0-or-later"] }, # lib
     { all_of: ["Unicode-TOU", "Unicode-DFS-2016"] }, # matching COPYING.unicode
@@ -12,6 +12,7 @@ class Libidn2 < Formula
     "LGPL-2.1-or-later", # parts of gnulib
     "FSFAP-no-warranty-disclaimer", # man3
   ]
+  compatibility_version 1
 
   livecheck do
     url :stable
@@ -19,13 +20,14 @@ class Libidn2 < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "670f6ed3768acde8ce10b5dcfc88fef69cea994ff84491b253a5e818cd4f9a1b"
-    sha256 arm64_ventura:  "df4d2b529ac1534d36e44c63aeee6e9be8ee856f3545e75511497de5c60e0e80"
-    sha256 arm64_monterey: "621dbb561aeddc8c0d7e856e990414526c43d9da400d3a2a613d2be3c1ebb41f"
-    sha256 sonoma:         "32aec190642166c2081088f424cd39cc8b820105ce0b3372d0d8835635424b38"
-    sha256 ventura:        "4b4f5eadc82273fb3b0d384466dab53d9fdc7200cbfae1eb5b5bebfe359f4f1e"
-    sha256 monterey:       "a1b41989b1decc3a33e8a64a914680c881f9931e2bd2bdac47a9215a4579d686"
-    sha256 x86_64_linux:   "2d94c867e00156a44644758c62895dd6d13538aff7f638ea598ff70e0e8f6505"
+    sha256 arm64_tahoe:   "f8f1b459f15a4ac11d2dce786a9140509782227b7d499cbdf3a1279dd325d90b"
+    sha256 arm64_sequoia: "1eb02bfa40ec00b7ea64d8608fcf2115069d99de5a35eb3e2b3ac444a695ea46"
+    sha256 arm64_sonoma:  "6c578e128c82759e211298ae9b004c83844c2626c074f5cf4950402399bdb8f1"
+    sha256 arm64_ventura: "d0d933dad3ab921d09acd3fe3efa952ee8859f3d9d03aa0210490aca25e0c544"
+    sha256 sonoma:        "ef2c85790a55f54f58fceb849e1ee46f2b06ebe516c83043e68c979e47934e6f"
+    sha256 ventura:       "96fdb47b24345178dae4b88855adafb51efbca9797d6de046f117b26e7674d74"
+    sha256 arm64_linux:   "25d5d1e8d6893f66f15c0f94f88be9618d47e5cd65d6391d938478d3cf75c7b0"
+    sha256 x86_64_linux:  "9e8c065bb543ee967667db82c00185419a108555ecbd965b2e6cebe202472e7f"
   end
 
   head do
@@ -49,7 +51,7 @@ class Libidn2 < Formula
     end
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "libunistring"
 
   on_macos do

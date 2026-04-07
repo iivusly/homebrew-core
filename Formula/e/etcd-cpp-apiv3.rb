@@ -4,23 +4,21 @@ class EtcdCppApiv3 < Formula
   url "https://github.com/etcd-cpp-apiv3/etcd-cpp-apiv3/archive/refs/tags/v0.15.4.tar.gz"
   sha256 "4516ecfa420826088c187efd42dad249367ca94ea6cdfc24e3030c3cf47af7b4"
   license "BSD-3-Clause"
-  revision 10
+  revision 45
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "f883f72f93d35df7b159abba6e0b4301da063e9b0e1789d19297b5c32a6e988b"
-    sha256 cellar: :any,                 arm64_ventura:  "c9213602d48b738bf1f2a90936a4d85c6234b98c4e12a495a53cfecec7f31207"
-    sha256 cellar: :any,                 arm64_monterey: "61d0b59da0715896606d86ad08cebc4e724da11e9e2b45245ba54c14f0dc03ab"
-    sha256 cellar: :any,                 sonoma:         "33655333b8e9ffc3e687bcae43cf2af2155e160f90e02532456cd649ff51ee7d"
-    sha256 cellar: :any,                 ventura:        "33fce957976ab0099bf5b4454f36b982cdb6f62023084960072f6d9cca60564a"
-    sha256 cellar: :any,                 monterey:       "cd48e5da602f69bad644c3bf8a76c00b554d41d3d8439c54b778a6a3eb10a215"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "fcb362d41bcd81d856636f1f5673a24501f3401e434121e72e0d2769b826b889"
+    sha256 cellar: :any, arm64_tahoe:   "bf69a21c97148bc0cf6b4f3df53d42b9cc38e572214a6c355fd93bddc8bd7112"
+    sha256 cellar: :any, arm64_sequoia: "01b35beaadec95c015c95a9ff04cefd949060f0d5d0b2e963bb0083db730863b"
+    sha256 cellar: :any, arm64_sonoma:  "87a48d2846e77c2fca83769ddec924dee30df0369881304b6b5e8a488837b78d"
+    sha256 cellar: :any, sonoma:        "6e7bce0b4f600b6eda6b5fc5841106aa68a8ac2e142157b5dd582eeca394e49f"
+    sha256               arm64_linux:   "193805dd7ffbffab1488fbf1f4b6f44252046d036214308e3f726b2e8fc6e503"
+    sha256               x86_64_linux:  "d6ef31a79b7cd6354358073d20ec41cb2b7f0a07389af19787bebd715ed4fbe2"
   end
 
   depends_on "cmake" => [:build, :test]
   depends_on "etcd" => :test
 
   depends_on "abseil"
-  depends_on "boost"
   depends_on "c-ares"
   depends_on "cpprestsdk"
   depends_on "grpc"
@@ -28,12 +26,32 @@ class EtcdCppApiv3 < Formula
   depends_on "protobuf"
   depends_on "re2"
 
-  fails_with gcc: "5"
+  # Fix for removal of GPR_ASSERT macro in grpc.
+  # https://github.com/etcd-cpp-apiv3/etcd-cpp-apiv3/pull/281
+  patch do
+    url "https://github.com/etcd-cpp-apiv3/etcd-cpp-apiv3/commit/ece56adf4d01658a5f0668a3618c97153665581c.patch?full_index=1"
+    sha256 "f3686647436045a9a53b05f81fae02d5a5a2025d5ce78a66aca0ade85c1a99c6"
+  end
+
+  # Backport cluster manager api needed for newer `vineyard`
+  patch do
+    url "https://github.com/etcd-cpp-apiv3/etcd-cpp-apiv3/commit/17d7b60194e5b6d9005bb10947905a393f432624.patch?full_index=1"
+    sha256 "b0d1bce10cf2f03124af744f2a184162b6b555b09d162b8633ed8ab9b613f8f8"
+  end
+  patch do
+    url "https://github.com/etcd-cpp-apiv3/etcd-cpp-apiv3/commit/3ad17314d6e8c26beb88501f8e74e506ccaf26b8.patch?full_index=1"
+    sha256 "52dd6132b03c4c1210bb1c0b8a32ff952f84b198d612903c10a53b7a4f5ce2b9"
+  end
+  patch do
+    url "https://github.com/etcd-cpp-apiv3/etcd-cpp-apiv3/commit/ea56cee80f441973a0149b57604e7a7874c61b65.patch?full_index=1"
+    sha256 "bce8ef02bc56f2ac430d580191217ff78210cc6e261d29c7031a22e65cd05693"
+  end
 
   def install
     system "cmake", "-S", ".", "-B", "build",
                     "-DCMAKE_CXX_STANDARD=17",
                     "-DCMAKE_CXX_STANDARD_REQUIRED=TRUE",
+                    "-DCMAKE_POLICY_VERSION_MINIMUM=3.5",
                     "-DBUILD_ETCD_TESTS=OFF",
                     "-DOPENSSL_ROOT_DIR=#{Formula["openssl@3"].opt_prefix}",
                     *std_cmake_args
@@ -44,7 +62,7 @@ class EtcdCppApiv3 < Formula
   test do
     port = free_port
 
-    (testpath/"test.cc").write <<~EOS
+    (testpath/"test.cc").write <<~CPP
       #include <iostream>
       #include <etcd/Client.hpp>
 
@@ -54,10 +72,10 @@ class EtcdCppApiv3 < Formula
         auto response = etcd.get("foo").get();
         std::cout << response.value().as_string() << std::endl;
       }
-    EOS
+    CPP
 
     (testpath/"CMakeLists.txt").write <<~CMAKE
-      cmake_minimum_required(VERSION 3.5)
+      cmake_minimum_required(VERSION 4.0)
       set(CMAKE_CXX_STANDARD 17)
       project(test LANGUAGES CXX)
       find_package(protobuf CONFIG REQUIRED)
@@ -67,8 +85,14 @@ class EtcdCppApiv3 < Formula
     CMAKE
 
     ENV.delete "CPATH"
-    system "cmake", ".", "-Wno-dev", "-DCMAKE_BUILD_RPATH=#{HOMEBREW_PREFIX}/lib"
-    system "cmake", "--build", "."
+
+    args = %W[
+      -Wno-dev
+      -DCMAKE_BUILD_RPATH=#{HOMEBREW_PREFIX}/lib
+    ]
+
+    system "cmake", "-S", ".", "-B", "build", *args
+    system "cmake", "--build", "build"
 
     # prepare etcd
     etcd_pid = spawn(
@@ -82,7 +106,7 @@ class EtcdCppApiv3 < Formula
     # sleep to let etcd get its wits about it
     sleep 10
 
-    assert_equal("bar\n", shell_output("./test_etcd_cpp_apiv3"))
+    assert_equal("bar\n", shell_output("./build/test_etcd_cpp_apiv3"))
   ensure
     # clean up the etcd process before we leave
     Process.kill("HUP", etcd_pid)

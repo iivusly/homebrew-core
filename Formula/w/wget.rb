@@ -1,33 +1,32 @@
 class Wget < Formula
   desc "Internet file retriever"
   homepage "https://www.gnu.org/software/wget/"
-  url "https://ftp.gnu.org/gnu/wget/wget-1.24.5.tar.gz"
-  sha256 "fa2dc35bab5184ecbc46a9ef83def2aaaa3f4c9f3c97d4bd19dcb07d4da637de"
+  url "https://ftpmirror.gnu.org/gnu/wget/wget-1.25.0.tar.gz"
+  sha256 "766e48423e79359ea31e41db9e5c289675947a7fcf2efdcedb726ac9d0da3784"
   license "GPL-3.0-or-later"
+  compatibility_version 1
 
   bottle do
-    sha256 arm64_sonoma:   "9befdad158e59763fb0622083974a6252878019702d8c961e1bec3a5f5305339"
-    sha256 arm64_ventura:  "ac4c0330b70dae06eaa8065bfbea78dda277699d1ae8002478017a1bd9cf1908"
-    sha256 arm64_monterey: "02313702fc03880f221d60ce4d0b652c8b44fe68c15609329d757d031bce6bc4"
-    sha256 sonoma:         "034528edb247df85f90997aca6a51ddb988a880af6bb571b8473de1702a887af"
-    sha256 ventura:        "1b7e2f76c90553543a5e25dadf031c6fcfe280f52bf27d89e04006f9d33fd20b"
-    sha256 monterey:       "ffc49a5064a003006e69f51434ac5f7ec4f4019c161ad32fab22c32697db61cd"
-    sha256 x86_64_linux:   "6a4642964fe5c4d1cc8cd3507541736d5b984e34a303a814ef550d4f2f8242f9"
+    rebuild 1
+    sha256 arm64_tahoe:   "03be72d23a113a3273245b3e071667b611ea5d81dab6f52e995a84420d0ed734"
+    sha256 arm64_sequoia: "d620e085be7df7e93c7a8e6dc98e71b7a2faedbb40e83daae9b823374ee9b09e"
+    sha256 arm64_sonoma:  "0611b16c2d24332fbb48cf1d75717b3ac3fc579a6ddac33ee1acaa791ff12e8e"
+    sha256 sonoma:        "91995d4d44951e981c36879505e8e294d15e46bbd3ef3965caf94d55424e165b"
+    sha256 arm64_linux:   "6c291dba1e71dcfada741192dbf78790c60488d927fa15c82f4bd0901edfa014"
+    sha256 x86_64_linux:  "09603bb2a51e4bdc94a9f4f3e66442ef6e401a2a2d244213066c58cceb686f95"
   end
 
   head do
-    url "https://git.savannah.gnu.org/git/wget.git"
+    url "https://git.savannah.gnu.org/git/wget.git", branch: "master"
 
     depends_on "autoconf" => :build
     depends_on "automake" => :build
     depends_on "xz" => :build
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "libidn2"
   depends_on "openssl@3"
-
-  uses_from_macos "zlib"
 
   on_macos do
     depends_on "gettext"
@@ -36,6 +35,7 @@ class Wget < Formula
 
   on_linux do
     depends_on "util-linux"
+    depends_on "zlib-ng-compat"
   end
 
   def install
@@ -52,6 +52,6 @@ class Wget < Formula
   end
 
   test do
-    system bin/"wget", "-O", "/dev/null", "https://google.com"
+    system bin/"wget", "-O", File::NULL, "https://google.com"
   end
 end

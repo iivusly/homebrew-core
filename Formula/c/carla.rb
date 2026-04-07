@@ -2,17 +2,15 @@ class Carla < Formula
   desc "Audio plugin host supporting LADSPA, LV2, VST2/3, SF2 and more"
   homepage "https://kx.studio/Applications:Carla"
   license "GPL-2.0-or-later"
-  head "https://github.com/falkTX/Carla.git", branch: "main"
+  revision 1
 
   stable do
-    url "https://github.com/falkTX/Carla/archive/refs/tags/v2.5.8.tar.gz"
-    sha256 "4ec96d06342ff28da4b80d4a76bc08fcaa5703726f96e5174afcdc4f7fc6195d"
+    url "https://github.com/falkTX/Carla/archive/refs/tags/v2.5.10.tar.gz"
+    sha256 "ae2835b12081f7271a6b0b25d34b87d36b022c40370028ca4a10f90fcedfa661"
 
-    # liblo API build patch, remove in next release
-    patch do
-      url "https://github.com/falkTX/Carla/commit/9370483b0a278eab6462c33b16e53377f7fffc6c.patch?full_index=1"
-      sha256 "eb9d9c45eaa95cb7756a0b0c38f7f2bd456a3ee3a0096a60d2fdd6af44bd1a49"
-    end
+    # TODO: Use `pyqt` and `qt` from HEAD in 2.6.0
+    depends_on "pyqt@5"
+    depends_on "qt@5"
   end
 
   livecheck do
@@ -21,24 +19,29 @@ class Carla < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "ec1291381e671d32533a89d49ac8422f0c33fb88f9ad4738798f011028c2599c"
-    sha256 cellar: :any,                 arm64_ventura:  "56f402f64745b913bc0645dbf7fa8ba50ad420b982379c06a887d764bc873a03"
-    sha256 cellar: :any,                 arm64_monterey: "929e274b0219f74c23be1c65f9cdda50e3b5f8b9ae38ffd1afc0f55d0f535213"
-    sha256 cellar: :any,                 sonoma:         "3da956c57828aff90102bb0a76f37bfdf13b1b0dd0f5f6dfaf0a951e52aa7b17"
-    sha256 cellar: :any,                 ventura:        "8f378e081f6fb5ab948a97d31741b42e6dc51cd273219239a1e24873b9cb9403"
-    sha256 cellar: :any,                 monterey:       "2640474117ea51fa88e1289ee017bf440c6c00631339ddff05b9affa91e49f88"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "945471081c1fa496a673c4b0d86375612ff1198ccbe92dd799dfc93a8c2a893b"
+    sha256 cellar: :any,                 arm64_tahoe:   "e262b34d4e21d5ca0d5abbd27a19ee022eb195a52c0622c814456e1cd95f1454"
+    sha256 cellar: :any,                 arm64_sequoia: "67daad4cbe5241d8c83ed16f26f4de4f4ca40c737895428da7c0924fb3bf6a6c"
+    sha256 cellar: :any,                 arm64_sonoma:  "3757c8d6ac0389d6181b9dfb7ab66d48dc426bfe310715756f4c6b2fd408f11a"
+    sha256 cellar: :any,                 sonoma:        "cd9c3cfbd45c97b0a82fc238c0dc96a4ba41f523459eddb07d8541319482c8b4"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "b951b632b5eed8b2600195552a1dea945cc16cc79d8a6a1059fec105f1e0742e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "5ed922b11d7bb6755b0745ad5a51fb581909d653263830b41639299272ae3ff3"
   end
 
-  depends_on "pkg-config" => :build
+  head do
+    url "https://github.com/falkTX/Carla.git", branch: "main"
+
+    depends_on "pyqt"
+    depends_on "qtbase"
+    depends_on "qtsvg"
+  end
+
+  depends_on "pkgconf" => :build
 
   depends_on "fluid-synth"
   depends_on "liblo"
   depends_on "libmagic"
   depends_on "libsndfile"
-  depends_on "pyqt@5"
-  depends_on "python@3.12"
-  depends_on "qt@5"
+  depends_on "python@3.14"
 
   on_linux do
     depends_on "alsa-lib"
@@ -49,14 +52,18 @@ class Carla < Formula
     depends_on "sdl2"
   end
 
-  fails_with gcc: "5"
-
   def install
+    # Workaround for https://github.com/falkTX/Carla/issues/1926
+    if build.stable? && OS.mac? && MacOS.version >= :sequoia
+      odie "Remove deployment target!" if version >= "2.6"
+      ENV["MACOSX_DEPLOYMENT_TARGET"] = "14.0"
+    end
+
     system "make"
     system "make", "install", "PREFIX=#{prefix}"
 
     inreplace bin/"carla", "PYTHON=$(which python3 2>/dev/null)",
-                           "PYTHON=#{which("python3.12")}"
+                           "PYTHON=#{which("python3.14")}"
   end
 
   test do

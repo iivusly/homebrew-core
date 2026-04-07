@@ -1,4 +1,6 @@
 class Distribution < Formula
+  include Language::Python::Shebang
+
   desc "Create ASCII graphical histograms in the terminal"
   homepage "https://github.com/time-less-ness/distribution"
   url "https://github.com/time-less-ness/distribution/archive/refs/tags/1.3.tar.gz"
@@ -7,16 +9,19 @@ class Distribution < Formula
   head "https://github.com/time-less-ness/distribution.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, all: "46e6afa7ee3cdc08f4fde478e6235b1df80813391abe507505e1452926d5aff2"
+    rebuild 2
+    sha256 cellar: :any_skip_relocation, all: "51f9e979ccce6ace7efb959a4e7bee9b9db4b6faa7eea4049ff06b98358a02fc"
   end
 
+  uses_from_macos "python"
+
   def install
+    rewrite_shebang detected_python_shebang(use_python_from_path: true), "distribution.py"
     bin.install "distribution.py" => "distribution"
     doc.install "distributionrc", "screenshot.png"
   end
 
   test do
-    (testpath/"test").write "a\nb\na\n"
-    `#{bin}/distribution <test 2>/dev/null`.include? "a|2"
+    assert_match "a|2 (66.67%)", pipe_output("#{bin}/distribution 2>/dev/null", "a\nb\na\n", 0)
   end
 end

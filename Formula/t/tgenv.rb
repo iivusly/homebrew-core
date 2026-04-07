@@ -1,19 +1,13 @@
 class Tgenv < Formula
   desc "Terragrunt version manager inspired by tfenv"
-  homepage "https://github.com/cunymatthieu/tgenv"
-  url "https://github.com/cunymatthieu/tgenv/archive/refs/tags/v0.0.3.tar.gz"
-  sha256 "e59c4cc9dfccb7d52b9ff714b726ceee694cfa389474cbe01a65c5f9bc13eca4"
+  homepage "https://github.com/tgenv/tgenv"
+  url "https://github.com/tgenv/tgenv/archive/refs/tags/v1.3.0.tar.gz"
+  sha256 "cccf0d5714cf1156aaa9f451d98601afa3e7bb0b104eda61013a9a8849bee2fb"
   license "MIT"
-  head "https://github.com/cunymatthieu/tgenv.git", branch: "master"
-
-  livecheck do
-    url :stable
-    regex(/^v?(\d+(?:\.\d+)+)$/i)
-  end
+  head "https://github.com/tgenv/tgenv.git", branch: "main"
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, all: "5d9c35f1dd3856a985c721d8e0f2d33b656f207092ea5f836ed878e03bba7505"
+    sha256 cellar: :any_skip_relocation, all: "41d63971b87c2f8003c821f8cfc00eaf264acef2560a75c7e0dc631da4a726a6"
   end
 
   uses_from_macos "unzip"
@@ -26,6 +20,7 @@ class Tgenv < Formula
   end
 
   test do
-    assert_match "0.58.1", shell_output("#{bin}/tgenv list-remote")
+    ret_status = OS.mac? ? 1 : 0
+    assert_match "0.73.6", shell_output("#{bin}/tgenv list-remote 2>&1", ret_status)
   end
 end

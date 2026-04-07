@@ -3,27 +3,27 @@ class Ford < Formula
 
   desc "Automatic documentation generator for modern Fortran programs"
   homepage "https://github.com/Fortran-FOSS-Programmers/ford"
-  url "https://files.pythonhosted.org/packages/a2/00/1dee70777917617df2c63bef8db8ec4e8a68495fae0d77b9208cdda6b458/ford-7.0.8.tar.gz"
-  sha256 "b9d0695eac1779f73078776e11f5e6c7dbf22e5c9e3dff4a5e7fbe92a0740562"
+  url "https://files.pythonhosted.org/packages/7e/22/c9688672022dc47456a0dd0a51e0f4310e5c69ef4cd8243c141420421dc9/ford-7.0.13.tar.gz"
+  sha256 "482a75b34b9f2b1975cbae9aa1c533a62d63e0c1861b5b772d25aa52fb1ce809"
   license "GPL-3.0-or-later"
+  revision 1
   head "https://github.com/Fortran-FOSS-Programmers/ford.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "c1351443ffecad4a799bb3072b3ec517b9520758a43044d0c1bd29343dbd251e"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "6686763de4492e4b8dd3aeffff68d3a671d3c453cd33854adf3f645b68537148"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "53f2ad95e85e83908deb35d7b756d49e8d0849bb0e8dbb8a462c2a7db127fced"
-    sha256 cellar: :any_skip_relocation, sonoma:         "65053a6afd1013e8ee8d994746d82960c0ba145edfa29d64c1a028511103721f"
-    sha256 cellar: :any_skip_relocation, ventura:        "cae5da7ad6598c1a11bb0d93651aa8ab2e26e168ec433ec00739366f85ca9ae6"
-    sha256 cellar: :any_skip_relocation, monterey:       "cff651a8796c4de58bb68c80deb90da87c2c8a5fd923d09b32dce6942a597d9b"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "241bf2424a18c68f48519af4e36afed61bcc68ba3c84af093460c53ca2623cf8"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "2cf02c0873c7cbbe937d5f2d5b6715f39879c9aff8ce6ee9a9380e9c46f79d8f"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "a81168709bd0970c463be5c9ba5deff31a4eb5dacb64c1a4ad1a1a9731c94d06"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "a40d6849247ea7b2191ae773b92858e543c877cf9edbe77312bd942669d5001a"
+    sha256 cellar: :any_skip_relocation, sonoma:        "f733ce2f59893fd27bc0ade8ed4a5dc74e0c6713992cbb0d0be04c6e7b1257ef"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "fd6ac9b7b437bf042a411adbf44cebb75d99a8fcec194c6caacb6427a3f126e7"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "3404cda6e1c63274e0d4a7fbbe84c54a07acb45714832efa992c527597101ffd"
   end
 
   depends_on "graphviz"
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   resource "beautifulsoup4" do
-    url "https://files.pythonhosted.org/packages/b3/ca/824b1195773ce6166d388573fc106ce56d4a805bd7427b624e063596ec58/beautifulsoup4-4.12.3.tar.gz"
-    sha256 "74e3d1928edc070d21748185c46e3fb33490f22f52a3addee9aee0f4f7781051"
+    url "https://files.pythonhosted.org/packages/c3/b0/1c6a16426d389813b48d95e26898aff79abbde42ad353958ad95cc8c9b21/beautifulsoup4-4.14.3.tar.gz"
+    sha256 "6292b1c5186d356bba669ef9f7f051757099565ad9ada5dd630bd9de5fa7fb86"
   end
 
   resource "graphviz" do
@@ -32,8 +32,8 @@ class Ford < Formula
   end
 
   resource "jinja2" do
-    url "https://files.pythonhosted.org/packages/ed/55/39036716d19cab0747a5020fc7e907f362fbf48c984b14e62127f7e68e5d/jinja2-3.1.4.tar.gz"
-    sha256 "4a3aee7acbbe7303aede8e9648d13b8bf88a429282aa6122a993f0ac800cb369"
+    url "https://files.pythonhosted.org/packages/df/bf/f7da0350254c0ed7c72f3e33cef02e048281fec7ecec5f032d4aac52226b/jinja2-3.1.6.tar.gz"
+    sha256 "0137fb05990d35f1275a587e9aee6d56da821fc83491a0fb838183be43f66d6d"
   end
 
   resource "markdown" do
@@ -47,13 +47,13 @@ class Ford < Formula
   end
 
   resource "markdown-it-py" do
-    url "https://files.pythonhosted.org/packages/38/71/3b932df36c1a044d397a1f92d1cf91ee0a503d91e470cbd670aa66b07ed0/markdown-it-py-3.0.0.tar.gz"
-    sha256 "e3f60a94fa066dc52ec76661e37c851cb232d92f9886b15cb560aaada2df8feb"
+    url "https://files.pythonhosted.org/packages/5b/f5/4ec618ed16cc4f8fb3b701563655a69816155e79e24a17b651541804721d/markdown_it_py-4.0.0.tar.gz"
+    sha256 "cb0a2b4aa34f932c007117b194e945bd74e0ec24133ceb5bac59009cda1cb9f3"
   end
 
   resource "markupsafe" do
-    url "https://files.pythonhosted.org/packages/87/5b/aae44c6655f3801e81aa3eef09dbbf012431987ba564d7231722f68df02d/MarkupSafe-2.1.5.tar.gz"
-    sha256 "d283d37a890ba4c1ae73ffadf8046435c76e7bc2247bbb63c00bd1a709c6544b"
+    url "https://files.pythonhosted.org/packages/7e/99/7690b6d4034fffd95959cbe0c02de8deb3098cc577c67bb6a24fe5d7caa7/markupsafe-3.0.3.tar.gz"
+    sha256 "722695808f4b6457b320fdc131280796bdceb04ab50fe1795cd540799ebe1698"
   end
 
   resource "mdurl" do
@@ -67,23 +67,23 @@ class Ford < Formula
   end
 
   resource "pygments" do
-    url "https://files.pythonhosted.org/packages/8e/62/8336eff65bcbc8e4cb5d05b55faf041285951b6e80f33e2bff2024788f31/pygments-2.18.0.tar.gz"
-    sha256 "786ff802f32e91311bff3889f6e9a86e81505fe99f2735bb6d60ae0c5004f199"
+    url "https://files.pythonhosted.org/packages/c3/b2/bc9c9196916376152d655522fdcebac55e66de6603a76a02bca1b6414f6c/pygments-2.20.0.tar.gz"
+    sha256 "6757cd03768053ff99f3039c1a36d6c0aa0b263438fcab17520b30a303a82b5f"
   end
 
   resource "python-markdown-math" do
-    url "https://files.pythonhosted.org/packages/ec/17/e7e3f3fce951b8adec10987834f4b2fa721ebd9bd6651ce2a4f39c4c544d/python-markdown-math-0.8.tar.gz"
-    sha256 "8564212af679fc18d53f38681f16080fcd3d186073f23825c7ce86fadd3e3635"
+    url "https://files.pythonhosted.org/packages/4c/68/fbea05ec6fb318bdcf56ea47596605614554f51d77bfd14f6fb481139ad8/python_markdown_math-0.9.tar.gz"
+    sha256 "567395553dc4941e79b3789a1096dcabb3fda9539d150d558ef3507948b264a3"
   end
 
   resource "rich" do
-    url "https://files.pythonhosted.org/packages/b3/01/c954e134dc440ab5f96952fe52b4fdc64225530320a910473c1fe270d9aa/rich-13.7.1.tar.gz"
-    sha256 "9be308cb1fe2f1f57d67ce99e95af38a1e2bc71ad9813b0e247cf7ffbcc3a432"
+    url "https://files.pythonhosted.org/packages/b3/c6/f3b320c27991c46f43ee9d856302c70dc2d0fb2dba4842ff739d5f46b393/rich-14.3.3.tar.gz"
+    sha256 "b8daa0b9e4eef54dd8cf7c86c03713f53241884e814f4e2f5fb342fe520f639b"
   end
 
   resource "soupsieve" do
-    url "https://files.pythonhosted.org/packages/ce/21/952a240de1c196c7e3fbcd4e559681f0419b1280c617db21157a0390717b/soupsieve-2.5.tar.gz"
-    sha256 "5663d5a7b3bfaeee0bc4372e7fc48f9cff4940b3eec54a6451cc5299f1097690"
+    url "https://files.pythonhosted.org/packages/7b/ae/2d9c981590ed9999a0d91755b47fc74f74de286b0f5cee14c9269041e6c4/soupsieve-2.8.3.tar.gz"
+    sha256 "3267f1eeea4251fb42728b6dfb746edc9acaffc4a45b27e19450b676586e8349"
   end
 
   resource "toposort" do
@@ -92,8 +92,13 @@ class Ford < Formula
   end
 
   resource "tqdm" do
-    url "https://files.pythonhosted.org/packages/c1/c2/d8a40e5363fb01806870e444fc1d066282743292ff32a9da54af51ce36a2/tqdm-4.64.1.tar.gz"
-    sha256 "5f4f682a004951c1b450bc753c710e9280c5746ce6ffedee253ddbcbf54cf1e4"
+    url "https://files.pythonhosted.org/packages/09/a9/6ba95a270c6f1fbcd8dac228323f2777d886cb206987444e4bce66338dd4/tqdm-4.67.3.tar.gz"
+    sha256 "7d825f03f89244ef73f1d4ce193cb1774a8179fd96f31d7e1dcde62092b960bb"
+  end
+
+  resource "typing-extensions" do
+    url "https://files.pythonhosted.org/packages/72/94/1a15dd82efb362ac84269196e94cf00f187f7ed21c242792a923cdb1c61f/typing_extensions-4.15.0.tar.gz"
+    sha256 "0cea48d173cc12fa28ecabc3b837ea3cf6f38c6d1136f85cbaaf598984861466"
   end
 
   def install
@@ -103,7 +108,7 @@ class Ford < Formula
   end
 
   test do
-    (testpath/"test-project.md").write <<~EOS
+    (testpath/"test-project.md").write <<~MARKDOWN
       project: Example Project
       summary: This is a short example project
           that demonstrates many of Ford's features
@@ -157,9 +162,9 @@ class Ford < Formula
       \end{equation}
       So let your imagination run wild. As you can tell, I'm more or less just
       filling in space now. This will be the last sentence.
-    EOS
+    MARKDOWN
     mkdir testpath/"src" do
-      (testpath/"src"/"ford_test_program.f90").write <<~EOS
+      (testpath/"src/ford_test_program.f90").write <<~FORTRAN
         program ford_test_program
           !! Simple Fortran program to demonstrate the usage of FORD and to test its installation
           use iso_fortran_env, only: output_unit, real64
@@ -185,9 +190,9 @@ class Ford < Formula
             end do
           end subroutine
         end program
-      EOS
+      FORTRAN
     end
     system bin/"ford", testpath/"test-project.md"
-    assert_predicate testpath/"doc"/"index.html", :exist?
+    assert_path_exists testpath/"doc/index.html"
   end
 end

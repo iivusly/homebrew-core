@@ -4,23 +4,30 @@ class Picotool < Formula
   license "BSD-3-Clause"
 
   stable do
-    url "https://github.com/raspberrypi/picotool/archive/refs/tags/2.0.0.tar.gz"
-    sha256 "9392c4a31f16b80b70f861c37a029701d3212e212840daa097c8a3720282ce65"
+    url "https://github.com/raspberrypi/picotool/archive/refs/tags/2.2.0.tar.gz"
+    sha256 "aab3d82fb1e576d97156ddcb962ae7cf290518a5f20d9002ac27e628dc657620"
 
     resource "pico-sdk" do
-      url "https://github.com/raspberrypi/pico-sdk/archive/refs/tags/2.0.0.tar.gz"
-      sha256 "626db87779fa37f7f9c7cfe3e152f7e828fe19c486730af2e7c80836b6b57e1d"
+      # Use git checkout to allow fetching mbedtls submodule
+      url "https://github.com/raspberrypi/pico-sdk.git",
+          tag:      "2.2.0",
+          revision: "a1438dff1d38bd9c65dbd693f0e5db4b9ae91779"
+
+      livecheck do
+        formula :parent
+      end
     end
   end
 
   bottle do
-    sha256 arm64_sonoma:   "d2cdf2d3bef83207f173ee96fcb66976fe14b638fa2b941e6f16f44ab60bfc93"
-    sha256 arm64_ventura:  "91dce37d751e159802bbccd9d11be16f8620197f04240c612efa6ba8bb09a393"
-    sha256 arm64_monterey: "e4bf549b3d172a4f93e1f965df6d004550ff4322a40118a1caf18774d729c297"
-    sha256 sonoma:         "8534519fb9e80d196690f5b4a27880533847dce3d1e3b2103d7c66565bf826f7"
-    sha256 ventura:        "56c36f61d6f798a875a6db5744e8fb4ad9936dc3f57c334ed46224fc9728b3d7"
-    sha256 monterey:       "19af651cbee2f74c3808681cf1afba755e849f39d01750cbe15e0a754486ae5d"
-    sha256 x86_64_linux:   "e92224ae304cef3422d9abb25f79316f895a26cfcfe8a7677c25266fc54e1eaf"
+    sha256 arm64_tahoe:   "b12cf07252361b521281cf7602d0ab010555d02abac576e1ce3be340df4d66c7"
+    sha256 arm64_sequoia: "49cb6c6d41e91089a09df5bf092d83d658f5db22490e391134e9c9ead450f0f8"
+    sha256 arm64_sonoma:  "2159fc13efa5a87797d8d6d0ded1647cef3c78cbf41c83fbb18294e48f81b0cb"
+    sha256 arm64_ventura: "7025bf2422beece703941ecd4cafd63f2f7ec104a91197970e9a2be19f0f9bf1"
+    sha256 sonoma:        "08e87accab4171dd4d3fbd0fc2d68ba6b4212281f39664c0d6e833f2b76acdc7"
+    sha256 ventura:       "74c24dc9a56d7e5f3302c665452a5a0151be7554b4442eb2ba49910513ebbfc8"
+    sha256 arm64_linux:   "d0019fa8d364fc028d890587caca5944c3f49eaa559f3e4076fefe2b347e9fbd"
+    sha256 x86_64_linux:  "3a7872893bf73e1fa954822415d7f3dbb72d16a83899635fe091d0adb1454994"
   end
 
   head do
@@ -32,35 +39,40 @@ class Picotool < Formula
   end
 
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "libusb"
 
-  resource "homebrew-pico-blink" do
-    url "https://rptl.io/pico-blink"
-    sha256 "4b2161340110e939b579073cfeac1c6684b35b00995933529dd61620abf26d6f"
-  end
-
   def install
+    odie "pico-sdk resource needs to be updated" if build.stable? && version != resource("pico-sdk").version
+
     resource("pico-sdk").stage buildpath/"pico-sdk"
 
     args = %W[-DPICO_SDK_PATH=#{buildpath}/pico-sdk]
+
     system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
   end
 
   test do
-    resource("homebrew-pico-blink").stage do
+    # from https://github.com/raspberrypi/pico-examples?tab=readme-ov-file#first-examples
+    resource "homebrew-picow_blink" do
+      url "https://rptl.io/pico-w-blink"
+      sha256 "ba6506638166c309525b4cb9cd2a9e7c48ba4e19ecf5fcfd7a915dc540692099"
+    end
+
+    resource("homebrew-picow_blink").stage do
       result = <<~EOS
-        File blink.uf2:
+        File blink_picow.uf2 family ID 'rp2040':
 
         Program Information
-         name:          blink
-         web site:      https://github.com/raspberrypi/pico-examples/tree/HEAD/blink
+         name:          picow_blink
+         web site:      https://github.com/raspberrypi/pico-examples/tree/HEAD/pico_w/blink
+         features:      UART stdin / stdout
          binary start:  0x10000000
-         binary end:    0x10003198
+         binary end:    0x1003feac
       EOS
-      assert_equal result, shell_output("#{bin}/picotool info blink.uf2")
+      assert_equal result, shell_output("#{bin}/picotool info blink_picow.uf2")
     end
   end
 end

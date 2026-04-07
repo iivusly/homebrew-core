@@ -1,9 +1,10 @@
 class GitLfs < Formula
   desc "Git extension for versioning large files"
-  homepage "https://git-lfs.github.com/"
-  url "https://github.com/git-lfs/git-lfs/releases/download/v3.5.1/git-lfs-v3.5.1.tar.gz"
-  sha256 "fc19c7316e80a6ef674aa4e1863561c1263cd4ce0588b9989e4be9461664d752"
+  homepage "https://git-lfs.com/"
+  url "https://github.com/git-lfs/git-lfs/releases/download/v3.7.1/git-lfs-v3.7.1.tar.gz"
+  sha256 "8f56058622edfea1d111e50e9844ef2f5ce670b2dbe4d55d48e765c943af4351"
   license "MIT"
+  compatibility_version 1
 
   # Upstream creates releases that are sometimes not the latest stable version,
   # so we use the `github_latest` strategy to fetch the release tagged as "latest".
@@ -13,13 +14,12 @@ class GitLfs < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "6079593e9b2008a74a71a109518d49f522939c98770fe233fcc4147d9e10439d"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "241e895f27aa45b46f459bf78ac8b031748c329e3d4b5c24b5343d61dbbb1472"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "5ac1391a61a43b8b4c28efc591a96683443e1c66f17e4fdd503b27c60be88400"
-    sha256 cellar: :any_skip_relocation, sonoma:         "62c2e70ba22ed9c265c8a994c2d54021588d6b581d599be627a802e21f5cb2a7"
-    sha256 cellar: :any_skip_relocation, ventura:        "bbe0d1cdec9bc6838bcb3cbc18782e7a131d7e4d2623acd30f6b809e800283c1"
-    sha256 cellar: :any_skip_relocation, monterey:       "702a41d4bb7fb85b3232ceb3a6d590b5777e09d147a531f9c65ee4838101f7d7"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "80391a7442b2c4a592f8c66ab24e07537559b3a4f420a85c60661c1182ddf197"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "edf7cb5683caadeca2318d455130e4e67ddae8647594760aad039f77c7712df1"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "edf7cb5683caadeca2318d455130e4e67ddae8647594760aad039f77c7712df1"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "edf7cb5683caadeca2318d455130e4e67ddae8647594760aad039f77c7712df1"
+    sha256 cellar: :any_skip_relocation, sonoma:        "97e7aefe5058a1a4d7687c391c18baf20a2d6d387d038597de4d33002348c6eb"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "b0c10c6238b6b826c078809c7846b44d44ebed18212d61928dfca369e62c74db"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "93d215d3757e8e3249e22af329ade9d031312820e2e8565638d6c9f1337f4dd9"
   end
 
   depends_on "asciidoctor" => :build
@@ -37,6 +37,7 @@ class GitLfs < Formula
     man5.install Dir["man/man5/*.5"]
     man7.install Dir["man/man7/*.7"]
     doc.install Dir["man/html/*.html"]
+    generate_completions_from_executable(bin/"git-lfs", "completion")
   end
 
   def caveats

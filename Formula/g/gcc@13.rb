@@ -1,9 +1,9 @@
 class GccAT13 < Formula
   desc "GNU compiler collection"
   homepage "https://gcc.gnu.org/"
-  url "https://ftp.gnu.org/gnu/gcc/gcc-13.3.0/gcc-13.3.0.tar.xz"
-  mirror "https://ftpmirror.gnu.org/gcc/gcc-13.3.0/gcc-13.3.0.tar.xz"
-  sha256 "0845e9621c9543a13f484e94584a49ffc0129970e9914624235fc1d061a0c083"
+  url "https://ftpmirror.gnu.org/gnu/gcc/gcc-13.4.0/gcc-13.4.0.tar.xz"
+  mirror "https://ftp.gnu.org/gnu/gcc/gcc-13.4.0/gcc-13.4.0.tar.xz"
+  sha256 "9c4ce6dbb040568fdc545588ac03c5cbc95a8dbf0c7aa490170843afb59ca8f5"
   license "GPL-3.0-or-later" => { with: "GCC-exception-3.1" }
 
   livecheck do
@@ -12,13 +12,15 @@ class GccAT13 < Formula
   end
 
   bottle do
-    sha256                               arm64_sonoma:   "ff56bc82f41d769ff59131299f9d576df8b4a1162ef44acc3a1c45ffbbaa6f9c"
-    sha256                               arm64_ventura:  "2711d2616329446feb71d48fefd12e100b232f664dabee59873a961b8665239e"
-    sha256                               arm64_monterey: "80a178083c446e401c59c4fd6ebe4c28fde89b4f93f6446e5144ec25d9b8b6dc"
-    sha256                               sonoma:         "4c479e51e3e4dc9eefacd32a8fce5f8f0f707311df3e06e2f6b470dd8713a6eb"
-    sha256                               ventura:        "24838fe887472d23d42eefd4b3cb15461fa6974690ec84973d856c80f7ad27e7"
-    sha256                               monterey:       "2726062334206e315f78b1c354b32cfa0b9d3d94e0a20e5eefe8b12da70ca6b3"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "d2e725ff21e23929d6d84f92e2b8f559df6ea6b6550cc55e647aaeb7dd345436"
+    rebuild 3
+    sha256                               arm64_tahoe:   "2ae26a4499ac71797f04f9683c7fb02516f29965e6ff7627598edbeca5e4b1a0"
+    sha256                               arm64_sequoia: "a7fc4d6151e3c922f4309f5ff12344cc9e921e0637b96b97c4833920c3418051"
+    sha256                               arm64_sonoma:  "58d90b7b779a0d4e32ffa9a7bee9ab35f62670c589643cc5be0ff9df93d42feb"
+    sha256                               tahoe:         "b3165a6e856abe35d4b04e44d10673221c4ca3f579a02361f6531125d6bc072d"
+    sha256                               sequoia:       "ec886ab2faac8aebaf7f819c25e57eb2574dd9565f27d1d507e14d3d90361424"
+    sha256                               sonoma:        "d9d26a82d4764225005049dcd46f1c11946fe89f41e9c5d5ea30c06a1547d993"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "a55fe1e29dfb809af029b9ca0033aa161a8d2a1c43562e13617730c4453ec001"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "228b119f868a6df8eb73603775999f6895fd9ef55de2f963d57d53b170f01ee6"
   end
 
   # The bottles are built on systems with the CLT installed, and do not work
@@ -31,20 +33,16 @@ class GccAT13 < Formula
   depends_on "mpfr"
   depends_on "zstd"
 
-  uses_from_macos "zlib"
-
   on_linux do
     depends_on "binutils"
+    depends_on "zlib-ng-compat"
   end
-
-  # GCC bootstraps itself, so it is OK to have an incompatible C++ stdlib
-  cxxstdlib_check :skip
 
   # Branch from the Darwin maintainer of GCC, with a few generic fixes and
   # Apple Silicon support, located at https://github.com/iains/gcc-13-branch
   patch do
-    url "https://raw.githubusercontent.com/Homebrew/formula-patches/bda0faddfbfb392e7b9c9101056b2c5ab2500508/gcc/gcc-13.3.0.diff"
-    sha256 "c5e9236430ef6edbdda7de9ac70bf79e21628077a48322cec7f3f064ccfc243d"
+    url "https://raw.githubusercontent.com/Homebrew/homebrew-core/1cf441a0/Patches/gcc/gcc-13.4.0.diff"
+    sha256 "60b22ae7f5f78b41e12c51d8c6e99ba933a7e124454fe8cdbff7200505167949"
   end
 
   def install
@@ -90,9 +88,6 @@ class GccAT13 < Formula
       # "Updated load commands do not fit in the header"
       make_args = %w[BOOT_LDFLAGS=-Wl,-headerpad_max_install_names]
     else
-      # Fix cc1: error while loading shared libraries: libisl.so.15
-      args << "--with-boot-ldflags=-static-libstdc++ -static-libgcc #{ENV.ldflags}"
-
       # Fix Linux error: gnu/stubs-32.h: No such file or directory.
       args << "--disable-multilib"
 
@@ -102,11 +97,10 @@ class GccAT13 < Formula
       # Change the default directory name for 64-bit libraries to `lib`
       # https://stackoverflow.com/a/54038769
       inreplace "gcc/config/i386/t-linux64", "m64=../lib64", "m64="
+      inreplace "gcc/config/aarch64/t-aarch64-linux", "lp64=../lib64", "lp64="
 
-      make_args = %W[
-        BOOT_CFLAGS=-I#{Formula["zlib"].opt_include}
-        BOOT_LDFLAGS=-L#{Formula["zlib"].opt_lib}
-      ]
+      ENV.append_path "CPATH", Formula["zlib-ng-compat"].opt_include
+      ENV.append_path "LIBRARY_PATH", Formula["zlib-ng-compat"].opt_lib
     end
 
     mkdir "build" do
@@ -224,18 +218,18 @@ class GccAT13 < Formula
   end
 
   test do
-    (testpath/"hello-c.c").write <<~EOS
+    (testpath/"hello-c.c").write <<~C
       #include <stdio.h>
       int main()
       {
         puts("Hello, world!");
         return 0;
       }
-    EOS
+    C
     system bin/"gcc-#{version.major}", "-o", "hello-c", "hello-c.c"
     assert_equal "Hello, world!\n", shell_output("./hello-c")
 
-    (testpath/"hello-cc.cc").write <<~EOS
+    (testpath/"hello-cc.cc").write <<~CPP
       #include <iostream>
       struct exception { };
       int main()
@@ -246,11 +240,11 @@ class GccAT13 < Formula
           catch (...) { }
         return 0;
       }
-    EOS
+    CPP
     system bin/"g++-#{version.major}", "-o", "hello-cc", "hello-cc.cc"
     assert_equal "Hello, world!\n", shell_output("./hello-cc")
 
-    (testpath/"test.f90").write <<~EOS
+    (testpath/"test.f90").write <<~FORTRAN
       integer,parameter::m=10000
       real::a(m), b(m)
       real::fact=0.5
@@ -260,7 +254,7 @@ class GccAT13 < Formula
       end do
       write(*,"(A)") "Done"
       end
-    EOS
+    FORTRAN
     system bin/"gfortran-#{version.major}", "-o", "test", "test.f90"
     assert_equal "Done\n", shell_output("./test")
   end

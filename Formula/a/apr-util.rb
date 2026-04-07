@@ -8,6 +8,8 @@ class AprUtil < Formula
   revision 1
 
   bottle do
+    sha256 arm64_tahoe:    "c1b6ca1239679046b74a5ea73032f87a83cbc9c503455a0cf3bc12a54777a03d"
+    sha256 arm64_sequoia:  "6d3282873dffcfed602c5cfb7eb5ddad4b7115aaa954e191dfd4b733a58ef43e"
     sha256 arm64_sonoma:   "e21a775a4cd6e721ad4f09cd7ed0355b5a1181ca8ad6834911a045c8f076eb01"
     sha256 arm64_ventura:  "cb73075171b2079d2b8e8028f42766dffa5db08882261c3f5aff59d8eb9638a9"
     sha256 arm64_monterey: "e4a7a42c82ae44bb192b2f718af4ced48d34560325b63d5c653a5c569edf759f"
@@ -16,6 +18,7 @@ class AprUtil < Formula
     sha256 ventura:        "127d4d4523d49a73e7dbf610f3e439ac2051a383edbf28cc18438faf78945ef0"
     sha256 monterey:       "1d6b4a8fed8cbec1e7056432a378b27455454f7b69de61a227d452a7b4671551"
     sha256 big_sur:        "92bfab4310f0b384081f1997054f207e0d03c97e067407a328e19148a0132375"
+    sha256 arm64_linux:    "830c11d6eb7e0d08d27adeac35c24865e6a49c1bef237b6dc704ca4057062a7d"
     sha256 x86_64_linux:   "5ad68f7525d3368b7e1fae3157c0338fffad2d33a907413c87ce8728c2e19378"
   end
 
@@ -29,17 +32,15 @@ class AprUtil < Formula
   uses_from_macos "sqlite"
 
   on_linux do
-    depends_on "mawk"
     depends_on "unixodbc"
   end
 
   def install
-    system "./configure", *std_configure_args,
-                          "--with-apr=#{Formula["apr"].opt_prefix}",
+    system "./configure", "--with-apr=#{Formula["apr"].opt_prefix}",
                           "--with-crypto",
                           "--with-openssl=#{Formula["openssl@3"].opt_prefix}",
-                          "--without-pgsql"
-
+                          "--without-pgsql",
+                          *std_configure_args
     system "make"
     system "make", "install"
 

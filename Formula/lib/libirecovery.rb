@@ -1,26 +1,29 @@
 class Libirecovery < Formula
   desc "Library and utility to talk to iBoot/iBSS via USB"
   homepage "https://www.libimobiledevice.org/"
-  url "https://github.com/libimobiledevice/libirecovery/releases/download/1.2.0/libirecovery-1.2.0.tar.bz2"
-  sha256 "74448348f8a68b654015fe1952fdc4e0781db20dcf4e1d85ec97d6f91e95eb14"
+  url "https://github.com/libimobiledevice/libirecovery/releases/download/1.3.1/libirecovery-1.3.1.tar.bz2"
+  sha256 "28a3a521782063c8eb2ee5f4c0f38a517e023853edb55856052cdd7ac400381b"
   license "LGPL-2.1-only"
   head "https://github.com/libimobiledevice/libirecovery.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "8e33848346905d014f7196a8ff5a7ec4fd07aa2df634b9d644e70e16d9a6ec82"
-    sha256 cellar: :any,                 arm64_ventura:  "baf684cbb170ca1dd6a667b151bee4eb8225e29a0db24f7fc8fa646fafd67b74"
-    sha256 cellar: :any,                 arm64_monterey: "10a72e5bc74f8b6b12146cc27546a708c5b402ee52360358ac3e00e001dced85"
-    sha256 cellar: :any,                 sonoma:         "c9a4575f92626ebc8bc6d52fdb169c26eefbafffbeb1dc55252e88bc19c05051"
-    sha256 cellar: :any,                 ventura:        "f311a8460344860385ecf64e4022f4bf775e6ebaf9ab9f8d24ca10a22513e4f3"
-    sha256 cellar: :any,                 monterey:       "7b846f671bc3566d8cb556e015c29458c093afd5830c30351ac2d44ad45b29eb"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "3c01e6062a8da402b79cc561d6fd4687005b55ce5b4456030e45275accd8eb00"
+    sha256 cellar: :any,                 arm64_tahoe:   "14126dca02da81d6266e719840639fa3c7dba674a7fe5e22fe39c856f5f1eafd"
+    sha256 cellar: :any,                 arm64_sequoia: "5b65d2e4775295b517a4324c43c0f9553871fafe19f423b890d9355f76050a69"
+    sha256 cellar: :any,                 arm64_sonoma:  "d248aaefd0b49f856770bbc48c531b624b9e64ae203af153dc2f3be3cadeae49"
+    sha256 cellar: :any,                 sonoma:        "139905a8f27754ed0ad2546491a171679fc2823e1060dbf2e1ff7e09a3b9de8e"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "e51daa52330dffe61ac4fa323b48023c9d638e960d977ddd0bc834d2d5483639"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "95cb02d908ffb064784fd215510258e01417621f2689df80a7e702c7b02b3d96"
   end
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
   depends_on "libtool" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "libimobiledevice-glue"
+
+  on_macos do
+    depends_on "libplist"
+  end
 
   on_linux do
     depends_on "libusb"
@@ -28,11 +31,8 @@ class Libirecovery < Formula
   end
 
   def install
-    if build.head?
-      system "./autogen.sh", *std_configure_args, "--disable-silent-rules"
-    else
-      system "./configure", *std_configure_args, "--disable-silent-rules"
-    end
+    configure = build.head? ? "./autogen.sh" : "./configure"
+    system configure, "--disable-silent-rules", *std_configure_args
     system "make", "install"
   end
 

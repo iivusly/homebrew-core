@@ -7,17 +7,11 @@ class LaunchSocketServer < Formula
   head "https://github.com/mistydemeo/launch_socket_server.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "9ce6af2c7124bc91494a306292073b296f109482869a4c01870ef97e81d5d62d"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "f097f91e97343b78e0208793705506ccec3ea9deddb38d9a15d11c11103888cf"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "055953e5098f4c8e2c823d58e123eb3a905174c9619791b3fa54de1d671b193d"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "b95b2bbe04b54feb6b103b5ead74f984160ff920a8914619004b40c1402bceb7"
-    sha256 cellar: :any_skip_relocation, sonoma:         "0fd45ecadc044db17343dcbd89327fd2324512e7055f9b30e26f40dc4c513bc2"
-    sha256 cellar: :any_skip_relocation, ventura:        "1201c5615810d1e37d6c6c2c26ccadf8ffd9a346905cbf064ea637aab8f04629"
-    sha256 cellar: :any_skip_relocation, monterey:       "165fd5a279db8b88e586ca82f2c1017946a7675c8f0c158921d9cb48d152e13b"
-    sha256 cellar: :any_skip_relocation, big_sur:        "0d490a674d736272ea67f2289d5eb715b5aa48acf5e289a6a8e8327cd4cbc4a4"
-    sha256 cellar: :any_skip_relocation, catalina:       "ff86499103ad1d9d33cdc039e24f065aa08405bda980c9e242c46ed157bc33ff"
-    sha256 cellar: :any_skip_relocation, mojave:         "823d84eddeb72fdabeccdc189bc19269485bfeb23d0a57824cdbf95c92a6ccb8"
-    sha256 cellar: :any_skip_relocation, high_sierra:    "ef58f2afc33d6454282d1e1b92e4d16269885464707ae58079c29514f4cadc60"
+    rebuild 2
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "cd7f62d360a2d0e3ccbc0d127e6c93cf7b04341547a0cc47712e9cc30bfada44"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "7f9379e42b9f24b9f1d7c8e4f899901ad90999fe69c526c081c883e813cd36ea"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "b39407abb6a275dc2f8d7cee19b56126213e46ed61e6ef0d9e0eff631112c3e9"
+    sha256 cellar: :any_skip_relocation, sonoma:        "bffce7fd244160abb5333fed263f40e868bd09c2da174a51d7be6b255101992f"
   end
 
   depends_on "go" => :build
@@ -36,7 +30,7 @@ class LaunchSocketServer < Formula
     require_root true
     error_log_path var/"log/launch_socket_server.log"
     log_path var/"log/launch_socket_server.log"
-    sockets "tcp://0.0.0.0:80"
+    sockets Socket: "tcp://127.0.0.1:80"
   end
 
   test do

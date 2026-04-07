@@ -1,20 +1,18 @@
 class Inetutils < Formula
   desc "GNU utilities for networking"
   homepage "https://www.gnu.org/software/inetutils/"
-  url "https://ftp.gnu.org/gnu/inetutils/inetutils-2.5.tar.xz"
-  mirror "https://ftpmirror.gnu.org/inetutils/inetutils-2.5.tar.xz"
-  sha256 "87697d60a31e10b5cb86a9f0651e1ec7bee98320d048c0739431aac3d5764fb6"
+  url "https://ftpmirror.gnu.org/gnu/inetutils/inetutils-2.7.tar.gz"
+  mirror "https://ftp.gnu.org/gnu/inetutils/inetutils-2.7.tar.gz"
+  sha256 "a156be1cde3c5c0ffefc262180d9369a60484087907aa554c62787d2f40ec086"
   license "GPL-3.0-or-later"
 
   bottle do
-    rebuild 1
-    sha256 arm64_sonoma:   "e6afa68602fd3a2789d7488c2080fb88acab6021aadc8e4c8cdb7fb5c1168e39"
-    sha256 arm64_ventura:  "9b554572efb13f9762a17d4abfa721c1e9b4d757a78ac67eb56bfcd777852ba4"
-    sha256 arm64_monterey: "8dd6e104cc9092a2225c205dfa346ad7a9f0134f0608e8f58e454f6c749b6714"
-    sha256 sonoma:         "251dcd9d1fee54a85c35ccc0c29e5ca1f9bbccc7edb71ae714ee6cab51f52e54"
-    sha256 ventura:        "f77f7f7460b637f6d90997cd8b0ab2edf1a94ce62b79d5d167e1f02b0ab9a475"
-    sha256 monterey:       "6f6271408faa0f220506dd46ca5eb1fbf353f77071139c94d84406a10a7c3cfd"
-    sha256 x86_64_linux:   "d76a8cb2d5cf6eb61e23d0cd6fa0527dea4e0649830a5e562d423df4cadcb0ce"
+    sha256 arm64_tahoe:   "679c93f5939a40a29d8405d0494cf42900d039adde87f2c6c80cb0ac78bea4d5"
+    sha256 arm64_sequoia: "945627896b2789911b27c99c415ec4392c4950e2857d3ccd63810c695c00b4ac"
+    sha256 arm64_sonoma:  "8d4c9f02566b20dde1c997e6902230d9bee5100eb659627dfeebc9469c366926"
+    sha256 sonoma:        "bb1efe4e985bba255854ed3cb1b3b1a5e94a2be65b390a6f384746e1be4f3009"
+    sha256 arm64_linux:   "2f583154f1494f33345fe3d74baba8805fb95be9cb152ffe1f7b3b4a4fa84d45"
+    sha256 x86_64_linux:  "252b3d566a72404df73d6a4c5e4094a4bf84ed98a594ae6fb5c5174ea8ad85ae"
   end
 
   depends_on "help2man" => :build
@@ -33,11 +31,7 @@ class Inetutils < Formula
 
   def noshadow
     # List of binaries that do not shadow macOS utils
-    list = %w[dnsdomainname rcp rexec rlogin rsh]
-    on_high_sierra :or_newer do
-      list += %w[ftp telnet]
-    end
-    list
+    %w[dnsdomainname ftp rcp rexec rlogin rsh telnet]
   end
 
   def linux_conflicts
@@ -49,14 +43,11 @@ class Inetutils < Formula
     list
   end
 
-  # upstream bug report, https://savannah.gnu.org/bugs/index.php?65093
-  patch :DATA
-
   def install
-    system "./configure", *std_configure_args,
-                          "--disable-silent-rules",
+    system "./configure", "--disable-silent-rules",
                           "--with-idn",
-                          "--program-prefix=g"
+                          "--program-prefix=g",
+                          *std_configure_args
     system "make", "SUIDMODE=", "install"
 
     no_conflict = OS.mac? ? noshadow : []
@@ -65,7 +56,7 @@ class Inetutils < Formula
     # (ftpd, inetd, rexecd, rlogind, rshd, syslogd, talkd, telnetd, tftpd, uucpd)
     if OS.linux?
       libexec.find.each do |path|
-        next if !File.executable?(path) || File.directory?(path)
+        next if !path.executable? || path.directory?
 
         cmd = path.basename.to_s.sub(/^g/, "")
         sbin.install_symlink libexec/"g#{cmd}" => cmd
@@ -76,12 +67,12 @@ class Inetutils < Formula
     # Symlink commands without 'g' prefix into libexec/gnubin and
     # man pages into libexec/gnuman
     bin.find.each do |path|
-      next if !File.executable?(path) || File.directory?(path)
+      next if !path.executable? || path.directory?
 
       cmd = path.basename.to_s.sub(/^g/, "")
       no_conflict << cmd unless OS.mac?
       (libexec/"gnubin").install_symlink bin/"g#{cmd}" => cmd
-      (libexec/"gnuman"/"man1").install_symlink man1/"g#{cmd}.1" => "#{cmd}.1"
+      (libexec/"gnuman/man1").install_symlink man1/"g#{cmd}.1" => "#{cmd}.1"
     end
     (libexec/"gnubin").install_symlink "../gnuman" => "man"
 
@@ -128,19 +119,3 @@ class Inetutils < Formula
     assert_match "Connected to ftp.gnu.org.\n220 GNU FTP server ready", output
   end
 end
-
-__END__
-diff --git a/src/syslogd.c b/src/syslogd.c
-index 918686d..dd8c359 100644
---- a/src/syslogd.c
-+++ b/src/syslogd.c
-@@ -278,7 +278,9 @@ void logerror (const char *);
- void logmsg (int, const char *, const char *, int);
- void printline (const char *, const char *);
- void printsys (const char *);
-+#if !__APPLE__
- char *ttymsg (struct iovec *, int, char *, int);
-+#endif
- void wallmsg (struct filed *, struct iovec *);
- char **crunch_list (char **oldlist, char *list);
- char *textpri (int pri);

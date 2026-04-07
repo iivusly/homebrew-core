@@ -1,18 +1,17 @@
 class Snapraid < Formula
   desc "Backup program for disk arrays"
   homepage "https://www.snapraid.it/"
-  url "https://github.com/amadvance/snapraid/releases/download/v12.3/snapraid-12.3.tar.gz"
-  sha256 "1f27aba6e5db3929474da9c472fc4a3bc51d4a83aa5385af6b09afc9f68d6d44"
+  url "https://github.com/amadvance/snapraid/releases/download/v14.1/snapraid-14.1.tar.gz"
+  sha256 "b33e19558ad0f29f1c8d3907a772377f1125f19b44003db8b8df05cec46cd7c6"
   license "GPL-3.0-or-later"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "f4da7ec06ad641c8d25b350c67fb8a100e0fe6d1a539deb8bb189244bdff8cb5"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "a0685e224941fd715cdc9074113ed6f85e81523bd90d3b74ce7d6c67d1073e09"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "3fb09589076aef618afe6cddd5f0801c9332e074cbfea5b41770b01c5d1b0230"
-    sha256 cellar: :any_skip_relocation, sonoma:         "d0b303ac35e773f6e1f7540ea4ece7f91f7d2943ab6fd251f644998637ba01eb"
-    sha256 cellar: :any_skip_relocation, ventura:        "1a85343ba4048288a9e950883b7fa0eb5b6f0436fc90e0a0295b80fbc7b32c14"
-    sha256 cellar: :any_skip_relocation, monterey:       "d7952a904318b1162fa61da0500fbd13930debd9dbc95818265c75768dfa5df3"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "e375ce8b03bd4fc70b7bf52a2b64b4ee626e0b2946845d3874cc0a3e29875bb4"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "ae244c68599c9f836cd7ead50b72aac6bc1ff693c17c78c10884deae913bf424"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "823465ce79d61c2d1f3094e7ec468b75bb0adcb062678d71e4a371d8d93d2821"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "a3e3f24ffa52fa6769f13ab164bcca08eb93603544f50331e48aee74181cdc25"
+    sha256 cellar: :any_skip_relocation, sonoma:        "66ea8f86e7d6001e4c4afa93c366792c7adcb440c837d841330835f17568c605"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "3dca5fa97366e905beecfb1c0eb9c83a760bd7733419caefce4cf89d5eea34fb"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "16ff37466314bb669f4b8c9950fabfce60bd39d4303e44d42712fa091d94d555"
   end
 
   head do

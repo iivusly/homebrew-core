@@ -7,6 +7,7 @@ class Aggregate < Formula
 
   bottle do
     rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_sequoia:  "acc66660e03c2394db8381da8ad5200a6a6f02fce14b1de748dd555f0f98ffa6"
     sha256 cellar: :any_skip_relocation, arm64_sonoma:   "0b7b89c9bc52c33559e7a3f8df32bb2a20b3fcdd1c5b5714452f1efe93f9467a"
     sha256 cellar: :any_skip_relocation, arm64_ventura:  "7ed5b3fee9fdcadb6278923b3776739ef63226ae5ad3dbc024ddfc54e1eea0fc"
     sha256 cellar: :any_skip_relocation, arm64_monterey: "387184c17669967eb2af11d108d5bd53294ea7163a19ec3a2519449e3f8c24a6"
@@ -16,18 +17,17 @@ class Aggregate < Formula
     sha256 cellar: :any_skip_relocation, monterey:       "b8cb4e13724b2c45889b17303bb378dd6444557aa0a0c3bb7a100643aabbde49"
     sha256 cellar: :any_skip_relocation, big_sur:        "ab6914ea220f96d957eb322596ddc34fb72e8beedaed0bc21ee5dbfb2d0c64ca"
     sha256 cellar: :any_skip_relocation, catalina:       "3e22a340761b031b33e9f4a48f39edd98c18f7ea7c77abd02d95f816e7fe7245"
-    sha256 cellar: :any_skip_relocation, mojave:         "231a7cce3160591eff39c8f70a9324dd0329a6a21355d49747c74308527cc946"
-    sha256 cellar: :any_skip_relocation, high_sierra:    "6dc7626282f519003e1d559ac42a983f4a571494ac04e5b61858fdf16d1ca924"
-    sha256 cellar: :any_skip_relocation, sierra:         "ebe7aa16c7cf36684463292995c60fdde12cdac889de551d8f85b89e6b77416c"
-    sha256 cellar: :any_skip_relocation, el_capitan:     "87507a739f2bd5ba57ccd23b34f2b7c41d68a897c128231dbbc32ba23b869ed5"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "ba57c28f3e39be87d0283a8365934747979b67e5d692f86fc869f1e6f88d119c"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "ed89de5c64cf464e1002d2b16aaa6749a68b113199dd702077a36db84a1a7ae1"
   end
 
   deprecate! date: "2024-05-04", because: :repo_removed
-
-  conflicts_with "crush-tools", because: "both install an `aggregate` binary"
+  disable! date: "2025-05-05", because: :repo_removed
 
   def install
+    # Workaround for newer Clang
+    ENV.append_to_cflags "-Wno-implicit-int" if DevelopmentTools.clang_build_version >= 1403
+
     bin.mkpath
     man1.mkpath
 

@@ -1,8 +1,8 @@
 class Fping < Formula
   desc "Scriptable ping program for checking if multiple hosts are up"
   homepage "https://fping.org/"
-  url "https://fping.org/dist/fping-5.2.tar.gz"
-  sha256 "a7692d10d73fb0bb76e1f7459aa7f19bbcdbfc5adbedef02f468974b18b0e42f"
+  url "https://fping.org/dist/fping-5.5.tar.gz"
+  sha256 "15c4e32b6c55ff105bafe03e8c91c7ca1b2eda31bf9a7127326bb87887ee18fe"
   license "BSD-3-Clause"
 
   livecheck do
@@ -11,13 +11,12 @@ class Fping < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "4423ec7fed15ac1c3c77b38e94a558509cdd653e7c8c8a6f5614bd1a1440b205"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "af03b2f649dc3f6dd40665bdaa3ad678072b520f8fcee99adffa3c37e8308c65"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "be35f1c21a4d9bb9ec325098f1657525517c8e8a0145edbd0be4745a93d2aefe"
-    sha256 cellar: :any_skip_relocation, sonoma:         "4502b4d3010674df0e2b12a176e70dfef11755f955cc7d40849d933984d632d1"
-    sha256 cellar: :any_skip_relocation, ventura:        "55b47df6f6aefd32e91638b0c079176cbd852cac55aa5f1c70456e516ceebc7c"
-    sha256 cellar: :any_skip_relocation, monterey:       "81505d83664af7408ce69debeaff2612316c3b356b696e4935e9e96052459e55"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "2ca9f76165721fab77165b38b482909fd28e6460cc3fd39b5c072a25f5d4684f"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "d8e132e94c41b8dcf3149faf3356beece440bc4f5b804e723e9f7ee9cb14817d"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "cbe25f1d45b4b018ed308fd986f26211a00cf32c205ebc5c46ebcafdc546e352"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "251479f09a0b2ef3cf58fcd6a7144d0b33baf68f1555f2a6dcdcfea4b1e3eaef"
+    sha256 cellar: :any_skip_relocation, sonoma:        "f126c58d92896bc945c83969b8ee25e7ec5aee3b2480eb836f6c036a550f7c54"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "7df0fdc7745faf467a98549da150873dc5c944cf5a3deb49c64972d5a0eda5b7"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "2cc39f11322e6922333f12d26b85a755520ff205f4214b9602bb7062d79b7673"
   end
 
   head do

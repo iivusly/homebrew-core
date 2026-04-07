@@ -1,18 +1,18 @@
 class GdkPixbuf < Formula
   desc "Toolkit for image loading and pixel buffer manipulation"
   homepage "https://gtk.org"
-  url "https://download.gnome.org/sources/gdk-pixbuf/2.42/gdk-pixbuf-2.42.12.tar.xz"
-  sha256 "b9505b3445b9a7e48ced34760c3bcb73e966df3ac94c95a148cb669ab748e3c7"
+  url "https://download.gnome.org/sources/gdk-pixbuf/2.44/gdk-pixbuf-2.44.6.tar.xz"
+  sha256 "140c2d0b899fcf853ee92b26373c9dc228dbcde0820a4246693f4328a27466fa"
   license "LGPL-2.1-or-later"
+  compatibility_version 1
 
   bottle do
-    sha256 arm64_sonoma:   "25939bb8cc913348f52c3c72ad16089b15cd2293397b3a9a4bcec90dbd409987"
-    sha256 arm64_ventura:  "b5d7e955fda95853264840a0f05fa7c9f1d7b45a08e0d1b4bcf15c16b3c03820"
-    sha256 arm64_monterey: "a32e123ccc804f092841336600e33fc67c6ac912d5aee8f99465afd7390014db"
-    sha256 sonoma:         "3e7266d92df1d8a3afde5e67030878a610ede9d9dfa75572e54dcb74d5779cdc"
-    sha256 ventura:        "80e5eacf286d8371d7fcc13cc9b79d4612ded6d0db3398c5741790174ae70f85"
-    sha256 monterey:       "8949303fe5fe4f755cdde41339de6485b4fc0da74b9991eafb78eabe6fe38e1e"
-    sha256 x86_64_linux:   "1acee0ae28b67cd12f744e7923ff8a5e8c9396777af0bb661089b6e33492b8b3"
+    sha256 arm64_tahoe:   "023b480ec88e40ba0b7879663177a7baaa009d93853cf74b313ce1029f8e7c5b"
+    sha256 arm64_sequoia: "eed711bc1bc0a308e57ddcdcb0c5ab3e40cd03d47ecf82f344b508e1f4317475"
+    sha256 arm64_sonoma:  "f05616e33ac2730638a5e31d6f2835b05b17b08d94feabf773e8c3a92322016a"
+    sha256 sonoma:        "af601b57fead60ddd3d08af5025d41876d37d6f1cf9348bd79e03611b6d56ff7"
+    sha256 arm64_linux:   "2cf25e29b84262b52aa087c5ea8d8f113160e1ed107f50410203cd4d3244e7aa"
+    sha256 x86_64_linux:  "de021570fbdc6b613d5d620620f8ca735371d7fd5f442fbb127eb2e0331a56df"
   end
 
   depends_on "docutils" => :build # for rst2man
@@ -20,7 +20,7 @@ class GdkPixbuf < Formula
   depends_on "gobject-introspection" => :build
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => [:build, :test]
+  depends_on "pkgconf" => [:build, :test]
   depends_on "glib"
   depends_on "jpeg-turbo"
   depends_on "libpng"
@@ -63,6 +63,7 @@ class GdkPixbuf < Formula
                                       "-Djpeg=enabled",
                                       "-Dothers=enabled",
                                       "-Dintrospection=enabled",
+                                      "-Dglycin=disabled",
                                       *std_meson_args
     system "meson", "compile", "-C", "build", "--verbose"
     system "meson", "install", "-C", "build"
@@ -70,9 +71,7 @@ class GdkPixbuf < Formula
     # Other packages should use the top-level modules directory
     # rather than dumping their files into the gdk-pixbuf keg.
     inreplace lib/"pkgconfig/gdk-pixbuf-#{gdk_so_ver}.pc" do |s|
-      libv = s.get_make_var "gdk_pixbuf_binary_version"
-      s.change_make_var! "gdk_pixbuf_binarydir",
-        HOMEBREW_PREFIX/"lib/gdk-pixbuf-#{gdk_so_ver}"/libv
+      s.change_make_var! "prefix", HOMEBREW_PREFIX
     end
   end
 
@@ -88,15 +87,15 @@ class GdkPixbuf < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <gdk-pixbuf/gdk-pixbuf.h>
 
       int main(int argc, char *argv[]) {
         GType type = gdk_pixbuf_get_type();
         return 0;
       }
-    EOS
-    flags = shell_output("pkg-config --cflags --libs gdk-pixbuf-#{gdk_so_ver}").chomp.split
+    C
+    flags = shell_output("pkgconf --cflags --libs gdk-pixbuf-#{gdk_so_ver}").chomp.split
     system ENV.cc, "test.c", "-o", "test", *flags
     system "./test"
   end

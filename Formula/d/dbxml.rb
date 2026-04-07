@@ -4,34 +4,33 @@ class Dbxml < Formula
   url "https://download.oracle.com/berkeley-db/dbxml-6.1.4.tar.gz"
   sha256 "a8fc8f5e0c3b6e42741fa4dfc3b878c982ff8f5e5f14843f6a7e20d22e64251a"
   license "AGPL-3.0-only"
-  revision 3
+  revision 4
+
+  livecheck do
+    skip "No longer developed or maintained"
+  end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "25687dcaf01e85b2a0c3b4bd04f46c819aa6a0b2329463734b5c4654f38a74a9"
-    sha256 cellar: :any,                 arm64_ventura:  "d15ff7b5156f4bb68e1a397e62c0631733f0323300afb3358da574be87cdf12f"
-    sha256 cellar: :any,                 arm64_monterey: "04519c8d0b802cc58234228fb4e697d0e4e83a89304d449f6976c9c5fa8287c5"
-    sha256                               arm64_big_sur:  "04e8d59d289cdfeded395a021516b357e5bb63eed09e49aca28ed262c8c31128"
-    sha256 cellar: :any,                 sonoma:         "7bd7f56e7b85ee60909a63f3bbd17bef0e4a78a989f96e44f213c8c872f24d99"
-    sha256 cellar: :any,                 ventura:        "18bb9ec11944c14033f7486d0278fc9111ebb1de2778c6ca930ac79bb96dfa73"
-    sha256 cellar: :any,                 monterey:       "33d915b0652f7509895b421e65f6228915f1fddb42820076cb618b711432a898"
-    sha256                               big_sur:        "e53e40e0184768fdac585276000c0224a04cfa9284ce94be1ab80380d2b79965"
-    sha256                               catalina:       "59c12069d26a6be4f542d4c7869841c2bd71e8cb08a1c809d559818fb1cb156a"
-    sha256                               mojave:         "b525b9d21d149d533aeb62a169becfe1e140f143d34291d0a8fddf2ada41a018"
-    sha256                               high_sierra:    "1886b654f152fc03a6a6e781ca94e5ca3a08f7f190bc1168326bf46b337c02e9"
-    sha256                               sierra:         "2a350300c31d639d46e9fafc16747d5cbe1897035acf1c365f795127535693b3"
-    sha256                               el_capitan:     "e2c82383d79f243654a0bbebdfb141334bbf683c6925b5a8f3ce0d1568024fec"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "bb0abe86852f38edf93fe495c3d2644f63bdfd1ebe51eee71f75c8c6d977eb1e"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "3828eca647ae656062c684b2a22643d28cd2f0f1664ec44c960a5f7b20a7d5e6"
+    sha256 cellar: :any,                 arm64_sequoia: "2166cda564eb4f6e94f668bb382754318e67ef46b591e4a6a3739a234876656d"
+    sha256 cellar: :any,                 arm64_sonoma:  "ba173a558212fb40fa962959759c2217185e2827a30fa47ea516e82e449c2f22"
+    sha256 cellar: :any,                 sonoma:        "e40be797484590b2d264134fff52a2f77dd3e8e7f1104bbc312d9618828b9e0f"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "9a19a0a31bfa89f8b1ae945f05cd44281267114d25d49cc6f0b3f06f6c3f43bc"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "afed5853113aeb049c66efecd663697396c9cca6466c67c5b34b7f37981415c6"
   end
 
   depends_on "berkeley-db"
   depends_on "xerces-c"
   depends_on "xqilla"
 
-  uses_from_macos "zlib"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   # No public bug tracker or mailing list to submit this to, unfortunately.
   patch do
-    url "https://raw.githubusercontent.com/Homebrew/formula-patches/4d337833ef2e10c1f06a72170f22b1cafe2b6a78/dbxml/c%2B%2B11.patch"
+    url "https://raw.githubusercontent.com/Homebrew/homebrew-core/2c3abc44ccac26dc8ecf09a8fb6cf33f47b5cfc9/Patches/dbxml/cxx11.patch"
     sha256 "98d518934072d86c15780f10ceee493ca34bba5bc788fd9db1981a78234b0dc4"
   end
 
@@ -51,7 +50,9 @@ class Dbxml < Formula
       --with-xerces=#{Formula["xerces-c"].opt_prefix}
       --with-berkeleydb=#{Formula["berkeley-db"].opt_prefix}
     ]
-    args << "--with-zlib=#{Formula["zlib"].opt_prefix}" unless OS.mac?
+    args << "--with-zlib=#{Formula["zlib-ng-compat"].opt_prefix}" unless OS.mac?
+    # Help old config scripts identify arm64 linux
+    args << "--build=aarch64-unknown-linux-gnu" if OS.linux? && Hardware::CPU.arm64?
 
     cd "dbxml" do
       system "./configure", *std_configure_args, *args
@@ -60,7 +61,7 @@ class Dbxml < Formula
   end
 
   test do
-    (testpath/"simple.xml").write <<~EOS
+    (testpath/"simple.xml").write <<~XML
       <breakfast_menu>
         <food>
           <name>Belgian Waffles</name>
@@ -71,7 +72,7 @@ class Dbxml < Formula
           <calories>950</calories>
         </food>
       </breakfast_menu>
-    EOS
+    XML
 
     (testpath/"dbxml.script").write <<~EOS
       createContainer ""

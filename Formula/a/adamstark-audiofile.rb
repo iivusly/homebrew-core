@@ -1,14 +1,13 @@
 class AdamstarkAudiofile < Formula
   desc "C++ Audio File Library by Adam Stark"
   homepage "https://github.com/adamstark/AudioFile"
-  url "https://github.com/adamstark/AudioFile/archive/refs/tags/1.1.1.tar.gz"
-  sha256 "664f9d5fbbf1ff6c603ae054a35224f12e9856a1d8680be567909015ccaac328"
+  url "https://github.com/adamstark/AudioFile/archive/refs/tags/1.1.4.tar.gz"
+  sha256 "e3749f90a9356b5206ef8928fa0a9c039e7db49e46bb7f32c3963d6c44c5bea8"
   license "MIT"
   head "https://github.com/adamstark/AudioFile.git", branch: "master"
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, all: "79027b21202b73bbb3ad74b98c7c5a33f93e14ee089354174cdf7aefa9a3ec79"
+    sha256 cellar: :any_skip_relocation, all: "dce0123d95e01e4609051018ea590c2811908a0e75cb97f7c445c491d21de87e"
   end
 
   def install
@@ -16,14 +15,14 @@ class AdamstarkAudiofile < Formula
   end
 
   test do
-    (testpath/"audiofile.cc").write <<~EOS
+    (testpath/"audiofile.cc").write <<~CPP
       #include "AudioFile.h"
       int main(int argc, char* *argv) {
         AudioFile<double> audioFile;
         AudioFile<double>::AudioBuffer abuf;
         return 0;
       }
-    EOS
+    CPP
 
     system ENV.cxx, "-std=c++17",
            "-I#{include}",

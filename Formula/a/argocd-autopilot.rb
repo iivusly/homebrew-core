@@ -2,18 +2,19 @@ class ArgocdAutopilot < Formula
   desc "Opinionated way of installing Argo CD and managing GitOps repositories"
   homepage "https://argoproj.io"
   url "https://github.com/argoproj-labs/argocd-autopilot.git",
-      tag:      "v0.4.17",
-      revision: "17ffa4b689c320672c0a5c88627d922cc9df7f7e"
+      tag:      "v0.4.20",
+      revision: "a1d2d4c97c59d19127b1bfc1eca3149ca0984df9"
   license "Apache-2.0"
+  head "https://github.com/argoproj-labs/argocd-autopilot.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "b424c0fdaf38d1fd946854932f8dbda270ca802968e0a47762995c42e6957169"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "ec4c1fdc85da245f040cae71900df16a889bd18d64afbd497fd1012f9a0dfd56"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "4580d5f993ea837766802f8391abdd883cb12149e9d092b2624c48869d6c1eb1"
-    sha256 cellar: :any_skip_relocation, sonoma:         "a8ec329087021b889547ce633df751a1722a1388ab7c46c07db2fd7947db2bdc"
-    sha256 cellar: :any_skip_relocation, ventura:        "58df8ae7c89f3ba093c8ecc9ac35720e4eec122aa5a871979189a46e7c8f1339"
-    sha256 cellar: :any_skip_relocation, monterey:       "306cbcded6cf64ffe94ed43f1e2bf402fea9a045f2a456914ebc47f6b19b6fae"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "0728147d47d23fea5e23d16ec5b1f15e7f0e0120a1280bbf192d67bbb38a4675"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "a14fad86f97d6d1434c5ed7e74b2ed3488354f777782ff105dc80765c409f45c"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "be3de2de809b1525f5812b4e0088cf4fb69febfe8d8f9f16ec12cab9523154e8"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "8d1b8ee76391c7f4f3cecf6475ebbc16778ece41c61fddd36b49845b375996b9"
+    sha256 cellar: :any_skip_relocation, sonoma:        "4c24727bb33f1b6b561a40e09f2d6f04adb3184a259622063033bf37c54eb271"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "43d271b59cee87bd956374bdecc77a94dfeaf834889193be442c5b5473ebc484"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "0d92042a9cbae654c5abe3821ca44e8bb65405f27872c12055e2e7f40cc466ad"
   end
 
   depends_on "go" => :build
@@ -22,7 +23,7 @@ class ArgocdAutopilot < Formula
     system "make", "cli-package", "DEV_MODE=false"
     bin.install "dist/argocd-autopilot"
 
-    generate_completions_from_executable(bin/"argocd-autopilot", "completion")
+    generate_completions_from_executable(bin/"argocd-autopilot", shell_parameter_format: :cobra)
   end
 
   test do

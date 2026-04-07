@@ -1,8 +1,8 @@
 class MongoCxxDriver < Formula
   desc "C++ driver for MongoDB"
   homepage "https://github.com/mongodb/mongo-cxx-driver"
-  url "https://github.com/mongodb/mongo-cxx-driver/releases/download/r3.10.2/mongo-cxx-driver-r3.10.2.tar.gz"
-  sha256 "52b99b2866019b5ea25d15c5a39e2a88c70fe1259c40f1091deff8bfae0194be"
+  url "https://github.com/mongodb/mongo-cxx-driver/releases/download/r4.2.0/mongo-cxx-driver-r4.2.0.tar.gz"
+  sha256 "391c321891d512543e35f2a1889972384df52d4e030fc3a6a6751bd6bf75bc92"
   license "Apache-2.0"
   head "https://github.com/mongodb/mongo-cxx-driver.git", branch: "master"
 
@@ -12,17 +12,16 @@ class MongoCxxDriver < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "c5f1935ab6adb6c7470003904987c9fb22ca00d4757c1d1528a65136b29f986a"
-    sha256 cellar: :any,                 arm64_ventura:  "1b23dac19617ef1caaa94e967757e7d7088200d8e2c94c8d16f6bb83b204ceb2"
-    sha256 cellar: :any,                 arm64_monterey: "e7158d2d8573f406ebeed69f0b697225a29424459e8f5d9af2ea64b59fe96b9c"
-    sha256 cellar: :any,                 sonoma:         "592c68556b57567ba2461b8827254cb9830ad935e5bea3804e4b7de4885badbc"
-    sha256 cellar: :any,                 ventura:        "b0b1c37736dc7482166aafdcd9b238710c6262ed83b1aef1746193b20c636188"
-    sha256 cellar: :any,                 monterey:       "0303a5d8d299b1c29ae24aa94f58db6f643b5bbb15d6f68b4fc8411838ea6c3b"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "4852dce8fa374146a015501e8e9d41a6f3465d5b8e7bc8f6d88168d958ba518e"
+    sha256 cellar: :any,                 arm64_tahoe:   "d537b73fa8e6f4970c72da1afa8661de14f3bc7d14ae390c13580fa6a1989b46"
+    sha256 cellar: :any,                 arm64_sequoia: "e537e9f9cdbb6b9c1fd36a4f5352f556bdd1b3c5b8b90faaaf262d750d07b373"
+    sha256 cellar: :any,                 arm64_sonoma:  "df9979dabdf6bd22ed901ad996b1cced1afb32b64ad5dd6ca3e9ad7fab91e6a1"
+    sha256 cellar: :any,                 sonoma:        "29ebee2eab8f7d88e701266c6ef5f4233f18f818bf5f9ac3006ca03a25198aa3"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "ba252c79ebf2ef4e4edc556719cbf560b09b0150d1a6af7d0f4518780c02fbce"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "57ff04c45cbf2f8ca387bbfee2507f96760a188c8c92116c74855b2bf0379d12"
   end
 
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :test
+  depends_on "pkgconf" => :test
   depends_on "mongo-c-driver"
 
   def install
@@ -45,15 +44,14 @@ class MongoCxxDriver < Formula
   end
 
   test do
-    pkg_config_flags = shell_output("pkg-config --cflags --libs libbsoncxx").chomp.split
+    pkgconf_flags = shell_output("pkgconf --cflags --libs libbsoncxx").chomp.split
     system ENV.cc, "-std=c++11", pkgshare/"examples/bsoncxx/builder_basic.cpp",
-      *pkg_config_flags, "-lstdc++", "-o", "test"
+                   "-I#{pkgshare}", *pkgconf_flags, "-lstdc++", "-o", "test"
     system "./test"
 
-    pkg_config_flags = shell_output("pkg-config --cflags --libs libbsoncxx libmongocxx").chomp.split
+    pkgconf_flags = shell_output("pkgconf --cflags --libs libbsoncxx libmongocxx").chomp.split
     system ENV.cc, "-std=c++11", pkgshare/"examples/mongocxx/connect.cpp",
-      *pkg_config_flags, "-lstdc++", "-o", "test"
-    assert_match "No suitable servers",
-      shell_output("./test mongodb://0.0.0.0 2>&1", 1)
+                   "-I#{pkgshare}", *pkgconf_flags, "-lstdc++", "-o", "test"
+    assert_match "No suitable servers", shell_output("./test mongodb://0.0.0.0 2>&1", 1)
   end
 end

@@ -3,35 +3,56 @@ class SolcSelect < Formula
 
   desc "Manage multiple Solidity compiler versions"
   homepage "https://github.com/crytic/solc-select"
-  url "https://files.pythonhosted.org/packages/60/a0/2a2bfbbab1d9bd4e1a24e3604c30b5d6f84219238f3c98f06191faf5d019/solc-select-1.0.4.tar.gz"
-  sha256 "db7b9de009af6de3a5416b80bbe5b6d636bf314703c016319b8c1231e248a6c7"
+  url "https://files.pythonhosted.org/packages/62/89/51e614fdbf26f47268c18f8a3b6cf1cb67c9a8b48b7b7231c948cae97814/solc_select-1.2.0.tar.gz"
+  sha256 "ad0a7afcae05061ce5e7632950b1fa0193ba9eaf05e4956f86effee024c6fb07"
   license "AGPL-3.0-only"
-  revision 2
+  revision 3
   head "https://github.com/crytic/solc-select.git", branch: "dev"
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "dcf2eda0e30f6361041ed6d3a9cf058c0621ac9b3aaf32953c6cb5f3bb321378"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "f3a72a574989a15328910c3339eb1840aba5b7a84375859ca0bd6835d96b16b0"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "4c7d8c394a4831a52da179c98fc476386433dcd18205314b0f9bd21b63600609"
-    sha256 cellar: :any_skip_relocation, sonoma:         "0af1d0beb9c4c438b2c2983bc6e8598997417da0e7e4971a2f2d706d1c5fcb92"
-    sha256 cellar: :any_skip_relocation, ventura:        "b699007b5b946854167d61d4973d658277ec09da13efc8d7888813faec4295d2"
-    sha256 cellar: :any_skip_relocation, monterey:       "34f1dc7cffa7cb317316d6a00e0d44dc8e34b9395974062e7be8abf26575a7f2"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "01ef9d77fd4f6823091b8a867632c9c5b935c0d0458bd104824eb28deb49e9cd"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "b9ab36fdaca2ba04fc8053d828e9418e49b49f9ddc4a041305b2fc69a140e05e"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "ddda8b294afc08d15c844f14be32986f62b049cebe9739cc40ea2eeaca787b6d"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "014e08dc0899b496c984bc001e9660dcba54c49603ce627ead0674372cbf9278"
+    sha256 cellar: :any_skip_relocation, sonoma:        "775c9cce4b4685951b0d63de078b2b602a13ca39ec30a2112e3dc2b3c767918e"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "4d90042fbaae048ac031dbb5a85e76ba3ee8157f605224113348259fc51c6441"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ffc3d31b961e32baf3ab3d6409b33d273772a4f5650cf28ba7ce9206869f021c"
   end
 
-  depends_on "python@3.12"
+  depends_on "certifi" => :no_linkage
+  depends_on "python@3.14"
 
   conflicts_with "solidity", because: "both install `solc` binaries"
 
+  pypi_packages exclude_packages: "certifi"
+
+  resource "charset-normalizer" do
+    url "https://files.pythonhosted.org/packages/7b/60/e3bec1881450851b087e301bedc3daa9377a4d45f1c26aa90b0b235e38aa/charset_normalizer-3.4.6.tar.gz"
+    sha256 "1ae6b62897110aa7c79ea2f5dd38d1abca6db663687c0b1ad9aed6f6bae3d9d6"
+  end
+
+  resource "idna" do
+    url "https://files.pythonhosted.org/packages/6f/6d/0703ccc57f3a7233505399edb88de3cbd678da106337b9fcde432b65ed60/idna-3.11.tar.gz"
+    sha256 "795dafcc9c04ed0c1fb032c2aa73654d8e8c5023a7df64a53f39190ada629902"
+  end
+
   resource "packaging" do
-    url "https://files.pythonhosted.org/packages/fb/2b/9b9c33ffed44ee921d0967086d653047286054117d584f1b1a7c22ceaf7b/packaging-23.2.tar.gz"
-    sha256 "048fb0e9405036518eaaf48a55953c750c11e1a1b68e0dd1a9d62ed0c092cfc5"
+    url "https://files.pythonhosted.org/packages/65/ee/299d360cdc32edc7d2cf530f3accf79c4fca01e96ffc950d8a52213bd8e4/packaging-26.0.tar.gz"
+    sha256 "00243ae351a257117b6a241061796684b084ed1c516a08c48a3f7e147a9d80b4"
   end
 
   resource "pycryptodome" do
-    url "https://files.pythonhosted.org/packages/b1/38/42a8855ff1bf568c61ca6557e2203f318fb7afeadaf2eb8ecfdbde107151/pycryptodome-3.19.1.tar.gz"
-    sha256 "8ae0dd1bcfada451c35f9e29a3e5db385caabc190f98e4a80ad02a61098fb776"
+    url "https://files.pythonhosted.org/packages/8e/a6/8452177684d5e906854776276ddd34eca30d1b1e15aa1ee9cefc289a33f5/pycryptodome-3.23.0.tar.gz"
+    sha256 "447700a657182d60338bab09fdb27518f8856aecd80ae4c6bdddb67ff5da44ef"
+  end
+
+  resource "requests" do
+    url "https://files.pythonhosted.org/packages/34/64/8860370b167a9721e8956ae116825caff829224fbca0ca6e7bf8ddef8430/requests-2.33.0.tar.gz"
+    sha256 "c7ebc5e8b0f21837386ad0e1c8fe8b829fa5f544d8df3b2253bff14ef29d7652"
+  end
+
+  resource "urllib3" do
+    url "https://files.pythonhosted.org/packages/c7/24/5f1b3bdffd70275f6661c76461e25f024d5a38a46f04aaca912426a2b1d3/urllib3-2.6.3.tar.gz"
+    sha256 "1b62b6884944a57dbe321509ab94fd4d3b307075e0c2eae991ac71ee15ad38ed"
   end
 
   def install

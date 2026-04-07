@@ -1,41 +1,46 @@
 class Foma < Formula
   desc "Finite-state compiler and C library"
-  homepage "https://code.google.com/p/foma/"
-  url "https://bitbucket.org/mhulden/foma/downloads/foma-0.9.18.tar.gz"
-  sha256 "cb380f43e86fc7b3d4e43186db3e7cff8f2417e18ea69cc991e466a3907d8cbd"
-  license "GPL-2.0-only"
+  homepage "https://github.com/mhulden/foma"
+  url "https://github.com/mhulden/foma/archive/refs/tags/v0.10.0.tar.gz"
+  sha256 "32fff2bd0a8338716adfee71505277d8562dabd48be9bf15620c38b15c8c404e"
+  license "Apache-2.0"
+  revision 1
 
-  bottle do
-    rebuild 1
-    sha256 cellar: :any,                 arm64_sonoma:   "8e14b1f28eb40350b2f337bd468a4a3971dbfab55ef04c5bc0d4732daf090913"
-    sha256 cellar: :any,                 arm64_ventura:  "c5378bb8f0183650512e47377197a74d7603a8f05c6d6e27cc1c67cbc478b524"
-    sha256 cellar: :any,                 arm64_monterey: "bad60b2c29b968a05b7c9f7cc7a7d3350bb0dfd831e9f788d2eb1a102dd6403b"
-    sha256 cellar: :any,                 arm64_big_sur:  "8cac09b69356887a31f4d2314b9eb7a193ad21858b0cc43ade7d48a485e4b55d"
-    sha256 cellar: :any,                 sonoma:         "38e83f4dabe638b27c003cbf55df8d39bb930497bb6966727524dfdae0e53380"
-    sha256 cellar: :any,                 ventura:        "dda2e7f7f7aedfd6bb1dccff1a489c0787b8e2b2680969e57525db9c3ba04b8f"
-    sha256 cellar: :any,                 monterey:       "45c56570de4b909b5d145bb2f6cb83ef3852d2076150e6d96432c44ed3441f2e"
-    sha256 cellar: :any,                 big_sur:        "cdf3b3105f0207ddea3f5b0ba458b650cab22b1ac3db85896631ec5304cc5bf1"
-    sha256 cellar: :any,                 catalina:       "dc0a238f67280d9e15e50bc7064669f1715170c9a59d608537ed195801db0c9e"
-    sha256 cellar: :any,                 mojave:         "a3b11300d427959a0ca8aa908d6c43369a8c17889a63f56d7772c6c4fdaeee04"
-    sha256 cellar: :any,                 high_sierra:    "d223eaa3a2f821d24b5f3b5486494a1a029f96e1640d4fe6f3633e6ad53e14a9"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "ed4b46bd3f62ab26bbb0407019c2989448d3b9df0680ebb87266bdbfe5b3e9c9"
+  livecheck do
+    url "https://raw.githubusercontent.com/mhulden/foma/refs/heads/master/foma/CHANGELOG"
+    regex(/v?(\d+(?:\.\d+)+)/i)
   end
 
-  uses_from_macos "zlib"
+  bottle do
+    sha256 cellar: :any,                 arm64_tahoe:   "585a4ed242e82fa06b31fffea4747c3dcfb370d15b774ee2c099e89352494185"
+    sha256 cellar: :any,                 arm64_sequoia: "54a82aed63a09cf0195f9473699e03bb64873b524684a4bab75eba204f80a97a"
+    sha256 cellar: :any,                 arm64_sonoma:  "bc850a65c0df114711be58efc04e36402297f4f2df1a1c6ae2c303ab35bd80e4"
+    sha256 cellar: :any,                 sonoma:        "20e9102b4df0a214b23c3eb5cd1d8b5e8d485b46c77e6e6913086889ac98f0c4"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "2fda34fa0f539af95305f663109e71bc25f679d9fa0712298c6b2785bdf94293"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "3d226105516d5b70e4981e53bb1fac0d8d7d61ba4fbae352c76c2f2223263f1f"
+  end
+
+  depends_on "bison" => :build # requires Bison 3.0+
+  depends_on "cmake" => :build
+  depends_on "pkgconf" => :build
+
+  uses_from_macos "flex" => :build
 
   on_linux do
     depends_on "readline"
+    depends_on "zlib-ng-compat"
   end
 
   conflicts_with "freeling", because: "freeling ships its own copy of foma"
 
   def install
-    system "make"
-    system "make", "install", "prefix=#{prefix}"
+    system "cmake", "-S", "foma", "-B", "build", *std_cmake_args
+    system "cmake", "--build", "build"
+    system "cmake", "--install", "build"
   end
 
   test do
-    # Source: https://code.google.com/p/foma/wiki/ExampleScripts
+    # Source: https://code.google.com/archive/p/foma/wikis/ExampleScripts.wiki
     (testpath/"toysyllabify.script").write <<~EOS
       define V [a|e|i|o|u];
       define Gli [w|y];

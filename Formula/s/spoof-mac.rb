@@ -10,16 +10,11 @@ class SpoofMac < Formula
   head "https://github.com/feross/SpoofMAC.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "896dfbb0ecd231f39803a2613f6f8e957ba51678726d05bd18ffaf6bc37889cb"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "69b5b283ac01d458293d93788dea4acde6975b4e6cd88a6d18deb9692b2c1024"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "c6cc086a652071944e7bd0c49a2a02b9d72d825c3c88f5481b4e2c63a48b0658"
-    sha256 cellar: :any_skip_relocation, sonoma:         "3caff99ef4a85c18d5826a9323105a2b1cf3ae70ac53a874353382a713cd7c81"
-    sha256 cellar: :any_skip_relocation, ventura:        "649cec73533c1ee598190d0693fc85fcc2d2fdb1452038531da1d5a6f4299737"
-    sha256 cellar: :any_skip_relocation, monterey:       "a1bbf8d8fc4cfa12a86f3154c114d46f6909e153a550c1893b74c8a261a03dc2"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "a0f5dbc8a9ae8952a603b6252c4eaa2f12819da4cd96a0033958bd71811920d6"
+    rebuild 2
+    sha256 cellar: :any_skip_relocation, all: "5e718f8027feceaf1fa8499fafc6e5638107ef2ed128b41d4c7467d3a824b65c"
   end
 
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   on_linux do
     depends_on "net-tools"
@@ -52,8 +47,8 @@ class SpoofMac < Formula
   service do
     run [opt_bin/"spoof-mac", "randomize", "en0"]
     require_root true
-    log_path "/dev/null"
-    error_log_path "/dev/null"
+    log_path File::NULL
+    error_log_path File::NULL
   end
 
   test do

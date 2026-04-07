@@ -1,9 +1,9 @@
 class Plzip < Formula
   desc "Data compressor"
   homepage "https://www.nongnu.org/lzip/plzip.html"
-  url "https://download.savannah.gnu.org/releases/lzip/plzip/plzip-1.11.tar.gz"
-  mirror "https://download-mirror.savannah.gnu.org/releases/lzip/plzip/plzip-1.11.tar.gz"
-  sha256 "d8e3cbe45c9222383339130e1bcc6e5e884d776b63f188896e6df67bc1d5626b"
+  url "https://download.savannah.gnu.org/releases/lzip/plzip/plzip-1.13.tar.gz"
+  mirror "https://download-mirror.savannah.gnu.org/releases/lzip/plzip/plzip-1.13.tar.gz"
+  sha256 "64d49dde20daa5fdff2b3ff28e3348082de10dd54eb10df6da7d1bc6c7a6db64"
   license "GPL-2.0-or-later"
 
   livecheck do
@@ -12,18 +12,31 @@ class Plzip < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "c7ed4608e48fc82bb1570ada081e9e425f4c51ec37dc40cf78599b610a3ff9fe"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "5fd52379b6800e5a8040a4586069dc837b4e902cf31e98c212ea341579e48a3b"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "80f66ad184dcd6b079d226119667004ca63c877a9227c781988826bd4fbee76c"
-    sha256 cellar: :any_skip_relocation, sonoma:         "8a007f3feecd82329c6c76e230c3686d8a174d9028860e0dd3edf03fac07ba68"
-    sha256 cellar: :any_skip_relocation, ventura:        "0d5589eed9ac420cab422f50a22f4b48f8ad70e06b948367e208db5ebf90ce51"
-    sha256 cellar: :any_skip_relocation, monterey:       "f25f2b228adb941a62a793f5542c14cdbd03defabac4e57fb5233cb3a92b3937"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "523c2e22ef52117ff7eaa2d12f6e8d374d5f8cf39897a47df3e71e78fb32a85a"
+    sha256 cellar: :any,                 arm64_tahoe:   "7e9a39d0c7a76d4dfc59bf8c4a57ef23f7fc5dec279cfbda606ab6d29c4ee524"
+    sha256 cellar: :any,                 arm64_sequoia: "a359a880525cbbdecf7b43d17beb3063e4d143708739cc656fc55d51799fbb43"
+    sha256 cellar: :any,                 arm64_sonoma:  "bc9d8f45b2c08cd119591fe7c2238d4f943eaa70f6abc269d6c58d26439a4e98"
+    sha256 cellar: :any,                 sonoma:        "9a63b775274a845dc0ef78d08c50dc1f8888892067da217c7b8ece851b3fb408"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "53d5184e928ac968868bb2cb8cf1c490cacc9e1761f68810285d9b05d3f8cfef"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "57747a3638e54f01df731df623f5f63495fbdfe219067a37cda1807e0ff665f6"
   end
 
   depends_on "lzlib"
 
+  on_sequoia :or_newer do
+    depends_on "gcc"
+
+    # Binaries created by Apple Clang 1700+ are broken
+    fails_with :clang do
+      cause "'make check' fails with '(stdin): Not enough memory'"
+    end
+  end
+
+  fails_with :llvm_clang do
+    cause "'make check' fails with '(stdin): Not enough memory'"
+  end
+
   def install
+    # Not an autotools configure script
     system "./configure", "--prefix=#{prefix}"
     system "make"
     system "make", "check"

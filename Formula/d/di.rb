@@ -1,27 +1,41 @@
 class Di < Formula
   desc "Advanced df-like disk information utility"
-  homepage "https://gentoo.com/di/"
-  url "https://downloads.sourceforge.net/project/diskinfo-di/di-4.53.tar.gz"
-  sha256 "00dd5befc11dac8d65a68b248fd34158a2e6a850c2e4e2ab77594c79aa01e83e"
+  homepage "https://diskinfo-di.sourceforge.io/"
+  url "https://downloads.sourceforge.net/project/diskinfo-di/di-6.2.2.2.tar.gz"
+  sha256 "19eeeb7ebcad3061ae7814cdae5593accfb2bb261ce24795a604a282cbfc60fe"
   license "Zlib"
 
+  # This only matches tarballs in the root directory, as a way of avoiding
+  # unstable versions in the `/beta` subdirectory.
   livecheck do
     url :stable
-    regex(%r{url=.*?/di[._-]v?(\d+(?:\.\d+)+)\.t}i)
+    regex(%r{url=.*?/files/di[._-]v?(\d+(?:\.\d+)+)\.t}i)
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "1cb85ef2ac8d49ae838f9dd1532429f21d3542ddbdc4afcb2fc0b16e8ac150c1"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "471a2eda35ef12e75e26d879eb314db261dc04991678281798a56f9054af0bac"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "1ff4f6e79db0371824b4a38d86529199a3133781e48df12d5b1d79e6b51f0dc5"
-    sha256 cellar: :any_skip_relocation, sonoma:         "809d81076eddeb2f405b12c0639fa56787aa15b8d7c4ac170991298fc431a1b9"
-    sha256 cellar: :any_skip_relocation, ventura:        "4bafb5d2d243a519eb48c23c9d319b50e88f6e7f6883f8da628a8000f9581cbb"
-    sha256 cellar: :any_skip_relocation, monterey:       "863bef6679888f9a1d44dde5e771953bc285a06baf3acc2ed05ea088313e2723"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "31a51f410bed3067152b6f8b6c23948e5f98398a774f183c987eaba0b4b27c20"
+    sha256 cellar: :any,                 arm64_tahoe:   "62d724a0e3eb3478b48eb8d94c7ba89f3b72e4675f75d523177e7a18a6b37516"
+    sha256 cellar: :any,                 arm64_sequoia: "b0f9ecb8b5537a0b5ab09b4b8cf6dedd3001113f48c220873d9ff4331fe59ce5"
+    sha256 cellar: :any,                 arm64_sonoma:  "56bb403fea87acd0e51c543d2d68c5ce7188abe0c5f9f3a571518d797a7ce7e0"
+    sha256 cellar: :any,                 sonoma:        "004ef54b06af5aaedd8a6884719e64ce765d565e42fa012fda3408d1af69d3fd"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "8a5589a65efc777ac948a4c538bdd867516b9f173cebb3701fc8cd80526c1a7b"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "57ad47925b5cb2b800c1c540469598c1fde34be1aa3de30790292999af5fb8e1"
   end
 
+  depends_on "cmake" => :build
+  depends_on "pkgconf" => :build
+
   def install
-    system "make", "install", "prefix=#{prefix}"
+    args = %W[
+      -DDI_BUILD=Release
+      -DDI_VERSION=#{version}
+      -DDI_LIBVERSION=#{version}
+      -DDI_SOVERSION=#{version.major}
+      -DDI_RELEASE_STATUS=production
+    ]
+
+    system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
+    system "cmake", "--build", "build"
+    system "cmake", "--install", "build"
   end
 
   test do

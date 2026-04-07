@@ -1,23 +1,20 @@
-require "language/perl"
-
 class SqlTranslator < Formula
-  include Language::Perl::Shebang
-
   desc "Manipulate structured data definitions (SQL and more)"
   homepage "https://github.com/dbsrgits/sql-translator/"
   url "https://cpan.metacpan.org/authors/id/I/IL/ILMARI/SQL-Translator-1.62.tar.gz"
   sha256 "0acd4ff9ac3a2f8d5d67199aac02cdc127e03888e479c51c7bbdc21b85c1ce24"
   license any_of: ["Artistic-1.0-Perl", "GPL-1.0-or-later"]
-  revision 2
+  revision 4
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "78517f7f8c11b9e601ed833b1d9d150504bf1025593cc5118eb28b8aca635395"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "a9130885a44e325a2bac38b12376f2256999c29ec25ebe9c68205abadfd6626b"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "a9130885a44e325a2bac38b12376f2256999c29ec25ebe9c68205abadfd6626b"
-    sha256 cellar: :any_skip_relocation, sonoma:         "abfe61301d558ba8458966977b541d98287ee8eb61f7f2561a4b82aa93ba40b9"
-    sha256 cellar: :any_skip_relocation, ventura:        "4c2d1a17220491814d9cb9e728b17c78f1ed7de30403d956f612dc95e25d3221"
-    sha256 cellar: :any_skip_relocation, monterey:       "4c2d1a17220491814d9cb9e728b17c78f1ed7de30403d956f612dc95e25d3221"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "9e6eb190aaf0e23c87a415f8794c292bf9443b6d8c65ada6736693392fe74608"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "6619655ae2fdbbcc5c2213ab55e2ffd0f45d964cf1f9eb1bef7db81e87e76b4e"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "6619655ae2fdbbcc5c2213ab55e2ffd0f45d964cf1f9eb1bef7db81e87e76b4e"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "6619655ae2fdbbcc5c2213ab55e2ffd0f45d964cf1f9eb1bef7db81e87e76b4e"
+    sha256 cellar: :any_skip_relocation, tahoe:         "d66c552719a802570cc86bdbb667d0ec83c215b3e68dc3584e76a98cf0e3f245"
+    sha256 cellar: :any_skip_relocation, sequoia:       "d66c552719a802570cc86bdbb667d0ec83c215b3e68dc3584e76a98cf0e3f245"
+    sha256 cellar: :any_skip_relocation, sonoma:        "d66c552719a802570cc86bdbb667d0ec83c215b3e68dc3584e76a98cf0e3f245"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "df14d63cd54e55fb81d663546e14f38ba6c58a49de115302d9dcd960b21f1ef3"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "546f4079d19414f1b7fe9851c12f2b846e44869b6c9d4b44f600eea2a6c92a96"
   end
 
   uses_from_macos "perl"
@@ -107,23 +104,18 @@ class SqlTranslator < Formula
                                   "INSTALLSITEMAN3DIR=#{man3}"
     system "make", "install"
 
-    # Disable dynamic selection of perl which may cause segfault when an
-    # incompatible perl is picked up.
-    # https://github.com/Homebrew/homebrew-core/issues/4936
-    rewrite_shebang detected_perl_shebang, *bin.children
-
     bin.env_script_all_files libexec/"bin", PERL5LIB: ENV["PERL5LIB"]
   end
 
   test do
     command = "#{bin}/sqlt -f MySQL -t PostgreSQL --no-comments -"
     sql_input = "create table sqlt ( id int AUTO_INCREMENT );"
-    sql_output = <<~EOS
+    sql_output = <<~SQL
       CREATE TABLE "sqlt" (
         "id" serial
       );
 
-    EOS
+    SQL
     assert_equal sql_output, pipe_output(command, sql_input)
   end
 end

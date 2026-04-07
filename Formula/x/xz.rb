@@ -1,26 +1,26 @@
 class Xz < Formula
   desc "General-purpose data compression with high compression ratio"
   homepage "https://tukaani.org/xz/"
-  # The archive.org mirror below needs to be manually created at `archive.org`.
-  url "https://github.com/tukaani-project/xz/releases/download/v5.6.2/xz-5.6.2.tar.gz"
-  mirror "https://downloads.sourceforge.net/project/lzmautils/xz-5.6.2.tar.gz"
-  mirror "https://archive.org/download/xz-5.6.2.tar/xz-5.6.2.tar.gz"
-  mirror "http://archive.org/download/xz-5.6.2.tar/xz-5.6.2.tar.gz"
-  sha256 "8bfd20c0e1d86f0402f2497cfa71c6ab62d4cd35fd704276e3140bfb71414519"
+  url "https://github.com/tukaani-project/xz/releases/download/v5.8.3/xz-5.8.3.tar.gz"
+  mirror "https://downloads.sourceforge.net/project/lzmautils/xz-5.8.3.tar.gz"
+  mirror "http://downloads.sourceforge.net/project/lzmautils/xz-5.8.3.tar.gz"
+  sha256 "3d3a1b973af218114f4f889bbaa2f4c037deaae0c8e815eec381c3d546b974a0"
   license all_of: [
     "0BSD",
     "GPL-2.0-or-later",
   ]
   version_scheme 1
+  compatibility_version 1
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "5ec389ac6a0b190914be00c62d2de0a18265c39d1243420d08841afea16ff7f9"
-    sha256 cellar: :any,                 arm64_ventura:  "102957fe805b6182ed63b96ccf7eb027032867f318348b045a7b7cedf3534a2f"
-    sha256 cellar: :any,                 arm64_monterey: "e45fcf2977a8541a97f7efef3ccbc0fc782c597b3c340616ada6868e7cf31452"
-    sha256 cellar: :any,                 sonoma:         "b940be1e4e0492a9000c11ba2b23d4c57f0f9870c8535acfe149370a82bf73e4"
-    sha256 cellar: :any,                 ventura:        "1f1b9f77e5e1938c2702db2834c0fa856d0134fa8ea14c1ab979dadda2952043"
-    sha256 cellar: :any,                 monterey:       "4eb1665050b038767bf09f561882b5c9b51233d6738b81427e262deaac2b3c1a"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "ab97999c22de61b2efa61c2a3f62d28085ce3f15601035955e41b8d783b89725"
+    sha256 cellar: :any,                 arm64_tahoe:   "55c891f5d47142fe923c87df0e3343d7ef2bc7d368c67892b4ad2c80e53069d5"
+    sha256 cellar: :any,                 arm64_sequoia: "c4be907ac8459f8b3e764c06287cc88b79c1d5c16a2db1c0335e1facf4fd4dbe"
+    sha256 cellar: :any,                 arm64_sonoma:  "0a6e40dbeea3358a1277f347ef9b892070096a79a81cda90edfedbfe721c4ba3"
+    sha256 cellar: :any,                 tahoe:         "df5011c2bf8ce426cd62fcd0b849268511cfdbf71331f7eaa07bf790bcf93a0f"
+    sha256 cellar: :any,                 sequoia:       "be9bd234f1e9ec28b25cd8ce0850ea841751cd337dffd6f104432c57cdc32c78"
+    sha256 cellar: :any,                 sonoma:        "fcd2df6962b5b94ef14232d02df71ee0b329482c2d8478942e07287f016ebe73"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "18d983dde14681d8403f46f7fc1a5b743b98b0fa84e3cf4b07153709847a71f9"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "61032fd340234974371a87c9908c998d9a52bebdf056b83e629ebf7aa038840f"
   end
 
   deny_network_access! [:build, :postinstall]
@@ -38,7 +38,7 @@ class Xz < Formula
 
     # compress: data.txt -> data.txt.xz
     system bin/"xz", path
-    refute_predicate path, :exist?
+    refute_path_exists path
 
     # decompress: data.txt.xz -> data.txt
     system bin/"xz", "-d", "#{path}.xz"
@@ -50,7 +50,9 @@ class Xz < Formula
       next if mirror.start_with?("https")
 
       xz_tar.unlink if xz_tar.exist?
-      system "curl", "--location", mirror, "--output", xz_tar
+
+      # Set fake CA Cert to block any HTTPS redirects.
+      system "curl", "--location", mirror, "--cacert", "/fake", "--output", xz_tar
       assert_equal stable.checksum.hexdigest, xz_tar.sha256
     end
   end

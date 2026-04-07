@@ -1,9 +1,10 @@
 class Chafa < Formula
   desc "Versatile and fast Unicode/ASCII/ANSI graphics renderer"
   homepage "https://hpjansson.org/chafa/"
-  url "https://hpjansson.org/chafa/releases/chafa-1.14.2.tar.xz"
-  sha256 "8a28d308074e25597e21bf280747461ac695ae715f2f327eb0e0f0435967f8b3"
+  url "https://hpjansson.org/chafa/releases/chafa-1.18.1.tar.xz"
+  sha256 "e75a9772444247a70178cdd238b522d35c613dfb6f3a3bf516457958109e9910"
   license "LGPL-3.0-or-later"
+  compatibility_version 1
 
   livecheck do
     url "https://hpjansson.org/chafa/releases/?C=M&O=D"
@@ -11,20 +12,28 @@ class Chafa < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "a4d628175d8e1370d2c029725ca5dfed28ae8557202a05921a09ff4a8d36695c"
-    sha256 cellar: :any,                 arm64_ventura:  "e9559f683e16db079084e8f2e07b8b7935f669eac0a83cf3133c368ed33cdf53"
-    sha256 cellar: :any,                 arm64_monterey: "efd04351d4046b6ffbd52893186127f8f373fe4b781fb0c127161bfe9169f22c"
-    sha256 cellar: :any,                 sonoma:         "684159ed9101150b5612f7e2bc901cee76581b7882fb8531e93fd791b608256b"
-    sha256 cellar: :any,                 ventura:        "a3275323cdbbe2c74381636c1441d153cd06bc8cb4a197ee68c80312a38d19af"
-    sha256 cellar: :any,                 monterey:       "592ffcf3776f9454f4f035da2b35624e64b553ff3eac4baa276e222851fd5c7f"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "c9013544016acf877bb9d6c346ba0ea9c79ce8107e54788dfd6e098342cad2ca"
+    sha256 cellar: :any,                 arm64_tahoe:   "8481084fe39e9971a49c4e1aa094c161230de635d53afb45e07e25a21b654cb5"
+    sha256 cellar: :any,                 arm64_sequoia: "0dcd125a55d77500044cdeff708777e60229d8120c85fed9186bb2194a51a8bf"
+    sha256 cellar: :any,                 arm64_sonoma:  "41113fa3f691c936a3805e7cc9cd00b860d50dbbbe2ad7bb65074425d592254b"
+    sha256 cellar: :any,                 sonoma:        "c4cc89aed4c4637d304044c4f44bc8a761f348dedad467a955d22b98bf6628a2"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "04eeb0c26b507b7b9c6b71c46f1aa92f03ee255cf52a78eef07926c64b867b57"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "356f1d9486e4e1a759490d85492e7eda81262ac3e36299bc1d8724c98ac98b73"
   end
 
-  depends_on "pkg-config" => :build
+  head do
+    url "https://github.com/hpjansson/chafa.git", branch: "master"
+    depends_on "autoconf" => :build
+    depends_on "automake" => :build
+    depends_on "libtool" => :build
+  end
+
+  depends_on "pkgconf" => :build
   depends_on "cairo"
   depends_on "freetype"
   depends_on "glib"
   depends_on "jpeg-turbo"
+  depends_on "jpeg-xl"
+  depends_on "libavif"
   depends_on "librsvg"
   depends_on "libtiff"
   depends_on "webp"
@@ -35,15 +44,16 @@ class Chafa < Formula
   end
 
   def install
+    with_env(NOCONFIGURE: "1") { system "./autogen.sh" } if build.head?
     system "./configure", "--disable-silent-rules", *std_configure_args
     system "make", "install"
-    man1.install "docs/chafa.1"
+    man1.install "docs/chafa.1" if build.stable?
   end
 
   test do
     output = shell_output("#{bin}/chafa #{test_fixtures("test.png")}")
     assert_equal 3, output.lines.count
     output = shell_output("#{bin}/chafa --version")
-    assert_match(/Loaders:.* JPEG.* SVG.* TIFF.* WebP/, output)
+    assert_match(/Loaders:.* AVIF.* JPEG.* JXL.* SVG.* TIFF.* WebP/, output)
   end
 end

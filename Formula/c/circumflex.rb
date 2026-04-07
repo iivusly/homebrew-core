@@ -1,32 +1,37 @@
 class Circumflex < Formula
   desc "Hacker News in your terminal"
   homepage "https://github.com/bensadeh/circumflex"
-  url "https://github.com/bensadeh/circumflex/archive/refs/tags/3.7.tar.gz"
-  sha256 "421cb4757fe15b7d403a7ae5ef70c0fa283ee445b957f1689d68eaece1947dcc"
-  license "AGPL-3.0-only"
+  url "https://github.com/bensadeh/circumflex/archive/refs/tags/4.0.tar.gz"
+  sha256 "48799d929afb0b4d0b2bca57ce7919eebd5ff11227f49fd851adf20a1689113a"
+  license "MIT"
+  head "https://github.com/bensadeh/circumflex.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "cb7300a1adcecca4c7f342b5b2b80fd77f4738ee8ba837898cc9371a29f175bd"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "7a8c39cad6212319001b92f719cd052aa61296e2d979391430d5dcdaeaeddad0"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "9f533af5000f818611a7934c749f7171e7e317bcdf216f18508c38c8973920c3"
-    sha256 cellar: :any_skip_relocation, sonoma:         "b0d39d9faccabd8fed803f3c69ed479672e15c28b61ef2e5af12349ae070a408"
-    sha256 cellar: :any_skip_relocation, ventura:        "4f9f2bf56d39d6e5e9478c051b07fdf686da2a688746dc1b2f0a4e496db49d2b"
-    sha256 cellar: :any_skip_relocation, monterey:       "6e28a94198ffb94ed0cf2c4bdd9f8187d7c77297b7d25e08857d85157dbb29a8"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "4b25b51f2bbf9a19b8df483220000d0244b6dbbafc9b1908f02982b549aac625"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "f221aab5645f12b7d8187a21881906aabfdaa7e11c13e6facd5baea0c804b889"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "f221aab5645f12b7d8187a21881906aabfdaa7e11c13e6facd5baea0c804b889"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "f221aab5645f12b7d8187a21881906aabfdaa7e11c13e6facd5baea0c804b889"
+    sha256 cellar: :any_skip_relocation, sonoma:        "98082abc7cbc19c8a3de2069320459d7ca20c9004fb29ad3f986d02c3ff450ce"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "47da3ca485277ef48e64a67b4cdd45e657e2d44f4b84943a39b9f07027ed7d3f"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "78f6ce73a62d0763a860bd1530dd8e590e6b2405892444fc338278711fd47891"
   end
 
   depends_on "go" => :build
   depends_on "less"
 
   def install
-    system "go", "build", *std_go_args(output: bin/"clx", ldflags: "-s -w")
+    system "go", "build", *std_go_args(output: bin/"clx", ldflags: "-s -w"), "./cmd/clx"
     man1.install "share/man/clx.1"
   end
 
   test do
-    assert_match "List of visited IDs cleared", shell_output("#{bin}/clx clear 2>&1")
-    return if OS.linux? && ENV["HOMEBREW_GITHUB_ACTIONS"].present?
+    ENV["XDG_CONFIG_HOME"] = testpath/".config"
+    config_home = if OS.mac?
+      testpath/"Library/Application Support"
+    else
+      testpath/".config"
+    end
 
-    assert_match "Y Combinator", shell_output("#{bin}/clx article 1")
+    assert_match "Item added to favorites", shell_output("#{bin}/clx add 1")
+    assert_path_exists config_home/"circumflex/favorites.json"
   end
 end

@@ -1,40 +1,36 @@
 class Gkrellm < Formula
   desc "Extensible GTK system monitoring application"
   homepage "https://billw2.github.io/gkrellm/gkrellm.html"
-  url "http://gkrellm.srcbox.net/releases/gkrellm-2.3.11.tar.bz2"
-  sha256 "1ee0643ed9ed99f88c1504c89d9ccb20780cf29319c904b68e80a8e7c8678c06"
+  url "https://gkrellm.srcbox.net/releases/gkrellm-2.5.1.tar.bz2"
+  sha256 "089e3c1ed398482e682c9900b504ea166a6144a6c9fa041e70c5bbca6b177e63"
   license "GPL-3.0-or-later"
-  revision 4
 
   livecheck do
-    url "http://gkrellm.srcbox.net/releases/"
+    url "https://gkrellm.srcbox.net/releases/"
     regex(/href=.*?gkrellm[._-]v?(\d+(?:\.\d+)+)\.t/i)
   end
 
   bottle do
-    sha256 arm64_sonoma:   "993ebbc08b5ec357975352c9a128735a459e5e844d45502fc47179f2ffbb70e7"
-    sha256 arm64_ventura:  "b76e8a47e234dcaddce425c0c01250bd5055de84de83428e1035e7545fa59eeb"
-    sha256 arm64_monterey: "cffde5aecac4ab95199a6a127eefa70248eea91eab2e3eb48f67b808e8094bd1"
-    sha256 sonoma:         "2fd34cbbdb66f96ab134190c082ad04c14bd82a93a972f0cf5ad01636d71cda3"
-    sha256 ventura:        "39828a1b0aa6586591195d1b7175a9a127abf4ed13e6a22094410f88ed05da7c"
-    sha256 monterey:       "ac1bdf3dcd6745101eb07b106acd4ae64d7e68ea27307dfc7033d1915f8af74d"
-    sha256 x86_64_linux:   "8d8b012ba597fb48d4a205aecfff14230f67053b25a504e64945378fa3331fd4"
+    sha256 arm64_tahoe:   "936a8c81763c7bec55bff88e4191b3c550629ea638728b94924ad7548a52f663"
+    sha256 arm64_sequoia: "cf13c52a8564497ea6b470048141efec9afad5fe0173982a1a8e8d7f6e6211eb"
+    sha256 arm64_sonoma:  "c2113a61b119137b16dcc32073cfbca1851e8def91cf7a7588628e01cb29d5b6"
+    sha256 sonoma:        "5580325f07672b8271d4dfd69a7018e9d6b242a695fc4f62903479cd83ab120b"
+    sha256 arm64_linux:   "29063e4bc0c06e3e6c1328fad75f9f1a5061a1d66d41bfcbe16a7faa91136817"
+    sha256 x86_64_linux:  "f3d9b23caf99e6749de17b505878868a235bb4e7cca6143470c32335a6a1fe7a"
   end
 
-  depends_on "pkg-config" => :build
-  depends_on "at-spi2-core"
-  depends_on "cairo"
-  depends_on "fontconfig"
-  depends_on "freetype"
+  depends_on "gettext" => :build
+  depends_on "meson" => :build
+  depends_on "ninja" => :build
+  depends_on "pkgconf" => :build
   depends_on "gdk-pixbuf"
-  depends_on "gettext"
   depends_on "glib"
   depends_on "gtk+" # GTK3 issue: https://git.srcbox.net/gkrellm/gkrellm/issues/1
   depends_on "openssl@3"
   depends_on "pango"
 
   on_macos do
-    depends_on "harfbuzz"
+    depends_on "gettext"
   end
 
   on_linux do
@@ -44,20 +40,18 @@ class Gkrellm < Formula
   end
 
   def install
-    args = ["INSTALLROOT=#{prefix}"]
-    args << "macosx" if OS.mac?
-    system "make", *args
-    system "make", "INSTALLROOT=#{prefix}", "install"
+    args = []
+    args << "-Dx11=disabled" if OS.mac?
+    system "meson", "setup", "build", *args, *std_meson_args
+    system "meson", "compile", "-C", "build", "--verbose"
+    system "meson", "install", "-C", "build"
   end
 
   test do
-    pid = fork do
-      exec "#{bin}/gkrellmd --pidfile #{testpath}/test.pid"
-    end
-    sleep 2
-
+    pid = spawn "#{bin}/gkrellmd --pidfile #{testpath}/test.pid"
     begin
-      assert_predicate testpath/"test.pid", :exist?
+      sleep 2
+      assert_path_exists testpath/"test.pid"
     ensure
       Process.kill "SIGINT", pid
       Process.wait pid

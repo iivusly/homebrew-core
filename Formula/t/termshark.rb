@@ -6,6 +6,8 @@ class Termshark < Formula
   license "MIT"
 
   bottle do
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:    "4d25d6397d1fd6a69180bb90da9b2278d6e17b25db52493e8264ca61f5c75403"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia:  "a0c4f19d16204de97425576057c2ac0d841a78bb26981703c919ed102e104982"
     sha256 cellar: :any_skip_relocation, arm64_sonoma:   "097ad857907c26ef893a9f0863fbe6d21d49d5015068c3bc981f0c7a522ba52f"
     sha256 cellar: :any_skip_relocation, arm64_ventura:  "11cf99e534c667d968ea4daff6c3baf9a86345a6823627ad722398e5c5daeedd"
     sha256 cellar: :any_skip_relocation, arm64_monterey: "37948c9f61f945ad6044eb03753da35bf735a2ef0599c21ee957c24c6549e670"
@@ -15,23 +17,20 @@ class Termshark < Formula
     sha256 cellar: :any_skip_relocation, monterey:       "b22556c8b7777479e5a36c5c8abb9fbcff1e2774feb96383533ece79da6a5a6d"
     sha256 cellar: :any_skip_relocation, big_sur:        "8b19aa1bd9d176bb52410f2751fd3877e22a8d4ba21ee7cccd93d08ef32c8653"
     sha256 cellar: :any_skip_relocation, catalina:       "ce2586a94ccbc846b9d825e48dfec76e3aec711315564b01db2d87d9643a03b8"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "0c4b0b7dd2e10d91bcf7fb4a64b436f5e54ad0e00d7f68d02102a5ab0cbb1be7"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "69ee110ad437376b219f4aaa960818850be8e28868c8a0dc3ceff715849c8b1f"
   end
+
+  # https://github.com/gcla/termshark/issues/167
+  deprecate! date: "2025-01-03", because: :unmaintained
+  disable! date: "2026-01-03", because: :unmaintained
 
   depends_on "go" => :build
   depends_on "socat" => :test
   depends_on "wireshark"
 
   def install
-    # Don't set GOPATH because we want to build using go modules to
-    # ensure our dependencies are the ones specified in go.mod.
-    mkdir_p buildpath
-    ln_sf buildpath, buildpath/"termshark"
-
-    cd "termshark" do
-      system "go", "build", "-o", bin/"termshark",
-             "cmd/termshark/termshark.go"
-    end
+    system "go", "build", *std_go_args(ldflags: "-s -w"), "./cmd/termshark"
   end
 
   test do

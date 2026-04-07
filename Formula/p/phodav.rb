@@ -4,21 +4,21 @@ class Phodav < Formula
   url "https://download.gnome.org/sources/phodav/3.0/phodav-3.0.tar.xz"
   sha256 "392ec2d06d50300dcff1ef269a2a985304e29bce3520002fca29f2edc1d138d1"
   license "LGPL-2.1-only"
+  revision 1
   head "https://gitlab.gnome.org/GNOME/phodav.git", branch: "master"
 
   bottle do
-    sha256 arm64_sonoma:   "e71f34ceed2c0b5ac310099aa989f2899c3d6b8a2c135aca3898e112e737437a"
-    sha256 arm64_ventura:  "7f62bb9ee32a97be3e81f9fa437e60de55e25ac8b33fcc3a90862616afcbd3cc"
-    sha256 arm64_monterey: "84935f58bd6529731b3f854f3afccb7abd495b4545fd753a0414d1352586faad"
-    sha256 sonoma:         "19bda4a63bf2f2778e6cb01121f7965c50ac94c839e933e9637a46155315bc32"
-    sha256 ventura:        "4645f36c79e05c30cafcefba89de8be68e8af11049ed95c11876f0555200b59a"
-    sha256 monterey:       "6b4b21ff80701f00e1b0bad840a6364cdb4b2a69e4d26b1762a0caadd03b3deb"
-    sha256 x86_64_linux:   "bf36f39b43b04e8d0dafba15e623f7fb0a7e8873dcd2286a1dc7d62587fa0938"
+    sha256 arm64_tahoe:   "f1192115b21287b4a91568fa9257b8db536bb3529471c9fcf09da51f43408206"
+    sha256 arm64_sequoia: "275e604708cdfcd2d5468532bd3ae37c7fc914f913ae2923b5c10b05d9ccab89"
+    sha256 arm64_sonoma:  "2164243dc4377c2624727447888926105498bb67bce02636811d5488bf9438dd"
+    sha256 sonoma:        "1b958681dab50441f112f3cc754f79f2f7f3a7766af6b5a85318a64d3692b5ad"
+    sha256 arm64_linux:   "5d8943c4e2ebdf97363b6d5efc2d000debf452fd8d6614efba08e6ce05a2501c"
+    sha256 x86_64_linux:  "44add3c66eabacd501c955a9ec7e41dc7c966b6abbf74df01d533bf1c25f2e69"
   end
 
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => [:build, :test]
+  depends_on "pkgconf" => [:build, :test]
 
   depends_on "glib"
   depends_on "libsoup"
@@ -36,7 +36,7 @@ class Phodav < Formula
   end
 
   test do
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include <libphodav/phodav.h>
       #include <glib.h>
       int main() {
@@ -57,10 +57,10 @@ class Phodav < Formula
         g_object_unref(phodav);
         return 0;
       }
-    EOS
+    CPP
 
     ENV.prepend_path "PKG_CONFIG_PATH", Formula["icu4c"].lib/"pkgconfig" if OS.mac?
-    flags = shell_output("pkg-config --libs --cflags libphodav-3.0").chomp.split
+    flags = shell_output("pkgconf --libs --cflags libphodav-3.0").chomp.split
     system ENV.cc, "test.cpp", "-o", "test", *flags
     system "./test"
   end

@@ -1,8 +1,8 @@
 class Crowdin < Formula
   desc "Command-line tool that allows to manage your resources with crowdin.com"
   homepage "https://support.crowdin.com/cli-tool/"
-  url "https://github.com/crowdin/crowdin-cli/releases/download/4.1.1/crowdin-cli.zip"
-  sha256 "129446127f9cb5e16de2d9fbd1bc9c22b2088e4f9950eda7e522b5e0773642ad"
+  url "https://github.com/crowdin/crowdin-cli/releases/download/4.14.1/crowdin-cli.zip"
+  sha256 "ce5a2e65cec3b4c6131e20ce2d20ad6b010a4cc38a82a25ed35822791c5e8852"
   license "MIT"
 
   livecheck do
@@ -11,8 +11,7 @@ class Crowdin < Formula
   end
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, all: "387268f108387a25943f9b5fe79e991deba63e372aa5c2a62e627613bf7a88b0"
+    sha256 cellar: :any_skip_relocation, all: "34ea087ac5bbbd85814a6dce4e6121d819c85c2bc4b48770a58294aeac4ac245"
   end
 
   depends_on "openjdk"
@@ -23,7 +22,7 @@ class Crowdin < Formula
   end
 
   test do
-    (testpath/"crowdin.yml").write <<~EOS
+    (testpath/"crowdin.yml").write <<~YAML
       "project_id": "12"
       "api_token": "54e01--your-personal-token--2724a"
       "base_path": "."
@@ -37,7 +36,7 @@ class Crowdin < Formula
           "translation" : "/%two_letters_code%/%original_file_name%"
         }
       ]
-    EOS
+    YAML
 
     system bin/"crowdin", "init"
 

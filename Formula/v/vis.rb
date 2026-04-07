@@ -4,27 +4,34 @@ class Vis < Formula
   url "https://github.com/martanne/vis/archive/refs/tags/v0.9.tar.gz"
   sha256 "bd37ffba5535e665c1e883c25ba5f4e3307569b6d392c60f3c7d5dedd2efcfca"
   license "ISC"
+  revision 1
   head "https://github.com/martanne/vis.git", branch: "master"
 
   bottle do
-    sha256 arm64_sonoma:   "04a4e8d45b5442ffb3397012eccde1c747b249ae42e8468b24d557dd15ea6081"
-    sha256 arm64_ventura:  "ce1c6d2521a9ab11b32316850690289887a739b2b88a9809b1678682b586fc26"
-    sha256 arm64_monterey: "aeb76e19c965bce4434207059279cae63e30be3e51e933bee8ff52f579b8035d"
-    sha256 sonoma:         "77bfde98fc76bf93d057923482bd1e9b3d538ef8c3875f4b9b579a63cbb75d22"
-    sha256 ventura:        "b27829afe0c6cbb2792f3340ac3605caa16c68677764a1c586879f5387064ca4"
-    sha256 monterey:       "30d9272d1e6e00b8b87c61157e157df124a32c265d4f8befc52df8ac8e2545fb"
-    sha256 x86_64_linux:   "6f7e0f61479a8c931556361f8c0dd42a913211ddff0a8b8dfb6b2240f6fb2c6b"
+    sha256 arm64_tahoe:   "48f1f7959be85ddf700d6a18f71e5f1597a490e2679f81038aac4506c3f33472"
+    sha256 arm64_sequoia: "c4cff2af4d8434d9c01314c8020c3831b3047fe2868c33c31210fbe13ed74ce6"
+    sha256 arm64_sonoma:  "bd83067d95abd29e175739d0ccb942008d3a77e8af0fd005073c1bff33a1516c"
+    sha256 sonoma:        "a7460f4c478624d321fcbf3c5eb60d323481d485e5448b295893ece018c17fef"
+    sha256 arm64_linux:   "21494a89af0e59a06cdd78d618c4de6dbe67b2d38421efc88f7500320dfe7b8f"
+    sha256 x86_64_linux:  "9e56addec38aa4ab41947607ed671c38dfa96e4eb0323890579d87ee4aeae839"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "libtermkey"
   depends_on "lpeg"
-  depends_on "lua"
+  depends_on "lua@5.4" # https://github.com/martanne/vis/commit/b8fea9bcb14ea10e618c539c400139dd43d90e02
+  depends_on "tre"
 
   uses_from_macos "unzip" => :build
   uses_from_macos "ncurses"
 
+  on_linux do
+    depends_on "acl"
+  end
+
   def install
+    odie 'Switch to `depends_on "lua"`!' if build.stable? && version > "0.9"
+
     system "./configure", "--enable-lua", "--enable-lpeg-static=no", *std_configure_args
     system "make", "install"
 

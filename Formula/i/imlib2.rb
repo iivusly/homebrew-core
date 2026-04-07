@@ -1,21 +1,22 @@
 class Imlib2 < Formula
   desc "Image loading and rendering library"
   homepage "https://sourceforge.net/projects/enlightenment/"
-  url "https://downloads.sourceforge.net/project/enlightenment/imlib2-src/1.12.3/imlib2-1.12.3.tar.gz"
-  sha256 "544f789c7dfefbc81b5e82cd74dcd2be3847ae8ce253d402852f19a82f25186b"
+  url "https://downloads.sourceforge.net/project/enlightenment/imlib2-src/1.12.6/imlib2-1.12.6.tar.gz"
+  sha256 "59743ce82aefa9c1ec9476af608d541b74164714d2928fbd84ff5db6c4399079"
   license "Imlib2"
+  compatibility_version 1
 
   bottle do
-    sha256 arm64_sonoma:   "9085e6232c5f55a28549db1a2f5175ed3956307b894feee4c96e079136e0b0ad"
-    sha256 arm64_ventura:  "4e51a7001b37bc1b970df359ad757b3c6c86d94a95723e07e53b92a586d9fc64"
-    sha256 arm64_monterey: "854c0238df0cea22cefe702a71f4e411c0c68e1df76817430c75116ca75421f3"
-    sha256 sonoma:         "858748fdfe4b3a886b09099f91452d0f051721d9dffd639827c42b5d63c59f40"
-    sha256 ventura:        "428f45e532a9b3abbfd5fcdefab2881cf16838fef907f2de51245adb5e4036b7"
-    sha256 monterey:       "2332ec7db084abef90fdd880cdd70d26e7d650d1bc04f6758af582d79b923f93"
-    sha256 x86_64_linux:   "02135ffdab6c249729d5253a44c1a232c80be1f4464f8887524019404ed00b65"
+    rebuild 1
+    sha256 arm64_tahoe:   "2b91eb5c5e4b335cb4ce21ac5f9379e37c1d798a99605db3edb384a9b92f2e6a"
+    sha256 arm64_sequoia: "622ef7a95f9b20ea7521c35c7e6608ca8c69cda18f838c2bbbc35c5899c03c84"
+    sha256 arm64_sonoma:  "c12ac5662371d80fc850fa03086044ea09dec1812afee6a4febc6f52fe20a082"
+    sha256 sonoma:        "a5894661719aa0e61993021bcf5683adb5c101098872bc6e4ddcae528752425a"
+    sha256 arm64_linux:   "3f6ba4191ffc83dafc78761ac21ff667f455caf1a8a88c718510f0ba51332e53"
+    sha256 x86_64_linux:  "d86ce123067142a835df423eea2c8a2d4cb1d095ab44688c315a00297d7d6c2d"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "freetype"
   depends_on "giflib"
   depends_on "jpeg-turbo"
@@ -27,11 +28,13 @@ class Imlib2 < Formula
   depends_on "xz"
 
   uses_from_macos "bzip2"
-  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
-    system "./configure", *std_configure_args,
-                          "--disable-silent-rules",
+    system "./configure", "--disable-silent-rules",
                           "--enable-amd64=no",
                           "--without-heif",
                           "--without-id3",
@@ -39,7 +42,8 @@ class Imlib2 < Formula
                           "--without-jxl",
                           "--without-ps",
                           "--without-svg",
-                          "--without-webp"
+                          "--without-webp",
+                          *std_configure_args
     system "make", "install"
   end
 

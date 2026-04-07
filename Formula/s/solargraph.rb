@@ -3,24 +3,25 @@ class Solargraph < Formula
   homepage "https://solargraph.org"
   # Must be git, because solargraph.gemspec uses git ls-files
   url "https://github.com/castwide/solargraph.git",
-      tag:      "v0.50.0",
-      revision: "58f3b8d0f31a3bded0b1cdbb6b2934eee262f03b"
+      tag:      "v0.58.3",
+      revision: "d1669eb68f1fb542e999ddbcf7707726ca2b4612"
   license "MIT"
-  revision 1
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "adf2c964dbf8a6e8e6df15c78a99c7635cad6a8e29eeb922e418a135f414c38b"
-    sha256 cellar: :any,                 arm64_ventura:  "ac3502934bfd32481fc7bb267318ac17fa4a1f4c4f87d83a1226c0fc7b84243e"
-    sha256 cellar: :any,                 arm64_monterey: "a5d150ce559e3a63e7c2cf8cacd0b693ecae7d3a0cc4053ab4bfb118ca55e8b8"
-    sha256 cellar: :any,                 sonoma:         "9a0a1f7fbdbd210833a3fd49228457bb49d73df9aaa3255bbdf539f40bb5755b"
-    sha256 cellar: :any,                 ventura:        "7c26cfc1b83a167f245b25283fc9c15af0083605f4a6e8a188932466efe3ac32"
-    sha256 cellar: :any,                 monterey:       "77c8978cae979848b8caf92d1a11c9a7bfa64657b2b27fdedc11d2584a2ec5a5"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "36d017f532d294cfc9a8d42ec0997e89117b49d6f9457cdfb0c69bf1da2c88c2"
+    sha256 cellar: :any,                 arm64_tahoe:   "3198bfaa8d68f01d16e0c77643ed445d7409cc9d307638bffe74fae7f9bd86d3"
+    sha256 cellar: :any,                 arm64_sequoia: "a5a12378fb568c36cb123f65e9cbc16055690dd61b0a90547b6c9fdc8022ad90"
+    sha256 cellar: :any,                 arm64_sonoma:  "51b998fda9cffcd3f9e3ca5eecd9cd12770a93b6860fc6aa3d2fe69f01919b9f"
+    sha256 cellar: :any,                 sonoma:        "bd086d0bec28ebe9b4231205be150438dd89d868dba8aef9141954aec7da787a"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "cf5527026033d2be9fbc281e749ebf279d0d033a5dd9d2e8f6592dc077e5bcc2"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "48a89d68665b532441aba666dabb1bc2a72da08b847141bc62eaadad45430a7a"
   end
 
-  depends_on "ruby" # Requires >= Ruby 2.7
-
+  depends_on "ruby"
   depends_on "xz"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     ENV["GEM_HOME"] = libexec

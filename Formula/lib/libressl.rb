@@ -2,9 +2,9 @@ class Libressl < Formula
   desc "Version of the SSL/TLS protocol forked from OpenSSL"
   homepage "https://www.libressl.org/"
   # Please ensure when updating version the release is from stable branch.
-  url "https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-3.9.2.tar.gz"
-  mirror "https://mirrorservice.org/pub/OpenBSD/LibreSSL/libressl-3.9.2.tar.gz"
-  sha256 "7b031dac64a59eb6ee3304f7ffb75dad33ab8c9d279c847f92c89fb846068f97"
+  url "https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-4.2.1.tar.gz"
+  mirror "https://mirrorservice.org/pub/OpenBSD/LibreSSL/libressl-4.2.1.tar.gz"
+  sha256 "6d5c2f58583588ea791f4c8645004071d00dfa554a5bf788a006ca1eb5abd70b"
   license "OpenSSL"
 
   livecheck do
@@ -13,13 +13,12 @@ class Libressl < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "8a693d60b9b442208116773760d403923bbe1b0fef78aa97817421d594ee53fa"
-    sha256 arm64_ventura:  "7ab87499e353f7a0b57708ecd239e85cba5716bd4b352f549c43277a78d9477d"
-    sha256 arm64_monterey: "0aa833fa1a9bb0be187b532fd57a1eae0570495b7a6ad7d8d6a8ef60a6b7ad7a"
-    sha256 sonoma:         "f19dced1e6d79b56a351045968bea672c42092554a8df6d811d43f3e151fad98"
-    sha256 ventura:        "04cb9a492d3a0105737c7baefbfd49ac74263b795391c53d6e501ed52bcb5839"
-    sha256 monterey:       "c3668ac2b548fec36e85a005358fb85c64d7a6274858f44a39e1c94faf432c31"
-    sha256 x86_64_linux:   "9a49c9d29fbc50e52e4eda1ca7e9ab89965a7e9d9f388a2c073417444e3c1aeb"
+    sha256 arm64_tahoe:   "ba6ef9fa38ea1b994cb15718d4dd77104f8c140b1f2b7561c2ccbbebb77af94b"
+    sha256 arm64_sequoia: "6133145affd65d37db277d64f5e19ef4744917acc5fae5974abbde7c8d472a85"
+    sha256 arm64_sonoma:  "aa48217c34ad123558c0001e5d40b3e1076371b22b1c9eb722bfd0cc35c382e1"
+    sha256 sonoma:        "383e3ef03088ef5348c1b36e828ae2af3d098876c1265f8920a9138412a26798"
+    sha256 arm64_linux:   "2eddbafa15b069f1abdae1d3df6a74cf5f3b4c30e0db216ee5fb2106e226f9d3"
+    sha256 x86_64_linux:  "8690dae24ab88821c36d409f6ecf04ba2d85011fc92540d23d97c7ca72873f43"
   end
 
   head do
@@ -68,8 +67,8 @@ class Libressl < Formula
 
   test do
     # Make sure the necessary .cnf file exists, otherwise LibreSSL gets moody.
-    assert_predicate HOMEBREW_PREFIX/"etc/libressl/openssl.cnf", :exist?,
-            "LibreSSL requires the .cnf file for some functionality"
+    assert_path_exists HOMEBREW_PREFIX/"etc/libressl/openssl.cnf",
+"LibreSSL requires the .cnf file for some functionality"
 
     # Check LibreSSL itself functions as expected.
     (testpath/"testfile.txt").write("This is a test file")

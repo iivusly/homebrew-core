@@ -14,14 +14,13 @@ class SpiceGtk < Formula
   end
 
   bottle do
-    rebuild 1
-    sha256 arm64_sonoma:   "9882ec3f69fc197c1ac475ad3422950df499d9b80a7c9bc624817d95506a0fe2"
-    sha256 arm64_ventura:  "42600de9d33cc9d1c2e32eccf80cfa14f771457c3c39080d97ff3b611899dff8"
-    sha256 arm64_monterey: "82ab9fac4205428b48ea403708e85e19a9a42fd6c64a114a949e773e94367bf2"
-    sha256 sonoma:         "5899efc0635b8e80ed5d8500bbfb654aaaf241a457d7a817d51c066f991d73ed"
-    sha256 ventura:        "25c6fdcf7449f65c449d4ef7379d80b607c6d6aabc2a5823b4bd0241394e73cf"
-    sha256 monterey:       "a553e9a2c8c13b84545376374a8a1418c35bb9aa10baeeb6c536c09c106b7a5b"
-    sha256 x86_64_linux:   "7ffdfb8565e07edaa4aaaed8ec4926679bfbe5242b32343e9c97dfe6ff02f69a"
+    rebuild 3
+    sha256 arm64_tahoe:   "7ad0ed6ed58e9398be517b16d9ec4b6082d871e0662b49ae45d0228f4e6ce4ee"
+    sha256 arm64_sequoia: "18e571898c70aeb70242562ae79267b34d749f3677902ab487e0a2284084b9f0"
+    sha256 arm64_sonoma:  "0d25f4afe099a8bc79aaf80258f1640ade5e9f40676bb8e2406e2005e1e8c519"
+    sha256 sonoma:        "d52d67c6476174fc7389f1eb999f649097e2c5560ab1571db1489027393cf8b3"
+    sha256 arm64_linux:   "25e897876c6900507c0cd80e3c20717d2526f1bc2240f81967565c84ed98e42b"
+    sha256 x86_64_linux:  "ca84d516eaae38af2beb7f30ebc30beaa744c6c34e84d7dcb3d9a72417b55918"
   end
 
   depends_on "gobject-introspection" => :build
@@ -29,8 +28,8 @@ class SpiceGtk < Formula
   depends_on "libtool" => :build
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => [:build, :test]
-  depends_on "python@3.12" => :build
+  depends_on "pkgconf" => [:build, :test]
+  depends_on "python@3.14" => :build
   depends_on "vala" => :build
 
   depends_on "at-spi2-core"
@@ -55,26 +54,24 @@ class SpiceGtk < Formula
   depends_on "spice-protocol"
   depends_on "usbredir"
 
-  uses_from_macos "zlib"
-
   on_macos do
     depends_on "gobject-introspection"
     depends_on "harfbuzz"
   end
 
   on_linux do
+    depends_on "cyrus-sasl"
     depends_on "libva"
     depends_on "wayland"
+    depends_on "zlib-ng-compat"
   end
+
+  pypi_packages package_name:   "",
+                extra_packages: "pyparsing"
 
   resource "pyparsing" do
-    url "https://files.pythonhosted.org/packages/46/3a/31fd28064d016a2182584d579e033ec95b809d8e220e74c4af6f0f2e8842/pyparsing-3.1.2.tar.gz"
-    sha256 "a1bac0ce561155ecc3ed78ca94d3c9378656ad4c94c1270de543f621420f94ad"
-  end
-
-  resource "six" do
-    url "https://files.pythonhosted.org/packages/71/39/171f1c67cd00715f190ba0b100d606d440a28c93c7714febeca8b79af85e/six-1.16.0.tar.gz"
-    sha256 "1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"
+    url "https://files.pythonhosted.org/packages/f3/91/9c6ee907786a473bf81c5f53cf703ba0957b23ab84c264080fb5a450416f/pyparsing-3.3.2.tar.gz"
+    sha256 "c777f4d763f140633dcb6d8a3eda953bf7a214dc4eff598413c070bcdc117cbc"
   end
 
   # Backport fix for "ld: unknown file type in '.../spice-gtk-0.42/src/spice-glib-sym-file'"
@@ -83,11 +80,23 @@ class SpiceGtk < Formula
     sha256 "67c2b1d9c689dbb8eb3ed7c92996cf8c9d083d51050883593ee488957ad2a083"
   end
 
+  # Backport six removal
+  patch do
+    url "https://gitlab.freedesktop.org/spice/spice-common/-/commit/91fc091358ac4906a05b68d70e9db94082c0749f.diff"
+    sha256 "dd5ef8701bc1d97c0ff20af9ff95dffc660a5e1a3a8a0a92cd4d643d0a3553ed"
+    directory "subprojects/spice-common"
+  end
+  patch do
+    url "https://gitlab.freedesktop.org/spice/spice-common/-/commit/29dacb5f53f5183fb089a3fb02d081dd08bde8a1.diff"
+    sha256 "3c8a0adaf4b088986bef7541ffef399c7652969c5584c4a4c4055f4988ef0f7a"
+    directory "subprojects/spice-common"
+  end
+
   # https://gitlab.com/keycodemap/keycodemapdb/-/merge_requests/18
   patch :DATA
 
   def install
-    venv = virtualenv_create(buildpath/"venv", "python3.12")
+    venv = virtualenv_create(buildpath/"venv", "python3.14")
     venv.pip_install resources
     ENV.prepend_path "PATH", venv.root/"bin"
 
@@ -97,20 +106,21 @@ class SpiceGtk < Formula
   end
 
   test do
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include <spice-client.h>
       #include <spice-client-gtk.h>
       int main() {
         return spice_session_new() ? 0 : 1;
       }
-    EOS
+    CPP
     ENV.prepend_path "PKG_CONFIG_PATH", "#{Formula["icu4c"].lib}/pkgconfig"
     system ENV.cc, "test.cpp",
-                   *shell_output("pkg-config --cflags --libs spice-client-gtk-3.0 ").chomp.split,
+                   *shell_output("pkgconf --cflags --libs spice-client-gtk-3.0").chomp.split,
                    "-o", "test"
     system "./test"
   end
 end
+
 __END__
 diff --git a/subprojects/keycodemapdb/tools/keymap-gen b/subprojects/keycodemapdb/tools/keymap-gen
 index b6cc95b..d05e945 100755

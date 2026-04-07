@@ -1,21 +1,18 @@
 class Libmodbus < Formula
   desc "Portable modbus library"
   homepage "https://libmodbus.org/"
-  url "https://github.com/stephane/libmodbus/archive/refs/tags/v3.1.10.tar.gz"
-  sha256 "e93503749cd89fda4c8cf1ee6371a3a9cc1f0a921c165afbbc4fd96d4813fa1a"
+  url "https://github.com/stephane/libmodbus/archive/refs/tags/v3.1.12.tar.gz"
+  sha256 "4151177f5223625c6be94230affb096aa8b1cdb0df00fe1f74ce53878a25d15d"
   license "LGPL-2.1-or-later"
   head "https://github.com/stephane/libmodbus.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "3b9c2f9582962d98481e78df8ee431118ca2725cd6db782087f99f9e4e43656d"
-    sha256 cellar: :any,                 arm64_ventura:  "585781b5c3f26d145faf3b0c06e58bd9789ace242f6631689edfc4dee3ab5b1f"
-    sha256 cellar: :any,                 arm64_monterey: "782038c57d82103f1c245d8d76f9acec4fd25b9bbb38c90fc8558c63ff00ddb5"
-    sha256 cellar: :any,                 arm64_big_sur:  "870b055e0964bde546ca96ac9a381f6d47de22e1bda504e9332800eefa2478bf"
-    sha256 cellar: :any,                 sonoma:         "0cd572e641242012940e0a66c4a0133b348e506e908c9d847f4929290a22e999"
-    sha256 cellar: :any,                 ventura:        "20eb8bf548c71959c9269981ec3d95b30871cca5074b32d60780356ee2930bb2"
-    sha256 cellar: :any,                 monterey:       "aaf518a16cbfdcc17b4355d4edb497607363b3b8f78d57e5b1c7d5af67588532"
-    sha256 cellar: :any,                 big_sur:        "25ad3c494672c5006f15cb27bd69cedb91d5a14ada0f52a4e8c622dbdec76d6c"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "b04b946ea68e47136a06d01734d22e1a6c6eb9ed21514394f28f9b30364e1f54"
+    sha256 cellar: :any,                 arm64_tahoe:   "a19a1e7794e92ff2457f53854efe9f25af59eb226c3e9894434f0bba430af5c5"
+    sha256 cellar: :any,                 arm64_sequoia: "2e81e96a86fc637f9beb11bbc671d2f8ce779232959c21425f4d809532566200"
+    sha256 cellar: :any,                 arm64_sonoma:  "ee16ccee86da68d0902e0d539b4ec259851c5c06751d627a3df3c62e57b97644"
+    sha256 cellar: :any,                 sonoma:        "f95283005a391bc212c9492d0177d7a9532c09c05e9d7c8d17056ab61d456593"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "c8bbf29d0d6b2a53ddc10fae268b78d191aafce3788209174754fd037e100bc4"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ca28017a4ab526343a25a5f36a5f441fc7512ff6daf7089a7a0e611a6813c095"
   end
 
   depends_on "autoconf" => :build
@@ -29,7 +26,7 @@ class Libmodbus < Formula
   end
 
   test do
-    (testpath/"hellomodbus.c").write <<~EOS
+    (testpath/"hellomodbus.c").write <<~C
       #include <modbus.h>
       #include <stdio.h>
       int main() {
@@ -49,7 +46,7 @@ class Libmodbus < Formula
         mb = 0;
         return (p == 0);
       }
-    EOS
+    C
     system ENV.cc, "hellomodbus.c", "-o", "foo", "-L#{lib}", "-lmodbus",
       "-I#{include}/libmodbus", "-I#{include}/modbus"
     system "./foo"

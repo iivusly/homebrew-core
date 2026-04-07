@@ -13,17 +13,16 @@ class CKermit < Formula
     regex(/The current C-Kermit release is v?(\d+(?:\.\d+)+) /i)
   end
 
+  no_autobump! because: :incompatible_version_format
+
   bottle do
-    rebuild 2
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "399806a413435186dd70cd55cd12782354c3642259870b348f81ca40b6424cbb"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "6ee8af35826f4b5be62d1c4b4e8b38eb39915da0b28d6b8f53ff9dfbb99f6698"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "8315af8bc632253d0b2fdfde4b9da0fef5ad11af891b4e4eb8b51a35902f1e33"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "259f1f0d2e2a1af6545bec724db3e1f154169dbd33e2b8ef43364381b3664cfe"
-    sha256 cellar: :any_skip_relocation, sonoma:         "b940d6c43c5b2298913376ff58726c674de4a741353460e7de2a94c7d01d99df"
-    sha256 cellar: :any_skip_relocation, ventura:        "0772fae0e560c8e726c611bd1e5b55d03e77f6f42feb3f763cb12f15a0151dc9"
-    sha256 cellar: :any_skip_relocation, monterey:       "e379dd0cdd6eb9eec792cdd48ca7c5b7cd9281288840b15ce1d860fbb78982b2"
-    sha256 cellar: :any_skip_relocation, big_sur:        "c2867c176bc81a35f56d5fe29847500b7c5f8c3e05ac10b5986073502a888a0f"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "0d5959e91d9fce4bee2b835433a8d2cc589f8f9f37e02c0f1078dbe645e6351a"
+    rebuild 4
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "8c0e72e5bb4d72caed49b3f6d972c288574cf259071e49b9f2d7cecb996dbce8"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "dc6dba17341e3f98196d564a5fffc6302338e58371b4eca3ebeedb82e274606e"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "ab2fa4f2c5baad32ef5a049ac5a386f2b8900e2a0083cd666476b66287a03e03"
+    sha256 cellar: :any_skip_relocation, sonoma:        "39dea4932cd8e64dc2f836f6614bf7e1a27547f5256c18bd96b6a52ffcc42147"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "d4e5b61305d55c1c90bb0a83b2a3d60684e5e8e9104b6dbc8c84637132114054"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "694f5ef3996f1e14a0ef1c1117902226f1eaba0488a27dbc248a52af354121b1"
   end
 
   uses_from_macos "libxcrypt"
@@ -32,9 +31,27 @@ class CKermit < Formula
   # Apply patch to fix build failure with glibc 2.28+
   # Apply patch to fix build failure on Sonoma (missing headers)
   # Will be fixed in next release: https://www.kermitproject.org/ckupdates.html
+  # Apply patch to fix memory corruption on macos where -DNOUUCP is used where an unintended codepath was taken.
+  # Patch for this soruced from beta 10.0:
+  # Notes on the bugfixes can be found in C-Kermit 10.0 NOTES.TXT lines 2533-2538 and 3356-3370
+  # Or in the code:
+  # ckucmd.c#L1694-L1696
+  # ckufio.c#L2746-L2748
+  # ckufio.c#L2827
+
   patch :DATA
 
   def install
+    # Makefile only supports system libraries on Linux
+    if OS.linux?
+      inreplace "makefile" do |s|
+        s.gsub! "/usr/include/ncurses", "#{Formula["ncurses"].opt_include}/ncurses"
+        s.gsub! "/usr/lib/libncurses", "#{Formula["ncurses"].opt_lib}/libncurses"
+        s.gsub! "/usr/include/crypt", "#{Formula["libxcrypt"].opt_include}/crypt"
+        s.gsub! "/usr/lib/libcrypt", "#{Formula["libxcrypt"].opt_lib}/libcrypt"
+      end
+    end
+
     os = OS.mac? ? "macosx" : "linux"
     system "make", os
     man1.mkpath
@@ -177,3 +194,36 @@ index 2f3bb75..71b9080 100644
  #ifdef MAINTYPE
  /*
    If you get complaints about "main: return type is not blah",
+diff --git a/ckucmd.c b/ckucmd.c
+index 274dc2d..5364bfd 100644
+--- a/ckucmd.c
++++ b/ckucmd.c
+@@ -1577,7 +1577,7 @@ o_again:
+     }
+ #endif /* CK_TMPDIR */
+ 
+-    if (strcmp(s,CTTNAM) && (zchko(s) < 0)) { /* OK to write to console */
++    if ((strcmp(s,CTTNAM) == 0) && (zchko(s) < 0)) { /* write to console OK */
+ #ifdef COMMENT
+ #ifdef OS2
+ /*
+diff --git a/ckufio.c b/ckufio.c
+index b5bfaae..b1fb374 100644
+--- a/ckufio.c
++++ b/ckufio.c
+@@ -2596,6 +2596,7 @@ zchko(name) char *name; {
+ 	} else {
+ 	    debug(F101,"zchko open errno","",errno); 
+ 	    x = -1;
++        goto xzchko;
+ 	}
+     }
+ #endif	/* NOUUCP */
+@@ -2667,6 +2668,7 @@ zchko(name) char *name; {
+     debug(F100,"zchko swapped ids restored","",0);
+ #endif /* SW_ACC_ID */
+ 
++xzchko:                               /* Exit point */
+     if (x < 0)
+       debug(F111,"zchko access failed:",s,errno);
+     else

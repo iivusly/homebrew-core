@@ -9,16 +9,16 @@ class Keepassc < Formula
   revision 5
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "59ab2d959aa8bbaad5ac6c7f208a7ed22374f694bae1f96725342b9dfd2d8b70"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "b2a9652625bc12ad0456f3f3c2d5a0cc619629e162b14bc2b58963f44aca1a2c"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "1a1e3179e658e703e11f18f6927cbfd0d1d23f3a0932abe737b04512eb31a303"
-    sha256 cellar: :any_skip_relocation, sonoma:         "1e6f5ef6929d5cf02571b46280c3f1fe215adc30d3250078840dd0bdb1e0164d"
-    sha256 cellar: :any_skip_relocation, ventura:        "06b888038774bbdad203f571c00ea8e5b6511276d2bc7336d5846160138f55db"
-    sha256 cellar: :any_skip_relocation, monterey:       "f84c91130f612fcdfb3fc58543f551cb9ff945c93155ce6dd48470c8cbb1861a"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "882f680f1d047d0b327bb499a284bcfac9e5661f5a427e41f74aa3f3a513ec02"
+    rebuild 2
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "01903f453e4afc999a98345cff835cdc781a8cec808fe49aee80d90f0de84171"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "85381b7751afaae1d193207777a06aeef66570058ba7bd9fb60b8fda1227fa77"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "05068b7cbec71870bd259fd31d0fcb779cbee043498cdbd418225dd3113cff5b"
+    sha256 cellar: :any_skip_relocation, sonoma:        "b9e4bd9fa7f24ac7b95b6fd355554430611d0f3b6bf3ac39001fddb000bddc60"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "09e9e115b01e92086c1c1ff02a4f2cb5a0943fbb60adc1a10fbb9483d4647139"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "1468f8a2747ba5d8576f0d4263ec8160b68646490c45b5e53287e4e639713139"
   end
 
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   resource "kppy" do
     url "https://files.pythonhosted.org/packages/c8/d9/6ced04177b4790ccb1ba44e466c5b67f3a1cfe4152fb05ef5f990678f94f/kppy-1.5.2.tar.gz"
@@ -26,13 +26,12 @@ class Keepassc < Formula
   end
 
   resource "pycryptodomex" do
-    url "https://files.pythonhosted.org/packages/3f/13/84f2aea851d75e12e7f32ccc11a00f1defc3d285b4ed710e5d049f31c5a6/pycryptodomex-3.19.1.tar.gz"
-    sha256 "0b7154aff2272962355f8941fd514104a88cb29db2d8f43a29af900d6398eb1c"
+    url "https://files.pythonhosted.org/packages/c9/85/e24bf90972a30b0fcd16c73009add1d7d7cd9140c2498a68252028899e41/pycryptodomex-3.23.0.tar.gz"
+    sha256 "71909758f010c82bc99b0abf4ea12012c98962fbf0583c2164f8b84533c2e4da"
   end
 
   def install
     virtualenv_install_with_resources
-    man1.install_symlink libexec.glob("share/man/man1/*.1")
   end
 
   test do

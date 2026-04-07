@@ -7,6 +7,8 @@ class Libb64 < Formula
   revision 1
 
   bottle do
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:    "3b92d742579da7f5934e8b7d99144b42167ff17b40144299d86924f828148368"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia:  "210e5acb036ffda3a85af650cdcbda27c8ca804cb099d556a1dfd4779ec17fb7"
     sha256 cellar: :any_skip_relocation, arm64_sonoma:   "a7471a04a5dd363f1ee8f2ee6c215cb99760698a34c73a5a6ce0dbefd519a66a"
     sha256 cellar: :any_skip_relocation, arm64_ventura:  "899db1753787af2de66e4ac321d5d750190a8357576611d59644eaa9ed0f852f"
     sha256 cellar: :any_skip_relocation, arm64_monterey: "cf8f611b34a951b0c3930f8c3714e0f24aa4074c79a3cb483810b7325461f1df"
@@ -16,6 +18,7 @@ class Libb64 < Formula
     sha256 cellar: :any_skip_relocation, monterey:       "3b2acebf1e9432ef07e0035bfc410fdb8530aace59513ad9fad36fe35a661880"
     sha256 cellar: :any_skip_relocation, big_sur:        "50dafb7c970bfd56ab7c88100df7876d1590c806295987a8268029eb87b7ca2b"
     sha256 cellar: :any_skip_relocation, catalina:       "4f357626774a02fae97f7668665a8e41c96b4cdf041a8b8ba658dbd5f8a86bd9"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "f3308134e879205166e277b0139eed2ac6a73ccdaf5dce0cea2b087469e698a1"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "8da3dbc95cbf4c396038b3b71fbb2b6b583f72f46277cb6deea7b7afb410e9f7"
   end
 
@@ -26,7 +29,7 @@ class Libb64 < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <string.h>
       #include <b64/cencode.h>
       int main()
@@ -39,7 +42,7 @@ class Libb64 < Formula
         if (memcmp(buf,"AQIDBA==",8)) return(-1);
         return 0;
       }
-    EOS
+    C
     system ENV.cc, "test.c", "-I#{include}", "-L#{lib}", "-lb64", "-o", "test"
     system "./test"
   end

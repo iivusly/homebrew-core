@@ -8,18 +8,20 @@ class Xmltoman < Formula
   url "https://downloads.sourceforge.net/project/xmltoman/xmltoman/xmltoman-0.4.tar.gz/xmltoman-0.4.tar.gz"
   sha256 "948794a316aaecd13add60e17e476beae86644d066cb60171fc6b779f2df14b0"
   license "GPL-2.0-or-later"
-  revision 1
+  revision 3
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "27b72d91e8bd4c48a82d2328598b1de5d21049cff8cf9d7466df9da57378110b"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "27b72d91e8bd4c48a82d2328598b1de5d21049cff8cf9d7466df9da57378110b"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "27b72d91e8bd4c48a82d2328598b1de5d21049cff8cf9d7466df9da57378110b"
-    sha256 cellar: :any_skip_relocation, sonoma:         "38bd2ebadf4eef66896118cda5ee50038f94630e1d3da2ca4253e151bae7fc9b"
-    sha256 cellar: :any_skip_relocation, ventura:        "38bd2ebadf4eef66896118cda5ee50038f94630e1d3da2ca4253e151bae7fc9b"
-    sha256 cellar: :any_skip_relocation, monterey:       "38bd2ebadf4eef66896118cda5ee50038f94630e1d3da2ca4253e151bae7fc9b"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "f5690e906d64cedbdd8f98ba039f638dabac00067996ac5a95c0cb8d19702c8b"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "1dc66e4edcf9738b149ab2d52a0b50185d94237f473a174c8a3b40a747149f8a"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "1dc66e4edcf9738b149ab2d52a0b50185d94237f473a174c8a3b40a747149f8a"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "1dc66e4edcf9738b149ab2d52a0b50185d94237f473a174c8a3b40a747149f8a"
+    sha256 cellar: :any_skip_relocation, tahoe:         "1dc66e4edcf9738b149ab2d52a0b50185d94237f473a174c8a3b40a747149f8a"
+    sha256 cellar: :any_skip_relocation, sequoia:       "1dc66e4edcf9738b149ab2d52a0b50185d94237f473a174c8a3b40a747149f8a"
+    sha256 cellar: :any_skip_relocation, sonoma:        "1dc66e4edcf9738b149ab2d52a0b50185d94237f473a174c8a3b40a747149f8a"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "820c90d12578e4a1bb4276c03e5acbd0a03d9f0b0317de2b4b1d0c731878a60e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "df54ca9aec96466a2d111f21e4fee9fae3b96ade496f0801b2d0bf51ead733d2"
   end
 
+  uses_from_macos "expat"
   uses_from_macos "perl"
 
   resource "XML::Parser" do

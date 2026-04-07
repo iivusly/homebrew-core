@@ -1,28 +1,24 @@
 class Lerna < Formula
   desc "Tool for managing JavaScript projects with multiple packages"
   homepage "https://lerna.js.org"
-  url "https://registry.npmjs.org/lerna/-/lerna-8.1.8.tgz"
-  sha256 "f2404d1e5596ee7a6af9906bdd1b6365423ec16e75f55737336870be2a41b0b0"
+  url "https://registry.npmjs.org/lerna/-/lerna-9.0.7.tgz"
+  sha256 "c98524665b4c4836ac7a88e18c7c24a46f5fd6bf3833a40c576788fdd45bef3c"
   license "MIT"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "c3d8dfa0f3fe17d6cc0a1249376aa5746e5bb5e80c3e24c08fdb7d6cd6cc012d"
-    sha256 cellar: :any,                 arm64_ventura:  "c3d8dfa0f3fe17d6cc0a1249376aa5746e5bb5e80c3e24c08fdb7d6cd6cc012d"
-    sha256 cellar: :any,                 arm64_monterey: "c3d8dfa0f3fe17d6cc0a1249376aa5746e5bb5e80c3e24c08fdb7d6cd6cc012d"
-    sha256 cellar: :any,                 sonoma:         "53eb46ccaa58156d095cef438f907dca9a2de1d5ae4b424dd3bc1179fa3d75e1"
-    sha256 cellar: :any,                 ventura:        "53eb46ccaa58156d095cef438f907dca9a2de1d5ae4b424dd3bc1179fa3d75e1"
-    sha256 cellar: :any,                 monterey:       "53eb46ccaa58156d095cef438f907dca9a2de1d5ae4b424dd3bc1179fa3d75e1"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "38b853ee6dc578484b09d9c6e67bcac94a6625b23ef79d125e02e4671e445cdc"
+    sha256 cellar: :any,                 arm64_tahoe:   "90e31832b1407d7276b03a688cdceaf4d0d07baf983b731696889dca2802fa7e"
+    sha256 cellar: :any,                 arm64_sequoia: "88c230c1915d25f30dc8dab5cd7f3c86ebd4f76eac0ef4725caf28236b8447bb"
+    sha256 cellar: :any,                 arm64_sonoma:  "88c230c1915d25f30dc8dab5cd7f3c86ebd4f76eac0ef4725caf28236b8447bb"
+    sha256 cellar: :any,                 sonoma:        "93ebef6b1abaaa328c74bd6ceccf9d2d10ea02a9e95e454a53c03311bc21e75e"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "559588a47d384e09594421c37427be9db253c13eab16007950a8d48818304bf1"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "a5416abeca4ee5099817f6f9a54355f287f7c3471d6364170e96eeea1b100e4c"
   end
 
   depends_on "node"
 
   def install
     system "npm", "install", *std_npm_args
-    bin.install_symlink Dir["#{libexec}/bin/*"]
-
-    # Replace universal binaries with native slices
-    deuniversalize_machos
+    bin.install_symlink libexec.glob("bin/*")
   end
 
   test do

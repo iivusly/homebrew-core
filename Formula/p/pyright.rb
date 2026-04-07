@@ -1,33 +1,29 @@
 class Pyright < Formula
   desc "Static type checker for Python"
   homepage "https://github.com/microsoft/pyright"
-  url "https://registry.npmjs.org/pyright/-/pyright-1.1.379.tgz"
-  sha256 "df7d4477fbc28a8ea85448b0feb6cb06672a3a49b59b5bdf9715e27775b1af14"
+  url "https://registry.npmjs.org/pyright/-/pyright-1.1.408.tgz"
+  sha256 "16f73d4281d00ddbd549d5dbe574d0f2cf0aec34f276f91bd6ae63fe1001473e"
   license "MIT"
-  head "https://github.com/microsoft/pyright.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "b56102263fd3fdec25f01561fa11e607cde576a3b0103abb17140ae99d7ec0f7"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "b56102263fd3fdec25f01561fa11e607cde576a3b0103abb17140ae99d7ec0f7"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "b56102263fd3fdec25f01561fa11e607cde576a3b0103abb17140ae99d7ec0f7"
-    sha256 cellar: :any_skip_relocation, sonoma:         "e0af3666b98c7455fc429dec70a6482dfac598ebca9ff48fcb2993cc6ba5b411"
-    sha256 cellar: :any_skip_relocation, ventura:        "e0af3666b98c7455fc429dec70a6482dfac598ebca9ff48fcb2993cc6ba5b411"
-    sha256 cellar: :any_skip_relocation, monterey:       "e0af3666b98c7455fc429dec70a6482dfac598ebca9ff48fcb2993cc6ba5b411"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "b56102263fd3fdec25f01561fa11e607cde576a3b0103abb17140ae99d7ec0f7"
+    sha256 cellar: :any_skip_relocation, all: "ca302128b320fd700103d02c9d1b65e0b2bb11e90e7555e064d2b50a644d3ae0"
   end
 
   depends_on "node"
 
   def install
-    system "npm", "install", *std_npm_args
-    bin.install_symlink Dir["#{libexec}/bin/*"]
+    system "npm", "install", *std_npm_args(ignore_scripts: false)
+    bin.install_symlink libexec.glob("bin/*")
+
+    # Remove empty directory to make all bottle
+    rm_r libexec/"lib/node_modules/pyright/node_modules" if OS.mac?
   end
 
   test do
-    (testpath/"broken.py").write <<~EOS
+    (testpath/"broken.py").write <<~PYTHON
       def wrong_types(a: int, b: int) -> str:
           return a + b
-    EOS
+    PYTHON
     output = pipe_output("#{bin}/pyright broken.py 2>&1")
     assert_match "error: Type \"int\" is not assignable to return type \"str\"", output
   end

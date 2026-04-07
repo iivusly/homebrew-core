@@ -1,8 +1,8 @@
 class Conduit < Formula
   desc "Streams data between data stores. Kafka Connect replacement. No JVM required"
   homepage "https://conduit.io/"
-  url "https://github.com/ConduitIO/conduit/archive/refs/tags/v0.11.1.tar.gz"
-  sha256 "da16e12823640869e388ebbce5e5f1fac73ba0d3b0e360a7205d87177ceaa795"
+  url "https://github.com/ConduitIO/conduit/archive/refs/tags/v0.14.0.tar.gz"
+  sha256 "4747b7a8b1cce5a32490ff3bb9c31e0d0cb4a97da75e2d4f9f97a33af9a8c4f1"
   license "Apache-2.0"
   head "https://github.com/ConduitIO/conduit.git", branch: "main"
 
@@ -12,18 +12,17 @@ class Conduit < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "57c127f3236d7897a62c624c2574b1b3a86237cab99ab920e95a2fd7d17f8a6c"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "08901c87b39970bd6f016caef1209dfa885c9db76dafbe5f22bb5ff3333b9fee"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "dfbf59cd09588015fc1c96cd72a042ed11284e6c8f18771e3126b0b3c0fdc106"
-    sha256 cellar: :any_skip_relocation, sonoma:         "dfc2f661dc17dbd2b8f2f6d404330e308b0b0a393d46f22a7f798a677ae137dd"
-    sha256 cellar: :any_skip_relocation, ventura:        "362fcf1cb5fbbaf15f6c996287086d0a5ae484676779137cbab6481b438fa6e8"
-    sha256 cellar: :any_skip_relocation, monterey:       "d3cfee5fe65cefbe4fc90c18c10500482689843dfb94232c1deb9fe2fdb4da9c"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "68f78c703af12d2d0d1970dc5a33591e4c780bbb836f5c4a932c5f0d95ec0437"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "118277b357cfc6c3d7f2696c118bb887d70dfed444d7b582da092cdd2108b62b"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "c73e20dfa33416ce64040037ca7598f323225b06bf11ff7d9caf0992e7bb0910"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "badd297ac7b2138dbdfcfb4fbe66459a7e5dac5fbeeb6f7d81ddeb919978ad94"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "53d9b586efdc7a2e87004979dc51313c4858388b9d8a3aab4610843cd0a83b82"
+    sha256 cellar: :any_skip_relocation, sonoma:        "c3ca928abb6ada159254a94275ab9e9b7c67f2e310be6278ac24e590b340a724"
+    sha256 cellar: :any_skip_relocation, ventura:       "cfed5653e00116ee2b17fab9b0678514fecef893e04e58de7b46bbbaf69d8338"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "8f3a72e785383509d2ea012a2a9502c3de4cebb273300693e38464d4a9dd259d"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "5ce98054ac53225a6aa027d7b5929a116e13dce0bd82ea35887fb0b6c0913922"
   end
 
   depends_on "go" => :build
-  depends_on "node" => :build
-  depends_on "yarn" => :build
 
   def install
     system "make", "VERSION=#{version}"
@@ -31,17 +30,14 @@ class Conduit < Formula
   end
 
   test do
-    # Assert conduit version
-    assert_match(version.to_s, shell_output("#{bin}/conduit -version"))
+    assert_match version.to_s, shell_output("#{bin}/conduit --version")
 
     File.open("output.txt", "w") do |file|
       # redirect stdout to the file
       $stdout.reopen(file)
-      pid = fork do
-        # Run conduit with random free ports for gRPC and HTTP servers
-        exec bin/"conduit", "--grpc.address", ":0",
-                            "--http.address", ":0"
-      end
+      pid = spawn bin/"conduit", "run", "--api.enabled", "true",
+                                 "--api.grpc.address", ":0",
+                                 "--api.http.address", ":0"
       sleep(5)
       # Kill process
       Process.kill("SIGKILL", pid)

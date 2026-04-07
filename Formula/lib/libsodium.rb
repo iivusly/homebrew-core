@@ -1,9 +1,10 @@
 class Libsodium < Formula
   desc "NaCl networking and cryptography library"
   homepage "https://libsodium.org/"
-  url "https://download.libsodium.org/libsodium/releases/libsodium-1.0.20.tar.gz"
-  sha256 "ebb65ef6ca439333c2bb41a0c1990587288da07f6c7fd07cb3a18cc18d30ce19"
+  url "https://download.libsodium.org/libsodium/releases/libsodium-1.0.21.tar.gz"
+  sha256 "9e4285c7a419e82dedb0be63a72eea357d6943bc3e28e6735bf600dd4883feaf"
   license "ISC"
+  compatibility_version 1
 
   livecheck do
     url "https://download.libsodium.org/libsodium/releases/"
@@ -11,13 +12,12 @@ class Libsodium < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "66835fcd7e4dd8dde5be4e8d34c5314481c1d724e8dd82d4e97059d9fdaf1a45"
-    sha256 cellar: :any,                 arm64_ventura:  "21b83b95eef039b914d712f4ac5d235d85e1f1143383dfa9c5359f0cc88fa08d"
-    sha256 cellar: :any,                 arm64_monterey: "25377f9e16747b9af732be608a966b580287d0854c2d530f23eea1235bca1ff7"
-    sha256 cellar: :any,                 sonoma:         "ebc452002391195287aef3819c1285ba597bbfe55cb926f18dae5990202afa12"
-    sha256 cellar: :any,                 ventura:        "5de3b5180b73678d93c4c69a77d662afd6aac0bfd71246be6e78cfacf97cc3d7"
-    sha256 cellar: :any,                 monterey:       "0556f27feb8d4b5f31edf42e392eb4901daa5b9dbb8510499aa196c9e77134c6"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "94394d217dc5a833492a702a8a9e914573a945da13f3b4f42b59f2513835f439"
+    sha256 cellar: :any,                 arm64_tahoe:   "f67601f25a55e3845e1792c60a7bfab15dd3541fbb03e116b147e252fb153c9a"
+    sha256 cellar: :any,                 arm64_sequoia: "e8b956a02a7563e3d2c653de81a7976a8798dc63ba906e65cc2e9f3dff89cb37"
+    sha256 cellar: :any,                 arm64_sonoma:  "258e5d00e53f7809780498b615216e20a4a4876f9b96f788e9af56eb4ed3b1be"
+    sha256 cellar: :any,                 sonoma:        "437e033a04914c6ce7c3f642410bc924e5c2edfeab136dbd77e0a4d455387bd4"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "ef2ff41f468c1eb03d919ee31a903a242e762b1a9bb22f52e34438a907d6bbd4"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "082cbc3178f73ab138d65735f2b4e8c2d47df2b411f398669482d51c7001d369"
   end
 
   head do
@@ -29,6 +29,9 @@ class Libsodium < Formula
   end
 
   def install
+    # Allow type conversion between vectors on Arm Linux
+    ENV.append_to_cflags "-flax-vector-conversions" if OS.linux? && Hardware::CPU.arm?
+
     system "./autogen.sh", "-sb" if build.head?
     system "./configure", "--disable-debug", "--disable-dependency-tracking",
                           "--prefix=#{prefix}"
@@ -37,7 +40,7 @@ class Libsodium < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <assert.h>
       #include <sodium.h>
 
@@ -46,7 +49,7 @@ class Libsodium < Formula
         assert(sodium_init() != -1);
         return 0;
       }
-    EOS
+    C
     system ENV.cc, "test.c", "-I#{include}", "-L#{lib}",
                    "-lsodium", "-o", "test"
     system "./test"

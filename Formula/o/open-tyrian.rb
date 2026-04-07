@@ -7,6 +7,8 @@ class OpenTyrian < Formula
   head "https://github.com/opentyrian/opentyrian.git", branch: "master"
 
   bottle do
+    sha256 arm64_tahoe:    "f6dd404f14a99279b9ea9d9dcc7343e56e2094a329a4424340c361dcb523ca30"
+    sha256 arm64_sequoia:  "7a860fc29e71e5a0fc1b97ca782c57d39eadde156b0d557880e840ac1a588e5f"
     sha256 arm64_sonoma:   "b35a65491b3b3e18929614588953e7d05c9a59ddc8037c3524a8d69f0da5a7a7"
     sha256 arm64_ventura:  "97b601296652fbd37fa910ae6ee874ebe3fd0d6a6744f4518b1dbdb77db31544"
     sha256 arm64_monterey: "fe7198245df131d6e19dfb50e409b8e22d069d36e9375932525cac283b0cf5f9"
@@ -16,10 +18,11 @@ class OpenTyrian < Formula
     sha256 monterey:       "dd82b9fb887fb98fc009442c650b35a16c486d20d0b8b1dac74cb43f102d670f"
     sha256 big_sur:        "16549c5626bed5dd265ee914b75075da381cc81e1883e2a09cf841d1acfaa920"
     sha256 catalina:       "e23f7e095081f02181e4f7c17f5d2165da83c99691fbdacf12b036e8adb8e803"
+    sha256 arm64_linux:    "9031f900da6fba1bb5702d9c9dee4c128772f8c5012542aa0ed4d0c15fdb4b88"
     sha256 x86_64_linux:   "20d32afb8db3ce9038cdbc8424c16a081b93e0060ac43f35a3d62bcde0c54fbd"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "sdl2"
   depends_on "sdl2_net"
 

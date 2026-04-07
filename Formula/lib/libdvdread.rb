@@ -1,18 +1,11 @@
 class Libdvdread < Formula
   desc "C library for reading DVD-video images"
   homepage "https://www.videolan.org/developers/libdvdnav.html"
+  url "https://download.videolan.org/pub/videolan/libdvdread/7.0.1/libdvdread-7.0.1.tar.xz"
+  sha256 "2e3e04a305c15c3963aa03ae1b9a83c1d239880003fcf3dde986d3943355d407"
   license "GPL-2.0-or-later"
-
-  stable do
-    url "https://download.videolan.org/pub/videolan/libdvdread/6.1.3/libdvdread-6.1.3.tar.bz2"
-    sha256 "ce35454997a208cbe50e91232f0e73fb1ac3471965813a13b8730a8f18a15369"
-
-    # Fix -flat_namespace being used on Big Sur and later.
-    patch do
-      url "https://raw.githubusercontent.com/Homebrew/formula-patches/03cf8088210822aa2c1ab544ed58ea04c897d9c4/libtool/configure-big_sur.diff"
-      sha256 "35acd6aebc19843f1a2b3a63e880baceb0f5278ab1ace661e57a502d9d78c93c"
-    end
-  end
+  compatibility_version 1
+  head "https://code.videolan.org/videolan/libdvdread.git", branch: "master"
 
   livecheck do
     url "https://download.videolan.org/pub/videolan/libdvdread/"
@@ -20,34 +13,39 @@ class Libdvdread < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "6d2583d6d35a5b71d45cfbfc63e3e76dd9757c85973752b1583c4af9502d723c"
-    sha256 cellar: :any,                 arm64_ventura:  "221b4cb3ad771cc650454a1624a89348973c3ef5bedc5f526b77e4bbb281b938"
-    sha256 cellar: :any,                 arm64_monterey: "7c258b5c5be30d3ee53dacd0b137d7faadb5e21e06e5cf98859e7728e91cf303"
-    sha256 cellar: :any,                 arm64_big_sur:  "e8642520b4bc06ac122e5c7e3affa0c80ed79678b09d220c1973e042aa11d30f"
-    sha256 cellar: :any,                 sonoma:         "b1fa4f93b744c0b212e021aa63fa59f901e40b3ce029c11ea68f1e727698e1ea"
-    sha256 cellar: :any,                 ventura:        "dbf236d4d32bb5e6d4180910f464225e5a09989d8fc542ec8bd5d3493a962308"
-    sha256 cellar: :any,                 monterey:       "6ba400a8d928d2cd478969406000895023049c5a2257f11b6fab2791ff8b7105"
-    sha256 cellar: :any,                 big_sur:        "cd57db884506fccb0b37b4cde83db05ba9cb15cddf1092f401918ae0972ac495"
-    sha256 cellar: :any,                 catalina:       "5cd4a9df11e095e001d9d8a2a587f4701696de974b5527aea260afc9c5cc4f49"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "5805295785ab4ce6aeb1bdfeb7fe1aab4946ea9df2555f2016bbc540322f9c81"
+    rebuild 1
+    sha256 cellar: :any, arm64_tahoe:   "1af80a56982f63473b2f068b6580cdbadea4c6565743a3f12a21902cbaf0d3dc"
+    sha256 cellar: :any, arm64_sequoia: "9dfed914bad377bc19f96a1d1f03da797e81264391d4726b1893d3dee8e9c37c"
+    sha256 cellar: :any, arm64_sonoma:  "a728eb5b019155bba93815034450f9f92e3319c15928a3708bd0b019940b699c"
+    sha256 cellar: :any, sonoma:        "a56d7091a092d522823af1ade8f88bdd42c82f6104ba4252f4910c23638dbc3d"
+    sha256               arm64_linux:   "a3271813c01cd5ba6329facdb2dc46f08d36a4c5afc206ae2fa5148ab9bb4233"
+    sha256               x86_64_linux:  "3a828260d4443afa4c8a45b0a5ca3ce6bf003aee19909ec15d3684ed07b477dc"
   end
 
-  head do
-    url "https://code.videolan.org/videolan/libdvdread.git", branch: "master"
-    depends_on "autoconf" => :build
-    depends_on "automake" => :build
-    depends_on "libtool" => :build
-  end
-
+  depends_on "meson" => :build
+  depends_on "ninja" => :build
+  depends_on "pkgconf" => [:build, :test]
   depends_on "libdvdcss"
 
   def install
-    ENV.append "CFLAGS", "-DHAVE_DVDCSS_DVDCSS_H"
-    ENV.append "LDFLAGS", "-ldvdcss"
+    system "meson", "setup", "build", *std_meson_args
+    system "meson", "compile", "-C", "build", "--verbose"
+    system "meson", "install", "-C", "build"
+  end
 
-    system "autoreconf", "-if" if build.head?
-    system "./configure", "--disable-dependency-tracking",
-                          "--prefix=#{prefix}"
-    system "make", "install"
+  test do
+    (testpath/"test.c").write <<~C
+      #include <dvdread/version.h>
+      #include <stdio.h>
+
+      int main(int argc, char** argv) {
+        printf("%s\\n", DVDREAD_VERSION_STRING);
+        return 0;
+      }
+    C
+
+    pkg_config_flags = shell_output("pkgconf --cflags --libs dvdread").chomp.split
+    system ENV.cc, "test.c", *pkg_config_flags, "-o", "test"
+    assert_match version.to_s, shell_output("./test")
   end
 end

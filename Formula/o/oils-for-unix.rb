@@ -1,28 +1,26 @@
 class OilsForUnix < Formula
   desc "Bash-compatible Unix shell with more consistent syntax and semantics"
-  homepage "https://www.oilshell.org/"
-  url "https://www.oilshell.org/download/oils-for-unix-0.23.0.tar.gz"
-  sha256 "c9d35ca78b4a08eeafac8bc6439e2bb40bccd3370db2226487faed6348a17521"
+  homepage "https://oils.pub/"
+  url "https://oils.pub/download/oils-for-unix-0.37.0.tar.gz"
+  sha256 "f4d41d20a0523dbcfbd4ba231f82edf25b08d4965d65bc71fcb56666d6743000"
   license "Apache-2.0"
 
   livecheck do
-    url "https://www.oilshell.org/releases.html"
+    url "https://oils.pub/releases.html"
     regex(/href=.*?oils-for-unix[._-]v?(\d+(?:\.\d+)+)\.t/i)
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "70b30bf460e32ccfd874c89c11067b20b6623cd19bc1f825453ea34c1035e29f"
-    sha256 cellar: :any,                 arm64_ventura:  "76de3593db7b5aae07beb6118e280baa5c17036810ec6101ceef39bb6485d8fb"
-    sha256 cellar: :any,                 arm64_monterey: "b5cd80ed7b3430c3aaed7461fce51b88162c2235e370f5bd29b63d57076d48cc"
-    sha256 cellar: :any,                 sonoma:         "431ada600584ba373dd189b3e1e5bac7c7916b77f982b6302a41e676d0a06071"
-    sha256 cellar: :any,                 ventura:        "4343f49136d3e8ee975c3e272e5be8a0b7fd479969c2d6f0fb3d29b44d829af2"
-    sha256 cellar: :any,                 monterey:       "c93128bc87f7d27a2daa7c56d75d361654647043c0d4220a87c91ddb0b477f98"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "41b43c7d3e5ad3fea25dc19dc24b0458faad3e6f5de692b701cf8a884381c48b"
+    sha256 cellar: :any,                 arm64_tahoe:   "78ad773133116d4f0552f7aee472eadaeb746242c18709af21f1174b56dbfe40"
+    sha256 cellar: :any,                 arm64_sequoia: "9376c438f4cc76b588affa35c61f2be91729ff34ff213afdaf27e091ccebfd7f"
+    sha256 cellar: :any,                 arm64_sonoma:  "1211e0bcdd6b6ccf0e16cfb310b40295f496e131374c390184aafef8c88bef48"
+    sha256 cellar: :any,                 sonoma:        "21baa2abb4dead1655801f44a1ec764ba37c3dbc99ff0e3489affb94b711065d"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "96888e840150140c0101352d2f6aa8ba526b48cec35564555255edc65e36c57b"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "0b779dc36db8448f09582af439acb8b41e2d712dbb7ebbbc340526cb7c3f9131"
   end
 
   depends_on "readline"
 
-  conflicts_with "oil", because: "both install 'osh' and 'ysh' binaries"
   conflicts_with "etsh", "omake", because: "both install 'osh' binaries"
 
   def install
@@ -35,7 +33,7 @@ class OilsForUnix < Formula
   end
 
   test do
-    system bin/"osh", "-c", "shopt -q parse_backticks"
+    system bin/"osh", "-c", "shopt -q lastpipe"
     assert_equal testpath.to_s, shell_output("#{bin}/osh -c 'echo `pwd -P`'").strip
 
     system bin/"ysh", "-c", "shopt -u parse_equals"

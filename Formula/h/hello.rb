@@ -1,24 +1,20 @@
 class Hello < Formula
   desc "Program providing model for GNU coding standards and practices"
   homepage "https://www.gnu.org/software/hello/"
-  url "https://ftp.gnu.org/gnu/hello/hello-2.12.1.tar.gz"
-  sha256 "8d99142afd92576f30b0cd7cb42a8dc6809998bc5d607d88761f512e26c7db20"
+  url "https://ftpmirror.gnu.org/gnu/hello/hello-2.12.3.tar.gz"
+  sha256 "0d5f60154382fee10b114a1c34e785d8b1f492073ae2d3a6f7b147687b366aa0"
   license "GPL-3.0-or-later"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "c1770a992b197e450da7cf2282fdeaae855765f66609063bfb963ffb2ccf69a5"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "cb3569886bfa1c197ea1db0b0eee32f5eff574454517ca64520c34adeff90404"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "a0103553329c8a010ed68a1143bf9126b0f1977fec308953e9068a9722790d9d"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "e8c7459b0310a5c99d441e1a5814f9eb1723b11e84b58efad01c0db4aeaf8d36"
-    sha256 cellar: :any_skip_relocation, sonoma:         "fba57a7f384eeab7d36b575b80054ddf2169249962139fc0c818553c1a1bdc6e"
-    sha256 cellar: :any_skip_relocation, ventura:        "b430480afc7bb4107bc1a42930bf69baa7f1da42c2080cdf837e57f7a509147a"
-    sha256 cellar: :any_skip_relocation, monterey:       "62534bceb8f7074827fa2146dd13603018aaf07c82e22cfef96571c8133ce8a1"
-    sha256 cellar: :any_skip_relocation, big_sur:        "480a77f0f4e0ea6aa4175b3853feba7bdeda9f0b3dd808ad02eeb358b8a48f4a"
-    sha256 cellar: :any_skip_relocation, catalina:       "c30c2be3191bd643f36e96b45b1282b5a750219bc8cab2e31d3c23d4cad5d70c"
-    sha256                               x86_64_linux:   "7935d0efdae69742f5140d514ef2e3e50d1d7cb82104cf6033ad51b900c12749"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "1d542fba541d655b431c64e07b0a2f020fa1b47cf7213bddec73d51f6b1246e4"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "ce9f4dd817532429fb3b890a901da44fa66f0540e242321f40fa12231f5ffa60"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "c2d2936b723280b7ea2fd38d977fbce0c20919e3a483229d0b4f4c96800e4d7c"
+    sha256 cellar: :any_skip_relocation, tahoe:         "d3c167221f723235eed887d3116ba656ecb4d2c824e4a04037bf63dca96ce227"
+    sha256 cellar: :any_skip_relocation, sequoia:       "d0ec57cc9a6a0ed8d035d8f19073d83f5dba21007c0d2815333d4908d40f98a8"
+    sha256 cellar: :any_skip_relocation, sonoma:        "c55ce0232ee793fee24cea7dfce44f323e9b006eb49e6ff381678614e22aa3b5"
+    sha256                               arm64_linux:   "1758c42f89b579961610910892bf56d9d637614a4bd505265ebce6e09240e397"
+    sha256                               x86_64_linux:  "babafecd3b1c532d4e799de46f943f6384b5d78beffb52c9f4730e30ad374a70"
   end
-
-  conflicts_with "perkeep", because: "both install `hello` binaries"
 
   def install
     ENV.append "LDFLAGS", "-liconv" if OS.mac?

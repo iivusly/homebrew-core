@@ -1,8 +1,8 @@
 class Tintin < Formula
   desc "MUD client"
   homepage "https://tintin.mudhalla.net/"
-  url "https://github.com/scandum/tintin/releases/download/2.02.41/tintin-2.02.41.tar.gz"
-  sha256 "b86b4af5a57b986d4ef5db41e64d38e027cf85004749479c9424f18df7642a49"
+  url "https://github.com/scandum/tintin/releases/download/2.02.61/tintin-2.02.61.tar.gz"
+  sha256 "640b4823b6f24ada6d417311bfd6263ab13be2422573c3b4ad4352223b535d88"
   license "GPL-3.0-or-later"
 
   livecheck do
@@ -11,19 +11,21 @@ class Tintin < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "64acefaf2f1dae303c72b1c27e507a16198b2dd38fe051aa98bfcc96beb413e5"
-    sha256 cellar: :any,                 arm64_ventura:  "93a881b57f3f805973ddf227470ed4b3f6d71ab49f4dfab877d8997a1f390a89"
-    sha256 cellar: :any,                 arm64_monterey: "807575c3e4722326d51bb213a11d9bb62d22e30c27494e0e3b09eef34d60b1dd"
-    sha256 cellar: :any,                 sonoma:         "bf152b74032e58f7938f17084c1b69c0c691e89a448d355cd58d6cfb73185da8"
-    sha256 cellar: :any,                 ventura:        "65e603e6184e01f46203b2e461ac88141bcb0d6759c8510d892327d7e32eab8f"
-    sha256 cellar: :any,                 monterey:       "78e273335ab2a23248743fce208fa0089009d3df2d5bfaea0c53fc3dc4a8feee"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "d1d3b0b57e1fb479e274dbb7a5cb50c48ba7e1fed97f2896e2c010125790abb2"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "1b32873045afd7f28de23d1f2e7bb8cf6d2443b5be875a075e9788f338f941b0"
+    sha256 cellar: :any,                 arm64_sequoia: "a7173fdb565b12114bf44ab36fab43de5d51d1fa31210463fb4dd895d880b87b"
+    sha256 cellar: :any,                 arm64_sonoma:  "29429cbfdd5bfa3b8e05c7d047d1be43eab5b206cddd3d15e9075f3f82c1674d"
+    sha256 cellar: :any,                 sonoma:        "ed898b18d439132d6275d38e94a2f4dacc7d71de933bfe637562782e32e06def"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "f935a18a99c16d1f8f9544970620f0e06877c933f5ca081b7dd30d4eedf3de29"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "09c43f08ffc98738dff09bbec41da931652f2ab68f932c6ac74f5271313bc170"
   end
 
   depends_on "gnutls"
-  depends_on "pcre" # PCRE2 issue: https://github.com/scandum/tintin/issues/163
+  depends_on "pcre2"
 
-  uses_from_macos "zlib"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     # find Homebrew's libpcre

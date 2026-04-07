@@ -1,10 +1,9 @@
 class Metaproxy < Formula
   desc "Z39.50 proxy and router utilizing Yaz toolkit"
   homepage "https://www.indexdata.com/resources/software/metaproxy/"
-  url "https://ftp.indexdata.com/pub/metaproxy/metaproxy-1.21.0.tar.gz"
-  sha256 "874223a820b15ee2626240c378eee71e31a4e6d3498a433c94409c949e654fae"
+  url "https://ftp.indexdata.com/pub/metaproxy/metaproxy-1.22.3.tar.gz"
+  sha256 "db154f1d57e00769c59e676888be7610bde70e32ee179c8185bd9179f2b02811"
   license "GPL-2.0-or-later"
-  revision 5
 
   # The homepage doesn't link to the latest source file, so we have to check
   # the directory listing page directly.
@@ -14,16 +13,15 @@ class Metaproxy < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "ffb90c9755736aad5b6550da41cd76092c911bde384b2a861137bb75fe825931"
-    sha256 cellar: :any,                 arm64_ventura:  "c7f1d531b20ce456abfc44a9e9bd3264e92886aa4c22078f8a40ad176d6eeb6a"
-    sha256 cellar: :any,                 arm64_monterey: "324592b63eeaa2b09519704902931acd77873e4b3ffaac9eb8dcd464df6254bb"
-    sha256 cellar: :any,                 sonoma:         "288a4377a1da730b21bb30abb69aa538f4e7e196c0c355a06b70dc9d8838083a"
-    sha256 cellar: :any,                 ventura:        "3f39818e46442d8f649354b76a0c2cf332214b3437bd1881181330be0622c1cb"
-    sha256 cellar: :any,                 monterey:       "50429ace6ef86b4ddf96da9ab950bdc40cf237662434fc61ff6f6a8f08d8c2b8"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "a6b0f7dfee1364a2b5fa6bed0444dfc973f393ba576c06840643967a5da1f64f"
+    sha256 cellar: :any,                 arm64_tahoe:   "a7eb460d7ec0ac7fb969b7f5a28fe294e07be6920f744cd3197bb65e82af295f"
+    sha256 cellar: :any,                 arm64_sequoia: "e19f2ba6325e1dfd0a27a4e932dd091af4650c35b754518246dce8e8bfa3bf39"
+    sha256 cellar: :any,                 arm64_sonoma:  "c36838976487a7d4858fab5553deb3fa08a78880768933535401b33254f36a33"
+    sha256 cellar: :any,                 sonoma:        "697ab1129a23df310aa052b7fd07b2c763d920a4c84d82d08b682e7fed9ca101"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "027749a6c0dac836bd413b5dee064ecc3ea1e71ad51b909f3f08e1c1fc7de864"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "93ab93973838c8a4537df846e886efb25da6e83adfdf38129ec611f0cb1a4e60"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
 
   depends_on "boost"
   depends_on "yaz"
@@ -31,8 +29,6 @@ class Metaproxy < Formula
 
   uses_from_macos "libxml2"
   uses_from_macos "libxslt"
-
-  fails_with gcc: "5"
 
   def install
     # Match C++ standard in boost to avoid undefined symbols at runtime
@@ -45,7 +41,7 @@ class Metaproxy < Formula
 
   # Test by making metaproxy test a trivial configuration file (etc/config0.xml).
   test do
-    (testpath/"test-config.xml").write <<~EOS
+    (testpath/"test-config.xml").write <<~XML
       <?xml version="1.0"?>
       <metaproxy xmlns="http://indexdata.com/metaproxy" version="1.0">
         <start route="start"/>
@@ -65,7 +61,7 @@ class Metaproxy < Formula
           </route>
         </routes>
       </metaproxy>
-    EOS
+    XML
 
     system bin/"metaproxy", "-t", "--config", testpath/"test-config.xml"
   end

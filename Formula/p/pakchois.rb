@@ -12,6 +12,8 @@ class Pakchois < Formula
 
   bottle do
     rebuild 3
+    sha256                               arm64_tahoe:    "7f225dfdf9d1ac84b9bbd38a83157664f5b03b6951a09b9888b8b67ab586ae59"
+    sha256                               arm64_sequoia:  "9634938ed93d02adaa5e477a29ee2f128d058f63cfbbe9c460ead07b53ac23d1"
     sha256                               arm64_sonoma:   "c5e557c4172e6800ca80178acedc0a6029c4870ceb37ed56d6a3944f32a271ee"
     sha256                               arm64_ventura:  "d8467830fd424d6fea0a0f0ff82949262d55d4221fa2a2d630b0679d374c803f"
     sha256                               arm64_monterey: "fb701bf9c363b4e09f285fa9c6f60aba921a93f826c37afd5fcc54b0bc5e4ed1"
@@ -21,7 +23,7 @@ class Pakchois < Formula
     sha256                               monterey:       "f53bdb6cb2f47b0ed2e1df5f2c80f9568c3b2c55463de2cfdfe742da945364c0"
     sha256 cellar: :any,                 big_sur:        "fd91b09bb010ac37483a910b0431c6082903ee843a15f4cc767bde57ce0b7267"
     sha256 cellar: :any,                 catalina:       "ca82f2950582bc54e46122eb71ff8e8acdc739772baf53ab2d545755f03303f8"
-    sha256 cellar: :any,                 mojave:         "cc98c7b706f27320ee7c673d906b4da22b402afe0d93b4c66f73a8cde86f7929"
+    sha256                               arm64_linux:    "f1d80aa63347835060c9d57d93c36226dc116d3c4b573e3db74128a86e4bfc1b"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "e9e96d8cef014042091db67065c8b02439cba4cfd381ca7651bc721ec120ad4a"
   end
 
@@ -29,8 +31,39 @@ class Pakchois < Formula
     # Fix flat namespace usage
     inreplace "configure", "${wl}-flat_namespace ${wl}-undefined ${wl}suppress", "${wl}-undefined ${wl}dynamic_lookup"
 
-    system "./configure", "--disable-dependency-tracking",
-                          "--prefix=#{prefix}"
+    args = []
+    # Help old config scripts identify arm64 linux
+    args << "--build=aarch64-unknown-linux-gnu" if OS.linux? && Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
+
+    system "./configure", *args, *std_configure_args
     system "make", "install"
+  end
+
+  test do
+    (testpath/"test.c").write <<~C
+      #include <pakchois/pakchois.h>
+      #include <stdio.h>
+
+      int main(void) {
+        pakchois_module_t *mod = NULL;
+
+        // load non-existent module
+        ck_rv_t rv = pakchois_module_load(&mod, "nonexistent-module");
+        printf("pakchois_module_load returned: %lu\\n", rv);
+
+        if (rv != 0) {
+          printf("Module load failed as expected\\n");
+        }
+
+        if (mod != NULL) {
+          pakchois_module_destroy(mod);
+        }
+
+        return 0;
+      }
+    C
+
+    system ENV.cc, "test.c", "-I#{include}", "-L#{lib}", "-lpakchois", "-o", "test"
+    assert_match "Module load failed as expected", shell_output("./test")
   end
 end

@@ -1,13 +1,12 @@
 class Doctest < Formula
   desc "Feature-rich C++11/14/17/20/23 single-header testing framework"
   homepage "https://github.com/doctest/doctest"
-  url "https://github.com/doctest/doctest/archive/refs/tags/v2.4.11.tar.gz"
-  sha256 "632ed2c05a7f53fa961381497bf8069093f0d6628c5f26286161fbd32a560186"
+  url "https://github.com/doctest/doctest/archive/refs/tags/v2.5.1.tar.gz"
+  sha256 "d4ebd26061d5a5d05355f52289c3f595d744aac8d70c547a012b2be96bc2f014"
   license "MIT"
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, all: "519e6fbf49ef8e5dadf22eb0cc8ee2ae2f9103d1916549fd16bc6afc21d83ea1"
+    sha256 cellar: :any_skip_relocation, all: "27974a7be4dbe3e03b7edfe2d66e203682fabfc6f94c342a7983908556fede52"
   end
 
   depends_on "cmake" => :build
@@ -19,7 +18,7 @@ class Doctest < Formula
   end
 
   test do
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
       #include <doctest/doctest.h>
       TEST_CASE("Basic") {
@@ -32,7 +31,7 @@ class Doctest < Formula
           REQUIRE(x == 1);
         }
       }
-    EOS
+    CPP
 
     system ENV.cxx, "test.cpp", "-std=c++11", "-o", "test"
     system "./test"

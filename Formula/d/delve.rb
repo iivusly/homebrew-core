@@ -1,24 +1,26 @@
 class Delve < Formula
   desc "Debugger for the Go programming language"
   homepage "https://github.com/go-delve/delve"
-  url "https://github.com/go-delve/delve/archive/refs/tags/v1.23.0.tar.gz"
-  sha256 "fed613f0457600a30713968c111bb1fc3b014a4ebb25acaaf45cdbd03f8337a1"
+  url "https://github.com/go-delve/delve/archive/refs/tags/v1.26.1.tar.gz"
+  sha256 "16bc1b7ae9277e109d4a8c3c607aa676ebd2ce07fd5fe44d4f4ac83fc12f9c20"
   license "MIT"
+  head "https://github.com/go-delve/delve.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "b5e5204b640fefe62e35cb361a8434141cf17cfe1c075f6e1e90971150bd7387"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "795ffc08b586586cf5db980a881a541d9dd0f1f633138851cd792b373557df6b"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "a3810ff7324bc563a72f0e5759d4a686537b005af4e1429306493b398396ad08"
-    sha256 cellar: :any_skip_relocation, sonoma:         "44050c71d0250428196bd7770896a7e5aa20d4be2d5f31adda6d8831cc68fe2e"
-    sha256 cellar: :any_skip_relocation, ventura:        "e8f4d5f6288feae80457987e3c9e13e6c66d00874dd8df2641b2adfe42848413"
-    sha256 cellar: :any_skip_relocation, monterey:       "ced6163225098afdae945e3af3412e46ad23aef6606221f60c277c10c689f0aa"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "2a2e991dd05dfc47d22efa151f2495b667289b945b9026d04c277457188d910e"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "860a3030deba778d991e3f7f32a82f8c85df8fc53e2f52861f3cf3ae5da6e85a"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "860a3030deba778d991e3f7f32a82f8c85df8fc53e2f52861f3cf3ae5da6e85a"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "860a3030deba778d991e3f7f32a82f8c85df8fc53e2f52861f3cf3ae5da6e85a"
+    sha256 cellar: :any_skip_relocation, sonoma:        "73eabe3da7276ed59abe741cf3d4af043b84bf03ad34d28645bce04ea6e580a2"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "6600bcd3fe110c6b453b36b5055ed23dced1125c25d4e20cdcb1333f8c089ab3"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "e61ef4e5c1178f6bc95f5be201e8f56541ce2d0a3487d281107b2de069b557f8"
   end
 
   depends_on "go" => :build
 
   def install
-    system "go", "build", *std_go_args(output: bin/"dlv"), "./cmd/dlv"
+    system "go", "build", *std_go_args(ldflags: "-s -w", output: bin/"dlv"), "./cmd/dlv"
+
+    generate_completions_from_executable(bin/"dlv", shell_parameter_format: :cobra)
   end
 
   test do

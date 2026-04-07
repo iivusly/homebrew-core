@@ -1,20 +1,17 @@
 class TRec < Formula
   desc "Blazingly fast terminal recorder that generates animated gif images for the web"
   homepage "https://github.com/sassman/t-rec-rs"
-  url "https://github.com/sassman/t-rec-rs/archive/refs/tags/v0.7.6.tar.gz"
-  sha256 "a261104e33d6f60a8f9fe51c2339b79875ddb5ff5b9e7de68e7e52f9d25bf19e"
+  url "https://github.com/sassman/t-rec-rs/archive/refs/tags/v0.8.2.tar.gz"
+  sha256 "79ea7cbfe88e45ab913fa9963d74b9b7530cb73e39b686b0d8a692b7a9f331b8"
   license "GPL-3.0-only"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "60f11e3b53621879f01fd84bc63c26cd3a86f66b2cd93a177f8c63f732f4996e"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "f66c613c2713d64447c565f01e31ac69153ebf9dcefb3c3292fa5ec92c7b96fc"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "10e8931e0466e77574f5528464d94d78fefa4a303219341605430c0cd992441c"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "bedf1fd21666f526ffa3aad1196c3b7847b17734af07c984affcd2d20646ba16"
-    sha256 cellar: :any_skip_relocation, sonoma:         "613a0fe4fb12ea1db11698c315130e2137ae98ad4f5a10ea7753409a4c15627f"
-    sha256 cellar: :any_skip_relocation, ventura:        "b2d905a57f708846827719505b1a6c7e43f45a0e2a1e0b4112039288b64d8194"
-    sha256 cellar: :any_skip_relocation, monterey:       "52275aef2850a0cac76c8fb91ce392bd29b6c494312b7f563896922bd8c78a8c"
-    sha256 cellar: :any_skip_relocation, big_sur:        "a1ea4ff9e0fd2f102ff606a9de2f7a851f51d518cd36cd70192fadf8d0ad2680"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "3d3e2cb3b655b70016073b173db82dc545abb140388880ac0ae8c205c0732a1b"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "157385e3762d2e024b351cffb777869ce4e7ad9113047b8cae70abfd6e572254"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "df45c6c6354b2fb570c29e252d892b714fc3cef78b01ee9b2a77d099cacf3dc0"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "11e3c4fe21f9571c79fd41638781a4d27b274df574a2b8330bbc98b1d3904c8c"
+    sha256 cellar: :any_skip_relocation, sonoma:        "5276859a6a2b1beb31ecb92edc804f73f3241e7caa71fc175415b15362a02d65"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "3e88a77bda09c3124d85389a9c1942a1af5cdf4886304dbefb770514fc30c172"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "626548f7c83623216cf151c1238264e074a2d7e6cae14256f50a59147f357db9"
   end
 
   depends_on "rust" => :build
@@ -29,7 +26,7 @@ class TRec < Formula
     if OS.mac?
       assert_equal "Error: Cannot grab screenshot from CGDisplay of window id 999999", o
     else
-      assert_equal "Error: Display parsing error", o
+      assert_equal "Error: $DISPLAY variable not set and no value was provided explicitly", o
     end
   end
 end

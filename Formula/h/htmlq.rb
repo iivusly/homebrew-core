@@ -8,6 +8,8 @@ class Htmlq < Formula
 
   bottle do
     rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:    "10400c86049f0533ce50d31348a73cfbed969c2143c5080c674b962378b6d81e"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia:  "dad7b90fdb9cf7781efc52510275c94be20072923755c429fcbc72f0101fbc7d"
     sha256 cellar: :any_skip_relocation, arm64_sonoma:   "e2a2cabca03421c79492a6928576d7e6282ce001a17e278b89335f37717d29ff"
     sha256 cellar: :any_skip_relocation, arm64_ventura:  "0b48cd78910d620c598a8102cc8801f0155b8aee452440b6f6d965e931488906"
     sha256 cellar: :any_skip_relocation, arm64_monterey: "2e03e8a2c059ad4ac3454ad2b4cc70fb77e7883d7141f6f10d8a9bfe9c421b53"
@@ -17,6 +19,7 @@ class Htmlq < Formula
     sha256 cellar: :any_skip_relocation, monterey:       "c2dc9b6cb1914175ee46979f7edcf7d6883b9234da5f85711fd7f58ebef11e44"
     sha256 cellar: :any_skip_relocation, big_sur:        "f14e7cff6db455661e178db9d57b3b5cbc172c4bc3903d959ee1b5f38bf816a2"
     sha256 cellar: :any_skip_relocation, catalina:       "4a790da130fb9f4db4d43051df1fbcf409b6dbd49293d757411cd5118c9e18e9"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "feb04cd2b99368ec5b5ad4119906d9766235c8d88ab842f26ec35126c9c535a5"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "b93418d06723d65a8da8cb3c34819f24f825a057efc7788bf45f0db3484abf13"
   end
 
@@ -27,7 +30,7 @@ class Htmlq < Formula
   end
 
   test do
-    (testpath/"test.html").write <<~EOS
+    (testpath/"test.html").write <<~HTML
       <!doctype html>
       <html>
         <head>
@@ -44,7 +47,7 @@ class Htmlq < Formula
             </div>
         </body>
       </html>
-    EOS
+    HTML
 
     test_html = testpath/"test.html"
     assert_equal "More information...\n", pipe_output("#{bin}/htmlq -t p a", test_html.read)

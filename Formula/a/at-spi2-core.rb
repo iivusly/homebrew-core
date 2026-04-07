@@ -1,34 +1,34 @@
 class AtSpi2Core < Formula
   desc "Protocol definitions and daemon for D-Bus at-spi"
-  homepage "https://www.freedesktop.org/wiki/Accessibility/AT-SPI2"
-  url "https://download.gnome.org/sources/at-spi2-core/2.52/at-spi2-core-2.52.0.tar.xz"
-  sha256 "0ac3fc8320c8d01fa147c272ba7fa03806389c6b03d3c406d0823e30e35ff5ab"
+  homepage "https://www.freedesktop.org/wiki/Accessibility/AT-SPI2/"
+  url "https://download.gnome.org/sources/at-spi2-core/2.60/at-spi2-core-2.60.0.tar.xz"
+  sha256 "80e50c1a97d8fd660a3fadb02ca35876df881c266d3d6108fc5b4c113614cb99"
   license "LGPL-2.1-or-later"
+  compatibility_version 1
 
   bottle do
-    sha256 arm64_sonoma:   "ff5e01eeb14e7db7651863f15fe80e74bac6fe884af58aa48fad227b9bb4fe54"
-    sha256 arm64_ventura:  "be2bf9926dcb90cb91a2efa12d82a5dd61542f30bf8a44fa78104d74919aa3b8"
-    sha256 arm64_monterey: "3864d518fef45312ff7d3ae79c7c98161e4ddf1af86a32e5927638c33cc793d4"
-    sha256 sonoma:         "1f344739ceff74c6b3effec6c82da08feab4e404a63c06034172045869bdefab"
-    sha256 ventura:        "b3d3cc4309862f55efd46a713f1ba2dd813be0f654f70525291f2a631f1d35f7"
-    sha256 monterey:       "5ce9e4f1a004e2d5de65ff205747c0e3734576fb9ae6d5dcb28f69304ad1544e"
-    sha256 x86_64_linux:   "3163183968f02b39e5476ac538b74f5e0eb5ac8a613e53da0bd90380cfd2ae30"
+    sha256 arm64_tahoe:   "9f10240d7f2e152d0694dc1c499bb0904b5d32ef465f1e2a17dffb580dc03fa0"
+    sha256 arm64_sequoia: "8d0f5d633269e1feb5d59530f36f4f9b25b14633d3ca3812cb439f7d4a316b16"
+    sha256 arm64_sonoma:  "e823a0efee98929e83750ce1b729a2f5d565b7a58a7878402034457f817db267"
+    sha256 sonoma:        "d5c1066543b18a34cdc2e6c85a45a7fbff42feba15feda0da6f88e44e7d67a6b"
+    sha256 arm64_linux:   "4d0cbf9c05b9540e382b6cc9ab91d5c8c262e7ec3be829206e5a4a0137b94c96"
+    sha256 x86_64_linux:  "d5772836953d6d9a8144461f01f1d1c5f2187c53f0112107f0c6d6d54d8d5041"
   end
 
   depends_on "gettext" => :build
   depends_on "gobject-introspection" => :build
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => [:build, :test]
+  depends_on "pkgconf" => [:build, :test]
+  depends_on "xorgproto" => :build
 
   depends_on "dbus"
   depends_on "glib"
   depends_on "libx11"
   depends_on "libxi"
   depends_on "libxtst"
-  depends_on "xorgproto"
 
-  uses_from_macos "libxml2"
+  uses_from_macos "libxml2" => :build
 
   on_macos do
     depends_on "gettext"
@@ -41,7 +41,7 @@ class AtSpi2Core < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       /*
        * List the applications registered on at-spi.
        */
@@ -71,7 +71,7 @@ class AtSpi2Core < Formula
 
         return 1;
       }
-    EOS
+    C
 
     pkg_config_cflags = shell_output("pkg-config --cflags --libs atspi-2").chomp.split
     system ENV.cc, "test.c", *pkg_config_cflags, "-lgobject-2.0", "-o", "test"

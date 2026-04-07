@@ -2,25 +2,24 @@ class Caf < Formula
   # Renamed from libccpa
   desc "Implementation of the Actor Model for C++"
   homepage "https://www.actor-framework.org/"
-  url "https://github.com/actor-framework/actor-framework/archive/refs/tags/1.0.1.tar.gz"
-  sha256 "635bdd6e3b70886f1d9aa75c48e5bdb4084afae1f159bbfe5ea91f99b0460f6b"
+  url "https://github.com/actor-framework/actor-framework/archive/refs/tags/1.1.0.tar.gz"
+  sha256 "9febd85d3a4f50dac760592043028a36bea62bba50c3ee2fc1eace954dd8ae27"
   license "BSD-3-Clause"
-  head "https://github.com/actor-framework/actor-framework.git", branch: "master"
+  head "https://github.com/actor-framework/actor-framework.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "1e12a584df05f1cec7122920ced89d6bb99c55878a673da31bb66ed8c741b4e0"
-    sha256 cellar: :any,                 arm64_ventura:  "c0790aeb9aef8cdd4379c4b06112871709ddf81b103068d92247f506bfa602fc"
-    sha256 cellar: :any,                 arm64_monterey: "61a7b91ff6b083dbaa10e24be3cdfeb693d3e2c6e81c95a66804b5d6d9fc08c0"
-    sha256 cellar: :any,                 sonoma:         "4d6531af952489110db600767de32e33bd70c0e65ce6ce9214fbe07f6365194f"
-    sha256 cellar: :any,                 ventura:        "ee77d8ccc34bdb1b0050a094936ef9d2395abd9e42a55a3d170c573547ccc21b"
-    sha256 cellar: :any,                 monterey:       "3d5ce3f385d9e01f38bf6621b1c0d3a7fb8177880c86b25d551142adae5c669c"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "5f5dc9a456f8b1e63432bc16068cb1d33f0b88b2b2224223033c3018ba13ee4c"
+    sha256 cellar: :any,                 arm64_tahoe:   "faa09c3ddebe8332936b1cc01028494b75a7b80763b045256840983be78f3785"
+    sha256 cellar: :any,                 arm64_sequoia: "7678c03ac5833969bc5ef720b398e774d1e3156d268d34ce9d95349e7f885823"
+    sha256 cellar: :any,                 arm64_sonoma:  "34839f1a22902b556f3ece25edc7e1b3123768f17ed76f2a0e5a24ae0f13110b"
+    sha256 cellar: :any,                 arm64_ventura: "c2b9cac897daf44e7c17dcf6b52790a4ed3b74d36a96b61f1794bf3077be02df"
+    sha256 cellar: :any,                 sonoma:        "aa3ca3370d07b8ed67d9e319eccf4412e8b7cd8a654eadd8df8fbf1f2c2feff3"
+    sha256 cellar: :any,                 ventura:       "967061c8c7b2f3b6adc948623502333c7d680616a6fe21941374aba7f836ae01"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "980f1e6bf7b3462f90c1251a2fc22ca9cdee8f81e1ae631fd34cdd48469aad7c"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "18dd86732ab832bc6b035af48f3fcc8d05c6ec4dca5ec068d09f43fc3b724335"
   end
 
   depends_on "cmake" => :build
   depends_on "openssl@3"
-
-  fails_with gcc: "5"
 
   def install
     tools = pkgshare/"tools"
@@ -33,7 +32,7 @@ class Caf < Formula
   end
 
   test do
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include <iostream>
       #include <caf/all.hpp>
       using namespace caf;
@@ -44,7 +43,7 @@ class Caf < Formula
         });
       }
       CAF_MAIN()
-    EOS
+    CPP
     system ENV.cxx, "-std=c++17", "test.cpp", "-L#{lib}", "-lcaf_core", "-o", "test"
     system "./test"
   end

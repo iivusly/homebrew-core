@@ -6,18 +6,15 @@ class Libgda < Formula
   # The executable tools are GPL-2.0-or-later, but these are considered experimental
   # and not installed by default. The license should be updated when tools are installed.
   license "LGPL-2.0-or-later"
-  revision 2
+  revision 5
 
   bottle do
-    sha256 arm64_sonoma:   "aed3116bda74be0c4710ef3ea32751eb6651c9446e5d06c61aaf852c08e7add0"
-    sha256 arm64_ventura:  "799870ada5491b29dfb5b8a9a0d4334f531166cc6fddb21fd82438fc08fed9b9"
-    sha256 arm64_monterey: "0256d4371104f081140440e55caa0574a6a50dfaa85b959a3dbeefd595cba19c"
-    sha256 arm64_big_sur:  "a3659901c2e025869a202521f3f002fa43dbebb2620c44991510e9ea480356f0"
-    sha256 sonoma:         "0cfe5ef27e321aad9fb3040ba28d01d9ab182ed8964e5f872148a3f04bdc9b80"
-    sha256 ventura:        "7d44fcfd33753ebb70cae62895997dfef29d22883eeaade00035bb7ba2dae1ae"
-    sha256 monterey:       "4639bf64ccd60afcdad48e70a95e3fa3f6949ce206588500e59c93909fa1bc12"
-    sha256 big_sur:        "b1765e96a889c64da0b3d8c841999fff887791c1e43f919a601f025acf632903"
-    sha256 x86_64_linux:   "ee867a6ff4b253fc4bf1f39757e68a03f4347d0856601e825e258fbefda22db5"
+    sha256 arm64_tahoe:   "3b88a622a31068287a6ffb6cbc65f564087bf4075f9b7d12e1558a271dfa4098"
+    sha256 arm64_sequoia: "8f4076b1d7e3f9d4638d740248e2b2e2533e078c559701115c5a75fcea611a91"
+    sha256 arm64_sonoma:  "a5f1c8797863b56478b0a90eafff8fa01118e5e5f65f5d6312366e27cf62f1ab"
+    sha256 sonoma:        "dde0d4d9216afd054308c32af549d5da2f4ef1132560de75fb45294e22c62eab"
+    sha256 arm64_linux:   "432428c494240cbb76d0399b1ffcacd120214b14259a8c69b9ddeb8b85404be8"
+    sha256 x86_64_linux:  "94e7dcaf6d1c37b5acd8ba1657acbd9a06ab82064a1709ad97050458cb41f174"
   end
 
   depends_on "gettext" => :build
@@ -25,11 +22,12 @@ class Libgda < Formula
   depends_on "intltool" => :build
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => [:build, :test]
+  depends_on "pkgconf" => [:build, :test]
   depends_on "vala" => :build
   depends_on "glib"
   depends_on "iso-codes"
   depends_on "json-glib"
+  depends_on "mariadb-connector-c"
   depends_on "sqlite"
 
   uses_from_macos "libxml2"
@@ -56,6 +54,12 @@ class Libgda < Formula
     sha256 "2f2d257085b40ef4fccf2db68fe51407ba0f59d39672fc95fd91be3e46e91ffa"
   end
 
+  # Apply Fedora patch to use `mariadb-connector-c`
+  patch do
+    url "https://src.fedoraproject.org/rpms/libgda/raw/e33ef2c0af32d1aab4a1255b83882552e36002a4/f/mariadb.patch"
+    sha256 "5e2dca080ab2d5d09bba5d41ff4bc7dd63dea5f9f493d6b3e28d592ef48f52fc"
+  end
+
   def install
     system "meson", "setup", "build", *std_meson_args
     system "meson", "compile", "-C", "build", "--verbose"
@@ -65,7 +69,7 @@ class Libgda < Formula
 
   test do
     cp pkgshare/"example.c", testpath
-    flags = shell_output("pkg-config --cflags --libs libgda-#{version.major_minor}").chomp.split
+    flags = shell_output("pkgconf --cflags --libs libgda-#{version.major_minor}").chomp.split
     system ENV.cc, "example.c", "-o", "example", *flags
     assert_match <<~EOS, shell_output("./example")
       ------+---------+---------

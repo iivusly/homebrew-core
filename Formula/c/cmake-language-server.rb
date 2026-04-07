@@ -3,26 +3,26 @@ class CmakeLanguageServer < Formula
 
   desc "Language Server for CMake"
   homepage "https://github.com/regen100/cmake-language-server"
-  url "https://files.pythonhosted.org/packages/cc/ce/4b14dcaac4359fc9bdcb823763c7984b72e16ff2bf1c709bbc963cc0e0bc/cmake_language_server-0.1.10.tar.gz"
-  sha256 "dbc627dc1e549fc7414f459bdb340812acd84a0c8727b92e73c4bd348e6311bf"
+  url "https://files.pythonhosted.org/packages/cf/ad/54c337fd2093a7c7c13528ac1393aeda009cdc16be954041834328845237/cmake_language_server-0.1.11.tar.gz"
+  sha256 "005f48367ec569457a7229a58f6762044fddacac647858b39d725ae2b3cd695b"
   license "MIT"
   head "https://github.com/regen100/cmake-language-server.git", branch: "master"
 
   bottle do
     rebuild 1
-    sha256 cellar: :any_skip_relocation, all: "6990801bff5c6c969e674d53a254218c949c0f71468faa41f8ad32fd0afd19ff"
+    sha256 cellar: :any_skip_relocation, all: "4067002616d19dd610a111948026e3ef733dbffb44c86238cf882fe3b2b26359"
   end
 
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   resource "attrs" do
-    url "https://files.pythonhosted.org/packages/e3/fc/f800d51204003fa8ae392c4e8278f256206e7a919b708eef054f5f4b650d/attrs-23.2.0.tar.gz"
-    sha256 "935dc3b529c262f6cf76e50877d35a4bd3c1de194fd41f47a2b7ae8f19971f30"
+    url "https://files.pythonhosted.org/packages/49/7c/fdf464bcc51d23881d110abd74b512a42b3d5d376a55a831b44c603ae17f/attrs-25.1.0.tar.gz"
+    sha256 "1c97078a80c814273a76b2a298a932eb681c87415c11dee0a6921de7f1b02c3e"
   end
 
   resource "cattrs" do
-    url "https://files.pythonhosted.org/packages/1e/57/c6ccd22658c4bcb3beb3f1c262e1f170cf136e913b122763d0ddd328d284/cattrs-23.2.3.tar.gz"
-    sha256 "a934090d95abaa9e911dac357e3a8699e0b4b14f8529bcc7d2b1ad9d51672b9f"
+    url "https://files.pythonhosted.org/packages/64/65/af6d57da2cb32c076319b7489ae0958f746949d407109e3ccf4d115f147c/cattrs-24.1.2.tar.gz"
+    sha256 "8028cfe1ff5382df59dd36474a86e02d817b06eaf8af84555441bac915d2ef85"
   end
 
   resource "lsprotocol" do
@@ -36,21 +36,30 @@ class CmakeLanguageServer < Formula
   end
 
   def install
+    # Unpin python for 3.14: https://github.com/regen100/cmake-language-server/pull/104
+    inreplace "pyproject.toml", 'requires-python = ">=3.8.0,<3.14"', 'requires-python = ">=3.8.0"'
     virtualenv_install_with_resources
   end
 
   test do
-    input =
-      "Content-Length: 152\r\n" \
-      "\r\n" \
-      "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\":{\"" \
-      "processId\":88075,\"rootUri\":null,\"capabilities\":{},\"trace\":\"ver" \
-      "bose\",\"workspaceFolders\":null}}\r\n"
-
-    output = pipe_output(bin/"cmake-language-server", input)
-
-    assert_match(/^Content-Length: \d+/i, output)
-
     assert_match version.to_s, shell_output("#{bin}/cmake-language-server --version")
+
+    json = <<~JSON
+      {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "initialize",
+        "params": {
+          "processId": 88075,
+          "rootUri": null,
+          "capabilities": {},
+          "trace": "verbose",
+          "workspaceFolders": null
+        }
+      }
+    JSON
+    input = "Content-Length: #{json.size}\r\n\r\n#{json}"
+    output = pipe_output(bin/"cmake-language-server", input)
+    assert_match(/^Content-Length: \d+/i, output)
   end
 end

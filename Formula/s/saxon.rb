@@ -1,9 +1,9 @@
 class Saxon < Formula
   desc "XSLT and XQuery processor"
   homepage "https://github.com/Saxonica/Saxon-HE"
-  url "https://github.com/Saxonica/Saxon-HE/releases/download/SaxonHE12-5/SaxonHE12-5J.zip"
-  version "12.5"
-  sha256 "35a46728792bd4cec2fc262d48777b4c79b5cdeef03d2981e3a64ecb3a19f716"
+  url "https://github.com/Saxonica/Saxon-HE/releases/download/SaxonHE12-9/SaxonHE12-9J.zip"
+  version "12.9"
+  sha256 "f2895bef3794112c650a158be27c39a86e88c1717ebb8e0e88067d1f07635d12"
   license all_of: ["BSD-3-Clause", "MIT", "MPL-2.0"]
 
   livecheck do
@@ -17,9 +17,10 @@ class Saxon < Formula
     end
   end
 
+  no_autobump! because: :incompatible_version_format
+
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, all: "a3155919fc60b17e722c0f2c760f08c4a8e39812273cf86f11e3aa0e6e36b2ee"
+    sha256 cellar: :any_skip_relocation, all: "694718b25706ab34c48a5b3916841c3f45c391f4202e6b4c15d30ed486e46974"
   end
 
   depends_on "openjdk"
@@ -27,13 +28,18 @@ class Saxon < Formula
   def install
     libexec.install Dir["*.jar", "doc", "lib", "notices"]
     bin.write_jar_script libexec/"saxon-he-#{version.major_minor}.jar", "saxon"
+    (bin/"gizmo").write <<~EOS
+      #!/bin/bash
+      export JAVA_HOME="#{Language::Java.overridable_java_home_env("11+")[:JAVA_HOME]}"
+      exec "${JAVA_HOME}/bin/java" -cp "#{libexec}/saxon-he-#{version.major_minor}.jar" net.sf.saxon.Gizmo "$@"
+    EOS
   end
 
   test do
-    (testpath/"test.xml").write <<~EOS
+    (testpath/"test.xml").write <<~XML
       <test>It works!</test>
-    EOS
-    (testpath/"test.xsl").write <<~EOS
+    XML
+    (testpath/"test.xsl").write <<~XSL
       <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="2.0">
         <xsl:template match="/">
           <html>
@@ -43,14 +49,24 @@ class Saxon < Formula
           </html>
         </xsl:template>
       </xsl:stylesheet>
-    EOS
-    assert_equal <<~EOS.chop, shell_output("#{bin}/saxon test.xml test.xsl")
+    XSL
+    assert_equal <<~HTML.chop, shell_output("#{bin}/saxon test.xml test.xsl")
       <!DOCTYPE HTML>
       <html>
          <body>
             <p>It works!</p>
          </body>
       </html>
-    EOS
+    HTML
+
+    (testpath/"test-gizmo.txt").write "show\n"
+
+    # Run the command and capture output
+    output = shell_output("#{bin}/gizmo -s:test.xml -q:test-gizmo.txt")
+
+    # Split output into lines
+    lines = output.lines.map(&:chomp)
+
+    assert_equal "<test>It works!</test>", lines[1]
   end
 end

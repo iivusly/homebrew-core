@@ -1,13 +1,12 @@
 class SchemaEvolutionManager < Formula
   desc "Manage postgresql database schema migrations"
   homepage "https://github.com/mbryzek/schema-evolution-manager"
-  url "https://github.com/mbryzek/schema-evolution-manager/archive/refs/tags/0.9.54.tar.gz"
-  sha256 "8d1f3ec1673f3da8b423866ee9b1ceb6e6492ef723022884a39f2097c05a5410"
+  url "https://github.com/mbryzek/schema-evolution-manager/archive/refs/tags/0.9.57.tar.gz"
+  sha256 "fdb590811ddfda25a4d217458ad8452ea15b4daa1e238b2d6d38f5f439501c46"
   license "Apache-2.0"
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, all: "8d9f6e20e4347e6a41d9f2df4a9cab93e7e2ea9ff3331070e7c16a8d064b392e"
+    sha256 cellar: :any_skip_relocation, all: "b1aca779bb8dbd57365c399582cbb6f091d8aad8a0d808e18e2177e07bed81b9"
   end
 
   uses_from_macos "ruby"
@@ -17,9 +16,9 @@ class SchemaEvolutionManager < Formula
   end
 
   test do
-    (testpath/"new.sql").write <<~EOS
+    (testpath/"new.sql").write <<~SQL
       CREATE TABLE IF NOT EXISTS test (id text);
-    EOS
+    SQL
     system "git", "init", "."
     assert_match "File staged in git", shell_output("#{bin}/sem-add ./new.sql")
   end

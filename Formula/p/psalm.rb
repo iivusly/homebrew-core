@@ -1,18 +1,17 @@
 class Psalm < Formula
   desc "PHP Static Analysis Tool"
   homepage "https://psalm.dev"
-  url "https://github.com/vimeo/psalm/releases/download/5.25.0/psalm.phar"
-  sha256 "c914089a0a93e63e30365b6263b442f1abb0842896ce68267adc566fba6a4d6f"
+  url "https://github.com/vimeo/psalm/releases/download/6.16.1/psalm.phar"
+  sha256 "7ace71e4f698466e7e16810679a1895ea623060579aff46fcf9fd0f1c09abe00"
   license "MIT"
 
+  livecheck do
+    url :stable
+    regex(/^v?(\d+(?:\.\d+)+)$/i)
+  end
+
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "c633e0ce3bcecd7b7f17a0fd797b8a2001e8a754b80a1162e347a3e970c7eebf"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "c633e0ce3bcecd7b7f17a0fd797b8a2001e8a754b80a1162e347a3e970c7eebf"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "c633e0ce3bcecd7b7f17a0fd797b8a2001e8a754b80a1162e347a3e970c7eebf"
-    sha256 cellar: :any_skip_relocation, sonoma:         "4efa33533fdf9ee99b160c971732b8e1d79bd9598f3eb220e0468878bf3a51b9"
-    sha256 cellar: :any_skip_relocation, ventura:        "4efa33533fdf9ee99b160c971732b8e1d79bd9598f3eb220e0468878bf3a51b9"
-    sha256 cellar: :any_skip_relocation, monterey:       "4efa33533fdf9ee99b160c971732b8e1d79bd9598f3eb220e0468878bf3a51b9"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "2c08515655e03c77d6bf27afac93978f01ceb9ecb105045e62204a303e298f37"
+    sha256 cellar: :any_skip_relocation, all: "dac221bf058fb65febc3640fa45736d45a5729c4b0c54aba6a5eb41f5440d741"
   end
 
   depends_on "composer" => :test
@@ -26,11 +25,16 @@ class Psalm < Formula
   end
 
   def install
-    bin.install "psalm.phar" => "psalm"
+    libexec.install "psalm.phar" => "psalm"
+
+    (bin/"psalm").write <<~PHP
+      #!#{Formula["php"].opt_bin}/php
+      <?php require '#{libexec}/psalm';
+    PHP
   end
 
   test do
-    (testpath/"composer.json").write <<~EOS
+    (testpath/"composer.json").write <<~JSON
       {
         "name": "homebrew/psalm-test",
         "description": "Testing if Psalm has been installed properly.",
@@ -46,9 +50,9 @@ class Psalm < Formula
         },
         "minimum-stability": "stable"
       }
-    EOS
+    JSON
 
-    (testpath/"src/Email.php").write <<~EOS
+    (testpath/"src/Email.php").write <<~PHP
       <?php
       declare(strict_types=1);
 
@@ -90,7 +94,7 @@ class Psalm < Formula
           }
         }
       }
-    EOS
+    PHP
 
     system "composer", "install"
 

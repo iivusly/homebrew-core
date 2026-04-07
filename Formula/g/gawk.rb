@@ -1,21 +1,20 @@
 class Gawk < Formula
   desc "GNU awk utility"
   homepage "https://www.gnu.org/software/gawk/"
-  url "https://ftp.gnu.org/gnu/gawk/gawk-5.3.0.tar.xz"
-  mirror "https://ftpmirror.gnu.org/gawk/gawk-5.3.0.tar.xz"
-  sha256 "ca9c16d3d11d0ff8c69d79dc0b47267e1329a69b39b799895604ed447d3ca90b"
+  url "https://ftpmirror.gnu.org/gnu/gawk/gawk-5.4.0.tar.xz"
+  mirror "https://ftp.gnu.org/gnu/gawk/gawk-5.4.0.tar.xz"
+  sha256 "3dd430f0cd3b4428c6c3f6afc021b9cd3c1f8c93f7a688dc268ca428a90b4ac1"
   license "GPL-3.0-or-later"
+  compatibility_version 1
   head "https://git.savannah.gnu.org/git/gawk.git", branch: "master"
 
   bottle do
-    rebuild 2
-    sha256 arm64_sonoma:   "73d743d915e4c9841f9bdc289710ef4ea071ccf1f026542f1fcc8ba4a870e8f5"
-    sha256 arm64_ventura:  "36265210141086740f625d2e672b6275a2247de4de1f1df9747ed51b409a5e24"
-    sha256 arm64_monterey: "24956ab7119678bf5168a66ace1b5e735cede929084ff756da14ab74a1c8f63a"
-    sha256 sonoma:         "786aa0d52925e6816ece520d4ca45778862775249186e9bea85022dc96653c38"
-    sha256 ventura:        "30185c073065bff4138f1512603315c789babcb83a3253a8155b670e4baa32c1"
-    sha256 monterey:       "ee33b62eba04ca68cc6346b7fa51466696b9380f67e2a2bedaa367a1a154c9a4"
-    sha256 x86_64_linux:   "2938d1181dc33bd3b5470f59eeda56184d522af135bcce84142d7495d1cf2b33"
+    sha256 arm64_tahoe:   "e1bc77dcb48a44183688670a386ee6a3cd715eab698ee0b80ee31137315142f1"
+    sha256 arm64_sequoia: "aa754b38ca8ca0faf881045cf942b830c133b1cea8070e0c236219e7833b347d"
+    sha256 arm64_sonoma:  "34ef779d06ace9e63586abd8e2e8d8c53e4b2ee8127de6c6a85281d0c8bb8740"
+    sha256 sonoma:        "5d049a18eed72add370ea73a187e7ee23521321f0b56a228eca4fb32b4e7704d"
+    sha256 arm64_linux:   "7d360bbda03e7212c6c001dfbb9b6dc97fb0c2117f001e7dafffc119f1016c3c"
+    sha256 x86_64_linux:  "299c7fbc71fe23b5c30380b6cc6419536183cd53769630bce5f86fc3311b586b"
   end
 
   depends_on "gmp"
@@ -37,16 +36,13 @@ class Gawk < Formula
       --disable-silent-rules
       --without-libsigsegv-prefix
     ]
-    # Persistent memory allocator (PMA) is enabled by default. At the time of
-    # writing, that would force an x86_64 executable on macOS arm64, because a
-    # native ARM binary with such feature would not work. See:
-    # https://git.savannah.gnu.org/cgit/gawk.git/tree/README_d/README.macosx?h=gawk-5.2.1#n1
-    args << "--disable-pma" if OS.mac? && Hardware::CPU.arm?
     system "./configure", *args, *std_configure_args
 
     system "make"
     if which "cmp"
-      system "make", "check"
+      # Cannot run pma tests in Docker container due to seccomp needed for personality syscall
+      check_args = ["NEED_PMA="] if OS.linux?
+      system "make", "check", *check_args
     else
       opoo "Skipping `make check` due to unavailable `cmp`"
     end

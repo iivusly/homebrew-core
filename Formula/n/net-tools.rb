@@ -6,8 +6,9 @@ class NetTools < Formula
   license "GPL-2.0-or-later"
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "e08cb177a10583b6af76c29fa3c49c930d057aaa759946b72a579205d3fc093f"
+    rebuild 2
+    sha256 cellar: :any_skip_relocation, arm64_linux:  "a7d523b6843e87fd1b0791952b634c66f5918b78b97e4b851d9d2b3a413e9886"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "eecef80de080f3957e605ff06292e6bffc51f34385307f70896b64d1dd2c823b"
   end
 
   depends_on "libdnet"

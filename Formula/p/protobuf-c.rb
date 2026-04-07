@@ -1,59 +1,49 @@
 class ProtobufC < Formula
   desc "Protocol buffers library"
   homepage "https://github.com/protobuf-c/protobuf-c"
-  url "https://github.com/protobuf-c/protobuf-c/releases/download/v1.5.0/protobuf-c-1.5.0.tar.gz"
-  sha256 "7b404c63361ed35b3667aec75cc37b54298d56dd2bcf369de3373212cc06fd98"
+  url "https://github.com/protobuf-c/protobuf-c/releases/download/v1.5.2/protobuf-c-1.5.2.tar.gz"
+  sha256 "e2c86271873a79c92b58fef7ebf8de1aa0df4738347a8bd5d4e65a80a16d0d24"
   license "BSD-2-Clause"
-  revision 8
+  revision 13
+  compatibility_version 1
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "626106ff116a51b04fa2c2cd36c742bd0fa596597b8673bad8e0de053a2b5d98"
-    sha256 cellar: :any,                 arm64_ventura:  "d737e93aac2b0359d19debceb053bcfcd7825ed6ed07faccf094417dc26df46a"
-    sha256 cellar: :any,                 arm64_monterey: "397f5064d4e1a75843be44cd2c160b793834993536b2bf7a19cfcd7c7036aca1"
-    sha256 cellar: :any,                 sonoma:         "c41774a8276efd7814b4f836713e5238a9edf0ff003914152be166c60bde014e"
-    sha256 cellar: :any,                 ventura:        "adbe9cd183d279b2880738a18838bbededf4d2023b76b8e554ace649788ae262"
-    sha256 cellar: :any,                 monterey:       "752d7fcb9214ce1de147f00ea1a7771a2ae8c55957271edd97ca088da86af163"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "b5c80b6b3e0f47806635a9f37e2a202ff552c4f8dde81d3406fb3dcfda7c1402"
+    sha256 cellar: :any, arm64_tahoe:   "3a33506851ee7cd58481af48b15a49bae8618f86e90e4d1a0be8e711cb01a817"
+    sha256 cellar: :any, arm64_sequoia: "eee12301464448819eb1c0052df63c18fb45adccf5e27135f232662552adfcb3"
+    sha256 cellar: :any, arm64_sonoma:  "7e827adb8a62a0d40fa19f65f177986dcf5c40615582ef3d85e60a1acb4c3a87"
+    sha256 cellar: :any, sonoma:        "e5636f30eb752a3155c38e974dda38734c5ddcc59947564a439670d4a3656bee"
+    sha256               arm64_linux:   "0184eb879a953953c2397218f68f1b86b6d1493766c6f555c92bb5da53240c73"
+    sha256               x86_64_linux:  "78e9b6bd905c1531f3ad143541a5d568a9e513c1c67a660e3f1af837c52bd9e0"
   end
 
   head do
     url "https://github.com/protobuf-c/protobuf-c.git", branch: "master"
+
     depends_on "asciidoc" => :build
     depends_on "autoconf" => :build
     depends_on "automake" => :build
     depends_on "libtool" => :build
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "abseil"
   depends_on "protobuf"
 
-  # Apply commits from open PR to support Protobuf 26.
-  # PR ref: https://github.com/protobuf-c/protobuf-c/pull/711
+  # Apply commit from open PR to support Protobuf 34
+  # PR ref: https://github.com/protobuf-c/protobuf-c/pull/797
   patch do
-    url "https://github.com/protobuf-c/protobuf-c/commit/e3acc96ca2a00ef715fa2caa659f677cad8a9fa0.patch?full_index=1"
-    sha256 "3b564a971023d127bb7b666e5669f792c94766836ccaed5acfae3e23b8152d43"
-  end
-  patch do
-    url "https://github.com/protobuf-c/protobuf-c/commit/1b4b205d87b1bc6f575db1fd1cbbb334a694abe8.patch?full_index=1"
-    sha256 "6d02812445a229963add1b41c07bebddc3437fecb2a03844708512326fd70914"
-  end
-  patch do
-    url "https://github.com/protobuf-c/protobuf-c/commit/d95aced22df60a2f0049fc03af48c8b02ce4d474.patch?full_index=1"
-    sha256 "7aa44807367a4547bd15b3aa9a5275d5fe4739348bf2741ca773fa47015fb01a"
+    url "https://github.com/protobuf-c/protobuf-c/commit/d39f001b4578966600de0aaf7fc665eec6e057e5.patch?full_index=1"
+    sha256 "10b5ea9c08f62be10ceb1df24a3211118a94cb0d09efcdf043ac3542368915fb"
   end
 
   def install
-    # https://github.com/protocolbuffers/protobuf/issues/9947
-    ENV.append_to_cflags "-DNDEBUG"
-
     system "autoreconf", "--force", "--install", "--verbose" if build.head?
     system "./configure", *std_configure_args
     system "make", "install"
   end
 
   test do
-    testdata = <<~EOS
+    testdata = <<~PROTO
       syntax = "proto3";
       package test;
       message TestCase {
@@ -62,8 +52,11 @@ class ProtobufC < Formula
       message Test {
         repeated TestCase case = 1;
       }
-    EOS
+    PROTO
     (testpath/"test.proto").write testdata
     system Formula["protobuf"].opt_bin/"protoc", "test.proto", "--c_out=."
+
+    testpath.glob("test.pb-c.*").map(&:unlink)
+    system bin/"protoc-c", "test.proto", "--c_out=."
   end
 end

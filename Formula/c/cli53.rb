@@ -1,20 +1,20 @@
 class Cli53 < Formula
   desc "Command-line tool for Amazon Route 53"
   homepage "https://github.com/barnybug/cli53"
-  url "https://github.com/barnybug/cli53/archive/refs/tags/0.8.22.tar.gz"
-  sha256 "5acf576662cf8cb01ecbe027dfc3531e19bd03c1cd22425125e2a0a986273a7a"
+  url "https://github.com/barnybug/cli53/archive/refs/tags/v0.8.25.tar.gz"
+  sha256 "7fc01388af416b88f164244e1c7269a122b8203485313970196913982b80e56d"
   license "MIT"
+  head "https://github.com/barnybug/cli53.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "ef23798b7feb21fe2dcf19360548b44ea5e6d0d3ce755d6a295a30e24d82dd06"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "fb27aef03a8a1238d7d6daebc3b1a40569c3895b3ff94deb2cbf600b3001e4e9"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "fb27aef03a8a1238d7d6daebc3b1a40569c3895b3ff94deb2cbf600b3001e4e9"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "fb27aef03a8a1238d7d6daebc3b1a40569c3895b3ff94deb2cbf600b3001e4e9"
-    sha256 cellar: :any_skip_relocation, sonoma:         "4b947c58451743f9290db4cec6ee0b6c3fb1293050a924e98f765da5987357ad"
-    sha256 cellar: :any_skip_relocation, ventura:        "0cbae4a4ed0e2f14e48ae285d665b9d683a4f3c23b74735992f4a6d77c5fe0de"
-    sha256 cellar: :any_skip_relocation, monterey:       "0cbae4a4ed0e2f14e48ae285d665b9d683a4f3c23b74735992f4a6d77c5fe0de"
-    sha256 cellar: :any_skip_relocation, big_sur:        "0cbae4a4ed0e2f14e48ae285d665b9d683a4f3c23b74735992f4a6d77c5fe0de"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "fe47a8f80755ada1e60568573e4cf46bc61307892747d726ad9899b89f093ff5"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "9095f0aee379f36b2ffdd4d9d11bdcc19806ec0bf49a2c7f9ae2b23e30d69ae4"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "e4b9ffd175d7e981bdd4c7c2356e6268b94c6b5347a2d50d5781318a9ac53136"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "e4b9ffd175d7e981bdd4c7c2356e6268b94c6b5347a2d50d5781318a9ac53136"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "e4b9ffd175d7e981bdd4c7c2356e6268b94c6b5347a2d50d5781318a9ac53136"
+    sha256 cellar: :any_skip_relocation, sonoma:        "cdb240862a0674ac5a321b32faaac47bd536dc774b45be2c27d8d9252f3feaa2"
+    sha256 cellar: :any_skip_relocation, ventura:       "cdb240862a0674ac5a321b32faaac47bd536dc774b45be2c27d8d9252f3feaa2"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "9c9813986e728f56443c377c9117e35bcb63e306e76e8186a5b5eb7e08f817c9"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "a78fd47c4eac438afac66284ad3aa5b4f2dd37232b5330405d1fe6657d480f76"
   end
 
   depends_on "go" => :build

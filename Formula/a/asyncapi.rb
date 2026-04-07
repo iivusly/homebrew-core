@@ -1,32 +1,41 @@
 class Asyncapi < Formula
   desc "All in one CLI for all AsyncAPI tools"
   homepage "https://github.com/asyncapi/cli"
-  url "https://registry.npmjs.org/@asyncapi/cli/-/cli-2.3.2.tgz"
-  sha256 "7045e0c08eda29eb2c5347f58900992a7e70b1df6c6c3c1519ea200422db4590"
+  url "https://registry.npmjs.org/@asyncapi/cli/-/cli-6.0.0.tgz"
+  sha256 "c5939aca4cb9c64cacb404f78bc1ae242d95a6c07151db1698505ae3ed607327"
   license "Apache-2.0"
+  version_scheme 1
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "5bef59f9631958584181f32f56a70c9814c272c1bd0bb8d898cb2f9b38f2ccd1"
-    sha256 cellar: :any,                 arm64_ventura:  "5bef59f9631958584181f32f56a70c9814c272c1bd0bb8d898cb2f9b38f2ccd1"
-    sha256 cellar: :any,                 arm64_monterey: "5bef59f9631958584181f32f56a70c9814c272c1bd0bb8d898cb2f9b38f2ccd1"
-    sha256 cellar: :any,                 sonoma:         "b1af0f54708115e7c8efe1f13cef9b3fd8a3021aa1ee3469049469825425f495"
-    sha256 cellar: :any,                 ventura:        "b1af0f54708115e7c8efe1f13cef9b3fd8a3021aa1ee3469049469825425f495"
-    sha256 cellar: :any,                 monterey:       "b1af0f54708115e7c8efe1f13cef9b3fd8a3021aa1ee3469049469825425f495"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "eea3bfd9f314b08ba50fdb45d0bd0a02efc57084cbaf70f4326504244f8afe0b"
+    sha256 cellar: :any,                 arm64_tahoe:   "966ff0b86f86e32a7e397003765c796806e0a0998e9e473a377f3d46a8d7593c"
+    sha256 cellar: :any,                 arm64_sequoia: "1cf61ab278ae0707914ac18f70ab9ace15bc6d2c279cdcb000d9f0d6a575f84c"
+    sha256 cellar: :any,                 arm64_sonoma:  "1cf61ab278ae0707914ac18f70ab9ace15bc6d2c279cdcb000d9f0d6a575f84c"
+    sha256 cellar: :any,                 sonoma:        "0eb19ea51d5b2bb701dc566186b33b8e6b83aa2bd7226a8b3facb960e5694350"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "3dfa4934db0c269c77235d553a71580a431feb2689bf02c4557f5c981a279b1c"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "1c2714c128d47db98239819bcbac0d3fe738ef170a0eecd2590f95feb4781295"
   end
 
   depends_on "node"
 
   def install
+    # Set the log directory to var/log/asyncapi
+    inreplace "lib/utils/logger.js", /const logDir = .*;/, "const logDir = '#{var}/log/asyncapi';"
+
     system "npm", "install", *std_npm_args
-    bin.install_symlink Dir["#{libexec}/bin/*"]
+    bin.install_symlink libexec.glob("bin/*")
+
+    # Cleanup .pnpm folder
+    node_modules = libexec/"lib/node_modules/@asyncapi/cli/node_modules"
+    rm_r (node_modules/"@asyncapi/studio/build/standalone/node_modules/.pnpm") if OS.linux?
 
     # Replace universal binaries with their native slices
-    deuniversalize_machos
+    deuniversalize_machos node_modules/"fsevents/fsevents.node"
+
+    (var/"log/asyncapi").mkpath
   end
 
   test do
-    system bin/"asyncapi", "new", "--file-name=asyncapi.yml", "--example=default-example.yaml", "--no-tty"
-    assert_predicate testpath/"asyncapi.yml", :exist?, "AsyncAPI file was not created"
+    system bin/"asyncapi", "new", "file", "--file-name=asyncapi.yml", "--example=default-example.yaml", "--no-tty"
+    assert_path_exists testpath/"asyncapi.yml", "AsyncAPI file was not created"
   end
 end

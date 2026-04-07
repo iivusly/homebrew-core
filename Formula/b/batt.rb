@@ -2,14 +2,20 @@ class Batt < Formula
   desc "Control and limit battery charging on Apple Silicon MacBooks"
   homepage "https://github.com/charlie0129/batt"
   url "https://github.com/charlie0129/batt.git",
-    tag:      "v0.2.1",
-    revision: "90df4aaefb930ab05a6763c96866e8db0faf698e"
+      tag:      "v0.7.3",
+      revision: "569ec86b0a201fe0403db131f6eb13f495b62f37"
   license "GPL-2.0-only"
+  head "https://github.com/charlie0129/batt.git", branch: "master"
+
+  livecheck do
+    url :stable
+    strategy :github_latest
+  end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "9aea7e73d8f35fecb4538915741bc9338d0e076d07d68882137cd2f895acca57"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "ab9b98798b385d490d20244727705067cbb98a2245f2a9edd00179f6615ca30b"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "fe4b87bb7e401deed1cc4db56a40d36f79f1b41bfbf44628805517eb112ff11c"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "e9a8eba7cf7e021be0c298827143c00de15a616c38401c9a95cb288b0bbced60"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "6978b24b291f2b25640d27a297d9e7aa4632e8587c90f0d3e73da126d6f7fa86"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "e1b5bcce79047ed867ba0193e8b5f7fe38ba65fec443810a80b60f9365e34e58"
   end
 
   depends_on "go" => :build
@@ -17,27 +23,28 @@ class Batt < Formula
   depends_on :macos
 
   def install
-    # batt does not provide separate control for AllowNonRootAccess.
-    # Normally it's changed during service file installation,
-    # but brew service supersedes that, leaving a daemon refusing to
-    # talk to anything non-root. Changing the defaults here.
-    inreplace "conf.go", "AllowNonRootAccess:      false,",
-                         "AllowNonRootAccess:      true,"
-    # Limit config path to Homebrew prefix. The socket remains in /var/run
-    # to deter non-root invocation of daemon
-    inreplace ["conf.go", "README.md"], "/etc/batt.json", etc/"batt.json"
-    # Due to local changes version tag would show v0.2.1-dirty
-    system "make", "VERSION=v#{version}"
-    inreplace "hack/cc.chlc.batt.plist", "/path/to/batt", bin/"batt"
-    system "plutil", "-insert", "ProcessType", "-string", "Background",
-                     "--", "hack/cc.chlc.batt.plist"
+    # Point to the correct path for the binary
+    inreplace "hack/cc.chlc.batt.plist", "/path/to/batt", opt_bin/"batt"
+    # Limit config path to Homebrew prefix.
+    system "plutil", "-insert", "ProgramArguments",
+           "-string", "--config=#{etc}/batt.json", "-append",
+           "--", "hack/cc.chlc.batt.plist"
+    # Allow non-root access to the battery controller.
+    system "plutil", "-insert", "ProgramArguments",
+           "-string", "--always-allow-non-root-access", "-append",
+           "--", "hack/cc.chlc.batt.plist"
+    # Due to local changes version tag would show vx.x.x-dirty, override VERSION.
+    # GOTAGS is set to disable built-in install/uninstall commands when building for Homebrew.
+    system "make", "GOTAGS=brew", "VERSION=v#{version}"
     bin.install "bin/batt"
     prefix.install "hack/cc.chlc.batt.plist"
+
+    generate_completions_from_executable(bin/"batt", shell_parameter_format: :cobra)
   end
 
   def caveats
     <<~EOS
-      The service must be running before most of batt's commands will work.
+      The batt service must be running before most of batt's commands will work.
     EOS
   end
 
@@ -47,10 +54,11 @@ class Batt < Formula
   end
 
   test do
-    # NB: assumes first run of batt, with no previous config.
-    assert_match "config file #{etc}/batt.json does not exist, using default config",
-      shell_output("#{bin}/batt daemon 2>&1", 1) # Non-root daemon exits with 1
-    assert_match "failed to connect to unix socket.",
+    # batt is only meaningful on Mac laptops. There is not much we can test
+    # in a VM.
+    assert_match "operation not permitted", # Non-root daemon cannot listen in /var/run
+      shell_output("#{bin}/batt daemon --config=#{etc}/batt.json 2>&1", 1) # Non-root daemon exits with 1
+    assert_match "batt daemon is not running",
       shell_output("#{bin}/batt status 2>&1", 1) # Cannot connect to daemon
   end
 end

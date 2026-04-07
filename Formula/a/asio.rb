@@ -1,9 +1,10 @@
 class Asio < Formula
   desc "Cross-platform C++ Library for asynchronous programming"
-  homepage "https://think-async.com/Asio"
-  url "https://downloads.sourceforge.net/project/asio/asio/1.30.2%20%28Stable%29/asio-1.30.2.tar.bz2"
-  sha256 "9f12cef05c0477eace9c68ccabd19f9e3a04b875d4768c323714cbd3a5fa3c2b"
+  homepage "https://think-async.com/Asio/"
+  url "https://downloads.sourceforge.net/project/asio/asio/1.36.0%20%28Stable%29/asio-1.36.0.tar.bz2"
+  sha256 "7bf4dbe3c1ccd9cc4c94e6e6be026dcc2110f9201d286bb9500dc85d69825524"
   license "BSL-1.0"
+  compatibility_version 1
 
   livecheck do
     url :stable
@@ -11,13 +12,14 @@ class Asio < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "8904055a14a4247b64b0b0109092dc16ec9b041a80b5575d41b19f4f68fa948d"
-    sha256 cellar: :any,                 arm64_ventura:  "5f54e51a9617b78d98d5460432535ddbedd49c4f0a06b5674e9b4f4c4ccca2d5"
-    sha256 cellar: :any,                 arm64_monterey: "671a310b49125e7690a9d3a5c11b98497b38146c59cc4d102addbc854e766b51"
-    sha256 cellar: :any,                 sonoma:         "bf8e8eb31835f402abf69def9a391124c99f344117a0c6412d355e8a92681bb9"
-    sha256 cellar: :any,                 ventura:        "45e09606350054371499f004e2c103222ad54c0d5e424cdcc066944817d62c26"
-    sha256 cellar: :any,                 monterey:       "8e5c462f8c024efc16d037f57693465de5dd30523ef63f00309410d1dfe13d54"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "327a7b1dadeaf5971516e58b9d7009e9004ffe198cd6621749d6836e604ff257"
+    sha256 cellar: :any,                 arm64_tahoe:   "c270edee8c7f97079ae4f4cf2c6ea3f072a02e3966354fa233a72df2dff6834b"
+    sha256 cellar: :any,                 arm64_sequoia: "701828b9474caf60d19e538ae4988a86d9df9a09ce95c9cf0e2de1cc8a6cbda6"
+    sha256 cellar: :any,                 arm64_sonoma:  "acbee89e1effe0135dd01fec0bc94243cffbe5c2f5c7d5b0f7340428d9516dde"
+    sha256 cellar: :any,                 arm64_ventura: "f6758226362135efb7485211bfe170ee4c3788c46a1275dca59c477ae8c6051c"
+    sha256 cellar: :any,                 sonoma:        "6a4f0422454474b28955a8d9bb203d703bdbb7c857096dc32bd6c191fb8a0ba5"
+    sha256 cellar: :any,                 ventura:       "0e1a5a2d7537a2ef0cd946cb75edcf3e72e615f78bc610f77987b0bacaad3231"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "8d1cda2230726d6339c1233ea2a126525d9044aacac103fb6da0fd195698a68b"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "7b3a5307039ebc24abeba8e99bf96fdff91577b4d2a413715c3e83ff755c4ed4"
   end
 
   head do
@@ -36,10 +38,10 @@ class Asio < Formula
       system "./autogen.sh"
     end
 
-    system "./configure", *std_configure_args,
-                          "--disable-silent-rules",
-                          "--with-boost=no",
-                          "--with-openssl=#{Formula["openssl@3"].opt_prefix}"
+    system "./configure", "--disable-silent-rules",
+                          "--without-boost",
+                          "--with-openssl=#{Formula["openssl@3"].opt_prefix}",
+                          *std_configure_args
     system "make", "install"
     pkgshare.install "src/examples"
   end
@@ -49,11 +51,9 @@ class Asio < Formula
     raise "no http_server example file found" if found.empty?
 
     port = free_port
-    pid = fork do
-      exec found.first, "127.0.0.1", port.to_s, "."
-    end
-    sleep 5
+    pid = spawn found.first, "127.0.0.1", port.to_s, "."
     begin
+      sleep 5
       assert_match "404 Not Found", shell_output("curl http://127.0.0.1:#{port}")
     ensure
       Process.kill 9, pid

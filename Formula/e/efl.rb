@@ -1,9 +1,10 @@
 class Efl < Formula
   desc "Enlightenment Foundation Libraries"
   homepage "https://www.enlightenment.org"
-  url "https://download.enlightenment.org/rel/libs/efl/efl-1.27.0.tar.xz"
-  sha256 "3dfb99fbcc268c0bc797e2f83e8c503ef9de66284f40b381bb597a08185c00f4"
+  url "https://download.enlightenment.org/rel/libs/efl/efl-1.28.1.tar.xz"
+  sha256 "84cf6145f9cc82bfff690005be24392c8f3c52f8e00ff04d8eea371429c09424"
   license all_of: ["GPL-2.0-only", "LGPL-2.1-only", "BSD-2-Clause", "FTL", "zlib-acknowledgement"]
+  revision 3
 
   livecheck do
     url "https://download.enlightenment.org/rel/libs/efl/"
@@ -11,18 +12,17 @@ class Efl < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "6d15f7f09291ed56ba192bd80c7fda195154865485893579db152e113999bf4e"
-    sha256 arm64_ventura:  "6bc9494f01ea7397644b6c77085e634dc48c5f557ef82d3fb598671cd66a9984"
-    sha256 arm64_monterey: "7c5a8ca44000ef1f51c60d165baaaee3d12ffe75fc6eb317e8f7be590a46e5a7"
-    sha256 sonoma:         "904885617ad5f8629101266eb5ceb70634192e3933d4577f7126fc2c2dd14df9"
-    sha256 ventura:        "32d3ab7c6f32f5291c394022051146fc8fb980afaa1226a2602436d3e2df5c78"
-    sha256 monterey:       "b48ff5fc791cad44d0276a5910d10a216daaa7e2d5db286517000f1e3b6801e4"
-    sha256 x86_64_linux:   "1d265348e67f8f8691f74219ba1b7b03a6ad1fcc8b99663225cca5a49b3d5ecc"
+    sha256 arm64_tahoe:   "5fe006170652a5269733d7fd8643c1db0f6d67f2cb2e7d10549eedcdaf4aee0c"
+    sha256 arm64_sequoia: "25d4bbc4da7b19433ffa889dad44565407b216983791ae935d2d69073ad6a6f9"
+    sha256 arm64_sonoma:  "c1521f318595cf0b58bf66d8fabfb2b211a3b9ef50b585c843cb1f88a89543bb"
+    sha256 sonoma:        "a2f12d7c110188bc6f61fd0234dddef8b09062665a9ee8a957343f64229f8003"
+    sha256 arm64_linux:   "3f921af530e562f7fe1983a788cfc9461323fc20cd99c6f68dc487ed3c87e72e"
+    sha256 x86_64_linux:  "1f7826b4a3c65d4aa9b7cbb8a225872d60264095c32eaea60535fc453854fb66"
   end
 
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "bullet"
   depends_on "cairo"
   depends_on "dbus"
@@ -50,8 +50,6 @@ class Efl < Formula
   depends_on "shared-mime-info"
   depends_on "webp"
 
-  uses_from_macos "zlib"
-
   on_macos do
     depends_on "gdk-pixbuf"
     depends_on "little-cms2"
@@ -59,6 +57,17 @@ class Efl < Formula
 
   on_linux do
     depends_on "mesa"
+    depends_on "zlib-ng-compat"
+  end
+
+  # Fix conflicting bool definition.
+  patch do
+    url "https://git.enlightenment.org/enlightenment/efl/commit/0fcaf460c4a33eb54a51b9d8cb38321603019529.patch"
+    sha256 "45492dcea5141814763ed17ac22b068aa74bb165e40afa0fc6cef72af5632335"
+  end
+  patch do
+    url "https://git.enlightenment.org/enlightenment/efl/commit/628c40cce2de0a18818b40615d3351b0c9e9b889.patch"
+    sha256 "13823eb598c2dd81c0a3f143a5b043d0163e8d3b843e397ec4666302943b56d9"
   end
 
   # Remove LuaJIT 2.0 linker args -pagezero_size and -image_base
@@ -80,6 +89,7 @@ class Efl < Formula
       -Dsystemd=false
       -Dv4l2=false
       -Dx11=false
+      -Dlua-interpreter=luajit
     ]
     args << "-Dcocoa=true" if OS.mac?
 

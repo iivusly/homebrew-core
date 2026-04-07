@@ -1,27 +1,40 @@
 class Xcbeautify < Formula
   desc "Little beautifier tool for xcodebuild"
   homepage "https://github.com/cpisciotta/xcbeautify"
-  url "https://github.com/cpisciotta/xcbeautify/archive/refs/tags/2.11.0.tar.gz"
-  sha256 "a64c0bfe9dfb384305e68f043bdda787251dd251e7f40719f7ac997788d0b236"
+  url "https://github.com/cpisciotta/xcbeautify/archive/refs/tags/3.2.1.tar.gz"
+  sha256 "7575dcb90e4650f8d8f66b92ca2f3eaa5ad9feddda7bf3c63aeb0edca199aa80"
   license "MIT"
   head "https://github.com/cpisciotta/xcbeautify.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "697d50f9544c2daa242d7787e43fda4460ece2c3440cd7b9baff4ba051fbaa6c"
-    sha256 cellar: :any_skip_relocation, arm64_ventura: "f58c2e7342577a7b274bf5be5a9c0915aa3f3ba5b4a05674c6417c8d03637cfb"
-    sha256 cellar: :any_skip_relocation, sonoma:        "629341e7c0add869ed6ec0d3a78d6f69e2e53ccf765296981be5677da789df6c"
-    sha256 cellar: :any_skip_relocation, ventura:       "bb72929872a1b86e7e9ae523e87a738d940667f482d45cfdf7d8888ffc0efc3a"
-    sha256                               x86_64_linux:  "e9d0709beee07adcc9be5137fcb117191c6d908817223ea9bbcd427127f3e642"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "55d10b6b29942408802a3f7c141c8245b310054331c39be16f027f93867ad005"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "f1094ef28d3e6f734cc58b43201a7112218b2518ed5b47b0c4e3242071a90742"
+    sha256 cellar: :any,                 arm64_sonoma:  "f65b81e0e1d354fc026fda8e4006579b99e764a5bee9cdb20343a432c902f84a"
+    sha256 cellar: :any,                 sonoma:        "da329e9b36ffc742e9dcba04f9bc2d2dcb05e41ecb9d902b5ab016145a46ac2c"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "0699fc7ed411b8e6875d2273dd230b83947a10f38471e59ff953a57283cb4c26"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "1121ea99822c46089101d09aa4d43ad5679c5883f6c2212e712ba016db5a3ffe"
   end
 
-  # needs Swift tools version 5.9.0
-  depends_on xcode: ["15.0", :build]
+  # needs Swift tools version 6.1.0
+  uses_from_macos "swift" => :build, since: :sequoia
+  uses_from_macos "libxml2"
 
-  uses_from_macos "swift"
+  on_sequoia do
+    # Workaround for https://github.com/apple/swift-argument-parser/issues/827
+    # Conditional should really be Swift >= 6.2 but not available so using
+    # a check on the specific ld version included with Xcode >= 26
+    depends_on xcode: :build if DevelopmentTools.ld64_version >= "1221.4"
+  end
 
   def install
-    system "swift", "build", "--disable-sandbox", "--configuration", "release"
+    args = if OS.mac?
+      %w[--disable-sandbox]
+    else
+      %w[--static-swift-stdlib -Xswiftc -use-ld=ld]
+    end
+    system "swift", "build", *args, "--configuration", "release"
     bin.install ".build/release/xcbeautify"
+    generate_completions_from_executable(bin/"xcbeautify", "--generate-completion-script")
   end
 
   test do

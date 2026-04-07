@@ -1,8 +1,8 @@
 class Corepack < Formula
   desc "Package acting as bridge between Node projects and their package managers"
   homepage "https://github.com/nodejs/corepack"
-  url "https://registry.npmjs.org/corepack/-/corepack-0.29.3.tgz"
-  sha256 "63b88391da952a8c977e1e85db734bfa975805cf22c1c5dc5dc9e54eb9eed97e"
+  url "https://registry.npmjs.org/corepack/-/corepack-0.34.6.tgz"
+  sha256 "af29678fc25ed5ae02343e9b67b214a25bacdcffae566f8cf848936beb23a7c8"
   license "MIT"
 
   livecheck do
@@ -11,19 +11,18 @@ class Corepack < Formula
   end
 
   bottle do
-    rebuild 2
-    sha256 cellar: :any_skip_relocation, all: "7d90b3f17059a78d6b20c20afe53e1d6d91484af19bff3c8256a61d79b2e3414"
+    sha256 cellar: :any_skip_relocation, all: "c13ad904bb3a6fc3097e11ff06794c82636c901d6d8701bbd244c94b805c97de"
   end
 
   depends_on "node"
 
   conflicts_with "hadoop", because: "both install `yarn` binaries"
-  conflicts_with "yarn", because: "both install `yarn` and `yarnpkg` binaries"
   conflicts_with "pnpm", because: "both install `pnpm` and `pnpx` binaries"
+  conflicts_with "yarn", because: "both install `yarn` and `yarnpkg` binaries"
 
   def install
     system "npm", "install", *std_npm_args
-    bin.install_symlink Dir["#{libexec}/bin/*"]
+    bin.install_symlink libexec.glob("bin/*")
   end
 
   test do
@@ -35,6 +34,6 @@ class Corepack < Formula
 
     (testpath/"package.json").delete
     system bin/"pnpm", "init"
-    assert_predicate testpath/"package.json", :exist?, "package.json must exist"
+    assert_path_exists testpath/"package.json", "package.json must exist"
   end
 end

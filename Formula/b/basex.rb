@@ -1,18 +1,20 @@
 class Basex < Formula
   desc "Light-weight XML database and XPath/XQuery processor"
   homepage "https://basex.org"
-  url "https://files.basex.org/releases/11.2/BaseX112.zip"
-  version "11.2"
-  sha256 "9da3a98b069d4395d9d8c4a3f144c804769b60c007d4a3c8b5d819075d998a45"
+  url "https://files.basex.org/releases/12.2/BaseX122.zip"
+  version "12.2"
+  sha256 "cc3e9a615608ac5eac643e51e8d341487f061a029f0cfbacf73b015adbfe3b2c"
   license "BSD-3-Clause"
 
   livecheck do
-    url "https://files.basex.org/releases/"
-    regex(%r{href=.*?v?(\d+(?:\.\d+)+)/?["' >]}i)
+    url "https://basex.org/download/"
+    regex(%r{href=.*?/v?(\d+(?:\.\d+)+)/BaseX[._-]?v?(\d+(?:\.\d+)*)\.zip}i)
   end
 
+  no_autobump! because: :incompatible_version_format
+
   bottle do
-    sha256 cellar: :any_skip_relocation, all: "ec6c0470c980c4ae0a5f99bbde7cb3dab3348f4ab51ccbb997136fe016e52de9"
+    sha256 cellar: :any_skip_relocation, all: "783a32f7b250c99feccee4de07c7eb583e8ad6daeb109bbceeeb2eaa082b027a"
   end
 
   depends_on "openjdk"
@@ -24,7 +26,7 @@ class Basex < Formula
     rm_r("etc")
 
     libexec.install Dir["*"]
-    bin.install Dir["#{libexec}/bin/*"]
+    bin.install libexec.glob("bin/*")
     bin.env_script_all_files libexec/"bin", JAVA_HOME: Formula["openjdk"].opt_prefix
   end
 

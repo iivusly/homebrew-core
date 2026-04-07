@@ -1,19 +1,18 @@
 class Act < Formula
   desc "Run your GitHub Actions locally"
   homepage "https://github.com/nektos/act"
-  url "https://github.com/nektos/act/archive/refs/tags/v0.2.66.tar.gz"
-  sha256 "128a88d966df451730448235ca0d5c804a642fc5f183fb613a5f4f92d9dc12e7"
+  url "https://github.com/nektos/act/archive/refs/tags/v0.2.87.tar.gz"
+  sha256 "e04dcdcbc56741e2a5426814ae7c330e41f708d466838ad6e42622690b80af23"
   license "MIT"
   head "https://github.com/nektos/act.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "3a5e11a6b587bb00844a61dded9f352c68dc62fa3dedf0462d587688164b80a7"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "9ed87d2a0c2dc57a70ff1150e85a285e294c3acdd71ee43f5ed66f9230bd7152"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "0d449ff744d42287d200f4752cd648f7456d1fdd34f633db626bb7abfaea6ed5"
-    sha256 cellar: :any_skip_relocation, sonoma:         "7ea0ca2d75716d6bf62f020990f908a16891597e59dd9affb4b5b4c991d7361f"
-    sha256 cellar: :any_skip_relocation, ventura:        "f5477a357920803903073eb6ae5eb69cf147eb413db0c61cd7e94fa47db6dedd"
-    sha256 cellar: :any_skip_relocation, monterey:       "9535b347dba1f79063f6bae41aea1c1f95f89c166b43aef6ae5a690a0204b7ea"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "ef2e57163398737ba649891e35da81ac55856a3279e24ddf270cce121b3c3c99"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "31e04ddd1a5fc0ec333004ebbd4e99453ca4993fca875f8b3056cbf097990f41"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "e1a968907ae281da480d5d964c9f771f4f786746816bf4548771558fd1a51efa"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "42eb590baec1fc6e3f783c2254d82c058578b787e3c02b85a4bcaeea97a8cf5e"
+    sha256 cellar: :any_skip_relocation, sonoma:        "9506505c76e66d02bbab12fd3046b0683ddd44768fd27c779cd7fae50307c987"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "cdd693ca3f5c3b9f1720609da00ca7f4ce69969d2152440a2ee943467d1ba899"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "75dd3e14d13a5fea2a70d04c5ce4360d38f614f0f9583b849758e60f2ba8d859"
   end
 
   depends_on "go" => :build
@@ -21,6 +20,8 @@ class Act < Formula
   def install
     system "make", "build", "VERSION=#{version}"
     bin.install "dist/local/act"
+
+    generate_completions_from_executable(bin/"act", shell_parameter_format: :cobra)
   end
 
   test do

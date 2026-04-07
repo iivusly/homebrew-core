@@ -1,57 +1,60 @@
 class Scipy < Formula
   desc "Software for mathematics, science, and engineering"
   homepage "https://www.scipy.org"
-  url "https://files.pythonhosted.org/packages/62/11/4d44a1f274e002784e4dbdb81e0ea96d2de2d1045b2132d5af62cc31fd28/scipy-1.14.1.tar.gz"
-  sha256 "5a275584e726026a5699459aa72f828a610821006228e841b94275c4a7c08417"
+  url "https://files.pythonhosted.org/packages/7a/97/5a3609c4f8d58b039179648e62dd220f89864f56f7357f5d4f45c29eb2cc/scipy-1.17.1.tar.gz"
+  sha256 "95d8e012d8cb8816c226aef832200b1d45109ed4464303e997c5b13122b297c0"
   license "BSD-3-Clause"
+  compatibility_version 1
   head "https://github.com/scipy/scipy.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "2148d339325ed35253ab5932b2f1173dc27ccc2dd0fd5824fac8803afb109090"
-    sha256 cellar: :any,                 arm64_ventura:  "694ff1f342f3c8a2bf9e5395fc0880702dd916af27223fc978d3da3886f1a524"
-    sha256 cellar: :any,                 arm64_monterey: "2b7727f7d9ac60e357a1bfa0a11d1dfa6923ee6c2ed5afbedb8c6bd46630ec46"
-    sha256 cellar: :any,                 sonoma:         "ca1af7099de12b5621f76f51d903c19bcffa59a8915ae2f903a60a87e17d0b6c"
-    sha256 cellar: :any,                 ventura:        "e812b863c129425d46d5e85a7b066f0313ce3380a17d1b3a720e33ab05708dff"
-    sha256 cellar: :any,                 monterey:       "c4092245f269cec545011209abbde8c4d628ec10c831d18ad321157e3bebd52b"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "d350cfed231253b7ea035004e390fb90c7609e773b264e5c959997a02470c808"
+    sha256 cellar: :any,                 arm64_tahoe:   "78f1f5aed3d3b4f72f9df7ca3a12f9fbbe38b037eb3ed1f5267dd743c6ca8e7a"
+    sha256 cellar: :any,                 arm64_sequoia: "2f74aa1069b4f9705fef6f6542d5f9912e99b642a554dc5e00c9dd3fda71f875"
+    sha256 cellar: :any,                 arm64_sonoma:  "fba1a0ab3414bd57d0077ddf4e98ec75c983e745d3686dd4f9d6de08766d3e99"
+    sha256 cellar: :any,                 sonoma:        "c8783212ebe892ba6f7b7ffae47c3cee9e75d73e51b27ce5b2c729c07251c954"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "8fff82c03b8ddb88896760fc68f86badcf38520a93046082af1d6937dcb21ca3"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "e270d3de3e13788049162a7fd4b7d215fc3ddf08b4ae96d76cdec9d11e0ceea6"
   end
 
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
+  depends_on "python@3.13" => [:build, :test]
+  depends_on "python@3.14" => [:build, :test]
   depends_on "gcc" # for gfortran
   depends_on "numpy"
   depends_on "openblas"
-  depends_on "python@3.12"
   depends_on "xsimd"
 
   on_linux do
     depends_on "patchelf" => :build
   end
 
-  cxxstdlib_check :skip
+  pypi_packages exclude_packages: "numpy"
 
-  fails_with gcc: "5"
-
-  def python3
-    "python3.12"
+  def pythons
+    deps.map(&:to_formula)
+        .select { |f| f.name.start_with?("python@") }
+        .map { |f| f.opt_libexec/"bin/python" }
   end
 
   def install
-    system python3, "-m", "pip", "install", *std_pip_args(build_isolation: true), "."
+    pythons.each do |python3|
+      system python3, "-m", "pip", "install", *std_pip_args(build_isolation: true), "."
+    end
   end
 
-  # cleanup leftover .pyc files from previous installs which can cause problems
-  # see https://github.com/Homebrew/homebrew-python/issues/185#issuecomment-67534979
   def post_install
-    rm(Dir["#{HOMEBREW_PREFIX}/lib/python*.*/site-packages/scipy/**/*.pyc"])
+    HOMEBREW_PREFIX.glob("lib/python*.*/site-packages/scipy/**/*.pyc").map(&:unlink)
   end
 
   test do
-    (testpath/"test.py").write <<~EOS
+    (testpath/"test.py").write <<~PYTHON
       from scipy import special
       print(special.exp10(3))
-    EOS
-    assert_equal "1000.0", shell_output("#{python3} test.py").chomp
+    PYTHON
+    pythons.each do |python3|
+      assert_equal "1000.0", shell_output("#{python3} test.py").chomp
+    end
   end
 end

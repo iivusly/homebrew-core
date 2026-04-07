@@ -6,6 +6,8 @@ class Libofx < Formula
   license "GPL-2.0-or-later"
 
   bottle do
+    sha256 arm64_tahoe:    "67845c43017a64530b8c0340bcb29c70dff8121b8af9ec532c3e51b9a651754a"
+    sha256 arm64_sequoia:  "e4b8c683f7d31032a59fc92af99e162ed7b91d250b05ddb8f22f2a92d44ae571"
     sha256 arm64_sonoma:   "ed293b1aa272081ac72e90ed0fde58477750798dccfc1daaa7c46813d950f268"
     sha256 arm64_ventura:  "4c2f9ec0e41e667c21b2a6c1fbe81d11e356e1d5d5afdf80b1f3e771a6da3183"
     sha256 arm64_monterey: "c6e732fd8e3dac426fea0f2845c634af8542661058265f43886ef2f65828f95f"
@@ -15,6 +17,7 @@ class Libofx < Formula
     sha256 monterey:       "aa32a1500793c8add1ae49017887b2288f5c0d921d4db3681c1150f854da1038"
     sha256 big_sur:        "8e0d20d6e6f664a559e2e4cd665562b514b17ec491fe9a433bc8b85fb4ba221e"
     sha256 catalina:       "08593e309b9133e1b534200b44ed4a87446fa305f63dfdc79e1de93a9ac22835"
+    sha256 arm64_linux:    "c388005e8748764a55e879ecad1fd1ee36f004050585ade3f76103b861fba479"
     sha256 x86_64_linux:   "88107478b5837f83a6f9f6f99279b3fa10c9465b7fca30fb52ff51a6b07f1271"
   end
 

@@ -1,29 +1,26 @@
 class Inspectrum < Formula
   desc "Offline radio signal analyser"
   homepage "https://github.com/miek/inspectrum"
-  url "https://github.com/miek/inspectrum/archive/refs/tags/v0.3.1.tar.gz"
-  sha256 "94e42333aceb06c15fb6fc10d186d61112975fdcf9539357a279e886e9edf35e"
+  url "https://github.com/miek/inspectrum/archive/refs/tags/v0.4.0.tar.gz"
+  sha256 "a11214070c0aa3379e6ffd1728aa9528bf1dd722b8b72218ea1b872471b50c65"
   license "GPL-3.0-or-later"
   head "https://github.com/miek/inspectrum.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "b8fed8bc9e251d6f90e191b260fba14a907183b966ce9058eca5e45832fd096b"
-    sha256 cellar: :any,                 arm64_ventura:  "85676ab09338e0dc82b50ef359f7ac49e8f1ae09eaa673ad23da5edb55dcbe07"
-    sha256 cellar: :any,                 arm64_monterey: "a4a8b084973fc6d26f895e56e82e3bb5b6f10ef5f803a2ae41b85ecd7e84d06f"
-    sha256 cellar: :any,                 sonoma:         "d362f00903bb5068748061931788f911ecc8f219453822eb5e2dbfbefbe77e7d"
-    sha256 cellar: :any,                 ventura:        "4698d8a738a586230abc96eafdf2b8e5ddc404eed157a9793232742c60689f0d"
-    sha256 cellar: :any,                 monterey:       "dd6e9a06f5bb1a627906d9b87b5f2a54c0589f9663335224092eed9d4ec8e038"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "ebd0cb2283b88fad36bb8c481cab44ee8fa12be897a798697d3643646772cf4c"
+    sha256 cellar: :any,                 arm64_tahoe:   "5c21e4520df7498e5a4e54bfad5930e87379dc94f359daa059399a58a7c52546"
+    sha256 cellar: :any,                 arm64_sequoia: "2cbc4ecbe7531a6d91f495a71b0c133c729e381ee9930ec0fbaef5c39ee28c83"
+    sha256 cellar: :any,                 arm64_sonoma:  "23dced3dffb32ada03c65c0cab098173142464cba27f26139bcaf5da21a21ff2"
+    sha256 cellar: :any,                 sonoma:        "40f559efcf1c01153547a4621f5af92e555b8261aa328ed97ad0b66e34db568e"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "529fdfe5ad6cef116d9d402b7b366b4158b83c490e1d6eb1083bcd7306e74c39"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "bdf31450cc84970bce45314f564dd15eced52aea0d8e3278569301dfb283abc7"
   end
 
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
 
   depends_on "fftw"
   depends_on "liquid-dsp"
-  depends_on "qt@5"
-
-  fails_with gcc: "5"
+  depends_on "qtbase"
 
   def install
     system "cmake", "-S", ".", "-B", "build", *std_cmake_args
@@ -32,7 +29,9 @@ class Inspectrum < Formula
   end
 
   test do
-    return if OS.linux? && ENV["HOMEBREW_GITHUB_ACTIONS"]
+    # Set QT_QPA_PLATFORM to minimal to avoid error:
+    # "This application failed to start because no Qt platform plugin could be initialized."
+    ENV["QT_QPA_PLATFORM"] = "minimal" if OS.linux? && ENV["HOMEBREW_GITHUB_ACTIONS"]
 
     # inspectrum is a GUI application
     assert_match "-r, --rate <Hz>     Set sample rate.", shell_output("#{bin}/inspectrum -h").strip

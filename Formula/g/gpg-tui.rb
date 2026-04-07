@@ -1,21 +1,23 @@
 class GpgTui < Formula
   desc "Manage your GnuPG keys with ease!"
   homepage "https://github.com/orhun/gpg-tui"
-  url "https://github.com/orhun/gpg-tui/archive/refs/tags/v0.11.0.tar.gz"
-  sha256 "741def01fe84ee20c3eac1cbbe2533e1a9c387832cab31b5d233062338254ce1"
+  url "https://github.com/orhun/gpg-tui/archive/refs/tags/v0.11.1.tar.gz"
+  sha256 "ecc232b42ff07888eb12a43daf5a956791a21efc85f6e71fbed9b9769ec50b50"
   license "MIT"
+  revision 1
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "8a5f8cfea861d52c8e83459bab25140df30632087ccb626f3b37b6342a94900f"
-    sha256 cellar: :any,                 arm64_ventura:  "b2b9e2574869dd0a954d772e3baa52833e6353e8ddaf500d69e8bb12502e8987"
-    sha256 cellar: :any,                 arm64_monterey: "839bd1b54c25768ee1a8a7c86dd96c38ca313eb2cbe3c9029e9780d43423ac67"
-    sha256 cellar: :any,                 sonoma:         "003cfc65824809391ce325ba7e70041149a1c31a8ff093071d891ebdb5fe05e8"
-    sha256 cellar: :any,                 ventura:        "8420ac55ac0ce5f3d020660a6a8033dff374b48599f3ef1f7e96dc6e5135398e"
-    sha256 cellar: :any,                 monterey:       "62d158f8de0104dbda18ff48f8b17bad1d5d97514067e5f87537e25f2fe333c6"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "4b326e5cb490b82f26db74f3c98efbcaf2b361f43ad6041129c6fd33645185f8"
+    sha256 cellar: :any,                 arm64_tahoe:   "abbd155171e756035475b2d056af6a211670e7771f0c5b4aa602c74c479ecc73"
+    sha256 cellar: :any,                 arm64_sequoia: "465e6299e30e75bbae4b8532311daeaed79c693a4108c0af84bc2e6854d8dd59"
+    sha256 cellar: :any,                 arm64_sonoma:  "db699046d18a6d2b9ad48f7119ffdafcdddb4c298793e2d625164279b336fe0f"
+    sha256 cellar: :any,                 arm64_ventura: "c0bda54defeb5ebc244a1b9088e507ff48dee169d32d9ad08a80c4e4cde6d904"
+    sha256 cellar: :any,                 sonoma:        "da34e2326c5339717bda310f989e70d696858a31852ff892101e56d6d9781144"
+    sha256 cellar: :any,                 ventura:       "8868cd44a2ff7f56d30c75bfba3f3d1f03c56b5faded21f69f86f93bffd1b331"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "b12d1cddc16374cfbb0be45749aace3e1c1e6f623b300e593b99b97d827fbbf3"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "c846cd2826dff13817d7dac553ebc7adbd9d992f852ee9c2c4b3540fc8f017eb"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "rust" => :build
   depends_on "gnupg"
   depends_on "gpgme"

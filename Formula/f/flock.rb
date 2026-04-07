@@ -6,6 +6,8 @@ class Flock < Formula
   license "ISC"
 
   bottle do
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:    "aa8dc5d082d7ad26bdd99dbb7b33a4d2a23c4c92a97baed4739c25119e30bafe"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia:  "b3e9f9fbebb4256a845dd8db15993c3cd7c17cabac188c0695780c5b2b8a06d8"
     sha256 cellar: :any_skip_relocation, arm64_sonoma:   "81934a5818c68542712a6d8b56c6b92f303308394a39cdaf8618c057f6c75b93"
     sha256 cellar: :any_skip_relocation, arm64_ventura:  "37a4abe9f2dc5ad5297a5dfdcb10fc1aeafe587b06a7a275231d05a3dd48b572"
     sha256 cellar: :any_skip_relocation, arm64_monterey: "0a65c4619ce6f133e7a5b9e82d7648b7da9ace48a09f89d69eb66f38bd6e2b6a"
@@ -15,6 +17,7 @@ class Flock < Formula
     sha256 cellar: :any_skip_relocation, monterey:       "ec7c9523be673e50dec3b6aa3d17ef4905076e0f804e9ebccbca128bbf8855c5"
     sha256 cellar: :any_skip_relocation, big_sur:        "1f9fc94a66a10a05c005b8043b477fe5f8ec4c995efbc853a9d56c541370ac97"
     sha256 cellar: :any_skip_relocation, catalina:       "b781487b76eed046d9e7c5d2db71a7c81001dc6b80926b9215bc7cb4e7a3c162"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "52565fd522beb6cf07defd4a4a790e20f52975261f940658442d1354c9dab7da"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "ca5c17cfc66b0b2589e07c696cfbe385addb1ed8905c5d851d64b2dbbee00940"
   end
 
@@ -23,19 +26,14 @@ class Flock < Formula
   end
 
   def install
-    system "./configure", *std_configure_args,
-                          "--disable-debug",
-                          "--disable-dependency-tracking",
-                          "--disable-silent-rules"
+    system "./configure", "--disable-silent-rules", *std_configure_args
     system "make", "install"
   end
 
   test do
-    pid = fork do
-      exec bin/"flock", "tmpfile", "sleep", "5"
-    end
+    pid = spawn bin/"flock", "tmpfile", "sleep", "5"
     sleep 1
-    assert shell_output("#{bin}/flock --nonblock tmpfile true", 1).empty?
+    assert_empty shell_output("#{bin}/flock --nonblock tmpfile true", 1)
   ensure
     Process.wait pid
   end

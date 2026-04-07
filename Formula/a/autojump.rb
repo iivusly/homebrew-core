@@ -8,14 +8,14 @@ class Autojump < Formula
   head "https://github.com/wting/autojump.git", branch: "master"
 
   bottle do
-    rebuild 5
-    sha256 cellar: :any_skip_relocation, all: "8807ff6e88ececba13987344f311629bfc6334d36d3e6b3b9c6050a0806e86ea"
+    rebuild 7
+    sha256 cellar: :any_skip_relocation, all: "2a5206b6e787350ca32d8e9adbf7b336dc794ff95b54a1da6ba968db261892b3"
   end
 
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   def install
-    python_bin = Formula["python@3.12"].opt_libexec/"bin"
+    python_bin = Formula["python@3.14"].opt_libexec/"bin"
     system python_bin/"python", "install.py", "-d", prefix, "-z", zsh_completion
 
     # ensure uniform bottles

@@ -12,46 +12,57 @@ class TemporalTables < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "4c329e88b8fa82e9360be732ae2054d0d77b41b29e302636c31f1da2b47203e0"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "5222d996fc391c50b0b70a096e931c886620e6f538c34d3955bea1fd86f46508"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "e458a800f09bb073d81b032e56e6ba124f86a46e8adf7fec9afd5dbfcaee8617"
-    sha256 cellar: :any_skip_relocation, sonoma:         "91a343a4100f09bf265f0bb826ecdd610189a5e55fa7349911512a3f5a45c0ab"
-    sha256 cellar: :any_skip_relocation, ventura:        "1292cf245c40f3c833b3c05dc4f17d960550107aa4a5df06c8cd8ea77612060b"
-    sha256 cellar: :any_skip_relocation, monterey:       "94cfaaa4269a1d3bb894d6eb63c3efb337fd05854a048e47f5d6952a3240d6a4"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "96fd42f1d03e29962b80bca8ddeb2f25091c810760ee8cbc3163c1b3852e41f9"
+    rebuild 2
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "961c3574dee3785c6a4a2d5dfee3fc55c758b09b06df2dc106a6f20caf555c18"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "2be633c14e63c4523d088fd0caadba5c804d7b2d9683f6a78e56f3e5111596d1"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "f35985639da76876dd1f2a903d24d2339eab09eb9e2885a01227a78c5016cc5f"
+    sha256 cellar: :any_skip_relocation, sonoma:        "2a3a851746ab81698051d7d408bcb4ebb38948aa5135f49480a62e8ac42c1acb"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "4c361513b78e4984086bb63776a72ecb2d2b44fb4c086cffa269652eefecafc3"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "41bcf18a2b6d4abee03cd3f87ddcceb820fee5410d2442ad1613075f7fc97c92"
   end
 
-  depends_on "postgresql@14"
+  depends_on "postgresql@17" => [:build, :test]
+  depends_on "postgresql@18" => [:build, :test]
 
-  def postgresql
-    deps.map(&:to_formula)
-        .find { |f| f.name.start_with?("postgresql@") }
+  def postgresqls
+    deps.map(&:to_formula).sort_by(&:version).filter { |f| f.name.start_with?("postgresql@") }
   end
 
   def install
-    system "make", "install", "PG_CONFIG=#{postgresql.opt_bin}/pg_config",
-                              "pkglibdir=#{lib/postgresql.name}",
-                              "datadir=#{share/postgresql.name}",
-                              "docdir=#{doc}"
+    odie "Too many postgresql dependencies!" if postgresqls.count > 2
+
+    postgresqls.each do |postgresql|
+      args = %W[
+        PG_CONFIG=#{postgresql.opt_bin}/pg_config
+        pkglibdir=#{lib/postgresql.name}
+        datadir=#{share/postgresql.name}
+        docdir=#{doc}
+      ]
+      system "make", "install", *args
+      system "make", "clean", *args
+    end
   end
 
   test do
     ENV["LC_ALL"] = "C"
-    pg_ctl = postgresql.opt_bin/"pg_ctl"
-    psql = postgresql.opt_bin/"psql"
-    port = free_port
+    postgresqls.each do |postgresql|
+      pg_ctl = postgresql.opt_bin/"pg_ctl"
+      psql = postgresql.opt_bin/"psql"
+      port = free_port
 
-    system pg_ctl, "initdb", "-D", testpath/"test"
-    (testpath/"test/postgresql.conf").write <<~EOS, mode: "a+"
+      datadir = testpath/postgresql.name
+      system pg_ctl, "initdb", "-D", datadir
+      (datadir/"postgresql.conf").write <<~EOS, mode: "a+"
 
-      shared_preload_libraries = 'temporal_tables'
-      port = #{port}
-    EOS
-    system pg_ctl, "start", "-D", testpath/"test", "-l", testpath/"log"
-    begin
-      system psql, "-p", port.to_s, "-c", "CREATE EXTENSION \"temporal_tables\";", "postgres"
-    ensure
-      system pg_ctl, "stop", "-D", testpath/"test"
+        shared_preload_libraries = 'temporal_tables'
+        port = #{port}
+      EOS
+      system pg_ctl, "start", "-D", datadir, "-l", testpath/"log-#{postgresql.name}"
+      begin
+        system psql, "-p", port.to_s, "-c", "CREATE EXTENSION \"temporal_tables\";", "postgres"
+      ensure
+        system pg_ctl, "stop", "-D", datadir
+      end
     end
   end
 end

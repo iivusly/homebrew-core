@@ -3,34 +3,31 @@ class Cryfs < Formula
 
   desc "Encrypts your files so you can safely store them in Dropbox, iCloud, etc."
   homepage "https://www.cryfs.org"
-  url "https://github.com/cryfs/cryfs/releases/download/0.11.4/cryfs-0.11.4.tar.gz"
-  sha256 "6caca6276ce5aec40bf321fd0911b0af7bcffc44c3cb82ff5c5af944d6f75a45"
+  url "https://github.com/cryfs/cryfs/releases/download/1.0.3/cryfs-1.0.3.tar.gz"
+  sha256 "5550f612f7b692e60c0c10a0331dcefbcc9616ad1411a016de7e4503ad866696"
   license "LGPL-3.0-or-later"
-  revision 7
-  head "https://github.com/cryfs/cryfs.git", branch: "develop"
+  revision 1
+  head "https://github.com/cryfs/cryfs.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "8aa0f0aded58dd01325c470c0411ff61d6b3be3e0e8f99b4c68ae7aa8afbe47e"
+    sha256 cellar: :any_skip_relocation, arm64_linux:  "aad3465262b4d592cf14d87253fca6f7543c8f1f1b6a5ab177d36befda519fd2"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "4d391a757720609a5f34600e573d517e8f061afddb31ff743d4f18737e2cf399"
   end
 
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
-  depends_on "python@3.12" => :build
+  depends_on "curl" => :build
+  depends_on "pkgconf" => :build
+  depends_on "python@3.14" => :build
+  depends_on "range-v3" => :build
   depends_on "boost"
-  depends_on "curl"
   depends_on "fmt"
-  depends_on "libfuse@2"
+  depends_on "libfuse@2" # FUSE 3 issue: https://github.com/cryfs/cryfs/issues/419
   depends_on :linux # on macOS, requires closed-source macFUSE
-  depends_on "range-v3"
   depends_on "spdlog"
 
-  fails_with gcc: "5"
-
   def install
-    system "cmake", "-B", "build", "-S", ".", *std_cmake_args,
-                    "-DBUILD_TESTING=off",
-                    "-DCRYFS_UPDATE_CHECKS=OFF",
-                    "-DDEPENDENCY_CONFIG=cmake-utils/DependenciesFromLocalSystem.cmake"
+    ENV.runtime_cpu_detection # for bundled cryptopp
+    system "cmake", "-B", "build", "-S", ".", "-DCRYFS_UPDATE_CHECKS=OFF", *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
   end

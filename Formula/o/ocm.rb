@@ -1,19 +1,18 @@
 class Ocm < Formula
   desc "CLI for the Red Hat OpenShift Cluster Manager"
   homepage "https://www.openshift.com/"
-  url "https://github.com/openshift-online/ocm-cli/archive/refs/tags/v0.1.75.tar.gz"
-  sha256 "3255b18494539bc9b7c1e17c34a98588b60f50ace8393c567f356a7eeac2d6c0"
+  url "https://github.com/openshift-online/ocm-cli/archive/refs/tags/v1.0.13.tar.gz"
+  sha256 "7ac0158b6a53ff56159c18decb0b8cc43739b7421120d4d88da0c6c721a25310"
   license "Apache-2.0"
   head "https://github.com/openshift-online/ocm-cli.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "a50b8fa07a0dc73812573bb89ca92f9aa2ea9f688ca78dc03d95164a16b524ee"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "176ffdf87a92e0826776419a7efdd240e70d0d27141652e3e11e1bbb1d562810"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "ff979f73abf651138c96e1488878648fd1e637a79e5420bb0efcaeb027bb4f9e"
-    sha256 cellar: :any_skip_relocation, sonoma:         "2f6a6a738c1abce44c55cba84a3f7d1903c96181832f6972f9b196ac29d69294"
-    sha256 cellar: :any_skip_relocation, ventura:        "c25d3b074c27dfe1053b852c45ce4b3b64d944d769d0d7e980846bf5d0708c67"
-    sha256 cellar: :any_skip_relocation, monterey:       "d8f9f6707a7167931c04426e5f95d0df4577e2c7341f5a88f44054526da39494"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "0edd3ee12ed2d62e687bd037e504eb9aa7a97db153b833ea98a38500b6ec0ce0"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "da3bb72fb8ba7464f1cc46b04acae51703a1fe77d1ed3d64a430bf2146491fe3"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "359d8fe5e47d93151bb05bed9c71ff241eea4dd396bc2637eb5b99876455f665"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "80691cafee10deb46f025c35740f1e39ea50e7a2c45c9dcae38019a70cc27f9a"
+    sha256 cellar: :any_skip_relocation, sonoma:        "c904d308cd0efaf6ef0b9d09364ec7eed0a3c4097f3485fa05ae417af598baee"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "ff1a75d7df9bc7ad5ca21d2272ef4eac9c54b013fa580ca8edfada8d2340154d"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "a22117289214bd859fe7fec61611a6631d1382e2f538d29c1d57af93969cb1fe"
   end
 
   depends_on "go" => :build
@@ -21,7 +20,7 @@ class Ocm < Formula
   def install
     ldflags = "-s -w"
     system "go", "build", *std_go_args(ldflags:), "./cmd/ocm"
-    generate_completions_from_executable(bin/"ocm", "completion")
+    generate_completions_from_executable(bin/"ocm", shell_parameter_format: :cobra)
   end
 
   test do

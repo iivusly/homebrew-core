@@ -1,32 +1,40 @@
 class Mighttpd2 < Formula
   desc "HTTP server"
   homepage "https://kazu-yamamoto.github.io/mighttpd2/"
-  url "https://hackage.haskell.org/package/mighttpd2-4.0.7/mighttpd2-4.0.7.tar.gz"
-  sha256 "28bb7c1309d71a276eab7b7ad0f78c00c5e7119a656ede408619cf676e749225"
+  # TODO: Check if `cborg` allow-newer workarounds can be removed
+  url "https://hackage.haskell.org/package/mighttpd2-4.0.10/mighttpd2-4.0.10.tar.gz"
+  sha256 "7512f967748517537f526cb1ff6c6bd4e896d432691dd14c613530071e8357db"
   license "BSD-3-Clause"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "9ce8b2007ade99047af65d374ba0b01bea3f382006db449857be9f196cf3df20"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "be986030a6d0bf9e7bcfc5218f57d350f30fdaff17b905ef45ed4d6623e44f53"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "0b3fc20fd35255a3b98d9d4150ceb05a532944e24168f07c82341f66c7775d85"
-    sha256 cellar: :any_skip_relocation, sonoma:         "cc899dbd255789fc44e49d0a94b804c3773302f2c1a7de1d7da0d18fdce511ff"
-    sha256 cellar: :any_skip_relocation, ventura:        "800fca27c5bc71d56aba593940f36087b4fda948301ede2dd2a8f159e1796578"
-    sha256 cellar: :any_skip_relocation, monterey:       "4dfa736657e5b293cf440d42ad467d8fdbf34fb67c69dbe1272a814a88932684"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "2edf3a1ccc28fac58f9a784c43d0f6de37e8d8c57ed2059c4d8a5f408d701361"
+    sha256 cellar: :any,                 arm64_tahoe:   "66fbd63b606e13da4d46baebd96a6a26de5dc555553ede663a49be878d6091d7"
+    sha256 cellar: :any,                 arm64_sequoia: "3bd15fc041272bcc6acba9fc872d3a14b4fe3dc500f1e3db04e0e3077ac49c81"
+    sha256 cellar: :any,                 arm64_sonoma:  "144cc74e8f72513a0791956190136c19373f2b456876f5172bb455f64e7c46b9"
+    sha256 cellar: :any,                 sonoma:        "1d87006977c3e8d4d4f64ee888e52c14dab67d14011d5f4d9f333739f10cf8e5"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "e5d0a2d98d44a5f042aa42c95129f90ea90fe6a8355cf047f9545924c00d1867"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "61f34699423a6e6e60e12776b21141712b2220b27b515365a469f4bfa41214ec"
   end
 
   depends_on "cabal-install" => :build
   depends_on "ghc" => :build
+  depends_on "gmp"
 
-  uses_from_macos "zlib"
+  uses_from_macos "libffi"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
+    # Workaround to build aeson with GHC 9.14, https://github.com/haskell/aeson/issues/1155
+    args = ["--allow-newer=base,containers,template-haskell"]
+
     system "cabal", "v2-update"
-    system "cabal", "v2-install", "-ftls", *std_cabal_v2_args
+    system "cabal", "v2-install", "--flags=tls", *args, *std_cabal_v2_args
   end
 
   test do
     system bin/"mighty-mkindex"
-    assert (testpath/"index.html").file?
+    assert_predicate testpath/"index.html", :file?
   end
 end

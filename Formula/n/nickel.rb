@@ -1,20 +1,23 @@
 class Nickel < Formula
   desc "Better configuration for less"
-  homepage "https://github.com/tweag/nickel"
-  url "https://github.com/tweag/nickel/archive/refs/tags/1.7.0.tar.gz"
-  sha256 "0a187cb5e4d34fb485ae7ceca77e18b27f22860cf79c03f92e12fc5c2c59c01e"
+  homepage "https://nickel-lang.org/"
+  url "https://github.com/tweag/nickel/archive/refs/tags/1.16.0.tar.gz"
+  sha256 "32a449ebc4d463dd193eb8ce8aced5324655188095e709a9c0addb7b3ceeaec3"
   license "MIT"
   head "https://github.com/tweag/nickel.git", branch: "master"
 
+  livecheck do
+    url :stable
+    regex(/^v?((?!9\.9\.9)\d+(?:\.\d+)+)$/i)
+  end
+
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "a522d3e1aae94df5f30388505f28acc4eb6bc3c3fc959a530ebb552d5dc0d951"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "3f6881c9772da598c5e5d26b8d498b12202f7ac6a086b2ba9debe4fbf092f304"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "23e4b08a784947748e47468eee77825a5f0f5cc43d115318170e6c73b4d86622"
-    sha256 cellar: :any_skip_relocation, sonoma:         "dc071ca43f33e73af100f18be725773b5f2dd2dc4aa4b9371ca09cb981123328"
-    sha256 cellar: :any_skip_relocation, ventura:        "2dc84f6726c6eb472401f06e8daebf90884f8f3326020b59c2a1f48b8859234f"
-    sha256 cellar: :any_skip_relocation, monterey:       "8621559b7921ad62b79ffced1e3c35349b202409e917e65440668bdbc6c2cac6"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "d3c615d3fdd6ba13c24c61632bfefecb555d9f1e1103f0c4e6f28784e007e21b"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "f316961ea89f7b1a77eb0b41f48309bfa04d44cdb38933ab6c451b8f9f27304d"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "a789f9851923d7a0af677ddf00efbaa1f514c110e300059abac0778012971c7b"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "5dcc83c98279bd606086e798c3c86e62a26c03aaba5f4ab654d866bf1c7fe167"
+    sha256 cellar: :any_skip_relocation, sonoma:        "8cc26de79d5d969db534b40647e280b09a593ed2850b361368bc15c11f9a9cd2"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "4784a57659030969606e685be6ae02acb143aa849e8b44c4aaee46756e7355ba"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "415e3d13763bee6ac4eadc9e3dcb71d15452b9db84ee92c70fd61ddf4d7e186d"
   end
 
   depends_on "rust" => :build
@@ -30,9 +33,9 @@ class Nickel < Formula
   test do
     assert_match version.to_s, shell_output("#{bin}/nickel --version")
 
-    (testpath/"program.ncl").write <<~EOS
+    (testpath/"program.ncl").write <<~NICKEL
       let s = "world" in "Hello, " ++ s
-    EOS
+    NICKEL
 
     output = shell_output("#{bin}/nickel eval program.ncl")
     assert_match "Hello, world", output

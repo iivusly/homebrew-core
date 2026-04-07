@@ -4,7 +4,7 @@ class Amtterm < Formula
   url "https://www.kraxel.org/releases/amtterm/amtterm-1.7.tar.gz"
   sha256 "8c58b76b3237504d751bf3588fef25117248a0569523f0d86deaf696d14294d4"
   license "GPL-2.0-or-later"
-  head "https://git.kraxel.org/git/amtterm/", branch: "master", using: :git
+  head "https://github.com/kraxel/amtterm.git", branch: "master"
 
   livecheck do
     url "https://www.kraxel.org/releases/amtterm/"
@@ -12,7 +12,9 @@ class Amtterm < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "51e227741242bb67cb8b195667372ec40a4010f167bc82010ae3fdbcfa44bb9d"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_linux:  "33934a9d2469315d7e292462ed352c552a01ef9717c98ed502b693fc496731f4"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "18584332d73c1ec0c92903282b8363ec3d459b2bfacd19748f69607652cc40c8"
   end
 
   depends_on "gtk+3"
@@ -22,6 +24,10 @@ class Amtterm < Formula
   resource "SOAP::Lite" do
     url "https://cpan.metacpan.org/authors/id/P/PH/PHRED/SOAP-Lite-1.27.tar.gz"
     sha256 "e359106bab1a45a16044a4c2f8049fad034e5ded1517990bc9b5f8d86dddd301"
+
+    livecheck do
+      url :url
+    end
   end
 
   def install
@@ -38,7 +44,7 @@ class Amtterm < Formula
     inreplace "mk/Autoconf.mk", "@echo -e", "@echo"
 
     system "make", "prefix=#{prefix}", "install"
-    bin.env_script_all_files(libexec+"bin", PERL5LIB: ENV["PERL5LIB"])
+    bin.env_script_all_files(libexec/"bin", PERL5LIB: ENV["PERL5LIB"])
   end
 
   test do

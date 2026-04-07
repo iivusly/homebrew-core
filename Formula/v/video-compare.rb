@@ -1,18 +1,17 @@
 class VideoCompare < Formula
   desc "Split screen video comparison tool using FFmpeg and SDL2"
   homepage "https://github.com/pixop/video-compare"
-  url "https://github.com/pixop/video-compare/archive/refs/tags/20240818.tar.gz"
-  sha256 "29155c67c90307153e2b3c4a909083c9a7def710e3c0c4c9a7ffaa50398195d4"
+  url "https://github.com/pixop/video-compare/archive/refs/tags/20260308.tar.gz"
+  sha256 "9e25b2a72f0c745637903cf1d3df71f32c040a610b64cb3d049831cafe1e2941"
   license "GPL-2.0-only"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "a17fdb0881d933cb289dbb2a2889fde7cd8007fb377d90041e2db9bb348c2c16"
-    sha256 cellar: :any,                 arm64_ventura:  "907933adc8eab74c9f21b6a5d55d005c9306facb9729544f4bc4f7523ea86364"
-    sha256 cellar: :any,                 arm64_monterey: "fb2b305e62ef1b7792b85ffba6f927a372da008945856e3ccd70b950fdf471aa"
-    sha256 cellar: :any,                 sonoma:         "1afbaf0dfb2766bc9091938f1bb398edd36251bb2d79ca97e2c1aebe780965be"
-    sha256 cellar: :any,                 ventura:        "a61bcbab0b10c4e36960e3a73bb7f38c59c8d98dc6febbbdfa9590536a2d3f7c"
-    sha256 cellar: :any,                 monterey:       "c5070b7597b576ea6a5fb1f681441893baef91fccdd5de485528892704e5b069"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "2693198a2dcc0078619c740c50a4b14d084a9ff3f59a3a8e3a6bded165c46ee5"
+    sha256 cellar: :any,                 arm64_tahoe:   "c8fddd93d8610b423d4e89de72db1cfcef64133e2c40db3bb94d627587efe37e"
+    sha256 cellar: :any,                 arm64_sequoia: "06a84854a6f3208fb2cf73abec3b33d922176491bb078b774434a6b12fa6bc5f"
+    sha256 cellar: :any,                 arm64_sonoma:  "bd66d5c35e4ffc84c0fba88c014ee5750f6397799978f34f89222c1319591e3a"
+    sha256 cellar: :any,                 sonoma:        "f27d5c558c11528c41d769b6444ae604a1b4904e25c363fd8720ad0484440c77"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "458fee5ace31fbe713ff4c84d5b09eab2be7b94475a9d12300f850e6c5b3956a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "eb906b7486530a942c8b605c3cb1005b157a1a8c09158e36479474c7fb51b79d"
   end
 
   depends_on "ffmpeg"
@@ -27,9 +26,7 @@ class VideoCompare < Formula
   test do
     testvideo = test_fixtures("test.gif") # GIF is valid ffmpeg input format
     begin
-      pid = fork do
-        exec bin/"video-compare", testvideo, testvideo
-      end
+      pid = spawn bin/"video-compare", testvideo, testvideo
       sleep 3
     ensure
       Process.kill("TERM", pid)

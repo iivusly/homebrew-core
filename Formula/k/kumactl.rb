@@ -1,9 +1,10 @@
 class Kumactl < Formula
   desc "Kuma control plane command-line utility"
   homepage "https://kuma.io/"
-  url "https://github.com/kumahq/kuma/archive/refs/tags/2.8.3.tar.gz"
-  sha256 "4327a2b3017dfe0648b01387b05fedcc49a2141d35b91bcc588c09cc1cbc3b11"
+  url "https://github.com/kumahq/kuma/archive/refs/tags/v2.13.3.tar.gz"
+  sha256 "161896c45adfd71a6acfa18d8643a276313bae036e771925358e3dc7d9239108"
   license "Apache-2.0"
+  head "https://github.com/kumahq/kuma.git", branch: "master"
 
   livecheck do
     url :stable
@@ -11,13 +12,12 @@ class Kumactl < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "1a6ca3721e882c706bbd974d6ab21b8c5287f72164d8fb3381d4f577d5bbe4b7"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "1a6ca3721e882c706bbd974d6ab21b8c5287f72164d8fb3381d4f577d5bbe4b7"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "1a6ca3721e882c706bbd974d6ab21b8c5287f72164d8fb3381d4f577d5bbe4b7"
-    sha256 cellar: :any_skip_relocation, sonoma:         "2b544c04428257db9cf591771ad7ed63f142153eeddcff864f47ad13a10bdc0f"
-    sha256 cellar: :any_skip_relocation, ventura:        "2b544c04428257db9cf591771ad7ed63f142153eeddcff864f47ad13a10bdc0f"
-    sha256 cellar: :any_skip_relocation, monterey:       "2b544c04428257db9cf591771ad7ed63f142153eeddcff864f47ad13a10bdc0f"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "03384283c7913ab17ca80b44745b37c01e25a54bdf67403b6e4289d3edf0abbd"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "5c21404783c1fb19a886a5f2a884da7338c1d38a68d0428d2dbd5a3167f8f450"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "68aece0a2faac6157e3c41a2b1987c7640109b8f5a317d755ba6eca671dfdc33"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "86c9c1af58aa08ba0adeeac2f2efb4abca2ab89c10a3091449f3e3ece2370f00"
+    sha256 cellar: :any_skip_relocation, sonoma:        "a9c90a5cfe26f3990d7e8607a377af449db8d466f50380588e7585a53f9259b9"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "5baf4a8ab58f215c6f3739689bd5af5cbc6eed5646943af77cb6d0bee05b4d9d"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "90d631715d5e248450eee4b188f83c5dda60fc22d138b96a9aba284b770cdf7d"
   end
 
   depends_on "go" => :build
@@ -25,14 +25,14 @@ class Kumactl < Formula
   def install
     ldflags = %W[
       -s -w
-      -X github.com/kumahq/kuma/pkg/version.version=#{version}
-      -X github.com/kumahq/kuma/pkg/version.gitTag=#{version}
-      -X github.com/kumahq/kuma/pkg/version.buildDate=#{time.strftime("%F")}
+      -X github.com/kumahq/kuma/v2/pkg/version.version=#{version}
+      -X github.com/kumahq/kuma/v2/pkg/version.gitTag=#{version}
+      -X github.com/kumahq/kuma/v2/pkg/version.buildDate=#{time.strftime("%F")}
     ]
 
     system "go", "build", *std_go_args(ldflags:), "./app/kumactl"
 
-    generate_completions_from_executable(bin/"kumactl", "completion")
+    generate_completions_from_executable(bin/"kumactl", shell_parameter_format: :cobra)
   end
 
   test do

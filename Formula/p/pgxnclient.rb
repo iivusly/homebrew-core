@@ -7,33 +7,29 @@ class Pgxnclient < Formula
   sha256 "b0343e044b8d0044ff4be585ecce0147b1007db7ae8b12743bf222758a4ec7d9"
   license "BSD-3-Clause"
   revision 2
+  head "https://github.com/pgxn/pgxnclient.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "44ff65d97f5481826e4963c3efaf758cdf6b20f6ec1ea7a15e198c6f91c9740e"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "36c3aef93ead993b2db8de5fcc9dc66f0e433938c17acd8c55d37dac2b6e0908"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "03c6ce799197f4f86f827ba75864555b5a512443b95e06cc160a28dbf3dcad41"
-    sha256 cellar: :any_skip_relocation, sonoma:         "e00942c2867b45d3d0bd9e6cfc78c2b556dce24c73be0090ae3611e36b28881f"
-    sha256 cellar: :any_skip_relocation, ventura:        "a9183ce3151aa765c62333b3423c2d6c75fa32af81d748dedd68a6486c93bbb9"
-    sha256 cellar: :any_skip_relocation, monterey:       "7f846a0accf04fed36d5ba5173ceff9a48d38c4365d585ed3f186434b4dcd00f"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "27e1ad1cc23034ff7976ab14da529ffc621a47c5256ce17275eeb961d44b4008"
+    rebuild 2
+    sha256 cellar: :any_skip_relocation, all: "34e47292dc284c01c684578dca761037d87b54c15d33de6d2be31e3f015a0001"
   end
 
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   resource "six" do
-    url "https://files.pythonhosted.org/packages/71/39/171f1c67cd00715f190ba0b100d606d440a28c93c7714febeca8b79af85e/six-1.16.0.tar.gz"
-    sha256 "1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"
+    url "https://files.pythonhosted.org/packages/94/e7/b2c673351809dca68a0e064b6af791aa332cf192da575fd474ed7d6f16a2/six-1.17.0.tar.gz"
+    sha256 "ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81"
   end
 
   def install
     venv = virtualenv_install_with_resources
     inreplace venv.site_packages/name/"__init__.py",
-              "/usr/local/libexec/pgxnclient", HOMEBREW_PREFIX/"libexec/#{name}"
+              "/usr/local/libexec/pgxnclient", venv.site_packages/name/"libexec"
   end
 
   test do
     assert_match "pgxn", shell_output("#{bin}/pgxnclient mirror")
     assert_match version.to_s, shell_output("#{bin}/pgxnclient --version")
-    assert_match "#{HOMEBREW_PREFIX}/libexec/#{name}", shell_output("#{bin}/pgxn help --libexec")
+    assert_match "site-packages/#{name}/libexec", shell_output("#{bin}/pgxn help --libexec")
   end
 end

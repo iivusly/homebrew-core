@@ -1,10 +1,10 @@
 class Flint < Formula
   desc "C library for number theory"
   homepage "https://flintlib.org/"
-  url "https://github.com/flintlib/flint/releases/download/v3.1.3-p1/flint-3.1.3-p1.tar.gz"
-  sha256 "96637ba9de43397d06657deefe8e6dee9d226992b5526bb1c9a9d563b983e027"
+  url "https://github.com/flintlib/flint/releases/download/v3.4.0/flint-3.4.0.tar.gz"
+  sha256 "9497679804dead926e3affeb8d4c58739d1c7684d60c2c12827550d28e454a33"
   license "LGPL-3.0-or-later"
-  head "https://github.com/flintlib/flint.git", branch: "main"
+  compatibility_version 1
 
   livecheck do
     url :stable
@@ -13,27 +13,30 @@ class Flint < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "74da020f9e6587c8899bda2034e1d94cf4d8b28dde5344c186dcbc45d4d10dab"
-    sha256 cellar: :any,                 arm64_ventura:  "ee89cff4b2e4a55c4c1b23b4435a5cb6d3e38bfb7cceaad86cb2d306d92ee86d"
-    sha256 cellar: :any,                 arm64_monterey: "f5efdb8826a3bd80de599455dc0aca0dd478276d4edbcde06e80f985cf9688ff"
-    sha256 cellar: :any,                 sonoma:         "8c60de59b79be3ab9aa996c3b1b65566751956e24bd47122bb14c7f575f87458"
-    sha256 cellar: :any,                 ventura:        "ac40ea9c126354efbd805a2a1d817e38e26c23410abfd9e189790e9c0fc60f11"
-    sha256 cellar: :any,                 monterey:       "daf2a177ea8b8b83cc10bf7d9f8719b60c128b335b74fb48b54ca73dca109f1d"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "999413efcfa5455b771d5fe28356fb36515c41b243bda6f4206240e2dbb3295d"
+    sha256 cellar: :any,                 arm64_tahoe:   "7ed744e782c8f2ec39097e89f333493247ed0edb5d4e19c0cb729003a9131791"
+    sha256 cellar: :any,                 arm64_sequoia: "394c68bb4acb7026e5bf02843706a61ae1b23dd4c451e18fc23d23c1d2d3867e"
+    sha256 cellar: :any,                 arm64_sonoma:  "2180a9d4657aba18c8bba14f55b4594742e5dbd34b505127afa92324b62dad8d"
+    sha256 cellar: :any,                 sonoma:        "28805b3eee716445aa9513690841e961f74273c6e5ea33cd2ba23ff3e4002c8b"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "5fa53f2cab0d3a03af52033f31095b06f10cca788ba19119b6788477ae7a9ac5"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "0fb876906fcaadbec62baf8734f08cf0dcda573f7573ce5a303811c889ac1138"
   end
 
-  depends_on "autoconf" => :build
-  depends_on "automake" => :build
-  depends_on "libtool" => :build
+  head do
+    url "https://github.com/flintlib/flint.git", branch: "main"
+
+    depends_on "autoconf" => :build
+    depends_on "automake" => :build
+    depends_on "libtool" => :build
+  end
+
   depends_on "gmp"
   depends_on "mpfr"
+
   uses_from_macos "m4" => :build
 
   def install
     # to build against NTL
     ENV.cxx11
-
-    system "./bootstrap.sh" if build.head?
 
     args = %W[
       --with-gmp=#{Formula["gmp"].prefix}
@@ -46,21 +49,25 @@ class Flint < Formula
       # we cannot rely on -march options
       if build.bottle?
         # prevent avx{2,512} in case we are building on a machine that supports it
-        args << "--enable-arch=#{Hardware.oldest_cpu}"
+        args << if OS.mac?
+          "--host=#{ENV.effective_arch}-apple-darwin#{OS.kernel_version}"
+        else
+          "--host=#{ENV.effective_arch}-unknown-linux-gnu"
+        end
       elsif Hardware::CPU.avx2?
         # TODO: enable avx512 support
         args << "--enable-avx2"
       end
     end
 
+    system "./bootstrap.sh" if build.head?
     system "./configure", *args, *std_configure_args
-
     system "make"
     system "make", "install"
   end
 
   test do
-    (testpath/"test.c").write <<-EOS
+    (testpath/"test.c").write <<~C
       #include <stdlib.h>
       #include <stdio.h>
       #include "flint.h"
@@ -70,7 +77,7 @@ class Flint < Formula
       int main(int argc, char* argv[])
       {
           slong i, bit_bound;
-          mp_limb_t prime, res;
+          ulong prime, res;
           fmpz_t x, y, prod;
 
           if (argc != 2)
@@ -109,7 +116,7 @@ class Flint < Formula
 
           return EXIT_SUCCESS;
       }
-    EOS
+    C
     system ENV.cc, "test.c", "-I#{include}/flint", "-L#{lib}", "-L#{Formula["gmp"].lib}",
            "-lflint", "-lgmp", "-o", "test"
     system "./test", "2"

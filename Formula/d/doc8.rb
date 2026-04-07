@@ -3,46 +3,36 @@ class Doc8 < Formula
 
   desc "Style checker for Sphinx documentation"
   homepage "https://github.com/PyCQA/doc8"
-  url "https://files.pythonhosted.org/packages/11/28/b0a576233730b756ca1ebb422bc6199a761b826b86e93e5196dfa85331ea/doc8-1.1.2.tar.gz"
-  sha256 "1225f30144e1cc97e388dbaf7fe3e996d2897473a53a6dae268ddde21c354b98"
+  url "https://files.pythonhosted.org/packages/92/91/88bb55225046a2ee9c2243d47346c78d2ed861c769168f451568625ad670/doc8-2.0.0.tar.gz"
+  sha256 "1267ad32758971fbcf991442417a3935c7bc9e52550e73622e0e56ba55ea1d40"
   license "Apache-2.0"
+  revision 1
   head "https://github.com/PyCQA/doc8.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "11b134247abd0f676ba46e3be31218d423ab545af59c6ae186fe612b86c46985"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "11b134247abd0f676ba46e3be31218d423ab545af59c6ae186fe612b86c46985"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "11b134247abd0f676ba46e3be31218d423ab545af59c6ae186fe612b86c46985"
-    sha256 cellar: :any_skip_relocation, sonoma:         "3a70c7423c1428253ddfbd08cd6403051c51d73f484071c7e2972b5e42b9f084"
-    sha256 cellar: :any_skip_relocation, ventura:        "3a70c7423c1428253ddfbd08cd6403051c51d73f484071c7e2972b5e42b9f084"
-    sha256 cellar: :any_skip_relocation, monterey:       "3a70c7423c1428253ddfbd08cd6403051c51d73f484071c7e2972b5e42b9f084"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "11b134247abd0f676ba46e3be31218d423ab545af59c6ae186fe612b86c46985"
+    sha256 cellar: :any_skip_relocation, all: "7d4573d3ab94153d219dbb6b880afe137ef540fe236de2c44278c4d7829cf705"
   end
 
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   resource "docutils" do
     url "https://files.pythonhosted.org/packages/ae/ed/aefcc8cd0ba62a0560c3c18c33925362d46c6075480bfa4df87b28e169a9/docutils-0.21.2.tar.gz"
     sha256 "3a6b18732edf182daa3cd12775bbb338cf5691468f91eeeb109deff6ebfa986f"
   end
 
-  resource "pbr" do
-    url "https://files.pythonhosted.org/packages/b2/35/80cf8f6a4f34017a7fe28242dc45161a1baa55c41563c354d8147e8358b2/pbr-6.1.0.tar.gz"
-    sha256 "788183e382e3d1d7707db08978239965e8b9e4e5ed42669bf4758186734d5f24"
-  end
-
   resource "pygments" do
-    url "https://files.pythonhosted.org/packages/8e/62/8336eff65bcbc8e4cb5d05b55faf041285951b6e80f33e2bff2024788f31/pygments-2.18.0.tar.gz"
-    sha256 "786ff802f32e91311bff3889f6e9a86e81505fe99f2735bb6d60ae0c5004f199"
+    url "https://files.pythonhosted.org/packages/c3/b2/bc9c9196916376152d655522fdcebac55e66de6603a76a02bca1b6414f6c/pygments-2.20.0.tar.gz"
+    sha256 "6757cd03768053ff99f3039c1a36d6c0aa0b263438fcab17520b30a303a82b5f"
   end
 
   resource "restructuredtext-lint" do
-    url "https://files.pythonhosted.org/packages/48/9c/6d8035cafa2d2d314f34e6cd9313a299de095b26e96f1c7312878f988eec/restructuredtext_lint-1.4.0.tar.gz"
-    sha256 "1b235c0c922341ab6c530390892eb9e92f90b9b75046063e047cacfb0f050c45"
+    url "https://files.pythonhosted.org/packages/ca/e6/eefcad2228f4124f17e01064428fbcd0ade06a274f3063ce3a126a569d6b/restructuredtext_lint-2.0.2.tar.gz"
+    sha256 "dd25209b9e0b726929d8306339faf723734a3137db382bcf27294fa18a6bc52b"
   end
 
   resource "stevedore" do
-    url "https://files.pythonhosted.org/packages/c4/59/f8aefa21020054f553bf7e3b405caec7f8d1f432d9cb47e34aaa244d8d03/stevedore-5.3.0.tar.gz"
-    sha256 "9a64265f4060312828151c204efbe9b7a9852a0d9228756344dbc7e4023e375a"
+    url "https://files.pythonhosted.org/packages/a2/6d/90764092216fa560f6587f83bb70113a8ba510ba436c6476a2b47359057c/stevedore-5.7.0.tar.gz"
+    sha256 "31dd6fe6b3cbe921e21dcefabc9a5f1cf848cf538a1f27543721b8ca09948aa3"
   end
 
   def install

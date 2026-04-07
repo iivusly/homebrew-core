@@ -1,8 +1,8 @@
 class I2util < Formula
   desc "Internet2 utility tools"
   homepage "https://github.com/perfsonar/i2util"
-  url "https://github.com/perfsonar/i2util/archive/refs/tags/v5.1.2.tar.gz"
-  sha256 "27f86aa2b5f2d08c0ea99412c05764cd1a4953fe4d37e30d550d7d53c3b93c3d"
+  url "https://github.com/perfsonar/i2util/archive/refs/tags/v5.2.4.tar.gz"
+  sha256 "c6d9063bc302160889e4f751f00818bbf3488f70056a4f9a8276213f971c3018"
   license "Apache-2.0"
 
   livecheck do
@@ -11,13 +11,12 @@ class I2util < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "568713828868369047a6edb673c19ed723501ee95a22951e5755ef967b3a330c"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "5180278807727aed98c0f42c553f7b75f93b1ebe9573494e12b7f6a7edbcb33b"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "2ead09e3b35f362f8828f577927d201260952ff63637ddbc929478f627e32dd9"
-    sha256 cellar: :any_skip_relocation, sonoma:         "ea50d9ecd048d84aa63bbba16e65bc31116b2ee0e59f7d3e7a7bd7162c4c4492"
-    sha256 cellar: :any_skip_relocation, ventura:        "d4e82541ef2b3a0bf20c2c3658769e92fa7b1a2a5fce6303e09c472081a396bc"
-    sha256 cellar: :any_skip_relocation, monterey:       "1c2771b19cc2a3f837b290e515e236c06b551c35b53222d543e1c960ad922ba3"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "5500ad8f15d515efc6405dcb15d4909ac3baa17a8808f89245d2ad81e45190b0"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "135a65518f90e04d0de2d93bcdc9b7b5f6af6d164ea7197b9a134a4eaa32dd71"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "a10c737b26381ce2e88a8713f54b1ae3e00b9ceb6fda33843fc1ca4d19aa1047"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "20a896f77935355887f0746e189a25b6c4e3f06b3d46fc1a6c3e6a6bac5c79e1"
+    sha256 cellar: :any_skip_relocation, sonoma:        "fced07b9b2bbe56dbed13925ae0678d6136f7b21085aa3c0fa1b6fe581f884a4"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "7a257fe712d830069dc6d84914e0680170891131a989f668e117ec7963715095"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ad8a6e1703fd59f08d3aeb9269740f5a80f61a58218f32959608bc9d31b7f765"
   end
 
   depends_on "autoconf" => :build
@@ -32,7 +31,7 @@ class I2util < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <I2util/util.h>
       #include <string.h>
 
@@ -42,7 +41,7 @@ class I2util < Formula
         if (buf[0] != 190 || buf[1] != 239) return 1;
         return 0;
       }
-    EOS
+    C
     system ENV.cc, "test.c", "-L#{lib}", "-lI2util", "-o", "test"
     system "./test"
   end

@@ -1,8 +1,8 @@
 class Kcgi < Formula
   desc "Minimal CGI and FastCGI library for C/C++"
   homepage "https://kristaps.bsd.lv/kcgi/"
-  url "https://kristaps.bsd.lv/kcgi/snapshots/kcgi-0.13.3.tgz"
-  sha256 "1c13538e21511086a6ba1a87f40543de257fc3d8871840b17626c16d714d2f5a"
+  url "https://kristaps.bsd.lv/kcgi/snapshots/kcgi-1.0.1.tgz"
+  sha256 "bc1cc29bca48eace5df4ba0f1aa1dfc2fe7ac773f750d4af84d80c52cece3c45"
   license "ISC"
 
   livecheck do
@@ -11,21 +11,20 @@ class Kcgi < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "3a05d82cb4e3c9265061d0cf05872cf12c591d4793dc6b7114232fd3ccdc3614"
-    sha256 cellar: :any,                 arm64_ventura:  "4a3714eb957ab3622c4eecb9add25a5e136971ad1030e32a712f08d3571efe94"
-    sha256 cellar: :any,                 arm64_monterey: "34d3a40ea1e1ab174589142b356ef3a758cead1806f823fc4413babd7e29342c"
-    sha256 cellar: :any,                 sonoma:         "b8a07a81577401eb7dac933817ab86d2cb62947c507cdb4697ddb49d3934681b"
-    sha256 cellar: :any,                 ventura:        "b0adefa894690c1f14ea7cd1bbf8de7d38c628bcc5ccc31c3f281bd06c3d6e63"
-    sha256 cellar: :any,                 monterey:       "72ebe7b1b8a88ec1b3567b05ff53200c37e6ccf88a434aac5ed8e39697dac8b4"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "9d9897e21cb8c9fe721e367847ddb11443b9793c73efe975c369e215ae0a66c9"
+    rebuild 1
+    sha256 cellar: :any, arm64_tahoe:   "191a0d3f1d112f9585774eddd41909e942affd5338e7c8144d38803e986acc66"
+    sha256 cellar: :any, arm64_sequoia: "709e821d80864c2780293caa51f078fdb3f900bff44e515fcf938564819e4d4f"
+    sha256 cellar: :any, arm64_sonoma:  "06fef37ce17eea27851fdc51b89191eb3363c849f6f8f47b65797a22fd1aba3f"
+    sha256 cellar: :any, sonoma:        "47d68ef9bc518eae514f46b1dcb7a1b25b5445fec3b67ba9eb00e58af2a62067"
+    sha256               arm64_linux:   "d2864c56de92d3996fe29fc5f3bd28e8cae3fc36e3823aee230b57b53c57952d"
+    sha256               x86_64_linux:  "884dac750cf8338c422c6fcd249002d42e77d2c9b6e332fea44ab048fff7c421"
   end
 
   depends_on "bmake" => :build
 
-  uses_from_macos "zlib"
-
   on_linux do
     depends_on "libseccomp"
+    depends_on "zlib-ng-compat"
   end
 
   def install
@@ -38,7 +37,7 @@ class Kcgi < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <sys/types.h>
       #include <stdarg.h>
       #include <stddef.h>
@@ -54,7 +53,7 @@ class Kcgi < Formula
         khttp_parse(&r, NULL, 0, &pages, 1, 0);
         return 0;
       }
-    EOS
+    C
     flags = %W[
       -L#{lib}
       -lkcgi

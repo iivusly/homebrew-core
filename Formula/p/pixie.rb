@@ -2,8 +2,8 @@ class Pixie < Formula
   desc "Observability tool for Kubernetes applications"
   homepage "https://px.dev/"
   url "https://github.com/pixie-io/pixie.git",
-      tag:      "release/cli/v0.8.2",
-      revision: "401c92c1ed086eaa35dbe17b4fbcfd96e7b1ca4f"
+      tag:      "release/cli/v0.8.8",
+      revision: "042e35639f16d32fced41939c5fbc5085e1272ff"
   license "Apache-2.0"
   head "https://github.com/pixie-io/pixie.git", branch: "main"
 
@@ -13,15 +13,13 @@ class Pixie < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "86bcfbf42b2ca7d8d092ac895c72086d4efa65f30b33f14de163723d0dd6a051"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "ae39dedd709f92a8add505011b2f5939eeba7f18e5a8372bf9b41767d1d4f94a"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "693e5840758901a9cafde136280a33628328119b0fe836d15aa1d1ea791180e3"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "f4d9c0810f8e2bfd7374d70c33427cd293adb2fde6eeb7afaa61174b54bfa94b"
-    sha256 cellar: :any_skip_relocation, sonoma:         "f1ff5421325773a73e7924610a9a92edf6c755fcdca8cca22c3266c934757b4f"
-    sha256 cellar: :any_skip_relocation, ventura:        "ca5612497f9bc097b7deaca8973674661db74d5cea9db12c147d7f90d78da29f"
-    sha256 cellar: :any_skip_relocation, monterey:       "151c8631c02e8a3fda66937ff3e6a0a7c27bcc2a5a8faa774c9e1aa8a380ddab"
-    sha256 cellar: :any_skip_relocation, big_sur:        "08a65cf20796c23ee6bce718fdbf33555b643a20bb64779d7f903d14747c8e3a"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "f25e44683314c716e558324dd012a8953def0f917f15b8c7968867c9aa32b1f5"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "83b266db822d9793caf6cf5a03e8317e02739f0d5f9406ca81beaec183f0146e"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "1d6e42fdcbc35d05f2eeaffdf327ee3ca07e8e8ae7f07d418441f7446eee67f0"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "381b9ea04db887835776f25887660ff3377ab78da55c8e71408d7c0f023e499f"
+    sha256 cellar: :any_skip_relocation, sonoma:        "fd4ac012e19ff02c9ab8717d1a2fdc49b1da39ad8a37075d3d3bc848b353b0d5"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "c86ec5008b0fbbeab19146112fb8b9474b41c09ec3de504c30727bf119b9b1cd"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "f803b6103598540b99c6ad6f663c4240bba259e6da0ee27f7453e3cde980f80d"
   end
 
   depends_on "go" => :build
@@ -41,7 +39,7 @@ class Pixie < Formula
     ]
     system "go", "build", *std_go_args(ldflags:, output: bin/"px"), "./src/pixie_cli"
 
-    generate_completions_from_executable(bin/"px", "completion", base_name: "px")
+    generate_completions_from_executable(bin/"px", shell_parameter_format: :cobra)
   end
 
   test do

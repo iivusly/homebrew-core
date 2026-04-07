@@ -1,9 +1,10 @@
 class Hwloc < Formula
   desc "Portable abstraction of the hierarchical topology of modern architectures"
   homepage "https://www.open-mpi.org/projects/hwloc/"
-  url "https://download.open-mpi.org/release/hwloc/v2.11/hwloc-2.11.1.tar.bz2"
-  sha256 "04cdfbffad225ce15f66184f0f4141327dabf288d10a8b84d13f517acb7870c6"
+  url "https://download.open-mpi.org/release/hwloc/v2.13/hwloc-2.13.0.tar.bz2"
+  sha256 "52e936afb6ebd80f171f763fcf14f7b1f5ce98b125af5dd2f328b873b1fd0dab"
   license "BSD-3-Clause"
+  compatibility_version 1
 
   livecheck do
     url "https://www.open-mpi.org/software/hwloc/current/downloads/latest_release.txt"
@@ -11,13 +12,12 @@ class Hwloc < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "dd30eda9f9e36bce8c9499e455d4b59661a27fbc677c83b9c9f9cf47517f2667"
-    sha256 cellar: :any,                 arm64_ventura:  "4a03a0c478558d2b1a7395e4c18d6e168300ee737f8787394eda2aaec65a2cbc"
-    sha256 cellar: :any,                 arm64_monterey: "6648c1390e447f0df8e90bcfeecde4f4aec3b51cc94c094b6fca054f633c1cbb"
-    sha256 cellar: :any,                 sonoma:         "f5d085652f70ed70430331b371f691de80822c892077e6421cf0423051f60eba"
-    sha256 cellar: :any,                 ventura:        "c1919e3cd770b89517da6834913b145298a08ef316b4feb326d2e53459b62bf3"
-    sha256 cellar: :any,                 monterey:       "fab9e144be850b7d45915b9a1ab172db0bb1c6360053fb156b9d77624b71e8fe"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "b4584b0e82512d2cf63bf9f473d479b144b4a586249efedab3e7fd9fc3dccba3"
+    sha256 cellar: :any,                 arm64_tahoe:   "9f8b4882a8b58c18900e03bb2ecadabc828ba3a50978fa33e4d9c8f4c83fe674"
+    sha256 cellar: :any,                 arm64_sequoia: "ad9de3dc933720a5e61ef567bee28793b5c283055d51a79e984133b37cc0d635"
+    sha256 cellar: :any,                 arm64_sonoma:  "841bca31067f7ae880010f9abacfc9bb59f2d675d51afdfebd768b06b1cbb7de"
+    sha256 cellar: :any,                 sonoma:        "2232073d9ed0f9d2783309ac0963b0042b2b9db381699a5b023cee251be0c86a"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "147461c3c53fb69fa1985ede4a7a1da3d658c675f6d380d51788b7d29c457fa5"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "35e4c018c3758ea1f9a6124ea34c1832a71b34b97c5fdab3fe25343f9f2f5fb4"
   end
 
   head do
@@ -27,18 +27,18 @@ class Hwloc < Formula
     depends_on "libtool" => :build
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
 
   uses_from_macos "libxml2"
   uses_from_macos "ncurses"
 
   def install
     system "./autogen.sh" if build.head?
-    system "./configure", *std_configure_args,
-                          "--enable-shared",
+    system "./configure", "--enable-shared",
                           "--enable-static",
                           "--disable-cairo",
-                          "--without-x"
+                          "--without-x",
+                          *std_configure_args
     system "make", "install", "bashcompletionsdir=#{bash_completion}"
 
     pkgshare.install "tests"

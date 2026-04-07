@@ -1,8 +1,8 @@
 class Libsolv < Formula
   desc "Library for solving packages and reading repositories"
   homepage "https://github.com/openSUSE/libsolv"
-  url "https://github.com/openSUSE/libsolv/archive/refs/tags/0.7.30.tar.gz"
-  sha256 "ce4aa2f0e3c5c9ab99dced6a1810af3f670f1b98892394edc68ccabe7b272133"
+  url "https://github.com/openSUSE/libsolv/archive/refs/tags/0.7.36.tar.gz"
+  sha256 "32b8a565b70b6ba81d9ad68070de4561dfc8462be12288725a267a90423c0fa6"
   license "BSD-3-Clause"
 
   livecheck do
@@ -11,22 +11,25 @@ class Libsolv < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "67fdecdc409d7985f97f9d0ec835e838b8a2a22c693e6650da379c623378c03a"
-    sha256 cellar: :any,                 arm64_ventura:  "e5550b95ded578e6456629bec5050a9a2ff730f3833b55b5f57ddc08f5858160"
-    sha256 cellar: :any,                 arm64_monterey: "605dba92ff28fb99043729da1792d2ed32acb5e6feb52ae2ab898115fe03a095"
-    sha256 cellar: :any,                 sonoma:         "e293ec024d26136dbaafc8b7b560db4a9679abb2285eb9bc3f4066eb9def9164"
-    sha256 cellar: :any,                 ventura:        "5a3c2423ec901cd464962e494cf801aed80abfe0e7d0195bbadc0772210ea84e"
-    sha256 cellar: :any,                 monterey:       "b00ed6d6773f1c0aeedd92943baa137423fe9e21aaa1ca771d81fa1e56ebe25d"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "b81f94d7990b8a3adb421f744319b2d947725f7e861fac7fefe3da3d74744c9c"
+    sha256 cellar: :any,                 arm64_tahoe:   "87086273dce26bc433877f410f39ca4d3cf250fa8b257c4b36fc47243b3ecf78"
+    sha256 cellar: :any,                 arm64_sequoia: "e82122f9978d6b918f9188d0b4acd3e8aa31cd403863614ba63561e58db2de9a"
+    sha256 cellar: :any,                 arm64_sonoma:  "f44a274210d5f2e0f6d125d51d4e102e1a2b044e2aaba4df2f1b06195bc83a9f"
+    sha256 cellar: :any,                 sonoma:        "f35a7b2bfb6ee65e76ce62c6a2d2b6f06f0bcd97835275b15dd3140e0a893b6e"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "6881cb23d0096ba56eaf6a7f9d1e8721a8196dff7a79ba61c6ab33700ea683d8"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "65acf2b26ea4359dfbf41daae79a079119be8926cdeffa304754db3bfa68c5f4"
   end
 
   depends_on "cmake" => :build
+  depends_on "rpm"
   depends_on "xz"
   depends_on "zstd"
 
   uses_from_macos "bzip2"
   uses_from_macos "expat"
-  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     args = %W[
@@ -45,6 +48,9 @@ class Libsolv < Formula
       -DENABLE_BZIP2_COMPRESSION=ON
       -DENABLE_ZSTD_COMPRESSION=ON
       -DENABLE_ZCHUNK_COMPRESSION=ON
+      -DENABLE_RPMDB=ON
+      -DENABLE_RPMMD=ON
+      -DENABLE_RPMPKG=ON
       -DCMAKE_INSTALL_RPATH=#{rpath}
     ]
 
@@ -54,7 +60,7 @@ class Libsolv < Formula
   end
 
   test do
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include <solv/pool.h>
       #include <solv/repo.h>
 
@@ -65,7 +71,7 @@ class Libsolv < Formula
 
         pool_free(pool);
       }
-    EOS
+    CPP
     system ENV.cc, "test.cpp", "-I#{include}", "-L#{lib}", "-lsolv", "-o", "test"
     system "./test"
   end

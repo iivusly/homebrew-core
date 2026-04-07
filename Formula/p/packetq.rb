@@ -1,8 +1,8 @@
 class Packetq < Formula
   desc "SQL-like frontend to PCAP files"
   homepage "https://www.dns-oarc.net/tools/packetq"
-  url "https://www.dns-oarc.net/files/packetq/packetq-1.7.2.tar.gz"
-  sha256 "07448d59315f6dfb50408c3c922bdc11bf590db639da15c041330bf21f15a6f8"
+  url "https://www.dns-oarc.net/files/packetq/packetq-1.7.3.tar.gz"
+  sha256 "faa9a3700bf6010347fbfa595b7777d32059a77abbb027f6e070b419369d7718"
   license "GPL-3.0-or-later"
 
   livecheck do
@@ -11,16 +11,18 @@ class Packetq < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "06a09654a38aecc2a9a949e343108225d89d3e71e94b4bc355c81b1dd9302bb0"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "2442e115398e3b589059032df51202f329391cc623d5855e5030efbffa69ba2b"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "51fe21d5b07ea5cb17163ef8bc1265d0b549464fcecb9e1f4d2b14e86012edee"
-    sha256 cellar: :any_skip_relocation, sonoma:         "76cedb5518e6b28b12cab51584fda888b6654bed5c85531d084579017ef547b0"
-    sha256 cellar: :any_skip_relocation, ventura:        "292a29bca2d46d7fd6c9cb6bc54a8a7b9be0035c8481e3a03c8243901e464f69"
-    sha256 cellar: :any_skip_relocation, monterey:       "69d252d932bdaef0814b954ac0125687a3311fa0b62a2a8d0b44ced4ca17ace1"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "2da2b991883f398c2cd94dedd9c5e3a0fcd15cc6bf75668d391c2f64aae7e063"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "29f2ffe806704b6ccf4a3b36ed2a03229aec5ab347638c02bc048b1869c269b8"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "0616b69581ac77fc31dc4a4d4a3d9258421ee38538997e38eca9a66a62d10339"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "175c53c989f9b926e7ddcf382517cec08f015ab1635938659ef8045f69e37e0d"
+    sha256 cellar: :any_skip_relocation, sonoma:        "26f2629870ea59d9bc6673411af50187b30cd4cee701fadf1557e6c949b43749"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "1d955362f371fe590e3a44a3fb66eef99bf88782410e6c7ee4c3b9c3b62c5d68"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "5afff996605124f10306b5a479c3b619b35f1719b262a939f4a02d3528a29800"
   end
 
-  uses_from_macos "zlib"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     system "./configure", *std_configure_args

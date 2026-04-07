@@ -6,36 +6,44 @@ class FlowTools < Formula
   license "BSD-2-Clause"
 
   bottle do
-    rebuild 1
-    sha256 arm64_sonoma:   "84db73f5e249e77d5aaef609008c7fcc3d3667262a9e0c1c7f07b14870e31f51"
-    sha256 arm64_ventura:  "c90987ead84d52f84bf1f156cd04ef871b4aa2a47ceeb26dcef0a4c6d97f25fb"
-    sha256 arm64_monterey: "21de46ca9080f98898aaeb06a9b33b0c56c7246dc8f01443939b9b621186fc92"
-    sha256 arm64_big_sur:  "2b3f15c05b798474764d6efa91aa0fb31d8f24fc4291b3c0c37d450a9d15e1d0"
-    sha256 sonoma:         "d2638337270268f5a43d2903f6f1abc422dcbe08d2edc149703b528ace2a383c"
-    sha256 ventura:        "65926d38c6c80db3795420c4693c2ff10f2d0976350bf1ec8df88267e29d4a77"
-    sha256 monterey:       "07a3f8962e183463a3780df8867e6bb5f02d238f550e14eaf9157ba1cb84b0a8"
-    sha256 big_sur:        "871477b9ba37ffd6ff5d85c96cac7602c3df7c420422071ca03bcc296f8f24e7"
-    sha256 x86_64_linux:   "30934a57a2b7c02704b76e05e81106f7e4aeefab82b7b23ef8f86a368639f74a"
+    rebuild 2
+    sha256 arm64_tahoe:   "c6ac8dfec95def2a25acdf33db6ddd896f473f64c402e415753a316d0eef78b1"
+    sha256 arm64_sequoia: "7e2efd253c92894d3d2a423bc535eb5fea7a8507b677e1346e14cd6cc925aef9"
+    sha256 arm64_sonoma:  "9e5dafcea86e53dc7e880dd4f4a978563e4e5abb7ab226386fca7f1afd40203d"
+    sha256 sonoma:        "9d5da70fb239297657612492fd4448ec29ebd54612fc2e3fc77db0d0802fece5"
+    sha256 arm64_linux:   "86b056849f21682bd1cb1c180e5df2e62790f79717c27f2cc2bd4d09ef3019be"
+    sha256 x86_64_linux:  "6ea0a8b997faf61a95f480149b697f9ee4446674e12bf5deaf34c132a1e314e8"
   end
 
-  uses_from_macos "zlib"
+  uses_from_macos "bison" => :build
+  uses_from_macos "flex" => :build
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   # Fix -flat_namespace being used on Big Sur and later.
   patch do
-    url "https://raw.githubusercontent.com/Homebrew/formula-patches/03cf8088210822aa2c1ab544ed58ea04c897d9c4/libtool/configure-pre-0.4.2.418-big_sur.diff"
+    url "https://raw.githubusercontent.com/Homebrew/homebrew-core/1cf441a0/Patches/libtool/configure-pre-0.4.2.418-big_sur.diff"
     sha256 "83af02f2aa2b746bb7225872cab29a253264be49db0ecebb12f841562d9a2923"
   end
 
+  # Apply Fedora patch to fix implicit function declarations and multiple definitions
+  patch do
+    url "https://src.fedoraproject.org/rpms/flow-tools/raw/5590477b99c33b61a4d18436453a29e398be01aa/f/flow-tools-c99.patch"
+    sha256 "ce1693d53c1dab3a91486a8005ea35ce35a794d6b42dad2a4e05513c40ee9495"
+  end
+  patch do
+    url "https://src.fedoraproject.org/rpms/flow-tools/raw/61ed33ab67251599c26a2e2636f1926b0448ab8a/f/flow-tools-extern.patch"
+    sha256 "3b0937004edfabc53d966e035ad2a2c3239bcfccdc1bacef2f54612fccd84290"
+  end
+
   def install
-    # Fix for newer Clang
-    ENV.append_to_cflags "-Wno-implicit-function-declaration" if DevelopmentTools.clang_build_version >= 1403
+    args = []
+    # Help old config scripts identify arm64 linux
+    args << "--build=aarch64-unknown-linux-gnu" if OS.linux? && Hardware::CPU.arm64?
 
-    # Work around failure from GCC 10+ using default of `-fno-common`
-    # /usr/bin/ld: acl2.o:(.bss+0x0): multiple definition of `acl_list'
-    ENV.append_to_cflags "-fcommon" if OS.linux?
-
-    system "./configure", "--disable-dependency-tracking",
-                          "--prefix=#{prefix}"
+    system "./configure", *args, *std_configure_args
     system "make", "install"
   end
 

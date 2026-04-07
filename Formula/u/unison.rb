@@ -1,8 +1,8 @@
 class Unison < Formula
   desc "File synchronization tool"
   homepage "https://www.cis.upenn.edu/~bcpierce/unison/"
-  url "https://github.com/bcpierce00/unison/archive/refs/tags/v2.53.5.tar.gz"
-  sha256 "330418ad130d93d0e13da7e7e30f9b829bd7c0e859355114bd4644c35fe08d23"
+  url "https://github.com/bcpierce00/unison/archive/refs/tags/v2.53.8.tar.gz"
+  sha256 "d0d30ea63e09fc8edf10bd8cbab238fffc8ed510d27741d06b5caa816abd58b6"
   license "GPL-3.0-or-later"
   head "https://github.com/bcpierce00/unison.git", branch: "master"
 
@@ -14,25 +14,24 @@ class Unison < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "1bc7beb7c68255b1a96833771159b02a442420f5319ccc00e410769b3811cebc"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "491b323c7ab54cbfa9869735318b6c50996088ca1be9baa21a3bccd4958d2d3b"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "574e9f2b018206c744996507e5d9f28bfabdbd0eed6d24a4554620e48074ed42"
-    sha256 cellar: :any_skip_relocation, sonoma:         "46c5b9bcf7d54254432ae5ae38a93ddbf0d6fbe13b2ecca1de754105e1d25399"
-    sha256 cellar: :any_skip_relocation, ventura:        "97bee1f54eb7abcdd2815bcaf8dd529e8fa296e558c83ebd5415b507e0c79ed0"
-    sha256 cellar: :any_skip_relocation, monterey:       "f2cfd8c07ec3d379ecba5a204dfc0bd7802191dedb2adda5ac8d8ab3dbccc75a"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "d27fcce8ad972cb3d8c678e3410d1ec41f0605504e7da5385f385b02015c05aa"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "e960ee6843d389ce54b269d5b0c3bce094c6bc88a7c11e2d7a6c681307921acc"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "1fb67a4b1ba39c81f40ea42ae106395d277f2f107d0b285768656e3e9f81661c"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "511db162bbfe4c4b56630bc8708ff5830985a3c6495b4b81c153928a41115ee7"
+    sha256 cellar: :any_skip_relocation, sonoma:        "e1b1f719237894bf6b5225e28cff289327a0f5d006d19b77796bce4da66149d9"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "25a927077afe54cfca1a4f9241575456e6dd5e8e8be8533334bc42280b76cf98"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "13617b296ef3577bffa235f06e94cb8c79789b7f55a6b6a5034dbb28e8679ecd"
   end
 
   depends_on "ocaml" => :build
 
+  conflicts_with cask: "unison-app"
+
   def install
-    system "make", "src/unison"
+    system "make"
+    system "make", "install", "prefix=#{prefix}"
     bin.install "src/unison"
-    # unison-fsmonitor is built just for Linux targets
-    if OS.linux?
-      system "make", "src/unison-fsmonitor"
-      bin.install "src/unison-fsmonitor"
-    end
+    bin.install "src/unison-fsmonitor" if OS.linux?
+    man1.install "man/unison.1"
   end
 
   test do

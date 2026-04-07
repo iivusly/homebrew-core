@@ -1,9 +1,8 @@
 class Opencascade < Formula
   desc "3D modeling and numerical simulation software for CAD/CAM/CAE"
   homepage "https://dev.opencascade.org/"
-  url "https://git.dev.opencascade.org/gitweb/?p=occt.git;a=snapshot;h=refs/tags/V7_8_1;sf=tgz"
-  version "7.8.1"
-  sha256 "33f2bdb67e3f6ae469f3fa816cfba34529a23a9cb736bf98a32b203d8531c523"
+  url "https://github.com/Open-Cascade-SAS/OCCT/archive/refs/tags/V7_9_3.tar.gz"
+  sha256 "5ecf094ec6b12d5413dfb851d8c3590c354058aee556e32e408bdfbf8c357d57"
   license "LGPL-2.1-only"
 
   # The first-party download page (https://dev.opencascade.org/release)
@@ -12,7 +11,7 @@ class Opencascade < Formula
   # information is posted at https://dev.opencascade.org/forums/occt-releases
   # but the text varies enough that we can't reliably match versions from it.
   livecheck do
-    url "https://git.dev.opencascade.org/repos/occt.git"
+    url :stable
     regex(/^v?(\d+(?:[._]\d+)+(?:p\d+)?)$/i)
     strategy :git do |tags, regex|
       tags.filter_map { |tag| tag[regex, 1]&.tr("_", ".") }
@@ -20,23 +19,21 @@ class Opencascade < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "725b60ffcfcdc50edb28dd8c5d8d87c44fd9e2c5267c64c677b6098e64b68f83"
-    sha256 cellar: :any,                 arm64_ventura:  "ebd45601d545eeeb65ac441d57a1a90b0cc615707eb9b0896d6161e9ace3ee2d"
-    sha256 cellar: :any,                 arm64_monterey: "55758e47849fa92c48982fb5c0898d4c53a034d4de6cbb64f69a555f36de2a8c"
-    sha256 cellar: :any,                 sonoma:         "f89cadd051255fe193fe39aebd04c2c2716393568189c343501767b4950d3a4a"
-    sha256 cellar: :any,                 ventura:        "f6b02e2c9146c3834f40673233f6091d50464f777416b80338d1a0e705096cbf"
-    sha256 cellar: :any,                 monterey:       "49121a638da14d08516ccefc1b28f0d7591984cc913fae410cc9f18362b68908"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "e7f813cfab8bc0c4dcf3ec91c7d6ca16c2e1ad732bda317f6d12a9334095850b"
+    sha256 cellar: :any,                 arm64_tahoe:   "ee074a5e0dac9f36e41231af3741dddc93501417b014443eadf212f680e9e91c"
+    sha256 cellar: :any,                 arm64_sequoia: "6ef97324bd4b35bdb86edf6e95ea25fb227fa932f7052995f3c7a98b7eabc209"
+    sha256 cellar: :any,                 arm64_sonoma:  "d2cec039010d0a23e41375ff1e745d0041f3cf3e3a36826d9af9a8fc2e938512"
+    sha256 cellar: :any,                 sonoma:        "a47410e2c2a5aa1460c8953001969edff4204bb16244d4c5551d9c2f167c748d"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "b3a3c89ab9ca41058d5afe03c5327501a2a0835b78b7bcf13348d4b7478ce836"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "e0cc020558ef5d2441e2d157fe7c98d039f876a815a17835f0b5fd14f610f24c"
   end
 
   depends_on "cmake" => [:build, :test]
   depends_on "doxygen" => :build
   depends_on "rapidjson" => :build
   depends_on "fontconfig"
-  depends_on "freeimage"
   depends_on "freetype"
   depends_on "tbb"
-  depends_on "tcl-tk"
+  depends_on "tcl-tk@8" # TCL 9 issue: https://tracker.dev.opencascade.org/view.php?id=33725
 
   on_linux do
     depends_on "libx11"
@@ -44,17 +41,20 @@ class Opencascade < Formula
   end
 
   def install
-    tcltk = Formula["tcl-tk"]
+    # FreeImage has multiple CVEs and has been dropped by distros like Arch Linux
+    # Ref: https://archlinux.org/todo/drop-freeimage/
+    odie "FreeImage should not be a dependency!" if deps.map(&:name).include?("freeimage")
+
+    tcltk = Formula["tcl-tk@8"]
     libtcl = tcltk.opt_lib/shared_library("libtcl#{tcltk.version.major_minor}")
     libtk = tcltk.opt_lib/shared_library("libtk#{tcltk.version.major_minor}")
 
     system "cmake", "-S", ".", "-B", "build",
-                    "-DUSE_FREEIMAGE=ON",
+                    "-DUSE_FREEIMAGE=OFF",
                     "-DUSE_RAPIDJSON=ON",
                     "-DUSE_TBB=ON",
                     "-DINSTALL_DOC_Overview=ON",
                     "-DBUILD_RELEASE_DISABLE_EXCEPTIONS=OFF",
-                    "-D3RDPARTY_FREEIMAGE_DIR=#{Formula["freeimage"].opt_prefix}",
                     "-D3RDPARTY_FREETYPE_DIR=#{Formula["freetype"].opt_prefix}",
                     "-D3RDPARTY_RAPIDJSON_DIR=#{Formula["rapidjson"].opt_prefix}",
                     "-D3RDPARTY_RAPIDJSON_INCLUDE_DIR=#{Formula["rapidjson"].opt_include}",

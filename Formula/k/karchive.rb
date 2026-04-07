@@ -1,8 +1,8 @@
 class Karchive < Formula
   desc "Reading, creating, and manipulating file archives"
-  homepage "https://api.kde.org/frameworks/karchive/html/index.html"
-  url "https://download.kde.org/stable/frameworks/6.5/karchive-6.5.0.tar.xz"
-  sha256 "e5530253c70de024926e1985154f9115f02af50c7d998a874a3175b404444e79"
+  homepage "https://api.kde.org/karchive-index.html"
+  url "https://download.kde.org/stable/frameworks/6.24/karchive-6.24.0.tar.xz"
+  sha256 "b68faa1c9012e40bbed516d8bb6be21e743af5aafb0249a84c29a7d9ff150d0d"
   license all_of: [
     "BSD-2-Clause",
     "LGPL-2.0-only",
@@ -17,27 +17,29 @@ class Karchive < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "e41b52cbfe087d0cc9d8f10d6bd4a2efb1108d86edf374471b89ec4c75e671da"
-    sha256 cellar: :any,                 arm64_ventura:  "9085c3eeb0d055dcba1719f068d78d7f9396395a054e6b2b35df1eca375431a5"
-    sha256 cellar: :any,                 arm64_monterey: "1cd3f4c0b204bb7f35dd1212447a6768293b2017d9abc31d1a92fa89e543d9d5"
-    sha256 cellar: :any,                 sonoma:         "78fb50b40afb40cbf1504bac628c9745bfecb46b08f308c3ba34832c93e6e87b"
-    sha256 cellar: :any,                 ventura:        "d41bf8b26d4754afccd6673cf967863e883cb22f09000c9921a82bd0ee1daa3d"
-    sha256 cellar: :any,                 monterey:       "c121d123266e25ef9ccc7e8728390d6bcf28d0d6eaeb8848686ff4d3291d652f"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "d88f8aa91a4803743c9ab152162f797c35729c354a9aa92a1c3b2353e8c4d0f0"
+    sha256 cellar: :any,                 arm64_tahoe:   "a24aa14f36fcd4b4cc8f1c34727d23549e192f3933e7248ec125d019270dee40"
+    sha256 cellar: :any,                 arm64_sequoia: "ea8249cc68968bd42e9298403301f575a2fe3acdae4acbf1ffeced3a68fa8338"
+    sha256 cellar: :any,                 arm64_sonoma:  "7d406662e4aa393991ae8729cb87d22d1d307599842c43495c76a3ecf83c8226"
+    sha256 cellar: :any,                 sonoma:        "6bd598b97894c6507a9df94e3721ba7fe3bc91ed4b70abd6c7926af6610bb480"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "a213fbd1a3f0c2192b9c0575f83454dbc9036827c25c6c5cf9c23bb010f13db6"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "0edb8346a26e992723f0d2e94dd54a62b0b80d0c60921c0ad80724ccc8b65918"
   end
 
   depends_on "cmake" => [:build, :test]
   depends_on "doxygen" => :build
   depends_on "extra-cmake-modules" => [:build, :test]
-  depends_on "pkg-config" => :build
-  depends_on "qt"
+  depends_on "pkgconf" => :build
+  depends_on "qttools" => :build
+  depends_on "openssl@3"
+  depends_on "qtbase"
   depends_on "xz"
   depends_on "zstd"
 
   uses_from_macos "bzip2"
-  uses_from_macos "zlib"
 
-  fails_with gcc: "5"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     system "cmake", "-S", ".", "-B", "build", "-DBUILD_QCH=ON", *std_cmake_args
@@ -58,10 +60,10 @@ class Karchive < Formula
     ]
 
     examples.each do |example|
-      inreplace testpath/example/"CMakeLists.txt", /^project\(/, <<~EOS
-        cmake_minimum_required(VERSION 3.5)
+      inreplace testpath/example/"CMakeLists.txt", /^project\(/, <<~CMAKE
+        cmake_minimum_required(VERSION 4.0)
         \\0
-      EOS
+      CMAKE
 
       system "cmake", "-S", example, "-B", example, *std_cmake_args
       system "cmake", "--build", example
@@ -69,12 +71,12 @@ class Karchive < Formula
 
     ENV["LC_ALL"] = "en_US.UTF-8"
     assert_match "The whole world inside a hello.", shell_output("helloworld/helloworld 2>&1")
-    assert_predicate testpath/"hello.zip", :exist?
+    assert_path_exists testpath/"hello.zip"
 
     system "unzipper/unzipper", "hello.zip"
-    assert_predicate testpath/"world", :exist?
+    assert_path_exists testpath/"world"
 
     system "tarlocalfiles/tarlocalfiles", "world"
-    assert_predicate testpath/"myFiles.tar.gz", :exist?
+    assert_path_exists testpath/"myFiles.tar.gz"
   end
 end

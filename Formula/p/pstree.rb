@@ -9,6 +9,8 @@ class Pstree < Formula
   license "GPL-3.0-only"
 
   bottle do
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:    "999cb5fb08aa25b078cf66c5a24c1b1244532e5757965e0089631b3bf4e4836e"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia:  "d294c9c8a1f140ad0505ab702204a8d909c860318e0013694dd760b95a39d1d1"
     sha256 cellar: :any_skip_relocation, arm64_sonoma:   "05dcf81f64516f4b96ccb2a82fe610e65d2733d0cfb6dbff41b54fcd9f45f111"
     sha256 cellar: :any_skip_relocation, arm64_ventura:  "ca06848c6042d6f8c7ee44477aae9d5e1ed8f73be77dc99d9ec126460bc1f9f8"
     sha256 cellar: :any_skip_relocation, arm64_monterey: "e43ea23b1cc41dbd5717b22c8de73faae3fa58e88a9f18845533e7f4acc24eeb"
@@ -18,6 +20,7 @@ class Pstree < Formula
     sha256 cellar: :any_skip_relocation, monterey:       "fc23e46dee144842b941ad5b6527018154d38b67827e4f019bf9efab24a15365"
     sha256 cellar: :any_skip_relocation, big_sur:        "bf6f7f6e9a1ec7b0e5454e15973ee091a143eb887c67d81b07f262c447c685b7"
     sha256 cellar: :any_skip_relocation, catalina:       "820b3dd1b26142457348dfc27c29ad8f1b6d86367995d8895ff41d8c74f91c8a"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "070950551bff0bbaa284ba426e1535a87698a3e732af9275e2c49efcfdb79d76"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "d65aff524b410c2ea45556fad2e5b07b9052896c07ee386fc6213208fdc7bc43"
   end
 
@@ -30,6 +33,6 @@ class Pstree < Formula
   test do
     lines = shell_output("#{bin}/pstree #{Process.pid}").strip.split("\n")
     assert_match $PROGRAM_NAME, lines[0]
-    assert_match bin/"pstree", lines[1]
+    assert_match (bin/"pstree").to_s, lines[1]
   end
 end

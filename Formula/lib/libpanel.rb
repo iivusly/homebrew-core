@@ -1,25 +1,24 @@
 class Libpanel < Formula
   desc "Dock/panel library for GTK 4"
   homepage "https://gitlab.gnome.org/GNOME/libpanel"
-  url "https://download.gnome.org/sources/libpanel/1.6/libpanel-1.6.0.tar.xz"
-  sha256 "b773494a3c69300345cd8e27027448d1189183026cc137802f886417c6ea30b6"
+  url "https://download.gnome.org/sources/libpanel/1.10/libpanel-1.10.4.tar.xz"
+  sha256 "593888a7691f0af8aaa6e193c9e14afa86a810c0c2f27515c6d813f18733b1cd"
   license "LGPL-3.0-or-later"
 
   bottle do
-    sha256 arm64_sonoma:   "f128a9f64a77bf5cd52335cf1bdbca30d5c5d72c4ab50db59381817e63b2e199"
-    sha256 arm64_ventura:  "2690f378bfe0dca66e25e5ba37df69c79059fca808fb4a33e1e4a0a11883da17"
-    sha256 arm64_monterey: "db427b5bd6ec77fe44a009b73b6a8b4a05c038674177f370a274bf0b221b5b9e"
-    sha256 sonoma:         "2184f1d539a8861ef0dc83942b0c57aa61747a2f1deea7f634eeecec623b8f44"
-    sha256 ventura:        "aadc359a7f15b4c3b2dffd9080e7a60d9358daa00c912cad5544b05566aefc75"
-    sha256 monterey:       "473b09c921351aa3de20e02546b2eadc395f91291fab6a5df01911b82896851d"
-    sha256 x86_64_linux:   "3fc32643880bc018a9f829ebbf34038b66ba5231c333fcaa956a8b5289e06ff9"
+    sha256 arm64_tahoe:   "6a216b47f6d3b8df07769ae54d79e77fe2f2b0e7eb16047ff8db33a84f0cea27"
+    sha256 arm64_sequoia: "95582ebb4c8e063b70512ab54d77412704e028012961a854fcb18cbe982433be"
+    sha256 arm64_sonoma:  "3b6e6656f461f9eba108dd2eb5478a611b75c15007c97469a446507ed63a4db4"
+    sha256 sonoma:        "ae99017a0cd281b87384b01b450f8d8249906edb252fde63a95c33a3dd7d70f9"
+    sha256 arm64_linux:   "ba6e37513eedd02b62735e484d834426953a80542b35c59cb73aaa8a2c3c9e6a"
+    sha256 x86_64_linux:  "53941d0e1aa07814775b7ec7602c02bf1365af0446542537e7f14a1d3b1b354d"
   end
 
   depends_on "gettext" => :build
   depends_on "gobject-introspection" => :build
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => [:build, :test]
+  depends_on "pkgconf" => [:build, :test]
   depends_on "vala" => :build
 
   depends_on "cairo"
@@ -40,16 +39,16 @@ class Libpanel < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <libpanel.h>
 
       int main(int argc, char *argv[]) {
         uint major = panel_get_major_version();
         return 0;
       }
-    EOS
-    flags = shell_output("#{Formula["pkg-config"].opt_bin}/pkg-config --cflags --libs libpanel-1").strip.split
-    flags += shell_output("#{Formula["pkg-config"].opt_bin}/pkg-config --cflags --libs libadwaita-1").strip.split
+    C
+    flags = shell_output("#{Formula["pkgconf"].opt_bin}/pkgconf --cflags --libs libpanel-1").strip.split
+    flags += shell_output("#{Formula["pkgconf"].opt_bin}/pkgconf --cflags --libs libadwaita-1").strip.split
     system ENV.cc, "test.c", "-o", "test", *flags
     system "./test"
 

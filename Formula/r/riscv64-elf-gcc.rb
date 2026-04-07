@@ -1,9 +1,9 @@
 class Riscv64ElfGcc < Formula
   desc "GNU compiler collection for riscv64-elf"
   homepage "https://gcc.gnu.org"
-  url "https://ftp.gnu.org/gnu/gcc/gcc-14.2.0/gcc-14.2.0.tar.xz"
-  mirror "https://ftpmirror.gnu.org/gcc/gcc-14.2.0/gcc-14.2.0.tar.xz"
-  sha256 "a7b39bc69cbf9e25826c5a60ab26477001f7c08d85cec04bc0e29cabed6f3cc9"
+  url "https://ftpmirror.gnu.org/gnu/gcc/gcc-15.2.0/gcc-15.2.0.tar.xz"
+  mirror "https://ftp.gnu.org/gnu/gcc/gcc-15.2.0/gcc-15.2.0.tar.xz"
+  sha256 "438fd996826b0c82485a29da03a72d71d6e3541a83ec702df4271f6fe025d24e"
   license "GPL-3.0-or-later" => { with: "GCC-exception-3.1" }
 
   livecheck do
@@ -11,13 +11,13 @@ class Riscv64ElfGcc < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "9cbd8106a4471dd260c8157d3bdac0b31539e3bf45f472d53ffb98a3c873943c"
-    sha256 arm64_ventura:  "2a652369a58722b961d41b1d2d8ffcd64229b6afb14efdc4fb3f7a8b2f43b68c"
-    sha256 arm64_monterey: "e00daa4dcc0d51798801eeeebbcb047e3d63455ec4985cd2f7300f1eab83cffe"
-    sha256 sonoma:         "294d42c13592a0ee389c2a5b5816460d19166b9bf32fc9d1b4b7d1673a370ef5"
-    sha256 ventura:        "8efdd8f653e94b0619589d0c488320abd559ae83237372c35654495b9ec77140"
-    sha256 monterey:       "bfa49e85eb21fbe29bb59e28281ef0c5861711db6a7b3629439e516080a19e72"
-    sha256 x86_64_linux:   "c1c2c11e020c46fdb637a70f7f57070506718b65a894118efad7ffd260c22d18"
+    rebuild 1
+    sha256 arm64_tahoe:   "6a6b9c6a1a1ab30d64f79c4c9b12a1b7f89bf343443c93acea3f44cb0e3fd024"
+    sha256 arm64_sequoia: "eda840ed9aaacfdde29945a1325d50059be192215fd503f7ad753fe6a725a2e0"
+    sha256 arm64_sonoma:  "45056ecd7ba6c56903bba4818af026245cbd835f35103ba855c3b3d4135f520e"
+    sha256 sonoma:        "14b7e6f6aa5b7ba859c8e1fcae88569f7e3394d33623935ac3383c97c964e4f1"
+    sha256 arm64_linux:   "76017c17d960c82448240e53d2da221ba33ceffc88a280da36da5de17847a0c4"
+    sha256 x86_64_linux:  "58d842ae0c40efa2fc02e673a634723797ac19b422dc816b3e8854c4568a80da"
   end
 
   depends_on "gmp"
@@ -25,6 +25,10 @@ class Riscv64ElfGcc < Formula
   depends_on "mpfr"
   depends_on "riscv64-elf-binutils"
   depends_on "zstd"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     target = "riscv64-elf"
@@ -37,6 +41,7 @@ class Riscv64ElfGcc < Formula
                              "--without-headers",
                              "--with-as=#{Formula["riscv64-elf-binutils"].bin}/riscv64-elf-as",
                              "--with-ld=#{Formula["riscv64-elf-binutils"].bin}/riscv64-elf-ld",
+                             "--with-system-zlib",
                              "--enable-languages=c,c++"
       system "make", "all-gcc"
       system "make", "install-gcc"
@@ -49,14 +54,14 @@ class Riscv64ElfGcc < Formula
   end
 
   test do
-    (testpath/"test-c.c").write <<~EOS
+    (testpath/"test-c.c").write <<~C
       int main(void)
       {
         int i=0;
         while(i<10) i++;
         return i;
       }
-    EOS
+    C
     system bin/"riscv64-elf-gcc", "-c", "-o", "test-c.o", "test-c.c"
     assert_match "file format elf64-littleriscv",
                  shell_output("#{Formula["riscv64-elf-binutils"].bin}/riscv64-elf-objdump -a test-c.o")

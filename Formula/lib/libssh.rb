@@ -1,51 +1,56 @@
 class Libssh < Formula
   desc "C library SSHv1/SSHv2 client and server protocols"
   homepage "https://www.libssh.org/"
-  url "https://www.libssh.org/files/0.11/libssh-0.11.1.tar.xz"
-  sha256 "14b7dcc72e91e08151c58b981a7b570ab2663f630e7d2837645d5a9c612c1b79"
+  url "https://www.libssh.org/files/0.12/libssh-0.12.0.tar.xz"
+  sha256 "1a6af424d8327e5eedef4e5fe7f5b924226dd617ac9f3de80f217d82a36a7121"
   license "LGPL-2.1-or-later"
+  revision 1
+  compatibility_version 1
   head "https://git.libssh.org/projects/libssh.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "0a6184ee3bcd7d1ef5deb30a1534d04a90ba4f6070eddd5a05fe75b9acc20ea1"
-    sha256 cellar: :any,                 arm64_ventura:  "9de46491d931e959172d96481de25cae970c55d2b5212a8fae8224208940c42d"
-    sha256 cellar: :any,                 arm64_monterey: "a9f3409bf9da4337393b2594157adf571c6c3fd5d421de079fb1bcf544a1a16d"
-    sha256 cellar: :any,                 sonoma:         "371ed72cfece039f5abec57b2c2f4a0c2782a0df85a9eab622df75ebcd28c63e"
-    sha256 cellar: :any,                 ventura:        "09014e85c296ec5452ea0958b8169b5d0eee8534b6f4b7f1bdc6055dfb35607f"
-    sha256 cellar: :any,                 monterey:       "8efb6ef891e6c9d2e9f7f1086d91663bcc54a4e6dec3a4c212f993ffc4a0abca"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "2b711f58f15aad1d605cbecba2cc82d3375fdc422b9938c890f5a57c35918ed3"
+    sha256 cellar: :any,                 arm64_tahoe:   "cfbd08103692e8ffbb2cf33596a8b1f40dea83dba35621732994c921dc50e338"
+    sha256 cellar: :any,                 arm64_sequoia: "90d7d2f53f98da8a7f02c13a661575370941603f1409f7e4a3667d7360c4c58a"
+    sha256 cellar: :any,                 arm64_sonoma:  "28078e9854ab58dbedd7f8d9391cb28869932c73907c54a9c00612af2bc689eb"
+    sha256 cellar: :any,                 sonoma:        "95737ba81393b810ef51b6e88e1422067987edc9843dc4263442d3e93b05104d"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "488dbc9708070ad0586823f1a17e4a53605205be5a39948aba60af8dacbc6285"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "8c7bd3b80655c34b25165fef797c3e1bb9b223423d58ba04353d2b6239ea1189"
   end
 
   depends_on "cmake" => :build
   depends_on "openssl@3"
 
-  uses_from_macos "zlib"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
-    mkdir "build" do
-      system "cmake", "..", "-DBUILD_STATIC_LIB=ON",
-                            "-DWITH_SYMBOL_VERSIONING=OFF",
-                            *std_cmake_args
-      system "make", "install"
-      lib.install "src/libssh.a"
-    end
+    args = %w[
+      -DBUILD_STATIC_LIB=ON
+      -DWITH_SYMBOL_VERSIONING=OFF
+    ]
+
+    system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
+    system "cmake", "--build", "build"
+    system "cmake", "--install", "build"
+    lib.install "build/src/libssh.a"
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <libssh/libssh.h>
       #include <stdlib.h>
-      int main()
-      {
+
+      int main() {
         ssh_session my_ssh_session = ssh_new();
         if (my_ssh_session == NULL)
           exit(-1);
         ssh_free(my_ssh_session);
         return 0;
       }
-    EOS
-    system ENV.cc, "-I#{include}", testpath/"test.c",
-           "-L#{lib}", "-lssh", "-o", testpath/"test"
+    C
+
+    system ENV.cc, "test.c", "-o", "test", "-I#{include}", "-L#{lib}", "-lssh"
     system "./test"
   end
 end

@@ -2,19 +2,18 @@ class Helm < Formula
   desc "Kubernetes package manager"
   homepage "https://helm.sh/"
   url "https://github.com/helm/helm.git",
-      tag:      "v3.15.4",
-      revision: "fa9efb07d9d8debbb4306d72af76a383895aa8c4"
+      tag:      "v4.1.3",
+      revision: "c94d381b03be117e7e57908edbf642104e00eb8f"
   license "Apache-2.0"
   head "https://github.com/helm/helm.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "78b0b1f06be1b74dc16d63ee534a448794bab86d7c0edaa6ace14e782837c73e"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "9e7f3a284c12b3a3b9b078b17a94b4f22144147cb985581db046b81d9d6a3cec"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "2bdb344a18a4cd2e3c34acbc03b8e95cc8432914f0dc15972bccf41ef385e697"
-    sha256 cellar: :any_skip_relocation, sonoma:         "49c3b477daada863ddaba962afb61636335edc5575471c840d8e5c54904e62a5"
-    sha256 cellar: :any_skip_relocation, ventura:        "9cc434835fd4509d759bf11b7b7fb7cd14c99b184f2953acfea661efabf73a3b"
-    sha256 cellar: :any_skip_relocation, monterey:       "aacc3a3269573c95323e4b38dfdffcebf1b46e701929565f0aec79a46c8567b2"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "0a84839615fab01d818a02d68c646a2662d7251daa31bc0fdca2d3b685edb576"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "f4117a9c9a33dce70bbf2a3852d630b0046229ff1c93dfa43dac2cfa7e298eb5"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "ccc97d91b5b4d34b7bb0649b94f1e9442428e23e5de7cfed111573b05481b91c"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "07a42834d231ac78bdbf73ae6fe1c57522faedb47fa3186e456ddd7a45035479"
+    sha256 cellar: :any_skip_relocation, sonoma:        "3d34e232f6adf216f63663fa17b3ed3068179ef21a24fc0ad3751d5a2b40ff24"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "79b0bdf02930b6e568af1f11bcc0f7b14efae1ee4d885badc8a1007020670208"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "8ec269b3b149e2daa3fa4c8781d37c92fccff10477faffbd3812ff962483e98c"
   end
 
   depends_on "go" => :build
@@ -28,7 +27,7 @@ class Helm < Formula
       man1.install Dir["*"]
     end
 
-    generate_completions_from_executable(bin/"helm", "completion")
+    generate_completions_from_executable(bin/"helm", shell_parameter_format: :cobra)
   end
 
   test do
@@ -36,7 +35,6 @@ class Helm < Formula
     assert File.directory? testpath/"foo/charts"
 
     version_output = shell_output("#{bin}/helm version 2>&1")
-    assert_match "GitTreeState:\"clean\"", version_output
     assert_match "GitCommit:\"#{stable.specs[:revision]}\"", version_output
     assert_match "Version:\"v#{version}\"", version_output
   end

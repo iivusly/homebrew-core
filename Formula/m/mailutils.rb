@@ -1,21 +1,21 @@
 class Mailutils < Formula
   desc "Swiss Army knife of email handling"
   homepage "https://mailutils.org/"
-  url "https://ftp.gnu.org/gnu/mailutils/mailutils-3.17.tar.gz"
-  mirror "https://ftpmirror.gnu.org/mailutils/mailutils-3.17.tar.gz"
-  sha256 "403d0a8a7d923560ee189783a35cec517e9993dda985e35b7afd9c488bf6f149"
+  url "https://ftpmirror.gnu.org/gnu/mailutils/mailutils-3.21.tar.gz"
+  mirror "https://ftp.gnu.org/gnu/mailutils/mailutils-3.21.tar.gz"
+  sha256 "5e305de7fcf2f744c8b210f1cfe904d49842bfc6d13a913031ec4dbf0c669c54"
   license "GPL-3.0-or-later"
 
   bottle do
-    sha256 arm64_sonoma:   "8a0c917dde78ad9e1e53adccfeed8a1ca7c5e465bf0fdae4392bb5460b407dc8"
-    sha256 arm64_ventura:  "f2b9f4a8a2078da0008e291c8abe58f73ba89013277042fd1df9b2f72db43999"
-    sha256 arm64_monterey: "8501f9f6b87427d70f99b03cd5246e6d22ebc9390c5a8211dcdf91166c209748"
-    sha256 sonoma:         "beedafeac4b0ea238ab762c14445a2a546774e9b76a92bddbb998f2709069851"
-    sha256 ventura:        "0298c5015f79f7f89bf550ab721f89b112b78df262cf5e789a125170e1836aa6"
-    sha256 monterey:       "397d16b0b03abb041cdfe05afa402b2576922a41df4386f9c974708b700a42f3"
-    sha256 x86_64_linux:   "9359d2d38ee56d75d796ed0a002b625eaaeece2e04248cc8a1493afbe9dba009"
+    sha256 arm64_tahoe:   "3bbe34b5065fd6cdf2585b829869afb913e27310f5d9fc17e8ae0c9f55785ce5"
+    sha256 arm64_sequoia: "31c47eda8f72d7d33763a5707b2d8f184471c6c7940ee426c490e6ab72738e7a"
+    sha256 arm64_sonoma:  "0a24ba5ab2eac9531076315acc05549a3b921dbf334ed2624ac2e8dbc51d11af"
+    sha256 sonoma:        "50f0023f1b027e9f6f6f8892f2d907421b210a8a2d0371d3f34c6bbc5ffb10af"
+    sha256 arm64_linux:   "0489c463756a0cf78b6e696339ddb02f695e7ef75a7f002b5e761c7458711299"
+    sha256 x86_64_linux:  "dca5b4e67b558d3641d13075ffb6f7af243d5599227702e2f3440b3e8409acb2"
   end
 
+  depends_on "gdbm"
   depends_on "gnutls"
   depends_on "gsasl"
   depends_on "libtool"
@@ -28,12 +28,6 @@ class Mailutils < Formula
     depends_on "gettext"
   end
 
-  # Fix -flat_namespace being used on Big Sur and later.
-  patch do
-    url "https://raw.githubusercontent.com/Homebrew/formula-patches/03cf8088210822aa2c1ab544ed58ea04c897d9c4/libtool/configure-big_sur.diff"
-    sha256 "35acd6aebc19843f1a2b3a63e880baceb0f5278ab1ace661e57a502d9d78c93c"
-  end
-
   def install
     # This is hardcoded to be owned by `root`, but we have no privileges on installation.
     inreplace buildpath.glob("dotlock/Makefile.*") do |s|
@@ -42,9 +36,9 @@ class Mailutils < Formula
     end
 
     system "./configure", "--disable-mh",
+                          "--disable-python",
                           "--disable-silent-rules",
                           "--without-fribidi",
-                          "--without-gdbm",
                           "--without-guile",
                           "--without-tokyocabinet",
                           *std_configure_args

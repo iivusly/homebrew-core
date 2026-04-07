@@ -1,9 +1,8 @@
 class Unicorn < Formula
   desc "Lightweight multi-architecture CPU emulation framework"
   homepage "https://www.unicorn-engine.org/"
-  url "https://github.com/unicorn-engine/unicorn/archive/refs/tags/2.0.1.post1.tar.gz"
-  version "2.0.1.post1"
-  sha256 "6b276c857c69ee5ec3e292c3401c8c972bae292e0e4cb306bb9e5466c0f14737"
+  url "https://github.com/unicorn-engine/unicorn/archive/refs/tags/2.1.4.tar.gz"
+  sha256 "ea8863f095a0136388694e5a6063afd9bb7650e30243dd6251af59c5ce5601f4"
   license all_of: [
     "GPL-2.0-only",
     "GPL-2.0-or-later", # glib, qemu
@@ -11,28 +10,28 @@ class Unicorn < Formula
   head "https://github.com/unicorn-engine/unicorn.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "19357aa9fc753df6791bf5a1764dbb2fdfeed8cdcc3a6b5c8174a052558cd8e2"
-    sha256 cellar: :any,                 arm64_ventura:  "4c9ea5656b2834aaa6a4fecd8bfc55ebc0b5fdd9f8ae360dca4ada9d25d7a484"
-    sha256 cellar: :any,                 arm64_monterey: "fc3a7ffad1c200b9dbb4eeb843d06eb9b6edf8313d42b38c9ca58f23e70810cc"
-    sha256 cellar: :any,                 arm64_big_sur:  "3ca1e960e66e83079c74b602e268db6f634cbd9c44ea52f18da8e71c29f67a43"
-    sha256 cellar: :any,                 sonoma:         "e092a3f6f7fbaa3483b3fa2b892da569adb0e3773aed3135aafe3eb9de132210"
-    sha256 cellar: :any,                 ventura:        "475d61a10d43ec74d07defb155d2ae5c53422d2fd4f9c3dd09f7fbaef3b6b4c5"
-    sha256 cellar: :any,                 monterey:       "37bdc2d1067fe898c5455cdb0c0d2a2b94b5f8190d41352ebf661716352d5ae4"
-    sha256 cellar: :any,                 big_sur:        "cfd01c643cfc2283b4e973ba0208bbed3ee081408796c7a95059ed98f758900d"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "f45a8a230a4a63c46fc1d9a63e4d3a8ea33e6448051200bb202c23081efc96f2"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "e317a3a90c3c1209bd849383f6b3a4b12c4bce696e1265c86ed4f4982581d274"
+    sha256 cellar: :any,                 arm64_sequoia: "717aaa05f34162a41e10f5abfe602e4782dd96f36f430cf95a54a383f946a138"
+    sha256 cellar: :any,                 arm64_sonoma:  "ea180ba3dcebf82a08b4f609d165939c6882117b5b05d928ce82ca9e932f9a4c"
+    sha256 cellar: :any,                 arm64_ventura: "4840fa33b6992f0c941c4df168c856af825d1e4304a8c3b93f61dab9a72e6adb"
+    sha256 cellar: :any,                 sonoma:        "b5fa6de6bd6cc5724e389317ad7e9aeddab31d79fa80c27570b728476e9d47c5"
+    sha256 cellar: :any,                 ventura:       "b5867abd468fce9779267faa65115f42986a2d5d4d6f59d2af0c6c39b726dc45"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "c31c5817a5dee6699a2e9e0f520bd2e5084b6c94a230ddf602ad8c076cac1599"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "0d95c484b1fb36c5a31dc3c5e2d6d20881de4ec035f20263e190f2bd33005d96"
   end
 
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
 
   def install
-    system "cmake", "-S", ".", "-B", "build", *std_cmake_args, "-DUNICORN_SHARE=yes"
+    system "cmake", "-S", ".", "-B", "build", "-DUNICORN_SHARE=yes", *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
   end
 
   test do
-    (testpath/"test1.c").write <<~EOS
+    (testpath/"test1.c").write <<~C
       /* Adapted from https://www.unicorn-engine.org/docs/tutorial.html
        * shamelessly and without permission. This almost certainly needs
        * replacement, but for now it should be an OK placeholder
@@ -74,9 +73,8 @@ class Unicorn < Formula
         puts("Emulation complete.");
         return 0;
       }
-    EOS
-    system ENV.cc, "-o", testpath/"test1", testpath/"test1.c",
-                   "-pthread", "-lpthread", "-lm", "-L#{lib}", "-lunicorn"
+    C
+    system ENV.cc, "-o", "test1", "test1.c", "-pthread", "-lpthread", "-lm", "-L#{lib}", "-lunicorn"
     system testpath/"test1"
   end
 end

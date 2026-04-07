@@ -13,6 +13,7 @@ class Libetpan < Formula
       url "https://github.com/dinhvh/libetpan/commit/1002a0121a8f5a9aee25357769807f2c519fa50b.patch?full_index=1"
       sha256 "824408a4d4b59b8e395260908b230232d4f764645b014fbe6e9660ad1137251e"
     end
+
     patch do
       url "https://github.com/dinhvh/libetpan/commit/298460a2adaabd2f28f417a0f106cb3b68d27df9.patch?full_index=1"
       sha256 "f5e62879eb90d83d06c4b0caada365a7ea53d4426199a650a7cc303cc0f66751"
@@ -26,27 +27,26 @@ class Libetpan < Formula
   end
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any,                 arm64_sonoma:   "eb5765b64ee9833f052439c9f5b29752115b84761e569c7d7d07d35b457fe5a5"
-    sha256 cellar: :any,                 arm64_ventura:  "daed620aaf4d24519d79be6cf34fdbf52386fa92c4c7880e8cf05cdccb0a787f"
-    sha256 cellar: :any,                 arm64_monterey: "1d33d9e801085b4c350423a936c7e79d1b6ed20b1bd0cfd08d42ae5e5274f07d"
-    sha256 cellar: :any,                 sonoma:         "a025d5684d2edc67c1b50b04ed4fab5f8ff5534c6a3c5b4093f5cf84837b46a0"
-    sha256 cellar: :any,                 ventura:        "143a977a506121a0b96acdcd4364ab55e278b2d887ab1e28f85d59c81e86e116"
-    sha256 cellar: :any,                 monterey:       "0803fa89cfe96b599bc4c811707872971b94c297e353032d614797f614bc90bc"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "c0c3a249c5498bb7b6b9fcd5f735b9ca04e3225b8654a72464f457506c6aa72e"
+    rebuild 2
+    sha256 cellar: :any,                 arm64_tahoe:   "2f2bc6b0e25e04a695cbfb726a3cfcf699098d8bcb3f65341ce73bc7fe5ac2e6"
+    sha256 cellar: :any,                 arm64_sequoia: "0f71f334cab29455274e4c1a1ea4db7d20eb8d3cd6f52a3380343c62f5473359"
+    sha256 cellar: :any,                 arm64_sonoma:  "ba50402af4e428540093a35f7493abfa5061dba3a80063c8356af13278d6b0d9"
+    sha256 cellar: :any,                 sonoma:        "6c780a96c2675aeb1dc3130c91a46f75e673e12ef3cc8a381d6973496a3ba361"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "793b454d15058dc0ba62741b7e094e27f9f311bcd56ec7fed2e197011b54eb6b"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "cf8c5f3550de87ef79a8037cba4778e4d148581c4ef4b28353a3eb80cad9aa61"
   end
 
   depends_on xcode: :build
 
   uses_from_macos "cyrus-sasl"
-  uses_from_macos "zlib"
 
   on_linux do
     depends_on "autoconf" => :build
     depends_on "automake" => :build
     depends_on "libtool" => :build
-    depends_on "pkg-config" => :build
+    depends_on "pkgconf" => :build
     depends_on "openssl@3"
+    depends_on "zlib-ng-compat"
   end
 
   def install
@@ -76,7 +76,7 @@ class Libetpan < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <libetpan/libetpan.h>
       #include <string.h>
       #include <stdlib.h>
@@ -85,7 +85,7 @@ class Libetpan < Formula
       {
         printf("version is %d.%d",libetpan_get_version_major(), libetpan_get_version_minor());
       }
-    EOS
+    C
     system ENV.cc, "test.c", "-L#{lib}", "-letpan", "-o", "test"
     system "./test"
   end

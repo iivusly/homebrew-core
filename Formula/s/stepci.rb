@@ -6,28 +6,22 @@ class Stepci < Formula
   license "MPL-2.0"
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "b51a4218cbf325447634057a0362fa99de98611348196764ba954f53baeb2eba"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "b51a4218cbf325447634057a0362fa99de98611348196764ba954f53baeb2eba"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "b51a4218cbf325447634057a0362fa99de98611348196764ba954f53baeb2eba"
-    sha256 cellar: :any_skip_relocation, sonoma:         "c59c4b4fa04b0d69872f8bbe4a27a0b1313afcc689b4ac00104963f540fcfad7"
-    sha256 cellar: :any_skip_relocation, ventura:        "c59c4b4fa04b0d69872f8bbe4a27a0b1313afcc689b4ac00104963f540fcfad7"
-    sha256 cellar: :any_skip_relocation, monterey:       "c59c4b4fa04b0d69872f8bbe4a27a0b1313afcc689b4ac00104963f540fcfad7"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "f06503b493bdddd590715fc784086f1c9a4241c67450af3f07cd4077099d581a"
+    rebuild 2
+    sha256 cellar: :any_skip_relocation, all: "98104a3592dd43f41522aae67073e1eed4344638c7501aa6617af89ee207d163"
   end
 
   depends_on "node"
 
   def install
     system "npm", "install", *std_npm_args
-    bin.install_symlink Dir["#{libexec}/bin/*"]
+    bin.install_symlink libexec.glob("bin/*")
   end
 
   test do
     # https://docs.stepci.com/legal/privacy.html
     ENV["STEPCI_DISABLE_ANALYTICS"] = "1"
 
-    (testpath/"workflow.yml").write <<~EOS
+    (testpath/"workflow.yml").write <<~YAML
       version: "1.1"
       name: Status Check
       env:
@@ -41,7 +35,7 @@ class Stepci < Formula
                 method: GET
                 check:
                   status: /^20/
-    EOS
+    YAML
 
     expected = <<~EOS
       Tests: 0 failed, 1 passed, 1 total

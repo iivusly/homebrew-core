@@ -2,20 +2,20 @@ class Pius < Formula
   include Language::Python::Virtualenv
 
   desc "PGP individual UID signer"
-  homepage "https://www.phildev.net/pius/"
+  homepage "https://github.com/jaymzh/pius"
   url "https://github.com/jaymzh/pius/archive/refs/tags/v3.0.0.tar.gz"
   sha256 "3454ade5540687caf6d8b271dd18eb773a57ab4f5503fc71b4769cc3c5f2b572"
   license "GPL-2.0-only"
   revision 3
-  head "https://github.com/jaymzh/pius.git", branch: "master"
+  head "https://github.com/jaymzh/pius.git", branch: "main"
 
   bottle do
-    rebuild 5
-    sha256 cellar: :any_skip_relocation, all: "955e8c9cf03a30cd3492596ed0e227eab2fa75c77120ccf763afbb437b940f8f"
+    rebuild 7
+    sha256 cellar: :any_skip_relocation, all: "4140e7427663db5e6c5d33d1b1589afe1d257b135c2874c15ac3d6b9aee3d743"
   end
 
   depends_on "gnupg"
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   def install
     # Replace hardcoded gpg path (WONTFIX)
@@ -25,11 +25,11 @@ class Pius < Formula
   end
 
   def caveats
-    <<~EOS
+    <<~TEXT
       The path to gpg is hardcoded in pius as `/usr/bin/env gpg`.
       You can specify a different path by editing ~/.pius:
         gpg-path=/path/to/gpg
-    EOS
+    TEXT
   end
 
   test do

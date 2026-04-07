@@ -1,18 +1,18 @@
 class Dillo < Formula
   desc "Fast and small graphical web browser"
   homepage "https://dillo-browser.github.io/"
-  url "https://github.com/dillo-browser/dillo/releases/download/v3.1.1/dillo-3.1.1.tar.bz2"
-  sha256 "5b85adc2315cff1f6cc29c4fa7e285a964cc3adb7b4cd652349c178292a4fb9e"
+  url "https://github.com/dillo-browser/dillo/releases/download/v3.2.0/dillo-3.2.0.tar.bz2"
+  sha256 "1066ed42ea7fe0ce19e79becd029c651c15689922de8408e13e70bb5701931bf"
   license "GPL-3.0-or-later"
 
   bottle do
-    sha256 arm64_sonoma:   "7659f9a43d50f1bbb57cbcf772e0678fd8450ce7e11449a99c1e6c2191c7ccdb"
-    sha256 arm64_ventura:  "988cd2898a45ab880b51f51803baccbae409468c18e329b3f3ee406fa783628c"
-    sha256 arm64_monterey: "d1870bc65b0e048eb642b1853f7b31526327160df24e6f9dda1a6c18976ba22c"
-    sha256 sonoma:         "b1a7d562d451d28fb2d2d16c894c070271dd4425bc33955d6dcb5c859466a482"
-    sha256 ventura:        "f7f73f1ce2a1c5ed69287182e8d870a366209dde19a76e49f547803468b16a95"
-    sha256 monterey:       "049ba3e72f9a0cf75e62f4ab6dfce2a11b383e06e253fe2d8a5c7223487cb97f"
-    sha256 x86_64_linux:   "fd6127a85c1bbabba2446009df8eb6bd91a9fc182b79cf6d259167fe23bfe69c"
+    rebuild 1
+    sha256 arm64_tahoe:   "133ccf2cba4d0bd952f33b732c18d55cf734e4cc52cdfe1eec378e77c9a4db24"
+    sha256 arm64_sequoia: "7dc7ce269edd8f4f14fceaeb32e4778124b9598c7012ff352ade23c8efa0438a"
+    sha256 arm64_sonoma:  "a79d60c5478603e8a82cfa50bbce87946c26b671a4d2bc118e1005c5e9ee4329"
+    sha256 sonoma:        "8e4b78d3b2f1909881dfcf2fbee7924222a055cf6b863d6d77a6346a127cbf50"
+    sha256 arm64_linux:   "affc8edd131cb4d01285085bb413c678ee6ebc0dbf55aebbee6f1abdab7dbae5"
+    sha256 x86_64_linux:  "633afe5f018db26138ac0d62cd5d0d55b11fefa78a68bedfc1992718e3ede88b"
   end
 
   head do
@@ -22,15 +22,16 @@ class Dillo < Formula
     depends_on "automake" => :build
   end
 
-  depends_on "fltk"
+  # TODO: Switch to unversioned `fltk` when possible.
+  # https://github.com/dillo-browser/dillo/issues/246
+  depends_on "fltk@1.3"
   depends_on "jpeg-turbo"
   depends_on "libpng"
   depends_on "openssl@3"
 
-  uses_from_macos "zlib"
-
   on_linux do
     depends_on "libx11"
+    depends_on "zlib-ng-compat"
   end
 
   def install
@@ -45,7 +46,7 @@ class Dillo < Formula
 
   test do
     test_file = testpath/"test.html"
-    (testpath/"test.html").write <<~EOS
+    (testpath/"test.html").write <<~HTML
       <!DOCTYPE html>
       <html>
         <head>
@@ -55,7 +56,7 @@ class Dillo < Formula
             <h1>test</h1>
         </body>
       </html>
-    EOS
+    HTML
 
     # create bunch of dillo resource files
     (testpath/".dillo").mkpath
@@ -66,7 +67,7 @@ class Dillo < Formula
 
     begin
       PTY.spawn(bin/"dillo", test_file) do |_r, _w, pid|
-        sleep 2
+        sleep 15
         Process.kill("TERM", pid)
       end
     rescue Errno::EIO
@@ -75,6 +76,6 @@ class Dillo < Formula
 
     assert_match "DEFAULT DENY", (testpath/".dillo/cookiesrc").read
 
-    assert_match "Dillo version #{version}", shell_output("#{bin}/dillo --version")
+    assert_match version.to_s, shell_output("#{bin}/dillo --version")
   end
 end

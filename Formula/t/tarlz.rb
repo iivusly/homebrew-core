@@ -1,9 +1,9 @@
 class Tarlz < Formula
   desc "Data compressor"
   homepage "https://www.nongnu.org/lzip/tarlz.html"
-  url "https://download.savannah.gnu.org/releases/lzip/tarlz/tarlz-0.25.tar.lz"
-  mirror "https://download-mirror.savannah.gnu.org/releases/lzip/tarlz/tarlz-0.25.tar.lz"
-  sha256 "7d0bbe9c3a137bb93a10be56988fcf7362e4dbc65490639edc4255b704105fce"
+  url "https://download.savannah.gnu.org/releases/lzip/tarlz/tarlz-0.29.tar.lz"
+  mirror "https://download-mirror.savannah.gnu.org/releases/lzip/tarlz/tarlz-0.29.tar.lz"
+  sha256 "7e127f1e1b1b62ca6e3417fde32f3ae0481ba5886f56a8553a215b19d81c6c19"
   license "GPL-2.0-or-later"
 
   livecheck do
@@ -12,13 +12,12 @@ class Tarlz < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "724ae61a60f4b858328dabb04ea1c8a96d5ac3992f7b1b4915dde4bca22ec907"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "3f4ee004dc11788230bf475c8a45aa88693d8c8e2fd5a73c6df973defaab3beb"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "818cc5f0bce8a9a6b2a0710a70f17d406de307d365bd3395ad624ec4a0649d7f"
-    sha256 cellar: :any_skip_relocation, sonoma:         "769cbcce323ad82b3321cf3ac067c1be49c9a81c1f1dd2f7397aa416e70aa1e8"
-    sha256 cellar: :any_skip_relocation, ventura:        "287f2d4b7a60a4bdd500f8ffabeaa260fe0df60f8b7501d32a872ceccd7dcb7a"
-    sha256 cellar: :any_skip_relocation, monterey:       "bbce39b7d5de4e4c66032f715c382e779bcfa9746e37815d2a85118595664b27"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "5e7441fc058e0e2de405d0ba720d32fc416eda8ba88db5ff75254ff0c2e3d74b"
+    sha256 cellar: :any,                 arm64_tahoe:   "335d682a3b430cba57a287119c7e87b46f1c90d6a50bc426ea6312a33aaaafc1"
+    sha256 cellar: :any,                 arm64_sequoia: "1f521f67485ce19c2224ce90ddc08c1a21d12c1bb0f90b0e298ea0faa832f544"
+    sha256 cellar: :any,                 arm64_sonoma:  "193f7909ef30f70836db95c0f28593e2f4154cf90a8addebffcefec1bec4137e"
+    sha256 cellar: :any,                 sonoma:        "d45112e00709bb96c1a60b4ca33f789a5f0e1ae6cf26d9b356173a8dea5270fd"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "762ba14cdcc171ec8f7e6884f7fe4ba7d21e916d0ed95cfd6cac379c9850b200"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "e55b50e47918fb42455d602c9c900d851c7ff4875cb8fdfa06e60f46ed25b98a"
   end
 
   depends_on "lzlib"
@@ -42,7 +41,7 @@ class Tarlz < Formula
     mkdir_p dpath
 
     system bin/"tarlz", "-C", testpath, "-cf", lzipfilepath, "source"
-    assert_predicate lzipfilepath, :exist?
+    assert_path_exists lzipfilepath
 
     system bin/"tarlz", "-C", dpath, "-xf", lzipfilepath
     assert_equal "TEST CONTENT", dtestfilepath.read

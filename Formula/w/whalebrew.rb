@@ -7,13 +7,13 @@ class Whalebrew < Formula
   head "https://github.com/whalebrew/whalebrew.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "4b20f0a59b4ddca952293210217096767bbf3641eeaf8a20d783479ec2d23029"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "1b9a806bb5c88d5074e037c34d4f1070b24a3c709a6c12997c256a68c12eaf44"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "e3afe9d7ab8ff22f8e394da65c9f58bc4b495dd758a19c27a6d0b5961f017885"
-    sha256 cellar: :any_skip_relocation, sonoma:         "e73f77883a8b321bcebdf5829211ae1d62c89633d760ec77cdfee6010665b681"
-    sha256 cellar: :any_skip_relocation, ventura:        "0cf1db6078f81c0139448aa53137190bb3396da6b1645632b04031e102d141e3"
-    sha256 cellar: :any_skip_relocation, monterey:       "ed592d731941336ccb5c3200f54e4557af185839a883dbe38f3882eb8e7f34b3"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "afe4b4c69e9b76da440101b3fc26cf623bf391ba23d1e5d64394f770a7776b86"
+    rebuild 2
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "c1f6830e7d52fc290dc2436ff9c6284990599dcb4c0425ea5f88e7010e0e6e40"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "c1f6830e7d52fc290dc2436ff9c6284990599dcb4c0425ea5f88e7010e0e6e40"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "c1f6830e7d52fc290dc2436ff9c6284990599dcb4c0425ea5f88e7010e0e6e40"
+    sha256 cellar: :any_skip_relocation, sonoma:        "37d1cce1732c129b95ecb9802c4e59cf6d404407835d545f0d5019387e0ef37d"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "d87aaaf730a6451d6442f3caa38545e5bb3ed6779926d712ea111823d26f3058"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "0143e7491195c0620ed7a492aab85c01fbe901849955acc5278a23d224b01550"
   end
 
   depends_on "go" => :build
@@ -26,12 +26,13 @@ class Whalebrew < Formula
   end
 
   def install
+    ENV["CGO_ENABLED"] = OS.mac? ? "1" : "0"
     ldflags = %W[
       -s -w
       -X github.com/whalebrew/whalebrew/version.Version=#{version}+homebrew
     ]
     system "go", "build", *std_go_args(ldflags:)
-    generate_completions_from_executable(bin/"whalebrew", "completion")
+    generate_completions_from_executable(bin/"whalebrew", shell_parameter_format: :cobra)
   end
 
   test do
@@ -39,6 +40,6 @@ class Whalebrew < Formula
     assert_match "whalebrew/whalesay", shell_output("#{bin}/whalebrew search whalesay")
 
     output = shell_output("#{bin}/whalebrew install whalebrew/whalesay -y 2>&1", 255)
-    assert_match(/connect to the Docker daemon|operation not permitted/, output)
+    assert_match(/failed to connect to the docker API|permission denied/, output)
   end
 end

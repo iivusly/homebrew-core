@@ -6,8 +6,15 @@ class Hfsutils < Formula
   sha256 "bc9d22d6d252b920ec9cdf18e00b7655a6189b3f34f42e58d5bb152957289840"
   license "GPL-2.0-or-later"
 
+  livecheck do
+    url "https://ftp.mars.org/hfs/"
+    regex(/href=.*?hfsutils[._-]v?(\d+(?:\.\d+)+)\.t/i)
+  end
+
   bottle do
     rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:    "3d8d4be93e186cb4e5f1aee2e128bbe94f68341e463b3fa86ea5cf15c30d0603"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia:  "2a486e1123355f24eb17dd33821edbfa4c9f7f505ffa9009f8380a0000b4f45f"
     sha256 cellar: :any_skip_relocation, arm64_sonoma:   "6d2cb41e60bac6d99365b3efc77078c76f6d13c92d9cc5413065db01f739a8c9"
     sha256 cellar: :any_skip_relocation, arm64_ventura:  "a8245a9a524d4f34c9a005a09a56f6d190ec20583c43fb8c1317fbc13827fc37"
     sha256 cellar: :any_skip_relocation, arm64_monterey: "4d74c98e3e180254629b1dbcf8898a6de9167d28feaabed35b76d3aebcf84b5b"
@@ -17,17 +24,20 @@ class Hfsutils < Formula
     sha256 cellar: :any_skip_relocation, monterey:       "6ae0944174c9dd94812396503c259d281061fa2706f610b03d538d9e502b17c7"
     sha256 cellar: :any_skip_relocation, big_sur:        "133b4b04a161486e76ca06ed4e78086a83ce7ed238b10b879f78a93d66d9dc68"
     sha256 cellar: :any_skip_relocation, catalina:       "5a0e074c5fdcfb43508e049941dd5d7384a7f4843c8d0fe3df325880a45823fd"
-    sha256 cellar: :any_skip_relocation, mojave:         "f32eb0e176bc5f5939a12599f0dbc808631a7680e21b5f820cc096e00fcec46e"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "884c03ae82783f8f238c85d784850ca15dfbf5a92c8d0948412551e850051111"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "ec4614155fc7221a5410f47eac547e8c6c906bfa9965acfc03433fee57a997c9"
   end
 
   def install
+    # Workaround for newer Clang
+    ENV.append_to_cflags "-Wno-implicit-int" if DevelopmentTools.clang_build_version >= 1403
+
     # hpwd.c:55:7: error: call to undeclared library function 'strcmp' with type 'int (const char *, const char *)';
     # ISO C99 and later do not support implicit function declarations
     # Notified the author via email on 2023-01-05
     inreplace "hpwd.c", "# include <stdio.h>\n", "# include <stdio.h>\n# include <string.h>\n"
 
-    system "./configure", "--prefix=#{prefix}", "--mandir=#{man}"
+    system "./configure", "--mandir=#{man}", *std_configure_args
     bin.mkpath
     man1.mkpath
     system "make", "install"

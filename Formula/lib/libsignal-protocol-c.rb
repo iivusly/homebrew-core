@@ -6,6 +6,7 @@ class LibsignalProtocolC < Formula
   license "GPL-3.0-only"
 
   bottle do
+    sha256 cellar: :any,                 arm64_sequoia:  "9a8ecae4c6099cd0732fddcd94730e7e8dc361e9f625fab00279792700e64130"
     sha256 cellar: :any,                 arm64_sonoma:   "5ea0c5c2b3ae7de38ab640492eb6e0627d1bd329413a18520c93c0699309f29d"
     sha256 cellar: :any,                 arm64_ventura:  "c2e2d424032060b1ea5eaad3e977c6bc2d2704c8aa1a43c371e119c06d68f1f1"
     sha256 cellar: :any,                 arm64_monterey: "28c12c6c31a0950b035347de5e67aca8a0057793bf35feb2b4dbe1d342a2682d"
@@ -15,15 +16,15 @@ class LibsignalProtocolC < Formula
     sha256 cellar: :any,                 monterey:       "a5216e8239283c702a4c68d4f63da4cfa9e532d4452d0edc8ed560c7aa38900d"
     sha256 cellar: :any,                 big_sur:        "16cbd5edd6e2d6a2905a6cf1d4b342deb3b356093c1945a9a4333038fbb3b60e"
     sha256 cellar: :any,                 catalina:       "2ad98569b7c0543579c9a2596a78e86bb7a915fb17632850cea099feb9d2d674"
-    sha256 cellar: :any,                 mojave:         "95991e7aa3ef7fa4fdfb25f8f3ed588103e7343599bb5fd86c190e0a2b62ebf8"
-    sha256 cellar: :any,                 high_sierra:    "9dc54604cd42340d8e1ab2da73b54fd19d4cfdb87144921bdb6bcf03e2b41993"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "313d261c9a30af89903531ff44ac68c58955e112edafe4afdf68225824ccebd9"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "3d3f06b8dc3938b4dc6912a65606713000e6ad910c4bfcb4af4e9c0dca899e0c"
   end
 
   deprecate! date: "2024-08-01", because: :repo_archived
+  disable! date: "2025-08-03", because: :repo_archived
 
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
 
   def install
     system "cmake", "-S", ".", "-B", "build", "-DBUILD_SHARED_LIBS=ON", *std_cmake_args
@@ -32,7 +33,7 @@ class LibsignalProtocolC < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <signal_protocol.h>
       #include <session_builder.h>
       #include <session_cipher.h>
@@ -103,7 +104,7 @@ class LibsignalProtocolC < Formula
 
         return 0;
       }
-    EOS
+    C
     system ENV.cc, "test.c", "-I#{include}/signal",
                    "-L#{lib}", "-lsignal-protocol-c",
                    "-o", "test"

@@ -1,32 +1,32 @@
 class Rospo < Formula
   desc "Simple, reliable, persistent ssh tunnels with embedded ssh server"
   homepage "https://github.com/ferama/rospo"
-  url "https://github.com/ferama/rospo/archive/refs/tags/v0.12.1.tar.gz"
-  sha256 "9e9343b60fa4cfb1507e3fc8ef3b3a30499a68081c6efdccaa4a5d47ceadd210"
+  url "https://github.com/ferama/rospo/archive/refs/tags/v0.15.3.tar.gz"
+  sha256 "4c36291969c84159baff261841e6ccd9520e17f8bc9142bf815b9097322a8857"
   license "MIT"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "fe0201c29f66f23581de0677faa71d40a872ec49da490dd1fa713e55a9c14307"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "ea2f8be686aaf285dcf380da7b22735e79b5c94e7a9fedd73016dbe72f7f5306"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "6ec7d9c311c08955f8e1a8372d60f573469cc5bc097d4a683207c2ea7798513c"
-    sha256 cellar: :any_skip_relocation, sonoma:         "49e5d37615fa638ad35cc07b7290662d01cb4d3d52e0cac95415665ef45af84f"
-    sha256 cellar: :any_skip_relocation, ventura:        "a69a35f14cfaa8c854adbc6e63b84296c756c654dd7a4d2097ea995cb8e4e81b"
-    sha256 cellar: :any_skip_relocation, monterey:       "cda0568991968c41b3797001f13f568654b586993e21cefb7b87db4ae5114d9c"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "26175c47fd3098ea360818e47c187eabb8e69d0b11a220e9d282d7a49d387362"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "43494ada262f259f82c05219386a821a57d24053dc7d17f5bf0466509c2a529a"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "43494ada262f259f82c05219386a821a57d24053dc7d17f5bf0466509c2a529a"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "43494ada262f259f82c05219386a821a57d24053dc7d17f5bf0466509c2a529a"
+    sha256 cellar: :any_skip_relocation, sonoma:        "19405ba3bdc6ee02655fa1ab3eb9b89aedeb4459792b08d313731e5bab9edd69"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "3772e1d03c5b37d9a00700c5628c8680fa3ab3d7801145f60a3270d2e2aba275"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "2180b3eabb574fdf196c1ec808c62d602637982a7eca1a01dc9d2b0afeea7873"
   end
 
   depends_on "go" => :build
 
   def install
-    system "go", "build", *std_go_args(ldflags: "-s -w -X 'github.com/ferama/rospo/cmd.Version=#{version}'")
+    ldflags = "-s -w -X github.com/ferama/rospo/cmd.Version=#{version}"
+    system "go", "build", *std_go_args(ldflags:)
 
-    generate_completions_from_executable(bin/"rospo", "completion")
+    generate_completions_from_executable(bin/"rospo", shell_parameter_format: :cobra)
   end
 
   test do
     system bin/"rospo", "-v"
     system bin/"rospo", "keygen", "-s"
-    assert_predicate testpath/"identity", :exist?
-    assert_predicate testpath/"identity.pub", :exist?
+    assert_path_exists testpath/"identity"
+    assert_path_exists testpath/"identity.pub"
   end
 end

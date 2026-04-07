@@ -7,6 +7,8 @@ class PamReattach < Formula
   head "https://github.com/fabianishere/pam_reattach.git", branch: "master"
 
   bottle do
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:    "ab1297caf49a797f8d06361fcb5d690b83b2b92444fe44a5be7d2cdef1ddc123"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia:  "762bb984039bcf0a785bce5fadb36341c579dcf9f3bbca652a839fba7988978d"
     sha256 cellar: :any_skip_relocation, arm64_sonoma:   "b6e506b3690188d4a532579c2e0fbca2a0e7b3c1bef8b45cf7de99b877496f03"
     sha256 cellar: :any_skip_relocation, arm64_ventura:  "470ceefd11808433f82347c1ba80e905d0c5a4b1076d47efac15692b0f86d34f"
     sha256 cellar: :any_skip_relocation, arm64_monterey: "d220980d0a233aeac53fc39fbd2eafcbf7cdcb9252b9c7bf24066e3dd6b0dda8"
@@ -22,8 +24,9 @@ class PamReattach < Formula
   depends_on :macos
 
   def install
-    system "cmake", ".", *std_cmake_args, "-DENABLE_CLI=ON"
-    system "make", "install"
+    system "cmake", "-S", ".", "-B", "build", "-DENABLE_CLI=ON", *std_cmake_args
+    system "cmake", "--build", "build"
+    system "cmake", "--install", "build"
   end
 
   test do

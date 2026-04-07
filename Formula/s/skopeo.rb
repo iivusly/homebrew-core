@@ -1,23 +1,22 @@
 class Skopeo < Formula
   desc "Work with remote images registries"
   homepage "https://github.com/containers/skopeo"
-  url "https://github.com/containers/skopeo/archive/refs/tags/v1.16.1.tar.gz"
-  sha256 "9402e71f3fba979d0c0509240b963847bfeda2eac60be83eb5a628fd67d098e6"
+  url "https://github.com/containers/skopeo/archive/refs/tags/v1.22.0.tar.gz"
+  sha256 "dc9aa749973b10d3c2672d2839e61bac75cf32d5e5106463420b83653c9df3ff"
   license "Apache-2.0"
 
   bottle do
-    sha256 arm64_sonoma:   "fc06bdf07767613b3cb812891b1594abad5288556d5ebe6619589e7b19ef133e"
-    sha256 arm64_ventura:  "e5e91e9782d5bf575e906cd7d643f33d43c39fe0d2a6fb9477ad27722abec047"
-    sha256 arm64_monterey: "8facdd0e32f905a021b2c2900a2e16239fbd7709dae80bb269d183e5aeba30c0"
-    sha256 sonoma:         "2042db33c2a16431a7971c235682b9fb45dc94b77a7cd9a55227ce6445fb0b31"
-    sha256 ventura:        "f1a1b64fcaa64bd8cac4ed04921efa60fd953a335f1eb88d446d0940fb229fe5"
-    sha256 monterey:       "2127ec67cdfff40b554206ed3ad36488edb4a443d8fc6554954cb8180bd27bf0"
-    sha256 x86_64_linux:   "6a93992478cda69aa34902ccbf51ed62fd56a2cf26abd9ebda97ec28e0b13b87"
+    sha256               arm64_tahoe:   "5136d3090106d2efd6fc03474a8f1a28b3287ff36deaa101b59cd09d5ac34c96"
+    sha256               arm64_sequoia: "ec5ae0b76bfab15be41bd9c03f3a9901b92cf215634cc522a7818016c2435056"
+    sha256               arm64_sonoma:  "0962c1966fb016658d1023d3b57bf87caae56bbfd2a1f295d4496abe92a2dce2"
+    sha256 cellar: :any, sonoma:        "86eb06061eb0750ae8af3f2ba654011d8b41b86d446b3b66cbe2723010ea93fe"
+    sha256               arm64_linux:   "3dcf123b78224f46ec524d78855c90cf0cba7e35a54ba63f5bb10eb91c773f8e"
+    sha256               x86_64_linux:  "1135babea45c4ae3d16a954d5e11872714d5d11e921dfa45259518551ac163fb"
   end
 
   depends_on "go" => :build
   depends_on "go-md2man" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "gpgme"
 
   on_linux do
@@ -29,14 +28,13 @@ class Skopeo < Formula
     ENV.append "CGO_FLAGS", ENV.cppflags
     ENV.append "CGO_FLAGS", Utils.safe_popen_read(Formula["gpgme"].opt_bin/"gpgme-config", "--cflags")
 
-    buildtags = [
+    tags = [
       "containers_image_ostree_stub",
-      Utils.safe_popen_read("hack/btrfs_tag.sh").chomp,
       Utils.safe_popen_read("hack/btrfs_installed_tag.sh").chomp,
       Utils.safe_popen_read("hack/libsubid_tag.sh").chomp,
-    ].uniq.join(" ")
+    ].uniq
 
-    ldflag_prefix = "github.com/containers/image/v5"
+    ldflag_prefix = "go.podman.io/image/v5"
     ldflags = %W[
       -X main.gitCommit=
       -X #{ldflag_prefix}/docker.systemRegistriesDirPath=#{etc}/containers/registries.d
@@ -45,17 +43,17 @@ class Skopeo < Formula
       -X #{ldflag_prefix}/pkg/sysregistriesv2.systemRegistriesConfPath=#{etc}/containers/registries.conf
     ]
 
-    system "go", "build", "-tags", buildtags, *std_go_args(ldflags:), "./cmd/skopeo"
+    system "go", "build", *std_go_args(ldflags:, tags:), "./cmd/skopeo"
     system "make", "PREFIX=#{prefix}", "GOMD2MAN=go-md2man", "install-docs"
 
     (etc/"containers").install "default-policy.json" => "policy.json"
     (etc/"containers/registries.d").install "default.yaml"
 
-    generate_completions_from_executable(bin/"skopeo", "completion")
+    generate_completions_from_executable(bin/"skopeo", shell_parameter_format: :cobra)
   end
 
   test do
-    cmd = "#{bin}/skopeo --override-os linux inspect docker://busybox"
+    cmd = "#{bin}/skopeo --override-os linux inspect --no-creds docker://busybox"
     output = shell_output(cmd)
     assert_match "docker.io/library/busybox", output
 

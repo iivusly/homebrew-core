@@ -2,8 +2,8 @@ class Vcluster < Formula
   desc "Creates fully functional virtual k8s cluster inside host k8s cluster's namespace"
   homepage "https://www.vcluster.com"
   url "https://github.com/loft-sh/vcluster.git",
-      tag:      "v0.20.0",
-      revision: "531ed2d4a99b8fd6bcaeaf1d1f61ee78355d4892"
+      tag:      "v0.33.1",
+      revision: "ac04311a85bce383aacdda0721408e98f8ef453c"
   license "Apache-2.0"
   head "https://github.com/loft-sh/vcluster.git", branch: "main"
 
@@ -16,40 +16,32 @@ class Vcluster < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "7c412096446a34d288fc7f140550ca7c52ada8396ff1d5816bfece2c30dce89b"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "3e9915a3574ed5e15f53ebd1e714c5b841afbed84cf920b7c37ca9f4e3d5741c"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "d4c65ac232dc6398e4ea3a4f7469436d7953368ef9b6d9e5a86a86660fb3ceb6"
-    sha256 cellar: :any_skip_relocation, sonoma:         "185d274f863ace48d76c4566d90611e90087cebb25435c8459b5d1d086cbe65d"
-    sha256 cellar: :any_skip_relocation, ventura:        "229c9a786c969210eedc7e3029b8a13506b98826afb6543a88ee18ddf407b6c5"
-    sha256 cellar: :any_skip_relocation, monterey:       "8d639f1920a1e15c39348623d46d5282f93d060dccbe7c4eb7e477fbc52cb7be"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "654f6ce34996068cecaf667756bf1506c3f7a2cae1ab2a4865d1727b4576e10c"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "0fd529461e1335c809a44763158e2d14ef06ecb58863b3174bc16bc308f20bd2"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "45d988b4ea093f783af67e609f9d2c7d03cc3a3a22d4009e9e82e9e2da4bb4a4"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "a83338360751eda28c1e4a959e3bfda594f113e59851b52109853705515c316d"
+    sha256 cellar: :any_skip_relocation, sonoma:        "6d8298f83793bf886123eb1bf02576961dd79627999a10cd03eb688d92783c91"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "499ad54b991b497ecdf5088b2c782843ffdea83181e0349fc6c3560bae70dab2"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "41103b25d357435fd16b885f77266dcfdc660703cf29aaf077c2e2532d7ce724"
   end
 
   depends_on "go" => :build
-  depends_on "helm"
+  depends_on "helm@3"
   depends_on "kubernetes-cli"
 
   def install
-    ldflags = %W[
-      -s -w
-      -X main.commitHash=#{Utils.git_head}
-      -X main.buildDate=#{time.iso8601}
-      -X main.version=#{version}
-    ]
+    ldflags = "-s -w -X main.commitHash=#{Utils.git_head} -X main.buildDate=#{time.iso8601} -X main.version=#{version}"
     system "go", "generate", "./..."
-    system "go", "build", "-mod", "vendor", *std_go_args(ldflags:), "./cmd/vclusterctl/main.go"
-    generate_completions_from_executable(bin/"vcluster", "completion")
+    system "go", "build", "-mod", "vendor", *std_go_args(ldflags:), "./cmd/vclusterctl"
+
+    generate_completions_from_executable(bin/"vcluster", shell_parameter_format: :cobra)
   end
 
   test do
-    help_output = "vcluster root command"
-    assert_match help_output, shell_output("#{bin}/vcluster --help")
+    ENV.prepend_path "PATH", Formula["helm@3"].opt_bin
 
-    create_output = "there is an error loading your current kube config " \
-                    "(invalid configuration: no configuration has been provided, " \
-                    "try setting KUBERNETES_MASTER environment variable), " \
-                    "please make sure you have access to a kubernetes cluster and the command " \
-                    "`kubectl get namespaces` is working"
-    assert_match create_output, shell_output("#{bin}/vcluster create vcluster -n vcluster --create-namespace 2>&1", 1)
+    assert_match version.to_s, shell_output("#{bin}/vcluster version")
+
+    output = shell_output("#{bin}/vcluster create vcluster -n vcluster --create-namespace 2>&1", 1)
+    assert_match "try setting KUBERNETES_MASTER environment variable", output
   end
 end

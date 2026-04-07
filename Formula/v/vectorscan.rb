@@ -1,38 +1,36 @@
 class Vectorscan < Formula
   desc "High-performance regular expression matching library"
   homepage "https://github.com/VectorCamp/vectorscan"
-  url "https://github.com/VectorCamp/vectorscan/archive/refs/tags/vectorscan/5.4.11.tar.gz"
-  sha256 "905f76ad1fa9e4ae0eb28232cac98afdb96c479666202c5a4c27871fb30a2711"
+  url "https://github.com/VectorCamp/vectorscan/archive/refs/tags/vectorscan/5.4.12.tar.gz"
+  sha256 "1ac4f3c038ac163973f107ac4423a6b246b181ffd97fdd371696b2517ec9b3ed"
   license "BSD-3-Clause"
-  revision 1
   head "https://github.com/VectorCamp/vectorscan.git", branch: "develop"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "f39f184ac1f5dbdb22087f8a6fe7ffaadcbb0fdea64d1ea872d2e4df90e28a0b"
-    sha256 cellar: :any,                 arm64_ventura:  "52148d0b76b052ffe68ddbf0c23b659fa97498f889e78b49c54db5f12ccd55c5"
-    sha256 cellar: :any,                 arm64_monterey: "bc41610e518516717336b23078e5b5b0b2880c5e1a7d6fa72a4d10f1ba8c105e"
-    sha256 cellar: :any,                 sonoma:         "19b569e181cf684a889a6be49f77794825e7605d811b4290be9877141133395f"
-    sha256 cellar: :any,                 ventura:        "68e0a9783052f829c597b7c45ed425b2e0b5a609cad7eb63a63847e66f9627ea"
-    sha256 cellar: :any,                 monterey:       "8e12bb9304fb04e3d8044835916b6d9ab5b5ce15f0183db96d8886a40961caad"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "731eccf9091173f46c7578649f8779e9b70ec340572128f69fb1799c9907897a"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "c6d394819c0355675f1ab7d48cf50cf99d68ae837bce318937c17893a9d2bd3e"
+    sha256 cellar: :any,                 arm64_sequoia: "2f6a350d68116e7831fbfe724b02d5aa673f537a08e549cb9c6ca42e71ff0d97"
+    sha256 cellar: :any,                 arm64_sonoma:  "b6de07c88d0e1b9d50c59eb42f1a66a2456e418ade7c01b23ec39b122664029b"
+    sha256 cellar: :any,                 sonoma:        "9a688ccb297c63cd173638267cac86dc0ce20f3f128d5e4a37270bff8fed567e"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "431822dd8fb05a2df316274fa9b8e0bbf11585b00d34a72dd82262507c4929dd"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "08b6394af47d74481f091177957ac9b7ea5fb799975482102223714ddd2c5eba"
   end
 
   depends_on "boost" => :build
   depends_on "cmake" => :build
-  depends_on "pcre" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "ragel" => :build
 
-  # fix SQLite requirement check; included in next release
-  patch do
-    url "https://github.com/VectorCamp/vectorscan/commit/d9ebb20010b3f90a7a5c7bf4a5edff2eb58f2a4f.patch?full_index=1"
-    sha256 "e61de5f0321e9020871912883dadcdc1f49cd423dab37de67b6c1e8d07115162"
-  end
-
   def install
+    # Avoid building hscollider which needs EOL `pcre`
+    # Issue ref: https://github.com/VectorCamp/vectorscan/issues/320
+    rm("tools/hscollider/CMakeLists.txt")
+
     cmake_args = [
+      "-DCCACHE_FOUND=CCACHE_FOUND-NOTFOUND",
       "-DBUILD_STATIC_LIBS=ON",
       "-DBUILD_SHARED_LIBS=ON",
+      "-DFAT_RUNTIME=OFF",
     ]
 
     system "cmake", "-S", ".", "-B", "build", *cmake_args, *std_cmake_args
@@ -41,7 +39,7 @@ class Vectorscan < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <stdio.h>
       #include <hs/hs.h>
       int main()
@@ -49,7 +47,7 @@ class Vectorscan < Formula
         printf("hyperscan v%s", hs_version());
         return 0;
       }
-    EOS
+    C
     system ENV.cc, "test.c", "-I#{include}", "-L#{lib}", "-lhs", "-o", "test"
     assert_match version.to_s, shell_output("./test")
   end

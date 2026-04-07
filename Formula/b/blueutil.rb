@@ -1,18 +1,18 @@
 class Blueutil < Formula
   desc "Get/set bluetooth power and discoverable state"
   homepage "https://github.com/toy/blueutil"
-  url "https://github.com/toy/blueutil/archive/refs/tags/v2.10.0.tar.gz"
-  sha256 "1558977dd4095ff89768a2f7eaff765e760b56c736a9cd5956b1227ebfee8f2b"
+  url "https://github.com/toy/blueutil/archive/refs/tags/v2.13.0.tar.gz"
+  sha256 "d6beba603ab6638f72d9966aed33343f35cac441fc48a81c04fd532c844f170d"
   license "MIT"
-  head "https://github.com/toy/blueutil.git", branch: "master"
+  head "https://github.com/toy/blueutil.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "02e1c9fad6e8b343d5b9e15a4aa0c4b853a1d2b1dac339d01da0b01fcbad86de"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "d0c09f20aad162c559723b5c883c63db270c2cb60005283b170f629de63f8313"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "a9f5aa947b307b1983cdfe545d47884074364a0db4a912891ca0d0ab4f20f843"
-    sha256 cellar: :any_skip_relocation, sonoma:         "2faeff79878497b5db013e243f8f2a88f54c1932a1df1ab422a671d472ebfd43"
-    sha256 cellar: :any_skip_relocation, ventura:        "288321f9b4d1e1bdd7371dfd70f3faaa5ef87fd8ca19f68a6062cd4d6789f97b"
-    sha256 cellar: :any_skip_relocation, monterey:       "d2d9405fa33c97ca5f9fdbac3e287c44902d97a7c80becf152eb6177f2c33163"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "c31d3a14d7db9bebfd0bc6db63cc175189c6bb715891a6f5b0bd4618f06f06b7"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "2d1d787bfda0fa2f1ed869851341fed5aec241e9910d49cf68d2fc45fb63b497"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "6cbfdc8b46cdde4d61bbf221aa5a434e9320d30df95e930f0365d38709eab349"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "23f8456a3b7b9cce7e3f34b60ffa75727b58d772e552af3e0f7aea4627524daa"
+    sha256 cellar: :any_skip_relocation, sonoma:        "2cff703f1c4f5826686dc1c948187a94b9130f9f367ec53fb765a193c953b602"
+    sha256 cellar: :any_skip_relocation, ventura:       "ca2cecb2e1d3c5138a89baff635c957a43f9bf019ad598d7b6c149f95f26a5cf"
   end
 
   depends_on xcode: :build

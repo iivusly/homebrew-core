@@ -1,18 +1,17 @@
 class Freerdp < Formula
   desc "X11 implementation of the Remote Desktop Protocol (RDP)"
   homepage "https://www.freerdp.com/"
-  url "https://github.com/FreeRDP/FreeRDP/archive/refs/tags/3.8.0.tar.gz"
-  sha256 "e313934a77a0bcca3af803455dd9ea1aa2f657c598e3397325aa48e6effd450d"
+  url "https://github.com/FreeRDP/FreeRDP/archive/refs/tags/3.24.2.tar.gz"
+  sha256 "dcb46af2a4296c796c83de610613002ac5a89a3f4ed18122f889d65611cf473e"
   license "Apache-2.0"
 
   bottle do
-    sha256 arm64_sonoma:   "ab64c73394aae736fdf575a169283b260db94726ecbe5921df314b40c0abff0b"
-    sha256 arm64_ventura:  "6e3001bdf3d9ba1b0f4aeff85d5de61788b783d3caa1966b5614017bb5226a4c"
-    sha256 arm64_monterey: "0a0d69d918188f2c83be63fb9fd24709b04c250510acff2c01b1975a4c49718f"
-    sha256 sonoma:         "fd7cc10c98ae3ff4c651108025c4ed7ea92982e9938a583dae56d1b139deb996"
-    sha256 ventura:        "85553e50f0512985443267b36a78f584d1afab0fbdeca1cebf0177e90fa5ea67"
-    sha256 monterey:       "b27c7d522042220ff01e3889d1f0f2984d986ec1b336ef7596142b02dfacd57c"
-    sha256 x86_64_linux:   "5a123ca4fbf5981e4e86cf2a488464d70739c0940960f222bf3b34a47270c42d"
+    sha256 arm64_tahoe:   "8988afd6e8828a4ff1454fde1173021c72af4d88324f95565c65703f66656175"
+    sha256 arm64_sequoia: "f59417b1763936b3e7c379485014f9e03bfad054fd074848238c5b6e88f8bb02"
+    sha256 arm64_sonoma:  "cc6d9fae72f71b53b178090eb853dfad0a95b20e342f602108cf44ce15f44052"
+    sha256 sonoma:        "68da11845defe13f6045888f773921bb49be3a29fc2ab05f98c9ddecc3298b28"
+    sha256 arm64_linux:   "65c24a6b100d92017dbb72ba5b1fedb5117a21790e57631ed270a9de5367eaeb"
+    sha256 x86_64_linux:  "eac5e3e505caa38107c8d0874853d513bdd2fd13673644c0b53f8c16e2c80dfe"
   end
 
   head do
@@ -21,9 +20,10 @@ class Freerdp < Formula
   end
 
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "cjson"
   depends_on "ffmpeg"
+  depends_on "jansson"
   depends_on "jpeg-turbo"
   depends_on "libusb"
   depends_on "libx11"
@@ -37,37 +37,45 @@ class Freerdp < Formula
   depends_on "libxv"
   depends_on "openssl@3"
   depends_on "pkcs11-helper"
+  depends_on "sdl3"
+  depends_on "sdl3_ttf"
+  depends_on "uriparser"
 
   uses_from_macos "cups"
-  uses_from_macos "zlib"
 
   on_linux do
     depends_on "alsa-lib"
-    depends_on "ffmpeg"
     depends_on "glib"
-    depends_on "icu4c"
+    depends_on "icu4c@78"
     depends_on "krb5"
     depends_on "libfuse"
     depends_on "systemd"
     depends_on "wayland"
-  end
-
-  # fix type conversion issue with `_Unwind_GetLanguageSpecificData`, upstream pr ref, https://github.com/FreeRDP/FreeRDP/pull/10542
-  patch do
-    url "https://github.com/FreeRDP/FreeRDP/commit/06d8164d5669c02759894d024f285e028c2023de.patch?full_index=1"
-    sha256 "484407240002837cf9a32c6f1250c040710cdf1b78f8455565dca936c078d6c5"
+    depends_on "zlib-ng-compat"
   end
 
   def install
     args = %W[
-      -DWITH_X11=ON
       -DBUILD_SHARED_LIBS=ON
-      -DWITH_JPEG=ON
       -DCMAKE_INSTALL_NAME_DIR=#{lib}
+      -DWITH_X11=ON
+      -DWITH_JPEG=ON
       -DWITH_MANPAGES=OFF
       -DWITH_WEBVIEW=OFF
-      -DWITH_CLIENT_SDL=OFF
+      -DWITH_CLIENT_SDL=ON
+      -DWITH_CLIENT_SDL2=OFF
+      -DWITH_CLIENT_SDL3=ON
     ]
+
+    # Native macOS client and server implementations are unmaintained and use APIs that are obsolete on Sequoia.
+    # Ref: https://github.com/FreeRDP/FreeRDP/issues/10558
+    if OS.mac? && MacOS.version >= :sequoia
+      # As a workaround, force X11 shadow server implementation. Can use -DWITH_SHADOW=OFF if it doesn't work
+      inreplace "server/shadow/CMakeLists.txt", "add_subdirectory(Mac)", "add_subdirectory(X11)"
+
+      args += ["-DWITH_CLIENT_MAC=OFF", "-DWITH_PLATFORM_SERVER=OFF"]
+    end
+
     system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
@@ -92,8 +100,6 @@ class Freerdp < Formula
   end
 
   test do
-    return if OS.linux? && ENV["HOMEBREW_GITHUB_ACTIONS"]
-
     success = `#{bin}/xfreerdp --version` # not using system as expected non-zero exit code
     details = $CHILD_STATUS
     raise "Unexpected exit code #{$CHILD_STATUS} while running xfreerdp" if !success && details.exitstatus != 128

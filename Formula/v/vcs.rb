@@ -1,37 +1,38 @@
 class Vcs < Formula
   desc "Creates video contact sheets (previews) of videos"
-  homepage "https://p.outlyer.net/vcs/"
-  url "https://p.outlyer.net/files/vcs/vcs-1.13.4.tar.gz"
+  homepage "https://web.archive.org/web/20240824173847/https://p.outlyer.net/vcs/"
+  url "https://web.archive.org/web/20240824173847/https://p.outlyer.net/files/vcs/vcs-1.13.4.tar.gz"
   sha256 "dc1d6145e10eeed61d16c3591cfe3496a6ac392c9c2f7c2393cbdb0cf248544b"
   license "LGPL-2.0-or-later"
   revision 3
 
-  livecheck do
-    url "https://p.outlyer.net/files/vcs/?C=M&O=D"
-    regex(/href=.*?vcs[._-]v?(\d+(?:\.\d+)+)\.t/i)
+  bottle do
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:    "15704818d772bec9a6e0298be99cf2fa16dea6e4365d74d987cf50a3ab144677"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia:  "65bbf115d8f6b21bf141e823218b52ce3cae82bfc2c4783d1ffabec160b1c6b3"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "65bbf115d8f6b21bf141e823218b52ce3cae82bfc2c4783d1ffabec160b1c6b3"
+    sha256 cellar: :any_skip_relocation, arm64_ventura:  "65bbf115d8f6b21bf141e823218b52ce3cae82bfc2c4783d1ffabec160b1c6b3"
+    sha256 cellar: :any_skip_relocation, arm64_monterey: "65bbf115d8f6b21bf141e823218b52ce3cae82bfc2c4783d1ffabec160b1c6b3"
+    sha256 cellar: :any_skip_relocation, sonoma:         "c910f7b36e0b796a03ebf4fa4a7b2adb315188db72901920abc95c790c3edd8e"
+    sha256 cellar: :any_skip_relocation, ventura:        "c910f7b36e0b796a03ebf4fa4a7b2adb315188db72901920abc95c790c3edd8e"
+    sha256 cellar: :any_skip_relocation, monterey:       "c910f7b36e0b796a03ebf4fa4a7b2adb315188db72901920abc95c790c3edd8e"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "c00d07a489a459bf48fb8393815f2a6187822407431cabcd2f6674510e144577"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:   "f48057f0e485f6e6b20d221f4f036e0708d896e6bb3165837e5a96f193710c1b"
   end
 
-  bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "1adb9f8d87916be7a53d895a867934af7b43de2739baa5f3833349389b6b11d8"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "032fbce3c72e8ea03c3b4fbcde03f391d7c9df149ae5b664618d7e5b2a265bce"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "032fbce3c72e8ea03c3b4fbcde03f391d7c9df149ae5b664618d7e5b2a265bce"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "5a12b2c51afec7626a44463cd9145bf47819e8561f05194f2f17ea8eec0459c9"
-    sha256 cellar: :any_skip_relocation, sonoma:         "ce2c5aabef4def1373db198c3d24fdd6eee2c97e733bbd3857f60099088f1835"
-    sha256 cellar: :any_skip_relocation, ventura:        "67aafd60a6d2b32a6bb487860c1ba6e6add8e082e9e6b5d4724d9932849940ce"
-    sha256 cellar: :any_skip_relocation, monterey:       "67aafd60a6d2b32a6bb487860c1ba6e6add8e082e9e6b5d4724d9932849940ce"
-    sha256 cellar: :any_skip_relocation, big_sur:        "f13c9ce9291572d343bb3411e059601aa71fc4776138f13d33941653aab4dfb4"
-    sha256 cellar: :any_skip_relocation, catalina:       "3ae09912577433e9aee40da787b21b278d2e4d625454e6a554a10dfd71a3cb82"
-    sha256 cellar: :any_skip_relocation, mojave:         "2100a37453706602e0bd5941c7fb343cf64659493b27889957bad498934c6daf"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "032fbce3c72e8ea03c3b4fbcde03f391d7c9df149ae5b664618d7e5b2a265bce"
-  end
+  deprecate! date: "2025-03-22", because: :repo_removed
+  disable! date: "2026-03-22", because: :repo_removed
 
   depends_on "ffmpeg"
   depends_on "ghostscript"
-  depends_on "gnu-getopt"
   depends_on "imagemagick"
 
+  on_macos do
+    depends_on "gnu-getopt"
+  end
+
   def install
-    inreplace "vcs", "declare GETOPT=getopt", "declare GETOPT=#{Formula["gnu-getopt"].opt_bin}/getopt"
+    inreplace "vcs", "declare GETOPT=getopt", "declare GETOPT=#{Formula["gnu-getopt"].opt_bin}/getopt" if OS.mac?
 
     system "make", "install", "prefix=#{prefix}"
   end
@@ -40,9 +41,9 @@ class Vcs < Formula
     system Formula["ffmpeg"].bin/"ffmpeg", "-f", "rawvideo", "-s", "hd720",
            "-pix_fmt", "yuv420p", "-r", "30", "-t", "5", "-i", "/dev/zero",
            testpath/"video.mp4"
-    assert_predicate testpath/"video.mp4", :exist?
+    assert_path_exists testpath/"video.mp4"
 
     system bin/"vcs", "-i", "1", "-o", testpath/"sheet.png", testpath/"video.mp4"
-    assert_predicate testpath/"sheet.png", :exist?
+    assert_path_exists testpath/"sheet.png"
   end
 end

@@ -1,40 +1,40 @@
 class Darkstat < Formula
   desc "Network traffic analyzer"
   homepage "https://unix4lyfe.org/darkstat/"
-  url "https://github.com/emikulic/darkstat/archive/refs/tags/3.0.721.tar.gz"
-  sha256 "0b405a6c011240f577559d84db22684a6349b25067c3a800df12439783c25494"
+  url "https://github.com/emikulic/darkstat/archive/refs/tags/3.0.722.tar.gz"
+  sha256 "5c8e66d4c478b6d7e58f4c842823a09125509bf6851017ff70e32b32ce95b01b"
   license all_of: ["BSD-4-Clause-UC", "GPL-2.0-only", "GPL-3.0-or-later", "X11"]
   head "https://github.com/emikulic/darkstat.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "e3e4f63fec4c167ff2ac71b28b5cdb1f163c2e961c4316792355500f96c85671"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "97674e5bd9b7f7924b24cff91ae6460327cc250272e9b67ef8d98c27f218f8d0"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "5981250184af819d33927ff9c81ab3249ee0ebe1f30c16fe6fdf59383946b718"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "223b3ec850fc9c5837d28d8484100ede7a06995ab925db15581925247e7ab729"
-    sha256 cellar: :any_skip_relocation, sonoma:         "dc560a58e6bb24f515919e503a009f993754111bf15306a580fa399caf133930"
-    sha256 cellar: :any_skip_relocation, ventura:        "885d6ca5a12e1faeb072e920dda1bcf214d9ecc9b401ffe207babca7ecc067b1"
-    sha256 cellar: :any_skip_relocation, monterey:       "8449dc87a9567d043d9cb0639213e0be3e3a664dcbc9829b7a4fd4fa02de5d68"
-    sha256 cellar: :any_skip_relocation, big_sur:        "d7f108870e81eb677b299a42824f4680a7f837614d26af49d6cee24519bb21fc"
-    sha256 cellar: :any_skip_relocation, catalina:       "ea01bd86053287a7fce043527aa68ad0dc138d6cdb8e800602947b581687f18c"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "7b32d27fc6e9539499c8d1c4ca716f2a489814fce3e71929b676339eb54425d9"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "8cfccbabe435d29d446814260e1b72630779beffead9eadd470af5afe9312693"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "23eb83cba8e48928c0cd41969bbdf96ccc3fb71a4acc4c1c66ad335fd40ab9f5"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "57bdcd3fd262d6d578db0c52953ef9d6f4584d0b912bde9a9739535382c3f323"
+    sha256 cellar: :any_skip_relocation, sonoma:        "381397a54498e721b83ac4367f14777baa722d28bab6ec8e319888a7047719af"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "9b34c601064b8dc71f66617d12b0e69408dd78a7db0c4a83d58851dd33293e7a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "8011056a0e2efc7eb4552ef971ae53c912c08609e1a91d92e2daf4c4858e728c"
   end
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
 
   uses_from_macos "libpcap"
-  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   # Patch reported to upstream on 2017-10-08
   # Work around `redefinition of clockid_t` issue on 10.12 SDK or newer
   patch do
-    url "https://raw.githubusercontent.com/Homebrew/formula-patches/442ce4a5/darkstat/clock_gettime.patch"
+    url "https://raw.githubusercontent.com/Homebrew/homebrew-core/1cf441a0/Patches/darkstat/clock_gettime.patch"
     sha256 "001b81d417a802f16c5bc4577c3b840799511a79ceedec27fc7ff1273df1018b"
   end
 
   def install
-    system "autoreconf", "-iv"
-    system "./configure", "--disable-debug", "--prefix=#{prefix}"
+    system "autoreconf", "--force", "--install", "--verbose"
+    system "./configure", *std_configure_args
     system "make", "install"
   end
 

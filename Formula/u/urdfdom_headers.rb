@@ -1,8 +1,8 @@
 class UrdfdomHeaders < Formula
   desc "Headers for Unified Robot Description Format (URDF) parsers"
   homepage "https://wiki.ros.org/urdfdom_headers/"
-  url "https://github.com/ros/urdfdom_headers/archive/refs/tags/1.1.1.tar.gz"
-  sha256 "b2ee5bffa51eea4958f64479b4fa273881d82a3bfa1d98686a16f8d8ca6c2350"
+  url "https://github.com/ros/urdfdom_headers/archive/refs/tags/2.1.0.tar.gz"
+  sha256 "aa5509d1931d31acb070d34cee9f46a08e1d62b1f89d50a1392405cdf4f02966"
   license "BSD-3-Clause"
 
   # Upstream uses Git tags (e.g. `1.0.0`) to indicate a new version. They
@@ -14,21 +14,20 @@ class UrdfdomHeaders < Formula
   end
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, all: "cc672a37a20913bc8b56ad3ac227047c2be97790754e4033897b3680493e74b1"
+    sha256 cellar: :any_skip_relocation, all: "afc75cef67f3551d5af2d8a4fce3a1b94af64c05f2b1e3ee86cd064fed2ba217"
   end
 
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :test
+  depends_on "pkgconf" => :test
 
   def install
-    ENV.cxx11
-    system "cmake", ".", *std_cmake_args
-    system "make", "install"
+    system "cmake", "-S", ".", "-B", "build", *std_cmake_args
+    system "cmake", "--build", "build"
+    system "cmake", "--install", "build"
   end
 
   test do
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include <urdf_model/pose.h>
       int main() {
         double quat[4];
@@ -36,7 +35,8 @@ class UrdfdomHeaders < Formula
         rot.getQuaternion(quat[0], quat[1], quat[2], quat[3]);
         return 0;
       }
-    EOS
+    CPP
+
     system ENV.cxx, shell_output("pkg-config --cflags urdfdom_headers").chomp, "test.cpp", "-std=c++11", "-o", "test"
     system "./test"
   end

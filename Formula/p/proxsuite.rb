@@ -1,62 +1,59 @@
 class Proxsuite < Formula
   desc "Advanced Proximal Optimization Toolbox"
   homepage "https://github.com/Simple-Robotics/proxsuite"
-  url "https://github.com/Simple-Robotics/proxsuite/releases/download/v0.6.7/proxsuite-0.6.7.tar.gz"
-  sha256 "3a397ba96ddcfe5ade150951f70f867a3741206a694e50588f954a94c4cf3f27"
+  url "https://github.com/Simple-Robotics/proxsuite/releases/download/v0.7.2/proxsuite-0.7.2.tar.gz"
+  sha256 "dedda8e06b2880f99562622368abb0c0130cc2ab3bff0dc0b26477f88458a136"
   license "BSD-2-Clause"
-  head "https://github.com/Simple-Robotics/proxsuite.git", branch: "main"
+  head "https://github.com/Simple-Robotics/proxsuite.git", branch: "devel"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "ca70c376b0a3759a4c95571c61fdcbd1ff793cef20457572fdd08cd622594a82"
-    sha256 cellar: :any,                 arm64_ventura:  "3e6bf30c36a80f68ddbbf9ad638bc1ea4a2326584f90d6ac2b29308b475e1674"
-    sha256 cellar: :any,                 arm64_monterey: "0726349c4172e3a0d03ca44be63ee8feec13999dd139d213f9da3ade150bcc89"
-    sha256 cellar: :any,                 sonoma:         "46455dfe6c6ee2701940b4e2a829810730d3ffe341e8e5172e7373f6c81ede73"
-    sha256 cellar: :any,                 ventura:        "bb01853666ccb2f5333133972e86ff6f80be0f5925bfec9339b6c6cd3d43022b"
-    sha256 cellar: :any,                 monterey:       "978d86948711a81e3418af1386b9837bf065c2f7725bbe9281e763d8c821df8f"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "adf28af671df40fef0c8f9ee27812ae8778c669f6b5fc580711b18963ef00000"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "2912fb63e15581feb0bb390fd5ed3e525c46bcb7b6781d12bd813dfe6282ce59"
+    sha256 cellar: :any,                 arm64_sequoia: "493ab8fd75c3da238ccf667516e248abfde1a8feb04ab5a6ce6813c7f35631ad"
+    sha256 cellar: :any,                 arm64_sonoma:  "d0484ed787682b90d87bfb5bb834b88e68ea04ac9d9fed36f27defa821469225"
+    sha256 cellar: :any,                 sonoma:        "3ff24000da0064252d189835999b4775042709339922ac3891c75c7201a91a08"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "696c5bd08330dba311f390d3aa3be29016d4d74ebc7d714bf2aee89c31580537"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "bd84dda9a674cf2ff721ce5cd3a2b62d03977601306072a905adec2559de78e2"
   end
 
   depends_on "cmake" => :build
   depends_on "doxygen" => :build
-  depends_on "pkg-config" => :build
-  depends_on "python-setuptools" => :build
+  depends_on "pkgconf" => :build
   depends_on "eigen"
   depends_on "numpy"
-  depends_on "python@3.12"
-  depends_on "scipy"
+  depends_on "python@3.14"
+  depends_on "scipy" => :no_linkage
   depends_on "simde"
 
   def python3
-    "python3.12"
+    "python3.14"
   end
 
   def install
     system "git", "submodule", "update", "--init", "--recursive" if build.head?
 
-    pyver = Language::Python.major_minor_version python3
-    python_exe = Formula["python@#{pyver}"].opt_libexec/"bin/python"
+    # Workaround to fix error: a template argument list is expected after
+    # a name prefixed by the template keyword [-Wmissing-template-arg-list-after-template-kw]
+    if DevelopmentTools.clang_build_version >= 1700
+      ENV.append_to_cflags "-Wno-missing-template-arg-list-after-template-kw"
+    end
 
-    ENV.prepend_path "PYTHONPATH", Formula["eigenpy"].opt_prefix/Language::Python.site_packages
-
-    # simde include dir can be removed after https://github.com/Simple-Robotics/proxsuite/issues/65
-    system "cmake", "-S", ".", "-B", "build",
-                    "-DPYTHON_EXECUTABLE=#{python_exe}",
-                    "-DBUILD_UNIT_TESTS=OFF",
-                    "-DBUILD_PYTHON_INTERFACE=ON",
-                    "-DINSTALL_DOCUMENTATION=ON",
-                    "-DSimde_INCLUDE_DIR=#{Formula["simde"].opt_prefix/"include"}",
-                    *std_cmake_args
+    args = %W[
+      -DPYTHON_EXECUTABLE=#{which(python3)}
+      -DBUILD_UNIT_TESTS=OFF
+      -DBUILD_PYTHON_INTERFACE=ON
+      -DINSTALL_DOCUMENTATION=ON
+    ]
+    system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
   end
 
   test do
-    pyver = Language::Python.major_minor_version python3
-    python_exe = Formula["python@#{pyver}"].opt_libexec/"bin/python"
-    system python_exe, "-c", <<~EOS
+    system python3, "-c", <<~PYTHON
       import proxsuite
       qp = proxsuite.proxqp.dense.QP(10,0,0)
       assert qp.model.H.shape[0] == 10 and qp.model.H.shape[1] == 10
-    EOS
+    PYTHON
   end
 end

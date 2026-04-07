@@ -4,25 +4,28 @@ class Libxcb < Formula
   url "https://xorg.freedesktop.org/archive/individual/lib/libxcb-1.17.0.tar.xz"
   sha256 "599ebf9996710fea71622e6e184f3a8ad5b43d0e5fa8c4e407123c88a59a6d55"
   license "MIT"
+  compatibility_version 1
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "73d103661722410b7789107ff2dc6d4290e6d6b3a48fe1311665bb4593110dc1"
-    sha256 cellar: :any,                 arm64_ventura:  "28d4e84c5f80959fcccf10e66bded2fe5d506d66fb89682d40acb6e0cc0a4611"
-    sha256 cellar: :any,                 arm64_monterey: "9c9f126aca70259930ccc652c9e208f2fa8db321ddadb31bc36af9c4ded4ac3a"
-    sha256 cellar: :any,                 sonoma:         "13fa9f9277a82b642375ad327d412afe69b7ad593ef3c0745454f731dd333f27"
-    sha256 cellar: :any,                 ventura:        "9184f59a65ee1c60eb22b5566a5b842f4730408f512c154ddf64ecbfac911b98"
-    sha256 cellar: :any,                 monterey:       "32b18a3b435be0f22af8cbf093fbd6f299a7265982e7cde07c3b6e4642817604"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "c89a99c1bd6af9c2ee85f4c7bacd07906bb16e6ab515cd5d347f9f392dbd80a1"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "059edd054b17234abb0ce8a34dcbbd927e104445d09a3f5904ea82f7c5aa7ded"
+    sha256 cellar: :any,                 arm64_sequoia: "cce8d9e12c3f0b2fdbffbb3f7ba02f7e25cf3fa495b3e759d34a6264599543b3"
+    sha256 cellar: :any,                 arm64_sonoma:  "103f2b2f44b6dfd22bc936c9eb7f325b598374c549a9f56465b8cce80a2ea829"
+    sha256 cellar: :any,                 arm64_ventura: "3de506a3b5fd61bdd3f1cd5a244b82ea34b696894c8c3124e844a37ff6afd8c7"
+    sha256 cellar: :any,                 sonoma:        "d7cbef805f6d1aab547a65a931972df59a768bb48ff845ecdcbf7b404f64cfa6"
+    sha256 cellar: :any,                 ventura:       "b0bd40b6aba450db00c38a98d4a1e3b8cf3335f4df18e4044e60e1b0ad7fb481"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "8ab6cbc2dd873785c24e669f1749dc1e694740b9de496eef4289be27f389c79d"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "1ccb2f6e9f4feb73b3dbc56248554bc8ce30cb34771ed987eec1bd956f8563e2"
   end
 
-  depends_on "pkg-config" => :build
-  depends_on "python@3.12" => :build # match version in `xcb-proto`
+  depends_on "pkgconf" => :build
+  depends_on "python@3.14" => :build # match version in `xcb-proto`
   depends_on "xcb-proto" => :build
   depends_on "libxau"
   depends_on "libxdmcp"
 
   def install
-    python3 = "python3.12"
+    python3 = "python3.14"
 
     args = %W[
       --sysconfdir=#{etc}
@@ -38,13 +41,13 @@ class Libxcb < Formula
       PYTHON=#{python3}
     ]
 
-    system "./configure", *std_configure_args, *args
+    system "./configure", *args, *std_configure_args
     system "make"
     system "make", "install"
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <stdio.h>
       #include <stdlib.h>
       #include <string.h>
@@ -89,7 +92,7 @@ class Libxcb < Formula
         xcb_disconnect(connection);
         return 0;
       }
-    EOS
+    C
     system ENV.cc, "test.c", "-o", "test", "-I#{include}", "-L#{lib}", "-lxcb"
     system "./test"
     assert_equal 0, $CHILD_STATUS.exitstatus

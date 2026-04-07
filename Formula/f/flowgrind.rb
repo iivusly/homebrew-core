@@ -4,7 +4,7 @@ class Flowgrind < Formula
   url "https://github.com/flowgrind/flowgrind/releases/download/flowgrind-0.8.2/flowgrind-0.8.2.tar.bz2"
   sha256 "432c4d15cb62d5d8d0b3509034bfb42380a02e3f0b75d16b7619a1ede07ac4f1"
   license "GPL-3.0-or-later"
-  revision 2
+  revision 4
 
   livecheck do
     url :stable
@@ -13,13 +13,12 @@ class Flowgrind < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "25f3197b68720e0e5858a73c2fb8dd78b576a1f153cb2f383f06179bd637a17e"
-    sha256 cellar: :any,                 arm64_ventura:  "c2fa42177d8ca42b47f974a821c1359b2ccb88b0ef286733974fddf35e5e5e83"
-    sha256 cellar: :any,                 arm64_monterey: "677e2405fd0fd400387c26291671a4324e29885c14176eed3586d019edd33004"
-    sha256 cellar: :any,                 sonoma:         "d645d6c2adbec394337e39eb92abd2de76255617cce022b8323737184d37bce8"
-    sha256 cellar: :any,                 ventura:        "823a2b3a36d1c8e0b3b3781cdda8ddf3d014ac8f500e9e869cfaa72aa3957370"
-    sha256 cellar: :any,                 monterey:       "c369b92e94e78c795892c5bfb5cbce8c548cd5b2e5bbafdef6576e50e7315846"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "9f8ec4303d62ad6711cebe7f7af64499c0ee3c8cea09e98870a5a6b8f48b4512"
+    sha256 cellar: :any,                 arm64_tahoe:   "dcd288a71292d550079710e54de9a1b51f45749548873121c5b93c876e60509e"
+    sha256 cellar: :any,                 arm64_sequoia: "be6f606a92e205f42558c6af8de0f5ced370aa3dc4b3b1a872bea87135a683f8"
+    sha256 cellar: :any,                 arm64_sonoma:  "5b6e921776fe31300df228841f92eae9051ec2d47b0f65641218de40a612896c"
+    sha256 cellar: :any,                 sonoma:        "ffccc45ede3a5189617d45f4174a4651c8268a8d79c20efd9150a593d323612f"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "8f3e749ef37e3609c899f5d6fc617045c2bc1c46b5f43c83d0b7c9edbf620e1e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "f6c4eee0899191de5387f8210f2c3d4ba96313d50d82ee80e453546e60cfd1b7"
   end
 
   head do

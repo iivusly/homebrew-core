@@ -1,11 +1,27 @@
 class Innoextract < Formula
   desc "Tool to unpack installers created by Inno Setup"
   homepage "https://constexpr.org/innoextract/"
-  url "https://constexpr.org/innoextract/files/innoextract-1.9.tar.gz"
-  sha256 "6344a69fc1ed847d4ed3e272e0da5998948c6b828cb7af39c6321aba6cf88126"
   license "Zlib"
-  revision 9
+  revision 13
   head "https://github.com/dscharrer/innoextract.git", branch: "master"
+
+  stable do
+    url "https://constexpr.org/innoextract/files/innoextract-1.9.tar.gz"
+    sha256 "6344a69fc1ed847d4ed3e272e0da5998948c6b828cb7af39c6321aba6cf88126"
+
+    # Backport commit to fix build with CMake 4
+    patch do
+      url "https://github.com/dscharrer/innoextract/commit/83d0bf4365b09ddd17dddb400ba5d262ddf16fb8.patch?full_index=1"
+      sha256 "fe5299d1fdea5c66287aef2f70fee41d86aedc460c5b165da621d699353db07d"
+    end
+
+    # Fix build with `boost` 1.85.0 using merged, unreleased PR
+    # PR ref: https://github.com/dscharrer/innoextract/pull/169
+    patch do
+      url "https://github.com/dscharrer/innoextract/commit/264c2fe6b84f90f6290c670e5f676660ec7b2387.patch?full_index=1"
+      sha256 "f968a9c0521083dd4076ce5eed56127099a9c9888113fc50f476b914396045cc"
+    end
+  end
 
   livecheck do
     url :homepage
@@ -13,24 +29,23 @@ class Innoextract < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "2d60ed6571f7d230035575cfe3630f7b2b7243bd911f69313dad3f981257fca6"
-    sha256 cellar: :any,                 arm64_ventura:  "19c8b7a38bd209c865695899c1cbb894569756751e22706a500a97598552dc77"
-    sha256 cellar: :any,                 arm64_monterey: "377142c8b5f00721c84f3a00157b7b26f270cbb3026da05f504f34f3bec80506"
-    sha256 cellar: :any,                 sonoma:         "c5a9bddd53d55669ac2203d86bae7f7feb864fd63bfd47f79e79885337cf10cf"
-    sha256 cellar: :any,                 ventura:        "8369c9af2fbd6cd7243b7d193e24d5402580537d0649738c67bc76ec8905d723"
-    sha256 cellar: :any,                 monterey:       "75e199d52822c846a48beab97ee091b028ccd757c0dc4abc25cd857e6bd29958"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "4492c1d8f175a20dbeaefca61a2c0d3525750c9939b210dff39fd6a123e1b439"
+    sha256 cellar: :any,                 arm64_tahoe:   "1150222eb02fdb776418d3253e62ba75592481225b162026bf45ad687784d730"
+    sha256 cellar: :any,                 arm64_sequoia: "9231e79c53ec988162f3173dad48d1e9a3d104af8b21e10f6837c922d4d12d99"
+    sha256 cellar: :any,                 arm64_sonoma:  "6ce904e75b4a103173837ba1c26d8b595d66123fbf5550a53ec83ff6b9bedc66"
+    sha256 cellar: :any,                 sonoma:        "eccddde976f66e9cddc35f6f72cac7c2377312343bb8cdfb954797c3173ead17"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "54d89c53d511089ab43432dc90c8cf8acc3ea5c3bb5ddf0f01f1954bcd9ec4ab"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "4fcfb3e634def1947791fab8be9c9b2ede7a6c453de29d92491a35638090afee"
   end
 
   depends_on "cmake" => :build
   depends_on "boost"
   depends_on "xz"
 
-  # Fix build with `boost` 1.85.0 using open PR
-  # PR ref: https://github.com/dscharrer/innoextract/pull/169
+  # Fix build with `boost` 1.89.0 using open PR
+  # PR ref: https://github.com/dscharrer/innoextract/pull/199
   patch do
-    url "https://github.com/dscharrer/innoextract/commit/264c2fe6b84f90f6290c670e5f676660ec7b2387.patch?full_index=1"
-    sha256 "f968a9c0521083dd4076ce5eed56127099a9c9888113fc50f476b914396045cc"
+    url "https://github.com/dscharrer/innoextract/commit/882796e0e9b134b02deeaae4bbfe92920adb6fe2.patch?full_index=1"
+    sha256 "d5af3e86eb2b74bff559885440d330678e5dbb028ce165bb836ddb14224af201"
   end
 
   def install

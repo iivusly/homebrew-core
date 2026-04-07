@@ -1,8 +1,8 @@
 class OpensslAT30 < Formula
   desc "Cryptography and SSL/TLS Toolkit"
   homepage "https://openssl-library.org"
-  url "https://github.com/openssl/openssl/releases/download/openssl-3.0.15/openssl-3.0.15.tar.gz"
-  sha256 "23c666d0edf20f14249b3d8f0368acaee9ab585b09e1de82107c66e1f3ec9533"
+  url "https://github.com/openssl/openssl/releases/download/openssl-3.0.19/openssl-3.0.19.tar.gz"
+  sha256 "fa5a4143b8aae18be53ef2f3caf29a2e0747430b8bc74d32d88335b94ab63072"
   license "Apache-2.0"
 
   livecheck do
@@ -11,36 +11,38 @@ class OpensslAT30 < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "5f48e4f3391e514597cf9959a95daaafc1295ce4df9a26964d3ce0cb705a041f"
-    sha256 arm64_ventura:  "90d988c61932197830a7962e9dfe3997a139689489763ffa55ec54a607b69d0e"
-    sha256 arm64_monterey: "4491fd5d9e0bd3f27cd45d6b3026f2f1e9f648b1dff73cd41514bdeb55d8bae4"
-    sha256 sonoma:         "49d60e1d467c46db85643ff1ec0fc0d7883698b878f0456467c4e36758ae6197"
-    sha256 ventura:        "2330210545b943f2989ef8b30f712eeca2b2ba6762b6ac6de19f82d6f9c2d41f"
-    sha256 monterey:       "e6815ce49c0657d581fac3ffdabbac99c47ea9903d43f5e812621091b8bd9921"
-    sha256 x86_64_linux:   "88feaacad8c06a6308c1b1bf4d322e812d069b9e7a9808982debf89c5a226e39"
+    sha256 arm64_tahoe:   "9619d2fb3b6919841f21b2cb093ef88109985755dcb84ea6498a0930ad49684a"
+    sha256 arm64_sequoia: "32fb5993fed07584ba005b8d639d7b632e517af3f6cc1a40d02295f4e924fbef"
+    sha256 arm64_sonoma:  "4a27401ee1913548c813f4449257ab3775590abdba2147f1e4f0b41b0022da33"
+    sha256 sonoma:        "1e9402edf1c94163731358634f313fb0daac05a22e612ae94f16878afcd0cde7"
+    sha256 arm64_linux:   "0b944da57f0fe0cba86f617ce0d570876dc5cf5925f58ae3b2a5844e6ceb41a6"
+    sha256 x86_64_linux:  "4be61c87690ed707e71ee39dfe6147d02bc9d598760b93807cc46b8785a0463a"
   end
 
   keg_only :versioned_formula
+
+  # See: https://www.openssl.org/policies/releasestrat.html
+  deprecate! date: "2026-09-07", because: :unsupported
 
   depends_on "ca-certificates"
 
   on_linux do
     resource "Test::Harness" do
-      url "https://cpan.metacpan.org/authors/id/L/LE/LEONT/Test-Harness-3.50.tar.gz"
-      mirror "http://cpan.metacpan.org/authors/id/L/LE/LEONT/Test-Harness-3.50.tar.gz"
-      sha256 "79b6acdc444f1924cd4c2e9ed868bdc6e09580021aca8ff078ede2ffef8a6f54"
+      url "https://cpan.metacpan.org/authors/id/L/LE/LEONT/Test-Harness-3.52.tar.gz"
+      mirror "http://cpan.metacpan.org/authors/id/L/LE/LEONT/Test-Harness-3.52.tar.gz"
+      sha256 "8fe65cfc0261ed3c8a4395f0524286f5719669fe305f9b03b16cf3684d62cd70"
     end
 
     resource "Test::More" do
-      url "https://cpan.metacpan.org/authors/id/E/EX/EXODIST/Test-Simple-1.302201.tar.gz"
-      mirror "http://cpan.metacpan.org/authors/id/E/EX/EXODIST/Test-Simple-1.302201.tar.gz"
-      sha256 "956185dc96c1f2942f310a549a2b206cc5dd1487558f4e36d87af7a8aacbc87c"
+      url "https://cpan.metacpan.org/authors/id/E/EX/EXODIST/Test-Simple-1.302219.tar.gz"
+      mirror "http://cpan.metacpan.org/authors/id/E/EX/EXODIST/Test-Simple-1.302219.tar.gz"
+      sha256 "420600911230de768427f6646758d89b6c07977b565e5b40118e5b8440dbb30b"
     end
 
     resource "ExtUtils::MakeMaker" do
-      url "https://cpan.metacpan.org/authors/id/B/BI/BINGOS/ExtUtils-MakeMaker-7.70.tar.gz"
-      mirror "http://cpan.metacpan.org/authors/id/B/BI/BINGOS/ExtUtils-MakeMaker-7.70.tar.gz"
-      sha256 "f108bd46420d2f00d242825f865b0f68851084924924f92261d684c49e3e7a74"
+      url "https://cpan.metacpan.org/authors/id/B/BI/BINGOS/ExtUtils-MakeMaker-7.76.tar.gz"
+      mirror "http://cpan.metacpan.org/authors/id/B/BI/BINGOS/ExtUtils-MakeMaker-7.76.tar.gz"
+      sha256 "30bcfd75fec4d512e9081c792f7cb590009d9de2fe285ffa8eec1be35a5ae7ca"
     end
   end
 
@@ -100,7 +102,7 @@ class OpensslAT30 < Formula
     system "perl", "./Configure", *(configure_args + arch_args)
     system "make"
     system "make", "install", "MANDIR=#{man}", "MANSUFFIX=ssl"
-    system "make", "test"
+    system "make", "HARNESS_JOBS=#{ENV.make_jobs}", "test"
 
     # Prevent `brew` from pruning the `certs` and `private` directories.
     touch %w[certs private].map { |subdir| openssldir/subdir/".keepme" }
@@ -128,8 +130,7 @@ class OpensslAT30 < Formula
 
   test do
     # Make sure the necessary .cnf file exists, otherwise OpenSSL gets moody.
-    assert_predicate pkgetc/"openssl.cnf", :exist?,
-            "OpenSSL requires the .cnf file for some functionality"
+    assert_path_exists pkgetc/"openssl.cnf", "OpenSSL requires the .cnf file for some functionality"
 
     # Check OpenSSL itself functions as expected.
     (testpath/"testfile.txt").write("This is a test file")

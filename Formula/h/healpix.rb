@@ -1,57 +1,51 @@
 class Healpix < Formula
   desc "Hierarchical Equal Area isoLatitude Pixelization of a sphere"
-  homepage "https://healpix.jpl.nasa.gov"
-  url "https://downloads.sourceforge.net/project/healpix/Healpix_3.82/Healpix_3.82_2022Jul28.tar.gz"
-  version "3.82"
-  sha256 "47629f057a2daf06fca3305db1c6950edb9e61bbe2d7ed4d98ff05809da2a127"
+  homepage "https://healpix.sourceforge.io"
+  url "https://downloads.sourceforge.net/project/healpix/Healpix_3.83/Healpix_3.83_2024Nov13.tar.gz"
+  version "3.83"
+  sha256 "8876c18efc596fd706b2a004ac15f2fb60b795f2db6fbabea9d8ccf549531dda"
   license "GPL-2.0-or-later"
-  revision 1
+  revision 2
+
+  no_autobump! because: :incompatible_version_format
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "34ddbedc57f2755c48a4ac145afcdaabe45555f82a3f1027511282cf7efc8f6f"
-    sha256 cellar: :any,                 arm64_ventura:  "cee714500355c2f6d2974df7c1942d7d04dc1a99e7c6b729d2c0dfb3e346d680"
-    sha256 cellar: :any,                 arm64_monterey: "2c20fec2724b39f5216682928570fa0b397bde0b5967fcdba09220381900211e"
-    sha256 cellar: :any,                 arm64_big_sur:  "60149b975f08c9843300573050067fff1cd11c0cb37dfcd622099c2b71094791"
-    sha256 cellar: :any,                 sonoma:         "c0b2d59b2b5299db3df855b12d28b65695f1e946c965677809e92355cad65c20"
-    sha256 cellar: :any,                 ventura:        "f668b103ad5eac9949f2bd52c1a694056cc7e716ace0d4b66829b856f86aa068"
-    sha256 cellar: :any,                 monterey:       "b69b3a3ea09a205f5f753f2984e29de6052fae940b31d8a97dc3f6c502a78ed5"
-    sha256 cellar: :any,                 big_sur:        "b4d35b6aedb577fa29673b4f5e6211c61675683fc9a328bcf186826d67a0dc1e"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "21947253baf912a6367c4ee798a53c6b3b517c4e8774bd9b3edc2aeb2bff3de5"
+    sha256 cellar: :any,                 arm64_tahoe:   "2cd47768112373cf69d551358a450576de47148b04927854453825f6f4d7ea34"
+    sha256 cellar: :any,                 arm64_sequoia: "0497504cbe071a0de19f56a2c2091c28d796141f7aecb37e8ab3473cf7d6c401"
+    sha256 cellar: :any,                 arm64_sonoma:  "8589afbe8752f4d93b15e68173266298dccc286e15d8b131021dc6913f433790"
+    sha256 cellar: :any,                 sonoma:        "95a5b5a8fa81458c51480629f45133744ae06bedd47c89c9b6ec37b846caed2c"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "2192382257e157d5c43c23f0ceb74e2ceb6616e286d21f1918d914a1afa7eef1"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "2e564d3d9c546315968321c06b82468e6f6120b873dfb9422c4316bd13d3e238"
   end
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
   depends_on "libtool" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "cfitsio"
 
   def install
-    configure_args = %w[
-      --disable-dependency-tracking
-      --disable-silent-rules
-    ]
-
     cd "src/C/autotools" do
-      system "autoreconf", "--install"
-      system "./configure", "--prefix=#{prefix}", *configure_args
+      system "autoreconf", "--force", "--install", "--verbose"
+      system "./configure", "--disable-silent-rules", *std_configure_args
       system "make", "install"
     end
 
     cd "src/common_libraries/libsharp" do
-      system "./configure", "--prefix=#{prefix}", *configure_args
+      system "./configure", "--disable-silent-rules", *std_configure_args
       system "make", "install"
     end
 
     cd "src/cxx" do
       ENV["SHARP_CFLAGS"] = "-I#{include}"
       ENV["SHARP_LIBS"] = "-L#{lib} -lsharp"
-      system "./configure", "--prefix=#{prefix}", *configure_args
+      system "./configure", "--disable-silent-rules", *std_configure_args
       system "make", "install"
     end
   end
 
   test do
-    (testpath/"test.cxx").write <<-EOS
+    (testpath/"test.cxx").write <<~CPP
       #include <math.h>
       #include <stdio.h>
       #include "chealpix.h"
@@ -64,7 +58,7 @@ class Healpix < Formula
           ns1  = npix2nside(npix);
         }
       };
-    EOS
+    CPP
 
     system ENV.cxx, "-o", "test", "test.cxx", "-L#{lib}", "-lchealpix"
     system "./test"

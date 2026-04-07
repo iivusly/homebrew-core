@@ -3,32 +3,32 @@ class Gexiv2 < Formula
   homepage "https://wiki.gnome.org/Projects/gexiv2"
   # release info on the website might lag behind, refer to gitlab tags for latest release info
   # see discussions in https://gitlab.gnome.org/GNOME/gexiv2/-/issues/77
-  url "https://download.gnome.org/sources/gexiv2/0.14/gexiv2-0.14.3.tar.xz"
-  sha256 "21e64d2c56e9b333d44fef3f2a4b25653d922c419acd972fa96fab695217e2c8"
+  url "https://download.gnome.org/sources/gexiv2/0.16/gexiv2-0.16.0.tar.xz"
+  sha256 "d96f895f24539f966f577b2bb2489ae84f8232970a8d0c064e4a007474a77bbb"
   license "GPL-2.0-or-later"
 
   bottle do
-    sha256 cellar: :any, arm64_sonoma:   "67e11e557d79c924eddda15dbca08e388946bf1f8d4ccb60e938901719f3c579"
-    sha256 cellar: :any, arm64_ventura:  "afda771f7cb34bcdccda695f5b843d1acd188427e8b0dcb55e895f427efb515e"
-    sha256 cellar: :any, arm64_monterey: "daef02de6a9fd13965b53543ecb568dbdfcccb69a9425f047fff2ae4bc28e457"
-    sha256 cellar: :any, sonoma:         "15453b28ad8ceae545a5fd10ba90075b191a87945da03ccfc4fd64a43433f886"
-    sha256 cellar: :any, ventura:        "fe5fa4ebfd93ac04ac0abf3e8aaa151312c4e6b4f33f2ed4e162d5617bbd6215"
-    sha256 cellar: :any, monterey:       "d8309f1187652152e7817e0973e6496e3ddedf549eb279c1704523ddd81c0e2a"
-    sha256               x86_64_linux:   "93e44d86332a71710f2e67fdc510541988bb8794493a735ac26a7c933c58e916"
+    rebuild 1
+    sha256 cellar: :any, arm64_tahoe:   "24d603085d106cc7d08e199642d858d2b962ffa9e38c40ee4b23bf9953efeeee"
+    sha256 cellar: :any, arm64_sequoia: "0c2696669b2614cbd240188c86a6e45db6ec4e9d672382ae39723f1bb4afb59f"
+    sha256 cellar: :any, arm64_sonoma:  "26e318f39f877307501fc0f7106a8c5541d0e3d6f3bb4761ce3bab0cf76b5221"
+    sha256 cellar: :any, sonoma:        "0a21ff17505b6557231bad21b09a6aaf47e249aa18c1983018a3620fa73cb923"
+    sha256               arm64_linux:   "6f720afb3387da506741f5c2bd998feefc0b208b4c280e5181b0c2f2f768690f"
+    sha256               x86_64_linux:  "d1a0c6ea1f0c31654fa2aa67ec016dc93ae6b19cab16866c72452400111102f1"
   end
 
   depends_on "gobject-introspection" => :build
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => [:build, :test]
   depends_on "pygobject3" => [:build, :test]
-  depends_on "python@3.12" => [:build, :test]
+  depends_on "python@3.14" => [:build, :test]
   depends_on "vala" => :build
   depends_on "exiv2"
   depends_on "glib"
 
   def python3
-    "python3.12"
+    "python3.14"
   end
 
   def install
@@ -44,28 +44,25 @@ class Gexiv2 < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <gexiv2/gexiv2.h>
       int main() {
         GExiv2Metadata *metadata = gexiv2_metadata_new();
         return 0;
       }
-    EOS
+    C
 
-    system ENV.cc, "test.c", "-o", "test",
-                   "-I#{HOMEBREW_PREFIX}/include/glib-2.0",
-                   "-I#{HOMEBREW_PREFIX}/lib/glib-2.0/include",
-                   "-L#{lib}",
-                   "-lgexiv2"
+    flags = shell_output("pkg-config --cflags --libs gexiv2-#{version.major_minor}").chomp.split
+    system ENV.cc, "test.c", "-o", "test", *flags
     system "./test"
 
-    (testpath/"test.py").write <<~EOS
+    (testpath/"test.py").write <<~PYTHON
       import gi
-      gi.require_version('GExiv2', '0.10')
+      gi.require_version('GExiv2', '#{version.major_minor}')
       from gi.repository import GExiv2
       exif = GExiv2.Metadata('#{test_fixtures("test.jpg")}')
       print(exif.try_get_gps_info())
-    EOS
+    PYTHON
     assert_equal "(longitude=0.0, latitude=0.0, altitude=0.0)\n", shell_output("#{python3} test.py")
   end
 end

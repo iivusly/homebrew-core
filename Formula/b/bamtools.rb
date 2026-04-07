@@ -1,30 +1,28 @@
 class Bamtools < Formula
   desc "C++ API and command-line toolkit for BAM data"
   homepage "https://github.com/pezmaster31/bamtools"
-  url "https://github.com/pezmaster31/bamtools/archive/refs/tags/v2.5.2.tar.gz"
-  sha256 "4d8b84bd07b673d0ed41031348f10ca98dd6fa6a4460f9b9668d6f1d4084dfc8"
+  url "https://github.com/pezmaster31/bamtools/archive/refs/tags/v2.5.3.tar.gz"
+  sha256 "7d4e59bac7c03bde488fe43e533692f78b5325a097328785ec31373ffac08344"
   license "MIT"
-  revision 1
   head "https://github.com/pezmaster31/bamtools.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "4971914ba3c1f62ef3b16f7d7605edea2a4163f9ccfed63602b1d61df323ddb9"
-    sha256 cellar: :any,                 arm64_ventura:  "58ddd12242c381fcae63a5142e1af12954965f1d4bf443c25a270fc35d5eba2d"
-    sha256 cellar: :any,                 arm64_monterey: "fd3594b78acee23bf5d260ecb30dbcc32a6c51f2c57b02fcd46f6bf6e0215741"
-    sha256 cellar: :any,                 arm64_big_sur:  "a09703edb44ac45c00f1ca338736af291def439419edf571500dfec776d7c71f"
-    sha256 cellar: :any,                 sonoma:         "f4c3d7841ef2523ce7e4b386d37b2f2051dbcb89cd988cb8ed82ef5845185ae3"
-    sha256 cellar: :any,                 ventura:        "b4066241fe612379ed5ef3086f50735d4fc3217fb8e171e04e9b4491766022f2"
-    sha256 cellar: :any,                 monterey:       "d81c6addc556c9d421e8a6974c3ae564c0de8291d64d0d9476dafe2cd9c8e5f0"
-    sha256 cellar: :any,                 big_sur:        "ae4c20d973c8ed46a430c668bcbc2b6ac4c32a9241bd989bf8c3afe3cc0f57da"
-    sha256 cellar: :any,                 catalina:       "4bd0d24b3301ba788bc79cdf12f07dbf499347dce3beb9250e7ec6e12b6670a9"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "5909b02859753489fe8e24652053afdca942f6d88b13f110a0d04650478c81a9"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "7f678e35ee8bbd84f50d0bc33a6ebeb840754b2581599be380d6bbd823f9b70e"
+    sha256 cellar: :any,                 arm64_sequoia: "b0af491c561150a59e610140388f05e9d61eaac14806f6e1aee5069413b4c2c7"
+    sha256 cellar: :any,                 arm64_sonoma:  "7a331a56657ba146a719fbe8911bb43e7b9155c824a6c4f33ecc88931800a53e"
+    sha256 cellar: :any,                 sonoma:        "83b46fc21dd8d03010235b022abe2d98bff4219707b5ff6fbad3c7735609286f"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "0575567ce67f57826e323b0f26aa06f5b0d4f23db128c45b659bd4f1243fd903"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "464bbce0fe1f5f7e302f4274e4e5bfb1153083f95b7e5d754b70690b8cc0748a"
   end
 
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "jsoncpp"
 
-  uses_from_macos "zlib"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     # Delete bundled jsoncpp to avoid fallback
@@ -45,14 +43,14 @@ class Bamtools < Formula
   end
 
   test do
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include "api/BamWriter.h"
       using namespace BamTools;
       int main() {
         BamWriter writer;
         writer.Close();
       }
-    EOS
+    CPP
     system ENV.cxx, "test.cpp", "-I#{include}/bamtools", "-L#{lib}",
                     "-lbamtools", "-lz", "-o", "test"
     system "./test"

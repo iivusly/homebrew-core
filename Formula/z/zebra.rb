@@ -1,10 +1,9 @@
 class Zebra < Formula
   desc "Information management system"
   homepage "https://www.indexdata.com/resources/software/zebra/"
-  url "https://ftp.indexdata.com/pub/zebra/idzebra-2.2.7.tar.gz"
-  sha256 "b465ffeb060f507316e6cfc20ebd46022472076d0d4e96ef7dab63e798066420"
+  url "https://ftp.indexdata.com/pub/zebra/idzebra-2.2.10.tar.gz"
+  sha256 "9ac047f9a4b402722a697062680cdc8fe4a9232da58de0976d7424a79208ad98"
   license "GPL-2.0-or-later"
-  revision 2
 
   livecheck do
     url "https://ftp.indexdata.com/pub/zebra/"
@@ -12,16 +11,18 @@ class Zebra < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "ed5577f3ddf35fa49cbc6f341de27307e871ce01899f3fceee962431bbf9a40e"
-    sha256 arm64_ventura:  "0490893dedda889a386fa7d796f8a48ecd2cde6079c0dfbc8280fc1cc9a59749"
-    sha256 arm64_monterey: "fa41931108751f1e96d79b03a914e180cf839775625448268006c63aa07de875"
-    sha256 sonoma:         "41cc4509c63ab4c111937bd04d593cf0afa71af3d81c7d5ee7f4b6bc9fd9546d"
-    sha256 ventura:        "778f56686d0e428122392a68d5f804612701826bab545e8edab2258512e9207f"
-    sha256 monterey:       "6a135417aa799bf98438651ad4efb6b5429be948b6b7d02c0051a5e8b4960d15"
-    sha256 x86_64_linux:   "1038933d7519ce99529c371bfd3d08759626bf84d81a01e65f2154d08e5fcf9a"
+    rebuild 1
+    sha256 arm64_tahoe:   "19bbf8d4ccb9a2101ba988660c99f28619faadf473dc5841385cd1946f8327b9"
+    sha256 arm64_sequoia: "8889a6a7ad2c160e224033529b6395f61de7619d8a603992ecb0edc606baa02b"
+    sha256 arm64_sonoma:  "5a8bab3d5c6af8415011b994f40f1618aa685668898bbc3994fd8f3ca7e38001"
+    sha256 sonoma:        "d5fd63bd6a150619f6ffbe4e314f286eabe3e999423e9cb9f35b71d86e681547"
+    sha256 arm64_linux:   "eb2d58aaffda0097ed21f908680cc33e649366997d5dcafaf89fa08c0b67af5b"
+    sha256 x86_64_linux:  "3559c2ea4ab4cea38fc905077c4873dd471586252375aaa2bc744a5037694b29"
   end
 
-  depends_on "icu4c"
+  depends_on "pkgconf" => :build
+
+  depends_on "icu4c@78"
   depends_on "yaz"
 
   uses_from_macos "bzip2"
@@ -29,18 +30,21 @@ class Zebra < Formula
   uses_from_macos "libxcrypt"
   uses_from_macos "libxml2"
   uses_from_macos "libxslt"
-  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
-    system "./configure", "--disable-dependency-tracking",
-                          "--prefix=#{prefix}",
+    system "./configure", "--disable-silent-rules",
                           "--enable-mod-text",
                           "--enable-mod-grs-regx",
                           "--enable-mod-grs-marc",
                           "--enable-mod-grs-xml",
                           "--enable-mod-dom",
                           "--enable-mod-alvis",
-                          "--enable-mod-safari"
+                          "--enable-mod-safari",
+                          *std_configure_args
     system "make", "install"
   end
 

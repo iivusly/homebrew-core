@@ -1,21 +1,18 @@
 class Janet < Formula
   desc "Dynamic language and bytecode vm"
   homepage "https://janet-lang.org"
-  url "https://github.com/janet-lang/janet/archive/refs/tags/v1.35.2.tar.gz"
-  sha256 "947dfdab6c1417c7c43efef2ecb7a92a3c339ce2135233fe88323740e6e7fab1"
+  url "https://github.com/janet-lang/janet/archive/refs/tags/v1.41.2.tar.gz"
+  sha256 "168e97e1b790f6e9d1e43685019efecc4ee473d6b9f8c421b49c195336c0b725"
   license "MIT"
-  revision 1
   head "https://github.com/janet-lang/janet.git", branch: "master"
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any,                 arm64_sonoma:   "40f4f632fdbbae7b5f11b705515a1b6f324e8181ae988436471bb06d13aaf226"
-    sha256 cellar: :any,                 arm64_ventura:  "e3876dc47ec753e6f38b7743f106a5ee27b1b39dffda25ffbea526e14e281a12"
-    sha256 cellar: :any,                 arm64_monterey: "aeefa31ebc70de186e6c0a76bdb9c2c3a5b6106decf6155089d58dc16251c9b4"
-    sha256 cellar: :any,                 sonoma:         "904739f0a4fd134a20413ea1b5d374a2d19381baa57044d8dcb44955ad0aaf16"
-    sha256 cellar: :any,                 ventura:        "6ddc5a43bcbd95ab847f0e890c0948c29e5547d9f9f69ad7d1abec1e7e166569"
-    sha256 cellar: :any,                 monterey:       "096bc375b1e29a0ef618b12ade14b481bfb632df0a579126c7e39293f734452f"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "21ecea304e49668de1310508cb15ed1cc33512c4548bf2417b0c4b700d3bcbc9"
+    sha256 cellar: :any,                 arm64_tahoe:   "95713b9d30546fdaab9f6f1f5f519f1cbc80089fe98afca9862639e7736ba51d"
+    sha256 cellar: :any,                 arm64_sequoia: "1e161621c9e8774fdaba026fcf56a1cd8ef71ab988182784aa06a486f11a2f2f"
+    sha256 cellar: :any,                 arm64_sonoma:  "7b9915ba7cdab2c07954cd308505e608c96cf88560e32998a138d54b78d6b1d4"
+    sha256 cellar: :any,                 sonoma:        "dbd1061f7b9eb25f476d1f8f1c1e0a3dee4b38bfe779c78a61af65d47c0beec1"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "b93f65debdf478e42ade08470c501b78f89c9c4bfa759d228eb91bf9a412426c"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "355439f1ee0ff6b1c47e00fb2ab241bc3d584cc9409c28b8978981095d08dd36"
   end
 
   resource "jpm" do
@@ -67,7 +64,7 @@ class Janet < Formula
     janet = bin/"janet"
     jpm = HOMEBREW_PREFIX/"bin/jpm"
     assert_equal "12", shell_output("#{janet} -e '(print (+ 5 7))'").strip
-    assert_predicate jpm, :exist?, "jpm must exist"
+    assert_path_exists jpm, "jpm must exist"
     assert_predicate jpm, :executable?, "jpm must be executable"
     assert_match syspath.to_s, shell_output("#{jpm} show-paths")
   end

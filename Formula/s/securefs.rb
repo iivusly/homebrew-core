@@ -1,30 +1,31 @@
 class Securefs < Formula
   desc "Filesystem with transparent authenticated encryption"
   homepage "https://github.com/netheril96/securefs"
-  url "https://github.com/netheril96/securefs/archive/refs/tags/v1.0.0.tar.gz"
-  sha256 "de888359734a05ca0db56d006b4c9774f18fd9e6f9253466a86739b5f6ac3753"
+  url "https://github.com/netheril96/securefs/archive/refs/tags/v2.0.0.tar.gz"
+  sha256 "d7fac7adc70c09473173aeadee5b7041d7e63fbf392ef40bdd77888590bb12a2"
   license "MIT"
-  revision 4
+  revision 7
   head "https://github.com/netheril96/securefs.git", branch: "master"
 
   livecheck do
     url :stable
-    regex(/^v?(\d+(?:\.\d+)+)$/i)
+    strategy :github_latest
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "9d93806947c68ae1e612adc8660c44cc7f9fe07b8705811f76052c49eec5d073"
+    sha256 arm64_linux:  "f0db09549b99af3cf566738d4d5a437983bf44847c834cef9e75358f9161983f"
+    sha256 x86_64_linux: "d8a7337686daadaa920c7f507f4d287d71012e8fe6e6d771c2271c09e324e5e7"
   end
 
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "tclap" => :build
   depends_on "abseil"
   depends_on "argon2"
   depends_on "cryptopp"
   depends_on "fruit"
   depends_on "jsoncpp"
-  depends_on "libfuse@2"
+  depends_on "libfuse@2" # FUSE 3 issue: https://github.com/netheril96/securefs/issues/181
   depends_on :linux # on macOS, requires closed-source macFUSE
   depends_on "protobuf"
   depends_on "sqlite"

@@ -1,27 +1,24 @@
 class Simg2img < Formula
   desc "Tool to convert Android sparse images to raw images and back"
   homepage "https://github.com/anestisb/android-simg2img"
-  url "https://github.com/anestisb/android-simg2img/archive/refs/tags/1.1.4.tar.gz"
-  sha256 "cbd32490c1e29d9025601b81089b5aec1707cb62020dfcecd8747af4fde6fecd"
+  url "https://github.com/anestisb/android-simg2img/archive/refs/tags/1.1.5.tar.gz"
+  sha256 "d9e9ec2c372dbbb69b9f90b4da24c89b092689e45cd5f74f0e13003bc367f3fc"
   license "Apache-2.0"
   head "https://github.com/anestisb/android-simg2img.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "6e257aaca0a352b98a949fab1d148fa6c40092ce8d00c53c595954c34fb083e2"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "a0dcd750c7e2a018a1947e3b944498f9032dbca077a8b5c90104d33f4db7c248"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "f4c50b28f615335a6d9dcb2730676b4d3d0b5f1cc02d0279959d313ac0eda6fd"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "cd4891712dae2fd35115f8ee32ba703bc3094ff365e52c8fe6a2b0d4694ee1ae"
-    sha256 cellar: :any_skip_relocation, sonoma:         "4801924ef7c07ca43fddd111a366d9b24951d65fe24f5c599941b8e6765bb453"
-    sha256 cellar: :any_skip_relocation, ventura:        "fc26e37af726109d97bf20222c18e97efba0d6259381a38380a21f90451fb34d"
-    sha256 cellar: :any_skip_relocation, monterey:       "3236b3d33786220a8a09ab5f43b237bd69b45bc397f1011f4075939399d44489"
-    sha256 cellar: :any_skip_relocation, big_sur:        "04bb96fc69c1e71931d0fe4b13f122f6036573135c9a228e14fbe54d60ef4515"
-    sha256 cellar: :any_skip_relocation, catalina:       "a79238cc3b241a3c9f2635b2ce230107f4372db3df7678dcc0857f8c7ef40581"
-    sha256 cellar: :any_skip_relocation, mojave:         "eb4046906b4bc9b2508ed5a7bbd0c9cfd2bab387c9891dbbf396c64374fdef6d"
-    sha256 cellar: :any_skip_relocation, high_sierra:    "677aa2ecb11b6c0df59eb44cd75b7bc66d7f99607a4a5e0b5f9137d42428efc5"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "12b3dc2a827326c0a15c73a1ea4dd3a986f68dfdaae65adcf035239c449f066e"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "24a4849d1dd7c830c30fe616fb752e3fd0c2fb11313ada32d3355762d4765881"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "9577828d12632f3b93ffb4a5ab7d41ec8a103c0c79bf3f63b82b2c5c4824b7bc"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "4c21744d5cf470ad2f34d56744744239bac51f08cdf3bfec889815536cf4a517"
+    sha256 cellar: :any_skip_relocation, sonoma:        "dbb8d4abc6e1771b2ad35ad31e8de166b9ffbdf4999c7578ab90d4fc381fcff9"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "47dc8a4e077eddf71ba9eec796d93fe4b2418ce7d848c17f0269a81865d93518"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "12395fc0ab3bc7182727330297eba9ac9db3d3ae9e52e256943f2dd0af38c561"
   end
 
-  uses_from_macos "zlib"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     system "make", "PREFIX=#{prefix}", "install"

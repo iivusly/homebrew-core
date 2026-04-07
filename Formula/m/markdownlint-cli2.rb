@@ -1,32 +1,31 @@
 class MarkdownlintCli2 < Formula
   desc "Fast, flexible, config-based cli for linting Markdown/CommonMark files"
   homepage "https://github.com/DavidAnson/markdownlint-cli2"
-  url "https://registry.npmjs.org/markdownlint-cli2/-/markdownlint-cli2-0.13.0.tgz"
-  sha256 "db7d09de0f934fb8146b5a2a01a819faf361aff36099de3030825d75ae1c4178"
+  url "https://registry.npmjs.org/markdownlint-cli2/-/markdownlint-cli2-0.22.0.tgz"
+  sha256 "b3cd84304356b2e7e403f9280f8e325b0c614be41ce22b69eda642ffa354f8d5"
   license "MIT"
 
   bottle do
-    rebuild 2
-    sha256 cellar: :any_skip_relocation, all: "81b77966383084e4a7ec3d7556009c231a21781e64d0e8df836791bf8884f902"
+    sha256 cellar: :any_skip_relocation, all: "3ebae4bc655bfcb9600ecdb6eadba366f1b692fba1559078e363b62219a1cb96"
   end
 
   depends_on "node"
 
   def install
     system "npm", "install", *std_npm_args
-    bin.install_symlink Dir["#{libexec}/bin/*"]
+    bin.install_symlink libexec.glob("bin/*")
   end
 
   test do
-    (testpath/"test-bad.md").write <<~EOS
+    (testpath/"test-bad.md").write <<~MARKDOWN
       # Header 1
       body
-    EOS
-    (testpath/"test-good.md").write <<~EOS
+    MARKDOWN
+    (testpath/"test-good.md").write <<~MARKDOWN
       # Header 1
 
       body
-    EOS
+    MARKDOWN
     assert_match "Summary: 1 error(s)",
       shell_output("#{bin}/markdownlint-cli2 :#{testpath}/test-bad.md 2>&1", 1)
     assert_match "Summary: 0 error(s)",

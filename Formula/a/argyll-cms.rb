@@ -1,8 +1,8 @@
 class ArgyllCms < Formula
   desc "ICC compatible color management system"
   homepage "https://www.argyllcms.com/"
-  url "https://www.argyllcms.com/Argyll_V3.2.0_src.zip"
-  sha256 "4861ab87b41618fb6706843099aad2cc649115634dee1e60738792387b371176"
+  url "https://www.argyllcms.com/Argyll_V3.5.0_src.zip"
+  sha256 "f8576ce5589fd15620abb73ff049ea31f55ddbd1bba6d1ffa87452658e7bc85f"
   license "AGPL-3.0-only"
 
   livecheck do
@@ -12,21 +12,18 @@ class ArgyllCms < Formula
 
   bottle do
     rebuild 1
-    sha256 cellar: :any,                 arm64_sonoma:   "9416d935216f5054e63c9baa53364c28d96d678c70abaf4d697c41bcc9bed185"
-    sha256 cellar: :any,                 arm64_ventura:  "6954dce83aba27dfa337eca3141fe1506bfcd72ffcc79d63040ba329d236a658"
-    sha256 cellar: :any,                 arm64_monterey: "9862c45da43e3cca13c78e82081c1dcaa5806dac6583c00f8eba95fe6ac298ed"
-    sha256 cellar: :any,                 sonoma:         "4577cd47871d566e045db7872a94946b7a4fab52d38e52e39ce6b353aa6082fd"
-    sha256 cellar: :any,                 ventura:        "2f13881ab15bd8d8b0aba4bf9ef4b9a40217c4b36b847190cc1f47e577f9bce3"
-    sha256 cellar: :any,                 monterey:       "3259f5cd7063614fa2e2434b7be2ccd19971226d2d5bb1a7561c942b8c4625ef"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "746d1e088f61bdfbca13e17f5351cc81a22ccba3acc3ea8e0f7ebe38c4bd82c2"
+    sha256 cellar: :any, arm64_tahoe:   "ad024d41761298dfa2f61e8f233fb7601562ad3171586b572bd6592e9ef59641"
+    sha256 cellar: :any, arm64_sequoia: "ec9dc920b963d51b861d30f1bac076b2af27fa5f5b8ab7dddea552e4ba718c14"
+    sha256 cellar: :any, arm64_sonoma:  "5d8283a588d6646c5e1cefe0b1aaabb7939786d09c6e568569e7679887e1af1c"
+    sha256 cellar: :any, sonoma:        "34f854d137000aa8be85754b576214963f1f1afa01336495854ab8b300e78c1f"
+    sha256               arm64_linux:   "2125b4c16e24180474d11d494a7883c492c0e5473acd7c7838ce2b17e7f8508d"
+    sha256               x86_64_linux:  "c38a332aa8e7a21574b3144a645676b01201718e1bd9df1266b7063df6f034cb"
   end
 
   depends_on "jpeg-turbo"
   depends_on "libpng"
   depends_on "libtiff"
   depends_on "openssl@3"
-
-  uses_from_macos "zlib"
 
   on_linux do
     depends_on "libx11"
@@ -36,6 +33,7 @@ class ArgyllCms < Formula
     depends_on "libxscrnsaver"
     depends_on "libxxf86vm"
     depends_on "xorgproto"
+    depends_on "zlib-ng-compat"
   end
 
   conflicts_with "num-utils", because: "both install `average` binaries"
@@ -59,7 +57,7 @@ class ArgyllCms < Formula
     # * Fix a typo that leads to an undeclared function error:
     #   `parse.c:102:20: error: call to undeclared function 'yylineno'`
     patch do
-      url "https://raw.githubusercontent.com/Homebrew/formula-patches/cf70f015e7398796660da57212ff0ab90c609acf/jam/2.6.1.patch"
+      url "https://raw.githubusercontent.com/Homebrew/homebrew-core/1cf441a0/Patches/jam/2.6.1.patch"
       sha256 "1850cf53c4db0e05978d52b90763b519c00fa4f2fbd6fc2753200e49943821ec"
     end
   end
@@ -67,7 +65,7 @@ class ArgyllCms < Formula
   def install
     resource("jam").stage do
       system "make", "CC=#{ENV.cc}", "CFLAGS=#{ENV.cflags}", "LOCATE_TARGET=bin"
-      libexec.install "bin/jam"
+      (buildpath/"bin").install "bin/jam"
     end
 
     # Remove bundled libraries to prevent fallback
@@ -99,14 +97,13 @@ class ArgyllCms < Formula
 
     ENV["NUMBER_OF_PROCESSORS"] = ENV.make_jobs.to_s
 
-    inreplace "makeall.sh", "jam", libexec/"jam"
-    inreplace "makeinstall.sh", "jam", libexec/"jam"
+    inreplace "makeall.sh", "jam", buildpath/"bin/jam"
+    inreplace "makeinstall.sh", "jam", buildpath/"bin/jam"
     system "sh", "makeall.sh"
     system "./makeinstall.sh"
     rm "bin/License.txt"
+    rm "bin/com.argyllcms.metainfo.xml"
     prefix.install "bin", "ref", "doc"
-
-    rm libexec/"jam"
   end
 
   test do
@@ -114,7 +111,7 @@ class ArgyllCms < Formula
     system bin/"printtarg", testpath/"test.ti1"
 
     %w[test.ti1.ps test.ti1.ti1 test.ti1.ti2].each do |f|
-      assert_predicate testpath/f, :exist?
+      assert_path_exists testpath/f
     end
 
     # Skip this part of the test on Linux because it hangs due to lack of a display.

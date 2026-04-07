@@ -4,20 +4,27 @@ class Dmd < Formula
   license "BSL-1.0"
 
   stable do
-    url "https://github.com/dlang/dmd/archive/refs/tags/v2.109.1.tar.gz"
-    sha256 "8c2ce18945e3807a1568f6ec6ce0a8f2b88efa472ce0397ea1305fc2a1b8a587"
+    url "https://github.com/dlang/dmd/archive/refs/tags/v2.112.0.tar.gz"
+    sha256 "33592dc18855bd113914ca065d9e88018745afaa5fbf85b971fbc1a6663c9ec5"
 
     resource "phobos" do
-      url "https://github.com/dlang/phobos/archive/refs/tags/v2.109.1.tar.gz"
-      sha256 "28974debe14d18eb58591db0dad3ddd4139e8f34783c3648c86619b67d7ba6f2"
+      url "https://github.com/dlang/phobos/archive/refs/tags/v2.112.0.tar.gz"
+      sha256 "99e046c1107bc3f365910f5cb52937483c9a5528f2d4ef543b8690ad66723f16"
+
+      livecheck do
+        formula :parent
+      end
     end
   end
 
+  livecheck do
+    url "https://downloads.dlang.org/releases/LATEST"
+    regex(/^v?(\d+(?:\.\d+)+)$/i)
+  end
+
   bottle do
-    sha256 sonoma:       "888f4825c9f75197c67767be536fcd13c45c6d62758f3d0b6a5d05dd331f4d7e"
-    sha256 ventura:      "dfdf2fc9e10f21f0dc248fbc22e66013e858738dfba0dc49f58b542b2dcba223"
-    sha256 monterey:     "45b25904b2bb4003cb3f52ff6e375852f2eb753ed20d1061c3650fa825a9f74d"
-    sha256 x86_64_linux: "cfb158ce63420e195494d3e2b211ca1d3c8c918850ea82cc7a3f8996c8b29dfb"
+    sha256 cellar: :any_skip_relocation, sonoma:       "a746a1c494721caba7ca9193a97d9c9c550599dcc3bfec608a937d1460f3963d"
+    sha256                               x86_64_linux: "c54dda66e096b2640e6c0432c73b984033c16daede0f0da46d78caee726d320b"
   end
 
   head do
@@ -31,13 +38,20 @@ class Dmd < Formula
   depends_on "ldc" => :build
   depends_on arch: :x86_64
 
+  on_macos do
+    # Can be undeprecated if upstream decides to support arm64 macOS
+    # TODO: Make linux-only when removing macOS support
+    deprecate! date: "2025-09-25", because: "is unsupported, https://docs.brew.sh/Support-Tiers#future-macos-support"
+    disable! date: "2026-09-25", because: "is unsupported, https://docs.brew.sh/Support-Tiers#future-macos-support"
+  end
+
   def install
     odie "phobos resource needs to be updated" if build.stable? && version != resource("phobos").version
 
     dmd_make_args = %W[
       INSTALL_DIR=#{prefix}
       SYSCONFDIR=#{etc}
-      HOST_DMD=#{Formula["ldc"].opt_bin/"ldmd2"}
+      HOST_DMD=#{Formula["ldc"].opt_bin}/ldmd2
       ENABLE_RELEASE=1
       VERBOSE=1
     ]
@@ -60,27 +74,16 @@ class Dmd < Formula
 
     kernel_name = OS.mac? ? "osx" : OS.kernel_name.downcase
     bin.install "generated/#{kernel_name}/release/64/dmd"
-    pkgshare.install "compiler/samples"
     man.install Dir["compiler/docs/man/*"]
 
     (include/"dlang/dmd").install Dir["druntime/import/*"]
     cp_r ["phobos/std", "phobos/etc"], include/"dlang/dmd"
     lib.install Dir["druntime/**/libdruntime.*", "phobos/**/libphobos2.*"]
 
-    dflags = "-I#{opt_include}/dlang/dmd -L-L#{opt_lib}"
-    # We include the -ld_classic linker argument in dmd.conf because it seems to need
-    # changes upstream to support the newer linker:
-    # https://forum.dlang.org/thread/jwmpdecwyazcrxphttoy@forum.dlang.org?page=1
-    # https://github.com/ldc-developers/ldc/issues/4501
-    #
-    # Also, macOS can't run CLT/Xcode new enough to need this flag, so restrict to Ventura
-    # and above.
-    dflags << " -L-ld_classic" if OS.mac? && DevelopmentTools.clang_build_version >= 1500
-
-    (buildpath/"dmd.conf").write <<~EOS
+    (buildpath/"dmd.conf").write <<~INI
       [Environment]
-      DFLAGS=#{dflags}
-    EOS
+      DFLAGS=-I#{opt_include}/dlang/dmd -L-L#{opt_lib}
+    INI
     etc.install "dmd.conf"
   end
 
@@ -112,7 +115,22 @@ class Dmd < Formula
   end
 
   test do
-    system bin/"dmd", "-fPIC", pkgshare/"samples/hello.d"
+    (testpath/"hello.d").write <<~EOS
+      import std.stdio;
+
+      void main(string[] args)
+      {
+          writeln("hello world");
+          writefln("args.length = %d", args.length);
+
+          foreach (index, arg; args)
+          {
+              writefln("args[%d] = '%s'", index, arg);
+          }
+      }
+    EOS
+
+    system bin/"dmd", "-fPIC", "hello.d"
     system "./hello"
   end
 end

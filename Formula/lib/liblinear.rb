@@ -1,9 +1,10 @@
 class Liblinear < Formula
   desc "Library for large linear classification"
   homepage "https://www.csie.ntu.edu.tw/~cjlin/liblinear/"
-  url "https://www.csie.ntu.edu.tw/~cjlin/liblinear/oldfiles/liblinear-2.47.tar.gz"
-  sha256 "99ce98ca3ce7cfb31f2544c42f23ba5bc6c226e536f95d6cd21fe012f94c65e0"
+  url "https://www.csie.ntu.edu.tw/~cjlin/liblinear/oldfiles/liblinear-2.50.tar.gz"
+  sha256 "e5eeafe2159c41148b59304da2ba0ed12648e3d491ce2b9625058e174e96ca29"
   license "BSD-3-Clause"
+  compatibility_version 1
   head "https://github.com/cjlin1/liblinear.git", branch: "master"
 
   livecheck do
@@ -12,29 +13,26 @@ class Liblinear < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "447ba6aa36bec6cb65825dd9d6aad55e07e2eb9cb10537a4ad142546bb015e1f"
-    sha256 cellar: :any,                 arm64_ventura:  "2f7f959e3a537760a29d4f4f4ff949bf5ef8f7206dbbb7f48492e8b733978f78"
-    sha256 cellar: :any,                 arm64_monterey: "3c2ee17592c9ff78f3b58baf9bdae899be678d7c073b471896314896c854c540"
-    sha256 cellar: :any,                 arm64_big_sur:  "c0f811408e6e5d5a29d7c8d94b89d92980d1b149b1c909413bae383a0df0cf31"
-    sha256 cellar: :any,                 sonoma:         "0fafcc1fcf64b944113137b103a7ff4900ceea6c96672979b79a7a88150869c2"
-    sha256 cellar: :any,                 ventura:        "785f3d2ae8640b9689caa8982f13119ad27b88868a432c9ccaaec6a345e2ac68"
-    sha256 cellar: :any,                 monterey:       "2b5c4306ba3b88b67d803d0b5ff4562889f1516d5e2a9b479c3c2ee3eb573a53"
-    sha256 cellar: :any,                 big_sur:        "26e5cca0e853ce2014ccf29cf38513e5a852e4c4a65b4fe1f39220f4a176d6f9"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "ed4f81487889a1f54491aed3e6ce5b492c60a16c8e59d782c94c552fc46311dd"
+    sha256 cellar: :any,                 arm64_tahoe:   "084eda55e8b1e787d35ba4b64b07973f28c03ba3b80caf34476453bfc0aa6fd3"
+    sha256 cellar: :any,                 arm64_sequoia: "1447af1433e4c22bb65f7d1483e80be28eef54f01ea4975cbaab5eeddcbf0329"
+    sha256 cellar: :any,                 arm64_sonoma:  "06d144b0bf2dc670bcdc8f6be989fd72bc4cfe0ca62b232af14af2695fafd9e0"
+    sha256 cellar: :any,                 sonoma:        "112816fd22beb8a5b8ee79f0fa0c6094c9813384de039df65874dad76fd4d090"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "5c0831cc8dc54b0696cdeabb442f146bf430aa0547bb97e3240c5f51c0c135f6"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "746b7ce2c2f425061ad373dedcf34bb5daa031ebb059bbbc9424dbcd7f9ba9c1"
   end
 
   # Fix sonames
   patch :p0 do
-    url "https://raw.githubusercontent.com/Homebrew/formula-patches/bac35ae9140405dec00f1f700d2ecc27cf82526b/liblinear/patch-Makefile.diff"
+    url "https://raw.githubusercontent.com/Homebrew/homebrew-core/1cf441a0/Patches/liblinear/patch-Makefile.diff"
     sha256 "11a47747918f665d219b108fac073c626779555b5022903c9b240a4c29bbc2a0"
   end
 
   def install
     soversion_regex = /^SHVER = (\d+)$/
     soversion = (buildpath/"Makefile").read
-                                      .lines
-                                      .grep(soversion_regex)
-                                      .first[soversion_regex, 1]
+                .lines
+                .grep(soversion_regex)
+                .first[soversion_regex, 1]
     system "make", "all"
     bin.install "predict", "train"
     lib.install shared_library("liblinear", soversion)

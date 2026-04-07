@@ -1,29 +1,52 @@
 class Octobuild < Formula
   desc "Compiler cache for Unreal Engine"
   homepage "https://github.com/octobuild/octobuild"
-  url "https://github.com/octobuild/octobuild/archive/refs/tags/1.4.0.tar.gz"
-  sha256 "559fa141ccc7d8b23f4bf063928c7abed24af78c9e87f1d0e240fe120021c2af"
+  url "https://github.com/octobuild/octobuild/archive/refs/tags/1.8.1.tar.gz"
+  sha256 "5638c8759899bfc7a5658d44d8cfcf091f0afc001fdcaa5d305a03f6aa668475"
   license "MIT"
-  head "https://github.com/octobuild/octobuild.git", branch: "master"
+  head "https://github.com/octobuild/octobuild.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "a0648c142ff702b4083fa83e7768f67139afd1f50b026db5745982d03ba896b6"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "ca6205aaf127361fcceed8ddbbd0e5fe02d76fc376718fd7e048ee655db9d7ae"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "7024d305a578287337cc4db25e25532109fc78397daa738c5c4e0448515eca19"
-    sha256 cellar: :any_skip_relocation, sonoma:         "663603d6450c90d42d84e2d3d4c647cbfa15d84b936338e25652e3605e78e091"
-    sha256 cellar: :any_skip_relocation, ventura:        "529aaec3549db4d2613b66432fe6d1b2dfb2808c5e8089f523e62f450066be33"
-    sha256 cellar: :any_skip_relocation, monterey:       "82cc6b3caf14d13b72fcaab9e17b37afb36debbd518cac6af4722b7bdaba4a0e"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "57cb08038aa3c666770a7fc13ebb2f9c8a1d816fac5f9b4346b2be540f13925e"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "ae3196c00596806784136909afae180ce3556bc53770ca95c8266324c285f1a3"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "476cd1bbe57d73e981ac7d93033892ce3a70e507dd4538bbcb3da11d615997f3"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "84c845b11b998c5eba0e275305a19b9c7db52ffefac17b07f8de5253c52bd92b"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "9de6ad46ac2f152cde3007ab589650442cc5ce9da7d74399c888534bab8dd7bf"
+    sha256 cellar: :any_skip_relocation, sonoma:        "58d75af4d61aa6ade3e137c414c4b355949e63835c731db228f939b0e3e20c7c"
+    sha256 cellar: :any_skip_relocation, ventura:       "fb996f3b6c85217689dbc99bf94cb1646effb6bc203b5eacf864f862d20046b6"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "32cd6cd48bb96e40477d91f1b0519c30ddf8b26654c0620060a107e931cd999a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "252412dd4df54aa83cfe00168e09b16c2404a1269ce0ae86da3cbdff8d88fbab"
   end
 
+  depends_on "pkgconf" => :build
   depends_on "rust" => :build
 
   on_linux do
-    depends_on "pkg-config" => :build
     depends_on "openssl@3"
   end
 
+  resource "ipc-rs" do
+    on_linux do
+      on_arm do
+        url "https://github.com/octobuild/ipc-rs/archive/e8d76ee36146d4548d18ba8480bf5b5a2f116eac.tar.gz"
+        sha256 "aaa5418086f55df5bea924848671df365e85aa57102abd0751366e1237abcff5"
+
+        # Apply commit from open PR https://github.com/octobuild/ipc-rs/pull/12
+        patch do
+          url "https://github.com/octobuild/ipc-rs/commit/1eabde12d785ceda197588490abeb15615a00dad.patch?full_index=1"
+          sha256 "521d8161be9695480f5b578034166c8e7e15b078733d3571cd5db2a00951cdd8"
+        end
+      end
+    end
+  end
+
   def install
+    if OS.linux? && Hardware::CPU.arm?
+      (buildpath/"ipc-rs").install resource("ipc-rs")
+      (buildpath/"Cargo.toml").append_lines <<~TOML
+        [patch."https://github.com/octobuild/ipc-rs"]
+        ipc = { path = "./ipc-rs" }
+      TOML
+    end
     system "cargo", "install", *std_cargo_args
   end
 

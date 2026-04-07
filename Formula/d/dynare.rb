@@ -1,11 +1,18 @@
 class Dynare < Formula
   desc "Platform for economic models, particularly DSGE and OLG models"
   homepage "https://www.dynare.org/"
-  url "https://www.dynare.org/release/source/dynare-6.1.tar.xz"
-  sha256 "fe887a570d13c1ae2fb45fb2978eee59cdf0f3915120fdde5bc3614e584d0693"
   license "GPL-3.0-or-later"
-  revision 2
+  revision 3
   head "https://git.dynare.org/Dynare/dynare.git", branch: "master"
+
+  stable do
+    url "https://www.dynare.org/release/source/dynare-6.5.tar.xz"
+    sha256 "56a6f934f5d2ded57206d2f109975324b39586394f4e8ce23b3c72aadcd5cd4a"
+
+    # backport fix for finding suite-sparse
+    # https://git.dynare.org/Dynare/dynare/-/commit/b3a50696bf7b8ef97cd8900c4941b479fd27dd2e
+    patch :DATA
+  end
 
   livecheck do
     url "https://www.dynare.org/download/"
@@ -13,13 +20,12 @@ class Dynare < Formula
   end
 
   bottle do
-    sha256 cellar: :any, arm64_sonoma:   "70f8cf68021e3f69276dc69264bbad893a9a2182475362ee8a84c2d6b40241b7"
-    sha256 cellar: :any, arm64_ventura:  "587bdf440ac8bad134b0e74c2dbf7825249df627ce2dcd6725fce874f0d5a0f4"
-    sha256 cellar: :any, arm64_monterey: "c582cd01711e9e06d74f2a447f55cfe18935beef80631943ec69daa9987b3d7b"
-    sha256 cellar: :any, sonoma:         "1d6f404f4b3749a04bc62ae1d8bbfdf12f10ed3ed7b7e7a67c47836a3317dfa4"
-    sha256 cellar: :any, ventura:        "77ec57507f9707240995297f58b320ba55ec86b21b6d1f90df4ef48e3f71c9ed"
-    sha256 cellar: :any, monterey:       "0bdd6c0a38b347fbf70dc5ac1bc445c7c1f0e12618e967570304a20721271f23"
-    sha256               x86_64_linux:   "44c2d406621d9ca5bd64ecca6775aaabdfafd2b34368bafc712ef148cfc7db3b"
+    sha256 cellar: :any, arm64_tahoe:   "c6d06691f1df3fad95b82da06060f6b8cd0540a5a55fb595e4958078448426ea"
+    sha256 cellar: :any, arm64_sequoia: "009776e9bbe11be7d8597277dff5094340832103c2ef8c4d9005dd07019b7144"
+    sha256 cellar: :any, arm64_sonoma:  "7181da19a9b60621d78978526b20cbcba254ebac89eae8a57f0581495db4d32e"
+    sha256 cellar: :any, sonoma:        "2636ef080cdd01465419438d0c0431c5911af60bc4e66966c44cf3a162f78b9d"
+    sha256               arm64_linux:   "29de507e86be91223ed947e504ab5e801911e8a7472d13db4376bdd5806142d8"
+    sha256               x86_64_linux:  "1331b5200bc99899977aa326bd212e05502a0000a7f527a01adbca11df5ebcc9"
   end
 
   depends_on "bison" => :build
@@ -28,47 +34,43 @@ class Dynare < Formula
   depends_on "flex" => :build
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => :build
-  depends_on "fftw"
-  depends_on "gcc"
+  depends_on "pkgconf" => :build
+  depends_on "gcc" # for gfortran
   depends_on "gsl"
-  depends_on "hdf5"
   depends_on "libmatio"
-  depends_on "metis"
   depends_on "octave"
   depends_on "openblas"
+  depends_on "slicot"
   depends_on "suite-sparse"
 
-  fails_with :clang do
-    cause <<~EOS
-      GCC is the only compiler supported by upstream
-      https://git.dynare.org/Dynare/dynare/-/blob/master/README.md#general-instructions
-    EOS
+  on_macos do
+    depends_on "llvm" => :build if DevelopmentTools.clang_build_version <= 1699
+    depends_on "libomp"
+
+    # Work around LLVM issue with structured bindings[^1] by partly reverting commit[^2].
+    # Upstream isn't planning to support Clang build[^3] but we need it to use a consistent OpenMP.
+    # [^1]: https://github.com/llvm/llvm-project/issues/33025
+    # [^2]: https://git.dynare.org/Dynare/dynare/-/commit/6ff7d4c56c26a2b7546de633dbcfe2f163bf846d
+    # [^3]: https://git.dynare.org/Dynare/dynare/-/issues/1977
+    patch do
+      url "https://raw.githubusercontent.com/Homebrew/homebrew-core/c49717c390cb2e587793b2db757c1f445f096219/Patches/dynare/clang.diff"
+      sha256 "2d174336fc8db4d8989cda214a972ef49c6302bb12a64d717140869e546e17d0"
+    end
   end
 
-  resource "slicot" do
-    url "https://deb.debian.org/debian/pool/main/s/slicot/slicot_5.0+20101122.orig.tar.gz"
-    sha256 "fa80f7c75dab6bfaca93c3b374c774fd87876f34fba969af9133eeaea5f39a3d"
+  on_sequoia do
+    depends_on xcode: ["26.0", :build] # for std::jthreads
+  end
+
+  fails_with :clang do
+    build 1699
+    cause "needs C++20 std::jthreads"
   end
 
   def install
-    resource("slicot").stage do
-      system "make", "lib", "OPTS=-fPIC", "SLICOTLIB=../libslicot_pic.a",
-             "FORTRAN=gfortran", "LOADER=gfortran"
-      system "make", "clean"
-      system "make", "lib", "OPTS=-fPIC -fdefault-integer-8",
-             "FORTRAN=gfortran", "LOADER=gfortran",
-             "SLICOTLIB=../libslicot64_pic.a"
-      (buildpath/"slicot/lib").install "libslicot_pic.a", "libslicot64_pic.a"
-    end
-
-    # Work around used in upstream builds which helps avoid runtime preprocessor error.
-    # https://git.dynare.org/Dynare/dynare/-/blob/master/macOS/homebrew-native-arm64.ini
-    ENV.append "LDFLAGS", "-Wl,-ld_classic" if DevelopmentTools.clang_build_version >= 1500
-
-    # Help meson find `suite-sparse` and `slicot`
-    ENV.append_path "LIBRARY_PATH", Formula["suite-sparse"].opt_lib
-    ENV.append_path "LIBRARY_PATH", buildpath/"slicot/lib"
+    # This needs a bit of extra help in finding the Octave libraries on Linux.
+    octave = Formula["octave"]
+    ENV.append "LDFLAGS", "-Wl,-rpath,#{octave.opt_lib}/octave/#{octave.version.major_minor_patch}" if OS.linux?
 
     system "meson", "setup", "build", "-Dbuild_for=octave", *std_meson_args
     system "meson", "compile", "-C", "build", "--verbose"
@@ -85,18 +87,12 @@ class Dynare < Formula
 
   test do
     resource "statistics" do
-      url "https://github.com/gnu-octave/statistics/archive/refs/tags/release-1.6.5.tar.gz", using: :nounzip
-      sha256 "0ea8258c92ce67e1bb75a9813b7ceb56fff1dacf6c47236d3da776e27b684cee"
+      url "https://github.com/gnu-octave/statistics/archive/refs/tags/release-1.7.3.tar.gz", using: :nounzip
+      sha256 "570d52af975ea9861a6fb024c23fc0f403199e4b56d7a883ee6ca17072e26990"
     end
 
-    ENV.cxx11
+    ENV.delete "CXX" # avoid overriding Octave flags
     ENV.delete "LDFLAGS" # avoid overriding Octave flags
-
-    # Work around Xcode 15.0 ld error with GCC: https://github.com/Homebrew/homebrew-core/issues/145991
-    if OS.mac? && (MacOS::Xcode.version.to_s.start_with?("15.0") || MacOS::CLT.version.to_s.start_with?("15.0"))
-      ENV["LDFLAGS"] = shell_output("#{Formula["octave"].opt_bin}/mkoctfile --print LDFLAGS").chomp
-      ENV.append "LDFLAGS", "-Wl,-ld_classic"
-    end
 
     statistics = resource("statistics")
     testpath.install statistics
@@ -105,14 +101,61 @@ class Dynare < Formula
 
     # Replace `makeinfo` with dummy command `true` to prevent generating docs
     # that are not useful to the test.
-    (testpath/"dyn_test.m").write <<~EOS
+    (testpath/"dyn_test.m").write <<~MATLAB
       makeinfo_program true
       pkg prefix #{testpath}/octave
       pkg install statistics-release-#{statistics.version}.tar.gz
       dynare bkk.mod console
-    EOS
+    MATLAB
 
     system Formula["octave"].opt_bin/"octave", "--no-gui",
            "--no-history", "--path", "#{lib}/dynare/matlab", "dyn_test.m"
   end
 end
+
+__END__
+diff --git a/meson.build b/meson.build
+index 435293bae021218d63aaf5c88e7ef8d9ad0a3762..7256ff96ff5693423099ae0e4d8143ceb7266194 100644
+--- a/meson.build
++++ b/meson.build
+@@ -260,21 +260,9 @@ else # Octave build
+   lapack_dep = declare_dependency(link_args : run_command(mkoctfile_exe, '-p', 'LAPACK_LIBS', check : true).stdout().split(),
+                                   dependencies : blas_dep)
+ 
+-  # Create a dependency object for UMFPACK.
+-  # The dependency returned by find_library('umfpack') is not enough, because we also want the define
+-  # that indicates the location of umfpack.h, so we construct a new dependency object.
+-  if cpp_compiler.has_header('suitesparse/umfpack.h', args : octave_incflags)
+-    umfpack_def = '-DHAVE_SUITESPARSE_UMFPACK_H'
+-  elif cpp_compiler.has_header('umfpack.h', args : octave_incflags)
+-    umfpack_def = '-DHAVE_UMFPACK_H'
+-  else
+-    error('Can’t find umfpack.h')
+-  endif
+   # Do not enforce static linking even if prefer_static is true, since that library is shipped
+   # with Octave.
+-  # The “dirs” argument is useful when cross-compiling.
+-  umfpack_dep_tmp = cpp_compiler.find_library('umfpack', dirs : octlibdir / '../..', static : false)
+-  umfpack_dep = declare_dependency(compile_args : umfpack_def, dependencies : [ umfpack_dep_tmp, blas_dep ])
++  umfpack_dep = dependency('UMFPACK', static : false)
+ 
+   # This library does not exist under Octave
+   ut_dep = []
+diff --git a/mex/sources/dynumfpack.h b/mex/sources/dynumfpack.h
+index ae3e11c94be51cbf9ee7249db80526712e55e469..c73fa5f8c0b1ab50b9e1b165719e27f1278f1ca8 100644
+--- a/mex/sources/dynumfpack.h
++++ b/mex/sources/dynumfpack.h
+@@ -25,12 +25,7 @@
+ #define DYNUMFPACK_H
+ 
+ #ifdef OCTAVE_MEX_FILE
+-# ifdef HAVE_SUITESPARSE_UMFPACK_H
+-#  include <suitesparse/umfpack.h>
+-# endif
+-# ifdef HAVE_UMFPACK_H
+-#  include <umfpack.h>
+-# endif
++# include <umfpack.h>
+ #else
+ 
+ /* Under MATLAB, we have to provide our own header file for functions in

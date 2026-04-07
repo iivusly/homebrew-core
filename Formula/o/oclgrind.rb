@@ -1,43 +1,41 @@
 class Oclgrind < Formula
   desc "OpenCL device simulator and debugger"
   homepage "https://github.com/jrprice/Oclgrind"
-  url "https://github.com/jrprice/Oclgrind/archive/refs/tags/v21.10.tar.gz"
-  sha256 "b40ea81fcf64e9012d63c3128640fde9785ef4f304f9f876f53496595b8e62cc"
+  url "https://github.com/jrprice/Oclgrind/archive/refs/tags/v26.03.1.tar.gz"
+  sha256 "d21a705a2b71491b1505f34a50e14f9666516d1654c0e6745983408bb300e4c2"
   license "BSD-3-Clause"
-  revision 2
 
   livecheck do
-    url :homepage
+    url :stable
     regex(/^v?(\d+(?:\.\d+)+)$/i)
   end
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any,                 arm64_sonoma:   "0dcf5df23a8e0972f081f74a530e1181e17d1fb7ad6d4af5d5a0d40faf25626b"
-    sha256 cellar: :any,                 arm64_ventura:  "ed53c5dcfe4878ac26531acdffe5ab48647c48b06f43332993f523986f99c797"
-    sha256 cellar: :any,                 arm64_monterey: "39f07818c2dffcce37d58d8aaeba1c824c68c33db786e89d6b692b262b76647a"
-    sha256 cellar: :any,                 sonoma:         "8c0333807ba86699af7cbe5daaf1fe1545f1ef0ebd4c93e081ba5b0722a97fba"
-    sha256 cellar: :any,                 ventura:        "ddaa39e73997893783482ef2744877704d393e069ddb999aa34ebedd9435d8b9"
-    sha256 cellar: :any,                 monterey:       "a04a89b7bde89c7bfa2d83ab13521f8ed5ea8b6b3ce7470ecf3c995408527986"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "867889a512d1c460d03496a763adf0d8c0d18b3ceea4d6ade2907d9513241b9a"
+    sha256 cellar: :any,                 arm64_tahoe:   "aae02edae15b83a6def6ea7eeb6f3704fb0a00d4c41f584f76a77dcdbd65ce65"
+    sha256 cellar: :any,                 arm64_sequoia: "f6c1c97a416c86005e139526b71ee15c4a69f1034c0a866e005a8a6456b4f162"
+    sha256 cellar: :any,                 arm64_sonoma:  "a09b5cd362971cd593b09073addab6934e8a722a5560f126c97f410749ae6cf3"
+    sha256 cellar: :any,                 sonoma:        "c031c0023646178f4f0cf6c5e24bf82a399832d942c00e227f1dab0adcb657dc"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "20b53a0ed9e7a6fbc94bbf1e5d5daf0b7d80df2bbb3e83411f5deba007f0dd1d"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "2ddc0208b7338e109df4c48e5a97980d87ff0e47dc0e84f089f35dc7002b6be2"
   end
 
   depends_on "cmake" => :build
-  depends_on "llvm@14" # Issue for newer LLVM: https://github.com/jrprice/Oclgrind/issues/209
+  depends_on "llvm@19" # FIXME: LLVM 20+ segfaults. Also seen upstream where CI using Homebrew LLVM was disabled
   depends_on "readline"
+
+  on_macos do
+    depends_on "zstd"
+  end
 
   on_linux do
     depends_on "opencl-headers" => :test
   end
 
-  # Backport support for `llvm@14`. Remove in the next release.
-  patch do
-    url "https://github.com/jrprice/Oclgrind/commit/6c76e7bec0aa7fa451515a5cfcb35ab2384ba6e0.patch?full_index=1"
-    sha256 "8c1b8ec75d8d8c8d02246124b40452ec9ef1243d3e3c497fe4ffa8571cd98ade"
-  end
-
   def install
-    system "cmake", "-S", ".", "-B", "build", *std_cmake_args, "-DCMAKE_INSTALL_RPATH=#{rpath}"
+    llvm = deps.find { |dep| dep.name.match?(/^llvm(@\d+)?$/) }
+               .to_formula
+    rpaths = [rpath, rpath(target: llvm.opt_lib)]
+    system "cmake", "-S", ".", "-B", "build", "-DCMAKE_INSTALL_RPATH=#{rpaths.join(";")}", *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
     # Install the optional ICD into #{prefix}/etc rather than #{etc} as it contains realpath
@@ -47,7 +45,7 @@ class Oclgrind < Formula
   end
 
   test do
-    (testpath/"rot13.c").write <<~EOS
+    (testpath/"rot13.c").write <<~C
       #include <stdio.h>
       #include <stdlib.h>
       #include <string.h>
@@ -151,7 +149,7 @@ class Oclgrind < Formula
 
         puts(buf2);
       }
-    EOS
+    C
 
     system ENV.cc, "rot13.c", "-o", "rot13", "-L#{lib}", "-loclgrind-rt"
     output = shell_output("#{bin}/oclgrind ./rot13 2>&1").chomp

@@ -1,29 +1,30 @@
 class Neonctl < Formula
   desc "Neon CLI tool"
   homepage "https://neon.tech/docs/reference/neon-cli"
-  url "https://registry.npmjs.org/neonctl/-/neonctl-1.36.0.tgz"
-  sha256 "8bba627837e6202c0ea6348c32dd3b011a197aa25ca810c2d660ea580ea2199c"
+  url "https://registry.npmjs.org/neonctl/-/neonctl-2.22.0.tgz"
+  sha256 "34fa17fdb04ce869ed1e62d0b9770953df6da725af0bead5c2b881074fc666c4"
   license "Apache-2.0"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "5dad61498831b8ad34f166554df6e1e56db865f31b266d9e23d9014a1102a68c"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "5dad61498831b8ad34f166554df6e1e56db865f31b266d9e23d9014a1102a68c"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "5dad61498831b8ad34f166554df6e1e56db865f31b266d9e23d9014a1102a68c"
-    sha256 cellar: :any_skip_relocation, sonoma:         "b01ee116d59805953d8b351b7302a4f0585e638bc3951bfdffa531974540c7a2"
-    sha256 cellar: :any_skip_relocation, ventura:        "b01ee116d59805953d8b351b7302a4f0585e638bc3951bfdffa531974540c7a2"
-    sha256 cellar: :any_skip_relocation, monterey:       "b01ee116d59805953d8b351b7302a4f0585e638bc3951bfdffa531974540c7a2"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "5dad61498831b8ad34f166554df6e1e56db865f31b266d9e23d9014a1102a68c"
+    sha256 cellar: :any_skip_relocation, all: "ee998173b07fc1cb44b89bd8d80a1af223c3082bac2af8b09b9a2d1bfcaf5629"
   end
 
   depends_on "node"
 
   def install
     system "npm", "install", *std_npm_args
-    bin.install_symlink Dir["#{libexec}/bin/*"]
+    bin.install_symlink libexec.glob("bin/*")
 
     %w[neonctl neon].each do |cmd|
-      generate_completions_from_executable(bin/cmd, "completion", base_name: cmd, shells: [:bash, :zsh])
+      generate_completions_from_executable(bin/cmd, "completion", shells: [:bash, :zsh])
     end
+
+    # Remove incompatible pre-built binaries
+    os = OS.kernel_name.downcase
+    arch = Hardware::CPU.intel? ? "x64" : Hardware::CPU.arch.to_s
+    node_modules = libexec/"lib/node_modules/neonctl/node_modules"
+    node_modules.glob("{bare-fs,bare-os,bare-url}/prebuilds/*")
+                .each { |dir| rm_r(dir) if dir.basename.to_s != "#{os}-#{arch}" }
   end
 
   test do

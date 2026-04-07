@@ -12,33 +12,34 @@ class OpenSimh < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "43567e394094f3435e761a4114a421c0488f5af137ce9b4d8aff87d75b485fa1"
-    sha256 cellar: :any,                 arm64_ventura:  "ee7d22345190d2009472b2233bb6c974790f5b38331877ec647be5971f403ae6"
-    sha256 cellar: :any,                 arm64_monterey: "134f1dff238a06523a66039d07f44493460b8b3cdc22b652cd2a6f5e64180e00"
-    sha256 cellar: :any,                 sonoma:         "086bbb15c8872e69967c8b5c600ae22a5389fd37e4e3a7fcc54cabae7cbe4cc6"
-    sha256 cellar: :any,                 ventura:        "28c9c12e56fea289d1d1803752e517f162e4692d76a24f33d7edc09288a02915"
-    sha256 cellar: :any,                 monterey:       "c68fb8a31e1b55c2a5aa6a907df37ab80ce8672573283adf394906720309a743"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "15e1de5c0c7a5ac581db904d311b660667ea9937cca2745c8b225856b5454208"
+    rebuild 2
+    sha256 cellar: :any,                 arm64_tahoe:   "14ca95542e0080680f5a68363b5a3cf88faebd66d2a85e0820048e4019a5b38c"
+    sha256 cellar: :any,                 arm64_sequoia: "25571e5341da2b41ee773893e974a462101e920cc7d92b27bd789ccd2f027989"
+    sha256 cellar: :any,                 arm64_sonoma:  "0d4672a79f07348b1727f6ced8a944a6bfe0ebdb5f3128c221738568c39077c3"
+    sha256 cellar: :any,                 sonoma:        "647307fe3b6a161e7764656a93f21c70888d85cb9ad4cbb262aba4913f839247"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "304120ac24e399c353405da304d1fcd76751342f2cfbf262f5d1f558bec6b96c"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "de06ffb145c4dc46c4b3535be6a5b99ac8ddec04cd7cd914ca1f8b0ccf595104"
   end
 
   depends_on "libpng"
-  depends_on "pcre"
   depends_on "vde"
 
   uses_from_macos "libedit"
   uses_from_macos "libpcap"
-  uses_from_macos "zlib"
 
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
+
+  conflicts_with "nova-fairwinds", because: "both install `nova` binaries"
   conflicts_with "sigma-cli", because: "both install `sigma` binaries"
 
   def install
-    ENV.append_to_cflags "-Os -fcommon" if OS.linux?
-    inreplace "makefile" do |s|
-      s.gsub! "+= /usr/lib/", "+= /usr/lib/ #{HOMEBREW_PREFIX}/lib/" if OS.linux?
-      s.gsub! "GCC = gcc", "GCC = #{ENV.cc}"
-      s.gsub! "= -O2", "= #{ENV.cflags}"
+    if OS.linux?
+      ENV.append_to_cflags "-fcommon"
+      inreplace "makefile", "+= /usr/lib/", "+= /usr/lib/ #{HOMEBREW_PREFIX}/lib/"
     end
-    system "make", "all"
+    system "make", "GCC=#{ENV.cc}", "CFLAGS_G=#{ENV.cflags}", "all"
 
     bin.install Dir["BIN/*"]
     doc.install Dir["doc/*"]
@@ -49,6 +50,6 @@ class OpenSimh < Formula
   end
 
   test do
-    assert_match(/Goodbye/, pipe_output("#{bin}/altair", "exit\n", 0))
+    assert_match "Goodbye", pipe_output("#{bin}/altair", "exit\n", 0)
   end
 end

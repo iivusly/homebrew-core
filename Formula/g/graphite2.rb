@@ -7,18 +7,13 @@ class Graphite2 < Formula
   head "https://github.com/silnrsi/graphite.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "4cdee055db9958e12662c53661fab627057d3553974d15b289e2955b439f4a9d"
-    sha256 cellar: :any,                 arm64_ventura:  "3ec770419ed60d211670f73bf078512824151b460c5c37740ee8b83e3dbb8357"
-    sha256 cellar: :any,                 arm64_monterey: "2254ea02844280605c79ab735ce1c5eb4a943fe897c3119611de54169130a88e"
-    sha256 cellar: :any,                 arm64_big_sur:  "544e2c344f6c0a7c2c3cb6541150f0d0d91cd1100460dac9c6a08578823f91c3"
-    sha256 cellar: :any,                 sonoma:         "afd3067ded2f8fb2ae3400d908a271825c5f7013f089312949ac9576b2a26d96"
-    sha256 cellar: :any,                 ventura:        "db73b7ef0318611d6dcf795cd4e43c5b62c5798190bc634dc94c6530e35afc46"
-    sha256 cellar: :any,                 monterey:       "3469eaae77f6c9cb802730d060f26fd0bd56d390674490dc8b17c4624705df0e"
-    sha256 cellar: :any,                 big_sur:        "ddc468a1eec491aed5d5b05b22d0cffa38b6059d87eab747301011507fcf6366"
-    sha256 cellar: :any,                 catalina:       "0831f474c920b66bbeab3f93a91fa019b82bfffcdd40e369fdab76372700e980"
-    sha256 cellar: :any,                 mojave:         "2f3abb971be03141e9eea54b87c6861d72865bd76fde73ae3161d64c40d51cd9"
-    sha256 cellar: :any,                 high_sierra:    "62e39dce0ae0440ac164edaab6e1351520bc5414ad509fc0b8d5c890500785bd"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "0e811b079268bc99d1b6253fc0c979e76325e91e294fd0596349dd0285e847b9"
+    rebuild 2
+    sha256 cellar: :any,                 arm64_tahoe:   "a5645201ace59a1ee7c24d075adf37ae1965018b41221062e8088b191763334d"
+    sha256 cellar: :any,                 arm64_sequoia: "a805dafe03fc697a0d2157a92d110be687f7136d360a483ca43c8f81cdfe4852"
+    sha256 cellar: :any,                 arm64_sonoma:  "1a57783f066cfb70115517438457ded104ecbb2d908586c58ebe0d6cd6117995"
+    sha256 cellar: :any,                 sonoma:        "1c40aed095158f418a818939a8398afab628147ec2bad529868d3f6fd1990f23"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "acc9b3af3f19b1246163a990bf74bec6b88f44f5c511ac70f0d73d6103b012ed"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "5cdf99ed424bacc35f62e84ff807fef46263a543be38c479a7f4a6bd180ab705"
   end
 
   depends_on "cmake" => :build
@@ -27,17 +22,36 @@ class Graphite2 < Formula
     depends_on "freetype" => :build
   end
 
-  resource "testfont" do
-    url "https://scripts.sil.org/pub/woff/fonts/Simple-Graphite-Font.ttf"
-    sha256 "7e573896bbb40088b3a8490f83d6828fb0fd0920ac4ccdfdd7edb804e852186a"
-  end
-
   def install
-    system "cmake", ".", *std_cmake_args
-    system "make", "install"
+    # CMake: Raised required version to 3.5
+    cmake_policy_files = %w[CMakeLists.txt src/CMakeLists.txt]
+    cmake_files = cmake_policy_files + %w[
+      gr2fonttest
+      tests/bittwiddling
+      tests/json
+      tests/sparsetest
+      tests/utftest
+    ].map { |f| "#{f}/CMakeLists.txt" }
+
+    inreplace cmake_files, "CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)", "CMAKE_MINIMUM_REQUIRED(VERSION 3.5)"
+    inreplace cmake_policy_files, "cmake_policy(SET CMP0012 NEW)", ""
+
+    args = %W[
+      -DCMAKE_INSTALL_RPATH=#{rpath}
+    ]
+    system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
+    system "cmake", "--build", "build"
+    system "cmake", "--install", "build"
+
+    inreplace lib/"pkgconfig/graphite2.pc", prefix.realpath, opt_prefix
   end
 
   test do
+    resource "testfont" do
+      url "https://scripts.sil.org/pub/woff/fonts/Simple-Graphite-Font.ttf"
+      sha256 "7e573896bbb40088b3a8490f83d6828fb0fd0920ac4ccdfdd7edb804e852186a"
+    end
+
     resource("testfont").stage do
       shape = shell_output("#{bin}/gr2fonttest Simple-Graphite-Font.ttf 'abcde'")
       assert_match(/67.*36.*37.*38.*71/m, shape)

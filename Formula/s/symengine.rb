@@ -1,18 +1,18 @@
 class Symengine < Formula
   desc "Fast symbolic manipulation library written in C++"
   homepage "https://www.sympy.org/en/index.html"
-  url "https://github.com/symengine/symengine/archive/refs/tags/v0.12.0.tar.gz"
-  sha256 "1b5c3b0bc6a9f187635f93585649f24a18e9c7f2167cebcd885edeaaf211d956"
+  url "https://github.com/symengine/symengine/archive/refs/tags/v0.14.0.tar.gz"
+  sha256 "11c5f64e9eec998152437f288b8429ec001168277d55f3f5f1df78e3cf129707"
   license "MIT"
+  revision 6
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "d2ab56021bd2a124b559a41a213cad940fd883a3869af2d01361b94b7fd3bd6b"
-    sha256 cellar: :any,                 arm64_ventura:  "1e9bd2a99176dc1fd9476ed304dc9b21e8a0f3bf323a4a09c01dd046aad21d4f"
-    sha256 cellar: :any,                 arm64_monterey: "99f948cca1c0144a48902ec86106aeb9473862e8cfce1063fbe2714dff3aeb5f"
-    sha256 cellar: :any,                 sonoma:         "ee58982edf91d2a315962e5a1782b8cd9370e0c52e01ef961bfaa22bd083fba1"
-    sha256 cellar: :any,                 ventura:        "8c08e8dff2ec75f71a1a8be955460a4e270d15d3120470514aca14eeec199900"
-    sha256 cellar: :any,                 monterey:       "96dd0c2c05e1cad567ec5acd6eada34cbe10984b10ef8f002076d0692786ffae"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "e567a13b598d649e018ee63905d33563f10bbd22b81ad370289e2a7cd78d66e0"
+    sha256 cellar: :any,                 arm64_tahoe:   "823eb038dbf1ba5e9e85ef64ff2fc302b524680193cf1dbed61751a13088fd8a"
+    sha256 cellar: :any,                 arm64_sequoia: "6b132faf393f9b5b732cc1572df20ed1c4f2ba4efd630fbf7e9a232f46d8e3c8"
+    sha256 cellar: :any,                 arm64_sonoma:  "074b1aaaf904ae345b67bbe47247ce96a8192cd3a252b8c9634ebfbbf139541c"
+    sha256 cellar: :any,                 sonoma:        "60c3b1a39dc2ab5a9bec741d8554279d9483d7c1e6cfe387cedfbefb80183833"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "2b515cc936113c8f47356744b9164c0baae4ada6fc43150d89a4ecb5d7e4853f"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "d6439720c2e9e2b1553a81125a3985f7bcf9d9cff430bf5e85372c84762d0a36"
   end
 
   depends_on "cereal" => :build
@@ -25,13 +25,28 @@ class Symengine < Formula
   depends_on "zstd"
 
   uses_from_macos "ncurses"
-  uses_from_macos "zlib"
 
   on_macos do
     depends_on "z3"
   end
 
-  fails_with gcc: "5"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
+
+  # Backport support for LLVM 22
+  patch do
+    url "https://github.com/symengine/symengine/commit/a498ff2eadac2032d7a3982fc6dc3f69c4cca319.patch?full_index=1"
+    sha256 "308abb8a03d8d132937f0340741030f6e8148030eef7fcfea12ab3e80b03d569"
+  end
+  patch do
+    url "https://github.com/symengine/symengine/commit/de7305e5e2fee97d80c25164a8f8c9f7ecfc9953.patch?full_index=1"
+    sha256 "09a5acf3043de18d5f09b2e28a6dc4edc127fe7e4b66e2656e3a0db4c26a5e6d"
+  end
+  patch do
+    url "https://github.com/symengine/symengine/commit/ea9868e64ced2cd2abb9cdc3ae97d965b892b974.patch?full_index=1"
+    sha256 "2a94699984ead1db45c024458783d13d70aa3b250bb72b1141502fb2287344ec"
+  end
 
   def install
     llvm = deps.map(&:to_formula).find { |f| f.name.match?(/^llvm(@\d+)?$/) }
@@ -53,7 +68,7 @@ class Symengine < Formula
   end
 
   test do
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include <symengine/expression.h>
       using SymEngine::Expression;
       int main() {
@@ -62,7 +77,7 @@ class Symengine < Formula
         auto equality = eq(ex+1, expand(ex));
         return equality == true;
       }
-    EOS
+    CPP
     lib_flags = [
       "-L#{Formula["gmp"].opt_lib}", "-lgmp",
       "-L#{Formula["mpfr"].opt_lib}", "-lmpfr",

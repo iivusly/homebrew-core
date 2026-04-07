@@ -2,10 +2,11 @@ class MoltenVk < Formula
   desc "Implementation of the Vulkan graphics and compute API on top of Metal"
   homepage "https://github.com/KhronosGroup/MoltenVK"
   license "Apache-2.0"
+  compatibility_version 1
 
   stable do
-    url "https://github.com/KhronosGroup/MoltenVK/archive/refs/tags/v1.2.10.tar.gz"
-    sha256 "3435d34ea2dafb043dd82ac5e9d2de7090462ab7cea6ad8bcc14d9c34ff99e9c"
+    url "https://github.com/KhronosGroup/MoltenVK/archive/refs/tags/v1.4.1.tar.gz"
+    sha256 "9985f141902a17de818e264d17c1ce334b748e499ee02fcb4703e4dc0038f89c"
 
     # MoltenVK depends on very specific revisions of its dependencies.
     # For each resource the path to the file describing the expected
@@ -13,43 +14,73 @@ class MoltenVk < Formula
     resource "SPIRV-Cross" do
       # ExternalRevisions/SPIRV-Cross_repo_revision
       url "https://github.com/KhronosGroup/SPIRV-Cross.git",
-          revision: "68d401117c85219ee6b2aba9a0cded314c55798f"
+          revision: "adec7acbf41a988713cdb85f93f26c8ca5ea863e"
+      version "adec7acbf41a988713cdb85f93f26c8ca5ea863e"
+
+      livecheck do
+        url "https://raw.githubusercontent.com/KhronosGroup/MoltenVK/refs/tags/v#{LATEST_VERSION}/ExternalRevisions/SPIRV-Cross_repo_revision"
+        regex(/^([0-9a-f]+)$/i)
+      end
+    end
+
+    resource "SPIRV-Headers" do
+      # ExternalRevisions/SPIRV-Headers_repo_revision
+      url "https://github.com/KhronosGroup/SPIRV-Headers.git",
+          revision: "b824a462d4256d720bebb40e78b9eb8f78bbb305"
+      version "b824a462d4256d720bebb40e78b9eb8f78bbb305"
+
+      livecheck do
+        url "https://raw.githubusercontent.com/KhronosGroup/MoltenVK/refs/tags/v#{LATEST_VERSION}/ExternalRevisions/SPIRV-Headers_repo_revision"
+        regex(/^([0-9a-f]+)$/i)
+      end
+    end
+
+    resource "SPIRV-Tools" do
+      # ExternalRevisions/SPIRV-Tools_repo_revision
+      url "https://github.com/KhronosGroup/SPIRV-Tools.git",
+          revision: "262bdab48146c937467f826699a40da0fdfc0f1a"
+      version "262bdab48146c937467f826699a40da0fdfc0f1a"
+
+      livecheck do
+        url "https://raw.githubusercontent.com/KhronosGroup/MoltenVK/refs/tags/v#{LATEST_VERSION}/ExternalRevisions/SPIRV-Tools_repo_revision"
+        regex(/^([0-9a-f]+)$/i)
+      end
     end
 
     resource "Vulkan-Headers" do
       # ExternalRevisions/Vulkan-Headers_repo_revision
       url "https://github.com/KhronosGroup/Vulkan-Headers.git",
-          revision: "fc6c06ac529e4b4b6e34c17cc650a8f62dee2eb0"
+          revision: "6aefb8eb95c8e170d0805fd0f2d02832ec1e099a"
+      version "6aefb8eb95c8e170d0805fd0f2d02832ec1e099a"
+
+      livecheck do
+        url "https://raw.githubusercontent.com/KhronosGroup/MoltenVK/refs/tags/v#{LATEST_VERSION}/ExternalRevisions/Vulkan-Headers_repo_revision"
+        regex(/^([0-9a-f]+)$/i)
+      end
     end
 
     resource "Vulkan-Tools" do
       # ExternalRevisions/Vulkan-Tools_repo_revision
       url "https://github.com/KhronosGroup/Vulkan-Tools.git",
-          revision: "b47676a03827fc0c287409b243b1fd62886e79c0"
+          revision: "013058f74e2356347f8d9317233bc769816c9dfb"
+      version "013058f74e2356347f8d9317233bc769816c9dfb"
+
+      livecheck do
+        url "https://raw.githubusercontent.com/KhronosGroup/MoltenVK/refs/tags/v#{LATEST_VERSION}/ExternalRevisions/Vulkan-Tools_repo_revision"
+        regex(/^([0-9a-f]+)$/i)
+      end
     end
 
     resource "cereal" do
       # ExternalRevisions/cereal_repo_revision
       url "https://github.com/USCiLab/cereal.git",
-          revision: "51cbda5f30e56c801c07fe3d3aba5d7fb9e6cca4"
-    end
+          revision: "a56bad8bbb770ee266e930c95d37fff2a5be7fea"
+      version "a56bad8bbb770ee266e930c95d37fff2a5be7fea"
 
-    resource "glslang" do
-      # ExternalRevisions/glslang_repo_revision
-      url "https://github.com/KhronosGroup/glslang.git",
-          revision: "fa9c3deb49e035a8abcabe366f26aac010f6cbfb"
-    end
-
-    resource "SPIRV-Tools" do
-      # known_good.json in the glslang repository at revision of resource above
-      url "https://github.com/KhronosGroup/SPIRV-Tools.git",
-          revision: "0cfe9e7219148716dfd30b37f4d21753f098707a"
-    end
-
-    resource "SPIRV-Headers" do
-      # known_good.json in the glslang repository at revision of resource above
-      url "https://github.com/KhronosGroup/SPIRV-Headers.git",
-          revision: "2acb319af38d43be3ea76bfabf3998e5281d8d12"
+      livecheck do
+        url "https://raw.githubusercontent.com/KhronosGroup/MoltenVK/refs/tags/v#{LATEST_VERSION}/ExternalRevisions/cereal_repo_revision"
+        regex(/^([0-9a-f]+)$/i)
+      end
     end
   end
 
@@ -59,73 +90,57 @@ class MoltenVk < Formula
   end
 
   bottle do
-    sha256 cellar: :any, arm64_sonoma:   "25a56ad433bb2d345a836eda1cc7063b7cac29e09f147e55cd3e1a04d45999ec"
-    sha256 cellar: :any, arm64_ventura:  "521089ebcb007b928c6fe5dc73ae9f81d3f50c1bb02765ba49d23feca8beb3ba"
-    sha256 cellar: :any, arm64_monterey: "698a475e905947cb6664e91cf763fe0ced69429fd4a1608a0b0cd119d6370405"
-    sha256 cellar: :any, sonoma:         "1b064d8edaf38568f00197e8a6245216d633ee818adf9d589d5c71c4b0dbdfe9"
-    sha256 cellar: :any, ventura:        "967bdf7e10ad32783d9a61efc94f109fcee621270a47f9c9f3717489d02cdaf9"
-    sha256 cellar: :any, monterey:       "f6c81b510db91bc3ee5f68281a803b1913596b7c40db24d8e472af0aa988070a"
+    sha256 cellar: :any, arm64_tahoe:   "c0b1bda916255edc08d5a884eec4826e2649a890283b03e6f62e4aa9984cc9b8"
+    sha256 cellar: :any, arm64_sequoia: "c37a023bd090ca66e5cec2e0b24f7fcd6a57078ca7cc2a1d661301d01975ee27"
+    sha256 cellar: :any, arm64_sonoma:  "0260e56d985f283c9f81af474469285855ce88f48ac5dc31c7a9fb7c2c846aa6"
+    sha256 cellar: :any, sonoma:        "9bb2d88ee0ed7cd035f982a59a2e9c5878237c9f4df88117172ccdbc5127f6d9"
   end
 
   head do
     url "https://github.com/KhronosGroup/MoltenVK.git", branch: "main"
 
-    resource "cereal" do
-      url "https://github.com/USCiLab/cereal.git", branch: "master"
-    end
-
-    resource "Vulkan-Headers" do
-      url "https://github.com/KhronosGroup/Vulkan-Headers.git", branch: "main"
-    end
-
     resource "SPIRV-Cross" do
       url "https://github.com/KhronosGroup/SPIRV-Cross.git", branch: "main"
-    end
-
-    resource "glslang" do
-      url "https://github.com/KhronosGroup/glslang.git", branch: "main"
-    end
-
-    resource "SPIRV-Tools" do
-      url "https://github.com/KhronosGroup/SPIRV-Tools.git", branch: "main"
     end
 
     resource "SPIRV-Headers" do
       url "https://github.com/KhronosGroup/SPIRV-Headers.git", branch: "main"
     end
 
+    resource "SPIRV-Tools" do
+      url "https://github.com/KhronosGroup/SPIRV-Tools.git", branch: "main"
+    end
+
+    resource "Vulkan-Headers" do
+      url "https://github.com/KhronosGroup/Vulkan-Headers.git", branch: "main"
+    end
+
     resource "Vulkan-Tools" do
       url "https://github.com/KhronosGroup/Vulkan-Tools.git", branch: "main"
+    end
+
+    resource "cereal" do
+      url "https://github.com/USCiLab/cereal.git", branch: "master"
     end
   end
 
   depends_on "cmake" => :build
   depends_on xcode: ["11.7", :build]
-  # Requires IOSurface/IOSurfaceRef.h.
-  depends_on macos: :sierra
   depends_on :macos # Linux does not have a Metal implementation. Not implied by the line above.
 
-  uses_from_macos "python" => :build, since: :catalina
+  uses_from_macos "python" => :build
 
   def install
     resources.each do |res|
       res.stage(buildpath/"External"/res.name)
     end
-    mv "External/SPIRV-Tools", "External/glslang/External/spirv-tools"
-    mv "External/SPIRV-Headers", "External/glslang/External/spirv-tools/external/spirv-headers"
-
-    # Build glslang
-    cd "External/glslang" do
-      system "./build_info.py", ".",
-              "-i", "build_info.h.tmpl",
-              "-o", "build/include/glslang/build_info.h"
-    end
 
     # Build spirv-tools
-    mkdir "External/glslang/External/spirv-tools/build" do
-      # Required due to files being generated during build.
-      system "cmake", "..", *std_cmake_args
-      system "make"
+    mv "External/SPIRV-Headers", "External/spirv-tools/external/spirv-headers"
+
+    mkdir "External/spirv-tools" do
+      system "cmake", "-S", ".", "-B", "build", *std_cmake_args
+      system "cmake", "--build", "build"
     end
 
     # Build ExternalDependencies
@@ -143,8 +158,6 @@ class MoltenVk < Formula
                 "-library", "./External/build/Release/libSPIRVCross.a"
       xcodebuild "-create-xcframework", "-output", "./External/build/Release/SPIRVTools.xcframework",
                 "-library", "./External/build/Release/libSPIRVTools.a"
-      xcodebuild "-create-xcframework", "-output", "./External/build/Release/glslang.xcframework",
-                "-library", "./External/build/Release/libglslang.a"
     end
 
     # Build MoltenVK Package
@@ -157,14 +170,10 @@ class MoltenVk < Formula
                "build"
 
     (libexec/"lib").install Dir["External/build/Release/" \
-                                "lib{SPIRVCross,SPIRVTools,glslang}.a"]
-    glslang_dir = Pathname.new("External/glslang")
-    Pathname.glob("External/glslang/{glslang,SPIRV}/**/*.{h,hpp}") do |header|
-      header.chmod 0644
-      (libexec/"include"/header.parent.relative_path_from(glslang_dir)).install header
-    end
+                                "lib{SPIRVCross,SPIRVTools}.a"]
+
     (libexec/"include").install "External/SPIRV-Cross/include/spirv_cross"
-    (libexec/"include").install "External/glslang/External/spirv-tools/include/spirv-tools"
+    (libexec/"include").install "External/SPIRV-Tools/include/spirv-tools"
     (libexec/"include").install "External/Vulkan-Headers/include/vulkan" => "vulkan"
     (libexec/"include").install "External/Vulkan-Headers/include/vk_video" => "vk_video"
 
@@ -181,12 +190,15 @@ class MoltenVk < Formula
 
     inreplace "MoltenVK/icd/MoltenVK_icd.json",
               "./libMoltenVK.dylib",
-              (lib/"libMoltenVK.dylib").relative_path_from(share/"vulkan/icd.d")
-    (share/"vulkan").install "MoltenVK/icd" => "icd.d"
+              (lib/"libMoltenVK.dylib").relative_path_from(prefix/"etc/vulkan/icd.d")
+    (prefix/"etc/vulkan").install "MoltenVK/icd" => "icd.d"
   end
 
   test do
-    (testpath/"test.cpp").write <<~EOS
+    # Disable Metal argument buffers for macOS Sonoma on arm
+    ENV["MVK_CONFIG_USE_METAL_ARGUMENT_BUFFERS"] = "0" if MacOS.version == :sonoma && Hardware::CPU.arm?
+
+    (testpath/"test.cpp").write <<~CPP
       #include <vulkan/vulkan.h>
       int main(void) {
         const char *extensionNames[] = { "VK_KHR_surface" };
@@ -200,7 +212,7 @@ class MoltenVk < Formula
         vkCreateInstance(&instanceCreateInfo, NULL, &inst);
         return 0;
       }
-    EOS
+    CPP
     system ENV.cc, "-o", "test", "test.cpp", "-I#{include}", "-I#{libexec/"include"}", "-L#{lib}", "-lMoltenVK"
     system "./test"
   end

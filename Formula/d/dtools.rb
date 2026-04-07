@@ -1,19 +1,18 @@
 class Dtools < Formula
   desc "D programming language tools"
   homepage "https://dlang.org/"
-  url "https://github.com/dlang/tools/archive/refs/tags/v2.109.1.tar.gz"
-  sha256 "6f9db3ec124356f1ba6b10681e6bb07e364a434faf8d1644ef2e254b90a16459"
+  url "https://github.com/dlang/tools/archive/refs/tags/v2.112.0.tar.gz"
+  sha256 "4d3b8d683770f16f1cb2e44a246f17b199a8aabde7b6ce7d7566aebc36a12d32"
   license "BSL-1.0"
   head "https://github.com/dlang/tools.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "e4da9f80c0dd636bdbdc3dc13440887df95716c9f718a64ea7ba9eacf69f41c8"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "d07da51134f24a745adfde5e2876e6cf81b650e3286648e5cce94b7e289eb450"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "422bb5c6da88abfe0055afa0e8d0a57f1d039b18cd1ecf70903dad2b946a3f5a"
-    sha256 cellar: :any_skip_relocation, sonoma:         "58cc9814b16fe73c3223b9190aad9e4208671f1272f2458fb02d1e77c03708bd"
-    sha256 cellar: :any_skip_relocation, ventura:        "dbfd5583ea5a1a2f26aad14c97152bef1599157fc6679f6d9949815eecc6ce73"
-    sha256 cellar: :any_skip_relocation, monterey:       "6344b77d8ab17334e4ccac3c3ab53d6c617871cf2a7c1ddda56ec502abdff3d0"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "4bcfd9495f99afff506110cd6bdf016c70b993f4437fab7567fa3e56bf0d46eb"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "566757d9c7fabf5dcc81d5139589bf8e601370424fb8f8170ff8ea542c9f0f74"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "8fdc39e94c686ee350bf6a92dc7f331182d9fa9e14e89ee6630c7b66d0e9e1b7"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "36c4848897bc99843bba6f6306e157c2c22b95ee4b66056573123e366ec04fcd"
+    sha256 cellar: :any_skip_relocation, sonoma:        "3e83e31e492dded0024a77bef1fa4916b5c4ba5b91ca12934dda63c18bc5ee35"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "b6ab7ef6c758eb003bfcec11dcdadc10c69d6d833b90dc103d1ccb7493caa953"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "fd470b2b653bfabec84bc5a4798f90260ec2c875c0466ec608cf63c6162209c3"
   end
 
   depends_on "dub" => :build
@@ -41,13 +40,13 @@ class Dtools < Formula
   end
 
   test do
-    (testpath/"hello.d").write <<~EOS
+    (testpath/"hello.d").write <<~D
       import std.stdio;
       void main()
       {
         writeln("Hello world!");
       }
-    EOS
+    D
     assert_equal "Hello world!", shell_output("#{bin}/rdmd #{testpath}/hello.d").chomp
   end
 end

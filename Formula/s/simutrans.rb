@@ -1,29 +1,34 @@
 class Simutrans < Formula
   desc "Transport simulator"
   homepage "https://www.simutrans.com/"
-  url "svn://servers.simutrans.org/simutrans/trunk/", revision: "11395"
-  version "124.2.2"
+  url "svn://servers.simutrans.org/simutrans/trunk/", revision: "11671"
+  version "124.3.1"
   license "Artistic-1.0"
+  revision 1
   head "https://github.com/simutrans/simutrans.git", branch: "master"
 
   livecheck do
     url "https://sourceforge.net/projects/simutrans/files/simutrans/"
     regex(%r{href=.*?/files/simutrans/(\d+(?:[.-]\d+)+)/}i)
-    strategy :page_match
+    strategy :page_match do |page, regex|
+      page.scan(regex).map { |match| match[0].tr("-", ".") }
+    end
   end
 
+  no_autobump! because: :incompatible_version_format
+
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "2d8bf26755e48c6addf9c56f74663a94d128ebf8530e907723d3f3d72563d816"
-    sha256 cellar: :any,                 arm64_ventura:  "ebeae515fdeb4f36b8f740ddf97fd8a0b6fd7be92b15279aadfb6c828c88d244"
-    sha256 cellar: :any,                 arm64_monterey: "111bc78c6b12fa85f08c07ffb88bdaebb09d2c661180a62192d5eade9395258d"
-    sha256 cellar: :any,                 sonoma:         "4e9865cec3ae3a7657c8fc376741a33e23cbd8f0def9f45be5c7c382f0842cd3"
-    sha256 cellar: :any,                 ventura:        "7ee56eef736b595d9386c129400bb38269968e82cdf7067820e2fed8dc175970"
-    sha256 cellar: :any,                 monterey:       "c32336285edb2c0e538350536578b89592d32fac030be677eb527af58c002bee"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "faee3e5fa566c1daef3d91393bcc8761dfc182f6e3e50c8cc2b2f5685fecb907"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "1fd7de0f2f6d759224c301571e17f5057755b13ad09ead31dbc2589c6ea0c4f8"
+    sha256 cellar: :any,                 arm64_sequoia: "5534b80d0083a84792de4c454e8856c96101d3d932bfa04c2b413731119d9530"
+    sha256 cellar: :any,                 arm64_sonoma:  "f5b0dcbb5ee3432922b76039f1f7a8ebd935abb9cab334986a50405e1b172640"
+    sha256 cellar: :any,                 sonoma:        "54bcf8151b603d18cdb4b2c50d627289797bc65b21d58282e41567a601c0bce9"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "365b26012ec707690ec42834ab7ac2753d8547246fde48f13bf8e66274f328ff"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ba5871955287bcbe8520ed25d63be1c4ce7c9b797caab0c2cac970676f9b4c44"
   end
 
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "fluid-synth"
   depends_on "fontconfig"
   depends_on "freetype"
@@ -35,13 +40,14 @@ class Simutrans < Formula
   uses_from_macos "unzip" => :build
   uses_from_macos "bzip2"
   uses_from_macos "curl"
-  uses_from_macos "zlib"
 
-  fails_with gcc: "5"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   resource "pak64" do
-    url "https://downloads.sourceforge.net/project/simutrans/pak64/124-2/simupak64-124-2.zip"
-    sha256 "e690e4647a1a617032a3778a2457c8812cc4510afad0f5bf8524999468146d86"
+    url "https://downloads.sourceforge.net/project/simutrans/pak64/124-3/simupak64-124-3.zip"
+    sha256 "ecde0e15301320549e92a9113fcdd1ada3b7f9aa1fce3d59a5dc98d56d648756"
   end
   resource "soundfont" do
     url "https://src.fedoraproject.org/repo/pkgs/PersonalCopy-Lite-soundfont/PCLite.sf2/629732b7552c12a8fae5b046d306273a/PCLite.sf2"
@@ -49,10 +55,13 @@ class Simutrans < Formula
   end
 
   def install
+    # fixed in 9aa819, remove in next release
+    inreplace "cmake/MacBundle.cmake", "SOURCE_DIR}src", "SOURCE_DIR}/src"
+
     # These translations are dynamically generated.
     system "./tools/get_lang_files.sh"
 
-    system "cmake", "-B", "build", "-S", ".", *std_cmake_args, "-DSIMUTRANS_USE_REVISION=#{stable.specs[:revision]}"
+    system "cmake", "-B", "build", "-S", ".", "-DSIMUTRANS_USE_REVISION=#{stable.specs[:revision]}", *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--build", "build", "--target", "makeobj"
     system "cmake", "--build", "build", "--target", "nettool"

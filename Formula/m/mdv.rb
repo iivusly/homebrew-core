@@ -6,34 +6,35 @@ class Mdv < Formula
   url "https://files.pythonhosted.org/packages/d0/32/f5e1b8c70dc40b02604fbd0be3ff0bd5e01ee99c9fddf8f423b10d07cd31/mdv-1.7.5.tar.gz"
   sha256 "eb84ed52a2b68d2e083e007cb485d14fac1deb755fd8f35011eff8f2889df6e9"
   license "BSD-3-Clause"
+  revision 1
 
   bottle do
-    rebuild 3
-    sha256 cellar: :any,                 arm64_sonoma:   "a2fca7b5066ffec483e3334ee021c2165b69767e89bd883dd744107fe61a7410"
-    sha256 cellar: :any,                 arm64_ventura:  "e46e133e37e80d0bf8cef00c329d6d83f2edffe4844d6b51e90d1369f0337cc7"
-    sha256 cellar: :any,                 arm64_monterey: "c1483e7152c649c7599c727339e18d4c29e6b072886bd257296441f78ff9acf6"
-    sha256 cellar: :any,                 sonoma:         "e8f8f7c52d3a2bf1bc3dca1a41e40981de6ebe5bfdb92942154d3719096a074e"
-    sha256 cellar: :any,                 ventura:        "f1ace8ac0376b82ec336fb54f4cf00577d1c13e7a2745a0c0b8243e89c558554"
-    sha256 cellar: :any,                 monterey:       "0aad2a912ab73605a010eda5e5d746ce8dffaae0fc54fd540a486426d80e235a"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "67e68c2e3d0fdd937eba2a890e6482cd65f7bfbd87df293660df31d78e3136b3"
+    sha256 cellar: :any,                 arm64_tahoe:   "7e3f993dff2c2285c95d307052eb788af49064b39416a4af601f1b6c8ccff2ed"
+    sha256 cellar: :any,                 arm64_sequoia: "2b2066297ec9e9fe3a49ebab06160e6a8c40b13e70ae5c2afe1e67a2066923b9"
+    sha256 cellar: :any,                 arm64_sonoma:  "4948a815dfb995aafe81414e4c8ff8cedf80654574d8521bb71c2aff69e9955c"
+    sha256 cellar: :any,                 sonoma:        "182702c80f2feeb950166ccff5f33825d02207948503d3a540c808836b749cd6"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "bcae45fe0cd6e612aa92fce775f120a8414c2937005f0d1821712abd29f1820e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "6db5f55e163a5bcdfcc3e2cb15ac45717470850c7c980145ba9fc5e0ff54813e"
   end
 
   depends_on "libyaml"
-  depends_on "python@3.12"
+  depends_on "python@3.14"
+
+  pypi_packages package_name: "mdv[yaml]"
 
   resource "markdown" do
-    url "https://files.pythonhosted.org/packages/11/28/c5441a6642681d92de56063fa7984df56f783d3f1eba518dc3e7a253b606/Markdown-3.5.2.tar.gz"
-    sha256 "e1ac7b3dc550ee80e602e71c1d168002f062e49f1b11e26a36264dafd4df2ef8"
+    url "https://files.pythonhosted.org/packages/2b/f4/69fa6ed85ae003c2378ffa8f6d2e3234662abd02c10d216c0ba96081a238/markdown-3.10.2.tar.gz"
+    sha256 "994d51325d25ad8aa7ce4ebaec003febcce822c3f8c911e3b17c52f7f589f950"
   end
 
   resource "pygments" do
-    url "https://files.pythonhosted.org/packages/55/59/8bccf4157baf25e4aa5a0bb7fa3ba8600907de105ebc22b0c78cfbf6f565/pygments-2.17.2.tar.gz"
-    sha256 "da46cec9fd2de5be3a8a784f434e4c4ab670b4ff54d605c4c2717e9d49c4c367"
+    url "https://files.pythonhosted.org/packages/c3/b2/bc9c9196916376152d655522fdcebac55e66de6603a76a02bca1b6414f6c/pygments-2.20.0.tar.gz"
+    sha256 "6757cd03768053ff99f3039c1a36d6c0aa0b263438fcab17520b30a303a82b5f"
   end
 
   resource "pyyaml" do
-    url "https://files.pythonhosted.org/packages/cd/e5/af35f7ea75cf72f2cd079c95ee16797de7cd71f29ea7c68ae5ce7be1eda0/PyYAML-6.0.1.tar.gz"
-    sha256 "bfdf460b1736c775f2ba9f6a92bca30bc2095067b8a9d77876d1fad6cc3b4a43"
+    url "https://files.pythonhosted.org/packages/05/8e/961c0007c59b8dd7729d542c61a4d537767a59645b82a0b521206e1e25c2/pyyaml-6.0.3.tar.gz"
+    sha256 "d76623373421df22fb4cf8817020cbb7ef15c725b9d5e45f17e189bfc384190f"
   end
 
   def install
@@ -41,11 +42,11 @@ class Mdv < Formula
   end
 
   test do
-    (testpath/"test.md").write <<~EOS
+    (testpath/"test.md").write <<~MARKDOWN
       # Header 1
       ## Header 2
       ### Header 3
-    EOS
-    system bin/"mdv", "#{testpath}/test.md"
+    MARKDOWN
+    system bin/"mdv", testpath/"test.md"
   end
 end

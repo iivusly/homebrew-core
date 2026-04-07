@@ -1,19 +1,19 @@
 class Skate < Formula
   desc "Personal key value store"
   homepage "https://github.com/charmbracelet/skate"
-  url "https://github.com/charmbracelet/skate/archive/refs/tags/v1.0.0.tar.gz"
-  sha256 "09a29b9f10a3098780c397e89ff50578498abb2659b3d861ba90a9429f192970"
+  url "https://github.com/charmbracelet/skate/archive/refs/tags/v1.0.1.tar.gz"
+  sha256 "f844fd980e1337be0f1bc321e58e48680fe3855e17c6c334ed8b22b9059949d2"
   license "MIT"
   head "https://github.com/charmbracelet/skate.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "1426264ba44446dfecba6ce0b3343269f91c5cff428b1a0a10dffdd1a65b4a6f"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "1426264ba44446dfecba6ce0b3343269f91c5cff428b1a0a10dffdd1a65b4a6f"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "1426264ba44446dfecba6ce0b3343269f91c5cff428b1a0a10dffdd1a65b4a6f"
-    sha256 cellar: :any_skip_relocation, sonoma:         "2cd214adbd53e8060bb6a2f9280038cab8fe49e8ed2515af4f7da458f6638b46"
-    sha256 cellar: :any_skip_relocation, ventura:        "2cd214adbd53e8060bb6a2f9280038cab8fe49e8ed2515af4f7da458f6638b46"
-    sha256 cellar: :any_skip_relocation, monterey:       "2cd214adbd53e8060bb6a2f9280038cab8fe49e8ed2515af4f7da458f6638b46"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "b6142d5e5c0febdc7847e25fb4305d721c6c9c92f0562b3edc5b8fc1606887e2"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "966917f5054c2a722ce35156256437222602a118fa3a27a609c54397b7155730"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "966917f5054c2a722ce35156256437222602a118fa3a27a609c54397b7155730"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "966917f5054c2a722ce35156256437222602a118fa3a27a609c54397b7155730"
+    sha256 cellar: :any_skip_relocation, sonoma:        "e28973a036de11d215bb911adf8708dd1e5d75071578bbc288c907c061cf23bc"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "5d5dad73511d894bf5ef083edeb30eef46b13398fabf73b1f6d92e062644c9c0"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "69757b83e851a3f06e7bd001afd3f27b813076f66c7b99c0ed84b6715daa1a3f"
   end
 
   depends_on "go" => :build
@@ -21,6 +21,8 @@ class Skate < Formula
   def install
     ldflags = "-s -w -X main.Version=#{version}"
     system "go", "build", *std_go_args(ldflags:)
+
+    generate_completions_from_executable(bin/"skate", shell_parameter_format: :cobra)
   end
 
   test do

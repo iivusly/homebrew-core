@@ -3,19 +3,18 @@ class Atlas < Formula
   homepage "https://atlasgo.io/"
   # Upstream may not mark patch releases as latest on GitHub; it is fine to ship them.
   # See https://github.com/ariga/atlas/issues/1090#issuecomment-1225258408
-  url "https://github.com/ariga/atlas/archive/refs/tags/v0.27.0.tar.gz"
-  sha256 "444eed6b081269b9f42839092689ef1e935631c8c5890a53dbacac1ed2596a11"
+  url "https://github.com/ariga/atlas/archive/refs/tags/v1.1.0.tar.gz"
+  sha256 "ab15ecd8ad713ff8edbb3cdfd6025417ee3bc539f1594431ed744b0b16102e55"
   license "Apache-2.0"
   head "https://github.com/ariga/atlas.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "2c58de084bfd7fc470691e590758986e085bb8037bc082ff52f005cd5e2bd3d9"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "94a7f705e06e643d658d302a7820ec9a49b488a292e61c5c7e85f8798018360e"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "9f69659dd6b4417d8075105a21930fc456fe9a8572d7a59c18dcbe89055d0da7"
-    sha256 cellar: :any_skip_relocation, sonoma:         "23c4d10340ba3412d88f81180cd9064b30e2956f5c5b08d3a1943d68a8bcb32a"
-    sha256 cellar: :any_skip_relocation, ventura:        "0f03a3233a78a3ffc7a8ed51feef8c2cbd0065f30dbcb24de49a8b75173a2184"
-    sha256 cellar: :any_skip_relocation, monterey:       "e5ac413768e23e4b8ac5e2b59199f685b4a2f1af605d9636af33d70519aee4a7"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "3e611d691eb041bb1bc8c577a9a83aa39143f15538dee1367fb2cb196ac499ed"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "b5f2097d31ddefa63bd8ff6c37112d164c639d85096bf433d0983129d9795396"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "ca356bca17f03f6246cd71dccb179fa1767077db489bd0b1c437c1fa76a9270b"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "04741f004b5e51d6b205ef20dfcb900ea6ac951a89944c6375b4c2942fa5b41d"
+    sha256 cellar: :any_skip_relocation, sonoma:        "495dcf514d848e5fac7e92565e523bb9b4a9a1bc98ae70ff7a7e57d76e0f75e0"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "bbeb0003802e61293bc9622a90fa18761f5980a6754392acdba835e998f4b92b"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "6b69686cdfb127d6653aebb8bc94b22b7d2ad50dae95f7bf05255dcd0ae8408f"
   end
 
   depends_on "go" => :build
@@ -31,7 +30,7 @@ class Atlas < Formula
       system "go", "build", *std_go_args(ldflags:)
     end
 
-    generate_completions_from_executable(bin/"atlas", "completion")
+    generate_completions_from_executable(bin/"atlas", shell_parameter_format: :cobra)
   end
 
   test do

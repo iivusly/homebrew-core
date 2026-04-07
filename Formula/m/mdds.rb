@@ -1,13 +1,12 @@
 class Mdds < Formula
   desc "Multi-dimensional data structure and indexing algorithm"
   homepage "https://gitlab.com/mdds/mdds"
-  url "https://kohei.us/files/mdds/src/mdds-2.1.1.tar.bz2"
-  sha256 "8a3767f0a60c53261b5ebbaa717381446813aef8cf28fe9d0ea1371123bbe3f1"
+  url "https://gitlab.com/api/v4/projects/mdds%2Fmdds/packages/generic/source/3.2.1/mdds-3.2.1.tar.bz2"
+  sha256 "2ed33238ca9e42cc9ffa99a14adc80d86c09c0b0d001f876724ae3a167435048"
   license "MIT"
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, all: "a2da132b4ae29347c8f894f09e61c56289e41aadde6c789ea16fad7af97b1bd6"
+    sha256 cellar: :any_skip_relocation, all: "a9255b6257595f8254dd106a41da7442ebae89cf3638573f9b86ec2423be10e7"
   end
 
   head do
@@ -18,8 +17,6 @@ class Mdds < Formula
 
   depends_on "autoconf" => :build
   depends_on "boost"
-
-  fails_with gcc: "5" # for C++17
 
   def install
     args = %W[
@@ -42,12 +39,12 @@ class Mdds < Formula
   end
 
   test do
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include <mdds/flat_segment_tree.hpp>
       int main() {
         mdds::flat_segment_tree<unsigned, unsigned> fst(0, 4, 8);
       }
-    EOS
+    CPP
     system ENV.cxx, "test.cpp", "-o", "test",
                     "-std=c++17",
                     "-I#{include.children.first}"

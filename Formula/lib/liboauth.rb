@@ -9,6 +9,8 @@ class Liboauth < Formula
   revision 3
 
   bottle do
+    sha256 cellar: :any,                 arm64_tahoe:    "a510309b244c20d084bcac6d01a80b888c0bb2e89ee67e8c7be5fdd4cdf28f84"
+    sha256 cellar: :any,                 arm64_sequoia:  "4eff11a4e53ab448c41469596fadeac63b03386c90c1f091372fc003f497562a"
     sha256 cellar: :any,                 arm64_sonoma:   "6f8593691c180a940c09d3cdb22c5f69fb4ac7dfb8877581b5cc13a02b6088a1"
     sha256 cellar: :any,                 arm64_ventura:  "a39ee9626caffc0652551afceb3de434b14f497d0e6f86888edfb987f0e46bfb"
     sha256 cellar: :any,                 arm64_monterey: "14eb9710933a0f1e3974449b3451288160147295e1a941ed41720af29b62c9e2"
@@ -17,6 +19,7 @@ class Liboauth < Formula
     sha256 cellar: :any,                 ventura:        "c428f77d8ce2e3ee3517782cfffcc442d6f136a98feaf969b9f0bc589a752ec0"
     sha256 cellar: :any,                 monterey:       "1ca737e530881673e82ccc350dfc769d1e30d6db94f5b77d2d2261216003f539"
     sha256 cellar: :any,                 big_sur:        "2a00f8fb82450e4acfec03f1e91dc74196ecf0150047b64a4357d6ac716d279c"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "d590a572f38268fe5b4a9ec90877b436030fe6ef35564681bd8af45f15a66186"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "0177a7a4378d03aa25b46b4bc37bc12b777438fa177ef15b0dd16406cfad40ef"
   end
 
@@ -30,7 +33,7 @@ class Liboauth < Formula
 
   # Fix -flat_namespace being used on Big Sur and later.
   patch do
-    url "https://raw.githubusercontent.com/Homebrew/formula-patches/03cf8088210822aa2c1ab544ed58ea04c897d9c4/libtool/configure-pre-0.4.2.418-big_sur.diff"
+    url "https://raw.githubusercontent.com/Homebrew/homebrew-core/1cf441a0/Patches/libtool/configure-pre-0.4.2.418-big_sur.diff"
     sha256 "83af02f2aa2b746bb7225872cab29a253264be49db0ecebb12f841562d9a2923"
   end
 

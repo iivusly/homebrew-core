@@ -1,33 +1,44 @@
 class Zydis < Formula
   desc "Fast and lightweight x86/x86_64 disassembler library"
   homepage "https://zydis.re"
-  # pull from git tag to get submodules
-  url "https://github.com/zyantific/zydis.git",
-      tag:      "v4.1.0",
-      revision: "569320ad3c4856da13b9dbf1f0d9e20bda63870e"
+  url "https://github.com/zyantific/zydis/archive/refs/tags/v4.1.1.tar.gz"
+  sha256 "45c6d4d499a1cc80780f7834747c637509777c01dca1e98c5e7c0bfaccdb1514"
   license "MIT"
   head "https://github.com/zyantific/zydis.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "2f7f72365b14908bbdfdf6b97cc058250e587f7edca69a75d3d63ac113f1933e"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "db12deb4305fb8967c2900ba080d5a02c7a57c8aaac3dee595b301115dc81276"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "7b9f1a1d12f1cf6db4a24835b7b2b4ba069d4003471b71615b5e56c5740cd325"
-    sha256 cellar: :any_skip_relocation, sonoma:         "a0f44abbde404047f49cc7c6d558c21040100f104952af5dbd6587badcaf9072"
-    sha256 cellar: :any_skip_relocation, ventura:        "27de11023e425dd95749c1188ba14213706ef99907086ce405582ed3189871e8"
-    sha256 cellar: :any_skip_relocation, monterey:       "55fe031082cf04e183669954faa236dcc5561aa1cca00852362652432f40e68d"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "8f300c27bd81d350987eb65ed20958866564e7d410018bff4b99978cd375b259"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "3d64cf57d8e2eb55ac2457d12c35d227cca34db9c480d0c7fe6e41fd207bacd2"
+    sha256 cellar: :any,                 arm64_sequoia: "be71db07f686d7a09c8db9171418d0f8b0fbe3129f02b32b4d2fb956be023a6d"
+    sha256 cellar: :any,                 arm64_sonoma:  "3f74e22ca0befe90b33a8682e243c4ad4faad8e05ed730b5a320d5fd0426b27e"
+    sha256 cellar: :any,                 sonoma:        "01ec1f6ed5fb736d90dceded3f6ce60e79a97749441b1974d74038fec675ee62"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "bfcb9abc2e3e2787212e9f9d3f2325730a33405e07567d2d0b67a4b82657b797"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "eb5cf27e4ef3db8977e70c0f33f9aa71da5ca8140769cfdd13e65925ca86c4d9"
   end
 
   depends_on "cmake" => :build
+  depends_on "ronn-ng" => :build
+  depends_on "zycore-c"
 
   def install
-    system "cmake", "-S", ".", "-B", "build", "-DZYDIS_BUILD_TESTS=OFF", *std_cmake_args
+    args = %W[
+      -DCMAKE_INSTALL_RPATH=#{rpath}
+      -DZYAN_SYSTEM_ZYCORE=ON
+      -DZYDIS_BUILD_MAN=ON
+      -DZYDIS_BUILD_SHARED_LIB=ON
+      -DZYDIS_BUILD_TESTS=OFF
+    ]
+    system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
+    (pkgshare/"examples").install "examples/EncodeMov.c"
   end
 
   test do
     output = shell_output("#{bin}/ZydisInfo -64 66 3E 65 2E F0 F2 F3 48 01 A4 98 2C 01 00 00")
     assert_match "xrelease lock add qword ptr gs:[rax+rbx*4+0x12C], rsp", output
+
+    system ENV.cc, pkgshare/"examples/EncodeMov.c", "-o", "test", "-L#{lib}", "-lZydis"
+    assert_equal "48 C7 C0 37 13 00 00", shell_output("./test").strip
   end
 end

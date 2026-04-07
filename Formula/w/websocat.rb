@@ -1,8 +1,8 @@
 class Websocat < Formula
   desc "Command-line client for WebSockets"
   homepage "https://github.com/vi/websocat"
-  url "https://github.com/vi/websocat/archive/refs/tags/v1.13.0.tar.gz"
-  sha256 "43800f8df38ede8b5bffe825e633c0db6a3c36cfe26c23e882bcfc028d3119c7"
+  url "https://github.com/vi/websocat/archive/refs/tags/v1.14.1.tar.gz"
+  sha256 "5c976c535800ca635b72839fe49d0fe4ad2479db8744c5a00f0cf911e4832e2d"
   license "MIT"
 
   livecheck do
@@ -11,24 +11,23 @@ class Websocat < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "ad69943ce0768290eef524aa9b69d2d3313199853586bc18c32fda8a04e20532"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "d75ddc5d4523e2127bd679e6e6436e306f43bf6caac96641fa52d38428ddb45b"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "7b28525e3861934de268b3599e868d134d4f5979e1ab571e6de3154516a340b8"
-    sha256 cellar: :any_skip_relocation, sonoma:         "f31b9e73fd06fedc160428c42a31b139b719581994e2e3f378b6a444189dc383"
-    sha256 cellar: :any_skip_relocation, ventura:        "bd3d8b8e591a95b50ea80806f62604fe53e1a9bfccbf11587e6434d7b39686b8"
-    sha256 cellar: :any_skip_relocation, monterey:       "cfa0efba1c5f8ea16042cd57891bdea87faa379ae0f5cdc32108422dc9aef6d9"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "b7d5dbdeca5e44981f69b3d1b93911932d7951e374c544379452b09dc3ded2af"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "6f1d55c1251a7ba4f35cfba173b03597528e12299a05997e4b7b53fce1f554e0"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "266c6def79896bc1474ec11fe544e31465c4dc44fc1f4e6f0024e8487eb5a4d1"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "519e9b048400f4650931d4f95b98d526fbf809d49afcd341ff63e6b2919e8d0c"
+    sha256 cellar: :any_skip_relocation, sonoma:        "8aa7862d2353ab1b8c3d3200d486419cf2f9b87f379e2872d3ea48acc3fead93"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "38cb45e49cfd724483a5b95f86e3de3fc65d1238c9607269b53136867931a5a6"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "33fe3fb016eec0925dfcd6cf0e8882abfa834bd247463d89ace9db6ef4d137f9"
   end
 
+  depends_on "pkgconf" => :build
   depends_on "rust" => :build
 
   on_linux do
-    depends_on "pkg-config" => :build
     depends_on "openssl@3"
   end
 
   def install
-    system "cargo", "install", "--features", "ssl", *std_cargo_args
+    system "cargo", "install", *std_cargo_args(features: "ssl")
   end
 
   test do

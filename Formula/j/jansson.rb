@@ -1,22 +1,18 @@
 class Jansson < Formula
   desc "C library for encoding, decoding, and manipulating JSON"
   homepage "https://digip.org/jansson/"
-  url "https://github.com/akheron/jansson/releases/download/v2.14/jansson-2.14.tar.gz"
-  sha256 "5798d010e41cf8d76b66236cfb2f2543c8d082181d16bc3085ab49538d4b9929"
+  url "https://github.com/akheron/jansson/releases/download/v2.15.0/jansson-2.15.0.tar.gz"
+  sha256 "070a629590723228dc3b744ae90e965a569efb9c535b3309b52e80e75d8eb3be"
   license "MIT"
+  compatibility_version 1
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "6652690ceed7b1425bc5f3ebb09951f5a77543283d755f54b4a002dc36d21f88"
-    sha256 cellar: :any,                 arm64_ventura:  "81cb5066da1551e9a2d250c63b64393f7ba61d4a50d2132efa311757206e884b"
-    sha256 cellar: :any,                 arm64_monterey: "f8a132e116364ead3e428b1ad39768791f7a11ad26c07f5040c41d3514b7dea2"
-    sha256 cellar: :any,                 arm64_big_sur:  "08a95c23eb5aa8cfe0af9dc360b4bb3ecab89cfb42db9d5e68bc6490b571321c"
-    sha256 cellar: :any,                 sonoma:         "cdac3d9d6f635983a33734c1eb3e159dfdf1fcf7adad6522cc5a2a444af41f49"
-    sha256 cellar: :any,                 ventura:        "b797c629e53bcc1424ec76f449e807ea82732938b811b2826a124e29448caad5"
-    sha256 cellar: :any,                 monterey:       "b17770854e930d4302809dd4549142205f99a153a231492a9740f0c18d8e3258"
-    sha256 cellar: :any,                 big_sur:        "bb129dc922c0610c35a7b161429033a9123f03c4171df35717ff086b9cb52922"
-    sha256 cellar: :any,                 catalina:       "ddf25d83863396b864697529e837b869220ce86b8bb7b2cc03b77bdf1129563c"
-    sha256 cellar: :any,                 mojave:         "e219fa24f9fa034654592f6626c4a09d01fdeb888343a259a08ab4b1d08ac4ec"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "4f29060c36272b9dd76c5215e4118c04c0ef9235565281f87c34f8e8029cc3cb"
+    sha256 cellar: :any,                 arm64_tahoe:   "1a1aa9d485c3bdc370ad50fc00667a284e343974db3fb5f492398d04759fb808"
+    sha256 cellar: :any,                 arm64_sequoia: "d50fc42e5f0fd4e7a2bb892c30d7af77acbbdc0b78ea98560d5c8517d3122ad5"
+    sha256 cellar: :any,                 arm64_sonoma:  "452a4f19fc5fa2a299cb6abcf0dde93f4b3b198b82c90046ade5c98d5b541993"
+    sha256 cellar: :any,                 sonoma:        "400c04c24f2676ea8bdc6293ea5625c4c3375f9f4e5f6fc8a263c54d3667bea3"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "2f93d9bf83d35a0aed6bdfd062fc18dc1c02ccdfe139ab5cb5cb592e13e41d7b"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "91b24e62741d5b67d096f8c2592d68a8589533b851b80fe7da9c3b3e5d3bfa5b"
   end
 
   def install
@@ -25,7 +21,7 @@ class Jansson < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <jansson.h>
       #include <assert.h>
 
@@ -38,7 +34,7 @@ class Jansson < Formula
         json_decref(json);
         return 0;
       }
-    EOS
+    C
     system ENV.cc, "test.c", "-L#{lib}", "-ljansson", "-o", "test"
     system "./test"
   end

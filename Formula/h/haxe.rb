@@ -1,20 +1,13 @@
 class Haxe < Formula
   desc "Multi-platform programming language"
   homepage "https://haxe.org/"
+  # TODO: Remove `ctypes==0.22.0` pin when `luv >= 0.5.14` for https://github.com/aantron/luv/issues/159
+  url "https://github.com/HaxeFoundation/haxe.git",
+      tag:      "4.3.7",
+      revision: "e0b355c6be312c1b17382603f018cf52522ec651"
   license all_of: ["GPL-2.0-or-later", "MIT"]
+  revision 2
   head "https://github.com/HaxeFoundation/haxe.git", branch: "development"
-
-  stable do
-    url "https://github.com/HaxeFoundation/haxe.git",
-        tag:      "4.3.6",
-        revision: "760c0dd9972abadceba4e72edb1db13b2a4fb315"
-
-    # Backport support for mbedtls 3.x
-    patch do
-      url "https://github.com/HaxeFoundation/haxe/commit/c3258892c3c829ddd9faddcc0167108e62c84390.patch?full_index=1"
-      sha256 "d92fa85053ed4303f147e784e528380f6a0f6f08d35b5d93fbdfbf072ca7ed3e"
-    end
-  end
 
   livecheck do
     url :stable
@@ -22,76 +15,46 @@ class Haxe < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "d0b13478d395cf9ea455a25b7b07f6536b4bac3b041ad48790e85fb105b45fbb"
-    sha256 cellar: :any,                 arm64_ventura:  "4a33e2aa4d5749040521f96cba3d3d3aa713e97db701063e3566d129e8251f75"
-    sha256 cellar: :any,                 arm64_monterey: "026ce9fe643c092f45b85d6fb99842261583f5d1e4ecb83f43bc7ebb94d0341f"
-    sha256 cellar: :any,                 sonoma:         "9376bf9c2c01df7a8ee36e1e474e909ef8e9e784d3eccd21760760868be65510"
-    sha256 cellar: :any,                 ventura:        "c331d84365e3caf89e27f9b833c0b832a4b703c56b74d1e8c8895e810a9adca2"
-    sha256 cellar: :any,                 monterey:       "8edf54dd46a8a8a786abb80d233d7ec0cad854e0a8484a32bde012030e929aec"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "37602a38987f6d010d03170855f54f85fc5ce193809234f6c5a7de9fb7486f8e"
+    rebuild 1
+    sha256 cellar: :any, arm64_tahoe:   "780794ad8ebbd6e46a8b065fea1395f8e36e880abfdee6cbb9c1a75f80dbf69e"
+    sha256 cellar: :any, arm64_sequoia: "4acb949891d907440bdf1b90d47f5ccaf2530ca1b7c9256e53fe5392e7809629"
+    sha256 cellar: :any, arm64_sonoma:  "16769f4a037fa4ca5c1ac5218041150e61275f79ec21bc783c790765c8548edd"
+    sha256 cellar: :any, sonoma:        "236ee018bfc0f0628852bcb490ea2dab1c0acfa9f54537f4089245a4e39b5988"
+    sha256               arm64_linux:   "fa61c88d7c07b125cb86d444e226ed74b827c4e3f0786043f73d48936e9a23cd"
+    sha256               x86_64_linux:  "fd290d4961bf7e566b8d04881ccf8b8fdebab317f64bb1ecb6eafff60bdb9ce4"
   end
 
-  depends_on "cmake" => :build
   depends_on "ocaml" => :build
   depends_on "opam" => :build
-  depends_on "pkg-config" => :build
-  depends_on "mbedtls"
+  depends_on "pkgconf" => :build
+  depends_on "mbedtls@3"
   depends_on "neko"
   depends_on "pcre2"
-  depends_on "zlib" # due to `mysql-client`
-
-  uses_from_macos "m4" => :build
-  uses_from_macos "perl" => :build
-  uses_from_macos "rsync" => :build
-  uses_from_macos "unzip" => :build
 
   on_linux do
     depends_on "node" => :test
-  end
-
-  resource "String::ShellQuote" do
-    url "https://cpan.metacpan.org/authors/id/R/RO/ROSCH/String-ShellQuote-1.04.tar.gz"
-    sha256 "e606365038ce20d646d255c805effdd32f86475f18d43ca75455b00e4d86dd35"
-  end
-
-  resource "IPC::System::Simple" do
-    url "https://cpan.metacpan.org/authors/id/J/JK/JKEENAN/IPC-System-Simple-1.30.tar.gz"
-    sha256 "22e6f5222b505ee513058fdca35ab7a1eab80539b98e5ca4a923a70a8ae9ba9e"
+    depends_on "zlib-ng-compat"
   end
 
   def install
+    # Workaround for OCaml >= 5.4 until next release. This only drops upper bound added for Windows.
+    # https://github.com/HaxeFoundation/haxe/commit/034178b97ba0d7a97e0230ecf76b5872c4b3c197
+    inreplace "haxe.opam", '"dune" {>= "1.11" & < "3.16"}', '"dune" {>= "1.11"}' if build.stable?
+
+    ENV["OPAMROOT"] = buildpath/".opam"
+    ENV["OPAMYES"] = "1"
+    ENV["ADD_REVISION"] = "1" if build.head?
+
+    system "opam", "init", "--compiler=ocaml-system", "--disable-sandboxing", "--no-setup"
+    system "opam", "pin", "add", "ctypes", "0.22.0"
+    system "opam", "install", ".", "--deps-only", "--no-depexts"
+
     # Build requires targets to be built in specific order
-    ENV.deparallelize
+    ENV.deparallelize { system "opam", "exec", "--", "make" }
 
-    ENV.prepend_create_path "PERL5LIB", libexec/"lib/perl5"
-    resources.each do |r|
-      r.stage do
-        system "perl", "Makefile.PL", "INSTALL_BASE=#{libexec}"
-        system "make", "install"
-      end
-    end
-
-    Dir.mktmpdir("opamroot") do |opamroot|
-      ENV["OPAMROOT"] = opamroot
-      ENV["OPAMYES"] = "1"
-      ENV["ADD_REVISION"] = "1" if build.head?
-      system "opam", "init", "--no-setup", "--disable-sandboxing"
-      system "opam", "exec", "--", "opam", "pin", "add", "haxe", buildpath, "--no-action"
-      system "opam", "exec", "--", "opam", "install", "haxe", "--deps-only", "--working-dir", "--no-depexts"
-      system "opam", "exec", "--", "make"
-    end
-
-    # Rebuild haxelib as a valid binary
-    cd "extra/haxelib_src" do
-      system "cmake", ".", *std_cmake_args
-      system "make"
-    end
-    rm "haxelib"
-    cp "extra/haxelib_src/haxelib", "haxelib"
-
-    bin.mkpath
     system "make", "install", "INSTALL_BIN_DIR=#{bin}",
-           "INSTALL_LIB_DIR=#{lib}/haxe", "INSTALL_STD_DIR=#{lib}/haxe/std"
+                              "INSTALL_LIB_DIR=#{lib}/haxe",
+                              "INSTALL_STD_DIR=#{lib}/haxe/std"
   end
 
   def caveats

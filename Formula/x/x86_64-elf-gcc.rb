@@ -1,9 +1,9 @@
 class X8664ElfGcc < Formula
   desc "GNU compiler collection for x86_64-elf"
   homepage "https://gcc.gnu.org"
-  url "https://ftp.gnu.org/gnu/gcc/gcc-14.2.0/gcc-14.2.0.tar.xz"
-  mirror "https://ftpmirror.gnu.org/gcc/gcc-14.2.0/gcc-14.2.0.tar.xz"
-  sha256 "a7b39bc69cbf9e25826c5a60ab26477001f7c08d85cec04bc0e29cabed6f3cc9"
+  url "https://ftpmirror.gnu.org/gnu/gcc/gcc-15.2.0/gcc-15.2.0.tar.xz"
+  mirror "https://ftp.gnu.org/gnu/gcc/gcc-15.2.0/gcc-15.2.0.tar.xz"
+  sha256 "438fd996826b0c82485a29da03a72d71d6e3541a83ec702df4271f6fe025d24e"
   license "GPL-3.0-or-later" => { with: "GCC-exception-3.1" }
 
   livecheck do
@@ -11,13 +11,13 @@ class X8664ElfGcc < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "e410ed798be5c4ba44d2fb9c4bf9f7506939933380bd52513c2904db67cf30bf"
-    sha256 arm64_ventura:  "aac94896e8ef3a894319bbac0b172ff7c1818b43d5d3ee13ce71ebde92ffb9e4"
-    sha256 arm64_monterey: "2d39f6758c078920001953818b75794ed4101e3efb21f8a339e911ca12202893"
-    sha256 sonoma:         "6dfd845604de9054e5e417ee899c411866b500ab1383a202d7eb7c591117860d"
-    sha256 ventura:        "1e9401598b9342ea92ba43d206baecb963b7b351771be382f9e661df84aec586"
-    sha256 monterey:       "fa9fb09fe1d3671f5d953321e4795458295d6d29274ce6fb82506a2ef59ae2f1"
-    sha256 x86_64_linux:   "5fb43e6c2f02594b826ae95c121159a73fed2e1eee2dfc721af98a694e59d2c4"
+    rebuild 1
+    sha256 arm64_tahoe:   "c09336382ae4333e2e8f4f87bed391f86a47470a3432321a0f56c404c1146f36"
+    sha256 arm64_sequoia: "77f70f69f5c62e425fd619acfabba6efe710c92a04c1a1c9ec149aad59ee84b4"
+    sha256 arm64_sonoma:  "0e8de4013e8b6d1de430cf0444be0bc9400f391b1f6342373a82dc20fc7cd761"
+    sha256 sonoma:        "e6e89c590cd3487f158f988cf1863712045e517286c04ff610320dba1cecb0fb"
+    sha256 arm64_linux:   "69660b3b18050c91c9859d50d3406528769f9962151040832bb521c842333bad"
+    sha256 x86_64_linux:  "29f9506ffca0f41dbf6c866535ea4cef4dcdde626822d291adbdc27f3c6a0eac"
   end
 
   depends_on "gmp"
@@ -25,6 +25,10 @@ class X8664ElfGcc < Formula
   depends_on "mpfr"
   depends_on "x86_64-elf-binutils"
   depends_on "zstd"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     target = "x86_64-elf"
@@ -37,6 +41,7 @@ class X8664ElfGcc < Formula
                              "--without-headers",
                              "--with-as=#{Formula["x86_64-elf-binutils"].bin}/x86_64-elf-as",
                              "--with-ld=#{Formula["x86_64-elf-binutils"].bin}/x86_64-elf-ld",
+                             "--with-system-zlib",
                              "--enable-languages=c,c++"
       system "make", "all-gcc"
       system "make", "install-gcc"
@@ -49,14 +54,14 @@ class X8664ElfGcc < Formula
   end
 
   test do
-    (testpath/"test-c.c").write <<~EOS
+    (testpath/"test-c.c").write <<~C
       int main(void)
       {
         int i=0;
         while(i<10) i++;
         return i;
       }
-    EOS
+    C
 
     system bin/"x86_64-elf-gcc", "-c", "-o", "test-c.o", "test-c.c"
     output = shell_output("#{Formula["x86_64-elf-binutils"].bin}/x86_64-elf-objdump -a test-c.o")

@@ -9,39 +9,41 @@ class CfnFlip < Formula
   revision 2
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "01055e5f8a5045685b3da9ed70a81bb5fa5730454e412577ab23579b825a9c3e"
-    sha256 cellar: :any,                 arm64_ventura:  "71b0e42536f22e0adfa2091d5e88392f315bf988c55e13ab6589af81d2e70711"
-    sha256 cellar: :any,                 arm64_monterey: "877d34e0ac9abf259fc72838533e102b04a7e540babfcfe34614ea7621943854"
-    sha256 cellar: :any,                 sonoma:         "b0ae466eec5b183208d606e4f57c15b27d37c48cf20762b4490251fd8f5d6881"
-    sha256 cellar: :any,                 ventura:        "c2b101fe21682a4de75bd0ad5c26ae5a10154ac73ff307dd7ef69417b11b403f"
-    sha256 cellar: :any,                 monterey:       "c215ce2af31666abf8509021f247ae201894f428730403fcab9e0267d8aa2a6d"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "151c0281223f341ee9cbeef8a197007798592d0a6a2eb5a9e6c3c5c9de1f3e37"
+    rebuild 4
+    sha256 cellar: :any,                 arm64_tahoe:   "91cf666b7be505945d1297f00adaae08f845a5949371a5575a3b6f05877bdd47"
+    sha256 cellar: :any,                 arm64_sequoia: "beb6acb08ffbc695cd400c5fce04973519ba0cf0521562134de52d76c2a6a8d1"
+    sha256 cellar: :any,                 arm64_sonoma:  "b1c4ca4f9eb9015da077c27998e7b4e4406607566eb1a366327cb4d65b9700f5"
+    sha256 cellar: :any,                 sonoma:        "50abc0dcca0ad672acefca8f38926dbe775070472bb28b96f4d899755399256f"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "2fc33742bd230258121b4e247daea5aec24567465769ab928f4fcb270630cd7f"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "1aa60a3fda02c52177a0b6497ba0c7e35a00972d0126a9f78bd2ac179893d22c"
   end
 
   depends_on "libyaml"
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   resource "click" do
-    url "https://files.pythonhosted.org/packages/96/d3/f04c7bfcf5c1862a2a5b845c6b2b360488cf47af55dfa79c98f6a6bf98b5/click-8.1.7.tar.gz"
-    sha256 "ca9853ad459e787e2192211578cc907e7594e294c7ccc834310722b41b9ca6de"
+    url "https://files.pythonhosted.org/packages/46/61/de6cd827efad202d7057d93e0fed9294b96952e188f7384832791c7b2254/click-8.3.0.tar.gz"
+    sha256 "e7b8232224eba16f4ebe410c25ced9f7875cb5f3263ffc93cc3e8da705e229c4"
   end
 
   resource "pyyaml" do
-    url "https://files.pythonhosted.org/packages/cd/e5/af35f7ea75cf72f2cd079c95ee16797de7cd71f29ea7c68ae5ce7be1eda0/PyYAML-6.0.1.tar.gz"
-    sha256 "bfdf460b1736c775f2ba9f6a92bca30bc2095067b8a9d77876d1fad6cc3b4a43"
+    url "https://files.pythonhosted.org/packages/05/8e/961c0007c59b8dd7729d542c61a4d537767a59645b82a0b521206e1e25c2/pyyaml-6.0.3.tar.gz"
+    sha256 "d76623373421df22fb4cf8817020cbb7ef15c725b9d5e45f17e189bfc384190f"
   end
 
   resource "six" do
-    url "https://files.pythonhosted.org/packages/71/39/171f1c67cd00715f190ba0b100d606d440a28c93c7714febeca8b79af85e/six-1.16.0.tar.gz"
-    sha256 "1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"
+    url "https://files.pythonhosted.org/packages/94/e7/b2c673351809dca68a0e064b6af791aa332cf192da575fd474ed7d6f16a2/six-1.17.0.tar.gz"
+    sha256 "ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81"
   end
 
   def install
     virtualenv_install_with_resources
+
+    generate_completions_from_executable(bin/"cfn-flip", shell_parameter_format: :click)
   end
 
   test do
-    (testpath/"test.json").write <<~EOS
+    (testpath/"test.json").write <<~JSON
       {
         "Resources": {
           "Bucket": {
@@ -54,15 +56,15 @@ class CfnFlip < Formula
           }
         }
       }
-    EOS
+    JSON
 
-    expected = <<~EOS
+    expected = <<~YAML
       Resources:
         Bucket:
           Type: AWS::S3::Bucket
           Properties:
             BucketName: !Ref 'AWS::StackName'
-    EOS
+    YAML
 
     assert_match expected, shell_output("#{bin}/cfn-flip test.json")
   end

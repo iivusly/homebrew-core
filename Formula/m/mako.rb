@@ -1,25 +1,24 @@
 class Mako < Formula
   desc "Production-grade web bundler based on Rust"
   homepage "https://makojs.dev"
-  url "https://registry.npmjs.org/@umijs/mako/-/mako-0.8.7.tgz"
-  sha256 "e75c955309be49db608203e72fdaade737f40d312308b78034bb4f0dd144e8ee"
+  url "https://registry.npmjs.org/@umijs/mako/-/mako-0.11.15.tgz"
+  sha256 "dbb00cf6478daff39eb97de02c144a5b2552094b7c097dd2166a55968731cbab"
   license "MIT"
 
   bottle do
-    sha256                               arm64_sonoma:   "28149b45903444ce1a30a613f1efedae31ac1dc15c585106f73ebd5cd182c9ae"
-    sha256                               arm64_ventura:  "49c0da41e096eba8e9d9a1b5091855b6d1a091ca53837f2cc4d5cd78caedf979"
-    sha256                               arm64_monterey: "174686beaaed7a4451e04b26fb2f29dbd00ff52068b2f8fe1093de3262fa9f4b"
-    sha256                               sonoma:         "2ae9fea598f69e2f6ef36867c225603e05f4fe7f74f484d05cf8edc73dbb7729"
-    sha256                               ventura:        "d965903692a3d72683dbf894ba1b792cd6799d4c38f4b46dfbec8eec6287f80d"
-    sha256                               monterey:       "58ef827fb659afada69386d883a52378ec80eb6d75b4bae150231a2340a383d2"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "e4e56c80b023c363455eff7d350ef1587942af8e339bb0f59ddc670f8acacc0c"
+    sha256 cellar: :any,                 arm64_tahoe:   "63d5c1b3555f8c3b4ca57b1582f0ae84a201ef17082fde72075118f319afa7a2"
+    sha256 cellar: :any,                 arm64_sequoia: "2bc72acf40db0cb4c619d718afbead3f46ee5f13d6cac6913436597a51955392"
+    sha256 cellar: :any,                 arm64_sonoma:  "2bc72acf40db0cb4c619d718afbead3f46ee5f13d6cac6913436597a51955392"
+    sha256 cellar: :any,                 sonoma:        "d7b4e42daf4872f46d9fb6336e3abd8a12387573b1070b2ecf398a43bc93373b"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "f4fda26cdd0ca34b72f8c0586a6eeffbebb88b39395b1a406b28423de6331627"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "b1820c8d230657278544b24bd1b48d8363377a5a0fc3ca9b5d9252c273d7ad70"
   end
 
   depends_on "node"
 
   def install
     system "npm", "install", *std_npm_args
-    bin.install_symlink Dir["#{libexec}/bin/*"]
+    bin.install_symlink libexec.glob("bin/*")
 
     # Remove incompatible pre-built binaries
     os = OS.kernel_name.downcase

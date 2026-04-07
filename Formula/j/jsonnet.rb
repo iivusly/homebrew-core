@@ -1,8 +1,8 @@
 class Jsonnet < Formula
   desc "Domain specific configuration language for defining JSON data"
   homepage "https://jsonnet.org/"
-  url "https://github.com/google/jsonnet/archive/refs/tags/v0.20.0.tar.gz"
-  sha256 "77bd269073807731f6b11ff8d7c03e9065aafb8e4d038935deb388325e52511b"
+  url "https://github.com/google/jsonnet/archive/refs/tags/v0.22.0.tar.gz"
+  sha256 "5914b9904d97efa662d919519cef1a14e4132bfddddaeed8b061b4a8af628f8d"
   license "Apache-2.0"
   head "https://github.com/google/jsonnet.git", branch: "master"
 
@@ -12,15 +12,12 @@ class Jsonnet < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "ccaf3138589f7378e7fbcf5fb30a2fc9c2d5ac0a6e2caacd50f69e5918d1719b"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "03ec1379d7d5378af1ac82ba694e6de7bbc4cecd2f3ef6c764319289e0543dd9"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "7257a1daa4372d40f359b43243d30954367e52b162ec27893175fdb1036602ad"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "d3093c17684dda91a5b4bff1096fea38eaa7d5167326e93143b32afb1ae090cc"
-    sha256 cellar: :any_skip_relocation, sonoma:         "1e5b28337c0272c443e96387ce6f339fed9aa0b2a064118df6b42840ea7f7292"
-    sha256 cellar: :any_skip_relocation, ventura:        "0e43c89b55909edbe4d9afe85c6da8e6ae31e148ec91ff494eb7e4a3115fd4bb"
-    sha256 cellar: :any_skip_relocation, monterey:       "08c2a197781b175611f446838028d3a9c23982c0d6031af98cf6408ebc24a6a8"
-    sha256 cellar: :any_skip_relocation, big_sur:        "468ec8c830e8cb239534389e54eb086a78b5b4b9261ae0a174a2ad40cfb792d2"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "3c93bb362a5b6c22590afb2ba44ab597ae623cddc650d8bc1a65eae169c43105"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "66a5ccefe36864188b76ab72a876281e0f84aa043d340763b746ac2affceae86"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "1ba072f6520c7d86667c2e69bd4d2aad4c0233d5162fd7c69fdb232d5c821986"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "821dcfaebdfc20b7af5cb518b7a38108abab34987eec98ce741f8eaf1a4eed5f"
+    sha256 cellar: :any_skip_relocation, sonoma:        "468b1b3a4f75fbf73b33033b143f64cb87f53989f7475de2b08968d563b0c1e2"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "017b5d0b4e17d47c2ebad8a34e976eb2e634cef232af744a329aea5c6baa4bfa"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "2867f7ad19c7c37f6efc5e53b4695e2b8352bb7d10f6f6cb25bbb80a35964890"
   end
 
   conflicts_with "go-jsonnet", because: "both install binaries with the same name"
@@ -33,7 +30,7 @@ class Jsonnet < Formula
   end
 
   test do
-    (testpath/"example.jsonnet").write <<~EOS
+    (testpath/"example.jsonnet").write <<~JSONNET
       {
         person1: {
           name: "Alice",
@@ -41,7 +38,7 @@ class Jsonnet < Formula
         },
         person2: self.person1 { name: "Bob" },
       }
-    EOS
+    JSONNET
 
     expected_output = {
       "person1" => {

@@ -1,18 +1,19 @@
 class Pylyzer < Formula
   desc "Fast static code analyzer & language server for Python"
   homepage "https://github.com/mtshiba/pylyzer"
-  url "https://github.com/mtshiba/pylyzer/archive/refs/tags/v0.0.61.tar.gz"
-  sha256 "fef6872880b51353f33513e8c1b3a94a8981dd702c8b1b452d1ea39214677ebe"
+  url "https://github.com/mtshiba/pylyzer/archive/refs/tags/v0.0.82.tar.gz"
+  sha256 "c2b30b29764321ba2f2be50cbeded24add03bc17a663a92825b1bce8a60ba24c"
   license "MIT"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "0ff10eb6de4ad1d6bd154d4800cf28f47898ead88f8b1df110b1ad62705048b3"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "f55bddced3c3fe3a0e8365c71edfb23d8af84c40d1cc2f82af52fecafd24f211"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "f7f15fd85eb6c65292dab383439399a5d99c150be4a1b33e40c3670c1e19416a"
-    sha256 cellar: :any_skip_relocation, sonoma:         "08cd9852d3de9335b37272f23936b178912fcff303c273ffc5abc6395cf9d538"
-    sha256 cellar: :any_skip_relocation, ventura:        "910dbb6132d9d90182df1c2d07efc64f650b597bc8c1820f9c4d782836dc571d"
-    sha256 cellar: :any_skip_relocation, monterey:       "07f6e3ac44945e6ab72edf5a279aa854d047b68cc1e1ade1db606af9bcd2e020"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "652912b27c5a3ce8bae40ae65f606dc54dfe1e3e3deb49f8a37d486053b8425c"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "f2679c879365d5385c2833d37469b4e68b23f033a88e1ee7fc894b65199eeed1"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "384c45ef35a14321ec11e8de0940b8f7ce1dcf78f99221aacc61c12e70d8cb39"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "1899d17ec224e0d9381499ed1c45b76cefb49e6a9fb2c36ac09095a1587c29b8"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "8978544d1715bb35ac3ba1008f8c35f24657809848762d1ba6763ec0e666c37f"
+    sha256 cellar: :any_skip_relocation, sonoma:        "26b44bdeb0c056279e0d33784763085902559b0e886e956d6df31681105b594a"
+    sha256 cellar: :any_skip_relocation, ventura:       "62e11efa74eb3ddf6889c89c5a8103091f676f3b0c879d8f9c76337cf2ea40dd"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "eaddb80359ab329ac866d56826ae40004d3b2c62d027a5637e275fde7bddc534"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "da07ee959c8519069c6846ded47178f8564265755851c1e65d794e03756182fe"
   end
 
   depends_on "rust" => :build
@@ -26,9 +27,9 @@ class Pylyzer < Formula
   end
 
   test do
-    (testpath/"test.py").write <<~EOS
+    (testpath/"test.py").write <<~PYTHON
       print("test")
-    EOS
+    PYTHON
 
     expected = <<~EOS
       \e[94mStart checking\e[m: test.py

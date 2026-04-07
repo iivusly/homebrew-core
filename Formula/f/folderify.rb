@@ -1,22 +1,19 @@
 class Folderify < Formula
   desc "Generate pixel-perfect macOS folder icons in the native style"
   homepage "https://github.com/lgarron/folderify"
-  url "https://github.com/lgarron/folderify/archive/refs/tags/v4.0.0.tar.gz"
-  sha256 "8a103f496cacc0fec72bb0d3847a630e38c49dba98dd334bbf89cb6273ec8b64"
+  url "https://github.com/lgarron/folderify/archive/refs/tags/v4.1.3.tar.gz"
+  sha256 "3a50b66b888754047931969d9a1fb84178406b638c183a387a58deb48529776a"
   license "MIT"
   head "https://github.com/lgarron/folderify.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "0219485b57420beaa462004c573c9fe8b55a56b3174e527f506adfdd216a28f1"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "302dbc5c7cf6c8cba6f7dfb54361b0a0e81a54ca10ad43c5410ee40770f06c53"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "cd4b774735fb5a2a8e318f19c438402c3b940164df49eb437b3b3fafa4aa4893"
-    sha256 cellar: :any_skip_relocation, sonoma:         "ccd32e6a64d7325cb151b84b678737285322a329659ae32dc4706405d39e179b"
-    sha256 cellar: :any_skip_relocation, ventura:        "5bb9b2ce71041402517f138f1e83fa829a8996d4a57d0cc715fa297eea8f41d3"
-    sha256 cellar: :any_skip_relocation, monterey:       "028c0a48489a0ec026c236ab146ab56c8984c788e814bef94b606c7dde1d96ab"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "bb1bc0263bc8da3aa0bd69a2665c5aabb9b423b333f52a1249597e0911e96eb8"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "714a45038bc2eea879d55859ce88e300076ad684eda9638893fbac1a3d2e3e3d"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "de5899d2af9dd54842d8b682299ee00c30ad4c9f0e0ce85540323956f83c99cb"
+    sha256 cellar: :any_skip_relocation, sonoma:        "d6df8796639c101a2eda752ebc75c50a5fffbd6bf42b416a9966fc58dc856f5d"
   end
 
   depends_on "rust" => :build
-  depends_on xcode: :build
   depends_on "imagemagick"
   depends_on :macos
 
@@ -28,12 +25,15 @@ class Folderify < Formula
 
   test do
     # Write an example icon to a file.
-    File.write("test.svg", '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-      <circle cx="50" cy="50" r="40" fill="transparent" stroke="black" stroke-width="20" /></svg>')
+    (testpath/"test.svg").write <<~EOS
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="40" fill="transparent" stroke="black" stroke-width="20" />
+      </svg>
+    EOS
 
     # folderify applies the test icon to a folder
     system bin/"folderify", "test.svg", testpath.to_s
     # Tests for the presence of the file icon
-    assert_predicate testpath / "Icon\r", :exist?
+    assert_path_exists testpath/"Icon\r"
   end
 end

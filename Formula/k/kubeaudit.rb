@@ -7,14 +7,18 @@ class Kubeaudit < Formula
   head "https://github.com/Shopify/kubeaudit.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "009138418c76bbb04d6a36a782c0c5723716f96490d97d97787de7d86862a4a5"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "009138418c76bbb04d6a36a782c0c5723716f96490d97d97787de7d86862a4a5"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "009138418c76bbb04d6a36a782c0c5723716f96490d97d97787de7d86862a4a5"
-    sha256 cellar: :any_skip_relocation, sonoma:         "c1bf1c8cf11944344d9002d983def83ba27189cc5f29f248afcbabb1c2db6750"
-    sha256 cellar: :any_skip_relocation, ventura:        "c1bf1c8cf11944344d9002d983def83ba27189cc5f29f248afcbabb1c2db6750"
-    sha256 cellar: :any_skip_relocation, monterey:       "c1bf1c8cf11944344d9002d983def83ba27189cc5f29f248afcbabb1c2db6750"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "36c94b606075a297fd812aa94fa7c8c95f5cac0dcec866d0f3d6d7c6ec6e8a74"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "ed7e03a89484195517aa271235e43c8c9a9a3a3f85bb8ab5984c5c51a08dc9b1"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "ed7e03a89484195517aa271235e43c8c9a9a3a3f85bb8ab5984c5c51a08dc9b1"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "ed7e03a89484195517aa271235e43c8c9a9a3a3f85bb8ab5984c5c51a08dc9b1"
+    sha256 cellar: :any_skip_relocation, sonoma:        "2dac6e3a8165ed695647bbecb20db5812bd0e6af8b71cdfc02a711b7b6ac8740"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "47a3f26a2b6da84e82db2c19f0563f0e25831b36958b503580539de658e399f6"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "9065ca35ea616d7e86b5be5c1a521880b56227dca2553e308f44b06c13d094b1"
   end
+
+  # https://github.com/Shopify/kubeaudit/pull/594
+  deprecate! date: "2025-01-10", because: :repo_archived, replacement_formula: "kube-bench"
+  disable! date: "2026-01-10", because: :repo_archived, replacement_formula: "kube-bench"
 
   depends_on "go" => :build
 
@@ -27,11 +31,11 @@ class Kubeaudit < Formula
 
     system "go", "build", *std_go_args(ldflags:), "./cmd"
 
-    generate_completions_from_executable(bin/"kubeaudit", "completion")
+    generate_completions_from_executable(bin/"kubeaudit", shell_parameter_format: :cobra)
   end
 
   test do
-    output = shell_output(bin/"kubeaudit --kubeconfig /some-file-that-does-not-exist all 2>&1", 1).chomp
+    output = shell_output("#{bin}/kubeaudit --kubeconfig /some-file-that-does-not-exist all 2>&1", 1).chomp
     assert_match "failed to open kubeconfig file /some-file-that-does-not-exist", output
   end
 end

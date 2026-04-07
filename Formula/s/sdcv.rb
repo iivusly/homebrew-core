@@ -8,25 +8,36 @@ class Sdcv < Formula
   head "https://github.com/Dushistov/sdcv.git", branch: "master"
 
   bottle do
-    sha256 arm64_sonoma:   "7c16b9b5e5b3ae014c182f84df89c800bd60cf9da4a0b1c0fda724dfb42d991c"
-    sha256 arm64_ventura:  "f04de637dc02721d831e83b089b85bfc985556faaac0070fefe22a3cc7092170"
-    sha256 arm64_monterey: "2f225971eef6a6f8b7b38132e08849c973126533a6e9089f9362674136d178c6"
-    sha256 arm64_big_sur:  "2ec8a144f854c615c2e461205ab7ee9ac323ebed46ab7c00067aaf021bea0c88"
-    sha256 sonoma:         "642c8bf7dddb3cda5cc973a74bec82fcddd7ea887e29204147f9337bd70901ab"
-    sha256 ventura:        "1f634180a15ceeb5f96805722e3e885dd7e55abfb8a60cedc5628aac51b9d026"
-    sha256 monterey:       "6b6f6f0cc8a7b79c11c540dd09ab258f67f8effb4c3b9222eb24c6fe7422de23"
-    sha256 big_sur:        "b9500af174861ad2fabb36db77642ff700c2b04c74f0008abb157deac4f4598e"
-    sha256 x86_64_linux:   "1d48958b5768fd52938d5358be25d96911066e0b738b0bc75497aae904c98d96"
+    rebuild 1
+    sha256 arm64_tahoe:   "d9e4a0a1b41d6d46b30202780982c90aff2d19cee7333b5f1e9d0da18cf68f52"
+    sha256 arm64_sequoia: "507d6ed1c271d67f1803267eacffaec3b80dc1bb028683e6461874f0656a7937"
+    sha256 arm64_sonoma:  "325be709ff03b8fc16ab595119d730066cc2299b3b8b214b4d20a8cf467e0d5b"
+    sha256 sonoma:        "a6a1dde20c0f583b113044908921e95fc76a3ad14195e68e242e0aa2bb6ce255"
+    sha256 arm64_linux:   "c48568253dc9cfbcdfe4f4aa520303a3d6cd51cffc2e4b88b8c2a39e2c94271f"
+    sha256 x86_64_linux:  "d01d6330eecd4858e0c73ea360a0f6870ce3004f7c97bce3284c64a9ae850d6f"
   end
 
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
+  depends_on "gettext" => :build
+  depends_on "pkgconf" => :build
 
-  depends_on "gettext"
   depends_on "glib"
   depends_on "readline"
 
-  uses_from_macos "zlib"
+  on_macos do
+    depends_on "gettext"
+  end
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
+
+  # fix type mismatch and memory deallocation build errors
+  # upstream PR ref, https://github.com/Dushistov/sdcv/pull/103
+  patch do
+    url "https://github.com/Dushistov/sdcv/commit/c2bb4e3fe51f9b9940440ea81d5d97b56d5582e7.patch?full_index=1"
+    sha256 "70c4c826c2dcd4c0aad5fa8f27b7e079f4461cfbbb380b4726aa4dfd8fb75a1c"
+  end
 
   def install
     system "cmake", "-S", ".", "-B", "build", *std_cmake_args

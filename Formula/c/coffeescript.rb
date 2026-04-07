@@ -17,7 +17,7 @@ class Coffeescript < Formula
 
   def install
     system "npm", "install", *std_npm_args
-    bin.install_symlink Dir["#{libexec}/bin/*"]
+    bin.install_symlink libexec.glob("bin/*")
   end
 
   test do
@@ -34,6 +34,6 @@ class Coffeescript < Formula
     EOS
 
     system bin/"coffee", "--compile", "test.coffee"
-    assert_predicate testpath/"test.js", :exist?, "test.js was not generated"
+    assert_path_exists testpath/"test.js", "test.js was not generated"
   end
 end

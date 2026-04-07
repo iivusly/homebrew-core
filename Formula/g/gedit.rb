@@ -1,25 +1,18 @@
 class Gedit < Formula
   desc "GNOME text editor"
   homepage "https://gedit-technology.github.io/apps/gedit/"
-  url "https://download.gnome.org/sources/gedit/47/gedit-47.0.tar.xz"
-  sha256 "fa4a597e34c76d4ac91431b5ae6e191c96c6b0af1702e0899ab35199edfa1bfa"
+  url "https://gitlab.gnome.org/World/gedit/gedit/-/archive/50.0/gedit-50.0.tar.bz2"
+  sha256 "c2d064001b95196f046a6f9705245e3a02dc427265f4e24af9bd2d5f3cb619ee"
   license "GPL-2.0-or-later"
-
-  # gedit doesn't seem to follow the typical GNOME version scheme, so we
-  # provide a regex to disable the `Gnome` strategy's version filtering.
-  livecheck do
-    url :stable
-    regex(/gedit[._-]v?(\d+(?:\.\d+)+)\.t/i)
-  end
+  revision 1
 
   bottle do
-    sha256 arm64_sonoma:   "dd584b18e86c5235a5489d70ff5d9e9b592029ed8695d91e4be0668d0cd57d49"
-    sha256 arm64_ventura:  "bb6e0bb90be7ac45bf541e6682eca988a08178d28a37705c959cb3a0e3667e1b"
-    sha256 arm64_monterey: "de2b6d26a133ad1dbe1e4e9f549210bbaa0af08753f6508d97193032be9d73f0"
-    sha256 sonoma:         "f4f2363f23697b099ee4203b7b04e4fb7fcd272de677c4098a3ecfcae9520477"
-    sha256 ventura:        "225c6cc2e8c21d272519b387a48776a2ff0fffe6a1f1145a4e76aeca88f21143"
-    sha256 monterey:       "4d491cf75ae5637ad53f83930628ce2a4321c698082a33f41c546304da2cc040"
-    sha256 x86_64_linux:   "d44f0ce398f5a58684a6797d457a6056b4f976e8bce80d93b14b4e831a94e79b"
+    sha256 arm64_tahoe:   "7ab23f8b77bacabdc5c44b8dbd1a723d6e3466520ec79efba32c317992b9780e"
+    sha256 arm64_sequoia: "37c41e7231cf0347a22679a0e93538a583256f18ec8f6e80e2dacc746b98abad"
+    sha256 arm64_sonoma:  "9c557f5e3353b2f47bed28cb382f154ddbe00e9093756e848bf5c9accd5d4fb5"
+    sha256 sonoma:        "c0de076352635b54021b8f2071a7b165560bce4d38c71080da5a9bd9a4462420"
+    sha256 arm64_linux:   "b67918659a932d7e8773cfce2841874fd440811ec088abefd89da0518901a1ca"
+    sha256 x86_64_linux:  "2e2bb9743758ec4e03af79652116c9ed9a52957360bcf9eaea61aecab70b4c3a"
   end
 
   depends_on "desktop-file-utils" => :build # for update-desktop-database
@@ -29,7 +22,7 @@ class Gedit < Formula
   depends_on "itstool" => :build
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => [:build, :test]
+  depends_on "pkgconf" => [:build, :test]
 
   depends_on "adwaita-icon-theme"
   depends_on "cairo"
@@ -44,7 +37,6 @@ class Gedit < Formula
   depends_on "libgedit-gtksourceview"
   depends_on "libgedit-tepl"
   depends_on "libpeas@1"
-  depends_on "libxml2"
   depends_on "pango"
 
   on_macos do
@@ -52,9 +44,25 @@ class Gedit < Formula
     depends_on "gtk-mac-integration"
   end
 
+  resource "libgd" do
+    url "https://gitlab.gnome.org/GNOME/libgd/-/archive/c7c7ff4e05d3fe82854219091cf116cce6b19de0.tar.bz2"
+    version "c7c7ff4e05d3fe82854219091cf116cce6b19de0"
+    sha256 "343abb090461d011dfb1bce5b5da1dfbc9f6c7b6b3223a1b322adb33675212c1"
+
+    livecheck do
+      url "https://gitlab.gnome.org/api/v4/projects/World%2Fgedit%2Fgedit/repository/files/subprojects%2Flibgd?ref=#{LATEST_VERSION}"
+      strategy :json do |json|
+        json["blob_id"]
+      end
+    end
+  end
+
   def install
+    resource("libgd").stage buildpath/"subprojects/libgd"
+
     ENV["DESTDIR"] = "/"
     ENV["XML_CATALOG_FILES"] = "#{etc}/xml/catalog"
+    ENV.append_to_cflags "-Wno-implicit-function-declaration"
     ENV.append "LDFLAGS", "-Wl,-rpath,#{lib}/gedit" if OS.linux?
 
     system "meson", "setup", "build", *std_meson_args
@@ -74,16 +82,16 @@ class Gedit < Formula
     # main executable test
     system bin/"gedit", "--version"
     # API test
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <gedit/gedit-debug.h>
 
       int main(int argc, char *argv[]) {
         gedit_debug_init();
         return 0;
       }
-    EOS
+    C
 
-    flags = shell_output("pkg-config --cflags --libs gedit").chomp.split
+    flags = shell_output("pkgconf --cflags --libs gedit").chomp.split
     flags << "-Wl,-rpath,#{lib}/gedit" if OS.linux?
     system ENV.cc, "test.c", "-o", "test", *flags
     system "./test"

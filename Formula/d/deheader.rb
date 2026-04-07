@@ -3,48 +3,44 @@ class Deheader < Formula
 
   desc "Analyze C/C++ files for unnecessary headers"
   homepage "http://www.catb.org/~esr/deheader/"
-  url "http://www.catb.org/~esr/deheader/deheader-1.10.tar.gz"
-  sha256 "909d2683a3e62da54bfc660814b4d8af93f582e23858810cc41bfa081571f593"
+  url "https://gitlab.com/esr/deheader/-/archive/1.12/deheader-1.12.tar.bz2"
+  sha256 "08ca718429db0d3fbe4388d62239d6604a08f979a5421fc4f1a1b55cb688a4d3"
   license "BSD-2-Clause"
+  head "https://gitlab.com/esr/deheader.git", branch: "master"
 
+  # The homepage links to the `stable` tarball but it can take longer than the
+  # ten second livecheck timeout, so we check the Git tags as a workaround.
   livecheck do
-    url :homepage
-    regex(/href=.*?deheader[._-]v?(\d+(?:\.\d+)+)\.t/i)
+    url :head
+    regex(/^v?(\d+(?:\.\d+)+)$/i)
   end
 
   bottle do
-    rebuild 2
-    sha256 cellar: :any_skip_relocation, all: "fa33da4be1663b6022f8fd5ca847d56f779d8d69538ad3035e034af160a15b02"
+    sha256 cellar: :any_skip_relocation, all: "a50361d052ca4a600d876ef7f12a4286551f3bbe2fe72645d8c856e98aa3c230"
   end
 
-  head do
-    url "https://gitlab.com/esr/deheader.git", branch: "master"
-    depends_on "xmlto" => :build
-  end
+  depends_on "asciidoctor" => :build
 
-  depends_on "python@3.12"
+  uses_from_macos "python"
 
   def install
-    if build.head?
-      ENV["XML_CATALOG_FILES"] = etc/"xml/catalog"
-      system "make"
-    end
+    system "asciidoctor", "-b", "manpage", "deheader.adoc"
 
     bin.install "deheader"
     man1.install "deheader.1"
 
-    rewrite_shebang detected_python_shebang, bin/"deheader"
+    rewrite_shebang detected_python_shebang(use_python_from_path: true), bin/"deheader"
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <stdio.h>
       #include <string.h>
       int main(void) {
         printf("%s", "foo");
         return 0;
       }
-    EOS
+    C
     assert_equal "121", shell_output("#{bin}/deheader test.c | tr -cd 0-9")
   end
 end

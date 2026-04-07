@@ -1,9 +1,10 @@
 class Cp2k < Formula
   desc "Quantum chemistry and solid state physics software package"
   homepage "https://www.cp2k.org/"
-  url "https://github.com/cp2k/cp2k/releases/download/v2024.2/cp2k-2024.2.tar.bz2"
-  sha256 "cc3e56c971dee9e89b705a1103765aba57bf41ad39a11c89d3de04c8b8cdf473"
+  url "https://github.com/cp2k/cp2k/releases/download/v2026.1/cp2k-2026.1.tar.bz2"
+  sha256 "4364c74bcffaa474bc234e11686b09550e4d06932acf2147a341e4f7679dd88e"
   license "GPL-2.0-or-later"
+  revision 1
 
   livecheck do
     url :stable
@@ -11,19 +12,22 @@ class Cp2k < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "b85ef0c8c0bb5e1dc8b8b10078e4e3c52fef22e8798add13a37acc90a9f277fa"
-    sha256 arm64_ventura:  "678a47ec0e02109f7e10e54cc2a0ac33662ebf9fed36540e13854d4e361e27cf"
-    sha256 arm64_monterey: "831b1783bb4a8e2660da3246f5cecdcb9d5e903e2e7d8477c725f7e409d7552a"
-    sha256 sonoma:         "352d8243211e8f6c0dc97e3d3761a0f0f6c4bfeda8fc5c368efa7bdf5ac21658"
-    sha256 ventura:        "92aceded178ca6bbe4f879a23c21defcb302a44a668526de1d989a3c37d84630"
-    sha256 monterey:       "6e6fddb40bfcdd67fb82eca9ab04fe2a19009fcbd939bc3d9caddf0fd69c9cd4"
-    sha256 x86_64_linux:   "c38c86e94d9f05e77adf596b1b4431f5ad89b98c6116c8ab335230910f5e3a1e"
+    sha256 arm64_tahoe:   "07bc22355e467c9d4e8b65013e9d370b01d099fd011e3758b1371ce1acf9b5a0"
+    sha256 arm64_sequoia: "76fb2d301939f06439dac5c3041d616e540facd946336d719aadbd0fb5d3c4d6"
+    sha256 arm64_sonoma:  "1abf089ae43d3df9b99fccb910c35d608d7afa3d84dd95ce65e2aff6da503a14"
+    sha256 sonoma:        "6bff1f36dd36d4a4da5d87625a4869e558d005388268638bb13065f3e58aa9fe"
+    sha256 arm64_linux:   "2df56fdcdadda4a0f684872a13095d462fa64a9436c0358e2036b318562ed715"
+    sha256 x86_64_linux:  "933366a7dfaa3353854c2e803c25bd9c8272a0fcd979e28c34abd230dab052a1"
   end
 
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
+  depends_on "fypp" => :build
+  depends_on "pkgconf" => :build
+
+  depends_on "dbcsr"
   depends_on "fftw"
   depends_on "gcc" # for gfortran
+  depends_on "libint"
   depends_on "libxc"
   depends_on "open-mpi"
   depends_on "openblas"
@@ -31,70 +35,48 @@ class Cp2k < Formula
 
   uses_from_macos "python" => :build
 
-  fails_with :clang # needs OpenMP support
-
-  resource "libint" do
-    url "https://github.com/cp2k/libint-cp2k/releases/download/v2.6.0/libint-v2.6.0-cp2k-lmax-5.tgz"
-    sha256 "1cd72206afddb232bcf2179c6229fbf6e42e4ba8440e701e6aa57ff1e871e9db"
+  on_macos do
+    depends_on "libomp"
   end
 
   def install
-    resource("libint").stage do
-      system "./configure", "--enable-fortran", "--with-pic", *std_configure_args(prefix: libexec)
-      system "make"
-      ENV.deparallelize { system "make", "install" }
-      ENV.prepend_path "PKG_CONFIG_PATH", libexec/"lib/pkgconfig"
-    end
-
-    # TODO: Remove dbcsr build along with corresponding CMAKE_PREFIX_PATH
-    # and add -DCP2K_BUILD_DBCSR=ON once `cp2k` build supports this option.
-    system "cmake", "-S", "exts/dbcsr", "-B", "build_psmp/dbcsr",
-                    "-DWITH_EXAMPLES=OFF",
-                    *std_cmake_args(install_prefix: libexec)
-    system "cmake", "--build", "build_psmp/dbcsr"
-    system "cmake", "--install", "build_psmp/dbcsr"
-    # Need to build another copy for non-MPI variant.
-    system "cmake", "-S", "exts/dbcsr", "-B", "build_ssmp/dbcsr",
-                    "-DUSE_MPI=OFF",
-                    "-DWITH_EXAMPLES=OFF",
-                    *std_cmake_args(install_prefix: buildpath/"dbcsr")
-    system "cmake", "--build", "build_ssmp/dbcsr"
-    system "cmake", "--install", "build_ssmp/dbcsr"
+    # Avoid over-optimizing fortran code as we don't have a shim for gfortran
+    optflags = ENV["HOMEBREW_OPTFLAGS"].to_s.split.join(";")
+    inreplace "cmake/CompilerConfiguration.cmake", "-march=native;-mtune=native", optflags
 
     # Avoid trying to access /proc/self/statm on macOS
     ENV.append "FFLAGS", "-D__NO_STATM_ACCESS" if OS.mac?
 
-    # Set -lstdc++ to allow gfortran to link libint
-    cp2k_cmake_args = %w[
-      -DCMAKE_SHARED_LINKER_FLAGS=-lstdc++
+    args = %W[
+      -DBUILD_SHARED_LIBS=ON
+      -DCMAKE_INSTALL_RPATH=#{rpath}
       -DCP2K_BLAS_VENDOR=OpenBLAS
+      -DCP2K_USE_FFTW3=ON
       -DCP2K_USE_LIBINT2=ON
       -DCP2K_USE_LIBXC=ON
-    ] + std_cmake_args
+      -DCP2K_USE_MPI=ON
+      -DCP2K_USE_MPI_F08=ON
+    ]
+    if OS.mac?
+      args += %W[
+        -DOpenMP_Fortran_LIB_NAMES=omp
+        -DOpenMP_omp_LIBRARY=#{Formula["libomp"].opt_lib}/libomp.dylib
+      ]
+    end
 
-    system "cmake", "-S", ".", "-B", "build_psmp/cp2k",
-                    "-DCMAKE_INSTALL_RPATH=#{rpath}",
-                    "-DCMAKE_PREFIX_PATH=#{libexec}",
-                    *cp2k_cmake_args
-    system "cmake", "--build", "build_psmp/cp2k"
-    system "cmake", "--install", "build_psmp/cp2k"
-
-    # Only build the main executable for non-MPI variant as libs conflict.
-    # Can consider shipping MPI and non-MPI variants as separate formulae
-    # or removing one variant depending on usage.
-    system "cmake", "-S", ".", "-B", "build_ssmp/cp2k",
-                    "-DBUILD_SHARED_LIBS=OFF",
-                    "-DCMAKE_PREFIX_PATH=#{buildpath}/dbcsr;#{libexec}",
-                    "-DCP2K_USE_MPI=OFF",
-                    *cp2k_cmake_args
-    system "cmake", "--build", "build_ssmp/cp2k", "--target", "cp2k-bin"
-    bin.install Dir["build_ssmp/cp2k/bin/*.ssmp"]
-
+    system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
+    system "cmake", "--build", "build"
+    system "cmake", "--install", "build"
     (pkgshare/"tests").install "tests/Fist/water.inp"
   end
 
   test do
-    system bin/"cp2k.ssmp", pkgshare/"tests/water.inp"
-    system "mpirun", bin/"cp2k.psmp", pkgshare/"tests/water.inp"
+    if OS.mac?
+      require "utils/linkage"
+      libgomp = Formula["gcc"].opt_lib/"gcc/current/libgomp.dylib"
+      refute Utils.binary_linked_to_library?(lib/"libcp2k.dylib", libgomp), "Unwanted linkage to libgomp!"
+    end
+
+    system Formula["open-mpi"].bin/"mpirun", bin/"cp2k.psmp", pkgshare/"tests/water.inp"
   end
 end

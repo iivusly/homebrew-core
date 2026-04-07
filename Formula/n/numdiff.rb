@@ -12,6 +12,8 @@ class Numdiff < Formula
   end
 
   bottle do
+    sha256 cellar: :any,                 arm64_tahoe:    "54f00b428c20f3de9065177cbc84a59cffb9865351b4062ea429b337197c2c8b"
+    sha256 cellar: :any,                 arm64_sequoia:  "5cb5945e56139a742bd1887a3b8a97affe5cb10bac1cafbb5cb40a5b1a70e28d"
     sha256 cellar: :any,                 arm64_sonoma:   "49e592dbd55f5df5add8f7a7814d349cbb150546f672ddca22d12e489ff65fde"
     sha256 cellar: :any,                 arm64_ventura:  "109d8e428ace4ef6d70dc8ded51bec5d0510906e07c9ee4b3e32143f5054c82c"
     sha256 cellar: :any,                 arm64_monterey: "bdd0116d55164e3704b948d8ff69aa57e3553d7c635897d26e9d381ef67b6dea"
@@ -21,6 +23,7 @@ class Numdiff < Formula
     sha256 cellar: :any,                 monterey:       "58e6c6f067c9a0ff39143bea741d68c5b50f06ddf7d66f5fbc35f4d691fcfd33"
     sha256 cellar: :any,                 big_sur:        "5acb0364a5f94b40b9f4d79c998910426855da30ea7f7b00241c135ffabdcb8e"
     sha256 cellar: :any,                 catalina:       "bb6458bc44ff4086cf74590c540dfce76014aaafdffd140b0a032b4ddbf17df6"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "ebf440325cddaad6e20bce018736dc65e4ea1895de1ce590f21c267b3ab304ad"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "c9334ab2846721f6a4b643e061dc1ef76f693a8a07f99f05dda3dfdc190165a9"
   end
 

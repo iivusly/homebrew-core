@@ -1,8 +1,8 @@
 class Txr < Formula
   desc "Lisp-like programming language for convenient data munging"
   homepage "https://www.nongnu.org/txr/"
-  url "https://www.kylheku.com/cgit/txr/snapshot/txr-296.tar.bz2"
-  sha256 "753e74c1f11c109a5235856b5e5800912b8267e08257a1a26f17e74efd5c2917"
+  url "https://www.kylheku.com/cgit/txr/snapshot/txr-302.tar.bz2"
+  sha256 "f0de012ed62218e049d09a39ae6a9387598d8eac12a7c2d7d9d906c27c36ef54"
   license "BSD-2-Clause"
 
   livecheck do
@@ -11,23 +11,45 @@ class Txr < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "665ae564cfe95691bf0c3d0be2efa808f6c84b9025d0cbebd5cc4d7900c09126"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "4a0333a9d183f4b37c476abd38a40271e64cff8cf85131470d854c939ae7193e"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "c18f7d0d82dcf758371083137178c7c6bab011ee78d1655e5d7a830f77be6fba"
-    sha256 cellar: :any_skip_relocation, sonoma:         "ff27d67de08045b34d41ee6089300571ca26bece1c891160b9a4501b1ffa66db"
-    sha256 cellar: :any_skip_relocation, ventura:        "cd5d5b338ad9182a270b841a09e3314a26ff03187093ea3571b10748bdd6bb92"
-    sha256 cellar: :any_skip_relocation, monterey:       "61091144d680585ceeaa4415d161e60e00a356c30d92795b2922fb1b49c3afb8"
+    rebuild 2
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "5a3e2696544766b198f2d6be38cee732e7757bc465a85951d3cc69c589a74490"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "080e9b53e0bf6f5fdf978e4498dce5138f32750ceaeeda57a4343a9fc3d9ca79"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "b7c6793df7533f54d70fb81522f014fa532c20ddb4386557d40554146b0aa53b"
+    sha256 cellar: :any_skip_relocation, sonoma:        "0db191f5177f88c2347a3374bd99847bc65034f200bd83ed891de7cb69d56823"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "ef7c5786a174ca30e31d3d87afa2aeb796cab3c72a837f01397af9011cfe9885"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "28c0d4e14ed8bf41888293d49df188ed82b731ef0dd5fe30fe279c69f4a17b1f"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
+
   uses_from_macos "bison" => :build
   uses_from_macos "flex" => :build
-  uses_from_macos "libffi", since: :catalina
+  uses_from_macos "libffi"
+  uses_from_macos "libxcrypt"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
-    system "./configure", "--prefix=#{prefix}", "--inline=static inline"
-    system "make"
+    # FIXME: We need to bypass the compiler shim to work around `-mbranch-protection=standard`
+    # (specifically pac-ret) causing tests/012/compile.tl to fail with an illegal instruction
+    if OS.linux? && Hardware::CPU.arm64?
+      ENV["CC"] = DevelopmentTools.locate(ENV.cc)
+      ENV.append_to_cflags ENV["HOMEBREW_OPTFLAGS"] if ENV["HOMEBREW_OPTFLAGS"]
+      ENV.append "CPPFLAGS", "-mbranch-protection=bti"
+    end
+
+    # FIXME: Workaround to avoid the compiler shim suppressing warnings needed during configure.
+    # Existing shim logic only works for autotools configure scripts where `as_nl` is used.
+    with_env(as_nl: "\n") do
+      system "./configure", "--no-debug-flags", "--prefix=#{prefix}"
+    end
+    system "make", "VERBOSE=1"
+    system "make", "tests" # run tests as upstream has gotten reports of broken TXR in Homebrew
     system "make", "install"
+    (share/"vim/vimfiles/syntax").install Dir["*.vim"]
+    Utils::Gzip.compress(*man1.glob("*.1"))
   end
 
   test do

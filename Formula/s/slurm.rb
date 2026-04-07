@@ -11,6 +11,8 @@ class Slurm < Formula
   end
 
   bottle do
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:    "b4f4153c52ba78d3ad62fa6ff84a348993f2b8a032a41c0dcf5565ddd013be08"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia:  "776f1360da9dd1fa05c2095b37974a193b18eaedaf5a94792e2945242a9bd1f1"
     sha256 cellar: :any_skip_relocation, arm64_sonoma:   "45e31ecee4bc3065e733dc130884346f4eabae06012ba29d75da76e5584e6481"
     sha256 cellar: :any_skip_relocation, arm64_ventura:  "a2e8b79fac19c1d029e8d8f2dc61b39d74abf242f509e0507c1761d0dbd8f0af"
     sha256 cellar: :any_skip_relocation, arm64_monterey: "7ede14c56489fae8439d7913dc2a173b9ffed43a3ac1c344749a5486ddda29ff"
@@ -20,18 +22,15 @@ class Slurm < Formula
     sha256 cellar: :any_skip_relocation, monterey:       "4db77bcd6316bb4e9d8b2070cad506e18dc46c0fbfc326252efb09d86bae8ec7"
     sha256 cellar: :any_skip_relocation, big_sur:        "f887511a3fc673569f504330987bae7100213e4c2ed12bee70db0f94c5465ef9"
     sha256 cellar: :any_skip_relocation, catalina:       "deb0b5005b323d47913ee26328ae1bc17321fb3f09a76f90f74c108b5f23c6fb"
+    sha256                               arm64_linux:    "01552c3c4c6ab5bbcce1eb3716ff2ba49e2bb66a683f0d17b7d8c75da30980f0"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "c06bff9e858ad8f9c8583f4149a8a297b099c3d77754a7497978897c89427362"
   end
 
   depends_on "meson" => :build
   depends_on "ninja" => :build
+  depends_on "pkgconf" => :build
 
   uses_from_macos "ncurses"
-
-  on_sonoma do
-    # Work around Sonoma's broken ncurses5.4-config by using pkg-config instead
-    depends_on "pkg-config" => :build
-  end
 
   def install
     system "meson", "setup", "build", *std_meson_args

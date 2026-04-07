@@ -1,8 +1,8 @@
 class Cling < Formula
   desc "C++ interpreter"
   homepage "https://root.cern/cling/"
-  url "https://github.com/root-project/cling/archive/refs/tags/v1.1.tar.gz"
-  sha256 "e8b33b5e99c6267a85be71fc6eb8e5622ce8aee864c60587cb71f43c27e97032"
+  url "https://github.com/root-project/cling/archive/refs/tags/v1.3.tar.gz"
+  sha256 "ca81f3bc952338beffba178633d77f5b3e1f1f180cbe2bb9f2713c06f410fd18"
   license all_of: [
     { any_of: ["LGPL-2.1-only", "NCSA"] },
     { "Apache-2.0" => { with: "LLVM-exception" } }, # llvm
@@ -17,28 +17,32 @@ class Cling < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "19b0412143d83a482fd5252d3a5a298ad5867f187f750a260be09be6889d31d2"
-    sha256 arm64_ventura:  "ac3b9dd399d88c74c4c3c0b88edc49ededd1922fd1cf1f03c23bed338697765d"
-    sha256 arm64_monterey: "6cf7a996760a1f5e5d79e5cbf4f258754c4d999691b74fdf37ab36629a0bce8b"
-    sha256 sonoma:         "cda39b9bbadc8473dce97cc997ba974630cdd80774f9ff78cccf5dfa9738a3a8"
-    sha256 ventura:        "c3ae49562e7dce88ff71708a1fac0813347f374d27b7f4afe3be1570271a61fa"
-    sha256 monterey:       "9462386c62c760c5826399df87f677f99ecc238348421230ec95032dad3ae0e7"
-    sha256 x86_64_linux:   "75a5918cdc9831cf4e42d32ab616fdcc95ca5a5e734273b12d7671385d063a09"
+    sha256 arm64_tahoe:   "a0e982f092f47c906adcc71ff75b127822ecfab69cc40d353955a007682e4cf1"
+    sha256 arm64_sequoia: "77bd4ae3b0df3f1a2ac6b89b97653e5b77539f8704b5cbe3fa069f2e0b86fb1d"
+    sha256 arm64_sonoma:  "ca6edc3940448d844e33400c80631bead2c2be135af68c9305f9b720f31d8103"
+    sha256 sonoma:        "f0c5153fa13c8f5194047a799cb51f44e66bab25dadfea0486363f72194ee810"
+    sha256 arm64_linux:   "4a99d40bb84f2cc6986094d0e9c89e73fe34aa5df810a3408a56dc8ff2d00208"
+    sha256 x86_64_linux:  "7072596311dacb08ab7bddb2e7d4d12496c6525ba44981f3e9d2973f97c5fdba"
   end
 
   depends_on "cmake" => :build
+  depends_on "zstd"
 
-  uses_from_macos "python" => :build, since: :catalina
+  uses_from_macos "python" => :build
   uses_from_macos "libedit"
   uses_from_macos "libxml2"
   uses_from_macos "ncurses"
-  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   # https://github.com/root-project/cling?tab=readme-ov-file#building-from-source
-  # grab the latest tag from cling-latest branch
+  # `git ls-remote --heads https://github.com/root-project/llvm-project.git cling-latest`
+  # grab the latest tag https://github.com/root-project/llvm-project/commit/<commit>
   resource "llvm" do
-    url "https://github.com/root-project/llvm-project/archive/refs/tags/cling-llvm16-20240621-02.tar.gz"
-    sha256 "51bcf665422be228fbc730cac8bd6bd78258fab80de97c90f629411f14021243"
+    url "https://github.com/root-project/llvm-project/archive/refs/tags/cling-llvm20-20260119-01.tar.gz"
+    sha256 "6d023a311393eee6025bf3b1e6bb9caa9b31ec2f288f9bee1a2fbe71072b2849"
   end
 
   def install
@@ -55,6 +59,7 @@ class Cling < Formula
                     "-DLLVM_ENABLE_PROJECTS=clang",
                     "-DLLVM_EXTERNAL_CLING_SOURCE_DIR=#{buildpath}",
                     "-DLLVM_EXTERNAL_PROJECTS=cling",
+                    "-DLLVM_INCLUDE_BENCHMARKS=OFF",
                     "-DLLVM_TARGETS_TO_BUILD=host;NVPTX",
                     *std_cmake_args(install_prefix: libexec)
     system "cmake", "--build", "build"

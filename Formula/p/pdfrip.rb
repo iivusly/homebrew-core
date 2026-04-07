@@ -1,19 +1,18 @@
 class Pdfrip < Formula
   desc "Multi-threaded PDF password cracking utility"
   homepage "https://github.com/mufeedvh/pdfrip"
-  url "https://github.com/mufeedvh/pdfrip/archive/refs/tags/v2.0.1.tar.gz"
-  sha256 "60f284d79bac98c97e6eaa1a2f29d66055de5b3c8a129eb14b24057a7cb31cd3"
+  url "https://github.com/mufeedvh/pdfrip/archive/refs/tags/v3.0.0.tar.gz"
+  sha256 "e75bb5bcc2b58f80189dd10ba18e3cb8673935316172b8bd7a63822859cba11b"
   license "MIT"
   head "https://github.com/mufeedvh/pdfrip.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "92eafcb03fc927dbe7a94aa8b5657038621d342f1405c2a09d6766a94ee04231"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "b6c3dfc1b88440a91d4cdcdf76699599cf6955b8c31d1376bbff00b13751ead1"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "0d5def9d0760ae745a23e26a0b37afb953a340ea6de90940a3f218b0dc369ebc"
-    sha256 cellar: :any_skip_relocation, sonoma:         "a1d72c6cfcec8a572e0e8c3e07acea03120fb692c321c8c88993dac530a127e0"
-    sha256 cellar: :any_skip_relocation, ventura:        "83cd8a56b4a4238f6ccf0dca5519393686ec2c4e144d035841c71228637a7933"
-    sha256 cellar: :any_skip_relocation, monterey:       "cf71e60e04dc370096a46ba62694e46749dbeaf9e5fbdd9050bd355f0d8be40b"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "311c5aacf5d23a6e692524c39f632bac0bc0a4984b0a5de34ff452f6490d9a28"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "b5856a2f08d97cb02cfca8c54d867f4265ca284b864ec7c7818c3a3beb4523a3"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "a4f70dca6d1b3856a4082fc53d5532cdd89a827109475fc856c9f63e4623de35"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "db92291f34f5c62fbf965660d077527b507d34d7f0bc4c43465fdcb515bd434c"
+    sha256 cellar: :any_skip_relocation, sonoma:        "b5e175aa463c916e4ad738afdde1454cad704e10ab03c7eeae7b3ab2e1ff062a"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "c56527b7206b55fa93791339360963c87a49e8f7af73d617b65b985c3617b852"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "3fc702689e1725749aef7fa49952a53a740a1e21ca15032928d97d3ed3933c2a"
   end
 
   depends_on "cmake" => :build
@@ -28,8 +27,7 @@ class Pdfrip < Formula
   test do
     assert_match version.to_s, shell_output("#{bin}/pdfrip --version")
 
-    touch testpath/"test.pdf"
-    output = shell_output("#{bin}/pdfrip -f test.pdf range 1 5 2>&1")
-    assert_match "Failed to crack file", output
+    output = shell_output("#{bin}/pdfrip -f #{test_fixtures("test.pdf")} range 1 5 2>&1", 1)
+    assert_match "PDF is not encrypted with the Standard password-based security handler", output
   end
 end

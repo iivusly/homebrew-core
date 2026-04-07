@@ -1,24 +1,23 @@
 class TemplateGlib < Formula
   desc "GNOME templating library for GLib"
   homepage "https://gitlab.gnome.org/GNOME/template-glib"
-  url "https://download.gnome.org/sources/template-glib/3.36/template-glib-3.36.2.tar.xz"
-  sha256 "0020f3a401888ce763b3a17508c2f58e91972a483a0c547afdb7ccbe25619948"
+  url "https://download.gnome.org/sources/template-glib/3.40/template-glib-3.40.0.tar.xz"
+  sha256 "e533ec2f6c24cc6df66ac55ac824fadd1b4a5f433a11cbf3a6b25815c0cfcfd5"
   license "LGPL-2.1-or-later"
 
   bottle do
-    sha256 cellar: :any, arm64_sonoma:   "2daee9e38dd1b1ef69dffd166f01fced59f2b995503bfa0b535217b75b0d9978"
-    sha256 cellar: :any, arm64_ventura:  "7fd444eaf0477d2faddb96a278f30c2c3d2073ab4e6b3bb8860262e1e4652812"
-    sha256 cellar: :any, arm64_monterey: "d1ad92f56762b7dc87a65ebcbeb0cbac29235c0a6234a07b07dcaf8e6efa9840"
-    sha256 cellar: :any, sonoma:         "384136ebb3f6198eb39a87a900f0b9a588160f01272d926aaf556dc00fee74c5"
-    sha256 cellar: :any, ventura:        "79aa07a322b002473fbd829d79dff1c6a2147d74e3186e843fb8b0572e3a9381"
-    sha256 cellar: :any, monterey:       "d23a2768d603f656bbd31439504dae0ad391ecd3329a1db66ca107f78b68663b"
-    sha256               x86_64_linux:   "d38c3fb436805bed97da9b3d88798a2b094b6eb51fc4ddc00cf43301ecde486d"
+    sha256 cellar: :any, arm64_tahoe:   "934953c6f2489b4b93150ac065da9734ae0eca17027531f6f4b13ec9e67158d9"
+    sha256 cellar: :any, arm64_sequoia: "15c9037f32b68d162ee9e7930736c185ad01790df7c4ea87c41eaded8b121419"
+    sha256 cellar: :any, arm64_sonoma:  "29329618672a3009b73ad4d0f8ece182fb949e5336a76f81952e112cb4cd25a1"
+    sha256 cellar: :any, sonoma:        "3ceb0dcb6ffeadceb7bd0d90e887197a028839fe46c76f9ecaea12dd15420311"
+    sha256               arm64_linux:   "3c3915749f31ece2b70b30bbe8d583659edcd549ea471d289734d09921a14a9b"
+    sha256               x86_64_linux:  "3894f9ee2b66a8d93181138e3ebaeace928609912ede356bf4d70223212a123a"
   end
 
   depends_on "bison" => :build # does not appear to work with system bison
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => [:build, :test]
+  depends_on "pkgconf" => [:build, :test]
   depends_on "vala" => :build
   depends_on "glib"
   depends_on "gobject-introspection"
@@ -36,7 +35,7 @@ class TemplateGlib < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <tmpl-glib.h>
 
       int main(int argc, char *argv[]) {
@@ -44,9 +43,9 @@ class TemplateGlib < Formula
         g_assert_nonnull(locator);
         return 0;
       }
-    EOS
+    C
 
-    flags = shell_output("pkg-config --cflags --libs template-glib-1.0").chomp.split
+    flags = shell_output("pkgconf --cflags --libs template-glib-1.0").chomp.split
     system ENV.cc, "test.c", "-o", "test", *flags
     system "./test"
   end

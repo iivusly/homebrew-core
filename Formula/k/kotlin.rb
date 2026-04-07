@@ -1,8 +1,8 @@
 class Kotlin < Formula
   desc "Statically typed programming language for the JVM"
   homepage "https://kotlinlang.org/"
-  url "https://github.com/JetBrains/kotlin/releases/download/v2.0.20/kotlin-compiler-2.0.20.zip"
-  sha256 "5f5d2a8ad6a718a002acd0775b67a9e27035872fdbd4b0791e3cb3ea00095931"
+  url "https://github.com/JetBrains/kotlin/releases/download/v2.3.20/kotlin-compiler-2.3.20.zip"
+  sha256 "222ba516cdc4052ce0be9d2ec6adf3c5c64fc53156d7dd91d1f5317809431b98"
   license "Apache-2.0"
 
   # Upstream maintains multiple major/minor versions and the "latest" release
@@ -14,10 +14,12 @@ class Kotlin < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, all: "20fc8fd68c8f1237bb3d3b13c1f820b0614275384958e36fca3f2b7a7e965e96"
+    sha256 cellar: :any_skip_relocation, all: "95a583fc4eebb634545b1ab4d04d94dbb0372c05b12c31c60a05454b7099ecee"
   end
 
   depends_on "openjdk"
+
+  conflicts_with cask: "kotlin-native"
 
   def install
     libexec.install "bin", "build.txt", "lib"
@@ -28,11 +30,12 @@ class Kotlin < Formula
   end
 
   test do
-    (testpath/"test.kt").write <<~EOS
+    (testpath/"test.kt").write <<~KOTLIN
       fun main(args: Array<String>) {
         println("Hello World!")
       }
-    EOS
+    KOTLIN
+
     system bin/"kotlinc", "test.kt", "-include-runtime", "-d", "test.jar"
     system bin/"kotlinc-jvm", "test.kt", "-include-runtime", "-d", "test.jar"
   end

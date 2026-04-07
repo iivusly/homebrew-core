@@ -6,29 +6,50 @@ class Openslp < Formula
   license "BSD-3-Clause"
 
   bottle do
-    sha256 sonoma:       "9e94160f7db637d08229abcd518e0a67e876cb712e48273fa90ddf00a1b4a994"
-    sha256 ventura:      "06a8525267384bb4eea04432b252c8e3063529b99d3d4a7203161115680c9d5c"
-    sha256 monterey:     "4fe473351f951da2840deac362acc9d16d5159a30e2e5a84077d1de3ee4dcede"
-    sha256 big_sur:      "3cc88f489dfe6e4e9566608ace194fb8e09a8cb28f80947d7454f03494d76341"
-    sha256 catalina:     "fee6eb82ad60bf1446278498ff8860584dcd2192a7505f3c57eec2bab55f337f"
-    sha256 mojave:       "948182086a86baa001d9b8864715c91d5d9b9ec76ba7c072667dc0d58e983d12"
-    sha256 high_sierra:  "3a933a2c697a2b7a00d9b1f9cc3a58664c43c18f7b4ff3d99afa7bc11d721da5"
-    sha256 sierra:       "fdd847dba24e5a96c30ccef98f0d035f39abc88617d779df627c132be5b648ae"
-    sha256 el_capitan:   "1c19d8355ddda63b9259101a0b7b56ea0fd9fb8f343e2df19f7248542fbf38e5"
-    sha256 x86_64_linux: "31a9bf8bd539a71378e4f5f6a438cdef166659e3641a9899213dd166dcaeee6c"
+    rebuild 1
+    sha256 arm64_tahoe:   "03318a808866a33ea675a2520d6d889c9aa74f6817b9a30bed9bbc0cf4a6938d"
+    sha256 arm64_sequoia: "8ad62fa05cfa66977820ce7095c95f7f3f9573fe8c11565cc80adb9767bb3ae2"
+    sha256 arm64_sonoma:  "88497463ae4bc988432fe2ec15a032ee2f4ea3516d8915405a08256c265633ee"
+    sha256 sonoma:        "9f8b91c18c4a8e0738618531ad35f6068daa27cb6069362510622592113aada5"
+    sha256 ventura:       "517653bc27072c320f9159e57040c51d5ba0b4ea8b234bb5af9af55a9aea9f42"
+    sha256 arm64_linux:   "7f3de41c36959025ce20d867cfa90c065fba46d872b055d0b7c2a2e6a631b44d"
+    sha256 x86_64_linux:  "aa1988503f1e9688dfd80e0331392ab29a053e62197b60653e933ee1bc681efb"
   end
-
-  depends_on arch: :x86_64
 
   # Fix -flat_namespace being used on Big Sur and later.
   patch do
-    url "https://raw.githubusercontent.com/Homebrew/formula-patches/03cf8088210822aa2c1ab544ed58ea04c897d9c4/libtool/configure-pre-0.4.2.418-big_sur.diff"
+    url "https://raw.githubusercontent.com/Homebrew/homebrew-core/1cf441a0/Patches/libtool/configure-pre-0.4.2.418-big_sur.diff"
     sha256 "83af02f2aa2b746bb7225872cab29a253264be49db0ecebb12f841562d9a2923"
   end
 
   def install
-    system "./configure", "--disable-debug", "--disable-dependency-tracking",
-                          "--prefix=#{prefix}"
+    # Workaround for arm64 macOS to use fallback global mutex as USE_APPLE_ATOMICS
+    # condition uses deprecated functions and code doesn't compile
+    # Issue ref: https://github.com/openslp-org/openslp/issues/19
+    inreplace "common/slp_atomic.c", <<~C, "#else\n" if OS.mac? && Hardware::CPU.arm?
+      #elif defined(__APPLE__)
+      # define USE_APPLE_ATOMICS
+      #else
+    C
+
+    system "./configure", *std_configure_args
     system "make", "install"
+  end
+
+  test do
+    (testpath/"test.c").write <<~C
+      #include <slp.h>
+
+      int main(void) {
+        SLPHandle hslp;
+        SLPError err;
+        err = SLPOpen("en", SLP_FALSE, &hslp);
+        SLPClose(hslp);
+        return err;
+      }
+    C
+
+    system ENV.cc, "test.c", "-o", "test", "-L#{lib}", "-lslp"
+    system "./test"
   end
 end

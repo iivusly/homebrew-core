@@ -1,9 +1,11 @@
 class Opus < Formula
   desc "Audio codec"
   homepage "https://www.opus-codec.org/"
-  url "https://ftp.osuosl.org/pub/xiph/releases/opus/opus-1.5.2.tar.gz"
-  sha256 "65c1d2f78b9f2fb20082c38cbe47c951ad5839345876e46941612ee87f9a7ce1"
+  url "https://ftp.osuosl.org/pub/xiph/releases/opus/opus-1.6.1.tar.gz"
+  mirror "https://github.com/xiph/opus/releases/download/v1.6.1/opus-1.6.1.tar.gz"
+  sha256 "6ffcb593207be92584df15b32466ed64bbec99109f007c82205f0194572411a1"
   license "BSD-3-Clause"
+  compatibility_version 1
 
   livecheck do
     url "https://ftp.osuosl.org/pub/xiph/releases/opus/"
@@ -11,13 +13,12 @@ class Opus < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "017d3d10cf679cad5cee3501a53945903eabff9f7657214944bf9156f85e9872"
-    sha256 cellar: :any,                 arm64_ventura:  "d53715a8e666c4d91917f6746c2516aca2f160294ca5542a7db7a53d953c7447"
-    sha256 cellar: :any,                 arm64_monterey: "02260aea3cc13374c4366abb75e14034bb374d76873d4fbbd9f26794e1d727cb"
-    sha256 cellar: :any,                 sonoma:         "858dbe63f7a6489d18c9ab19114496081881623319bce3b917e686e63550dd84"
-    sha256 cellar: :any,                 ventura:        "742d2b0dabd25100776c6a57743fde9e05b02e154612ead68dc25c1ef57fcc3d"
-    sha256 cellar: :any,                 monterey:       "becc7d03c9219308c69f7704d33cc7cf0579a2db902e82ef33bf5266f69a54c1"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "d35c066cdcaad6a6b9f840fc2dd70da4ca02000c11b08674fa065b8bf7a9b925"
+    sha256 cellar: :any,                 arm64_tahoe:   "5e8146a64fab2683ea447aaa7d0de0b1d717539b4cdabd1fedd4a510e4be0d1e"
+    sha256 cellar: :any,                 arm64_sequoia: "85d6f1e885117016478e468f92033f648d9bab05210708fe195cacefe5be8266"
+    sha256 cellar: :any,                 arm64_sonoma:  "9b159efdfe3b5a31e5f4db9bac8cf40054ac301c508215f7db13cfc6ca661a66"
+    sha256 cellar: :any,                 sonoma:        "0849d017c155c55ea1fb01b6156ff5dc77f2a2d7fec84592a099c32f6db9eef1"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "74f9c65c0f98b50f2e74f6fcd48a4f8ae7511d6c2da5d4ae9ed5fbeb4eb69c6a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "739c259ce69a8af064bb73412700615a4e76405344c186f056710201f6ffda7b"
   end
 
   head do
@@ -30,13 +31,12 @@ class Opus < Formula
 
   def install
     system "./autogen.sh" if build.head?
-    system "./configure", "--disable-dependency-tracking",
-                          "--disable-doc", "--prefix=#{prefix}"
+    system "./configure", "--disable-doc", *std_configure_args
     system "make", "install"
   end
 
   test do
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include <opus.h>
 
       int main(int argc, char **argv)
@@ -60,7 +60,7 @@ class Opus < Formula
         }
         return err;
       }
-    EOS
+    CPP
     system ENV.cxx, "-I#{include}/opus", testpath/"test.cpp",
            "-L#{lib}", "-lopus", "-o", "test"
     system "./test"

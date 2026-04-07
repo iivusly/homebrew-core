@@ -1,19 +1,18 @@
 class Restic < Formula
   desc "Fast, efficient and secure backup program"
   homepage "https://restic.net/"
-  url "https://github.com/restic/restic/archive/refs/tags/v0.17.0.tar.gz"
-  sha256 "031cf34eeafe09064a6b63bcf752093d742b89166e93924aa4dde13160f91301"
+  url "https://github.com/restic/restic/archive/refs/tags/v0.18.1.tar.gz"
+  sha256 "4b8e2b6cb20e9707e14b9b9d92ddb6f2e913523754e1f123e2e6f3321e67f7ca"
   license "BSD-2-Clause"
   head "https://github.com/restic/restic.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "94b215d3aa7f2fd78c34143a6468adf1ad94714404fadef23870f98750de4170"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "94b215d3aa7f2fd78c34143a6468adf1ad94714404fadef23870f98750de4170"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "94b215d3aa7f2fd78c34143a6468adf1ad94714404fadef23870f98750de4170"
-    sha256 cellar: :any_skip_relocation, sonoma:         "51c7f4cbe46df14860bac6a57f1133d887212aeea8f0aae53aa218cff18fe811"
-    sha256 cellar: :any_skip_relocation, ventura:        "51c7f4cbe46df14860bac6a57f1133d887212aeea8f0aae53aa218cff18fe811"
-    sha256 cellar: :any_skip_relocation, monterey:       "51c7f4cbe46df14860bac6a57f1133d887212aeea8f0aae53aa218cff18fe811"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "8dc16a5e2d06f28fb1910644a41fbdb1de76cd21983d1278ac40ad80288c0e29"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "d6fd5d1ca0cacb7629f7bc480c81dfa36c551bb610e5559e9a86a0712b4bc2a9"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "d6fd5d1ca0cacb7629f7bc480c81dfa36c551bb610e5559e9a86a0712b4bc2a9"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "d6fd5d1ca0cacb7629f7bc480c81dfa36c551bb610e5559e9a86a0712b4bc2a9"
+    sha256 cellar: :any_skip_relocation, sonoma:        "7d6d0d3486f2a8c77bef02e15e860c3ee9ecb2a78c217dffda26c125d4f0b3ff"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "cf1e673d725c5d20dd4829062da1a18710f0ce9780eb8a0f41613d913bd0397e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "f787724e226c9f3ee6a6e1a94feb01262102ce1053d1a09ed18f5f8d835a6f96"
   end
 
   depends_on "go" => :build
@@ -46,7 +45,7 @@ class Restic < Formula
     system bin/"restic", "init"
     system bin/"restic", "backup", "testfile"
 
-    system bin/"restic", "restore", "latest", "-t", "#{testpath}/restore"
-    assert compare_file "testfile", "#{testpath}/restore/testfile"
+    system bin/"restic", "restore", "latest", "-t", testpath/"restore"
+    assert compare_file "testfile", testpath/"restore/testfile"
   end
 end

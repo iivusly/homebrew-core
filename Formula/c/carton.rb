@@ -7,6 +7,8 @@ class Carton < Formula
   head "https://github.com/perl-carton/carton.git", branch: "master"
 
   bottle do
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:    "7cf6c91209b768cb3e963c1eb14131efe738a851748d61d9adf402c274beeabf"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia:  "228551b5317d850f5ba6cc3dcf31eced4f9df54d28a804ce0dbf24652ca30e75"
     sha256 cellar: :any_skip_relocation, arm64_sonoma:   "378f8a49ede0e31685f2086f07967294534e910c18d5427542b2b9093dbe57c2"
     sha256 cellar: :any_skip_relocation, arm64_ventura:  "e8b540a262fd997261a20add377f931b7eb4ddfd496954a7af4adb7d692abca3"
     sha256 cellar: :any_skip_relocation, arm64_monterey: "4ed93b6f36dcfcbda3cf60bd27d204ed6e3fef9837a2c604baf5134e5133a75d"
@@ -16,6 +18,7 @@ class Carton < Formula
     sha256 cellar: :any_skip_relocation, monterey:       "ae0fcb618fd8b91fb40d7e52ed07d1ccb8a76ef5fabe0f7a73772f7f63a9979f"
     sha256 cellar: :any_skip_relocation, big_sur:        "ae0fcb618fd8b91fb40d7e52ed07d1ccb8a76ef5fabe0f7a73772f7f63a9979f"
     sha256 cellar: :any_skip_relocation, catalina:       "ae0fcb618fd8b91fb40d7e52ed07d1ccb8a76ef5fabe0f7a73772f7f63a9979f"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "7b81c0ac17f7fe741e5129166180f44ea13271b3dd283efd97dd4b5b4b0f9cb3"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "2b241c14b6caf27b5e0a7eb694e31c186a60670a72a47834eda4883947ce5b89"
   end
 

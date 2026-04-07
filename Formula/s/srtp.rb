@@ -1,10 +1,11 @@
 class Srtp < Formula
   desc "Implementation of the Secure Real-time Transport Protocol"
   homepage "https://github.com/cisco/libsrtp"
-  url "https://github.com/cisco/libsrtp/archive/refs/tags/v2.6.0.tar.gz"
-  sha256 "bf641aa654861be10570bfc137d1441283822418e9757dc71ebb69a6cf84ea6b"
+  url "https://github.com/cisco/libsrtp/archive/refs/tags/v2.8.0.tar.gz"
+  sha256 "d123dcff5c56d4f1a9006f2b311ea99a85016cbf3bb24b1007885d422237db85"
   license "BSD-3-Clause"
-  head "https://github.com/cisco/libsrtp.git", branch: "master"
+  compatibility_version 1
+  head "https://github.com/cisco/libsrtp.git", branch: "main"
 
   livecheck do
     url :stable
@@ -12,20 +13,19 @@ class Srtp < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "f4659edc90366755154d729abdc17c15cd3f0afd5db88a34e113570b123fb32f"
-    sha256 cellar: :any,                 arm64_ventura:  "c3ce5d112378cb65da6076012f3e57071e449cec1624aed7cb643c6875325114"
-    sha256 cellar: :any,                 arm64_monterey: "d5caefa466b896041eb0eeaf3da044b75d19e63361b3bee650ac7ab99dc79ae7"
-    sha256 cellar: :any,                 sonoma:         "7b016d3673afb8f2a19a6b25117562eb7749732b67830e94c389a45f2313ad60"
-    sha256 cellar: :any,                 ventura:        "6854e02c592b23a903e2005f32686c5c2fbeab8bb2b442b19837db2b9f63bb61"
-    sha256 cellar: :any,                 monterey:       "96ec600ba0b44ae3989159641862b20da7149af4d345d60d8b968918038b14eb"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "eae0dbd9de36ab4ca28ded9160425af7fa9ab1928b5de1d94049866627b514b1"
+    sha256 cellar: :any,                 arm64_tahoe:   "57991308e7a77e9101f56b5746b72dc84d7ec71cccb0952255e150bb61fa8b31"
+    sha256 cellar: :any,                 arm64_sequoia: "456aa17cfcc530e2e116ea4dc8dc8bac7d1f57e82e9354da9c5afdf73efb719a"
+    sha256 cellar: :any,                 arm64_sonoma:  "fe511a421b2601d56208bca5b723dcf0cedabac7820b6dbc29b2e9a9975027be"
+    sha256 cellar: :any,                 sonoma:        "1f4d6d9dd142b054f6ce5951553620d5638bcdad5b476049a8d8aef66699f3e0"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "d8a50543ee3639a000b4e79006e72d66b7023905bb96a7b2699fc839cf16fd0a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "5efdbe2656736401da2b1b83008f1b61be3831f33c675d77f1b3446888a01813"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "openssl@3"
 
   def install
-    system "./configure", "--disable-debug", "--prefix=#{prefix}", "--enable-openssl"
+    system "./configure", "--enable-openssl", *std_configure_args
     system "make", "test"
     system "make", "shared_library"
     system "make", "install" # Can't go in parallel of building the dylib

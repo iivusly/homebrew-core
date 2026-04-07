@@ -1,18 +1,19 @@
 class Testscript < Formula
   desc "Integration tests for command-line applications in .txtar format"
   homepage "https://github.com/rogpeppe/go-internal/tree/master/cmd/testscript"
-  url "https://github.com/rogpeppe/go-internal/archive/refs/tags/v1.12.0.tar.gz"
-  sha256 "b51d588d05f3e82d3045545ef46bd758a0610b9cfde1ae243489a593908b6060"
+  url "https://github.com/rogpeppe/go-internal/archive/refs/tags/v1.14.1.tar.gz"
+  sha256 "7e54f6d0f002a4904f150e29417515b286ff3b0bbde8e1a01082cbb5178132cb"
   license "BSD-3-Clause"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "ff89d42aed19e76bde27a25603838030a9bd9b36f390ba77e2a2ec6606d31f6c"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "48f0f71c046f7fd3b299a52e16102ad2d400611730a9ac8d3efa0c5213d75343"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "f9f8e27f6a330bd5f2d96e2eec9027be814841cbc9987686870391f31ea4c178"
-    sha256 cellar: :any_skip_relocation, sonoma:         "2e8751265b7ce2e4485f6efbb96f7183d5d2b659d58f140015b127ab36754033"
-    sha256 cellar: :any_skip_relocation, ventura:        "e06976a430edc309215a9fb33ff78b0b8517b49bd47f196af297e606473aa7c2"
-    sha256 cellar: :any_skip_relocation, monterey:       "2d1397abe5f677d8c04593f47a43158248a9078213f492cc7f648346fbec0372"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "b52ddb065424f82aba7aa6105b38551ef0bf6b17fcd3a48845b79cec1ed6311a"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "28d3ec9f59f45bbc4d9422e206e72a57e219d7f406f45358969047c0b2c7d2b0"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "32cde373625b9755ac45543595073083f253574b0bfdf50ce6d42fd8e20f08b0"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "32cde373625b9755ac45543595073083f253574b0bfdf50ce6d42fd8e20f08b0"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "32cde373625b9755ac45543595073083f253574b0bfdf50ce6d42fd8e20f08b0"
+    sha256 cellar: :any_skip_relocation, sonoma:        "49b838e6643cee284d00a50e1cd8be9c5b3d67033856bc360deef31f2c629fcc"
+    sha256 cellar: :any_skip_relocation, ventura:       "49b838e6643cee284d00a50e1cd8be9c5b3d67033856bc360deef31f2c629fcc"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "c20bb5d4ba2e8032f66e5c61ddeaf01d07052db00e6810814be3abc85714f992"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "022c023408e7ecc0d604e44d262d675fb4be88303ea8794b422f1b472009e1ab"
   end
 
   depends_on "go" => :build

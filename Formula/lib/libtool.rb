@@ -1,20 +1,23 @@
 class Libtool < Formula
   desc "Generic library support script"
   homepage "https://www.gnu.org/software/libtool/"
-  url "https://ftp.gnu.org/gnu/libtool/libtool-2.4.7.tar.xz"
-  mirror "https://ftpmirror.gnu.org/libtool/libtool-2.4.7.tar.xz"
-  sha256 "4f7f217f057ce655ff22559ad221a0fd8ef84ad1fc5fcb6990cecc333aa1635d"
+  url "https://ftpmirror.gnu.org/gnu/libtool/libtool-2.5.4.tar.xz"
+  mirror "https://ftp.gnu.org/gnu/libtool/libtool-2.5.4.tar.xz"
+  sha256 "f81f5860666b0bc7d84baddefa60d1cb9fa6fceb2398cc3baca6afaa60266675"
   license "GPL-2.0-or-later"
+  compatibility_version 1
 
   bottle do
-    rebuild 3
-    sha256 cellar: :any,                 arm64_sonoma:   "53032e6f9f95662e8d7e5776c13d99e526f27aa91046b379537e6c9926328532"
-    sha256 cellar: :any,                 arm64_ventura:  "ddc4cbe56b2858f9e653d6c675e2e0a5a283748d1e21192963f9d5d828d9b4c8"
-    sha256 cellar: :any,                 arm64_monterey: "c075f2068699ea5ad408b952a58d9b0721072905014490d3adcc42c5636b9491"
-    sha256 cellar: :any,                 sonoma:         "774349ad71c3a2d6c2e0680939b995833d0c936fbb7dcf711a7b4503f986f0e6"
-    sha256 cellar: :any,                 ventura:        "abebe5e185ad6d66e8798be461ccbb2bf2ef58e5da78376713f760d0929098ee"
-    sha256 cellar: :any,                 monterey:       "eee91ce66c36b14328492b85f7fb4dd4bbe25c84fe48cda37352ca071faf4d03"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "8b4b093e7110026279c01fe6604308e0cc0e2ce4e341852f5cea87d944a59be1"
+    sha256 cellar: :any,                 arm64_tahoe:   "e3a7e5f39f3933f3c92daacbc054a38628521aeb6b52fddd2a3c945a897050e5"
+    sha256 cellar: :any,                 arm64_sequoia: "f21ea809c3bdc0aa1b25dce05dc05bebd228adb213957df244bf00af760392ef"
+    sha256 cellar: :any,                 arm64_sonoma:  "b78cea0747889cff2d5d5308cf2cfebef93f8fe3a5ad87cbadb5ee16f8dbc6a6"
+    sha256 cellar: :any,                 arm64_ventura: "f30240dd2c3b9c42be0f4a0dc4f8a9ceabd0d12f28db8e3650076f8d1c59a7bc"
+    sha256 cellar: :any,                 tahoe:         "4301ea7f74f94894c95e1dae08326d7f59e3dd7dd70962801ffb129f4664a253"
+    sha256 cellar: :any,                 sequoia:       "b86376ec9504b188528c074fb1c5ade15679402ed1e4b20a99b2ac2235780717"
+    sha256 cellar: :any,                 sonoma:        "fc28339b3192a79d41f5b67f53f5d232dfed48de66b464c02f21d64536da86d8"
+    sha256 cellar: :any,                 ventura:       "5ef401943faf0ebe8c57542bcd4ff976419f9ff67ce1b67e3c5c0b2cf0fa69df"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "deecc3ded6794f5ab08b785aa8a1800b3559376a61d369a6798b29e6568c7429"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "cad7f708b11b5bc65f08dadaab2f3f8c51eb2267efc0cc20ad9a4ce9f7c8134e"
   end
 
   depends_on "m4"
@@ -60,10 +63,10 @@ class Libtool < Formula
   test do
     system bin/"glibtool", "execute", File.executable?("/usr/bin/true") ? "/usr/bin/true" : "/bin/true"
 
-    (testpath/"hello.c").write <<~EOS
+    (testpath/"hello.c").write <<~C
       #include <stdio.h>
       int main() { puts("Hello, world!"); return 0; }
-    EOS
+    C
 
     system bin/"glibtool", "--mode=compile", "--tag=CC",
       ENV.cc, "-c", "hello.c", "-o", "hello.o"

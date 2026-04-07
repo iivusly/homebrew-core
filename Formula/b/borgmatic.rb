@@ -3,103 +3,78 @@ class Borgmatic < Formula
 
   desc "Simple wrapper script for the Borg backup software"
   homepage "https://torsion.org/borgmatic/"
-  url "https://files.pythonhosted.org/packages/8f/c1/84092a49c4bcb1744829051fd302ab057a7a59487db265e2d1aec265f9d1/borgmatic-1.8.14.tar.gz"
-  sha256 "598b3bc22c19d53bd375e5295afec56d111759f74671845aacfe055c539fa746"
+  url "https://files.pythonhosted.org/packages/fe/02/f3279746ae4cec5c8735fa740a1ca2379265ab5391828a5fe2f830a1602b/borgmatic-2.1.4.tar.gz"
+  sha256 "4bdc9db3a2c91998842e3125b25e2f570efa630e6c278b362ee8cb928add7ac0"
   license "GPL-3.0-or-later"
+  head "https://projects.torsion.org/borgmatic-collective/borgmatic.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "c158d4a4fd6e968836cf30b1f2991ac859c6de01250e7104d9a6eb8c738b520f"
-    sha256 cellar: :any,                 arm64_ventura:  "bf92f6b99bc36b20751369573cbcf98e346ce0f5e3d9ca46113dcda5aafb0489"
-    sha256 cellar: :any,                 arm64_monterey: "34bb9105e2fff685908227f85c27bd63032b1f9bbdc195176630ec098ac74b39"
-    sha256 cellar: :any,                 sonoma:         "90050fb546ea9f6ab18adecf84adba8aeee657a2d0444dcd0b2bb73fef41119c"
-    sha256 cellar: :any,                 ventura:        "b6c652000ccb9ad8802e0834f22e68bad3e57d475a548494744245d0ad7bad87"
-    sha256 cellar: :any,                 monterey:       "61782b16581211e1d3e32d8d1e196b111e44509027e504d96f1ef98c8858e43f"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "0a315c68ee384431f767e5f074b621e828c8899b82d1faeb64744e3abe1c4954"
+    sha256 cellar: :any_skip_relocation, all: "694fb5bbcdc07a9e4da78d3ddcde5c0d89e61ee4a04d46d12597d349ec89e67a"
   end
 
-  depends_on "rust" => :build # for rpds-py
-  depends_on "certifi"
-  depends_on "python@3.12"
+  depends_on "certifi" => :no_linkage
+  depends_on "python@3.14"
+  depends_on "rpds-py" => :no_linkage
+
+  pypi_packages exclude_packages: ["certifi", "rpds-py"]
 
   resource "attrs" do
-    url "https://files.pythonhosted.org/packages/fc/0f/aafca9af9315aee06a89ffde799a10a582fe8de76c563ee80bbcdc08b3fb/attrs-24.2.0.tar.gz"
-    sha256 "5cfb1b9148b5b086569baec03f20d7b6bf3bcacc9a42bebf87ffaaca362f6346"
+    url "https://files.pythonhosted.org/packages/9a/8e/82a0fe20a541c03148528be8cac2408564a6c9a0cc7e9171802bc1d26985/attrs-26.1.0.tar.gz"
+    sha256 "d03ceb89cb322a8fd706d4fb91940737b6642aa36998fe130a9bc96c985eff32"
   end
 
   resource "charset-normalizer" do
-    url "https://files.pythonhosted.org/packages/63/09/c1bc53dab74b1816a00d8d030de5bf98f724c52c1635e07681d312f20be8/charset-normalizer-3.3.2.tar.gz"
-    sha256 "f30c3cb33b24454a82faecaf01b19c18562b1e89558fb6c56de4d9118a032fd5"
-  end
-
-  resource "colorama" do
-    url "https://files.pythonhosted.org/packages/d8/53/6f443c9a4a8358a93a6792e2acffb9d9d5cb0a5cfd8802644b7b1c9a02e4/colorama-0.4.6.tar.gz"
-    sha256 "08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44"
+    url "https://files.pythonhosted.org/packages/e7/a1/67fe25fac3c7642725500a3f6cfe5821ad557c3abb11c9d20d12c7008d3e/charset_normalizer-3.4.7.tar.gz"
+    sha256 "ae89db9e5f98a11a4bf50407d4363e7b09b31e55bc117b4f7d80aab97ba009e5"
   end
 
   resource "idna" do
-    url "https://files.pythonhosted.org/packages/e8/ac/e349c5e6d4543326c6883ee9491e3921e0d07b55fdf3cce184b40d63e72a/idna-3.8.tar.gz"
-    sha256 "d838c2c0ed6fced7693d5e8ab8e734d5f8fda53a039c0164afb0b82e771e3603"
+    url "https://files.pythonhosted.org/packages/6f/6d/0703ccc57f3a7233505399edb88de3cbd678da106337b9fcde432b65ed60/idna-3.11.tar.gz"
+    sha256 "795dafcc9c04ed0c1fb032c2aa73654d8e8c5023a7df64a53f39190ada629902"
   end
 
   resource "jsonschema" do
-    url "https://files.pythonhosted.org/packages/38/2e/03362ee4034a4c917f697890ccd4aec0800ccf9ded7f511971c75451deec/jsonschema-4.23.0.tar.gz"
-    sha256 "d71497fef26351a33265337fa77ffeb82423f3ea21283cd9467bb03999266bc4"
+    url "https://files.pythonhosted.org/packages/b3/fc/e067678238fa451312d4c62bf6e6cf5ec56375422aee02f9cb5f909b3047/jsonschema-4.26.0.tar.gz"
+    sha256 "0c26707e2efad8aa1bfc5b7ce170f3fccc2e4918ff85989ba9ffa9facb2be326"
   end
 
   resource "jsonschema-specifications" do
-    url "https://files.pythonhosted.org/packages/f8/b9/cc0cc592e7c195fb8a650c1d5990b10175cf13b4c97465c72ec841de9e4b/jsonschema_specifications-2023.12.1.tar.gz"
-    sha256 "48a76787b3e70f5ed53f1160d2b81f586e4ca6d1548c5de7085d1682674764cc"
+    url "https://files.pythonhosted.org/packages/19/74/a633ee74eb36c44aa6d1095e7cc5569bebf04342ee146178e2d36600708b/jsonschema_specifications-2025.9.1.tar.gz"
+    sha256 "b540987f239e745613c7a9176f3edb72b832a4ac465cf02712288397832b5e8d"
   end
 
   resource "packaging" do
-    url "https://files.pythonhosted.org/packages/51/65/50db4dda066951078f0a96cf12f4b9ada6e4b811516bf0262c0f4f7064d4/packaging-24.1.tar.gz"
-    sha256 "026ed72c8ed3fcce5bf8950572258698927fd1dbda10a5e981cdf0ac37f4f002"
+    url "https://files.pythonhosted.org/packages/65/ee/299d360cdc32edc7d2cf530f3accf79c4fca01e96ffc950d8a52213bd8e4/packaging-26.0.tar.gz"
+    sha256 "00243ae351a257117b6a241061796684b084ed1c516a08c48a3f7e147a9d80b4"
   end
 
   resource "referencing" do
-    url "https://files.pythonhosted.org/packages/99/5b/73ca1f8e72fff6fa52119dbd185f73a907b1989428917b24cff660129b6d/referencing-0.35.1.tar.gz"
-    sha256 "25b42124a6c8b632a425174f24087783efb348a6f1e0008e63cd4466fedf703c"
+    url "https://files.pythonhosted.org/packages/22/f5/df4e9027acead3ecc63e50fe1e36aca1523e1719559c499951bb4b53188f/referencing-0.37.0.tar.gz"
+    sha256 "44aefc3142c5b842538163acb373e24cce6632bd54bdb01b21ad5863489f50d8"
   end
 
   resource "requests" do
-    url "https://files.pythonhosted.org/packages/63/70/2bf7780ad2d390a8d301ad0b550f1581eadbd9a20f896afe06353c2a2913/requests-2.32.3.tar.gz"
-    sha256 "55365417734eb18255590a9ff9eb97e9e1da868d4ccd6402399eaf68af20a760"
-  end
-
-  resource "rpds-py" do
-    url "https://files.pythonhosted.org/packages/55/64/b693f262791b818880d17268f3f8181ef799b0d187f6f731b1772e05a29a/rpds_py-0.20.0.tar.gz"
-    sha256 "d72a210824facfdaf8768cf2d7ca25a042c30320b3020de2fa04640920d4e121"
+    url "https://files.pythonhosted.org/packages/5f/a4/98b9c7c6428a668bf7e42ebb7c79d576a1c3c1e3ae2d47e674b468388871/requests-2.33.1.tar.gz"
+    sha256 "18817f8c57c6263968bc123d237e3b8b08ac046f5456bd1e307ee8f4250d3517"
   end
 
   resource "ruamel-yaml" do
-    url "https://files.pythonhosted.org/packages/29/81/4dfc17eb6ebb1aac314a3eb863c1325b907863a1b8b1382cdffcb6ac0ed9/ruamel.yaml-0.18.6.tar.gz"
-    sha256 "8b27e6a217e786c6fbe5634d8f3f11bc63e0f80f6a5890f28863d9c45aac311b"
-  end
-
-  resource "ruamel-yaml-clib" do
-    url "https://files.pythonhosted.org/packages/46/ab/bab9eb1566cd16f060b54055dd39cf6a34bfa0240c53a7218c43e974295b/ruamel.yaml.clib-0.2.8.tar.gz"
-    sha256 "beb2e0404003de9a4cab9753a8805a8fe9320ee6673136ed7f04255fe60bb512"
-  end
-
-  resource "setuptools" do
-    url "https://files.pythonhosted.org/packages/6a/21/8fd457d5a979109603e0e460c73177c3a9b6b7abcd136d0146156da95895/setuptools-74.0.0.tar.gz"
-    sha256 "a85e96b8be2b906f3e3e789adec6a9323abf79758ecfa3065bd740d81158b11e"
+    url "https://files.pythonhosted.org/packages/c7/3b/ebda527b56beb90cb7652cb1c7e4f91f48649fbcd8d2eb2fb6e77cd3329b/ruamel_yaml-0.19.1.tar.gz"
+    sha256 "53eb66cd27849eff968ebf8f0bf61f46cdac2da1d1f3576dd4ccee9b25c31993"
   end
 
   resource "urllib3" do
-    url "https://files.pythonhosted.org/packages/43/6d/fa469ae21497ddc8bc93e5877702dca7cb8f911e337aca7452b5724f1bb6/urllib3-2.2.2.tar.gz"
-    sha256 "dd505485549a7a552833da5e6063639d0d177c04f23bc3864e41e5dc5f612168"
+    url "https://files.pythonhosted.org/packages/c7/24/5f1b3bdffd70275f6661c76461e25f024d5a38a46f04aaca912426a2b1d3/urllib3-2.6.3.tar.gz"
+    sha256 "1b62b6884944a57dbe321509ab94fd4d3b307075e0c2eae991ac71ee15ad38ed"
   end
 
   def install
-    # Work around ruamel.yaml.clib not building on Xcode 15.3, remove after a new release
-    # has resolved: https://sourceforge.net/p/ruamel-yaml-clib/tickets/32/
-    ENV.append_to_cflags "-Wno-incompatible-function-pointer-types" if DevelopmentTools.clang_build_version >= 1500
-
     virtualenv_install_with_resources
   end
 
   test do
+    ENV["TMPDIR"] = testpath
+
     borg = (testpath/"borg")
     borg_info_json = (testpath/"borg_info_json")
     config_path = testpath/"config.yml"
@@ -108,7 +83,7 @@ class Borgmatic < Formula
     sentinel_path = testpath/"init_done"
 
     # Create a fake borg info json
-    borg_info_json.write <<~EOS
+    borg_info_json.write <<~JSON
       {
           "cache": {
               "path": "",
@@ -131,10 +106,10 @@ class Borgmatic < Formula
           },
           "security_dir": ""
       }
-    EOS
+    JSON
 
     # Create a fake borg executable to log requested commands
-    borg.write <<~EOS
+    borg.write <<~SHELL
       #!/bin/sh
       echo $@ >> #{log_path}
 
@@ -160,20 +135,23 @@ class Borgmatic < Formula
       if [ "$1" = "create" ]; then
         exit 0
       fi
-    EOS
+    SHELL
+
     borg.chmod 0755
 
     # Generate a config
-    system bin/"borgmatic", "config", "generate", "--destination", config_path
-
-    # Replace defaults values
-    inreplace config_path do |s|
-      s.gsub! "- /var/log/syslog*", ""
-      s.gsub! "- /home/user/path with spaces", ""
-      s.gsub! "- path: ssh://user@backupserver/./sourcehostname.borg", "- path: #{repo_path}"
-      s.gsub! "- path: /mnt/backup", ""
-      s.gsub!(/# ?local_path: borg1/, "local_path: #{borg}")
-    end
+    config_path.write <<~YAML
+      source_directories:
+          - /home
+          - /etc
+      repositories:
+          - path: #{repo_path}
+      local_path: #{borg}
+      patterns:
+          - R #{testpath}
+          - '- #{config_path}'
+      keep_daily: 7
+    YAML
 
     # Initialize Repo
     system bin/"borgmatic", "-v", "2", "--config", config_path, "init", "--encryption", "repokey"
@@ -188,21 +166,32 @@ class Borgmatic < Formula
     log_content = File.read(log_path)
 
     # Assert that the proper borg commands were executed
-    assert_equal <<~EOS, log_content
-      --version --debug --show-rc
-      info --json #{repo_path}
+    expected_log = <<~EOS
+      --version --log-json --debug --show-rc
+      info --critical --log-json --json #{repo_path}
       init --encryption repokey --debug #{repo_path}
-      --version
-      create #{repo_path}::{hostname}-{now:%Y-%m-%dT%H:%M:%S.%f} /etc /home #{testpath}/.borgmatic #{config_path}
-      prune --keep-daily 7 --glob-archives {hostname}-* #{repo_path}
-      compact #{repo_path}
-      info --json #{repo_path}
-      check --glob-archives {hostname}-* #{repo_path}
-      --version
-      create --json #{repo_path}::{hostname}-{now:%Y-%m-%dT%H:%M:%S.%f} /etc /home #{testpath}/.borgmatic #{config_path}
-      prune --keep-daily 7 --glob-archives {hostname}-* #{repo_path}
-      compact #{repo_path}
-      info --json #{repo_path}
+      --version --log-json
+      create --patterns-from #{testpath}/borgmatic-.{8}/borgmatic/tmp.{8} #{repo_path}::{hostname}-{now:%Y-%m-%dT%H:%M:%S.%f} --dry-run --list
+      create --patterns-from #{testpath}/borgmatic-.{8}/borgmatic/tmp.{8} --log-json #{repo_path}::{hostname}-{now:%Y-%m-%dT%H:%M:%S.%f}
+      prune --keep-daily 7 --glob-archives {hostname}-* --log-json #{repo_path}
+      compact --log-json #{repo_path}
+      info --critical --log-json --json #{repo_path}
+      check --glob-archives {hostname}-* --log-json #{repo_path}
+      --version --log-json
+      create --patterns-from #{testpath}/borgmatic-.{8}/borgmatic/tmp.{8} #{repo_path}::{hostname}-{now:%Y-%m-%dT%H:%M:%S.%f} --dry-run --list
+      create --patterns-from #{testpath}/borgmatic-.{8}/borgmatic/tmp.{8} --log-json --json #{repo_path}::{hostname}-{now:%Y-%m-%dT%H:%M:%S.%f}
+      prune --keep-daily 7 --glob-archives {hostname}-* --log-json #{repo_path}
+      compact --log-json #{repo_path}
+      info --critical --log-json --json #{repo_path}
     EOS
+    expected = expected_log.split("\n").map(&:strip)
+
+    log_content.lines.map.with_index do |line, i|
+      if line.start_with?("create")
+        assert_match(/#{expected[i].chomp}/, line.chomp)
+      else
+        assert_equal expected[i].chomp, line.chomp
+      end
+    end
   end
 end

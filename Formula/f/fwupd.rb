@@ -3,79 +3,83 @@ class Fwupd < Formula
 
   desc "Firmware update daemon"
   homepage "https://github.com/fwupd/fwupd"
-  url "https://github.com/fwupd/fwupd/releases/download/1.9.24/fwupd-1.9.24.tar.xz"
-  sha256 "12f560b35dbed981fde8cf774c6d1f2e658a157d3a63d6c439bf418dbcc44b4c"
+  url "https://github.com/fwupd/fwupd/releases/download/2.1.1/fwupd-2.1.1.tar.xz"
+  sha256 "0ae697f1f2011571310cef5d96429d8a5d541f73b0025bd2b622c9c7f4fe05b6"
   license "LGPL-2.1-or-later"
+  revision 1
   head "https://github.com/fwupd/fwupd.git", branch: "main"
 
   bottle do
-    sha256 arm64_sonoma:   "3098aa5f6ba05f9ac84c27fbdde0d829af379fb8f2ba1b05bc69a2786c9f58ef"
-    sha256 arm64_ventura:  "c75324e3034e466d04900c38fead2eb9f18567f93b3cb6b2d67c29c0c5b54dc4"
-    sha256 arm64_monterey: "efc0c6f7f49432e87b2a907b81681c3d299789c4509b814ac21031eb70b17b95"
-    sha256 sonoma:         "a105fd3b81aebf55e0a80cb810d2560c274fb0d7c052f4e485517c4dff387b2c"
-    sha256 ventura:        "b0fdce27ba07974bc08402260f381bf9796ea9ecf2f584f8dd92dc4538e4521f"
-    sha256 monterey:       "bd5fdcf2e6dfa058306f59ed52d7f78d686a947dfd1265b3bea66d7d076eefc9"
-    sha256 x86_64_linux:   "ce89989817d8a5004134e11ecf44ce75fa74e266a0191224fca27fedc930d4ff"
+    sha256 arm64_tahoe:   "83c854dc87a8d5898081c49f92258d85a659f4afe4c6fb8847bc643b9447f1cb"
+    sha256 arm64_sequoia: "5c1e8ba96490d1839e777abb2f3d0986afca3c329eb101a1a1079ccb536d867b"
+    sha256 arm64_sonoma:  "a80b3de18d41c892db44cb6b4349f661eac55a4b7a8c054da4b836f732e82f1a"
+    sha256 sonoma:        "d625aadbfa7b3a4b2cc271e67ce135b6493c379d9fd2469fd2a70e0634e2e3f6"
+    sha256 arm64_linux:   "61bb3ab55433384803109f2b6b1374131d827deb7c9dfc5bf393c55e18105cb3"
+    sha256 x86_64_linux:  "7414af8092fa95c77503352fb1cb6f024e3f1ac80c6b39f6d9ea1ec49e7e9841"
   end
 
-  depends_on "gi-docgen" => :build
+  depends_on "gettext" => :build # for msgfmt
   depends_on "gobject-introspection" => :build
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => :build
-  depends_on "python@3.12" => :build
+  depends_on "pkgconf" => [:build, :test]
+  depends_on "python@3.14" => :build
   depends_on "vala" => :build
-  depends_on "gcab"
-  depends_on "gettext"
+
   depends_on "glib"
   depends_on "gnutls"
-  depends_on "json-glib"
-  depends_on "libarchive"
   depends_on "libcbor"
-  depends_on "libgusb"
   depends_on "libjcat"
+  depends_on "libusb"
   depends_on "libxmlb"
-  depends_on "protobuf-c"
+  depends_on "readline"
   depends_on "sqlite"
+  depends_on "usb.ids"
   depends_on "xz"
 
   uses_from_macos "curl"
-  uses_from_macos "zlib"
+
+  on_macos do
+    depends_on "gettext"
+  end
+
+  on_linux do
+    depends_on "util-linux"
+    depends_on "zlib-ng-compat"
+  end
+
+  pypi_packages package_name:   "",
+                extra_packages: ["jinja2", "markupsafe"]
 
   resource "jinja2" do
-    url "https://files.pythonhosted.org/packages/ed/55/39036716d19cab0747a5020fc7e907f362fbf48c984b14e62127f7e68e5d/jinja2-3.1.4.tar.gz"
-    sha256 "4a3aee7acbbe7303aede8e9648d13b8bf88a429282aa6122a993f0ac800cb369"
+    url "https://files.pythonhosted.org/packages/df/bf/f7da0350254c0ed7c72f3e33cef02e048281fec7ecec5f032d4aac52226b/jinja2-3.1.6.tar.gz"
+    sha256 "0137fb05990d35f1275a587e9aee6d56da821fc83491a0fb838183be43f66d6d"
   end
 
   resource "markupsafe" do
-    url "https://files.pythonhosted.org/packages/87/5b/aae44c6655f3801e81aa3eef09dbbf012431987ba564d7231722f68df02d/MarkupSafe-2.1.5.tar.gz"
-    sha256 "d283d37a890ba4c1ae73ffadf8046435c76e7bc2247bbb63c00bd1a709c6544b"
+    url "https://files.pythonhosted.org/packages/7e/99/7690b6d4034fffd95959cbe0c02de8deb3098cc577c67bb6a24fe5d7caa7/markupsafe-3.0.3.tar.gz"
+    sha256 "722695808f4b6457b320fdc131280796bdceb04ab50fe1795cd540799ebe1698"
   end
 
   def python3
-    "python3.12"
+    "python3.14"
   end
 
   def install
     venv = virtualenv_create(buildpath/"venv", python3)
     venv.pip_install resources
-    ENV.prepend_path "PYTHONPATH", buildpath/"venv"/Language::Python.site_packages(python3)
+    ENV.prepend_path "PYTHONPATH", venv.root/Language::Python.site_packages(python3)
 
     system "meson", "setup", "build",
                     "-Dbuild=standalone", # this is used as PolicyKit is not available on macOS
-                    "-Dlibarchive=enabled", # fail if missing
                     "-Dpython=#{which(python3)}",
                     "-Dsupported_build=enabled",
                     "-Dplugin_flashrom=disabled",
-                    "-Dplugin_gpio=disabled",
                     "-Dplugin_modem_manager=disabled",
-                    "-Dplugin_msr=disabled",
-                    "-Dplugin_tpm=disabled",
-                    "-Dplugin_uefi_capsule=disabled",
-                    "-Dplugin_uefi_pk=disabled",
-                    # these two are needed for https://github.com/fwupd/fwupd/pull/6147
-                    "-Dplugin_logitech_scribe=disabled",
-                    "-Dplugin_logitech_tap=disabled",
+                    "-Dplugin_uefi_capsule_splash=false",
+                    "-Dtests=false",
+                    "-Ddocs=disabled",
+                    "-Dvendor_ids_dir=#{Formula["usb.ids"].opt_share}/misc/usb.ids",
                     *std_meson_args
     system "meson", "compile", "-C", "build", "--verbose"
     system "meson", "install", "-C", "build"
@@ -83,30 +87,17 @@ class Fwupd < Formula
 
   test do
     # check apps like gnome-firmware can link
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <fwupd.h>
       int main(int argc, char *argv[]) {
         FwupdClient *client = fwupd_client_new();
         g_assert_nonnull(client);
         return 0;
       }
-    EOS
-    gettext = Formula["gettext"]
-    glib = Formula["glib"]
-    flags = %W[
-      -I#{glib.opt_include}/glib-2.0
-      -I#{glib.opt_lib}/glib-2.0/include
-      -I#{include}/fwupd-1
-      -L#{gettext.opt_lib}
-      -L#{glib.opt_lib}
-      -L#{lib}
-      -lgio-2.0
-      -lglib-2.0
-      -lgobject-2.0
-      -lfwupd
-    ]
-    flags << "-lintl" if OS.mac?
-    system ENV.cc, "test.c", "-o", "test", *flags
+    C
+
+    pkgconf_flags = shell_output("pkgconf --cflags --libs fwupd").chomp.split
+    system ENV.cc, "test.c", "-o", "test", *pkgconf_flags
     system "./test"
 
     # this is a lame test, but fwupdtool requires root access to do anything much interesting

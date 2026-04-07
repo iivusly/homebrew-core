@@ -1,9 +1,10 @@
 class Gdcm < Formula
   desc "Grassroots DICOM library and utilities for medical files"
   homepage "https://sourceforge.net/projects/gdcm/"
-  url "https://github.com/malaterre/GDCM/archive/refs/tags/v3.0.24.tar.gz"
-  sha256 "d88519a094797c645ca34797a24a14efc10965829c4c3352c8ef33782a556336"
+  url "https://github.com/malaterre/GDCM/archive/refs/tags/v3.2.2.tar.gz"
+  sha256 "133078bfff4fe850a1faaea44b0a907ba93579fd16f34c956f4d665b24b590e5"
   license "BSD-3-Clause"
+  revision 1
 
   livecheck do
     url :stable
@@ -11,34 +12,36 @@ class Gdcm < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "b3c59d76d3075c22b131d69ffa1692c28a0fd2357a537b57b412e026f0a2d382"
-    sha256 arm64_ventura:  "847ee192e58ed159a28116d4e02c849203adff75eee0bc27e865a1c9269966aa"
-    sha256 arm64_monterey: "6e2a348a3aab4f5193aad6120e780605a3022393a4ffdb0af363dd89d306ab6e"
-    sha256 sonoma:         "e98f96ff6b897d241feddb12eb0d1340b612e033126f52dc9a675465d88c11d0"
-    sha256 ventura:        "8bada768a0e1349507f4e8c4cfece34f606c168bae51b81e2df16bc2ec98916d"
-    sha256 monterey:       "fd68db00f804806164c14a880ac66b107892461753d55731d134b39a06deac5b"
-    sha256 x86_64_linux:   "fe50e950bb25f9e13d890b92e82570887b3f1bc7174b508a46709a0ffaa35e09"
+    rebuild 1
+    sha256 arm64_tahoe:   "fbfbde99e1a4e66f63e4860a75e651483537551b7e361ea0748c3cb5dd216868"
+    sha256 arm64_sequoia: "3a12b63f85f0d745adf767d02560af6df94fc76fb350121de2acc17a2d3f15f1"
+    sha256 arm64_sonoma:  "3ecc27d0db8e9f6795c33ba5504828aed956c4b641146d47878fed6cce27b2f2"
+    sha256 sonoma:        "48af31c53b96008feb0f20f035d59b68e13e38535870efb086d6d447729e39ba"
+    sha256 arm64_linux:   "babc4e4d7802ce9f0c1feabad433376040eec5b28ceee29fa17422bfbccc2666"
+    sha256 x86_64_linux:  "8b3a83d368a69b1a84473dfd14ea69986f991bca7206b8082b1553ae2ca58d4d"
   end
 
   depends_on "cmake" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
+  depends_on "python@3.14" => [:build, :test] # for bindings, avoid runtime dependency due to `expat`
   depends_on "swig" => :build
+  depends_on "charls"
+  depends_on "json-c"
   depends_on "openjpeg"
   depends_on "openssl@3"
-  depends_on "python@3.12"
 
   uses_from_macos "expat"
-  uses_from_macos "zlib"
+  uses_from_macos "libxml2"
 
   on_linux do
+    depends_on "python@3.14"
     depends_on "util-linux" # for libuuid
+    depends_on "zlib-ng-compat"
   end
 
-  fails_with gcc: "5"
-
   def python3
-    which("python3.12")
+    which("python3.14")
   end
 
   def install
@@ -58,11 +61,14 @@ class Gdcm < Formula
       "-DGDCM_BUILD_EXAMPLES=OFF",
       "-DGDCM_BUILD_DOCBOOK_MANPAGES=OFF",
       "-DGDCM_USE_VTK=OFF", # No VTK 9 support: https://sourceforge.net/p/gdcm/bugs/509/
+      "-DGDCM_USE_SYSTEM_CHARLS=ON",
       "-DGDCM_USE_SYSTEM_EXPAT=ON",
-      "-DGDCM_USE_SYSTEM_ZLIB=ON",
-      "-DGDCM_USE_SYSTEM_UUID=ON",
+      "-DGDCM_USE_SYSTEM_JSON=ON",
+      "-DGDCM_USE_SYSTEM_LIBXML2=ON",
       "-DGDCM_USE_SYSTEM_OPENJPEG=ON",
       "-DGDCM_USE_SYSTEM_OPENSSL=ON",
+      "-DGDCM_USE_SYSTEM_UUID=ON",
+      "-DGDCM_USE_SYSTEM_ZLIB=ON",
       "-DGDCM_WRAP_PYTHON=ON",
       "-DPYTHON_EXECUTABLE=#{python3}",
       "-DPYTHON_INCLUDE_DIR=#{python_include}",
@@ -82,17 +88,16 @@ class Gdcm < Formula
   end
 
   test do
-    (testpath/"test.cxx").write <<~EOS
+    (testpath/"test.cxx").write <<~CPP
       #include "gdcmReader.h"
       int main(int, char *[])
       {
         gdcm::Reader reader;
         reader.SetFileName("file.dcm");
       }
-    EOS
+    CPP
 
-    system ENV.cxx, "-std=c++11", "-isystem", "#{include}/gdcm-3.0", "-o", "test.cxx.o", "-c", "test.cxx"
-    system ENV.cxx, "-std=c++11", "test.cxx.o", "-o", "test", "-L#{lib}", "-lgdcmDSED"
+    system ENV.cxx, "-std=c++11", "test.cxx", "-o", "test", "-I#{include}/gdcm-#{version.major_minor}", "-L#{lib}", "-lgdcmDSED"
     system "./test"
 
     system python3, "-c", "import gdcm"

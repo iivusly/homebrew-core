@@ -1,9 +1,11 @@
 class Cgns < Formula
   desc "CFD General Notation System"
-  homepage "http://cgns.org/"
-  url "https://github.com/CGNS/CGNS/archive/refs/tags/v4.4.0.tar.gz"
-  sha256 "3b0615d1e6b566aa8772616ba5fd9ca4eca1a600720e36eadd914be348925fe2"
+  homepage "https://cgns.github.io/"
+  url "https://github.com/CGNS/CGNS/archive/refs/tags/v4.5.1.tar.gz"
+  sha256 "ae63b0098764803dd42b7b2a6487cbfb3c0ae7b22eb01a2570dbce49316ad279"
   license "BSD-3-Clause"
+  revision 1
+  compatibility_version 1
   head "https://github.com/CGNS/CGNS.git", branch: "develop"
 
   livecheck do
@@ -12,29 +14,25 @@ class Cgns < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "4a36e9f04e131b588140deb67750c17af4872194edfb6532465b1eb7cb6489ea"
-    sha256 cellar: :any,                 arm64_ventura:  "ce99c50f036019874327c95a79a224a87360b6ed94253cff8efc405fd7bff096"
-    sha256 cellar: :any,                 arm64_monterey: "d4cac694928a1107b7f78561babe8ad5997914f19663dff150e6c827c602d831"
-    sha256 cellar: :any,                 arm64_big_sur:  "226385007cf78e02dbe88e56718c1662f0c26692a1a15eb502721427c82b9944"
-    sha256 cellar: :any,                 sonoma:         "ce1583b6de0e9202d9e74119c2d8dfb5af07673f0b6fdd5ce3a37c9387e3bb98"
-    sha256 cellar: :any,                 ventura:        "b8d92b3b67c9b85f9baf1779a70bc738d42f7cbb4586e6fc341689b1d61ee0ec"
-    sha256 cellar: :any,                 monterey:       "8979f06f47c90538924a233349020b1358f6fab95d8cc2097aa56b2fc3ca1799"
-    sha256 cellar: :any,                 big_sur:        "7bf1c37a0e5bbe6f9f3418b6eaaacb4ddb13e4c278438a9ca97c5bee428782a2"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "2d41b94fa8b9aa29224d83663f9a237ee18e793e8969c4b6193d2d03a200ed9e"
+    sha256                               arm64_tahoe:   "274b220aacb028fec11a4f272d7b24461431a7b7b00b19b4446a3cb097044b6a"
+    sha256                               arm64_sequoia: "655fca22fe9c033af766b7d849e760aa9ff7b38bfa73234ed286fb553a021b4d"
+    sha256                               arm64_sonoma:  "c807458cd9027b7151c53a27bae5c57b3bfe3cd8555e0001fec20fa1be82c995"
+    sha256                               sonoma:        "b5608db10d3e167bbecb376532a8ce96d1a5e5d3dcff72f0dab2a74ac1b1e01f"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "9d6f73711962658578e623e3eb4351027eee086086aebec4e2232875d12f04af"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "a5447f14d57dcd51381c2db73025529bb7eab9ac74c210b5ee6e45bf9a44f18a"
   end
 
   depends_on "cmake" => :build
   depends_on "gcc" # for gfortran
   depends_on "hdf5"
-  depends_on "libaec"
-
-  uses_from_macos "zlib"
 
   def install
+    # CMake FortranCInterface_VERIFY fails with LTO on Linux due to different GCC and GFortran versions
+    ENV.append "FFLAGS", "-fno-lto" if OS.linux?
+
     args = %w[
       -DCGNS_ENABLE_64BIT=YES
       -DCGNS_ENABLE_FORTRAN=YES
-      -DCGNS_ENABLE_HDF5=YES
     ]
 
     system "cmake", "-S", ".", "-B", "build", *std_cmake_args, *args
@@ -46,7 +44,7 @@ class Cgns < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <stdio.h>
       #include "cgnslib.h"
       int main(int argc, char *argv[])
@@ -56,7 +54,7 @@ class Cgns < Formula
           return 1;
         return 0;
       }
-    EOS
+    C
     flags = %W[-L#{lib} -lcgns]
     flags << "-Wl,-rpath,#{lib},-rpath,#{Formula["libaec"].opt_lib}" if OS.linux?
     system Formula["hdf5"].opt_prefix/"bin/h5cc", "test.c", *flags

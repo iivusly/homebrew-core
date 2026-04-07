@@ -1,18 +1,18 @@
 class TCompletion < Formula
   desc "Completion for CLI power tool for Twitter"
   homepage "https://sferik.github.io/t/"
-  url "https://github.com/sferik/t-ruby/archive/refs/tags/v4.1.1.tar.gz"
-  sha256 "998a884aa5dcd024617427c8cee7574eb3ab52235131bb34875df794b8c3c7d7"
+  url "https://github.com/sferik/t-ruby/archive/refs/tags/v5.0.0.tar.gz"
+  sha256 "30685de7d87d385a1c74b6ef47732c8b5259fe50f434efd651757e5529cc2fe9"
   license "MIT"
-  head "https://github.com/sferik/t-ruby.git", branch: "master"
+  head "https://github.com/sferik/t-ruby.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, all: "28d1c8535510ece370a91e8935cdf98e0a0f032f8d7c6a8b8c4ea65641cc5c22"
+    sha256 cellar: :any_skip_relocation, all: "8f41fb3b6dcda43958db52bea7f259cddd0272735e4f09eafa61a01637ac9b9d"
   end
 
   def install
-    bash_completion.install "etc/t-completion.sh" => "t"
-    zsh_completion.install "etc/t-completion.zsh" => "_t"
+    bash_completion.install "legacy/etc/t-completion.sh" => "t"
+    zsh_completion.install "legacy/etc/t-completion.zsh" => "_t"
   end
 
   test do

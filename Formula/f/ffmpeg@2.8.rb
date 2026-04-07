@@ -6,7 +6,7 @@ class FfmpegAT28 < Formula
   # None of these parts are used by default, you have to explicitly pass `--enable-gpl`
   # to configure to activate them. In this case, FFmpeg's license changes to GPL v2+.
   license "GPL-2.0-or-later"
-  revision 1
+  revision 8
 
   livecheck do
     url "https://ffmpeg.org/download.html"
@@ -14,18 +14,27 @@ class FfmpegAT28 < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "ce4b0294dbd37cc84c451100c83b35d0dbb4a4f62c3ae6b897577928c2824c62"
-    sha256 arm64_ventura:  "9a6e193bd3e2c76dd1d44daa7f9da5e07e66ce364d83908e5e7fe26512545e2f"
-    sha256 arm64_monterey: "878e4d8b5d2e0da0f3dc31a802e3081e9a5bccde2a71cb171490ee8f1b9a271b"
-    sha256 sonoma:         "a190fb614704211a2d38ef2199c4da37c0318f5e59b40c799e105f7dbd084c50"
-    sha256 ventura:        "39dc3173f263a1a52631f29a2a24c9ca99307e10ddb02317bd73b797f097dce6"
-    sha256 monterey:       "7a9bf7a4e873d9693d5c14b2340382e8731acc1633a50f2f4b18b67cfb55401f"
-    sha256 x86_64_linux:   "a547e14ec86a6927096e887ac5f7308cdfdd3f4e0d3341afb3367f2e86e0e82a"
+    sha256 arm64_tahoe:   "bae260c1a31f316dd652f4303f8432c48fc204e24d4d43991dc87b05cc60499d"
+    sha256 arm64_sequoia: "4c4d7e61422afc7d4124be058dd4d9eabbcbb8c0412eb4ad5fd7a4cbbf9bcdc0"
+    sha256 arm64_sonoma:  "5094bd37d69bab6ade913ff8663081a7969ce23db6d72753eba941f338c7114a"
+    sha256 sonoma:        "32e4419502dac2f59cfe8c7b82506f00f152fab55c395bf0a0506ed2c464569e"
+    sha256 arm64_linux:   "7ed56e8b454a70d760824309e9a2241fa3fe29e0f750c8d18aec6c28af6ba028"
+    sha256 x86_64_linux:  "5b447d92a974d1a3fb96e0f0b2ac9761906de6d47d15b2f1834992b74670e44f"
   end
 
   keg_only :versioned_formula
 
-  depends_on "pkg-config" => :build
+  # On deprecation date, we had over 5 versions of FFmpeg and `ffmpeg@2.8` was
+  # the least popular with 280 installs in 90 days. This means it no longer
+  # satisfies https://docs.brew.sh/Versions#acceptable-versioned-formulae
+  #
+  # > No more than five versions of a formula (including the main one)
+  # > will be supported at any given time, unless they are popular
+  # > (e.g. have over 1000 analytics 90 days installs of usage)
+  deprecate! date: "2026-01-17", because: :versioned_formula
+  disable! date: "2027-01-17", because: :versioned_formula
+
+  depends_on "pkgconf" => :build
   depends_on "texi2html" => :build
   depends_on "yasm" => :build
 
@@ -52,10 +61,10 @@ class FfmpegAT28 < Formula
   depends_on "xz"
 
   uses_from_macos "bzip2"
-  uses_from_macos "zlib"
 
   on_linux do
     depends_on "alsa-lib"
+    depends_on "zlib-ng-compat"
   end
 
   def install
@@ -114,9 +123,14 @@ class FfmpegAT28 < Formula
   end
 
   test do
-    # Create an example mp4 file
+    # Create a 5 second test MP4
     mp4out = testpath/"video.mp4"
-    system bin/"ffmpeg", "-y", "-filter_complex", "testsrc=rate=1:duration=1", mp4out
-    assert_predicate mp4out, :exist?
+    system bin/"ffmpeg", "-filter_complex", "testsrc=rate=1:duration=5", mp4out
+    assert_match(/Duration: 00:00:05\.00,.*Video: h264/m, shell_output("#{bin}/ffprobe -hide_banner #{mp4out} 2>&1"))
+
+    # Re-encode it in WMV2/Matroska (HEVC support is still experimental)
+    mkvout = testpath/"video.mkv"
+    system bin/"ffmpeg", "-i", mp4out, "-c:v", "wmv2", mkvout
+    assert_match(/Duration: 00:00:05\.00,.*Video: wmv2/m, shell_output("#{bin}/ffprobe -hide_banner #{mkvout} 2>&1"))
   end
 end

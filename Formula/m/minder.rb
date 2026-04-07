@@ -1,19 +1,18 @@
 class Minder < Formula
   desc "CLI for interacting with Stacklok's Minder platform"
-  homepage "https://minder-docs.stacklok.dev"
-  url "https://github.com/stacklok/minder/archive/refs/tags/v0.0.62.tar.gz"
-  sha256 "df8f7edd11764e1304a69e913fecca9106e95184623b98b396eea6f6fdbb33c6"
+  homepage "https://mindersec.github.io/"
+  url "https://github.com/mindersec/minder/archive/refs/tags/v0.1.2.tar.gz"
+  sha256 "f00ee6ca3f9928d6c569f61b9862324a14261c9a36b3c78c28ba57c4134930df"
   license "Apache-2.0"
-  head "https://github.com/stacklok/minder.git", branch: "main"
+  head "https://github.com/mindersec/minder.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "a84ce8789eb3762257b89b73f0a8e74245949f7b4382e07e660f22a2409fac40"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "a84ce8789eb3762257b89b73f0a8e74245949f7b4382e07e660f22a2409fac40"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "a84ce8789eb3762257b89b73f0a8e74245949f7b4382e07e660f22a2409fac40"
-    sha256 cellar: :any_skip_relocation, sonoma:         "86af176bd34784bc79771041bbeecb396edcab90b69ca4f559c4acc5af009cf6"
-    sha256 cellar: :any_skip_relocation, ventura:        "95e684cce313fe3eda13629525de33077e515b2a1091beea564cf55aa2e6a18e"
-    sha256 cellar: :any_skip_relocation, monterey:       "fd6790a998c68a2f41e7ea8c85d8556212b42d49034bac502421817c4343b1cf"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "234f438477806d3148ad8b98bb39366c1287de20f7dd15e67a45aa097a1c32c7"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "df2b7b2885900d397a14e765556a6aeb51c9f6f4a3ccc563a120727f0b36af9b"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "df2b7b2885900d397a14e765556a6aeb51c9f6f4a3ccc563a120727f0b36af9b"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "df2b7b2885900d397a14e765556a6aeb51c9f6f4a3ccc563a120727f0b36af9b"
+    sha256 cellar: :any_skip_relocation, sonoma:        "97b8fe2c47b3ec75565092743be6a95a8620a2bf89ab3b06ca8dffe8927ec621"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "9aaa89da3a0114602f4ced8cccbb803fc0ddded0c75948c1031bbed2965c20af"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ee20fa72e861b3e2d6ab3d5be950ec08f924d335a81339b9f4807468d8932f5f"
   end
 
   depends_on "go" => :build
@@ -21,17 +20,17 @@ class Minder < Formula
   def install
     ldflags = %W[
       -s -w
-      -X github.com/stacklok/minder/internal/constants.CLIVersion=#{version}
+      -X github.com/mindersec/minder/internal/constants.CLIVersion=#{version}
     ]
     system "go", "build", *std_go_args(ldflags:), "./cmd/cli"
 
-    generate_completions_from_executable(bin/"minder", "completion")
+    generate_completions_from_executable(bin/"minder", shell_parameter_format: :cobra)
   end
 
   test do
-    assert_match version.to_s, shell_output("#{bin}/minder version")
+    assert_match version.to_s, shell_output("#{bin}/minder version 2>&1")
 
-    output = shell_output("#{bin}/minder artifact list -p github 2>&1", 16)
-    assert_match "No config file present, using default values", output
+    # All the cli action trigger to open github authorization page,
+    # so we cannot test them directly.
   end
 end

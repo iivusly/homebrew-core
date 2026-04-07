@@ -11,24 +11,18 @@ class Qdbm < Formula
   end
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any,                 arm64_sonoma:   "fb9f9c8620e37ed0dfbbf506adb5c634d3055b503328019eea53afde01547ead"
-    sha256 cellar: :any,                 arm64_ventura:  "e6948ebb305c814ce996e7f26c20eed87531667acb01cfd47888ff002c89d324"
-    sha256 cellar: :any,                 arm64_monterey: "81801d3db8db3a73c8421819684eddd73b84c385c5e0005a9a572de5faf654a9"
-    sha256 cellar: :any,                 arm64_big_sur:  "5b0f851a602c8cb4f0fab49204037f7a6d28bc311a30559c7f08c37c36b66add"
-    sha256 cellar: :any,                 sonoma:         "cc13e898b5702e4412a1ec4c2b66ac4cf46d1072a15c7f7cd2d60a2a35544e78"
-    sha256 cellar: :any,                 ventura:        "a94916c4050a878f94976c479fe1ccc042292676f1abe11f76c2b12f92851b1c"
-    sha256 cellar: :any,                 monterey:       "f14f954b9e525de06afbb324b22df63af903f814ff81c5f2ecf787f9d9a2963f"
-    sha256 cellar: :any,                 big_sur:        "7257a9e22ee3661fc2213d5ff60148b44e5e217781a3af807405c239020b3c6a"
-    sha256 cellar: :any,                 catalina:       "0a0ba32270742fbd821ba60bbc6452e6b6b6a476d72e719bdb33fdf535e316f0"
-    sha256 cellar: :any,                 mojave:         "4861035c21a7fcd02efca60c922d06a45f3078eaffa374784a533932f9efa806"
-    sha256 cellar: :any,                 high_sierra:    "4ec4e60b16efb21fd7835c182fcf5d8f43c4af4329dd8afb07b4900bc1b17f60"
-    sha256 cellar: :any,                 sierra:         "547ecf82252706d276c8359448b7f4e738264999028b06cd3738af34ba58276c"
-    sha256 cellar: :any,                 el_capitan:     "6fd80b953a53cdf048bf686d2ac3620deda19a022a10a1e7cbd7aea073bf9b6a"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "52780796d139d8e46d0bb342f4e8cce314fa587fee9932a897626b3a1b58a481"
+    rebuild 3
+    sha256 cellar: :any,                 arm64_tahoe:   "8758b4bbc07fe322baf1aeb4815956e31dfe20720429254f6e78a2e6c500acbe"
+    sha256 cellar: :any,                 arm64_sequoia: "9983b409d48f7443900ce5b980b08f95e0f102854608c1615f4ff4f45b961f0a"
+    sha256 cellar: :any,                 arm64_sonoma:  "445dc7761c805ee218c4a5d29b521338a9ba3d0e773fdddd0622b272b970cbf6"
+    sha256 cellar: :any,                 sonoma:        "e972c7da4e44db7be3104ae998c53c23f3834aedba2eaf6a3169933327670571"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "8063229ce3fc0aac1e402f27c5f9c9ab27f7e1101006887aedc8047844b69fee"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "4f532caae96d2ab1726eb1fd9196db93dd0b4511f9b407b209c545a801449877"
   end
 
-  uses_from_macos "zlib"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     args = %W[
@@ -38,8 +32,17 @@ class Qdbm < Formula
       --enable-iconv
     ]
 
-    # Does not want to build on Linux
-    args << "--enable-bzip" if OS.mac?
+    if OS.mac?
+      # Does not want to build on Linux
+      args << "--enable-bzip"
+    else
+      ENV.append "LDFLAGS", "-L#{Formula["zlib-ng-compat"].opt_lib}"
+    end
+
+    # GCC < 13 with -O2 or higher can cause segmentation faults from loop optimisation bug
+    if ENV.compiler.to_s.start_with?("gcc") && DevelopmentTools.gcc_version("gcc") < 13
+      ENV.append "CPPFLAGS", "-fno-tree-vrp"
+    end
 
     system "./configure", *args
     if OS.mac?
@@ -52,7 +55,7 @@ class Qdbm < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <depot.h>
       #include <stdlib.h>
       #include <stdio.h>
@@ -76,7 +79,7 @@ class Qdbm < Formula
 
         return 0;
       }
-    EOS
+    C
 
     system ENV.cc, "test.c", "-I#{include}", "-L#{lib}", "-lqdbm", "-o", "test"
     assert_equal "mike, 00-12-34-56", shell_output("./test").chomp

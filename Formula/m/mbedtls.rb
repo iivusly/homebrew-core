@@ -1,8 +1,8 @@
 class Mbedtls < Formula
   desc "Cryptographic & SSL/TLS library"
   homepage "https://tls.mbed.org/"
-  url "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-3.6.1/mbedtls-3.6.1.tar.bz2"
-  sha256 "fc8bef0991b43629b7e5319de6f34f13359011105e08e3e16eed3a9fe6ffd3a3"
+  url "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-4.1.0/mbedtls-4.1.0.tar.bz2"
+  sha256 "377a09cf8eb81b5fb2707045e5522d5489d3309fed5006c9874e60558fc81d10"
   license "Apache-2.0"
   head "https://github.com/Mbed-TLS/mbedtls.git", branch: "development"
 
@@ -13,31 +13,32 @@ class Mbedtls < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "85ebbef174334a956d09467ae5f96664a80ddff5e4907d29b19f6dba93312323"
-    sha256 cellar: :any,                 arm64_ventura:  "24958180338112358f8d047c0dacb29d142b9ef7991ecea44c065ce3a31a395c"
-    sha256 cellar: :any,                 arm64_monterey: "9da50d1a90d39a1a72b682de00b11f9525f4966dc2274ad3254072360247c6a4"
-    sha256 cellar: :any,                 sonoma:         "00860dfbfe01e85918c698b95c50a40c1cd7e102ffaa548d17be6d7c1e27ab81"
-    sha256 cellar: :any,                 ventura:        "2d4f92d6cc330d519f999550cb1b2dc3e29bd3d10724bec8a5a5dca4cdff8189"
-    sha256 cellar: :any,                 monterey:       "8a5d71363939adf144c111501bcfa530e729c6a8d975d141415db895f8c3a182"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "ccbe393ef900a7aa55413c62c8a5e39cdd0b17a3e69edacc213cacb68faf59c5"
+    sha256 cellar: :any,                 arm64_tahoe:   "afb5b23bad6eb87cd8674539459d29bbdf9faa8d73af0e2ded7b668f240f510e"
+    sha256 cellar: :any,                 arm64_sequoia: "258007b03b55a6921a80ea8866ec93cb7b339c60a39d66c114098e87fe94a69e"
+    sha256 cellar: :any,                 arm64_sonoma:  "d07a25b71b81662643550226f26d111cdde1b3edd270ff2d1e274ac0903309c9"
+    sha256 cellar: :any,                 sonoma:        "835b7a62734a707f1429660356219758f0b0106cfbd48f844050d4456fd7e507"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "1d406f785dbdad88c23ada7d185006570c83ca60d6cf6aa48adf196603e1ac6e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "15cac95836fbe3f6cd9ed6252f9651960d8e0d59842e0ac790ee0a87e282533a"
   end
 
   depends_on "cmake" => :build
-  depends_on "python@3.12" => :build
+
+  uses_from_macos "python" => :build
 
   def install
-    inreplace "include/mbedtls/mbedtls_config.h" do |s|
+    inreplace "tf-psa-crypto/include/psa/crypto_config.h" do |s|
       # enable pthread mutexes
       s.gsub! "//#define MBEDTLS_THREADING_PTHREAD", "#define MBEDTLS_THREADING_PTHREAD"
       # allow use of mutexes within mbed TLS
       s.gsub! "//#define MBEDTLS_THREADING_C", "#define MBEDTLS_THREADING_C"
-      # enable DTLS-SRTP extension
-      s.gsub! "//#define MBEDTLS_SSL_DTLS_SRTP", "#define MBEDTLS_SSL_DTLS_SRTP"
     end
+
+    # enable DTLS-SRTP extension
+    inreplace "include/mbedtls/mbedtls_config.h", "//#define MBEDTLS_SSL_DTLS_SRTP", "#define MBEDTLS_SSL_DTLS_SRTP"
 
     system "cmake", "-S", ".", "-B", "build",
                     "-DUSE_SHARED_MBEDTLS_LIBRARY=On",
-                    "-DPython3_EXECUTABLE=#{which("python3.12")}",
+                    "-DPython3_EXECUTABLE=#{which("python3")}",
                     "-DCMAKE_INSTALL_RPATH=#{rpath}",
                     "-DGEN_FILES=OFF",
                     *std_cmake_args
@@ -48,20 +49,12 @@ class Mbedtls < Formula
       system "ctest", "--parallel", "1", "--test-dir", "build", "--rerun-failed", "--output-on-failure"
     end
     system "cmake", "--install", "build"
-
-    # Why does Mbedtls ship with a "Hello World" executable. Let's remove that.
-    rm(bin/"hello")
-    # Rename benchmark & selftest, which are awfully generic names.
-    mv bin/"benchmark", bin/"mbedtls-benchmark"
-    mv bin/"selftest", bin/"mbedtls-selftest"
-    # Demonstration files shouldn't be in the main bin
-    libexec.install bin/"mpi_demo"
   end
 
   test do
-    (testpath/"testfile.txt").write("This is a test file")
+    expected_contents = "This is a test file"
+    (testpath/"testfile.txt").write(expected_contents)
     # Don't remove the space between the checksum and filename. It will break.
-    expected_checksum = "e2d0fe1585a63ec6009c8016ff8dda8b17719a637405a4e23c0ff81339148249  testfile.txt"
-    assert_equal expected_checksum, shell_output("#{bin}/generic_sum SHA256 testfile.txt").strip
+    assert_equal expected_contents, shell_output("#{bin}/zeroize testfile.txt").strip
   end
 end

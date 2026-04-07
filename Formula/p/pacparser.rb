@@ -1,19 +1,18 @@
 class Pacparser < Formula
   desc "Library to parse proxy auto-config (PAC) files"
   homepage "https://github.com/manugarg/pacparser"
-  url "https://github.com/manugarg/pacparser/archive/refs/tags/v1.4.5.tar.gz"
-  sha256 "fac205f41d000e245519244dc3e730e649a0ac1c61b5f2d1d0660056e1680b2d"
+  url "https://github.com/manugarg/pacparser/archive/refs/tags/v1.5.0.tar.gz"
+  sha256 "2601a0e58e87caba6f4866aebefde2f5a44a277c05f01f17541ba8857c7a566e"
   license "LGPL-3.0-or-later"
-  head "https://github.com/manugarg/pacparser.git", branch: "master"
+  head "https://github.com/manugarg/pacparser.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "22d47d663a8dee08bffab1c78bb4ed863317da5c9fa5bd8a937fe87784d8996e"
-    sha256 cellar: :any,                 arm64_ventura:  "2eb88d3fbf6f69a38d7e9f95d8781d3471ad1b3cc89cfbfb7bbe4b08f9150a91"
-    sha256 cellar: :any,                 arm64_monterey: "10f108fb57f52d0774b9f02981e5bdb2c0c569c9bd1b5fa789a7f8d4383d1e26"
-    sha256 cellar: :any,                 sonoma:         "4d184243ed935d24e10744195addf345d21822ab299309636345ef1a8c5f14ae"
-    sha256 cellar: :any,                 ventura:        "67d627d395f5c153f5025fe552c70931e6ab55f0dd2e7171414de5d43497e20d"
-    sha256 cellar: :any,                 monterey:       "541bd6827519339d49f1521f5733fd9854961aec2fd48b157f70f99953e144a6"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "ea64d408d99ac2dfd8426d17e8afd6e39ed561ab0b17b62baf9fe6d871e87982"
+    sha256 cellar: :any,                 arm64_tahoe:   "39a44126df3d44f59c8715dc936e8ced528626c06b115990e3ec13e8ac56f8ca"
+    sha256 cellar: :any,                 arm64_sequoia: "6a21090df23934b60f62ae3201e2dce07a3d474e475d0b4501e96b473acd3f8c"
+    sha256 cellar: :any,                 arm64_sonoma:  "3f4b9365bf22505f77fd1e15fbf5f3679c6cda66e5bb0d1f36939857a798c2ce"
+    sha256 cellar: :any,                 sonoma:        "063baea8c6d415189ab1f448afb5ec5cbf67d5edf17fb0cd488617ced915ca66"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "6f7df8ad84a4fcf3f60884dee60d65897b724b82f6a6c347abbb1bd0997dba1a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "52fe3751f79b2bfcbd8019ddfd9d9b2050854bd779e9ebbcb2b367c83e1b31a7"
   end
 
   def install

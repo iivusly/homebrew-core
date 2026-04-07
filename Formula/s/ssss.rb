@@ -1,7 +1,9 @@
 class Ssss < Formula
   desc "Shamir's secret sharing scheme implementation"
   homepage "http://point-at-infinity.org/ssss/"
-  url "http://point-at-infinity.org/ssss/ssss-0.5.tar.gz"
+  # Upstream is only available via HTTP, so we prefer Debian's HTTPS mirror
+  url "https://deb.debian.org/debian/pool/main/s/ssss/ssss_0.5.orig.tar.gz"
+  mirror "http://point-at-infinity.org/ssss/ssss-0.5.tar.gz"
   sha256 "5d165555105606b8b08383e697fc48cf849f51d775f1d9a74817f5709db0f995"
   license "GPL-2.0-or-later"
 
@@ -11,6 +13,8 @@ class Ssss < Formula
   end
 
   bottle do
+    sha256 cellar: :any,                 arm64_tahoe:    "55d52ba91f9417c0fac93458bad42528c79b31f96c718f8d0ffeb614196344a7"
+    sha256 cellar: :any,                 arm64_sequoia:  "0baf04283135acc3f522af4d516f783c646cab07e6bc3ff9be9cd7c8f09d0059"
     sha256 cellar: :any,                 arm64_sonoma:   "56687b50265df26e2c4c08e7a3c397c3e39f66dd29c0c0bf1cfe4976c1eeac0d"
     sha256 cellar: :any,                 arm64_ventura:  "272b364205342419e458630610daf257d70f82c10308e87c5295cdaf047938b1"
     sha256 cellar: :any,                 arm64_monterey: "c9ff1f49c619f70ff87833f7060f33543099cb520aa1f1ea15dd034dc0db53b3"
@@ -20,10 +24,7 @@ class Ssss < Formula
     sha256 cellar: :any,                 monterey:       "9dc2e5f7a756608b8d979bc325ab16a466aaa650b836231d1cea1c4d816b8ca5"
     sha256 cellar: :any,                 big_sur:        "5ff50aef8004346c9cf21eb9aecae18ce2b7d4032c7460284b6c1903dc244d6f"
     sha256 cellar: :any,                 catalina:       "ba1cd924e9aa97d91ff125c082ff9d1b2eb7ce3bea642edc1ae9c4f94340d19d"
-    sha256 cellar: :any,                 mojave:         "96db005b3a278b26b7756c3dde1f94975cd09d901191029cf35649dfc1ac1178"
-    sha256 cellar: :any,                 high_sierra:    "af51b1deda77dc64304532dbe4131a02520a8e619f5aea178eeef9d30f87f2c9"
-    sha256 cellar: :any,                 sierra:         "d6c84cc81a0e079f55b32bf3bc35be3a70016226f5cb0e6d1862c9dca22aaa56"
-    sha256 cellar: :any,                 el_capitan:     "ffc9b4c320b50f3d093000f9cde8fff3e4f2869ff4111a7da25b0cf17a2bc065"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "7b17a59f64cafbf6650d62aa354f65ff5971353ac0aa105652be34b091dca140"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "74cef70f4478596824e7ecdb1356b650c6d03e1bd4bcf8202822622c16faf6b2"
   end
 

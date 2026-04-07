@@ -1,37 +1,41 @@
 class Colmap < Formula
   desc "Structure-from-Motion and Multi-View Stereo"
   homepage "https://colmap.github.io/"
-  url "https://github.com/colmap/colmap/archive/refs/tags/3.10.tar.gz"
-  sha256 "61850f323e201ab6a1abbfb0e4a8b3ba1c4cedbf55e0a5716bdea1df8ae1813a"
+  url "https://github.com/colmap/colmap/archive/refs/tags/4.0.3.tar.gz"
+  sha256 "9d0a0916c5419d8e8c59839a729b041856d46f8abc911f32847e3857918969bd"
   license "BSD-3-Clause"
-  revision 1
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "e81fa40995450b6f13fb3675bac57aeca83380faa146bed41304de45e3938bda"
-    sha256 cellar: :any,                 arm64_ventura:  "fd260454a7b9caca630278659b1e7398a63d36ee2abfacaabf0bf5c15d032915"
-    sha256 cellar: :any,                 arm64_monterey: "0741dc2a9c7f9228764e05de9bcb407ef3c063ac0a224b2732f40bf4b4631c99"
-    sha256 cellar: :any,                 sonoma:         "7cd8b4df89b8563f087459d460cb93845bc897376a520fe4efe0c4ad2fd9bb43"
-    sha256 cellar: :any,                 ventura:        "76d2391ad2721e30a94002a04a7bb66bebff4ecdf2319e0083fffbc06749cb7d"
-    sha256 cellar: :any,                 monterey:       "6fee96fd5d7bbe0a860fa4ac80c7548af1785a18746eef4636e8ea1a1156c7ca"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "8d67735677d48bb53f47c636ba0a34c3440235ca394d68767e88caeb709ed99c"
+    sha256                               arm64_tahoe:   "2c6162883f5a8420a0510bfd143f3e78948b6b21401bad656c0d7aafa46cc9a1"
+    sha256                               arm64_sequoia: "e2f342414e5c63c625a7ffc47506bb04e7f5deac970797499858706a96ff3506"
+    sha256                               arm64_sonoma:  "34fba5ca0ec55c27b3f0e7dffe4d7676d461d67a58463b607f5dcb4c0bc5ed0c"
+    sha256 cellar: :any,                 sonoma:        "d99650f406f0cb0241428a4066f83f97a07179a52354e76b90e336131bb91bd8"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "a4cff225e8bd2de10d4d9796fb0ed2bf18683dc96d75abfa0528ecf1cb108814"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "4d788e296603f158c90ebfba060a2beb2543f4ee69347e18e9a924914f1769ba"
   end
 
   depends_on "cmake" => :build
   depends_on "boost"
   depends_on "ceres-solver"
   depends_on "cgal"
-  depends_on "eigen"
+  depends_on "eigen" => :no_linkage
+  depends_on "faiss"
   depends_on "flann"
-  depends_on "freeimage"
   depends_on "gflags"
   depends_on "glew"
   depends_on "glog"
   depends_on "gmp"
   depends_on "lz4"
   depends_on "metis"
-  depends_on "qt@5"
+  depends_on "onnx"
+  depends_on "onnxruntime"
+  depends_on "openimageio"
+  depends_on "openssl@3"
+  depends_on "poselib"
+  depends_on "qtbase"
   depends_on "suite-sparse"
 
+  uses_from_macos "curl"
   uses_from_macos "sqlite"
 
   on_macos do
@@ -44,14 +48,20 @@ class Colmap < Formula
     depends_on "mesa"
   end
 
-  # Remove this patch after https://github.com/colmap/colmap/pull/2338 is included in
-  # a future release
-  patch :DATA
-
   def install
-    ENV.append_path "CMAKE_PREFIX_PATH", Formula["qt@5"].prefix
+    args = %w[
+      -DCUDA_ENABLED=OFF
+      -DFETCH_POSELIB=OFF
+      -DFETCH_FAISS=OFF
+      -DFETCH_ONNX=OFF
+      -DBUILD_SHARED_LIBS=ON
+    ]
 
-    system "cmake", "-S", ".", "-B", "build", "-DCUDA_ENABLED=OFF", *std_cmake_args
+    # Fix library install directory and rpath
+    inreplace "CMakeLists.txt", "LIBRARY DESTINATION thirdparty/", "LIBRARY DESTINATION lib/"
+    args << "-DCMAKE_INSTALL_RPATH=#{loader_path}"
+
+    system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
   end
@@ -61,31 +71,3 @@ class Colmap < Formula
     assert_path_exists (testpath / "db")
   end
 end
-
-__END__
-diff --git a/src/colmap/image/line.cc b/src/colmap/image/line.cc
-index 3637c3dc..33fff7da 100644
---- a/src/colmap/image/line.cc
-+++ b/src/colmap/image/line.cc
-@@ -27,6 +27,8 @@
- // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- // POSSIBILITY OF SUCH DAMAGE.
- 
-+#include <memory>
-+
- #include "colmap/image/line.h"
- 
- #include "colmap/util/logging.h"
-diff --git a/src/colmap/mvs/workspace.h b/src/colmap/mvs/workspace.h
-index 73d21b78..6d2c862c 100644
---- a/src/colmap/mvs/workspace.h
-+++ b/src/colmap/mvs/workspace.h
-@@ -29,6 +29,8 @@
- 
- #pragma once
- 
-+#include <memory>
-+
- #include "colmap/mvs/consistency_graph.h"
- #include "colmap/mvs/depth_map.h"
- #include "colmap/mvs/model.h"

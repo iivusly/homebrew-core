@@ -1,26 +1,29 @@
 class Openfpgaloader < Formula
   desc "Universal utility for programming FPGA"
   homepage "https://github.com/trabucayre/openFPGALoader"
-  url "https://github.com/trabucayre/openFPGALoader/archive/refs/tags/v0.12.1.tar.gz"
-  sha256 "8fb2d1aa3a0de50222f6286c47220a5bc7b73708b60fb7d58f764deebd43d82d"
+  url "https://github.com/trabucayre/openFPGALoader/archive/refs/tags/v1.1.1.tar.gz"
+  sha256 "ca965f933c52a2a9dbb318df4d4de70fac5f095a8e64523f81036ab467a4b567"
   license "Apache-2.0"
   head "https://github.com/trabucayre/openFPGALoader.git", branch: "master"
 
   bottle do
-    sha256 arm64_sonoma:   "4ea5de1bb729263aca9cd5a02f905bce83f33cd254066092f7743ddf8eee71f7"
-    sha256 arm64_ventura:  "78f4b3627bd8442931c6eb2aee3710f9e85440797401e111c0026e681e287e71"
-    sha256 arm64_monterey: "c39f654334abcaca0a6f06be85d10e84e1e11f17d87a1604c18c7e166d5b213d"
-    sha256 sonoma:         "e9a77b3de0e081a047a27bcc61a998ea29f8f405865563a8221f0748df31cbb0"
-    sha256 ventura:        "2ff894e1bbcd97e5e503e248fa3531484d0c78acf89516ceeca947877de888db"
-    sha256 monterey:       "fb2c87e13038d1e85d50ebc0981803684d58105253ed6eaf96b92ca13bfb596b"
-    sha256 x86_64_linux:   "6ba7e9b4d370b1ff5165c94f716e3a97542747da12ff7083d3bf76b75e42f24f"
+    sha256 arm64_tahoe:   "5fcb0ca1f40b157a892db1b780e1b10f24d9d082e45465ff03c5fabf034681b6"
+    sha256 arm64_sequoia: "8614fcca0f77cd93f87960c5c28ef0caeb0abce7147534155e8fa67d23c5fb75"
+    sha256 arm64_sonoma:  "3d74847d2cfcf600f3b8ae60551a4e769b8208a19f4d3da62546cc435d2cfb33"
+    sha256 sonoma:        "34caa66947e3bc29f8cd47266d2cbac8ec12ee1fd8090c55eda4663f87e57439"
+    sha256 arm64_linux:   "c779c9691fc3917e44f149774edd4ae4573cebe4fa75d4fbf009719b295f1bc8"
+    sha256 x86_64_linux:  "89ec85a2ce8460887a33d687fe685f9d2e7c3500a7c3710dbfa6b80cbe347e93"
   end
 
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "libftdi"
   depends_on "libusb"
-  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "systemd"
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     system "cmake", "-S", ".", "-B", "build", *std_cmake_args

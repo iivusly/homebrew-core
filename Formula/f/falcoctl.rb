@@ -1,19 +1,18 @@
 class Falcoctl < Formula
   desc "CLI tool for working with Falco and its ecosystem components"
   homepage "https://github.com/falcosecurity/falcoctl"
-  url "https://github.com/falcosecurity/falcoctl/archive/refs/tags/v0.9.1.tar.gz"
-  sha256 "3e364a5315a5138e83999c34326f0d231b0fee2fa4c92801ad14d1b4eba64817"
+  url "https://github.com/falcosecurity/falcoctl/archive/refs/tags/v0.12.2.tar.gz"
+  sha256 "05290a97ac6ac886fc4b34d157d533de37d5a1031f81cf4e6eb1f056c4015f49"
   license "Apache-2.0"
   head "https://github.com/falcosecurity/falcoctl.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "8312a2859deb68e163068f9973c4d327217b8c4301a0ba883def4999cdc07df2"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "89e8a5d31f04cbfe41a45b6c2a361223abf7d33902ed53292f7172fcbbb99567"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "392677dac85a86945967eedea04cdad5609adfebdb495cfb6bb78f4cd6c6844e"
-    sha256 cellar: :any_skip_relocation, sonoma:         "d1fafd0fba10c999a1aef966b201c7ab4582e9d1ba26b758fa916d936c3feed3"
-    sha256 cellar: :any_skip_relocation, ventura:        "a5c2c2196e327ad82a01f56752f0dd6c8c719d6fefba01b48c0543800f175471"
-    sha256 cellar: :any_skip_relocation, monterey:       "6140e90d273f9b375a3504fc3715f835036fb76537645fa61312cc16980e0c87"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "13eb10546aa3e523e97d73e86cd755db13dff64512b1f349e6cac9213a683711"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "580f5b4448b45dbce6b0c81469ab2aa5fff60527bfba560e32aba21c4398065c"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "975a8845bcb5401fe6b9b8084512ce4ec1f800ca8ea4eb56fce4c1c9cde5c962"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "3fd72eb17b4b6f5d6839d42f7c4dedc96d3fc0b525a56fda6e8de0169d27757d"
+    sha256 cellar: :any_skip_relocation, sonoma:        "9ffd3c24f261628ce5cd34e8e3ed7eb5f1400bfb6c6ef403ee20346b27e94d97"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "166745727c43a2c13dc11acbda8317b4eef4d2603a944dfe5aeee949bcc0792d"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "a77803385d65096c0b0cad6fbf99aa6b78f47b00c501378e506921893cd7cbe1"
   end
 
   depends_on "go" => :build
@@ -29,14 +28,14 @@ class Falcoctl < Formula
 
     system "go", "build", *std_go_args(ldflags:), "."
 
-    generate_completions_from_executable(bin/"falcoctl", "completion")
+    generate_completions_from_executable(bin/"falcoctl", shell_parameter_format: :cobra)
   end
 
   test do
     system bin/"falcoctl", "tls", "install"
-    assert_predicate testpath/"ca.crt", :exist?
-    assert_predicate testpath/"client.crt", :exist?
+    assert_path_exists testpath/"ca.crt"
+    assert_path_exists testpath/"client.crt"
 
-    assert_match version.to_s, shell_output(bin/"falcoctl version")
+    assert_match version.to_s, shell_output("#{bin}/falcoctl version")
   end
 end

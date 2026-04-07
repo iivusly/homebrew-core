@@ -1,13 +1,12 @@
 class PurescriptLanguageServer < Formula
   desc "Language Server Protocol server for PureScript"
   homepage "https://github.com/nwolverson/purescript-language-server"
-  url "https://registry.npmjs.org/purescript-language-server/-/purescript-language-server-0.18.0.tgz"
-  sha256 "4814f287375c5b03ff71d11ab43e2eab7c87bb4d856d22db70cd45f9051ec327"
+  url "https://registry.npmjs.org/purescript-language-server/-/purescript-language-server-0.18.5.tgz"
+  sha256 "2b4a55ab4ee71dda3f9feb290437dcf2b8b083344cab8490089d6caab123341d"
   license "MIT"
 
   bottle do
-    rebuild 2
-    sha256 cellar: :any_skip_relocation, all: "79af5f956fc4d788f73bab6dcbd8c44bcb235e0f94f7ced418ca15df9b0e103d"
+    sha256 cellar: :any_skip_relocation, all: "dc5f49524090444f724689302457dff282c2ee7655893e172c47cdaf83ebb533"
   end
 
   depends_on "node"
@@ -15,7 +14,7 @@ class PurescriptLanguageServer < Formula
 
   def install
     system "npm", "install", *std_npm_args
-    bin.install_symlink Dir["#{libexec}/bin/*"]
+    bin.install_symlink libexec.glob("bin/*")
   end
 
   test do

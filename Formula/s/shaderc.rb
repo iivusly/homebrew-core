@@ -4,36 +4,53 @@ class Shaderc < Formula
   license "Apache-2.0"
 
   stable do
-    url "https://github.com/google/shaderc/archive/refs/tags/v2024.1.tar.gz"
-    sha256 "eb3b5f0c16313d34f208d90c2fa1e588a23283eed63b101edd5422be6165d528"
+    url "https://github.com/google/shaderc/archive/refs/tags/v2026.1.tar.gz"
+    sha256 "245002feccbe7f8361b223545a5654cea69780745886872d7efff50a38d96c66"
 
     resource "glslang" do
-      # https://github.com/google/shaderc/blob/known-good/known_good.json
+      # https://github.com/google/shaderc/blob/DEPS
       url "https://github.com/KhronosGroup/glslang.git",
-          revision: "142052fa30f9eca191aa9dcf65359fcaed09eeec"
+          revision: "f0bd0257c308b9a26562c1a30c4748a0219cc951"
+      version "f0bd0257c308b9a26562c1a30c4748a0219cc951"
+
+      livecheck do
+        url "https://raw.githubusercontent.com/google/shaderc/refs/tags/v#{LATEST_VERSION}/DEPS"
+        regex(/["']glslang_revision["']:\s*["']([0-9a-f]+)["']/i)
+      end
     end
 
     resource "spirv-headers" do
-      # https://github.com/google/shaderc/blob/known-good/known_good.json
+      # https://github.com/google/shaderc/blob/DEPS
       url "https://github.com/KhronosGroup/SPIRV-Headers.git",
-          revision: "5e3ad389ee56fca27c9705d093ae5387ce404df4"
+          revision: "04f10f650d514df88b76d25e83db360142c7b174"
+      version "04f10f650d514df88b76d25e83db360142c7b174"
+
+      livecheck do
+        url "https://raw.githubusercontent.com/google/shaderc/refs/tags/v#{LATEST_VERSION}/DEPS"
+        regex(/["']spirv_headers_revision["']:\s*["']([0-9a-f]+)["']/i)
+      end
     end
 
     resource "spirv-tools" do
-      # https://github.com/google/shaderc/blob/known-good/known_good.json
+      # https://github.com/google/shaderc/blob/DEPS
       url "https://github.com/KhronosGroup/SPIRV-Tools.git",
-          revision: "dd4b663e13c07fea4fbb3f70c1c91c86731099f7"
+          revision: "fbe4f3ad913c44fe8700545f8ffe35d1382b7093"
+      version "fbe4f3ad913c44fe8700545f8ffe35d1382b7093"
+
+      livecheck do
+        url "https://raw.githubusercontent.com/google/shaderc/refs/tags/v#{LATEST_VERSION}/DEPS"
+        regex(/["']spirv_tools_revision["']:\s*["']([0-9a-f]+)["']/i)
+      end
     end
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "1c8a29c3a0edd76d3ae6e59037f48eb83e30f63083e1949838b5fe01a3224f5d"
-    sha256 cellar: :any,                 arm64_ventura:  "6210cc389dffb86e727d2f3f166d73b6c7d150e8f2e7d5c2866ae7cc5cd6772d"
-    sha256 cellar: :any,                 arm64_monterey: "996f8926a4ad55b1c2be2f4b7b92642fb8f39d9f7995df67d5cce9a43fc4e60d"
-    sha256 cellar: :any,                 sonoma:         "2c42b9747e28eee0093509b01017f732f9e78882698a8a271d750cb639e6d98e"
-    sha256 cellar: :any,                 ventura:        "0eea89915c9c734b2f08383ab163cf597e6f7f93279e0b3a451dd0060682ded3"
-    sha256 cellar: :any,                 monterey:       "6e7c1f25ca71fde54b5ce354c34cb8e371671fd34ab553a213a639e4cfb520f8"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "17c71813d88205305292164d9b47f3df20e810edab06b5f144a0d8d67fd33c00"
+    sha256 cellar: :any,                 arm64_tahoe:   "d7ddacc721d7007b1f2c19485b1c938f41cd579f574b340390d66d320dbc20c1"
+    sha256 cellar: :any,                 arm64_sequoia: "a13c345a193efe0785b209c98711d0283a777e153089273d5d0960aa3b53001a"
+    sha256 cellar: :any,                 arm64_sonoma:  "194d5bb48ba609fb62adda23c7943cb18d170cac7f82223770250a859dc47d05"
+    sha256 cellar: :any,                 sonoma:        "2295c30040b559918297da800c7ed9c4ee3df77295a4ac3845852435741b0507"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "e8c26769453214cc7c2e4dbc150cb62d0a1797f0e02aa1934aabc0c9e9cb5fa5"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "976b47b7844c989741ee3a3f6dbdb03ed0a524cb230f9bda8d1bf5b19d2e7a81"
   end
 
   head do
@@ -53,7 +70,8 @@ class Shaderc < Formula
   end
 
   depends_on "cmake" => :build
-  depends_on "python@3.12" => :build
+
+  uses_from_macos "python" => :build
 
   # patch to fix `target "SPIRV-Tools-opt" that is not in any export set`
   # upstream bug report, https://github.com/google/shaderc/issues/1413
@@ -77,7 +95,7 @@ class Shaderc < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <shaderc/shaderc.h>
       int main() {
         int version;
@@ -86,7 +104,7 @@ class Shaderc < Formula
           return 1;
         return (profile == shaderc_profile_core) ? 0 : 1;
       }
-    EOS
+    C
     system ENV.cc, "-o", "test", "test.c", "-I#{include}",
                    "-L#{lib}", "-lshaderc_shared"
     system "./test"

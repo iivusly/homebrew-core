@@ -1,19 +1,18 @@
 class Fd < Formula
   desc "Simple, fast and user-friendly alternative to find"
   homepage "https://github.com/sharkdp/fd"
-  url "https://github.com/sharkdp/fd/archive/refs/tags/v10.2.0.tar.gz"
-  sha256 "73329fe24c53f0ca47cd0939256ca5c4644742cb7c14cf4114c8c9871336d342"
+  url "https://github.com/sharkdp/fd/archive/refs/tags/v10.4.2.tar.gz"
+  sha256 "3a7e027af8c8e91c196ac259c703d78cd55c364706ddafbc66d02c326e57a456"
   license any_of: ["Apache-2.0", "MIT"]
   head "https://github.com/sharkdp/fd.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "82d5c2ffc2e2d0d8643a7c3f620c81ed49d7b23920aa23b6a7f4c50be69abc0b"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "354412ababb7d6c52abd9153ff96f133391406ce292b2122c76b96c2ab714f87"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "0b41f292041767fd1c3c5b92daaa6c823fb07c1d7cd11b0427a415f08463f035"
-    sha256 cellar: :any_skip_relocation, sonoma:         "4fa0fb4b3f512e45d35c569953efc7c59ebd8976caac9b2c1b1394b7e29157a0"
-    sha256 cellar: :any_skip_relocation, ventura:        "b1406e5414252b1e1b90cfad188454eb31058256ed6246baed48c4e1cfe593a1"
-    sha256 cellar: :any_skip_relocation, monterey:       "0ac060bf7d1529aa1f65e634f64b98b906df533d71f2185c883165c01f59ad53"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "2464fb21cc981166ffa9783fa14a09265790af4d89ce3a763421ddaf29119541"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "83d0c8ab8a95c83b6feccc78865996a865a6c4dd43b475e6dad4624faca0fbc7"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "702a6d8e88ca21cb61fb0a05f6cc08bc5238ebf8cc5c3f52e4836f742fe7f5c9"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "6c582c3e0ad24abcad44108598822fe746b4c3859b45e85a0be5c4ccdd786c76"
+    sha256 cellar: :any_skip_relocation, sonoma:        "f5ef209dd97a44f0adb952af33c3bf88b76cdb716cd52c1c172f798aa5890cb3"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "a481618eccb1c59d8350fc0ab4bd1099f7646c04f9eaaa8d139d95445ca77769"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ebfd9404fcc55cd20fed3bd149fc948fd6f127abdae785f0b9b786054571b615"
   end
 
   depends_on "rust" => :build
@@ -21,14 +20,12 @@ class Fd < Formula
   conflicts_with "fdclone", because: "both install `fd` binaries"
 
   def install
+    ENV["JEMALLOC_SYS_WITH_LG_PAGE"] = "16" if Hardware::CPU.arm? && OS.linux?
     system "cargo", "install", *std_cargo_args
-    man1.install "doc/fd.1"
-    generate_completions_from_executable(bin/"fd", "--gen-completions", shells: [:bash, :fish])
+
+    generate_completions_from_executable(bin/"fd", "--gen-completions", shells: [:bash, :fish, :pwsh])
     zsh_completion.install "contrib/completion/_fd"
-    # Bash completions are not compatible with Bash 3 so don't use v1 directory.
-    # bash: complete: nosort: invalid option name
-    # Issue ref: https://github.com/clap-rs/clap/issues/5190
-    (share/"bash-completion/completions").install bash_completion.children
+    man1.install "doc/fd.1"
   end
 
   test do

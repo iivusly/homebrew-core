@@ -1,30 +1,27 @@
 class GameMusicEmu < Formula
   desc "Videogame music file emulator collection"
   homepage "https://github.com/libgme/game-music-emu"
-  url "https://github.com/libgme/game-music-emu/archive/refs/tags/0.6.3.tar.gz"
-  sha256 "4c5a7614acaea44e5cb1423817d2889deb82674ddbc4e3e1291614304b86fca0"
+  url "https://github.com/libgme/game-music-emu/archive/refs/tags/0.6.4.tar.gz"
+  sha256 "f2360feb5a32ace226c583df4faf6eff74145c81264aaea11e17a1af2f6f101a"
   license one_of: ["LGPL-2.1-or-later", "GPL-2.0-or-later"]
-  revision 2
+  revision 1
+  compatibility_version 1
   head "https://github.com/libgme/game-music-emu.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "70bb1a2c61c5cfe9db5cea20d195b0a667584a462bd034eef4063b03948c883d"
-    sha256 cellar: :any,                 arm64_ventura:  "c33d21ce67a78b16cfe0e2e68372c62df99bec7d7c73ee20e9acece876ae2e0b"
-    sha256 cellar: :any,                 arm64_monterey: "1346614b5a9561f7eaace297b5493eeb99ec4c3e561acc65669ca6dbb0cd6793"
-    sha256 cellar: :any,                 arm64_big_sur:  "e83fbee26086cc93f7d2eed7d3b93f00a0a0c9eb9d59abf3aba91216fe89d3d8"
-    sha256 cellar: :any,                 sonoma:         "455b9e0b0d15d199a355fa22f242f4887bb67557f145c7ddc17ba7f0659bc7a2"
-    sha256 cellar: :any,                 ventura:        "7b686c42bec0fd89a976842ca616e41b8c40883d461faf49da21409e96585cb6"
-    sha256 cellar: :any,                 monterey:       "7b1e5a6934c8ff16fff726c1963e465abd11458f5773f26b38ce8771da3289a1"
-    sha256 cellar: :any,                 big_sur:        "a0abdc4c5ae05ea22ad3627a1a717ed8a1a137065188b995858c0f301dfda640"
-    sha256 cellar: :any,                 catalina:       "ee658e16c3d9d0061b0b930ca387a1cb2fa6b6b50d23c9f6f4ae7799ddb6f46d"
-    sha256 cellar: :any,                 mojave:         "754ab0c8bc0a6de76adcb56a59913c930196e8e44154958081c093fb7763edad"
-    sha256 cellar: :any,                 high_sierra:    "596497823bb1ebb30f20fa01c8656bb15544c12fad5d67c4de165f9ef3122e68"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "08b3b37367e9fada0881a14a96a8970eecb79426a378d02dc7ed8881923096f3"
+    sha256 cellar: :any,                 arm64_tahoe:   "8cad7f27befc7e783d32d9d69167f02612e161f6821af168960442067e93c3f6"
+    sha256 cellar: :any,                 arm64_sequoia: "0cc376bae52b30b1e0c72a44b69cb0a04e36da4378bb774f660a401f38adf2d8"
+    sha256 cellar: :any,                 arm64_sonoma:  "5f744556ffa8af626454d406f7139ced8a46c1e6a8cb50789c8848a47626e5a8"
+    sha256 cellar: :any,                 sonoma:        "8c403e2dbd363c1b5b72a24ebf8e7f994608a6657468b22ef7d3dc738935c214"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "81c70c227ec71617513c94601116e8c1a40ccda60ac92c7785366814669042f9"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ffc28bb91c6ca56f35eed5acc08c84808d8f54864952268c15b514e43f3c5960"
   end
 
   depends_on "cmake" => :build
 
-  uses_from_macos "zlib"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     system "cmake", "-S", ".", "-B", "build", "-DENABLE_UBSAN=OFF", *std_cmake_args
@@ -33,7 +30,7 @@ class GameMusicEmu < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <gme/gme.h>
       int main(void)
       {
@@ -48,7 +45,7 @@ class GameMusicEmu < Formula
           return -1;
         }
       }
-    EOS
+    C
 
     if OS.mac?
       ubsan_libdir = Dir["#{MacOS::CLT::PKG_PATH}/usr/lib/clang/*/lib/darwin"].first

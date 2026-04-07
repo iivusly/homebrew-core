@@ -1,10 +1,12 @@
 class Miniupnpc < Formula
   desc "UPnP IGD client library and daemon"
   homepage "https://miniupnp.tuxfamily.org"
-  url "https://miniupnp.tuxfamily.org/files/download.php?file=miniupnpc-2.2.7.tar.gz"
-  mirror "http://miniupnp.free.fr/files/miniupnpc-2.2.7.tar.gz"
-  sha256 "b0c3a27056840fd0ec9328a5a9bac3dc5e0ec6d2e8733349cf577b0aa1e70ac1"
+  url "https://miniupnp.tuxfamily.org/files/download.php?file=miniupnpc-2.3.3.tar.gz"
+  mirror "http://miniupnp.free.fr/files/miniupnpc-2.3.3.tar.gz"
+  sha256 "d52a0afa614ad6c088cc9ddff1ae7d29c8c595ac5fdd321170a05f41e634bd1a"
   license "BSD-3-Clause"
+  compatibility_version 1
+  head "https://github.com/miniupnp/miniupnp.git", branch: "master"
 
   # We only match versions with only a major/minor since versions like 2.1 are
   # stable and versions like 2.1.20191224 are unstable/development releases.
@@ -14,17 +16,23 @@ class Miniupnpc < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "dff09e9f7b0238cf21478d85f12a31c1785b4c8b34a894c7d9450f799989db61"
-    sha256 cellar: :any,                 arm64_ventura:  "12a157bafe9206633cb4837f8c0d2f7d4ac3d5a59c712738af32bc1a3f6126f0"
-    sha256 cellar: :any,                 arm64_monterey: "73fcc10ccdc15d29dee4f64e1c1619eb1c9cb3ae11ea0cf9866a7901fe0a9a35"
-    sha256 cellar: :any,                 sonoma:         "63c3ca5eab3479b56f18381f2332df2e99ca3bf7708cfdbf7ac26a4a8742c838"
-    sha256 cellar: :any,                 ventura:        "1f8cbe269314d11cc7a0d83d4618d983edf26bfaf869810fc4f9289f22aa7004"
-    sha256 cellar: :any,                 monterey:       "949a4c9a39f8b2bec9e1904574f3a390aceba622382777982fe323cae51fda1d"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "e06be7f4fcd21887a019cd6f58a99f44a77e951198be8d902e1f32cbe6b9540a"
+    sha256 cellar: :any,                 arm64_tahoe:   "b73df945175626c5dc6c3d05061ec1718f81ed5023c24cd59fd15c569eecf0f0"
+    sha256 cellar: :any,                 arm64_sequoia: "140a46fc7c4fc0b31604b74cbebbd48e741765fe51a8cce8e04ed692926dac97"
+    sha256 cellar: :any,                 arm64_sonoma:  "943b48d7a7a85e18273bb25f34e177f9b75a032f3bc7f00891f6516aad64e2a1"
+    sha256 cellar: :any,                 arm64_ventura: "956adafa0de14369e2e0624272c1cd6f1e777e8a359b642601a6d3933bf4bc46"
+    sha256 cellar: :any,                 sonoma:        "4b03e713001a5bde4ab0e36115d3bf20e81414099361a3ee7969e98c5f6dea35"
+    sha256 cellar: :any,                 ventura:       "20cf52235e1f51654b66062be1869416102ccd327769892f310fbfc74035cc28"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "8cd223f810f0720ac35009022063a6d3f03231f97a9a17b79f0f4f86e6095160"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "21e083d283863e771c6927a44ad88f565f0c4af7b9448a96f99af0c773d66f8e"
   end
 
   def install
-    system "make", "INSTALLPREFIX=#{prefix}", "install"
+    # When building from head we have to cd into the miniupnpc directory
+    build_dir = build.head? ? "miniupnpc" : "."
+
+    cd build_dir do
+      system "make", "INSTALLPREFIX=#{prefix}", "install"
+    end
   end
 
   test do

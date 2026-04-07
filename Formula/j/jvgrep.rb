@@ -1,25 +1,24 @@
 class Jvgrep < Formula
   desc "Grep for Japanese users of Vim"
   homepage "https://github.com/mattn/jvgrep"
-  url "https://github.com/mattn/jvgrep/archive/refs/tags/v5.8.12.tar.gz"
-  sha256 "7e24a6954db1874f226054d1ca2e720945a1c92f9b6aac219e20ed4c3ab6e79c"
+  url "https://github.com/mattn/jvgrep/archive/refs/tags/v5.8.15.tar.gz"
+  sha256 "8d992c01e39201aa6b513030d2de81a7b17040a6881395189779bb3ab5f36bed"
   license "MIT"
   head "https://github.com/mattn/jvgrep.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "75446e73d07e20f8f669a8aad8d06afa0ce4af12646e77c76cc985df3190a6a0"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "75446e73d07e20f8f669a8aad8d06afa0ce4af12646e77c76cc985df3190a6a0"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "75446e73d07e20f8f669a8aad8d06afa0ce4af12646e77c76cc985df3190a6a0"
-    sha256 cellar: :any_skip_relocation, sonoma:         "67d7ddecea5ea8a4f38e466a044f33156864e65df221a990b11d20366be2e462"
-    sha256 cellar: :any_skip_relocation, ventura:        "67d7ddecea5ea8a4f38e466a044f33156864e65df221a990b11d20366be2e462"
-    sha256 cellar: :any_skip_relocation, monterey:       "67d7ddecea5ea8a4f38e466a044f33156864e65df221a990b11d20366be2e462"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "c903876a35a55737263a79668f2f4f915c38481e0299ebe9f4296a66c4899c0b"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "7981c3185ddc4678970a2312a645c418822b99fcdc7103599607a4e661564a69"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "7981c3185ddc4678970a2312a645c418822b99fcdc7103599607a4e661564a69"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "7981c3185ddc4678970a2312a645c418822b99fcdc7103599607a4e661564a69"
+    sha256 cellar: :any_skip_relocation, sonoma:        "0cc035c4724437d837e4244ef64a637c18b3e6f2e805b14a3ab88bbd97de05a9"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "337079572e433500bb4d9c8da994a506c56b717b992c9fd366a9c37df2781879"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "4eb17950624747e7b7d8cad781c7a2785bbe7f19724185e6c08d7ac6b3d5b9a0"
   end
 
   depends_on "go" => :build
 
   def install
-    system "go", "build", *std_go_args
+    system "go", "build", *std_go_args(ldflags: "-s -w")
   end
 
   test do

@@ -1,35 +1,34 @@
 class Kickstart < Formula
   desc "Scaffolding tool to get new projects up and running quickly"
   homepage "https://github.com/Keats/kickstart"
-  url "https://github.com/Keats/kickstart/archive/refs/tags/v0.4.0.tar.gz"
-  sha256 "5aae308d7d6aa021ddf7f5dc882f8199a5d4f4db8cb8f7175c1c1ac831075a8c"
+  url "https://github.com/Keats/kickstart/archive/refs/tags/v0.6.0.tar.gz"
+  sha256 "0888ca59bc11e2c9531957047973b3f4d28e4270c03d1272f29d8b73f12bb142"
   license "MIT"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "35b8c0719e5f82dc9d3baa000f32fca793f6ba914ff8e0c9e94686da9be0aa6f"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "640c86a9964ef35f4462fee0a1a97f6be545528885b722045cfb8c35a5fd9cef"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "f70613fe6a2dc6100db688df22ab854d808180832a573bcdf232e9d0585defb3"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "ad4c7fa8afdb4e95808d2aea6ec5d20e65515873dd7e03623a9b9df24834b874"
-    sha256 cellar: :any_skip_relocation, sonoma:         "022446a079f1f4a0491fd8bb8566596ff2b71b9546919ec444b058023d1e1e7e"
-    sha256 cellar: :any_skip_relocation, ventura:        "4dfc07fc0fab079bf8adca81c5c1effd578b383a8037830b6be304f0d92064c9"
-    sha256 cellar: :any_skip_relocation, monterey:       "ebf772cfc77e3df1386cc001df2db0f5c33f6561fc49cfadd9439d85748aaef7"
-    sha256 cellar: :any_skip_relocation, big_sur:        "1790f244bedb54c169a788648144ec0568a748f4e7f74baa066888280c46e26d"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "dc36827caf4d0dac0558d7a5b609f43fd6ad064a399f3c79578eeb208f67b4bb"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "4da704a13fe097f488ef7ffff14c2449e08ce87f0863c4d3b0ec1fb4d84d817f"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "98d5fc2c7dd19846e28d7d3ac0aded2ba9d05a7027a2cd9b7d5d544aa643ae50"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "63ac54acda7d230418bb0b0fd3d43a6920eda599e6aebd8e6ad654ff94f5207c"
+    sha256 cellar: :any_skip_relocation, sonoma:        "ada53abf074cf433bcc799226148790a68578c86ecde501f4c55f79f7969ade6"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "5be6b2132ab93b209560ebe642576a39d6e7606ff5bd90215bac6415d2d0c32a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "cd13f0e62244332963acd82c481bd12d3f917c4adce0a7b62bfb4ee6a059d73b"
   end
 
   depends_on "rust" => :build
 
   def install
-    system "cargo", "install", *std_cargo_args
+    system "cargo", "install", *std_cargo_args(features: "cli")
   end
 
   test do
     # Create a basic template file and project, and check that kickstart
     # actually interpolates both the filename and its content.
-    #
-    (testpath/"{{file_name}}.txt").write("{{software_project}} is awesome!")
+    template_dir = testpath/"template"
+    output_dir = testpath/"output"
 
-    (testpath/"template.toml").write <<~EOS
+    (template_dir/"{{file_name}}.txt").write("{{software_project}} is awesome!")
+
+    (template_dir/"template.toml").write <<~TOML
       name = "Super basic"
       description = "A very simple template"
       kickstart_version = 1
@@ -43,12 +42,12 @@ class Kickstart < Formula
       name = "software_project"
       default = "kickstart"
       prompt = "Which software project is awesome?"
-    EOS
+    TOML
 
     # Run template interpolation
-    system bin/"kickstart", "--no-input", testpath.to_s
+    system bin/"kickstart", "--no-input", "--output-dir", output_dir, template_dir
 
-    assert_predicate testpath/"myfilename.txt", :exist?
-    assert_equal "kickstart is awesome!", (testpath/"myfilename.txt").read
+    assert_path_exists output_dir/"myfilename.txt"
+    assert_equal "kickstart is awesome!", (output_dir/"myfilename.txt").read
   end
 end

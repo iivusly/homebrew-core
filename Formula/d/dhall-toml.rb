@@ -1,30 +1,38 @@
 class DhallToml < Formula
   desc "Convert between Dhall and Toml"
   homepage "https://github.com/dhall-lang/dhall-haskell/tree/main/dhall-toml"
-  url "https://hackage.haskell.org/package/dhall-toml-1.0.3/dhall-toml-1.0.3.tar.gz"
-  sha256 "00a9ece5313c8b5ec32516e0b1e326b63062f9b7abb025a084bda5b69cae2935"
+  url "https://hackage.haskell.org/package/dhall-toml-1.0.4/dhall-toml-1.0.4.tar.gz"
+  sha256 "e2a71fe3a9939728b4829f32146ca949b3c5b3f61e1245486a9fd43ba86f32dc"
   license "BSD-3-Clause"
   head "https://github.com/dhall-lang/dhall-haskell.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "77850e914f5774c848519d088375e566ac96946ded3ca7428da4fac4394464ec"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "7d7f38cc68cd120e3869d3a535cd7c1c4b81d094f1754f395cb7864b66fdac94"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "a8a362df2578a98f41e80638d7adefa2863c96ba616ba47d4d97c4e8b71c9d54"
-    sha256 cellar: :any_skip_relocation, sonoma:         "269389acf7ed1db191734e00d35889ce824d8ca709c7753f4282c3b4019f5e4b"
-    sha256 cellar: :any_skip_relocation, ventura:        "4053831141433159830a642a31991506255863cd34f88cf59ee2ffa2b49954b1"
-    sha256 cellar: :any_skip_relocation, monterey:       "251b76a91597eb42b33b19c96650e0959fcf5ea5b444071d14dcaf8496fe30d9"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "39d2f70692a5706db31dd4d82561f774cd476053fe678b6656309cd7ad074099"
+    rebuild 2
+    sha256 cellar: :any,                 arm64_tahoe:   "3d83e52092e335ddba928d06ae826157f26f8179ab7db6b757b4c298bf1faf60"
+    sha256 cellar: :any,                 arm64_sequoia: "996c152df3dfc9a03b591e6e73125344fb7828a98c9b735d1c8ee3b8f3e1f0d5"
+    sha256 cellar: :any,                 arm64_sonoma:  "6338c0b88b6f2eaa8a42246a7ab9c5fa6e3c265578f0fcce47a652f89895ecda"
+    sha256 cellar: :any,                 sonoma:        "c67986762a7976ae8707fb802f8350871b8d3a182b81b04c4fc92222c7cc9f9a"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "40e8c1b7e7f0470c7faf90f1d53ba7372a8b581547c1259d1d8363f852318aec"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "0bb108a5e80145086584ae1367ee0eebe475ddc8a89419415e2e1d7536c7624d"
   end
 
   depends_on "cabal-install" => :build
-  depends_on "ghc@9.8" => :build
+  depends_on "ghc" => :build
+  depends_on "gmp"
 
+  uses_from_macos "libffi"
   uses_from_macos "ncurses"
-  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
+    # Workaround to build aeson with GHC 9.14, https://github.com/haskell/aeson/issues/1155
+    args = ["--allow-newer=base,containers,template-haskell"]
+
     system "cabal", "v2-update"
-    system "cabal", "v2-install", *std_cabal_v2_args
+    system "cabal", "v2-install", *args, *std_cabal_v2_args
   end
 
   test do

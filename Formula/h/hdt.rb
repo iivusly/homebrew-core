@@ -6,34 +6,28 @@ class Hdt < Formula
   license "LGPL-2.1-or-later"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "606b24419877439b12ba1833394854122acf1342bf10fa6801b32d213e12f1aa"
-    sha256 cellar: :any,                 arm64_ventura:  "a68a7b396c8b98c042548bd50ea2fc8736e1588be1c1f0d092bcc9d150df1f32"
-    sha256 cellar: :any,                 arm64_monterey: "13a72094b82ac91fe1bbaed2cfb12ffda92903715e105c1136e42c7a1a3d48d0"
-    sha256 cellar: :any,                 arm64_big_sur:  "934a8c000b23ee6a63cda409118c47737d4549a5f0fd260a1652ecfc6b49f1d2"
-    sha256 cellar: :any,                 sonoma:         "f6ff8a133b9be463e6b3212a5b9c2c2c3a022e369c02caf06eb1b8f0cf8d34c2"
-    sha256 cellar: :any,                 ventura:        "a086f2948a08f8143d2d379dad6165689f27904b03937287d2fa3c1d4daf5bca"
-    sha256 cellar: :any,                 monterey:       "693a2273358dcdc130f4bdc102d23e0c7d33d709a417811e737320faf96caaa4"
-    sha256 cellar: :any,                 big_sur:        "614cded2abf67c909f7fd1a980b3093e8368bf0fc802adcd774716e9e301f4f9"
-    sha256 cellar: :any,                 catalina:       "66978658e51117e228dea28a0d4264cfe3ce9ed7e4536eb0726d8c1438d4fb59"
-    sha256 cellar: :any,                 mojave:         "333a1baf863f372e94a40474a799fdd7e043bd691817ab5f7467983ce31a21cb"
-    sha256 cellar: :any,                 high_sierra:    "709ea815a3a24e104b0bd873948d8cbaca317ed235098f1c042ab308f7c3cb6f"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "7e252bf5067fa866d9fb2d81f5af2fc302347982ed6b8c5c7f1474da27eafff8"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "46d5822d2e9fe086b04b5e0f698e8fbbc6235da2f5a95987ac71479b6c2b232a"
+    sha256 cellar: :any,                 arm64_sequoia: "ae9bd2a9b1e243004fac4cd8f28b283efb97c13700de34d16818e68f3abf5b64"
+    sha256 cellar: :any,                 arm64_sonoma:  "4c49e3c9f860c27ffb56c2b3bd7b0e5e187c57e5207c2eaf88ed934ec812efcc"
+    sha256 cellar: :any,                 sonoma:        "557a38517d6af2dc25f191758a590acae074f7c0d549c49cdf2af3781f6d6ae4"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "142304a83cb7d18dab6b9f8b56791f9148d15a9e30641fb21d54553f12e10b28"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "44f1d786ef6d43ec1e4daca46268d2e57d1855985fd06871bb78c4c0228f5e89"
   end
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
   depends_on "libtool" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "serd"
 
-  uses_from_macos "zlib"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     system "./autogen.sh"
-    system "./configure", "--disable-debug",
-                          "--disable-dependency-tracking",
-                          "--disable-silent-rules",
-                          "--prefix=#{prefix}"
+    system "./configure", "--disable-silent-rules", *std_configure_args
     system "make", "install"
   end
 
@@ -57,7 +51,7 @@ class Hdt < Formula
     EOS
 
     system bin/"rdf2hdt", test_file, "test.hdt"
-    assert_predicate testtest_file/"test.hdt", :exist?
+    assert_path_exists testpath/"test.hdt"
     system bin/"hdtInfo", "test.hdt"
   end
 end

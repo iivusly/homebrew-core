@@ -7,19 +7,20 @@ class Invoice < Formula
   head "https://github.com/maaslalani/invoice.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "bfd3dde3902f66423f1a09b951ad977729e31b6e7b81e5e6f4f61de4765e438a"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "8f60846fa811e66cbd42acd1d900081f5029a492c8b5959983faa333409a3207"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "56261fe54c7a9268a1405a62d6b61f7a7ad1249ee4630d0c61ee3043db1db457"
-    sha256 cellar: :any_skip_relocation, sonoma:         "9998524c8a3e9e2eb17ddf71de7290230b3f1caa7f37ef1398beaed2908da774"
-    sha256 cellar: :any_skip_relocation, ventura:        "f4f343dc13b544093113964003344450c555714b286bb4be8049bf7dacd747f7"
-    sha256 cellar: :any_skip_relocation, monterey:       "8c2382bc80db909ed4d6e4ad929f31b8a042545fe0c822b0247197d6c7afa756"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "cc46d1f1aba2274b4f41c09a95b9beed529e456ecb3c0d8fe8f0f7f0246bc616"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "3666463773abc10aef019abd54dbac8b4b699db7783fc0b54e7be6c59b5844df"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "3666463773abc10aef019abd54dbac8b4b699db7783fc0b54e7be6c59b5844df"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "3666463773abc10aef019abd54dbac8b4b699db7783fc0b54e7be6c59b5844df"
+    sha256 cellar: :any_skip_relocation, sonoma:        "334d0d037207500ac6199cef1639e08c759cdf544f2232543c05f7d32aab631b"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "724180390bc239a924d1798745bea25a5ea50fcddc1b8f42adf4941e71be76a4"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "3d75038930d911627bed4b65260095a76623c0062c21f77d501451029da75de9"
   end
 
   depends_on "go" => :build
 
   def install
     system "go", "build", *std_go_args
+    generate_completions_from_executable(bin/"invoice", shell_parameter_format: :cobra)
   end
 
   test do
@@ -28,6 +29,6 @@ class Invoice < Formula
           "--tax 0.13 --discount 0.15 " \
           "--note \"For debugging purposes.\""
     assert_equal "Generated invoice.pdf", shell_output(cmd).chomp
-    assert_predicate testpath/"invoice.pdf", :exist?
+    assert_path_exists testpath/"invoice.pdf"
   end
 end

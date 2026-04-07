@@ -5,19 +5,16 @@ class PnpmAT8 < Formula
   sha256 "daa27a0b541bc635323ff96c2ded995467ff9fe6d69ff67021558aa9ad9dcc36"
   license "MIT"
 
-  livecheck do
-    url "https://registry.npmjs.org/pnpm/latest-8"
-    regex(/["']version["']:\s*?["'](8[^"']+)["']/i)
-  end
-
   bottle do
     rebuild 1
+    sha256 cellar: :any,                 arm64_sequoia:  "d27023c0a4cd4905688132e77e2729c06816516b1e35d9c73fcc4f70aedb05bf"
     sha256 cellar: :any,                 arm64_sonoma:   "d27023c0a4cd4905688132e77e2729c06816516b1e35d9c73fcc4f70aedb05bf"
     sha256 cellar: :any,                 arm64_ventura:  "d27023c0a4cd4905688132e77e2729c06816516b1e35d9c73fcc4f70aedb05bf"
     sha256 cellar: :any,                 arm64_monterey: "d27023c0a4cd4905688132e77e2729c06816516b1e35d9c73fcc4f70aedb05bf"
     sha256 cellar: :any,                 sonoma:         "b0146e361c9446d60b53583e83ca15eb49843b7d7056db3eced35b1c7066fc8c"
     sha256 cellar: :any,                 ventura:        "b0146e361c9446d60b53583e83ca15eb49843b7d7056db3eced35b1c7066fc8c"
     sha256 cellar: :any,                 monterey:       "b0146e361c9446d60b53583e83ca15eb49843b7d7056db3eced35b1c7066fc8c"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "e0ebd800d22d8e8c65092bfe4778a268493f5f0c4eca6df5fe9d7bcb63876245"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "7814ebe5944979026566edb11fa7466d282b4e7ec4fcfa6778c1a9cefdf02948"
   end
 
@@ -52,6 +49,6 @@ class PnpmAT8 < Formula
 
   test do
     system bin/"pnpm", "init"
-    assert_predicate testpath/"package.json", :exist?, "package.json must exist"
+    assert_path_exists testpath/"package.json", "package.json must exist"
   end
 end

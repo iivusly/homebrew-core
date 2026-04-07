@@ -6,6 +6,8 @@ class LibxdgBasedir < Formula
   license "MIT"
 
   bottle do
+    sha256 cellar: :any,                 arm64_tahoe:    "22234a6e02066d75cd724ec788a6a95bf28efef21338f6f5164f3efce25ccfcf"
+    sha256 cellar: :any,                 arm64_sequoia:  "830d1609d4a60b66a7de159c17476bd63834bfae62aafb38a37c7c6aac24575f"
     sha256 cellar: :any,                 arm64_sonoma:   "6fb0160f5b6cd2579d154b9a97c459aef54ca27470db7d8fe9dded2e2f208a2e"
     sha256 cellar: :any,                 arm64_ventura:  "63e6eff0ad399d3054cd01b23563674d726fd502cdf0ae468e489427015e9b79"
     sha256 cellar: :any,                 arm64_monterey: "e7aa730f8ebf8aed39fb649f132fe70611b658d3a2d5162bbc073f193c7050b9"
@@ -15,7 +17,7 @@ class LibxdgBasedir < Formula
     sha256 cellar: :any,                 monterey:       "24e93c008e652e67a3e37f2da0e8c937b4dbedc399f3fe1d1cb89ff1dafecc59"
     sha256 cellar: :any,                 big_sur:        "815e73cfc0be4d8091e83b4083bd583e2514a4768c553480d70be1a3e21d77c2"
     sha256 cellar: :any,                 catalina:       "dc5854179a0d219e058f13e294625d4ebd755e82ca2302ce462b33f75d8113c0"
-    sha256 cellar: :any,                 mojave:         "228bec555704181d31f3f0baf6d95a5839483d4e16374eef5f91063e29f4e89b"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "6211f3d04b552e82d3f0b8fc89494ac42fcc45fa6f7fc6fa05e63893dc929f0f"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "d160ef91d8ec2c931defacad6ff525a7e1336f42e8196e0625bc93a266e54f72"
   end
 
@@ -30,7 +32,7 @@ class LibxdgBasedir < Formula
   end
 
   test do
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include <basedir.h>
       int main() {
         xdgHandle handle;
@@ -38,7 +40,7 @@ class LibxdgBasedir < Formula
         xdgWipeHandle(&handle);
         return 0;
       }
-    EOS
+    CPP
     system ENV.cc, "test.cpp", "-L#{lib}", "-lxdg-basedir", "-o", "test"
     system "./test"
   end

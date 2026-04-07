@@ -1,19 +1,23 @@
 class Automake < Formula
   desc "Tool for generating GNU Standards-compliant Makefiles"
   homepage "https://www.gnu.org/software/automake/"
-  url "https://ftp.gnu.org/gnu/automake/automake-1.17.tar.xz"
-  mirror "https://ftpmirror.gnu.org/automake/automake-1.17.tar.xz"
-  sha256 "8920c1fc411e13b90bf704ef9db6f29d540e76d232cb3b2c9f4dc4cc599bd990"
+  url "https://ftpmirror.gnu.org/gnu/automake/automake-1.18.1.tar.xz"
+  mirror "https://ftp.gnu.org/gnu/automake/automake-1.18.1.tar.xz"
+  sha256 "168aa363278351b89af56684448f525a5bce5079d0b6842bd910fdd3f1646887"
   license "GPL-2.0-or-later"
+  compatibility_version 1
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "aaf3cb57d50c48af4886c0cd24340aa6ca5628feac4a566254a878f378aaa2e5"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "aaf3cb57d50c48af4886c0cd24340aa6ca5628feac4a566254a878f378aaa2e5"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "aaf3cb57d50c48af4886c0cd24340aa6ca5628feac4a566254a878f378aaa2e5"
-    sha256 cellar: :any_skip_relocation, sonoma:         "5548bc61f131a45a0aad86b38f044530a51b10243a95188101438e42842f10d9"
-    sha256 cellar: :any_skip_relocation, ventura:        "5548bc61f131a45a0aad86b38f044530a51b10243a95188101438e42842f10d9"
-    sha256 cellar: :any_skip_relocation, monterey:       "5548bc61f131a45a0aad86b38f044530a51b10243a95188101438e42842f10d9"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "ca591433edbdc896db26cea86f61dfbacea15e794828e7280482de2126d89e3e"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "7298e979d484b938f42b96dfd4b270353e64f61ab0f31e0718799b29dc1570fc"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "3c00a332610983c37659eee42e4a93341a3051892481362d223a40f5435b7555"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "3c00a332610983c37659eee42e4a93341a3051892481362d223a40f5435b7555"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "3c00a332610983c37659eee42e4a93341a3051892481362d223a40f5435b7555"
+    sha256 cellar: :any_skip_relocation, tahoe:         "78ea48a55a4f8b088e5e83a5284e29307981cc6c265487e026824baad283c3b9"
+    sha256 cellar: :any_skip_relocation, sequoia:       "bddfb6ebd600671dbeb0c3e665a98bc971c97834f9b5fdfc15c17f6e3cd44de8"
+    sha256 cellar: :any_skip_relocation, sonoma:        "bddfb6ebd600671dbeb0c3e665a98bc971c97834f9b5fdfc15c17f6e3cd44de8"
+    sha256 cellar: :any_skip_relocation, ventura:       "bddfb6ebd600671dbeb0c3e665a98bc971c97834f9b5fdfc15c17f6e3cd44de8"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "c5bc18b0f438a2b7776c8a2cec9f9c5a4189a46dd35b79046249ad9d3abd4da1"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "c5bc18b0f438a2b7776c8a2cec9f9c5a4189a46dd35b79046249ad9d3abd4da1"
   end
 
   depends_on "autoconf"
@@ -33,9 +37,9 @@ class Automake < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       int main() { return 0; }
-    EOS
+    C
     (testpath/"configure.ac").write <<~EOS
       AC_INIT(test, 1.0)
       AM_INIT_AUTOMAKE

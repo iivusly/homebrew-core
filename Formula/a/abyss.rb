@@ -1,22 +1,23 @@
 class Abyss < Formula
   desc "Genome sequence assembler for short reads"
   homepage "https://www.bcgsc.ca/resources/software/abyss"
-  url "https://github.com/bcgsc/abyss/releases/download/2.3.8/abyss-2.3.8.tar.gz"
-  sha256 "3c262269043f619c79ec3dcd91f5595cb141229f9a13d1a76a952b9a0bfb0d84"
+  url "https://github.com/bcgsc/abyss/releases/download/2.3.10/abyss-2.3.10.tar.gz"
+  sha256 "bbe42e00d1ebb53ec6afaad07779baaaee994aa5c65b9a38cf4ad2011bb93c65"
   license all_of: ["GPL-3.0-only", "LGPL-2.1-or-later", "MIT", "BSD-3-Clause"]
+  revision 1
 
   livecheck do
     url :stable
     regex(/^v?(\d+(?:\.\d+)+)$/i)
   end
+
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "d51aaa3ebeee8f2d7aafddbda19f362f8964bd438cc8cd882c4d449a34215aca"
-    sha256 cellar: :any,                 arm64_ventura:  "ee601d3305bf086edc4537d6e47c62ae6203c7b20a8554cf13320cecf8c534d8"
-    sha256 cellar: :any,                 arm64_monterey: "53684411c7bbb832019b78dba2e84c99a8172e81b8f580ea28f8bf3791c239dc"
-    sha256 cellar: :any,                 sonoma:         "fd91fd250b60d771640582cb02d4d7b1b50003d17cf05152a7a8fce9e63dd5e0"
-    sha256 cellar: :any,                 ventura:        "05f1bfc1159a8bd98b2258763927a02d64e691efab0440ee1c6ef386569a0506"
-    sha256 cellar: :any,                 monterey:       "b941004f43971894244fbb61163f307bc74826544f714209ac7e0578eedbdf8c"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "ce78fd4fc24e5657de9f8eba20727e0eda20b78eb47e735306c93566810da1e9"
+    sha256 cellar: :any,                 arm64_tahoe:   "274f0f758f4cc8852779e2a55f8900ea34ccf7dd0e784396752f03c7e6c56767"
+    sha256 cellar: :any,                 arm64_sequoia: "156d580ae0392d7045dd60c744d4a1a32206a950c86588cb25aa600dedd0e8ae"
+    sha256 cellar: :any,                 arm64_sonoma:  "61982df06da982cf2f7edca391a61f935cb3c1542d165f1ed69f60a33b4a6031"
+    sha256 cellar: :any,                 sonoma:        "cd3d743d197a92d98b4cd43a45615de53d5cc403a36ac9e41cdf6e47ce7aee44"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "57e42e8b368589c943fa3bd23e3c8f8a5af03b307530c445309dc45a72e2d2d8"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "e7b36e68d3d7b88d89656707fd50185e8649d31bac5359575f160dc875c1d28f"
   end
 
   head do
@@ -28,41 +29,30 @@ class Abyss < Formula
   end
 
   depends_on "boost" => :build
-  depends_on "cmake" => :build # For btllib
   depends_on "google-sparsehash" => :build
-  depends_on "meson" => :build # For btllib
-  depends_on "ninja" => :build # For btllib
-  depends_on "python@3.12" => :build # For btllib
-  depends_on "gcc"
+  depends_on "btllib"
   depends_on "open-mpi"
 
   uses_from_macos "sqlite"
 
-  fails_with gcc: "5"
-  fails_with :clang # no OpenMP support
-
-  resource "btllib" do
-    url "https://github.com/bcgsc/btllib/releases/download/v1.7.3/btllib-1.7.3.tar.gz"
-    sha256 "31e7124e1cda9eea6f27b654258a7f8d3dea83c828f0b2e8e847faf1c5296aa3"
+  on_macos do
+    depends_on "libomp"
   end
 
   def install
-    python3 = "python3.12"
+    # Help link to libomp on macOS
+    ENV["ac_cv_prog_cxx_openmp"] = "-Xpreprocessor -fopenmp -lomp" if OS.mac?
 
-    (buildpath/"btllib").install resource("btllib")
-    cd "btllib" do
-      inreplace "compile", '"python3-config"', "\"#{python3}-config\""
-      system "./compile"
-    end
-
+    args = %W[
+      --disable-silent-rules
+      --enable-maxk=128
+      --with-boost=#{Formula["boost"].include}
+      --with-btllib=#{Formula["btllib"].prefix}
+      --with-mpi=#{Formula["open-mpi"].prefix}
+      --with-sparsehash=#{Formula["google-sparsehash"].prefix}
+    ]
     system "./autogen.sh" if build.head?
-    system "./configure", *std_configure_args,
-                          "--enable-maxk=128",
-                          "--with-boost=#{Formula["boost"].include}",
-                          "--with-btllib=#{buildpath}/btllib/install",
-                          "--with-mpi=#{Formula["open-mpi"].prefix}",
-                          "--with-sparsehash=#{Formula["google-sparsehash"].prefix}",
-                          "--disable-silent-rules"
+    system "./configure", *args, *std_configure_args
     system "make", "install"
   end
 

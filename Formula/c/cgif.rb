@@ -1,18 +1,18 @@
 class Cgif < Formula
   desc "GIF encoder written in C"
   homepage "https://github.com/dloebl/cgif"
-  url "https://github.com/dloebl/cgif/archive/refs/tags/v0.4.1.tar.gz"
-  sha256 "8666f9c5f8123d1c22137a6dd714502a330377fb74e2007621926fe4258529d5"
+  url "https://github.com/dloebl/cgif/archive/refs/tags/v0.5.3.tar.gz"
+  sha256 "dcc7731e974ee77db75df26c99aca4d95f11ca2d267d870d42bce1e0d1e1e75f"
   license "MIT"
+  compatibility_version 1
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "b1ae5d3dd2d20c45e7cb52dd3ad1b1197afe9ffb7d606623633a284fee8b15ab"
-    sha256 cellar: :any,                 arm64_ventura:  "7af9a2854b5e137c6617ff25d94a2ecd7702ae32de7131a7369f83d86645dc15"
-    sha256 cellar: :any,                 arm64_monterey: "c0fda459730bd29c5e93bfb2e2352815564a95d0c00416728815dd3a638d2d3e"
-    sha256 cellar: :any,                 sonoma:         "f213c72c04de1ece5c8af176e41553665869bc056275400d1a258f37dc8000d4"
-    sha256 cellar: :any,                 ventura:        "439f55802f15db8367d2ce4bf3b2637206af2b67df76cd465e4e88e5c46e9467"
-    sha256 cellar: :any,                 monterey:       "2175691eb58b56eee3fd324390b18cd74041d4aa9ccb7f7fbe49e87aab6658b2"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "6abe9e69e0b29fda3b21c7c9666ebf20dd69868147cca837b4ae1b0fb13be0d1"
+    sha256 cellar: :any,                 arm64_tahoe:   "00230e0794e05d30890d706132a86d1712d38b3f0f413b4d35fe4423d0879a38"
+    sha256 cellar: :any,                 arm64_sequoia: "635be0b413d819ccf3899bc8c739117361beadf03253055df96657ebf96a23bc"
+    sha256 cellar: :any,                 arm64_sonoma:  "f14b0d9fa9df7a7f410cdccfd89eb3026184e3ad5f031b2af4f4333a58559589"
+    sha256 cellar: :any,                 sonoma:        "9f30f86baba08fee3dd8a024bc8d048fd8a6d52e6765e18f22b628b0a747615f"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "26a31b6ba4ef8d270a705fcfc967794b3371c21211f1076dd2935ea609e028c5"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "3c8289ec945eeed6a61c18a2a77db274d006cfd5cc3c2cb02785abed7bd3c641"
   end
 
   depends_on "meson" => :build
@@ -25,7 +25,7 @@ class Cgif < Formula
   end
 
   test do
-    (testpath/"try.c").write <<~EOS
+    (testpath/"try.c").write <<~C
       #include <cgif.h>
       int main() {
         CGIF_Config config = {0};
@@ -35,7 +35,7 @@ class Cgif < Formula
 
         return 0;
       }
-    EOS
+    C
     system ENV.cc, "try.c", "-L#{lib}", "-lcgif", "-o", "try"
     system "./try"
   end

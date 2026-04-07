@@ -1,8 +1,8 @@
 class Dar < Formula
   desc "Backup directory tree and files"
   homepage "http://dar.linux.free.fr/doc/index.html"
-  url "https://downloads.sourceforge.net/project/dar/dar/2.7.15/dar-2.7.15.tar.gz"
-  sha256 "fac56b59b78b5435ee19541ff4bd3dc329c8252ff78749ffea240f6421534bfe"
+  url "https://downloads.sourceforge.net/project/dar/dar/2.8.4/dar-2.8.4.tar.gz"
+  sha256 "8e1ba552fd8b0783076d42ac1c2eeda57781c89f9bcc119f9d00ff1326e95e13"
   license "GPL-2.0-or-later"
 
   livecheck do
@@ -11,27 +11,36 @@ class Dar < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "79f05ae92d1ccba3e57273d8db60335098b819f3b33df7e4c5b04c5a76043df3"
-    sha256 arm64_ventura:  "b83527a092546bbdc2a8af12c3f1a4eb648669d535d0ba8662138855e92b545c"
-    sha256 arm64_monterey: "8894d4a9043e1bca1e7916a01fa7e207bd894f83a99ad0b5f7aa60ef7a8fa209"
-    sha256 sonoma:         "0c31fb296286cfb881a4ad2220ae1b4b2d4f50d5b223af64cd06492a79bc87fd"
-    sha256 ventura:        "239601d4bd4fc347239f7b1360d588c4596752f7ad5d33c34f93847a191da871"
-    sha256 monterey:       "65961ced78cb512e29cff86fcf218fa1c818a47f6088351a966fde66eb3e4fe3"
-    sha256 x86_64_linux:   "85301842381745b10952ce739ba6af415c897e1adc1863748dbf8ae80885c672"
+    sha256 arm64_tahoe:   "07e5000da7c10842c0a4904ee273e9181788a85c4d9f5b1b18523791e35953bc"
+    sha256 arm64_sequoia: "084c50ac49485dd241cfc065c2c4253978041e613f2f331971a3aa3324152899"
+    sha256 arm64_sonoma:  "8ab6262d49e9a6dc408a82e2a793d06c3548031009218d7500889850b0ccd4f7"
+    sha256 sonoma:        "8f552ba3c2cd723a484c75d83795c81a2967d20fcf28159a0f22880423e8482b"
+    sha256 arm64_linux:   "b9138c84125ec7dd04982d2fbeaac778c69a37aa346e372aa5366cb4119aaa34"
+    sha256 x86_64_linux:  "b02825d5d9922187d2fc0d619488b43a7804a563215e4dea124630f77e9a5020"
   end
 
   depends_on "argon2"
   depends_on "libgcrypt"
+  depends_on "libgpg-error"
+  depends_on "lz4"
   depends_on "lzo"
+  depends_on "xz"
+  depends_on "zstd"
+  uses_from_macos "bzip2"
 
-  uses_from_macos "zlib"
+  on_macos do
+    depends_on "gettext"
+  end
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     system "./configure", "--prefix=#{prefix}",
                           "--disable-build-html",
                           "--disable-dar-static",
                           "--disable-dependency-tracking",
-                          "--disable-libxz-linking",
                           "--enable-mode=64"
     system "make", "install"
   end

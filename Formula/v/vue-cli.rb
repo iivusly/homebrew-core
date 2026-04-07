@@ -7,14 +7,20 @@ class VueCli < Formula
 
   bottle do
     rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:    "99415c2c2a9d3487c7bd190b79d63434126556c6afa2ccf482e618b52b071c7e"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia:  "3b72fda6c0563cd941f67f7fcff7ce0562af8f248188775a0409c7c26e23a2fc"
     sha256 cellar: :any_skip_relocation, arm64_sonoma:   "c106882fcbc2627f6939d21aa711c75b8781a49a846b0a2c64a3a48d230f1bd6"
     sha256 cellar: :any_skip_relocation, arm64_ventura:  "c106882fcbc2627f6939d21aa711c75b8781a49a846b0a2c64a3a48d230f1bd6"
     sha256 cellar: :any_skip_relocation, arm64_monterey: "c106882fcbc2627f6939d21aa711c75b8781a49a846b0a2c64a3a48d230f1bd6"
     sha256 cellar: :any_skip_relocation, sonoma:         "566e867488804efc1ff36499d3abaf6d5d20bae6173f8577f54f8d50b120b6e2"
     sha256 cellar: :any_skip_relocation, ventura:        "566e867488804efc1ff36499d3abaf6d5d20bae6173f8577f54f8d50b120b6e2"
     sha256 cellar: :any_skip_relocation, monterey:       "566e867488804efc1ff36499d3abaf6d5d20bae6173f8577f54f8d50b120b6e2"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "0f08dc625a000e5e23fb2ee9286233e8b9e2d3893cb091280423d3276919beba"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "f068d7c069a1dae0ecbba18a4537d4816d55d6357ff9feb4806923ee486e92e9"
   end
+
+  deprecate! date: "2024-12-22", because: :deprecated_upstream
+  disable! date: "2025-12-22", because: :deprecated_upstream
 
   depends_on "node"
 
@@ -24,7 +30,7 @@ class VueCli < Formula
 
   def install
     system "npm", "install", *std_npm_args
-    bin.install_symlink Dir["#{libexec}/bin/*"]
+    bin.install_symlink libexec.glob("bin/*")
 
     # Remove vendored pre-built binary `terminal-notifier`
     node_notifier_vendor_dir = libexec/"lib/node_modules/@vue/cli/node_modules/node-notifier/vendor"
@@ -41,14 +47,14 @@ class VueCli < Formula
   end
 
   test do
-    (testpath/".vuerc").write <<~EOS
+    (testpath/".vuerc").write <<~JSON
       {
         "useTaobaoRegistry": false,
         "packageManager": "yarn"
       }
-    EOS
+    JSON
 
-    assert_match "yarn", shell_output(bin/"vue config")
-    assert_match "npm", shell_output(bin/"vue info")
+    assert_match "yarn", shell_output("#{bin}/vue config")
+    assert_match "npm", shell_output("#{bin}/vue info")
   end
 end

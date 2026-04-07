@@ -7,19 +7,25 @@ class PscPackage < Formula
   revision 2
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "60ce822c848d09c9d477d37c8c3e7667ffae266897f06d538368c5d66746e1f2"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "d218b3190d7af58a6dee769d8fc8b0543ac7eed760af9552b871ec9e6c28b918"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "0f896fa8803f8405c76b6814302c9a81bc88ad63facccf653f302ca6c7314862"
-    sha256 cellar: :any_skip_relocation, sonoma:         "2745b40b2ca64e1a6e369b79ab2c3141ea04c84538d335be866978c594e2bde6"
-    sha256 cellar: :any_skip_relocation, ventura:        "34a6d89e4900fadd0f3844622d53df285ab26a54fb2b46c61191bd6b1b835c29"
-    sha256 cellar: :any_skip_relocation, monterey:       "c96222df112a5a511469867e560157aab7ffc0fba812261302ac227fc682aebe"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "57150c2dfc8edce29db3b116563bb83d58c573b95cf497381a711f960f804378"
+    rebuild 3
+    sha256 cellar: :any,                 arm64_tahoe:   "853fa3c46cc3d8014091d14617d648cb6b6b93f4c12bde49197b53fe213f85a6"
+    sha256 cellar: :any,                 arm64_sequoia: "6c5928de908600c114d1586d02da4c506a7b19c5cbf575eb1b7f59601b2af724"
+    sha256 cellar: :any,                 arm64_sonoma:  "be21d5ebf43c62b97943a8f695aaeb4c089d09e758025e09fc5d331ff94958cb"
+    sha256 cellar: :any,                 sonoma:        "cfbcf399e9fa7c9ae00731f65705c19e13484e8b4f90f40b355de009eab70d37"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "6b95340cc6d47cb4a2a0a39e28a6a2f9e5ea9f053610f370dc598687c1f3d85e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "c39f2e672013bcc94c77c15c585fc01bafaacbb74026cda1d720bc75b991d876"
   end
 
   depends_on "cabal-install" => :build
-  depends_on "ghc@9.8" => :build
+  depends_on "ghc" => :build
+  depends_on "gmp"
   depends_on "purescript"
+
+  uses_from_macos "libffi"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   # Apply upstream patch to fix build. Remove with next release.
   patch do
@@ -31,8 +37,14 @@ class PscPackage < Formula
   patch :DATA
 
   def install
+    # Workaround to build with GHC 9.10 until upstream allows `turtle >= 1.6`
+    args = ["--allow-newer=base,turtle:text"]
+
+    # Workaround to build aeson with GHC 9.14, https://github.com/haskell/aeson/issues/1155
+    args << "--allow-newer=containers,template-haskell"
+
     system "cabal", "v2-update"
-    system "cabal", "v2-install", *std_cabal_v2_args
+    system "cabal", "v2-install", *args, *std_cabal_v2_args
   end
 
   test do

@@ -1,34 +1,42 @@
 class Help2man < Formula
   desc "Automatically generate simple man pages"
   homepage "https://www.gnu.org/software/help2man/"
-  url "https://ftp.gnu.org/gnu/help2man/help2man-1.49.3.tar.xz"
-  mirror "https://ftpmirror.gnu.org/help2man/help2man-1.49.3.tar.xz"
+  url "https://ftpmirror.gnu.org/gnu/help2man/help2man-1.49.3.tar.xz"
+  mirror "https://ftp.gnu.org/gnu/help2man/help2man-1.49.3.tar.xz"
   sha256 "4d7e4fdef2eca6afe07a2682151cea78781e0a4e8f9622142d9f70c083a2fd4f"
   license "GPL-3.0-or-later"
-  revision 2
+  revision 4
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "cbbe4be42473a8911941a77ab20a064a3e5429c943d8fd55b187008e1687009e"
-    sha256 cellar: :any,                 arm64_ventura:  "c875f5b7412c9b503a3a6c855530d01d014217eba3589e6618b1a0678e0790ee"
-    sha256 cellar: :any,                 arm64_monterey: "e2bc370f6b6e9bed84fc77b6ca5536c545299b63f4898303dcdbc3af7324a13f"
-    sha256 cellar: :any,                 sonoma:         "c7be1329f64b7162d1ae7505f998630f88b58751c84c0240317a77841e250c8a"
-    sha256 cellar: :any,                 ventura:        "d70c0e7c8cd5293d48c2c93071c8262ba9116b257fe85622623c7ab3e61b3a7a"
-    sha256 cellar: :any,                 monterey:       "9e5ca214c3b4bcdf56e59e3c389dc86678dc33c1d9961a5764a8dba8f63cd1ff"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "49b4060b6a6027b81ea7a68db3b32d91d704a55d01bcb1c73e750963259e64f2"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "e3d3923d95ff50d31167bb31b79bfb5b5ff04ed958662d6097b87a8e7af80145"
+    sha256 cellar: :any,                 arm64_sequoia: "c32c8674bc6c07b61531fcb0e077a4a3566ef57628257bd258992708ec4c0a61"
+    sha256 cellar: :any,                 arm64_sonoma:  "1c1953fb1180f4ed0bca07f6befadec13ee94d6a3a7e86607e649457de47dc04"
+    sha256 cellar: :any,                 sonoma:        "59d2b48fe6b83c4e94ffda8e2ca12c99825dc11d14042aa4c59033be929f84c9"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "0f2a8a07d29e873804a3b89e0f1549813359a0aab0bd5716b66454a1987ded35"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "a9b95c2631c19512416b4e912e95517a81c1d9fddffd53e662e90c76511b6412"
   end
 
   depends_on "gettext"
-  depends_on "perl"
+  uses_from_macos "perl"
 
   resource "Locale::gettext" do
     url "https://cpan.metacpan.org/authors/id/P/PV/PVANDRY/gettext-1.07.tar.gz"
     sha256 "909d47954697e7c04218f972915b787bd1244d75e3bd01620bc167d5bbc49c15"
+
+    livecheck do
+      url :url
+    end
   end
 
   def install
     ENV.prepend_create_path "PERL5LIB", libexec/"lib/perl5"
 
     resource("Locale::gettext").stage do
+      # Workaround for macOS perl as MakeMaker can only search libraries in perl compile-time paths
+      # Issue ref: https://github.com/Perl-Toolchain-Gang/ExtUtils-MakeMaker/issues/277
+      inreplace "Makefile.PL", '$libs = "-lintl"', "$libs = \"-L#{Formula["gettext"].opt_lib} -lintl\"" if OS.mac?
+
       system "perl", "Makefile.PL", "INSTALL_BASE=#{libexec}", "NO_MYMETA=1"
       system "make", "install"
     end
@@ -37,13 +45,9 @@ class Help2man < Formula
     # see https://github.com/Homebrew/homebrew/issues/12609
     ENV.deparallelize
 
-    args = []
-    args << "--enable-nls" if Hardware::CPU.intel?
-
-    system "./configure", "--prefix=#{prefix}", *args
+    system "./configure", "--enable-nls", *std_configure_args
     system "make", "install"
-    (libexec/"bin").install bin/"help2man"
-    (bin/"help2man").write_env_script("#{libexec}/bin/help2man", PERL5LIB: ENV["PERL5LIB"])
+    bin.env_script_all_files(libexec/"bin", PERL5LIB: ENV["PERL5LIB"])
   end
 
   test do

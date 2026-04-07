@@ -3,28 +3,28 @@ class Fortls < Formula
 
   desc "Fortran language server"
   homepage "https://fortls.fortran-lang.org/"
-  url "https://files.pythonhosted.org/packages/f1/82/b0f91372538de824bccb5e4fe8936e47f6771dbd700a74d35e19045050b5/fortls-3.1.2.tar.gz"
-  sha256 "93ea78598492ac699f7cefb624e89bf5012d44604d07fbe5ad4a31e32fc977bc"
+  url "https://files.pythonhosted.org/packages/c1/2b/db1e5cd07fc9e74a2e4fb8f65946f8fd79ef72211001af00982a04d977d5/fortls-3.2.2.tar.gz"
+  sha256 "b43b2b8cbd447ae848c63b8f008c2df96fd48c3a967b33f6ed64b3421496883b"
   license "MIT"
   head "https://github.com/fortran-lang/fortls.git", branch: "master"
 
   bottle do
     rebuild 1
-    sha256 cellar: :any_skip_relocation, all: "c066910b7c8381a0be2b56213aced45bf2b6b3ec4e62c3de19a027c602607727"
+    sha256 cellar: :any_skip_relocation, all: "833467280f06afa96acd625eef628c7013b9cab7f781a06748336fbc34539d91"
   end
 
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   conflicts_with "fortran-language-server", because: "both install `fortls` binaries"
 
   resource "json5" do
-    url "https://files.pythonhosted.org/packages/91/59/51b032d53212a51f17ebbcc01bd4217faab6d6c09ed0d856a987a5f42bbc/json5-0.9.25.tar.gz"
-    sha256 "548e41b9be043f9426776f05df8635a00fe06104ea51ed24b67f908856e151ae"
+    url "https://files.pythonhosted.org/packages/12/ae/929aee9619e9eba9015207a9d2c1c54db18311da7eb4dcf6d41ad6f0eb67/json5-0.12.1.tar.gz"
+    sha256 "b2743e77b3242f8d03c143dd975a6ec7c52e2f2afe76ed934e53503dd4ad4990"
   end
 
   resource "packaging" do
-    url "https://files.pythonhosted.org/packages/51/65/50db4dda066951078f0a96cf12f4b9ada6e4b811516bf0262c0f4f7064d4/packaging-24.1.tar.gz"
-    sha256 "026ed72c8ed3fcce5bf8950572258698927fd1dbda10a5e981cdf0ac37f4f002"
+    url "https://files.pythonhosted.org/packages/a1/d4/1fc4078c65507b51b96ca8f8c3ba19e6a61c8253c72794544580a7b6c24d/packaging-25.0.tar.gz"
+    sha256 "d443872c98d677bf60f6a1f2f8c1cb748e8fe762d2bf9d3148b5599295b0fc4f"
   end
 
   def install
@@ -40,10 +40,10 @@ class Fortls < Formula
 
   test do
     system bin/"fortls", "--help"
-    (testpath/"test.f90").write <<~EOS
+    (testpath/"test.f90").write <<~FORTRAN
       program main
       end program main
-    EOS
+    FORTRAN
     system bin/"fortls", "--debug_filepath", testpath/"test.f90", "--debug_symbols", "--debug_full_result"
   end
 end

@@ -6,26 +6,18 @@ class Asciidoc < Formula
   url "https://files.pythonhosted.org/packages/1d/e7/315a82f2d256e9270977aa3c15e8fe281fd7c40b8e2a0b97e0cb61ca8fa0/asciidoc-10.2.1.tar.gz"
   sha256 "d9f13c285981b3c7eb660d02ca0a2779981e88d48105de81bb40445e60dddb83"
   license "GPL-2.0-or-later"
+  revision 1
   head "https://github.com/asciidoc-py/asciidoc-py.git", branch: "main"
 
-  livecheck do
-    url :head
-    regex(/^v?(\d+(?:\.\d+)+)$/i)
-  end
-
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "7289219aacccff18740c6234ac438cc39c8f1ebd2a31a5e5ddc5a62f222ca200"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "7289219aacccff18740c6234ac438cc39c8f1ebd2a31a5e5ddc5a62f222ca200"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "7289219aacccff18740c6234ac438cc39c8f1ebd2a31a5e5ddc5a62f222ca200"
-    sha256 cellar: :any_skip_relocation, sonoma:         "7ab32cd1cb6941a93ad04eede903bccef924de598f18ce3e3ceae24f352df018"
-    sha256 cellar: :any_skip_relocation, ventura:        "7ab32cd1cb6941a93ad04eede903bccef924de598f18ce3e3ceae24f352df018"
-    sha256 cellar: :any_skip_relocation, monterey:       "0d6d5e9be887a617249f785eb76402192778a5fc2885f17a9e8a9cc7595b9c29"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "8f7189d7ff2776ad9f27dcb9403f90f435f48e615552eb16db2972fc43616e38"
+    sha256 cellar: :any_skip_relocation, all: "1bc7364d821058b91231a5ccf9481b508bd85713522c2d2702c51807feecef78"
   end
 
   depends_on "docbook"
-  depends_on "python@3.12"
+  depends_on "python@3.14"
   depends_on "source-highlight"
+
+  uses_from_macos "libxml2"
 
   def install
     virtualenv_install_with_resources

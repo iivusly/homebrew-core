@@ -1,23 +1,23 @@
 class Openfortivpn < Formula
   desc "Open Fortinet client for PPP+TLS VPN tunnel services"
   homepage "https://github.com/adrienverge/openfortivpn"
-  url "https://github.com/adrienverge/openfortivpn/archive/refs/tags/v1.22.1.tar.gz"
-  sha256 "9aaaae2229f01b35bf79dcc9e1c0a4363cec75084a30fd46df58c20d52bff809"
+  url "https://github.com/adrienverge/openfortivpn/archive/refs/tags/v1.24.1.tar.gz"
+  sha256 "c40d33acd97b89c2e943bfd839c19b69e5a7a5997052e2fc9a595602745c0465"
   license "GPL-3.0-or-later" => { with: "openvpn-openssl-exception" }
+  head "https://github.com/adrienverge/openfortivpn.git", branch: "master"
 
   bottle do
-    sha256 arm64_sonoma:   "946734a0e699c191de0514da876e803c048b205aae824c4f8420ab50bbdb37fa"
-    sha256 arm64_ventura:  "580097ee6f08798f95b62c4598f1ed966ed4c85aec9a2c31a602c1ba2a0e59fa"
-    sha256 arm64_monterey: "5653d24c9352334c49c33f19ff5514bca38b5cc4d0e94ebbd68da4b2675730de"
-    sha256 sonoma:         "de8c7bd44f6f7c79c48b340cc1884b6f97c04ca96555a2aa84d96c25c327126d"
-    sha256 ventura:        "47ff2f44fdeffc326ae23aa344b9a5d8b82fb9b64365bf3d66bcd07b823e2387"
-    sha256 monterey:       "3ce32945254b9a2f25fe4e0534564b93e545ed8d54271204f478537c9d904d42"
-    sha256 x86_64_linux:   "7a059b81db6de8273b0b44e6d53686f58e76264e7c7fc031823479a6fa07c551"
+    sha256 arm64_tahoe:   "1cb3b9c06cf1b8af8984fe264878a82a0fe7b4f58ae0d0a90640a9ed37965a90"
+    sha256 arm64_sequoia: "dc900e43087d6641174632f37b884dc806b6777546f3b0c9c45fecbdf1573886"
+    sha256 arm64_sonoma:  "bd784e7336c8d86dbd91cbc9877122518fb8641720abbadf9480fd93381354ea"
+    sha256 sonoma:        "445013d98ad9c0d85b93cbc56dba215ee5096660cf7c56b43643779685b2ab55"
+    sha256 arm64_linux:   "b839b8ec4aa6c6c666c68f79571a2ec0ac0b73e1eef6d04c27943012484504e2"
+    sha256 x86_64_linux:  "f977e5a39f774039ea8b06090d1b0e4459d3321233aa171a4b157e4d8419cbe8"
   end
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "openssl@3"
 
   # awaiting formula creation
@@ -25,11 +25,10 @@ class Openfortivpn < Formula
 
   def install
     system "./autogen.sh"
-    system "./configure", "--disable-dependency-tracking",
-                          "--disable-silent-rules",
+    system "./configure", "--disable-silent-rules",
                           "--enable-legacy-pppd", # only for pppd < 2.5.0
-                          "--prefix=#{prefix}",
-                          "--sysconfdir=#{etc}/openfortivpn"
+                          "--sysconfdir=#{etc}/openfortivpn",
+                          *std_configure_args
     system "make", "install"
   end
 

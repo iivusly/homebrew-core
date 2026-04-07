@@ -1,29 +1,32 @@
 class Bup < Formula
   desc "Backup tool"
   homepage "https://bup.github.io/"
-  url "https://github.com/bup/bup/archive/refs/tags/0.33.4.tar.gz"
-  sha256 "f51284f2cb24aa653288f05aad32d6ec6ebb9546143ed7c588d40ba82f24b79a"
+  url "https://github.com/bup/bup/archive/refs/tags/0.33.10.tar.gz"
+  sha256 "5b7d169b3b0d821dc93c55798e18339594af618f018aae88dff28b8cc6333b00"
   license all_of: ["BSD-2-Clause", "LGPL-2.0-only"]
-  head "https://github.com/bup/bup.git", branch: "master"
+  head "https://github.com/bup/bup.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "0318b68039fcf8b554e28288c2fc56b3b448602fecab8535cd6bc1a7df94f785"
-    sha256 cellar: :any,                 arm64_ventura:  "53a8d9dfd22c18e1a442a6897d0fc0381dc29e243a44f2b322345146c7ec3967"
-    sha256 cellar: :any,                 arm64_monterey: "a66d236fc9183a6e08731af6c11024cf22998a8fe2276421d128aebbb8431783"
-    sha256 cellar: :any,                 sonoma:         "3b3850de4518caee4d8efe70833b7050f1a7297abc4347dab46eb6c84e5baa21"
-    sha256 cellar: :any,                 ventura:        "b2175d5efffcbfc460013f608259ca44ced450038bd4e1cdfa1857c2c666e563"
-    sha256 cellar: :any,                 monterey:       "6785a85f8e7088815267b8648786cc033d1408da3922e77cce18380e657abbf8"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "adce7c082d9fb66a0471b0728cb3c174a4a2fc1e89f3b4ac2e845ab58972b12d"
+    sha256 cellar: :any,                 arm64_tahoe:   "e8dd1764fdfdcb4e0a3be1c0187a5c9fae165c38130282620f4683d47bc4886f"
+    sha256 cellar: :any,                 arm64_sequoia: "9aad3e7860b09e030da32a5800505ebfe0b5fe7a647879db0cff40d919e9767f"
+    sha256 cellar: :any,                 arm64_sonoma:  "a4536482d2a0d6d13ec56e1574fb7a6913a561d4548ab7f3428cb289b2b28225"
+    sha256 cellar: :any,                 sonoma:        "a132b47d549095e472be6cb7703c0c8cf78f8850b0aa8dadc76210a00120e055"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "1916cb6c7346701861a8d1206d68eaf8e19bd79ff1e93a9cd60f7c6de26b7a27"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "1419ad06f33c6f879c55e6e40596f58ffd7d83a903c801433ee1f5b993adb5cd"
   end
 
   depends_on "pandoc" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
 
-  depends_on "python@3.12"
+  depends_on "python@3.14"
   depends_on "readline"
 
+  on_linux do
+    depends_on "acl"
+  end
+
   def python3
-    which("python3.12")
+    which("python3.14")
   end
 
   def install
@@ -34,6 +37,6 @@ class Bup < Formula
 
   test do
     system bin/"bup", "init"
-    assert_predicate testpath/".bup", :exist?
+    assert_path_exists testpath/".bup"
   end
 end

@@ -1,29 +1,36 @@
 class Rhash < Formula
   desc "Utility for computing and verifying hash sums of files"
   homepage "https://sourceforge.net/projects/rhash/"
-  url "https://downloads.sourceforge.net/project/rhash/rhash/1.4.4/rhash-1.4.4-src.tar.gz"
-  sha256 "8e7d1a8ccac0143c8fe9b68ebac67d485df119ea17a613f4038cda52f84ef52a"
+  url "https://downloads.sourceforge.net/project/rhash/rhash/1.4.6/rhash-1.4.6-src.tar.gz"
+  sha256 "9f6019cfeeae8ace7067ad22da4e4f857bb2cfa6c2deaa2258f55b2227ec937a"
   license "0BSD"
   head "https://github.com/rhash/RHash.git", branch: "master"
 
   bottle do
-    sha256 arm64_sonoma:   "ec69940028e8fcb9278ebba41f8f4eaf9c2fd551b361ebadb57b46724aaf92af"
-    sha256 arm64_ventura:  "85e7a1577e11e64ede19b413af736fbc8cf54e2d1461906a6ff6b41fd709d694"
-    sha256 arm64_monterey: "729cb8f7351431505bb7f57d4efbda5b7b3c97a11104c83af055fda35dd15b95"
-    sha256 arm64_big_sur:  "be996648d541819d91a8978524f6725a251d72e9c98e5a0b3dd2243122b94a75"
-    sha256 sonoma:         "515fa0b95cfdb4fab40f5303795ffc53fdefb7af4621722f12c4c8fd3965352a"
-    sha256 ventura:        "8a8a0981aab3afa047c62bd5499e60dc19ed97346a2acd231c75e9b0d8ebfe25"
-    sha256 monterey:       "436f258587befb5f28703d317afd598b12008304bd8fbdfc395519d1ccfc1e06"
-    sha256 big_sur:        "7f6267a9424d92a40bd9a802fc725a384e55c0a518ac0dbb70f8ca3f72494761"
-    sha256 x86_64_linux:   "44a16c670a13dfa5b0d7c2b387c808f3cc7f79fbc2af6e4e9db5b50ffc84e154"
+    sha256 arm64_tahoe:   "8381d2e7c93d8e50d3c1f6e70af34ee844a3bd07c6cf7a5882ed07cf073f5600"
+    sha256 arm64_sequoia: "7cfeaa013d6bc5fc89cad3d34349ebfbc38f65da844f6eda92e55f91d42144ec"
+    sha256 arm64_sonoma:  "10388639684b13fe90f7ac889e1023a7823e01087d04d4725068aca25207387e"
+    sha256 arm64_ventura: "757848383261b7e991ba04ecd5a3310bc263c8d259ee6ee98a8c82822b1f8ae3"
+    sha256 sonoma:        "d0ebe3819cd610352c788258e8b6e9d1e04941a598cc9e4e141b24e25caf6eab"
+    sha256 ventura:       "39760c4816095b7abc836fb065c2e5d7ae0e540d6dff9720e675c476a212851e"
+    sha256 arm64_linux:   "de58dca8a85542060574b3263b18556bc90adcacfb41710083ebd342a33ff5ba"
+    sha256 x86_64_linux:  "924accaa51ffbf427905f37750a5aae05bb8fd7b22190653560b90d8e3388108"
   end
 
   def install
-    system "./configure", "--prefix=#{prefix}", "--disable-gettext"
+    # Exclude unrecognized options
+    args = std_configure_args.reject { |s| s["--disable-dependency-tracking"] } + %W[
+      --disable-lib-static
+      --disable-gettext
+      --sysconfdir=#{etc}
+    ]
+
+    system "./configure", *args
     system "make"
-    system "make", "install"
-    lib.install "librhash/#{shared_library("librhash")}"
-    system "make", "-C", "librhash", "install-lib-headers"
+    # Avoid race during installation.
+    ENV.deparallelize { system "make", "install" }
+    system "make", "install-lib-headers", "install-pkg-config"
+    lib.install_symlink (lib/shared_library("librhash", version.major.to_s).to_s) => shared_library("librhash")
   end
 
   test do

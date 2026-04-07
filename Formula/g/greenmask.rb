@@ -1,8 +1,8 @@
 class Greenmask < Formula
   desc "PostgreSQL dump and obfuscation tool"
-  homepage "https://greenmask.io"
-  url "https://github.com/GreenmaskIO/greenmask/archive/refs/tags/v0.1.14.tar.gz"
-  sha256 "b5d7323d9dde7e4fcd288c461f6454b6e0e4e2b09eb62619cb967bf14971c990"
+  homepage "https://www.greenmask.io/"
+  url "https://github.com/GreenmaskIO/greenmask/archive/refs/tags/v0.2.18.tar.gz"
+  sha256 "631e34d0339b7dd413038590bca982b98bcb8f6512749af6baeb7284b48ce068"
   license "Apache-2.0"
   head "https://github.com/GreenmaskIO/greenmask.git", branch: "main"
 
@@ -12,34 +12,30 @@ class Greenmask < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "25bcd6ff301712eff33ede67836cca16265b96b3b3047d7b4a1580fa0b845e5c"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "da9353cc79191b3dfa604deb72b9e4a5b4544f43ceba0ba0657f290ecf31b80b"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "d0b4321544ba5d050aff079a2112b758f877bc25084253fbd233fa8ef6943f4f"
-    sha256 cellar: :any_skip_relocation, sonoma:         "91c54d885a31b0bb023055a4d4b4adc2952d4f6be169a46daf43bf8b25fa859f"
-    sha256 cellar: :any_skip_relocation, ventura:        "4cc11e565ab57dbab9ccd14c182630801edaceb76ed5978f516600f9cdc67e52"
-    sha256 cellar: :any_skip_relocation, monterey:       "490accb892eaf2e620adc6a24255e6f6625d33e93485512eebb9fddd01f3b84e"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "85a81586265d8353a4259e5d53a74cbd7a9b458f063fa08da3fc53cb64eb1b80"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "265c2450b88a010a1aabef43470525409ff3a53852efbb12a22ee25ec0398e72"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "265c2450b88a010a1aabef43470525409ff3a53852efbb12a22ee25ec0398e72"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "265c2450b88a010a1aabef43470525409ff3a53852efbb12a22ee25ec0398e72"
+    sha256 cellar: :any_skip_relocation, sonoma:        "7ff8fd84e94aca95b38204e22d1eb8dfe794802662a66aa401fa292a63f6e7e2"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "07ccc213d53e3fb9ac111fe877ca670b93af0b7df9c991971c288e08290af55f"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "1792fe2c18802dc9ee067d4cbc3460b5909662859c1aeb26e645efc1e4fdef9b"
   end
 
   depends_on "go" => :build
 
   def install
-    ldflags = %W[
-      -s -w
-      -X github.com/greenmaskio/greenmask/cmd/greenmask/cmd.Version=#{version}
-    ]
-    system "go", "build", *std_go_args(ldflags:), "./cmd/greenmask"
+    ldflags = "-s -w -X github.com/greenmaskio/greenmask/cmd/greenmask/cmd.Version=#{version}"
+    system "go", "build", *std_go_args(ldflags:, tags: "viper_bind_struct"), "./cmd/greenmask"
 
-    generate_completions_from_executable(bin/"greenmask", "completion")
+    generate_completions_from_executable(bin/"greenmask", shell_parameter_format: :cobra)
   end
 
   test do
     assert_match version.to_s, shell_output("#{bin}/greenmask -v")
 
-    (testpath/"config.yml").write <<~EOS
+    (testpath/"config.yml").write <<~YAML
       common:
-      pg_bin_path: "/usr/lib/postgresql/16/bin"
-      tmp_dir: "/tmp"
+        pg_bin_path: "/usr/lib/postgresql/16/bin"
+        tmp_dir: "/tmp"
 
       storage:
         s3:
@@ -71,8 +67,10 @@ class Greenmask < Formula
         pg_restore_options: # pg_restore option (you can use the same options as pg_restore has)
           jobs: 10
           dbname: "host=playground-db user=postgres password=example dbname=transformed"
-    EOS
-    output = shell_output(bin/"greenmask --config config.yml list-transformers")
-    assert_match "Generate random uuid", output
+    YAML
+
+    output = shell_output("#{bin}/greenmask --config config.yml list-transformers")
+    assert_match "Generate UUID", output
+    assert_match "Generates a random word", output
   end
 end

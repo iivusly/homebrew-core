@@ -1,41 +1,36 @@
 class Gdbm < Formula
   desc "GNU database manager"
   homepage "https://www.gnu.org.ua/software/gdbm/"
-  url "https://ftp.gnu.org/gnu/gdbm/gdbm-1.24.tar.gz"
-  mirror "https://ftpmirror.gnu.org/gdbm/gdbm-1.24.tar.gz"
-  sha256 "695e9827fdf763513f133910bc7e6cfdb9187943a4fec943e57449723d2b8dbf"
+  url "https://ftpmirror.gnu.org/gnu/gdbm/gdbm-1.26.tar.gz"
+  mirror "https://ftp.gnu.org/gnu/gdbm/gdbm-1.26.tar.gz"
+  sha256 "6a24504a14de4a744103dcb936be976df6fbe88ccff26065e54c1c47946f4a5e"
   license "GPL-3.0-or-later"
+  compatibility_version 1
 
   bottle do
-    sha256 cellar: :any, arm64_sonoma:   "439b678f3befe6e37a2e36c9a8df727137f5a86bdf0fdf6a2e612409ffe1409a"
-    sha256 cellar: :any, arm64_ventura:  "9517b85db682569c03ebd86330b2e4d7f5a044d48352e971ce36bee738cddc2c"
-    sha256 cellar: :any, arm64_monterey: "fc44f8e15beecf80991b2856a0e85309c68e0562d4ca7fe656fcb94c122fcf40"
-    sha256 cellar: :any, sonoma:         "20b4d20aab87fe96f59914aa5d012066342519b86bd6961696feade676b80fa9"
-    sha256 cellar: :any, ventura:        "de0719d7d530b03c71fb7f4d29244d9eac7691b614f570475a4ef22bf568fd20"
-    sha256 cellar: :any, monterey:       "3aa7e2f745e8ca1f6f8425c48a290855c34cac823c7d42a8e7d0ff0933e5e0d8"
-    sha256               x86_64_linux:   "7fd35749fc28a0bf5e2f3c7cc74d8e2da38914d3009127cbedf9cf617cb6fe61"
+    sha256 cellar: :any, arm64_tahoe:   "665930fdbccbaf710705195a7ee89f3b3e04122e11d585f6a50cac2ff2595296"
+    sha256 cellar: :any, arm64_sequoia: "1843430b18014e91e8ad64b5ff33bef23e44350d75c6cdfa2d640f32511cc5a4"
+    sha256 cellar: :any, arm64_sonoma:  "9308eb5eec8ac7b9186357ea3bc654be370735614b03c79ef4ffb8c55a5ea3a4"
+    sha256 cellar: :any, arm64_ventura: "cc827cc1644fa67d7b5d56de24707e45844dce0764a911265c82982674b32ba0"
+    sha256 cellar: :any, sequoia:       "cd2206fce6d0ecaaa40620b3aa6e73d5b227f444c10a2e9032813a50b6f89a52"
+    sha256 cellar: :any, sonoma:        "bc3db54835cc359259f83e3d0b3063a9f961e6c318708fdf98c9f159789266af"
+    sha256 cellar: :any, ventura:       "5b33d9eac93ab4587f19882e1e29c8534818d104984aeb6a661edc1f3afc2066"
+    sha256               arm64_linux:   "bc56203964d55e8ed24b6ce88e6753301d72df6bb66ff8e92923a5e8fe128a63"
+    sha256               x86_64_linux:  "4c4edca03ef3c629d9849d37084eb16afa5aaaf4b76d004f89c6f43e78af5adb"
   end
 
-  # Fix -flat_namespace being used on Big Sur and later.
-  patch do
-    url "https://raw.githubusercontent.com/Homebrew/formula-patches/03cf8088210822aa2c1ab544ed58ea04c897d9c4/libtool/configure-big_sur.diff"
-    sha256 "35acd6aebc19843f1a2b3a63e880baceb0f5278ab1ace661e57a502d9d78c93c"
-  end
-
-  # --enable-libgdbm-compat for dbm.h / gdbm-ndbm.h compatibility:
-  #   https://www.gnu.org.ua/software/gdbm/manual/html_chapter/gdbm_19.html
-  # Use --without-readline because readline detection is broken in 1.13
-  # https://github.com/Homebrew/homebrew-core/pull/10903
   def install
-    args = %W[
-      --disable-dependency-tracking
+    # --enable-libgdbm-compat for dbm.h / gdbm-ndbm.h compatibility:
+    #   https://www.gnu.org.ua/software/gdbm/manual/html_chapter/gdbm_19.html
+    # Use --without-readline because readline detection is broken in 1.13
+    # https://github.com/Homebrew/homebrew-core/pull/10903
+    args = %w[
       --disable-silent-rules
       --enable-libgdbm-compat
       --without-readline
-      --prefix=#{prefix}
     ]
 
-    system "./configure", *args
+    system "./configure", *args, *std_configure_args
     system "make", "install"
 
     # Avoid conflicting with macOS SDK's ndbm.h.  Renaming to gdbm-ndbm.h
@@ -45,7 +40,7 @@ class Gdbm < Formula
 
   test do
     pipe_output("#{bin}/gdbmtool --norc --newdb test", "store 1 2\nquit\n")
-    assert_predicate testpath/"test", :exist?
+    assert_path_exists testpath/"test"
     assert_match "2", pipe_output("#{bin}/gdbmtool --norc test", "fetch 1\nquit\n")
   end
 end

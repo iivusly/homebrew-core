@@ -20,13 +20,13 @@ class Lilypond < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "0297148d78c6d2867eb96287e6e6510740bf1347e2df029c47617f20a52cabad"
-    sha256 arm64_ventura:  "459d87f0218a549231c6234e8f604e394e326286a3d70dddcece77fa195b28e3"
-    sha256 arm64_monterey: "2b3ba8160fa4af8f5fdc807855d7c1d9d4ad36b4b29242d320cd791f8c5e966b"
-    sha256 sonoma:         "92fc98b5531e419e352ce0f6e4a1db7a861677cb42434ea3f390393dbe556bd0"
-    sha256 ventura:        "d3c3b80ddc67a781d1af17d7edf3082a3f06dbf746d4664378ad34484780678e"
-    sha256 monterey:       "e49c7dc7ae6b2ea71259bb9ed5fb06f2a5024ff1a7fa1e97b234c3110eeb54f5"
-    sha256 x86_64_linux:   "bf8f1e5ead358cf43fd6e215c6ec6004cc3082715072b0cbf2993c356fe2f27d"
+    rebuild 2
+    sha256 arm64_tahoe:   "08e195be137c3be99594e3277083e3a87a1ddb795770df30a2c87054b5a8994f"
+    sha256 arm64_sequoia: "5013c14b99b247ed68522f21c35bd688e32b6b6a14d4db0a37224bc47d25da58"
+    sha256 arm64_sonoma:  "0641f300ee72f3f31a31b868fb7093e5eb5bb98479fd89a4de493f5076b2a6a0"
+    sha256 sonoma:        "793294ac152b0b61343a9d38852246c995d12a6c12e445e2f928bb961b36cb1f"
+    sha256 arm64_linux:   "5924a471b8630d1dee04084de229ba6423e1b7ceb4609cbe609592a8a07ddb93"
+    sha256 x86_64_linux:  "295fc0a3f0be89287c2856b2d7fbcc639a444f5d694ebe47e4af952c75b6029b"
   end
 
   head do
@@ -35,11 +35,16 @@ class Lilypond < Formula
     mirror "https://git.savannah.gnu.org/git/lilypond.git"
 
     depends_on "autoconf" => :build
+
+    on_macos do
+      depends_on "make" => :build # make >= 4.2 is required
+    end
   end
 
   depends_on "bison" => :build # bison >= 2.4.1 is required
   depends_on "fontforge" => :build
-  depends_on "pkg-config" => :build
+  depends_on "gettext" => :build
+  depends_on "pkgconf" => :build
   depends_on "t1utils" => :build
   depends_on "texinfo" => :build # makeinfo >= 6.1 is required
   depends_on "texlive" => :build
@@ -50,7 +55,7 @@ class Lilypond < Formula
   depends_on "glib"
   depends_on "guile"
   depends_on "pango"
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   uses_from_macos "flex" => :build
   uses_from_macos "perl" => :build
@@ -58,10 +63,6 @@ class Lilypond < Formula
   on_macos do
     depends_on "gettext"
     depends_on "harfbuzz"
-  end
-
-  on_linux do
-    depends_on "gettext" => :build
   end
 
   resource "font-urw-base35" do
@@ -86,7 +87,7 @@ class Lilypond < Formula
 
     elisp.install share.glob("emacs/site-lisp/*.el")
 
-    fonts = pkgshare/version/"fonts/otf"
+    fonts = pkgshare/(build.head? ? File.read("out/VERSION").chomp : version)/"fonts/otf"
 
     resource("font-urw-base35").stage do
       ["C059", "NimbusMonoPS", "NimbusSans"].each do |name|
@@ -104,7 +105,7 @@ class Lilypond < Formula
   test do
     (testpath/"test.ly").write "\\relative { c' d e f g a b c }"
     system bin/"lilypond", "--loglevel=ERROR", "test.ly"
-    assert_predicate testpath/"test.pdf", :exist?
+    assert_path_exists testpath/"test.pdf"
 
     output = shell_output("#{bin}/lilypond --define-default=show-available-fonts 2>&1")
              .encode("UTF-8", invalid: :replace, replace: "\ufffd")

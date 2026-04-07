@@ -1,22 +1,26 @@
 class Subnetcalc < Formula
   desc "IPv4/IPv6 subnet calculator"
   homepage "https://www.nntb.no/~dreibh/subnetcalc/index.html"
-  url "https://github.com/dreibh/subnetcalc/archive/refs/tags/subnetcalc-2.5.1.tar.gz"
-  sha256 "c7257ca02518e863bf15042f7f88a70cae847917f333dc5dc17b7ccc6fc48000"
+  url "https://github.com/dreibh/subnetcalc/archive/refs/tags/subnetcalc-2.6.5.tar.gz"
+  sha256 "d3ca16b75b4eced6e4196b9791f9514941eaa9bcdaa2a899fbcc0b845103f097"
   license "GPL-3.0-or-later"
   head "https://github.com/dreibh/subnetcalc.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "c68d8d3458b1880d69912904cf05fdac23daff520ff49d5c9b3c57dfb32c3c49"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "5faea6c8efcb60fe3982b9f40d025a84665e1add0a2911eff15c6155c5d8fb2f"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "aa4e3a5bdcbfa06cd3887dfac1ed33fe914567aabed4cf32631dce70a9d7795e"
-    sha256 cellar: :any_skip_relocation, sonoma:         "fa8ad8d4b785ae31383188aaf2f22b550042adc174b1a34f04d9f149a6ce80f0"
-    sha256 cellar: :any_skip_relocation, ventura:        "d780d4de85adbefd23f805d9e1869795cb0ed3860ccba27276a678d30ba15ed2"
-    sha256 cellar: :any_skip_relocation, monterey:       "86da62090befa393bb27f39c47f2c7ad9bf67331690aa5137e81aec72ddfca3b"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "49e4fdb4ac568c15b7f6c17c8618dc52f49e01f21eba1211b109fd6982b05677"
+    sha256 cellar: :any,                 arm64_tahoe:   "d7923eaa0a2d183a02618bfb1cfac211e9dac6040597d28a3f4d4c8af3fba80d"
+    sha256 cellar: :any,                 arm64_sequoia: "e0c0d392a6d5fa27cd2207b26d8b1c376359e0738b63cffa5ae2951ee0e2c03e"
+    sha256 cellar: :any,                 arm64_sonoma:  "44199b26e469f3c20fd1f2de74d867e02d7ea2d2db4fec8ad9ac765b55a62035"
+    sha256 cellar: :any,                 sonoma:        "60e77cc0cd0d150a3169f0706466f62a5af2af28d3394ad582ddb44307bcf723"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "944e9791235a7515960ec89f50c2fdd837506fea80ea544a24b4cc7a1c47c51d"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "8051458c3e893d302194e119a105cefbefc848ede22667da8dd39d97cfefeb02"
   end
 
   depends_on "cmake" => :build
+  depends_on "gettext" => :build
+
+  on_macos do
+    depends_on "gettext"
+  end
 
   def install
     system "cmake", "-S", ".", "-B", "build", *std_cmake_args
@@ -26,20 +30,21 @@ class Subnetcalc < Formula
 
   test do
     expected = <<~EOS
-      Address       = 1.1.1.1
-                         \e[34m0\e[0m\e[34m0\e[0m\e[34m0\e[0m\e[34m0\e[0m\e[34m0\e[0m\e[34m0\e[0m\e[34m0\e[0m\e[34m1\e[0m . \e[34m0\e[0m\e[34m0\e[0m\e[34m0\e[0m\e[34m0\e[0m\e[34m0\e[0m\e[34m0\e[0m\e[34m0\e[0m\e[34m1\e[0m . \e[34m0\e[0m\e[34m0\e[0m\e[34m0\e[0m\e[34m0\e[0m\e[34m0\e[0m\e[34m0\e[0m\e[34m0\e[0m\e[34m1\e[0m . \e[34m0\e[0m\e[34m0\e[0m\e[34m0\e[0m\e[34m0\e[0m\e[34m0\e[0m\e[34m0\e[0m\e[34m0\e[0m\e[34m1\e[0m
-      Network       = 1.1.1.1 / 32
-      Netmask       = 255.255.255.255
-      Broadcast     = not needed on Point-to-Point links
-      Wildcard Mask = 0.0.0.0
-      Hex. Address  = 01010101
-      Hosts Bits    = 0
-      Max. Hosts    = 1   (2^0 - 0)
-      Host Range    = { 1.1.1.1 - 1.1.1.1 }
-      Properties    =
-         - 1.1.1.1 is a NETWORK address
+      Address        = 1.1.1.1
+                          \e[34m0\e[0m\e[34m0\e[0m\e[34m0\e[0m\e[34m0\e[0m\e[34m0\e[0m\e[34m0\e[0m\e[34m0\e[0m\e[34m1\e[0m . \e[34m0\e[0m\e[34m0\e[0m\e[34m0\e[0m\e[34m0\e[0m\e[34m0\e[0m\e[34m0\e[0m\e[34m0\e[0m\e[34m1\e[0m . \e[34m0\e[0m\e[34m0\e[0m\e[34m0\e[0m\e[34m0\e[0m\e[34m0\e[0m\e[34m0\e[0m\e[34m0\e[0m\e[34m1\e[0m . \e[34m0\e[0m\e[34m0\e[0m\e[34m0\e[0m\e[34m0\e[0m\e[34m0\e[0m\e[34m0\e[0m\e[34m0\e[0m\e[34m1\e[0m
+      Network        = 1.1.1.1 / 32
+      Netmask        = 255.255.255.255
+      Broadcast      = not needed on Point-to-Point links
+      Wildcard Mask  = 0.0.0.0
+      Hex. Address   = 01010101
+      Hosts Bits     = 0
+      Max. Hosts     = 1   (2^0 - 0)
+      Host Range     = { 1.1.1.1 - 1.1.1.1 }
+      Properties     = \
+
+         - 1.1.1.1 is a HOST address in 1.1.1.1/32
          - Class A
-      Performing reverse DNS lookup ...\r\e[KDNS Hostname  = one.one.one.one
+      Performing reverse DNS lookup ...\r\e[KDNS Hostname   = one.one.one.one
     EOS
     assert_equal expected, shell_output("#{bin}/subnetcalc 1.1.1.1/32")
   end

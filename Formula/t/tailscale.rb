@@ -2,26 +2,28 @@ class Tailscale < Formula
   desc "Easiest, most secure way to use WireGuard and 2FA"
   homepage "https://tailscale.com"
   url "https://github.com/tailscale/tailscale.git",
-      tag:      "v1.72.1",
-      revision: "f4a95663c8995b0a2362abef64ee91eceec52228"
+      tag:      "v1.96.4",
+      revision: "41cb72f27119f95b859335f3ffc3434d6ca55e23"
   license "BSD-3-Clause"
 
   livecheck do
     url :stable
     regex(/^v?(\d+(?:\.\d+)+)$/i)
+    strategy :github_latest
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "e6ed8ee88d30e8123f80e17c15494bd279775058d926200accc7f9b4fc6323f5"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "2efa20b4f4ab0de3638a6aace71b2a2cc538516459c941a426b6b05da96497d6"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "6e55c1181b0519cb84a2b16880c1a1058039fc7f05a9142829acd3b99d3985ab"
-    sha256 cellar: :any_skip_relocation, sonoma:         "cd5458b49feb2fd28b7103c499f142a70138a0f7ec827ac0d16491d9084fd71d"
-    sha256 cellar: :any_skip_relocation, ventura:        "bd14ef88b6f8c43bba7aaabfe29c83e16f32309b3cb5b3679d29628f889a210e"
-    sha256 cellar: :any_skip_relocation, monterey:       "869bd6e00f5da278932d22cdc1ec6fa6a92980641c907fc5a63973d2aa563f45"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "02a7fd3fd1b17e496f5103cfa86b96d10f6a007f6262132118857992ecd0aa23"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "a29fba8f8870e8003b6fa435d1cad8ef830d612939465caa25d096eb918d1950"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "116f5c3948f0d8214c22dc6682a2e1171dc9e3adb2e05e3b9e9910925d7f0839"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "8b59244df8a725ccfde1219124520af87a483078b8b3f8f20a51187e3954a549"
+    sha256 cellar: :any_skip_relocation, sonoma:        "5199e1b7dac4ad8e8a00df193624d38329f8a2c04136e5deeec0e94371463946"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "ddfc91bd76970b812780dccaa8bf5ec16318069e2ea159b0edf322e33402d24c"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "0dfd5298b0d76401d29ac9e6b90b648380f890a422ed761c37f49b9611ea7bda"
   end
 
   depends_on "go" => :build
+
+  conflicts_with cask: "tailscale-app"
 
   def install
     vars = Utils.safe_popen_read("./build_dist.sh", "shellvars")
@@ -34,7 +36,7 @@ class Tailscale < Formula
     system "go", "build", *std_go_args(ldflags:), "./cmd/tailscale"
     system "go", "build", *std_go_args(ldflags:, output: bin/"tailscaled"), "./cmd/tailscaled"
 
-    generate_completions_from_executable(bin/"tailscale", "completion")
+    generate_completions_from_executable(bin/"tailscale", shell_parameter_format: :cobra)
   end
 
   service do
@@ -49,10 +51,7 @@ class Tailscale < Formula
     assert_match version.to_s, version_text
     assert_match(/commit: [a-f0-9]{40}/, version_text)
 
-    fork do
-      system bin/"tailscaled", "-tun=userspace-networking", "-socket=#{testpath}/tailscaled.socket"
-    end
-
+    spawn bin/"tailscaled", "-tun=userspace-networking", "-socket=#{testpath}/tailscaled.socket"
     sleep 2
     assert_match "Logged out.", shell_output("#{bin}/tailscale --socket=#{testpath}/tailscaled.socket status", 1)
   end

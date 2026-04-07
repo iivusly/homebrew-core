@@ -1,11 +1,13 @@
 class Libdill < Formula
   desc "Structured concurrency in C"
-  homepage "https://libdill.org/"
+  homepage "https://github.com/sustrik/libdill"
   url "https://github.com/sustrik/libdill/archive/refs/tags/2.14.tar.gz"
   sha256 "ebba0e5b433ec123b74a57d49b89dfa673aa258e03e6a452959e556b4c4529b9"
   license "MIT"
 
   bottle do
+    sha256 cellar: :any,                 arm64_tahoe:    "7a6b319ff538280ed829e03970bc0c70b273080bb71a26bc83ff62bf396dd608"
+    sha256 cellar: :any,                 arm64_sequoia:  "cfe256a0ada19b9c8405be0b3b95885137548fe38e0f3938f28bb50b8245b561"
     sha256 cellar: :any,                 arm64_sonoma:   "e7e3f7443e7a91dc15164f1ddfba535a2d61992c9ea0e8ee6097e42f47742c5e"
     sha256 cellar: :any,                 arm64_ventura:  "b6196fd106aa6de14be8a61b18cdeb4244a721eaf03fb2512188d50248f9061a"
     sha256 cellar: :any,                 arm64_monterey: "091479e5dd7d08123896444b8a398cb4bec0b7ee72cc24bef0903919a2ceedd1"
@@ -15,9 +17,7 @@ class Libdill < Formula
     sha256 cellar: :any,                 monterey:       "f3d32c4b24787b52512ae841b0daf82e256bb7f7e42dad115bbc059541103507"
     sha256 cellar: :any,                 big_sur:        "d0bc288a3ce54ab333f48ae08d127aa78300f6ee4921f0a9b59ca7f685649a93"
     sha256 cellar: :any,                 catalina:       "124f2fd7aa4ba68e528bd2700637511943ae55ec9c2b2c9dcdb3bff1f2e34909"
-    sha256 cellar: :any,                 mojave:         "7ebbbe85ab5989b48664688c9fdc833b4bbc7846ea94f3f73c34ef620026b878"
-    sha256 cellar: :any,                 high_sierra:    "062d2f9f6fdeb5588036d3e06752ecfd95b5f4e7b6008b727208fc0a2e7f50a6"
-    sha256 cellar: :any,                 sierra:         "6f75a82c15eafe6818b0d79e9c55df0654c6665f37841ee21cf7fb90ac578a92"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "78f6fb6cd777dc91a61a369bb50c7a6879c50b209391429c7f160a7dea9569f3"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "6a7a4c9cd3cfe580d823fe85732058bbce181f915f348e1d9629bd93e86880f7"
   end
 
@@ -49,7 +49,7 @@ class Libdill < Formula
     # Issue ref: https://github.com/sustrik/libdill/issues/208
     ENV["CC"] = Formula["llvm"].opt_bin/"clang" if Hardware::CPU.arm?
 
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <libdill.h>
       #include <stdio.h>
       #include <stdlib.h>
@@ -67,7 +67,7 @@ class Libdill < Formula
           msleep(now() + 5000);
           return 0;
       }
-    EOS
+    C
     system ENV.cc, "test.c", "-I#{include}", "-L#{lib}", "-ldill", "-o", "test"
     system "./test"
   end

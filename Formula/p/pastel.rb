@@ -1,23 +1,18 @@
 class Pastel < Formula
   desc "Command-line tool to generate, analyze, convert and manipulate colors"
   homepage "https://github.com/sharkdp/pastel"
-  url "https://github.com/sharkdp/pastel/archive/refs/tags/v0.9.0.tar.gz"
-  sha256 "473c805de42f6849a4bb14ec103ca007441f355552bdb6ebc80b60dac1f3a95d"
+  url "https://github.com/sharkdp/pastel/archive/refs/tags/v0.12.0.tar.gz"
+  sha256 "2903853f24d742fe955edd9bea17947eb8f3f44000a8ac528d16f2ea1e52b78b"
   license any_of: ["Apache-2.0", "MIT"]
   head "https://github.com/sharkdp/pastel.git", branch: "master"
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "afa5aa6251200dc5beb9fe18c2c792a3d6db3d034d966ffcf6e93739726fb0a3"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "6c1b18789ed1303a84264ce7f255e29ad1e7dfaa823606bd268266544c02f843"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "6b4511db651e18bb5b23ca8343a0f7026ce70dc7417b9d64826b52b0ad6828eb"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "3b17baa2192e94615665aea818fe9b4ee202770e1ba66ea7b8a9e5889e278f38"
-    sha256 cellar: :any_skip_relocation, sonoma:         "89af4ebffd595f33dcbcf8a4227b04123982dbd79cdbeacf731df79ba0fb037a"
-    sha256 cellar: :any_skip_relocation, ventura:        "c48281221eb773d7118183bf0fdbf23f078337b97eee1b11626d4353ac9afecd"
-    sha256 cellar: :any_skip_relocation, monterey:       "3be2c4518d6cb3cda28aced6aa248ff97502ebbf856bae991d9016c950cecd21"
-    sha256 cellar: :any_skip_relocation, big_sur:        "a1966d65a627a20680c20cc54fee52280c695a0314cc53c655b6e9aefb5180d4"
-    sha256 cellar: :any_skip_relocation, catalina:       "13bf6e89bd6206f3e8b76eaeee9c957ae42a10647aaacb56ca2e14d693349c39"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "7826523f2dd332162d3226f9d3b749e67c354be885726caf9d695d62f67e8a1b"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "89d06442647a10897cd8bc0bbe66f4d30ab81783a4621318bf1bacd4fdba2173"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "72f9eefc623c703f761ede7bc3788e58af4ef92faefae6afbf546825d33d1e36"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "7c8f2b3d8d4a73b155605cd3afea957b8f8be6cd0a32c70a2e73e9d222825a7f"
+    sha256 cellar: :any_skip_relocation, sonoma:        "0fed916e4b23ebd294469b3f91eba4e4bb15732c91a5a3f90ebb3e0b10071d77"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "fc2150ac3309e6c8bc38cc52447438a45a5ae94b397fa11299887cc017cdc085"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "81d7d99fd7882266f0151351968c4a34ced4697258db1ca0860d5674af052154"
   end
 
   depends_on "rust" => :build
@@ -27,7 +22,7 @@ class Pastel < Formula
 
     system "cargo", "install", *std_cargo_args
 
-    bash_completion.install "completions/pastel.bash"
+    bash_completion.install "completions/pastel.bash" => "pastel"
     zsh_completion.install "completions/_pastel"
     fish_completion.install "completions/pastel.fish"
   end

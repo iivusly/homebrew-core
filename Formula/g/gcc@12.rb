@@ -1,24 +1,24 @@
 class GccAT12 < Formula
   desc "GNU compiler collection"
   homepage "https://gcc.gnu.org/"
-  url "https://ftp.gnu.org/gnu/gcc/gcc-12.4.0/gcc-12.4.0.tar.xz"
-  mirror "https://ftpmirror.gnu.org/gcc/gcc-12.4.0/gcc-12.4.0.tar.xz"
-  sha256 "704f652604ccbccb14bdabf3478c9511c89788b12cb3bbffded37341916a9175"
+  url "https://ftpmirror.gnu.org/gnu/gcc/gcc-12.5.0/gcc-12.5.0.tar.xz"
+  mirror "https://ftp.gnu.org/gnu/gcc/gcc-12.5.0/gcc-12.5.0.tar.xz"
+  sha256 "71cd373d0f04615e66c5b5b14d49c1a4c1a08efa7b30625cd240b11bab4062b3"
   license "GPL-3.0-or-later" => { with: "GCC-exception-3.1" }
 
+  # https://gcc.gnu.org/gcc-12/
   livecheck do
-    url :stable
-    regex(%r{href=["']?gcc[._-]v?(12(?:\.\d+)+)(?:/?["' >]|\.t)}i)
+    skip "No longer developed or maintained"
   end
 
   bottle do
-    sha256                               arm64_sonoma:   "55614581a8985550c5cc84cd29f7122d4aca5d11f60c5ff119e7432419c2b9d8"
-    sha256                               arm64_ventura:  "1466d203d2b62e3771a0d1935314747e6a098793622f6a007c23acaf8185731b"
-    sha256                               arm64_monterey: "94bc560bcbfc98966d891656b3a0705958bdac330dfab3a9913c4c412e2f5885"
-    sha256                               sonoma:         "de57cdd8fc489a7fb88f7af19a730af87a14418c7181e5ba03e20c40e4d65738"
-    sha256                               ventura:        "cbaf8ac753711e7c39e90cc3abf3dee9847dea8908e5e575bd4065ffeef0c9b0"
-    sha256                               monterey:       "436e51d082e7cfaa612458fdd2703f530abcd49730e7634ce659700fedb033e1"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "50b8eb4f9125e36b9daad5dcd7cf470d6780d1ab2a1bad652793299fc6036770"
+    sha256                               arm64_tahoe:  "d8adb7354a111d55e61c661379749d99cb6d0cbaac40b2552e471071cb38c1a6"
+    sha256                               arm64_sonoma: "ca7a9e949ae62998f413a0068cd3eba834297669f92043da35548766246ef6cf"
+    sha256                               tahoe:        "45b46f68b0f409889443043fdb529e484c858c2a9abfa165d97c6ec118089bfc"
+    sha256                               sequoia:      "93386ba3329d06cb4288e10f7fef54e606103bf940bf5be87dc099119364f22c"
+    sha256                               sonoma:       "60e80d01ab1801326bf3e3919f7c883109daa056a5d52d496707d2ce75280ab7"
+    sha256 cellar: :any_skip_relocation, arm64_linux:  "2b65fe2eb9ddd411fbaa0eae6d8470aca65d60d956843df26921b3e3619f6c89"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "9c1bcaa7819147a8539e81064d9f34d4cc9746d70e14b0ece9a80d81818ebec8"
   end
 
   # The bottles are built on systems with the CLT installed, and do not work
@@ -31,20 +31,30 @@ class GccAT12 < Formula
   depends_on "mpfr"
   depends_on "zstd"
 
-  uses_from_macos "zlib"
-
   on_linux do
     depends_on "binutils"
+    depends_on "zlib-ng-compat"
   end
-
-  # GCC bootstraps itself, so it is OK to have an incompatible C++ stdlib
-  cxxstdlib_check :skip
 
   # Branch from the Darwin maintainer of GCC, with a few generic fixes and
   # Apple Silicon support, located at https://github.com/iains/gcc-12-branch
   patch do
-    url "https://raw.githubusercontent.com/Homebrew/formula-patches/ca7047dad38f16fb02eb63bd4447e17d0b68b3bb/gcc/gcc-12.4.0.diff"
-    sha256 "c0e8e94fbf65a6ce13286e7f13beb5a1d84b182a610489026ce3e2420fc3d45c"
+    url "https://raw.githubusercontent.com/Homebrew/homebrew-core/8ce16876120a7c9b08682f6128e24aca41ebac60/Patches/gcc/gcc-12.4.0.diff"
+    sha256 "6178f6473bd2c225ed80745834d584e1c3beff9597f5afa982f249efb39ca084"
+  end
+  # Backport commits to build on Sonoma/Sequoia to allow rebottling.
+  # TODO: create merged patch if https://github.com/iains/gcc-12-branch is synced to 12.5.0
+  patch do
+    on_macos do
+      url "https://github.com/iains/gcc-12-branch/compare/e300c1337a48cf772b09e7136601fd7f9f09d6f1..914cec39148b1c8a697976275629aa8526ea1050.patch"
+      sha256 "f622b8fb9d36d679bed2c98adc47c46029d40923646410704eb8e04cd672de96"
+    end
+  end
+  patch do
+    on_macos do
+      url "https://github.com/iains/gcc-12-branch/compare/f0f9d56ffca2da2cab9af21c0c378ffe4d9cf908...99533d94172ed7a24c0e54c4ea97e6ae2260409e.patch"
+      sha256 "7aa45104e32a4fd288a8f3b931848dc5c306d0b295ca28c8bf60a048edd8d2a5"
+    end
   end
 
   def install
@@ -90,12 +100,7 @@ class GccAT12 < Formula
         toolchain_path = "/Library/Developer/CommandLineTools"
         args << "--with-ld=#{toolchain_path}/usr/bin/ld-classic"
       end
-
-      make_args = []
     else
-      # Fix cc1: error while loading shared libraries: libisl.so.15
-      args << "--with-boot-ldflags=-static-libstdc++ -static-libgcc #{ENV.ldflags}"
-
       # Fix Linux error: gnu/stubs-32.h: No such file or directory.
       args << "--disable-multilib"
 
@@ -105,16 +110,15 @@ class GccAT12 < Formula
       # Change the default directory name for 64-bit libraries to `lib`
       # https://stackoverflow.com/a/54038769
       inreplace "gcc/config/i386/t-linux64", "m64=../lib64", "m64="
+      inreplace "gcc/config/aarch64/t-aarch64-linux", "lp64=../lib64", "lp64="
 
-      make_args = %W[
-        BOOT_CFLAGS=-I#{Formula["zlib"].opt_include}
-        BOOT_LDFLAGS=-L#{Formula["zlib"].opt_lib}
-      ]
+      ENV.append_path "CPATH", Formula["zlib-ng-compat"].opt_include
+      ENV.append_path "LIBRARY_PATH", Formula["zlib-ng-compat"].opt_lib
     end
 
     mkdir "build" do
       system "../configure", *args
-      system "make", *make_args
+      system "make"
 
       # Do not strip the binaries on macOS, it makes them unsuitable
       # for loading plugins
@@ -227,18 +231,18 @@ class GccAT12 < Formula
   end
 
   test do
-    (testpath/"hello-c.c").write <<~EOS
+    (testpath/"hello-c.c").write <<~C
       #include <stdio.h>
       int main()
       {
         puts("Hello, world!");
         return 0;
       }
-    EOS
+    C
     system bin/"gcc-#{version.major}", "-o", "hello-c", "hello-c.c"
     assert_equal "Hello, world!\n", shell_output("./hello-c")
 
-    (testpath/"hello-cc.cc").write <<~EOS
+    (testpath/"hello-cc.cc").write <<~CPP
       #include <iostream>
       struct exception { };
       int main()
@@ -249,11 +253,11 @@ class GccAT12 < Formula
           catch (...) { }
         return 0;
       }
-    EOS
+    CPP
     system bin/"g++-#{version.major}", "-o", "hello-cc", "hello-cc.cc"
     assert_equal "Hello, world!\n", shell_output("./hello-cc")
 
-    (testpath/"test.f90").write <<~EOS
+    (testpath/"test.f90").write <<~FORTRAN
       integer,parameter::m=10000
       real::a(m), b(m)
       real::fact=0.5
@@ -263,7 +267,7 @@ class GccAT12 < Formula
       end do
       write(*,"(A)") "Done"
       end
-    EOS
+    FORTRAN
     system bin/"gfortran-#{version.major}", "-o", "test", "test.f90"
     assert_equal "Done\n", shell_output("./test")
   end

@@ -1,29 +1,27 @@
 class Frei0r < Formula
   desc "Minimalistic plugin API for video effects"
   homepage "https://frei0r.dyne.org/"
-  url "https://github.com/dyne/frei0r/archive/refs/tags/v2.3.3.tar.gz"
-  sha256 "aeeefe3a9b44761b2cf110017d2b1dfa2ceeb873da96d283ba5157380c5d0ce5"
+  url "https://github.com/dyne/frei0r/archive/refs/tags/v2.5.6.tar.gz"
+  sha256 "bfe715df3d33c1acb857732962402bb8b0eef73e9dde1b58485d3e3b0e42e182"
   license "GPL-2.0-or-later"
+  compatibility_version 1
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "59d88950f340427381e84fd644fbc6672a1255812f6c1bc4bb82aaed76640190"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "e1432fd9d7d702c1c27f0cf574b337e4191ee454ba439ad0e71be1fecb82f707"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "b080ed40975a908e12c9c94829f2b7664382f9fbd5b6083cfe7a289d5841e792"
-    sha256 cellar: :any_skip_relocation, sonoma:         "7499dc7a7e179e486b641d68d31ee0b7c6f9a16949f58da91e4702ddb970eb32"
-    sha256 cellar: :any_skip_relocation, ventura:        "80dd7d731c9bc516931aa77f313eb9a2016e9f0e50adec2e5e8966c0c860584b"
-    sha256 cellar: :any_skip_relocation, monterey:       "3d74d9a45e232e70927cdc16f9bb90b839efb979297bf887da998c8b1b479747"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "f85bc09b930b41d316d408e81c26f99f275a578bad4eeb3a24aa8796ca19835d"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "90e250739d6a8fedbbba1ef4800350f6a0ff6d3d86102273544ecc2d14cccedc"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "a99cacf361ef04dcec595f1faa2a88180502e23b3cacc823f4f67cbb5cfa4b5d"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "de8754332469b1fa82614a20563b89037ccd674aef45cc80fc437217e18676ed"
+    sha256 cellar: :any_skip_relocation, sonoma:        "433a2abc4c6a8d13fd382f42bc4104f593d29397e48155f6b0d6989d5fcd7ca9"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "405fb35048d0586f0689a12339e974303431e14c520d6a8c5a0a5e54a290bece"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "7437c3c0c632a4c78c4b9af4ee8d6d22c661c03fe61db375b3f39c3b3777c369"
   end
 
   depends_on "cmake" => :build
 
   def install
-    # Disable opportunistic linking against Cairo
-    inreplace "CMakeLists.txt", "find_package (Cairo)", ""
-
     args = %w[
       -DWITHOUT_OPENCV=ON
       -DWITHOUT_GAVL=ON
+      -DWITHOUT_CAIRO=ON
     ]
 
     system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
@@ -32,7 +30,7 @@ class Frei0r < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <frei0r.h>
 
       int main()
@@ -44,7 +42,7 @@ class Frei0r < Formula
           return 1;
         }
       }
-    EOS
+    C
     system ENV.cc, "-L#{lib}", "test.c", "-o", "test"
     system "./test"
   end

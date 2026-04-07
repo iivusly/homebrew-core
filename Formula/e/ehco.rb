@@ -1,8 +1,8 @@
 class Ehco < Formula
   desc "Network relay tool and a typo :)"
   homepage "https://github.com/Ehco1996/ehco"
-  url "https://github.com/Ehco1996/ehco/archive/refs/tags/v1.1.4.tar.gz"
-  sha256 "7409064ad97040988826c86ae62a6230943f6ae1667571f39798e311e535fb79"
+  url "https://github.com/Ehco1996/ehco/archive/refs/tags/v1.1.6.tar.gz"
+  sha256 "002d18a6b631f5026b2dc90dbbe55dc46469fbaaef24ad812a281356d54ebe26"
   license "GPL-3.0-only"
   head "https://github.com/Ehco1996/ehco.git", branch: "master"
 
@@ -12,18 +12,15 @@ class Ehco < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "231df470a08a92dcf5e904ceda7c3f5b530cd88c3694517dc00f99cbf5249eb6"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "39979432527f45f8cf6eddc335257d73f43b4ffae65d84cce6217496599b9241"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "faf1404fef3eebb3c1389e43df065fb520b5a13a0039f0f024597c488721737e"
-    sha256 cellar: :any_skip_relocation, sonoma:         "4fd4b56fff548abc18353aad3589158d27984261141cf58933e3205c65c0a833"
-    sha256 cellar: :any_skip_relocation, ventura:        "35b4e206605a39dd73c657cb7175abb63da2c3efa55a6f3394e034072dcc7115"
-    sha256 cellar: :any_skip_relocation, monterey:       "288e20c323998e9748e09f3642b30d0347021bb15e33b6be421c57d829aafe96"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "cb470e778aeeeb162968f48a891d7fedb1aae67df0f2e81ca2003dcfe8378062"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "ce103e44cecc91df6afb8fbc1de0832857851f393613b802cb966db8429851e0"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "8bf2af4784fbb7d9d852ac928e11393068452d3dd6667340f3cd2e1155e224bc"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "214a9fd3b94ec63e70ab9b3866b42e41a4dc70b5d64eea8145910512b4446424"
+    sha256 cellar: :any_skip_relocation, sonoma:        "60bedc9271b9192659103f62dcea107ff83244baff75d8b593b165e236b3dc4f"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "eaf25741f4d61ba3f1b5ce1ba2fbffbbbf7c4ada95949d58549baf11b9a5d562"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "d506b0b7b1914beb056d7d81c91704812e51d1673d490203f4c0802650cc58f2"
   end
 
   depends_on "go" => :build
-
-  uses_from_macos "netcat" => :test
 
   def install
     ldflags = %W[
@@ -32,27 +29,36 @@ class Ehco < Formula
       -X github.com/Ehco1996/ehco/internal/constant.GitRevision=#{tap.user}
       -X github.com/Ehco1996/ehco/internal/constant.BuildTime=#{time.iso8601}
     ]
-
     # -tags added here are via upstream's Makefile/CI builds
-    system "go", "build",
-            "-tags", "nofibrechannel,nomountstats",
-            *std_go_args(ldflags:), "cmd/ehco/main.go"
+    tags = "nofibrechannel,nomountstats"
+
+    system "go", "build", *std_go_args(ldflags:, tags:), "cmd/ehco/main.go"
   end
 
   test do
     version_info = shell_output("#{bin}/ehco -v 2>&1")
     assert_match "Version=#{version}", version_info
 
-    # run nc server
-    nc_port = free_port
-    spawn "nc", "-l", nc_port.to_s
+    # run tcp server
+    server_port = free_port
+    server = TCPServer.new(server_port)
+    server_pid = fork do
+      session = server.accept
+      session.puts "Hello world!"
+      session.close
+    end
     sleep 1
 
     # run ehco server
     listen_port = free_port
-    spawn bin/"ehco", "-l", "localhost:#{listen_port}", "-r", "localhost:#{nc_port}"
+    ehco_pid = spawn bin/"ehco", "-l", "localhost:#{listen_port}", "-r", "localhost:#{server_port}"
     sleep 1
 
-    system "nc", "-z", "localhost", listen_port.to_s
+    TCPSocket.open("localhost", listen_port) do |sock|
+      assert_match "Hello world!", sock.gets
+    end
+  ensure
+    Process.kill "TERM", ehco_pid if ehco_pid
+    Process.kill "TERM", server_pid if server_pid
   end
 end

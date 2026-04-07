@@ -1,10 +1,9 @@
 class Goaccess < Formula
   desc "Log analyzer and interactive viewer for the Apache Webserver"
   homepage "https://goaccess.io/"
-  url "https://tar.goaccess.io/goaccess-1.9.3.tar.gz"
-  sha256 "49f0ee49e3c4a95f5f75f6806b0406746fcbf2f9ad971cae23e2ea95d3ec7837"
+  url "https://tar.goaccess.io/goaccess-1.10.2.tar.gz"
+  sha256 "b9b7484a413279863c7d92dc7dd4c19dcb55c0a2d138735efc18570bcc4eaa0e"
   license "MIT"
-  head "https://github.com/allinurl/goaccess.git", branch: "master"
 
   livecheck do
     url "https://goaccess.io/download"
@@ -12,38 +11,38 @@ class Goaccess < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "87aa707dacbd55256870c04738ba57e253767e167c16bcd391f9fca89164931b"
-    sha256 arm64_ventura:  "fab59a784e6221780e73de49fb5b7b20b8be593a0fab28d07f031b5b1433a8e0"
-    sha256 arm64_monterey: "7cc09da579a2685826fec756cce8bf87fb868120ff09f680203fa172ad1d3af3"
-    sha256 sonoma:         "1b64c1206f019b712ed90724342e12ed9962e48e33d4f6ef0cb3dbebc184454f"
-    sha256 ventura:        "d0dde1b682b280570fcfe938d46c0ab44f8d79c30fbb0b167c203ecc0e93446a"
-    sha256 monterey:       "40999cea57bc1fca15720fc2d11304db6801b2ac1a89d9da74910fd049944d28"
-    sha256 x86_64_linux:   "a3ee515f40ffb70cf7db643c7150156a19558ec33a1426a792bad4b4434aa42a"
+    sha256 arm64_tahoe:   "7a698068fe2b1207233ff61c3b3881a27819d74cdb87e0df2b650703410e089d"
+    sha256 arm64_sequoia: "37dc6946eeb5bd7fb4b165bdbb2a6ac3ae0145b866298036c72aa6ac50e66c8e"
+    sha256 arm64_sonoma:  "26415e8602250913083cef1155f548207eb22cbda7a1a6712036127218d9a0b3"
+    sha256 sonoma:        "4cbf3d537d8c9e062191257c54d5a93859045cd4d9cba190151a6cda454e10d1"
+    sha256 arm64_linux:   "e4767498d50629470699c9f3fc3cfc78726f1307bdd61e4005301f394fdab5aa"
+    sha256 x86_64_linux:  "790bf490001601ad4681ce502577897ca00bfbfedccc7aec1800562c41c75a53"
   end
 
-  depends_on "autoconf" => :build
-  depends_on "automake" => :build
-  depends_on "gettext"
+  head do
+    url "https://github.com/allinurl/goaccess.git", branch: "master"
+
+    depends_on "autoconf" => :build
+    depends_on "automake" => :build
+    depends_on "gettext" => :build
+  end
+
   depends_on "libmaxminddb"
-  depends_on "tokyo-cabinet"
 
   uses_from_macos "ncurses"
 
-  def install
-    ENV.append_path "PATH", Formula["gettext"].bin
-    system "autoreconf", "-vfi"
+  on_macos do
+    depends_on "gettext"
+  end
 
-    args = %W[
-      --disable-debug
-      --disable-dependency-tracking
-      --prefix=#{prefix}
+  def install
+    args = %w[
       --enable-utf8
-      --enable-tcb=btree
       --enable-geoip=mmdb
-      --with-libintl-prefix=#{Formula["gettext"].opt_prefix}
     ]
 
-    system "./configure", *args
+    system "autoreconf", "--force", "--install", "--verbose" if build.head?
+    system "./configure", *args, *std_configure_args
     system "make", "install"
   end
 

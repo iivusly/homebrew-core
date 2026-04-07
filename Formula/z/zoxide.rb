@@ -1,18 +1,17 @@
 class Zoxide < Formula
   desc "Shell extension to navigate your filesystem faster"
   homepage "https://github.com/ajeetdsouza/zoxide"
-  url "https://github.com/ajeetdsouza/zoxide/archive/refs/tags/v0.9.4.tar.gz"
-  sha256 "ec002bdca37917130ae34e733eb29d4baa03b130c4b11456d630a01a938e0187"
+  url "https://github.com/ajeetdsouza/zoxide/archive/refs/tags/v0.9.9.tar.gz"
+  sha256 "eddc76e94db58567503a3893ecac77c572f427f3a4eabdfc762f6773abf12c63"
   license "MIT"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "f676f976bc36f800fb3e1501dac29b579493d4cfe09217bd9a7a78d7a6289ed3"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "1e0633546aacf6a5b61e8f4f3a3267fc2fe20437bdef451523bf6f6280441bc2"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "7a8eb375e99c59cd6f24432d3dd80d4ad7d6e79f43de93c215cfa79f7a27ff33"
-    sha256 cellar: :any_skip_relocation, sonoma:         "117d3d68c603514fd9c0db890f2cfb6337748b897e15d0f60ff1f80adcf72535"
-    sha256 cellar: :any_skip_relocation, ventura:        "c57845be5b2e1c2b1c0a1830ea238790be6010ac8471bff993e52e29e3588a38"
-    sha256 cellar: :any_skip_relocation, monterey:       "599d8d2fcd5f2dddf52ba4815bb310e3344f2b30bae902a6aff8956ef4991f1d"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "778fb5fd4766a8a149ad721195b626bf7efc8d11da7ae15b9a5d95a2b5a07365"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "a82505577d2966650cc8627de4017a136a93b47878292bd655f0e88599220f66"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "d65d45c8afa409ab16b6ebb5408f5ad351467cb61dfc34b10489f4763bc856dc"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "5c86d40f6688a7c7d1716b474d97b09900709ef842215106e4458d8c495a62df"
+    sha256 cellar: :any_skip_relocation, sonoma:        "6f35975692aa8c38f9ae6b3868122ed8710cb35b3c470844b32cf246cbd80944"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "aa8fb13ba0cd9a26df2de6472b1d6eb944eee0fcde663b0cffd69dc171a9c2ca"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "7aa96060fdfce45c0347eccb89f3d9b5cdaf97d43fc71c0f376867d8a26d942e"
   end
 
   depends_on "rust" => :build
@@ -26,7 +25,7 @@ class Zoxide < Formula
   end
 
   test do
-    assert_equal "", shell_output("#{bin}/zoxide add /").strip
+    assert_empty shell_output("#{bin}/zoxide add /").strip
     assert_equal "/", shell_output("#{bin}/zoxide query").strip
   end
 end

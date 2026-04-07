@@ -6,13 +6,20 @@ class SpeechTools < Formula
   head "https://github.com/festvox/speech_tools.git", branch: "master"
 
   stable do
-    url "http://festvox.org/packed/festival/2.5/speech_tools-2.5.0-release.tar.gz"
+    url "https://deb.debian.org/debian/pool/main/s/speech-tools/speech-tools_2.5.0.orig.tar.gz"
+    mirror "http://festvox.org/packed/festival/2.5/speech_tools-2.5.0-release.tar.gz"
     sha256 "e4fd97ed78f14464358d09f36dfe91bc1721b7c0fa6503e04364fb5847805dcc"
 
     # Fix build on Apple Silicon. Remove in the next release.
     patch do
       url "https://github.com/festvox/speech_tools/commit/06141f69d21bf507a9becb5405265dc362edb0df.patch?full_index=1"
       sha256 "a42493982af11a914d2cf8b97edd287a54b5cabffe6c8fe0e4a9076c211e85ef"
+    end
+
+    # Backport fix for building with -fno-common
+    patch do
+      url "https://github.com/festvox/speech_tools/commit/55bdddcca80906d63090872309c0a7838bf44f44.patch?full_index=1"
+      sha256 "0d0b97ea85550a55d09627d388345b16d467f5cbcbb4ab35aa51479950557048"
     end
   end
 
@@ -22,6 +29,8 @@ class SpeechTools < Formula
   end
 
   bottle do
+    sha256 cellar: :any,                 arm64_tahoe:    "676603f0e048211c64eef17bb9b6992b7fec2825469d4dae53a0a265e5b84dc4"
+    sha256 cellar: :any,                 arm64_sequoia:  "711ab1173ba030660d1d8ee4e33da992aedcea17abf46073d9cc61600393cf7a"
     sha256 cellar: :any,                 arm64_sonoma:   "661e6c51d679c86f3f8a3e0bf98f11d2bf70e94dfffa01b15ae8cfce3a25a32b"
     sha256 cellar: :any,                 arm64_ventura:  "904d6e001b1e6ba3dc80e9ff46f45e858e1551e4194779ecf29babdee3925d29"
     sha256 cellar: :any,                 arm64_monterey: "b6fc76b6258dbd5956b9ee1fc3c2b6bdd3bff70c3e5963d0909d063d7d58469e"
@@ -31,6 +40,7 @@ class SpeechTools < Formula
     sha256 cellar: :any,                 monterey:       "ff2891dc045fd7e6a9044dab515a213eb8cfacbdf94cee6191b4d14c32cdcff5"
     sha256 cellar: :any,                 big_sur:        "6752fe1558b7d5c824d6b8f534caf8a2ee2547cc8346e6802ba7138992af4ea3"
     sha256 cellar: :any,                 catalina:       "e88b78b7a2391634494dc70406f42667d8d152e41d8b85958afd38ec16d8b4e0"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "1e482ece1583a25e8e5b78f5089af87629eee73d505c8013fad0fe33e085157f"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "05b33f6bd508503c40c67baaa4d8766e3d3b58853b18c9f356d0e650a2ecad13"
   end
 

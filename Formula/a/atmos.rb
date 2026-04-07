@@ -1,33 +1,47 @@
 class Atmos < Formula
   desc "Universal Tool for DevOps and Cloud Automation"
   homepage "https://github.com/cloudposse/atmos"
-  url "https://github.com/cloudposse/atmos/archive/refs/tags/v1.88.0.tar.gz"
-  sha256 "c9258506be8a4349555fa08432a6bfbc0e4036eb865fa9b0f86fef6fa78aaf9b"
+  url "https://github.com/cloudposse/atmos/archive/refs/tags/v1.214.0.tar.gz"
+  sha256 "1eeafbcd0632eae3b45458418bfeb4ef1c52d6e82c48f3d0a91aff8b3b43fa07"
   license "Apache-2.0"
+  head "https://github.com/cloudposse/atmos.git", branch: "main"
+
+  livecheck do
+    url :stable
+    regex(/^v?(\d+(?:\.\d+)+)$/i)
+  end
+
+  no_autobump! because: :bumped_by_upstream
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "50c1f46a976f3b360f646fbe1f18d1e3ef31f137bd05ecb7c0aed3d5658ab8e8"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "50c1f46a976f3b360f646fbe1f18d1e3ef31f137bd05ecb7c0aed3d5658ab8e8"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "50c1f46a976f3b360f646fbe1f18d1e3ef31f137bd05ecb7c0aed3d5658ab8e8"
-    sha256 cellar: :any_skip_relocation, sonoma:         "d4982fbc166b20faa93dc07f8d6e78f1ae73ce3f2c4e5cf5eb99af7c2ffcd967"
-    sha256 cellar: :any_skip_relocation, ventura:        "d4982fbc166b20faa93dc07f8d6e78f1ae73ce3f2c4e5cf5eb99af7c2ffcd967"
-    sha256 cellar: :any_skip_relocation, monterey:       "d4982fbc166b20faa93dc07f8d6e78f1ae73ce3f2c4e5cf5eb99af7c2ffcd967"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "86936ce56a6bc395ed074280ae26e6dc3c157ce3498206ceeed4b255b97657bb"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "7ebe114f92561661c5f3f9c5a407709b9d5c737610533cd353d4d7c7d9771303"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "144acae480c6701700f45d6c7e6ace8106be8c00b90210512f9833eaf9e2cd2e"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "4831f524bd65e4e4d7e84dcdf4a02a954ee524bd11ef54322e603424fc7d6e37"
+    sha256 cellar: :any_skip_relocation, sonoma:        "8052bd9ef62e3d87db0600e98928b3567f9567cebf7ea60b0c1aa1c3fa17eb4c"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "cbc49db186bed637bcb5908c42a87d7bc30ff62b3ef03585b822639c52edc6ee"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "8616b3d82d5c2e77ef654e9dc04ddb0c55d872bb4f1db655e3c0248164a089b5"
   end
 
   depends_on "go" => :build
+  depends_on "pkgconf" => :build
+
+  on_linux do
+    depends_on "systemd" # libudev
+  end
 
   conflicts_with "tenv", because: "tenv symlinks atmos binaries"
 
   def install
-    system "go", "build", *std_go_args(ldflags: "-s -w -X 'github.com/cloudposse/atmos/cmd.Version=#{version}'")
+    ENV["CGO_ENABLED"] = "1" if OS.linux? && Hardware::CPU.arm?
 
-    generate_completions_from_executable(bin/"atmos", "completion")
+    system "go", "build", *std_go_args(ldflags: "-s -w -X 'github.com/cloudposse/atmos/pkg/version.Version=#{version}'")
+
+    generate_completions_from_executable(bin/"atmos", shell_parameter_format: :cobra)
   end
 
   test do
     # create basic atmos.yaml
-    (testpath/"atmos.yaml").write <<~EOT
+    (testpath/"atmos.yaml").write <<~YAML
       components:
         terraform:
           base_path: "./components/terraform"
@@ -49,14 +63,15 @@ class Atmos < Formula
           - "**/*globals*"
         name_pattern: "{tenant}-{environment}-{stage}"
       logs:
+        file: "/dev/stderr"
         verbose: false
         colors: true
-    EOT
+    YAML
 
     # create scaffold
     mkdir_p testpath/"stacks"
     mkdir_p testpath/"components/terraform/top-level-component1"
-    (testpath/"stacks/tenant1-ue2-dev.yaml").write <<~EOT
+    (testpath/"stacks/tenant1-ue2-dev.yaml").write <<~YAML
       terraform:
         backend_type: s3 # s3, remote, vault, static, etc.
         backend:
@@ -80,10 +95,10 @@ class Atmos < Formula
       components:
         terraform:
           top-level-component1: {}
-    EOT
+    YAML
 
     # create expected file
-    (testpath/"backend.tf.json").write <<~EOT
+    (testpath/"backend.tf.json").write <<~JSON
       {
         "terraform": {
           "backend": {
@@ -100,11 +115,13 @@ class Atmos < Formula
           }
         }
       }
-    EOT
+    JSON
 
     system bin/"atmos", "terraform", "generate", "backend", "top-level-component1", "--stack", "tenant1-ue2-dev"
     actual_json = JSON.parse(File.read(testpath/"components/terraform/top-level-component1/backend.tf.json"))
     expected_json = JSON.parse(File.read(testpath/"backend.tf.json"))
     assert_equal expected_json["terraform"].to_set, actual_json["terraform"].to_set
+
+    assert_match "Atmos #{version}", shell_output("#{bin}/atmos version")
   end
 end

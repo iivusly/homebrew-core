@@ -2,19 +2,20 @@ class KubeScore < Formula
   desc "Kubernetes object analysis recommendations for improved reliability and security"
   homepage "https://kube-score.com"
   url "https://github.com/zegl/kube-score.git",
-      tag:      "v1.18.0",
-      revision: "0fb5f668e153c22696aa75ec769b080c41b5dd3d"
+      tag:      "v1.20.0",
+      revision: "81371e9f53b633bec69423fc298295bd71bd869a"
   license "MIT"
   head "https://github.com/zegl/kube-score.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "c4e98d0912c56136708f76febcb5c21aa4120694aa176c510061ec0839382d23"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "43e478d458c20b767beaf3450f8c0d2639aeac1f5f347b3f1da6a933c29a660e"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "e16120280e27daad25243b31ac6852b7b0952b72e1efd690e14fd1a06849be24"
-    sha256 cellar: :any_skip_relocation, sonoma:         "795074d42d93536ba29ce24b5da559113c6c2eed6a00be74b357973bdbdf0ad8"
-    sha256 cellar: :any_skip_relocation, ventura:        "e42709aa48593bc08b62d2797fe5176194696228366bbf1a9bb5067711140b38"
-    sha256 cellar: :any_skip_relocation, monterey:       "750a7a9aa2a6d45fd1931918e4e2853fd3e05761b92a11b43f47a272b631837c"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "a5d1502c621b5960c422725ef8ab00ead69120d9e6056431c62e5b6efd079d34"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "f56227624dd0d4980bddcaa35592e0848a44dced318dcb595838eec62bf8b835"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "8c59a7d469dad58f1fa600c7e28fd9355ea66991c5c96921c72408eb631c8823"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "8c59a7d469dad58f1fa600c7e28fd9355ea66991c5c96921c72408eb631c8823"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "8c59a7d469dad58f1fa600c7e28fd9355ea66991c5c96921c72408eb631c8823"
+    sha256 cellar: :any_skip_relocation, sonoma:        "5c6eef05adc999c965abb8fbfe2e87845b4ae9dcd48109648350823fb755c861"
+    sha256 cellar: :any_skip_relocation, ventura:       "5c6eef05adc999c965abb8fbfe2e87845b4ae9dcd48109648350823fb755c861"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "3d8264d94b19a2eb76c3e07f8dfb29ea87127d0941c5d3bb53bea0202b93ebc0"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "69f6522e699234368ab760c7c0f55b66cb5fa9c020c923d9656248c56de0e169"
   end
 
   depends_on "go" => :build
@@ -32,7 +33,7 @@ class KubeScore < Formula
   test do
     assert_match version.to_s, shell_output("#{bin}/kube-score version")
 
-    (testpath/"test.yaml").write <<~EOS
+    (testpath/"test.yaml").write <<~YAML
       apiVersion: v1
       kind: Service
       metadata:
@@ -48,7 +49,7 @@ class KubeScore < Formula
           port: 80
           targetPort: 8080
         type: NodePort
-    EOS
+    YAML
     assert_match "The services selector does not match any pods", shell_output("#{bin}/kube-score score test.yaml", 1)
   end
 end

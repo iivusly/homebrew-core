@@ -7,20 +7,20 @@ class BootClj < Formula
   revision 2
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, all: "fa2f333dd444cb3c41bd9252450e72fcb6c5182017df0012b67da09acc52d619"
+    rebuild 2
+    sha256 cellar: :any_skip_relocation, all: "5d6682e08bc0900b365f7f704190ed3358ff39d7d53cde67e813d79e69f28f2b"
   end
 
   depends_on "openjdk"
 
   def install
     libexec.install "boot.jar"
-    (bin/"boot").write <<~EOS
+    (bin/"boot").write <<~SHELL
       #!/bin/bash
       export JAVA_HOME="${JAVA_HOME:-#{Formula["openjdk"].opt_prefix}}"
       declare -a "options=($BOOT_JVM_OPTIONS)"
       exec "${JAVA_HOME}/bin/java" "${options[@]}" -Dboot.app.path="#{bin}/boot" -jar "#{libexec}/boot.jar" "$@"
-    EOS
+    SHELL
   end
 
   test do

@@ -1,23 +1,19 @@
 class Wallpaper < Formula
   desc "Manage the desktop wallpaper"
   homepage "https://github.com/sindresorhus/macos-wallpaper"
-  url "https://github.com/sindresorhus/macos-wallpaper/archive/refs/tags/v2.3.1.tar.gz"
-  sha256 "d6aebaca1083ee3e5d6494f5574931691bad239a98e8fe99655790a40f2cb80a"
+  url "https://github.com/sindresorhus/macos-wallpaper/archive/refs/tags/v2.3.3.tar.gz"
+  sha256 "07838483fe015ae9798b542c1c15e02143bbae85c5f2e6fb51e6923bd76556ed"
   license "MIT"
   head "https://github.com/sindresorhus/macos-wallpaper.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "f6f09c6f49b2e84378b5601a03be68489d1a0127a0b02910d7fb87dcd1cc94c2"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "183473f47ee0c0756b878ea79b9b6af7c1a1ee99e15f2142429a04f599f5695d"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "f020cda2a5cafba2c001ae6d32cae25d0f63283c221fd3ce75dde1414e97a19a"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "c730b0f63bdf5395221ab3c45018e23e31b782a31e379691947f1b0199381ba4"
-    sha256 cellar: :any_skip_relocation, sonoma:         "5fdb89ddf5652524b1f3e06d9c64de79e7eb7ca943b73c527778200760ba866d"
-    sha256 cellar: :any_skip_relocation, ventura:        "b726b99912abf74b4a5d3f0cf265dc2986e3ff1302c600cc74b312ec34e4f1a2"
-    sha256 cellar: :any_skip_relocation, monterey:       "a4ca40d5df4a1983cc719122135a56d19f6861a216c347c984a2b7f89c4e4d4e"
-    sha256 cellar: :any_skip_relocation, big_sur:        "2f8fcb711d2e7a94dcef1894d6f23c754e950b1773f7a3da008cb5dd59696dfa"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "f32335062b487623a8128191f5a991409f3be90893ff52e74762a08f129c7940"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "f5748b482f492542189bce07a118dba99c058ac615864247f7127b44551d4f00"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "d6a1e560bda31c57d95392aa21e3e6c1e9d611e89dd96134db985604cc3f52dd"
+    sha256 cellar: :any_skip_relocation, sonoma:        "d1723c93aa42b6b3fdf61a1821db8975d4b2fa031f0fbfd2688f6b558a869164"
   end
 
-  depends_on xcode: ["13.0", :build]
+  depends_on xcode: ["16.0", :build]
   depends_on :macos
 
   def install

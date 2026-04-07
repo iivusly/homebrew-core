@@ -1,12 +1,22 @@
 class Skktools < Formula
   desc "SKK dictionary maintenance tools"
   homepage "https://github.com/skk-dev/skktools"
-  url "https://deb.debian.org/debian/pool/main/s/skktools/skktools_1.3.4.orig.tar.gz"
+  url "https://github.com/skk-dev/skktools/archive/refs/tags/skktools-1_3_4.tar.gz"
   sha256 "84cc5d3344362372e0dfe93a84790a193d93730178401a96248961ef161f2168"
   license "GPL-2.0-or-later"
   revision 2
 
+  livecheck do
+    url :stable
+    regex(/^skktools[._-]v?(\d+(?:[._]\d+)+)$/i)
+    strategy :git do |tags, regex|
+      tags.filter_map { |tag| tag[regex, 1]&.tr("_", ".") }
+    end
+  end
+
   bottle do
+    sha256 cellar: :any,                 arm64_tahoe:    "20ab94e9dabb1954777337c8abb6d98e39fc9da6963e7ec852cf96b65bae7f5a"
+    sha256 cellar: :any,                 arm64_sequoia:  "84de631d3930f335f030cfa8a3c8669d76c0052c26213b5321496087c4a156ec"
     sha256 cellar: :any,                 arm64_sonoma:   "e29e36abbb09213d335f3610286be258c8ee4f0f692cc30d66fa6553656c8e49"
     sha256 cellar: :any,                 arm64_ventura:  "00331db039291620e97f2dbd6b56062d00ffe4337a0fd6b041f1fb8952255be9"
     sha256 cellar: :any,                 arm64_monterey: "efda775981959fb7379c266e566532e39413278adc47cd63edad01d1e5b6479e"
@@ -16,11 +26,16 @@ class Skktools < Formula
     sha256 cellar: :any,                 monterey:       "e1183e406c1029e930284dd352e92429e12dc695af9e1f01d80d35871328c4bc"
     sha256 cellar: :any,                 big_sur:        "8fbd977dbce7602bff5b095508963570d20555cb607e8526d0fa0f7941aedc42"
     sha256 cellar: :any,                 catalina:       "3a24b4de5dd2f12b857d47a9776a979c0dc41f47525e0cf0d4e639e73fcd0df3"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "0fb78300abadf0685a2be3a0e51eed5581127a51c3aa56d85da8ce6e4192d419"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "ac8ed96d1342ecee708da56e9da672b9603b75c542bd835a83435d136e54100e"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "glib"
+
+  on_macos do
+    depends_on "gettext"
+  end
 
   on_linux do
     depends_on "gdbm"
@@ -33,7 +48,7 @@ class Skktools < Formula
       # Help find Homebrew's gdbm compatibility layer header
       inreplace %w[configure skkdic-expr.c], "gdbm/ndbm.h", "gdbm-ndbm.h"
     end
-    system "./configure", *std_configure_args, *args
+    system "./configure", *args, *std_configure_args
     system "make", "CC=#{ENV.cc}"
     ENV.deparallelize
     system "make", "install"

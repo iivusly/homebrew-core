@@ -1,19 +1,19 @@
 class Busted < Formula
   desc "Elegant Lua unit testing"
   homepage "https://lunarmodules.github.io/busted/"
-  url "https://github.com/lunarmodules/busted/archive/refs/tags/v2.2.0.tar.gz"
-  sha256 "befca10f573bb476fa1db2e3149150d65f802a71d34d1682679e640665f2dc2b"
+  url "https://github.com/lunarmodules/busted/archive/refs/tags/v2.3.0.tar.gz"
+  sha256 "1669a4f59ff9e08ad4b38d4212ad8cdd4519209101e3af5459a596d5ad9a7d24"
   license "MIT"
+  revision 1
   head "https://github.com/lunarmodules/busted.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "9267e5bd352ff30b679465035c1a6180df40dabdec7b4e14f31f1857155ebe00"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "005189ce90798040e77012a87a523454c8a64f6dcdf27e2d2022cb5a81c60491"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "86a649562e5124e1d9761e1bb18e2589e89a013268fed32dd9c12a1dc7be0f13"
-    sha256 cellar: :any_skip_relocation, sonoma:         "1d46925551fc50862907fe770dde0aaf06cad8d476ed7f313988afb3eb23b5a2"
-    sha256 cellar: :any_skip_relocation, ventura:        "bec97bc61b1ffe4f39f035d2710c626b6f31c91c1fa16c778fcc0bc3704681b2"
-    sha256 cellar: :any_skip_relocation, monterey:       "8510ad64b34d08addb54433deca168f8f7f2c1db6df90c7ab41f32ae352d23a3"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "ed3b9a4fea656d23198b327ed55879761fd1ab0f5332adf34db382f86622d8d1"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "b365b5128600da6de31d3d468d99d5008fb2c1a359362de3fbf7b206e9b307c3"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "cbb42897d81c69d3e00608baa5e8794c24cd5a8e7c88630d94f2c123b358b962"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "85ced43b2770a173da2f8ab203fc0014ce265728fcdad2068fdea82c29b0ef78"
+    sha256 cellar: :any_skip_relocation, sonoma:        "71b2b448322e152cb75656508cad75d28fbec3a66dcf804d87d9c8621853428c"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "b7031313aeb06f0e4cbc1610759e962b0494670f28707c7843248f74ece309e4"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "e6f66483354265a0fb9b8648ca9038154805516078072e888c56c78eb533bb3b"
   end
 
   depends_on "luarocks" => :build
@@ -23,19 +23,19 @@ class Busted < Formula
 
   def install
     system "luarocks", "make", "--tree=#{libexec}", "--local", "--lua-dir=#{Formula["lua"].opt_prefix}"
-    bin.install_symlink Dir["#{libexec}/bin/*"]
+    bin.install_symlink libexec.glob("bin/*")
   end
 
   test do
     test_file = testpath/"test.lua"
 
-    test_file.write <<~EOS
+    test_file.write <<~LUA
       describe("brewtest", function()
         it("should pass", function()
           assert.is_true(true)
         end)
       end)
-    EOS
+    LUA
 
     assert_match "1 success / 0 failures", shell_output("#{bin}/busted #{test_file}")
 

@@ -10,7 +10,11 @@ class Gws < Formula
     sha256 cellar: :any_skip_relocation, all: "0d31f65a9ff26f5e0d80055636889fe835445ffcdcccb144333e042ae2b771aa"
   end
 
-  depends_on "bash"
+  on_macos do
+    depends_on "bash"
+  end
+
+  conflicts_with "googleworkspace-cli", because: "both install a `gws` binary"
 
   def install
     bin.install "src/gws"

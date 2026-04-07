@@ -1,8 +1,8 @@
 class Werf < Formula
   desc "Consistent delivery tool for Kubernetes"
   homepage "https://werf.io/"
-  url "https://github.com/werf/werf/archive/refs/tags/v2.10.5.tar.gz"
-  sha256 "871e7a42b5f5457b8a897178288e2d7a323ae78adee9f2015184238a32e88243"
+  url "https://github.com/werf/werf/archive/refs/tags/v2.63.1.tar.gz"
+  sha256 "07bb49332ca2dbb995e43296a422d76b3f2473bf93003d00167cac9c4aed7807"
   license "Apache-2.0"
   head "https://github.com/werf/werf.git", branch: "main"
 
@@ -15,24 +15,25 @@ class Werf < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "22186a8f55a096f7391bfaab323410246745a37399bdaf11fae66be02aa6cc66"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "d6806dc03ed9ee8066423fd04f583993594dd83eb057415f49d6fc5a3022c43d"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "ec308dbf6ebc05ba3c1e6a6a4fc46c0e739f40e78f4ee29be7e783af53fb3cd2"
-    sha256 cellar: :any_skip_relocation, sonoma:         "1212e7388812c328a470ee78d8d2b3815fd22c8a4385acf713d6f544c438a503"
-    sha256 cellar: :any_skip_relocation, ventura:        "4f33b5a053f5ddd38fb11041b2ae2e6fbf63923070e7e3379dc5bea3d1a756f2"
-    sha256 cellar: :any_skip_relocation, monterey:       "eeb4a5a882d1605a2a15ea3b23e2ccbef7e7ecd0c6ec2f3202a22a56c35162b2"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "bf20e166a1bddcf548a94fac3cdb5a5b8c2a05524a19eea53551a2e81d98283d"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "7f209e17faed3f301e905a72e4b6b441b4f7c900fb0843134313f31850c5181c"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "3a63d608aa8c7f991c2aea97135b0d75e277a732b02dc9719b551c2eef74d23e"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "d37ed2d17fa9854fe841d53e49f8283ba1d3c09c9947a9b311f68e9b8bfd3af8"
+    sha256 cellar: :any_skip_relocation, sonoma:        "74ae690bea95365b17183e61195a31af1b36f886774500f366064720cd2cdcb3"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "654159b615a565eb04d17462383065f3af35e6eeae97678f16859266154f13a5"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "bbf855df5d38b86d656e4e9ee783e623dfaeb1b44f3538d872526414f04f2a0c"
   end
 
   depends_on "go" => :build
+  depends_on "pkgconf" => :build
 
   on_linux do
-    depends_on "pkg-config" => :build
     depends_on "btrfs-progs"
     depends_on "device-mapper"
   end
 
   def install
+    ENV["CGO_ENABLED"] = "1"
+
     if OS.linux?
       ldflags = %W[
         -linkmode external
@@ -43,20 +44,20 @@ class Werf < Formula
       tags = %w[
         dfrunsecurity dfrunnetwork dfrunmount dfssh containers_image_openpgp
         osusergo exclude_graphdriver_devicemapper netgo no_devmapper static_build
-      ].join(" ")
+      ]
     else
       ldflags = "-s -w -X github.com/werf/werf/v2/pkg/werf.Version=#{version}"
       tags = "dfrunsecurity dfrunnetwork dfrunmount dfssh containers_image_openpgp"
     end
 
-    system "go", "build", *std_go_args(ldflags:), "-tags", tags, "./cmd/werf"
+    system "go", "build", *std_go_args(ldflags:, tags:), "./cmd/werf"
 
-    generate_completions_from_executable(bin/"werf", "completion")
+    generate_completions_from_executable(bin/"werf", shell_parameter_format: :cobra)
   end
 
   test do
     werf_config = testpath/"werf.yaml"
-    werf_config.write <<~EOS
+    werf_config.write <<~YAML
       configVersion: 1
       project: quickstart-application
       ---
@@ -71,19 +72,20 @@ class Werf < Formula
       image: worker
       dockerfile: Dockerfile
       context: worker
-    EOS
+    YAML
 
-    output = <<~EOS
-      - image: vote
+    output = <<~YAML
       - image: result
+      - image: vote
       - image: worker
-    EOS
+    YAML
 
     system "git", "init"
     system "git", "add", werf_config
     system "git", "commit", "-m", "Initial commit"
 
-    assert_equal output, shell_output("#{bin}/werf config graph")
+    assert_equal output,
+                 shell_output("#{bin}/werf config graph").lines.sort.join
 
     assert_match version.to_s, shell_output("#{bin}/werf version")
   end

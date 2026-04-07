@@ -1,26 +1,28 @@
 class Gitmoji < Formula
   desc "Interactive command-line tool for using emoji in commit messages"
   homepage "https://gitmoji.dev"
-  url "https://registry.npmjs.org/gitmoji-cli/-/gitmoji-cli-9.4.0.tgz"
-  sha256 "edc4ac35493f321e441ab63aa2cd04f5bd315edeaf0fad952b0344f176bbde95"
+  url "https://registry.npmjs.org/gitmoji-cli/-/gitmoji-cli-9.7.0.tgz"
+  sha256 "feafd3520f57f5eed9c1df0a603cbd4c69869daab5fd2011bd7e3711541f482b"
   license "MIT"
 
   bottle do
     rebuild 1
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "20259fe5b567622f215aab554610a0b9dca79b031eba8886621539ec514b845d"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "20259fe5b567622f215aab554610a0b9dca79b031eba8886621539ec514b845d"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "20259fe5b567622f215aab554610a0b9dca79b031eba8886621539ec514b845d"
-    sha256 cellar: :any_skip_relocation, sonoma:         "89a2544cf484c302bd704ed411e0dcae4d789c271a230103c9e9a279a50a41b5"
-    sha256 cellar: :any_skip_relocation, ventura:        "89a2544cf484c302bd704ed411e0dcae4d789c271a230103c9e9a279a50a41b5"
-    sha256 cellar: :any_skip_relocation, monterey:       "89a2544cf484c302bd704ed411e0dcae4d789c271a230103c9e9a279a50a41b5"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "1af90b1631b3dbc51a16d76ae3b38c13ebf8c7bd7b6ce7524509cc6f2589bbbb"
+    sha256 cellar: :any_skip_relocation, all: "3caa7ff08fc6f9e6845699bd0390bef6d4529ec07a1e7fd1fc1bd9846ff1db6e"
   end
 
   depends_on "node"
 
   def install
     system "npm", "install", *std_npm_args
-    bin.install_symlink Dir["#{libexec}/bin/*"]
+    bin.install_symlink libexec.glob("bin/*")
+
+    # Ensure we have uniform bottles.
+    files = ["global-directory/index.d.ts", "npm-run-path/node_modules/path-key/index.d.ts",
+             "path-key/index.d.ts", "xdg-basedir/index.d.ts", "xdg-basedir/index.js",
+             "npm-run-path/index.d.ts", "global-directory/index.js", "@pnpm/npm-conf/lib/defaults.js"]
+    files.each do |file|
+      inreplace libexec/"lib/node_modules/gitmoji-cli/node_modules/#{file}", "/usr/local", HOMEBREW_PREFIX
+    end
   end
 
   test do

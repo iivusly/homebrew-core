@@ -1,24 +1,30 @@
 class StressNg < Formula
   desc "Stress test a computer system in various selectable ways"
   homepage "https://wiki.ubuntu.com/Kernel/Reference/stress-ng"
-  url "https://github.com/ColinIanKing/stress-ng/archive/refs/tags/V0.18.03.tar.gz"
-  sha256 "a19a25ba47c9196db23aab97df4ef55d8ec80d8a5a6afe580b3bec2b870422a9"
+  url "https://github.com/ColinIanKing/stress-ng/archive/refs/tags/V0.21.00.tar.gz"
+  sha256 "1339cbc6ccbff7e2ee2177bf0fd67e7b94e8ff7b07fe89bcfaec0280d800cf34"
   license "GPL-2.0-or-later"
 
-  bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "053f848443172b59c40dabf02b12dbb150815e1924a2668b148e1560bfbddc1a"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "d10fee0460ef493b7b44aa8042b4b35202225e53f2e38932a601a13e47d4b460"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "a6026f2cac37cb4c7b21c465db2333fbac009767359bf4f21ff207a58d73ea6f"
-    sha256 cellar: :any_skip_relocation, sonoma:         "e7454ce27c3d5b1268774ab25c5b42660fc9cd935ee83c8a30d2005a6135f78f"
-    sha256 cellar: :any_skip_relocation, ventura:        "f0a2f7d84ae6138a891264e728c9a712f89173b4ff9296c2393a1ed405ba7d7a"
-    sha256 cellar: :any_skip_relocation, monterey:       "0ee4a1c7d393abc4a6ba48a57ec7f9fb9e12081fababd86d7717317e2173aa0b"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "3e52f4cab697dd4865a041aa6e2b8f64289478f28994857a15ef855b081d1494"
+  livecheck do
+    url :stable
+    strategy :github_latest
   end
 
-  depends_on macos: :sierra
+  bottle do
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "c263f5c6e997c7e388e9ee8be9eee33e901af11b9cca58f8f5998e2d67515e1a"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "a2f2bc25da24e9ea9d66531c99630d0d2af0158b9531401a67891e21d10d5229"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "e39dc242bd6c2f848cd9ee3151b060ccabec8e81f8421d55af52fa55d2f90ade"
+    sha256 cellar: :any_skip_relocation, sonoma:        "b43e3627f435901273def8fc2dbdd6731393c6b8dca3d7e11448bacb0f81b672"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "1d890c784813e93215aff2a62dd226f067bfc6ebb960fb52d780eab7ad268aff"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "7f3f321d85c582369a921d8f21726bd2543dddfe787c44621d81a8cbdbd57004"
+  end
 
   uses_from_macos "libxcrypt"
-  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "acl"
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     inreplace "Makefile" do |s|

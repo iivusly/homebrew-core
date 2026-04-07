@@ -1,8 +1,8 @@
 class PythonGdbmAT312 < Formula
   desc "Python interface to gdbm"
   homepage "https://www.python.org/"
-  url "https://www.python.org/ftp/python/3.12.5/Python-3.12.5.tgz"
-  sha256 "38dc4e2c261d49c661196066edbfb70fdb16be4a79cc8220c224dfeb5636d405"
+  url "https://www.python.org/ftp/python/3.12.13/Python-3.12.13.tgz"
+  sha256 "0816c4761c97ecdb3f50a3924de0a93fd78cb63ee8e6c04201ddfaedca500b0b"
   license "Python-2.0"
 
   livecheck do
@@ -10,13 +10,12 @@ class PythonGdbmAT312 < Formula
   end
 
   bottle do
-    sha256 cellar: :any, arm64_sonoma:   "c1c9969544e3ecc3c60311a284f2230bd79b04c4afcd6d60fb74a2bdbac76f52"
-    sha256 cellar: :any, arm64_ventura:  "205fa55f400655a53e7f8a0cfcc33ce69243fa7760468ebefe9cc0b7986556ff"
-    sha256 cellar: :any, arm64_monterey: "efcb3a411ca35f8d978e957cc1f327a47db61403779ddca87fa4890499649624"
-    sha256 cellar: :any, sonoma:         "1397047586e618a2d56e478e5d0cd7f4bee09eff87d5419247b2bc347b6d334d"
-    sha256 cellar: :any, ventura:        "4e65c81ed7f9db642835d47670756c77d82daa4bb2597af1ac0491fff0b551bd"
-    sha256 cellar: :any, monterey:       "a1ddf6c2346b0026fad2f0a45a312537203003c4fe2c35ce58d9ed2f5febcd7e"
-    sha256               x86_64_linux:   "f68281e90c251b555a79aaba90769c8e2050d65171a1d01b1dbe3f6ad507070c"
+    sha256 cellar: :any, arm64_tahoe:   "0e5d91f359c8c637340ecba17b83a5fc4fdecf773ef100e3af4f2a0bd87ef2b8"
+    sha256 cellar: :any, arm64_sequoia: "28301403f1c5249d19cb51e82c1edc35c36c54cfd171e1df53859de48cd9915a"
+    sha256 cellar: :any, arm64_sonoma:  "679ecd75ce11fad8e4bbc46e47f77bd712e0cef54e357f5c13a0568c2937c6c7"
+    sha256 cellar: :any, sonoma:        "ec513ca3af354f7753f4b75f50266ac0ee3f454c27a42f1e1244ce62cf25aab4"
+    sha256               arm64_linux:   "301118405058ffc7144603b4a39099eeb0a3c379a2b564a040f912a5544aed08"
+    sha256               x86_64_linux:  "4582c9437253e10e7195b441f7dd5677b58d75b7523ad361b805ec7c5e339a6c"
   end
 
   depends_on "gdbm"
@@ -27,8 +26,15 @@ class PythonGdbmAT312 < Formula
   end
 
   def install
+    xy = Language::Python.major_minor_version python3
+    python_include = if OS.mac?
+      Formula["python@#{xy}"].opt_frameworks/"Python.framework/Versions/#{xy}/include/python#{xy}"
+    else
+      Formula["python@#{xy}"].opt_include/"python#{xy}"
+    end
+
     cd "Modules" do
-      (Pathname.pwd/"setup.py").write <<~EOS
+      (Pathname.pwd/"setup.py").write <<~PYTHON
         from setuptools import setup, Extension
 
         setup(name="gdbm",
@@ -36,12 +42,12 @@ class PythonGdbmAT312 < Formula
               version="#{version}",
               ext_modules = [
                 Extension("_gdbm", ["_gdbmmodule.c"],
-                          include_dirs=["#{Formula["gdbm"].opt_include}"],
+                          include_dirs=["#{Formula["gdbm"].opt_include}", "#{python_include}/internal"],
                           libraries=["gdbm"],
                           library_dirs=["#{Formula["gdbm"].opt_lib}"])
               ]
         )
-      EOS
+      PYTHON
       system python3, "-m", "pip", "install", *std_pip_args(prefix: false, build_isolation: true),
                                               "--target=#{libexec}", "."
       rm_r libexec.glob("*.dist-info")
@@ -50,7 +56,7 @@ class PythonGdbmAT312 < Formula
 
   test do
     testdb = testpath/"test.db"
-    system python3, "-c", <<~EOS
+    system python3, "-c", <<~PYTHON
       import dbm.gnu
 
       with dbm.gnu.open("#{testdb}", "n") as db:
@@ -58,6 +64,6 @@ class PythonGdbmAT312 < Formula
 
       with dbm.gnu.open("#{testdb}", "r") as db:
         assert db["testkey"] == b"testvalue"
-    EOS
+    PYTHON
   end
 end

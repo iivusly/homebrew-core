@@ -1,26 +1,25 @@
 class Cloudfox < Formula
   desc "Automating situational awareness for cloud penetration tests"
   homepage "https://github.com/BishopFox/cloudfox"
-  url "https://github.com/BishopFox/cloudfox/archive/refs/tags/v1.14.2.tar.gz"
-  sha256 "fd0873c5fddd9a8d80a786c002721d0dd320c745edaf742b094d720299e32cda"
+  url "https://github.com/BishopFox/cloudfox/archive/refs/tags/v2.0.1.tar.gz"
+  sha256 "ea30c806537f8b705e2a1a9f626a01eb9085853190afe2d3a8392935170e8bea"
   license "MIT"
   head "https://github.com/BishopFox/cloudfox.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "9e404f80ad32ce50c6d2348a5bc82ae7b9cc58a4da91f6e49f4b2bfb09b18f0f"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "ca2d8ffd718305bda6b5071cc256c387e780bd8c589d2c47d889232981703b40"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "036e21f57267904160bfe66f70d1d0a35063b6249ecde65b714b5ee5bf059b9e"
-    sha256 cellar: :any_skip_relocation, sonoma:         "c4abe3653fb2b6bfac26f779ab02f200068ece0dff41dc57d7d913d3fe57a826"
-    sha256 cellar: :any_skip_relocation, ventura:        "93de87af33a13c904a88ba1267d535776009fc6842958ad97c8bed59dd1e7c4a"
-    sha256 cellar: :any_skip_relocation, monterey:       "cdc1bab4fcfc22c2db10941651d4162e15acc6b49360cc7bc15a8eb41f72c29a"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "bb2daef3a55d9c0ec74618094508478c0f05d3e230372862fd26971a79de4e30"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "f1535f63bf52392205ac68dce9a6898f7bec0d5b7b2470696f219253083c404a"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "f1535f63bf52392205ac68dce9a6898f7bec0d5b7b2470696f219253083c404a"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "f1535f63bf52392205ac68dce9a6898f7bec0d5b7b2470696f219253083c404a"
+    sha256 cellar: :any_skip_relocation, sonoma:        "0242cc7ef0b849d50221f900cc72f4c493aea89f367e1672fac2434fa4801f5c"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "ee765a524cbffefcb80e2986aa6bdcd0f6f934ef8746070aeb14afdb134c6c98"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "670fe16c63f8c51c790ab75fb07cea0887713ed6e359bc2b9fd77c804e836ceb"
   end
 
   depends_on "go" => :build
 
   def install
     system "go", "build", *std_go_args(ldflags: "-s -w")
-    generate_completions_from_executable(bin/"cloudfox", "completion")
+    generate_completions_from_executable(bin/"cloudfox", shell_parameter_format: :cobra)
   end
 
   test do

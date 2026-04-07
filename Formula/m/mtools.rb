@@ -1,21 +1,23 @@
 class Mtools < Formula
   desc "Tools for manipulating MSDOS files"
   homepage "https://www.gnu.org/software/mtools/"
-  url "https://ftp.gnu.org/gnu/mtools/mtools-4.0.44.tar.gz"
-  mirror "https://ftpmirror.gnu.org/mtools/mtools-4.0.44.tar.gz"
-  sha256 "10be76148870f984fa44df297473a4e45184472cdb19a4d05ef17fdb59b5d5a4"
+  url "https://ftpmirror.gnu.org/gnu/mtools/mtools-4.0.49.tar.gz"
+  mirror "https://ftp.gnu.org/gnu/mtools/mtools-4.0.49.tar.gz"
+  sha256 "10cd1111da87bf2400a380c1639a6cba8bfb937a24f9c51f5f88d393ae5f6f76"
   license "GPL-3.0-or-later"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "9689a807460b4a4b69876a8b4369f63b98f8b5c6e6cc205923b3636cda22ac52"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "0a0f9a0019cff8eeccd637877d2166969ce9484756debe8a4d93ef8ee1f96380"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "8390f3de81dde1bc03f9a5bfb5c5f7c84dde0f072e503b991f26f39fcf9ccbbd"
-    sha256 cellar: :any_skip_relocation, sonoma:         "420075f755b412d1d8ab8973dbc7a1a9c5ab89f8060f7485c4f65d7579cf665b"
-    sha256 cellar: :any_skip_relocation, ventura:        "47aff66ced453f92d383c74546b18bb773dce5ce121603efec5d4dabd2905a86"
-    sha256 cellar: :any_skip_relocation, monterey:       "49b0b135fa91f67e246d2c78ec6f159a54ce29b9479f9ec7481a5521a2454404"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "a5f33a77cf8b89771cbc7393042ca761fa3db365f9c551496178cea955c12d78"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "4d7abe94bc09a3ff5ecb64d9a6c0dc37799b5ddd51c993d2480b2cee0567bef8"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "a0f6aad93ce1be47de8f0d965033933a895f026caa8efc14e61431e6e5025d5f"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "d09e38ca2a390336c1ae74821b15f84c08cbe89da16864c1d722b723d6b981d0"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "ea3820f4a0897055a525bb47089538e13021a432bd7d7b65ab730dcc3da91fca"
+    sha256 cellar: :any_skip_relocation, sonoma:        "befcc246e976f5f2669e27e33ef9a5b9a01745d5cf0dae4ed94e7f85d09c420d"
+    sha256 cellar: :any_skip_relocation, ventura:       "373f8d9fe58ac60117d60dc996720e2335db25cd2113f9239e6ce694a411ba83"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "86d4b01db4192dc7cff8f6b1f8ac4ce36bed68ed1cab50de953c56e5f6e1085b"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "5b35d3dda7886392a91cbfb237a7ab3c2f710ff6dc6875acedbbdec863d67c2b"
   end
 
+  conflicts_with "mcat", because: "both install `mcat` binaries"
   conflicts_with "multimarkdown", because: "both install `mmd` binaries"
 
   def install

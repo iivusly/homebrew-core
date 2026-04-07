@@ -1,10 +1,11 @@
 class Glm < Formula
   desc "C++ mathematics library for graphics software"
   homepage "https://glm.g-truc.net/"
-  url "https://github.com/g-truc/glm/archive/refs/tags/1.0.1.tar.gz"
-  sha256 "9f3174561fd26904b23f0db5e560971cbf9b3cbda0b280f04d5c379d03bf234c"
+  url "https://github.com/g-truc/glm/archive/refs/tags/1.0.3.tar.gz"
+  sha256 "6775e47231a446fd086d660ecc18bcd076531cfedd912fbd66e576b118607001"
   # GLM is licensed under The Happy Bunny License or MIT License
   license "MIT"
+  compatibility_version 1
   head "https://github.com/g-truc/glm.git", branch: "master"
 
   livecheck do
@@ -13,13 +14,12 @@ class Glm < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "6ca85b0488bb2907b912c68c5720934164d86afe6b038cd9467a78f06122f75d"
-    sha256 cellar: :any,                 arm64_ventura:  "ccf69c567c8790a7c1efb53aa3b940f27f0bfcef50c31b486208c85eb77e37ad"
-    sha256 cellar: :any,                 arm64_monterey: "7aea1476f18c285480341c410a24955a05cceee4f664a720bc3457d2dfac2f0b"
-    sha256 cellar: :any,                 sonoma:         "f5d0210c66b9780f30ce6429c1f05bd29f60c6ccf93e16ad12aca20ac9af1079"
-    sha256 cellar: :any,                 ventura:        "17c95c99013f142a9e48e3c557705c74d19e9de27b730c9f49a295183fe9d3cd"
-    sha256 cellar: :any,                 monterey:       "27404b50e8c5ea47840a934e470a170e9846d4e20a60906e3545eb026c144345"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "c4bb112c557b415df7d766a89422d73e6f6d10071c7e5750a54f5152f1603074"
+    sha256 cellar: :any,                 arm64_tahoe:   "8249c4e8338f0d834f967436fd7dbd239ba6dec2117716983a3fe54a5d091ef5"
+    sha256 cellar: :any,                 arm64_sequoia: "fae85fca847469c7c7e71ea2ef03f363ac98d3b95855c6eb444ac9ea22f7b96d"
+    sha256 cellar: :any,                 arm64_sonoma:  "81e11f0978855c2389d2283042e0c33e65ac04dedcf19743d3e7b89040abe5ca"
+    sha256 cellar: :any,                 sonoma:        "86c4b9d9788fe78f27caf754e87ae66e85c420e728eca547afb8512eaa66c906"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "bb411dab3df676bd1e7150c3ca6c76048cef96dec5fab02499701fd4ca5a7006"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "a3a08b5ba3b2bbd1afce59a27bb1957dc4e5f96e1f573771998b2efaab6b7adf"
   end
 
   depends_on "cmake" => :build
@@ -55,7 +55,7 @@ class Glm < Formula
   end
 
   test do
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include <glm/vec2.hpp>// glm::vec2
       int main()
       {
@@ -70,7 +70,7 @@ class Glm < Formula
         };
         return 0;
       }
-    EOS
+    CPP
     system ENV.cxx, "-I#{include}", testpath/"test.cpp", "-o", "test"
     system "./test"
   end

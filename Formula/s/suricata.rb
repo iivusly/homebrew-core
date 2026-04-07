@@ -3,8 +3,8 @@ class Suricata < Formula
 
   desc "Network IDS, IPS, and security monitoring engine"
   homepage "https://suricata.io"
-  url "https://www.openinfosecfoundation.org/download/suricata-7.0.6.tar.gz"
-  sha256 "21824f7ff12087c0c9b9de207199a75a9c31b03036688c7cb9c178f0a3b57f8d"
+  url "https://www.openinfosecfoundation.org/download/suricata-8.0.4.tar.gz"
+  sha256 "81cee7bae69848a9751b2ce0867620eefa52b192e79c20b5eac897600b28b191"
   license "GPL-2.0-only"
 
   livecheck do
@@ -13,16 +13,15 @@ class Suricata < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "04d5789273a379ec9f266fd9939081f5a6cc323848a293d13e25978ea5123b0b"
-    sha256 arm64_ventura:  "257ab453d4ccafc933372f60ab737ab4654e6a083b99cbed130356632f105802"
-    sha256 arm64_monterey: "80e9a9e85fb2f5377cbfece269ef766c06609a08585ce3e131c6cac126013511"
-    sha256 sonoma:         "f1c176d4b2be1ad5f7690700d36862919e4b252dc26fe6cf06fa65128ad0ba50"
-    sha256 ventura:        "85414e33be0f23c26b382c86bdf0405aee5d059fed2cebd1e469be0ca1744d52"
-    sha256 monterey:       "1e617fa86869e20f40e8270815418f92266cccd1312e5b67417d973ff850d2f2"
-    sha256 x86_64_linux:   "3f9f192fb72b176fd30a83783dffbe4acd29a950bbe104851ec48b3430cdcce5"
+    sha256 arm64_tahoe:   "9ff08e23cbe3c78ad7c95098d74221b552b4c498dace04964ff8f9129ecc2c7e"
+    sha256 arm64_sequoia: "ec79e69936a64dc39bd1b811e88f1e701b3c68efea72ed8ddc7d49d501e1c2e4"
+    sha256 arm64_sonoma:  "be3f13bf99413f8d5be1eedb38b588c95b2c59fd6153ddb68184a59dd23e66ad"
+    sha256 sonoma:        "6efb5b963da536e725cc2b8410cf7e425d9f2f4ff3866fa14cca5ae99fd976a1"
+    sha256 arm64_linux:   "a112b2142e7a65afec27231ad9361eb0dcd34c73791b015926526b51d06ac0f4"
+    sha256 x86_64_linux:  "1970c40449173305f48e525a1c13f0240870ab453958605b07b1abb1a13847f3"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "rust" => :build
   depends_on "jansson"
   depends_on "libmagic"
@@ -30,17 +29,28 @@ class Suricata < Formula
   depends_on "libyaml"
   depends_on "lz4"
   depends_on "pcre2"
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   uses_from_macos "libpcap"
 
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
+
+  pypi_packages package_name:   "",
+                extra_packages: "pyyaml"
+
   resource "pyyaml" do
-    url "https://files.pythonhosted.org/packages/cd/e5/af35f7ea75cf72f2cd079c95ee16797de7cd71f29ea7c68ae5ce7be1eda0/PyYAML-6.0.1.tar.gz"
-    sha256 "bfdf460b1736c775f2ba9f6a92bca30bc2095067b8a9d77876d1fad6cc3b4a43"
+    url "https://files.pythonhosted.org/packages/05/8e/961c0007c59b8dd7729d542c61a4d537767a59645b82a0b521206e1e25c2/pyyaml-6.0.3.tar.gz"
+    sha256 "d76623373421df22fb4cf8817020cbb7ef15c725b9d5e45f17e189bfc384190f"
+  end
+
+  def python3
+    "python3.14"
   end
 
   def install
-    venv = virtualenv_create(libexec, "python3.12")
+    venv = virtualenv_create(libexec, python3)
     venv.pip_install resources
     ENV.prepend_path "PATH", venv.root/"bin"
 

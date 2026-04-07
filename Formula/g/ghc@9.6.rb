@@ -1,8 +1,8 @@
 class GhcAT96 < Formula
   desc "Glorious Glasgow Haskell Compilation System"
   homepage "https://haskell.org/ghc/"
-  url "https://downloads.haskell.org/~ghc/9.6.6/ghc-9.6.6-src.tar.xz"
-  sha256 "008f7a04d89ad10baae6486c96645d7d726aaac7e1476199f6dd86c6bd9977ad"
+  url "https://downloads.haskell.org/~ghc/9.6.7/ghc-9.6.7-src.tar.xz"
+  sha256 "d053bf6ce1d588a75cfe8c9316269486e9d8fb89dcdf6fd92836fa2e3df61305"
   # We build bundled copies of libffi and GMP so GHC inherits the licenses
   license all_of: [
     "BSD-3-Clause",
@@ -11,25 +11,26 @@ class GhcAT96 < Formula
   ]
 
   livecheck do
-    url "https://www.haskell.org/ghc/download.html"
-    regex(/href=.*?download[._-]ghc[._-][^"' >]+?\.html[^>]*?>\s*?v?(9\.6(?:\.\d+)+)\s*?</i)
+    url "https://gitlab.haskell.org/ghc/ghc/-/wikis/GHC%20Status#all-released-ghc-versions"
+    regex(/v?(9\.6(?:\.\d+)+)[._-]notes/i)
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "c743179f1acb1dd0587eb5c81afe4063b597b01e36f33df96ff91578041f4f59"
-    sha256 cellar: :any,                 arm64_ventura:  "ca978842ded4cd067ae9fb240ea6f0265d5f5ddef3f66c53032ef9fa8c6fe628"
-    sha256 cellar: :any,                 arm64_monterey: "c45b5f329a05b78f0e1c37d70808d5026f19f5cb1a9ded56e9d4ef16118f3938"
-    sha256 cellar: :any,                 sonoma:         "96bccb2f76d066ba34caca9fc810230d7354576c8e4f65f2ec0f2ce2b2116004"
-    sha256 cellar: :any,                 ventura:        "f80fbe96a9def21638df7bdfbd10258f049ed7d0df84a256d225c0a856a8f042"
-    sha256 cellar: :any,                 monterey:       "2069497d6c4847352cd1a38afa4e2581384ccb16d6e84692be22cdfb6a7012eb"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "2c7dce17539c201eaf653bb1d48fc68209eab4cd6a8f3f816d135abc47577d35"
+    sha256 cellar: :any,                 arm64_tahoe:   "dd60a4884f86dfbdaa5c449e491b881d6c2de4ceba80c3945fc153f5606e17b0"
+    sha256 cellar: :any,                 arm64_sequoia: "4dcf5e47d790fe743ca3b5c071619ca00630900c269e7bb279ac69b7cf705bb3"
+    sha256 cellar: :any,                 arm64_sonoma:  "846e69dce0f0c5163b0814e9bb3f0f2e0cd0d935095811f0d070e92564e6f2d2"
+    sha256 cellar: :any,                 arm64_ventura: "bb1449611c052107ec0a6c4a9e883d8e5c79ab0116d36dd40074e7b5c918a7b5"
+    sha256 cellar: :any,                 sonoma:        "9d2462a0b1d0b49b90c08c7274f0e55a3fa522e203133aceb3aa2bec264e7e23"
+    sha256 cellar: :any,                 ventura:       "d4f0c1e17358fd3026d406f26fbfb6a26ab3e6c33b76dcca6092965f9fab55f6"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "34873088d18d1e13e29d62aeb008fc9cafd657aa57c20be13d92a9d5988c958a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "6b1a0d894b2236f1cada48a5f48ff3c90b763189b575f2d06d949dd209f5dec5"
   end
 
   keg_only :versioned_formula
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
-  depends_on "python@3.12" => :build
+  depends_on "python@3.14" => :build
   depends_on "sphinx-doc" => :build
 
   uses_from_macos "m4" => :build
@@ -98,18 +99,18 @@ class GhcAT96 < Formula
     sha256 "f7e921f7096c97bd4e63ac488186a132eb0cc508d04f0c5a99e9ded51bf16b25"
   end
 
-  # Backport fix for building docs with sphinx-doc 7.
-  # TODO: Remove patch if fix is backported to 9.6.
-  # Ref: https://gitlab.haskell.org/ghc/ghc/-/merge_requests/10520
-  patch do
-    url "https://gitlab.haskell.org/ghc/ghc/-/commit/70526f5bd8886126f49833ef20604a2c6477780a.diff"
-    sha256 "54cdde1ca5d1b6fe3bbad8d0eac2b8c112ca1f346c4086d1e7361fa9510f1f44"
-  end
-
   def install
-    ENV["CC"] = ENV["ac_cv_path_CC"] = ENV.cc
+    # ENV.cc and ENV.cxx return specific compiler versions on Ubuntu, e.g.
+    # gcc-11 and g++-11 on Ubuntu 22.04. Using such values effectively causes
+    # the bottle (binary package) to only run on systems where gcc-11 and g++-11
+    # binaries are available. This breaks on many systems including Arch Linux,
+    # Fedora and Ubuntu 24.04, as they provide g** but not g**-11 specifically.
+    #
+    # The workaround here is to hard-code both CC and CXX on Linux.
+    ENV["CC"] = ENV["ac_cv_path_CC"] = OS.linux? ? "cc" : ENV.cc
+    ENV["CXX"] = ENV["ac_cv_path_CXX"] = OS.linux? ? "c++" : ENV.cxx
     ENV["LD"] = "ld"
-    ENV["PYTHON"] = which("python3.12")
+    ENV["PYTHON"] = which("python3.14")
 
     binary = buildpath/"binary"
     resource("binary").stage do

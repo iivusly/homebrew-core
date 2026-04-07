@@ -12,6 +12,8 @@ class Xidel < Formula
   end
 
   bottle do
+    sha256 cellar: :any,                 arm64_tahoe:    "ab0881d178eb07b3b22246dea5ded4a0c5380084001b85a602aa38cbadd6e8b5"
+    sha256 cellar: :any,                 arm64_sequoia:  "22631f3ff23b3aebea5c18af4df873ba77d28b46b62a9ca681dc98890d6a95da"
     sha256 cellar: :any,                 arm64_sonoma:   "466555de8b7e479e1f4a49ec52a15559c44f05820e1810e9a0965efd2ab3d751"
     sha256 cellar: :any,                 arm64_ventura:  "1c90b748fa5f9087602a8d8670c25b706c24c3be99c11758300604fbac9a3eea"
     sha256 cellar: :any,                 arm64_monterey: "73f305dc1833d8ebdea3236df50cb4de5f52bdbefa2a37d3b682cf1cd73c8dd5"
@@ -21,6 +23,7 @@ class Xidel < Formula
     sha256 cellar: :any,                 monterey:       "aecd66d3be7b4ab3ba13a57dab9f70988e9cf271e818ee0a06a2aebe0a62da4e"
     sha256 cellar: :any,                 big_sur:        "e0a2b032e2ad48fa616a29a3249a9c5fbee970832dac267f8430c67f6abc2895"
     sha256 cellar: :any,                 catalina:       "b3f68c54bd0e368870f81873cefe84d90249ec4d7cf2dfb68aae648d3fabb1ae"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "da15ea47a8f2f01ecd1bbfdbbf0d29f44e8fe68093c78df36b1dab3ba08adc98"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "9a486375fd54f408102f37ffc3071fa806d318b56cdb03d6d0eeecc9f45f0b32"
   end
 
@@ -41,7 +44,7 @@ class Xidel < Formula
       r.stage buildpath/"import"/r.name
     end
 
-    cd "programs/internet/xidel" unless build.head?
+    cd "programs/internet/xidel" if build.stable?
     inreplace "build.sh", "$fpc ", "$fpc -k-rpath -k#{sh_quote Formula["openssl@3"].opt_lib.to_s} "
     system "./build.sh"
     bin.install "xidel"

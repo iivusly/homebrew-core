@@ -9,6 +9,8 @@ class Libmowgli < Formula
 
   bottle do
     rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:    "d71137de5a2fe97748ca2d1b90c4a2de5c401e327dfca7201d3b28391063a36e"
+    sha256 cellar: :any,                 arm64_sequoia:  "00f3b1d8ae9a7210417aa4b09f041dc3e04e1a60097724fc28ebf5b1fb00ab89"
     sha256 cellar: :any,                 arm64_sonoma:   "7a949575c3803dbfd27a4ad549c6f24c67f2159b9dfd73d83b5eb9ffd872561c"
     sha256 cellar: :any,                 arm64_ventura:  "19a8d7aa0f5c72bf5c7e459c1d6924fc7f5ab479f878c8129de5a3693dae3b8d"
     sha256 cellar: :any,                 arm64_monterey: "476e3d8c4864929ada3e6a5af324c768cb18719e9b2200e7ceeb7fe8711d9a2f"
@@ -18,6 +20,7 @@ class Libmowgli < Formula
     sha256 cellar: :any,                 monterey:       "62bff6552997f1240e9568627847e46c1f55371f2b383d005a8a62975ed2a029"
     sha256 cellar: :any,                 big_sur:        "f64462da9e3debd990315e0c16ecfcffae50fcdddf44538f125ae9dbd4c98fdc"
     sha256 cellar: :any,                 catalina:       "5ade175e55ef972a810e63c5508941679fb65a8c8583d7844676ce68e6c57dd1"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "30beecb54f1b874ff6f34866b679a96a2aacb1e2e0d10afc51bc72a278444978"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "6251f4bbfcc34a629e644b110d247a21e5ca26464ec056924f718a9ca46a5b71"
   end
 
@@ -31,7 +34,7 @@ class Libmowgli < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <mowgli.h>
 
       int main(int argc, char *argv[]) {
@@ -44,7 +47,7 @@ class Libmowgli < Formula
         mowgli_object_unref(r);
         return EXIT_SUCCESS;
       }
-    EOS
+    C
     system ENV.cc, "-I#{include}/libmowgli-2", "-o", "test", "test.c", "-L#{lib}", "-lmowgli-2"
     system "./test"
   end

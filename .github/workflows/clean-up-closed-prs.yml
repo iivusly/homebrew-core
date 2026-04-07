@@ -5,6 +5,10 @@ on:
     types:
       - closed
 
+defaults:
+  run:
+    shell: bash -xeuo pipefail {0}
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number }}
   cancel-in-progress: true
@@ -13,6 +17,7 @@ env:
   GH_REPO: ${{ github.repository }}
   GH_NO_UPDATE_NOTIFIER: 1
   GH_PROMPT_DISABLED: 1
+  HOMEBREW_DISABLE_LOAD_FORMULA: 1
   PR: ${{ github.event.number }}
 
 jobs:
@@ -22,21 +27,17 @@ jobs:
       !github.event.pull_request.merged
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/homebrew/ubuntu22.04:master
-    defaults:
-      run:
-        shell: bash
+      image: ghcr.io/homebrew/brew:main
     permissions:
       contents: read
       actions: write # for `gh run cancel`
       checks: read # for `GitHub.get_workflow_run`
     steps:
       - name: Set up Homebrew
-        uses: Homebrew/actions/setup-homebrew@master
+        uses: Homebrew/actions/setup-homebrew@main
         with:
           core: false
           cask: false
-          test-bot: false
 
       - name: Check CI status
         id: check
@@ -74,4 +75,4 @@ jobs:
             -X DELETE \
             --header 'Accept: application/vnd.github+json' \
             --header 'X-GitHub-Api-Version: 2022-11-28' \
-            "repos/{owner}/{repo}/git/refs/heads/$BRANCH"
+            "repos/$GITHUB_REPOSITORY/git/refs/heads/$BRANCH"

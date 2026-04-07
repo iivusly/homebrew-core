@@ -1,18 +1,17 @@
 class VulsioGost < Formula
   desc "Local CVE tracker & notification system"
   homepage "https://github.com/vulsio/gost"
-  url "https://github.com/vulsio/gost/archive/refs/tags/v0.4.5.tar.gz"
-  sha256 "2a76fb45307d2fd3f13fe3eff096b91f1b669dd18c6a0dc02a6951764d61c0e7"
+  url "https://github.com/vulsio/gost/archive/refs/tags/v0.7.2.tar.gz"
+  sha256 "e96c8c8f29b19c3cb9b2288e91903d60074a17d0525333a7712ad03e248dd96a"
   license "MIT"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "fd0cf6c27a0ffa0c1e19fc1fabc88a8a29efdfc3a38f244ec38aaae5a32a4e6e"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "645f39ac41d1759d4d1fc1752f2b402b7d104c6a53bfc012ab22cc7d8bbf0ebf"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "53984651214c75bf652b2a217e157410c79d062c35ffd517bde68174159e9ec5"
-    sha256 cellar: :any_skip_relocation, sonoma:         "aa538c63cfbe96adf509afabc06d6f0f4b0aff9cdc1c3f0624011443ff1f0ee1"
-    sha256 cellar: :any_skip_relocation, ventura:        "0f7a31a84529d0257b8f00458ed3f11a602a14ac88498f2559c6a2d1bf480643"
-    sha256 cellar: :any_skip_relocation, monterey:       "6eb7036d1f5c1d9b3ef062a604d40a5b7064c57ea18f398521575029ffe0e020"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "c3b53548bf113b485ab313fc6b92a40aa753f4810af8443f6168b0a428946673"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "813d140b549cab244bf2fa4de218034cd5066968ab0f869d64a74f934f017eaa"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "813d140b549cab244bf2fa4de218034cd5066968ab0f869d64a74f934f017eaa"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "813d140b549cab244bf2fa4de218034cd5066968ab0f869d64a74f934f017eaa"
+    sha256 cellar: :any_skip_relocation, sonoma:        "e368bafbdbf01f8ca5e69331d3cf131626b5e69daa94fe43ec9944690dc067ca"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "7be514f0ece49d3c709983bb2e04c5754f555f534e32307e56be378637c1fef6"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "a975a3784dd47bb8e2a5c71b9ad596c412231fb427ebf7496686ee1f8e309e4b"
   end
 
   depends_on "go" => :build
@@ -25,9 +24,9 @@ class VulsioGost < Formula
       -X github.com/vulsio/gost/config.Version=#{version}
       -X github.com/vulsio/gost/config.Revision=#{tap.user}
     ]
-    system "go", "build", *std_go_args(output: bin/"gost", ldflags:)
+    system "go", "build", *std_go_args(ldflags:, output: bin/"gost")
 
-    generate_completions_from_executable(bin/"gost", "completion", base_name: "gost")
+    generate_completions_from_executable(bin/"gost", shell_parameter_format: :cobra)
   end
 
   test do

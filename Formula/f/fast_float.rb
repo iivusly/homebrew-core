@@ -1,13 +1,13 @@
 class FastFloat < Formula
   desc "Fast and exact implementation of the C++ from_chars functions for number types"
   homepage "https://github.com/fastfloat/fast_float"
-  url "https://github.com/fastfloat/fast_float/archive/refs/tags/v6.1.5.tar.gz"
-  sha256 "597126ff5edc3ee59d502c210ded229401a30dafecb96a513135e9719fcad55f"
+  url "https://github.com/fastfloat/fast_float/archive/refs/tags/v8.2.4.tar.gz"
+  sha256 "b90b3a415e4410822f50c70bd4485cf2c5e6962c2b05cf0dc88045d8af959ccc"
   license "Apache-2.0"
   head "https://github.com/fastfloat/fast_float.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, all: "5d591c6a5d42db64fa7f059d4284c56b03a6f951b926171a59c783af503925c5"
+    sha256 cellar: :any_skip_relocation, all: "c97854f232ce6f13f283674295479708a1ce93eaa89685f90e260e394114ac66"
   end
 
   depends_on "cmake" => :build
@@ -18,7 +18,7 @@ class FastFloat < Formula
   end
 
   test do
-    (testpath/"test-fast-float.cc").write <<~CXX
+    (testpath/"test-fast-float.cc").write <<~CPP
       #include "fast_float/fast_float.h"
       #include <iostream>
 
@@ -30,7 +30,7 @@ class FastFloat < Formula
           std::cout << "parsed the number " << result << std::endl;
           return EXIT_SUCCESS;
       }
-    CXX
+    CPP
 
     ENV.append_to_cflags "-I#{include}"
     ENV.append "CXXFLAGS", "-std=c++11"

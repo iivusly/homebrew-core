@@ -1,19 +1,17 @@
 class IsaL < Formula
   desc "Intelligent Storage Acceleration Library"
   homepage "https://github.com/intel/isa-l"
-  url "https://github.com/intel/isa-l/archive/refs/tags/v2.31.0.tar.gz"
-  sha256 "e218b7b2e241cfb8e8b68f54a6e5eed80968cc387c4b1af03708b54e9fb236f1"
+  url "https://github.com/intel/isa-l/archive/refs/tags/v2.32.0.tar.gz"
+  sha256 "7a194ff80d0f7e20615c497654e8a51b0184d0c79e2e265c7f555f52a26a05a4"
   license "BSD-3-Clause"
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any,                 arm64_sonoma:   "20183aa5fc7bdf83833ef924ad844a13bee2f95386cf783da45d2756577d00c1"
-    sha256 cellar: :any,                 arm64_ventura:  "c0239e97ea4e8a1d185e49c646d51ec9ea498c70920a89247fadca5b84f5d68e"
-    sha256 cellar: :any,                 arm64_monterey: "3a51e53bf3ad0bb50767d009ebb8697b6aba0b19109bcacf8ba5c9bcb1915ad0"
-    sha256 cellar: :any,                 sonoma:         "e3f0efaabed341b094eea37d2cc6983ead4765ba23ed6b75aa7060bd3f3ef73a"
-    sha256 cellar: :any,                 ventura:        "5167d8bb29d7f9f476be36e32ecfa8e0c2ea72d5ddf5578d5bb9a1c1c55a9de8"
-    sha256 cellar: :any,                 monterey:       "b1539460388da543c470efc592d09f44c2acf5a6ada37d4802d6c7a28d7cff0e"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "38df9950275b3bf11b6f9df9c060c28d041590cbd73ab217d8f33dee11e5bc4f"
+    sha256 cellar: :any,                 arm64_tahoe:   "5c9267dff7be4ba1ab091dbda0b4b03357c137065c7cddce74d805db366cdd30"
+    sha256 cellar: :any,                 arm64_sequoia: "e019082d409dc6dd43f75fdeb61cb292a3aeef8f75b717fabbb99b1af3a09958"
+    sha256 cellar: :any,                 arm64_sonoma:  "b07dd2b0b39495e6761ea12b1ed3825fb9955e1ab980f750387b01c530b98e38"
+    sha256 cellar: :any,                 sonoma:        "290936d5a39f56f7fa037847e8f54eff05714e914851ee58ebe741a507d699b5"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "af4547348a1e1f584e886ac9c916f4591d864c41a5ae6e6954b59fe8cbd0fea1"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "d0818c2fe4f428cd02da5375231cf7e7cdd859fc47eb834ec8e4f0e51243e402"
   end
 
   depends_on "autoconf" => :build
@@ -21,15 +19,9 @@ class IsaL < Formula
   depends_on "libtool" => :build
   depends_on "nasm" => :build
 
-  # fix mach compilation
-  patch do
-    url "https://github.com/intel/isa-l/commit/f1b144bbab7cd1f603565b3b7f92bfb47b86e646.patch?full_index=1"
-    sha256 "41a300e3155a281dbf05aa79d54250b19eda035a8166f5368c18867467475c0b"
-  end
-
   def install
     system "./autogen.sh"
-    system "./configure", *std_configure_args, "--disable-silent-rules"
+    system "./configure", "--disable-silent-rules", *std_configure_args
     system "make"
     system "make", "install"
     pkgshare.install "examples"

@@ -3,53 +3,50 @@ class Cppcms < Formula
 
   desc "Free High Performance Web Development Framework"
   homepage "http://cppcms.com/wikipp/en/page/main"
-  url "https://downloads.sourceforge.net/project/cppcms/cppcms/1.2.1/cppcms-1.2.1.tar.bz2"
-  sha256 "10fec7710409c949a229b9019ea065e25ff5687103037551b6f05716bf6cac52"
+  url "https://github.com/artyom-beilis/cppcms/archive/refs/tags/v2.0.1.tar.gz"
+  sha256 "4a7a2217b3fa59384650912a7000e016c308b4fa986a3d2562002691e5a9d6e7"
   license "MIT"
-  revision 1
-
-  livecheck do
-    url :stable
-    regex(%r{url=.*?/cppcms[._-]v?(\d+(?:\.\d+)+)\.t}i)
-  end
 
   bottle do
     rebuild 1
-    sha256 cellar: :any,                 arm64_sonoma:   "685b90ed09888777bc4de5cc805780a843875f6703b8ea9c1e6bdcd89fbb19ba"
-    sha256 cellar: :any,                 arm64_ventura:  "f68675a3347dfe88a996f0ad925f35f62552d23765c7a0edd512d836cce06b43"
-    sha256 cellar: :any,                 arm64_monterey: "4c70578f35d994cf48783db520a152ce49a5c0cd877e37632a2254a2a9bdbe7e"
-    sha256 cellar: :any,                 sonoma:         "e05d50189df26fab05f6fddc95c3f0a0f8355dc0e049a9b8a47c94d5557274bd"
-    sha256 cellar: :any,                 ventura:        "0e14603d5eef7838b03cbf3dd59cb61ffb284150dd3a21a1bbcfc3493a1456d6"
-    sha256 cellar: :any,                 monterey:       "500746081d5faad30d230618d3a71b97d8332ed6476752bdbf1e3e81b44e262c"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "9b87fe3b52ead0794e23882355a33ffae08c1dd340d0b3710cb769e1dba7edb8"
+    sha256 cellar: :any,                 arm64_tahoe:   "78fd3c8d81ce0b0feb720b7da8db1ebfdf00670dd7d4c133bfe22a2cfa2049a1"
+    sha256 cellar: :any,                 arm64_sequoia: "1ca0e2347ea05bdd0d8d91e38d2e5e48e0452ec14ff25751ae2665c36859b491"
+    sha256 cellar: :any,                 arm64_sonoma:  "5407fbfe3aaccbc61545b918f41d98529d51e5666de00146d4e73e01cd68cb2e"
+    sha256 cellar: :any,                 sonoma:        "509c45a58217091401a6afc4ab929fe65f6ece4e2db7268f0252842016cf1998"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "c93be15dcdb0cbf3ae83438c373f8fb407545a6622de1827d5fa4da934eac5b9"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "086440ca1c958fb8a70d99ab91e81b56809e836f831b6959a0d24eac7a92d66b"
   end
 
   depends_on "cmake" => :build
   depends_on "openssl@3"
-  depends_on "pcre"
-  depends_on "python@3.12"
+
+  uses_from_macos "python"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
+
+  # Backport support for CMake 4
+  patch do
+    url "https://github.com/artyom-beilis/cppcms/commit/92164714273bddfc032d930d3d89f78428110939.patch?full_index=1"
+    sha256 "7934a74f9b39d2108944895f826d960ee34d4b88f52f2482a683f15d395fd74a"
+  end
 
   def install
-    ENV.cxx11
+    rewrite_shebang detected_python_shebang(use_python_from_path: true), "bin/cppcms_tmpl_cc"
 
-    # Look explicitly for python3 and ignore python2
-    inreplace "CMakeLists.txt", "find_program(PYTHON NAMES python2 python)", "find_program(PYTHON NAMES python3)"
-
-    # Adjust cppcms_tmpl_cc for Python 3 compatibility (and rewrite shebang to use brewed Python)
-    rewrite_shebang detected_python_shebang, "bin/cppcms_tmpl_cc"
-    inreplace "bin/cppcms_tmpl_cc" do |s|
-      s.gsub! "import StringIO", "import io"
-      s.gsub! "StringIO.StringIO()", "io.StringIO()"
-      s.gsub! "md5(header_define)", "md5(header_define.encode('utf-8'))"
-    end
-
-    system "cmake", "-S", ".", "-B", "build", *std_cmake_args
+    system "cmake", "-S", ".", "-B", "build",
+                    "-DCMAKE_CXX_STANDARD=11",
+                    "-DCMAKE_INSTALL_RPATH=#{rpath}",
+                    "-DDISABLE_PCRE=ON",
+                    "-DPYTHON=#{which("python3")}",
+                    *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
   end
 
   test do
-    (testpath/"hello.cpp").write <<~EOS
+    (testpath/"hello.cpp").write <<~CPP
       #include <cppcms/application.h>
       #include <cppcms/applications_pool.h>
       #include <cppcms/service.h>
@@ -88,10 +85,10 @@ class Cppcms < Formula
               return -1;
           }
       }
-    EOS
+    CPP
 
     port = free_port
-    (testpath/"config.json").write <<~EOS
+    (testpath/"config.json").write <<~JSON
       {
           "service" : {
               "api" : "http",
@@ -105,12 +102,12 @@ class Cppcms < Formula
               "script_names" : [ "/hello" ]
           }
       }
-    EOS
+    JSON
     system ENV.cxx, "hello.cpp", "-std=c++11", "-L#{lib}", "-lcppcms", "-o", "hello"
-    pid = fork { exec "./hello", "-c", "config.json" }
+    pid = spawn "./hello", "-c", "config.json"
 
-    sleep 1 # grace time for server start
     begin
+      sleep 5 # grace time for server start
       assert_match "Hello World", shell_output("curl http://127.0.0.1:#{port}/hello")
     ensure
       Process.kill "SIGTERM", pid

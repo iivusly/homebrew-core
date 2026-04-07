@@ -2,35 +2,41 @@ class Mas < Formula
   desc "Mac App Store command-line interface"
   homepage "https://github.com/mas-cli/mas"
   url "https://github.com/mas-cli/mas.git",
-      tag:      "v1.8.6",
-      revision: "560c89af2c1fdf0da9982a085e19bb6f5f9ad2d0"
+      tag:      "v6.0.1",
+      revision: "535562b304eb110700eb57f289317f7b5c41cb2d"
   license "MIT"
   head "https://github.com/mas-cli/mas.git", branch: "main"
 
+  livecheck do
+    url :stable
+    strategy :github_latest
+  end
+
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "7b11bfefcb43e9a423ff301f7bbc29b0fb86044bf93442f243c5a8a67d8d4869"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "e49511dd1283813c4420aec9fc3b3167d18f9fdbb51d82b1e479b628d5312342"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "379d46e2657be295321f1603dc1df28130ea0b5b264ceb192a9ba488d77c7a98"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "918a1484de106940f7bebc936e1ded87d7b65652054b09204887ad0651937ec4"
-    sha256 cellar: :any_skip_relocation, sonoma:         "24e3057991ea1eed52eb4a27c0f17d794106770621e5a8bb975477dae135b82d"
-    sha256 cellar: :any_skip_relocation, ventura:        "6ef7788e28c46cdc0f916812f49dfeb1fabf2240a8c36f33ce34bcfb9df1502f"
-    sha256 cellar: :any_skip_relocation, monterey:       "6b313f2f66d028cb7782c108d6e502ce73ccb9c08fac3bece0b057fcce5c4689"
-    sha256 cellar: :any_skip_relocation, big_sur:        "50b50f51219143fcb69c730b52b74011a76104f66348ea727d0200f7b375ae25"
-    sha256 cellar: :any_skip_relocation, catalina:       "d241d3b9156b033f3d2c31684a44de726297e07fd9bd5e3ccc4c36e4f1c3baf3"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "230f3f2b181f34401a690183ffe7ae26b038252b7a43a07bf49941fdcfaa4f56"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "40865540d35bab88be3b08906cbad8c529b519c4fe424f4584ff1740d6f781cb"
+    sha256 cellar: :any,                 arm64_sonoma:  "3b8df47fd3a3cc15e81475337e767a779a505692e169c09a8f556cd12f8473de"
+    sha256 cellar: :any,                 sonoma:        "127de59def45b51dae56f74280a21c807e7c4a670e2c8ae00c4559f2c21fdaec"
   end
 
   depends_on :macos
-  on_arm do
-    depends_on xcode: ["12.2", :build]
+
+  uses_from_macos "swift" => :build, since: :sequoia # swift 6.2+
+
+  on_sequoia :or_newer do
+    depends_on xcode: ["26.0", :build]
   end
-  on_intel do
-    depends_on xcode: ["12.0", :build]
+
+  on_sonoma :or_older do
+    depends_on "swift" => :build
   end
 
   def install
-    system "script/build"
-    system "script/install", prefix
-
+    ENV["MAS_DIRTY_INDICATOR"] = ""
+    system "Scripts/build", "homebrew/core/mas", "--disable-sandbox", "-c", "release"
+    bin.install ".build/release/mas"
+    system "swift", "package", "--disable-sandbox", "generate-manual"
+    man1.install ".build/plugins/GenerateManual/outputs/mas/mas.1"
     bash_completion.install "contrib/completion/mas-completion.bash" => "mas"
     fish_completion.install "contrib/completion/mas.fish"
   end

@@ -1,22 +1,22 @@
 class Eza < Formula
   desc "Modern, maintained replacement for ls"
   homepage "https://github.com/eza-community/eza"
-  url "https://github.com/eza-community/eza/archive/refs/tags/v0.19.1.tar.gz"
-  sha256 "a256ecdb9996933300bb54e19a68df61e27385e5df20ba1f780f2e454a7f8e8a"
-  license "MIT"
+  url "https://github.com/eza-community/eza/archive/refs/tags/v0.23.4.tar.gz"
+  sha256 "9fbcad518b8a2095206ac385329ca62d216bf9fdc652dde2d082fcb37c309635"
+  license "EUPL-1.2"
+  head "https://github.com/eza-community/eza.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "747a792b1a62ba0ce70f805f93a86d45fc52d0cc6e6e5d9dfe1143edf53ad693"
-    sha256 cellar: :any,                 arm64_ventura:  "b1410cd5ca1e9ead722e433b54937c3de13703b451a51909c6719fd37fb9e540"
-    sha256 cellar: :any,                 arm64_monterey: "de6a0c30c98ead503d543257f1d0edacf1c02a5b401dc37764420bb0be9ead4e"
-    sha256 cellar: :any,                 sonoma:         "84edef64b0339951bb8f85f85b8c3ab99e2488ea05423d18303a6485517d082f"
-    sha256 cellar: :any,                 ventura:        "a8add97c23411972a63308abd456442b25edf44ee434c80b1b4ff7a85409354d"
-    sha256 cellar: :any,                 monterey:       "3829d9cd27a86fe4aea15c3860aa66af6d3bf1e5a9eb6dc8e4d0a5d3d421195a"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "047e776be3ba0320295699c9bc367b4f682012a1cee39c9468b2d5bf3fd084d6"
+    sha256 cellar: :any,                 arm64_tahoe:   "41991ad81cb8fd691125d28eda4bbfa0ebb14c6f902767402dc2ea8763ecf196"
+    sha256 cellar: :any,                 arm64_sequoia: "2bc7df7c601dfb6b9004db58a8033a5633dfb731dbfc0288cb9cc0c4fc1a4df7"
+    sha256 cellar: :any,                 arm64_sonoma:  "4371bc10070f7728a665b3e590903c1861b6882fb37fef7abfed93717e38dbc4"
+    sha256 cellar: :any,                 sonoma:        "40120b86f48af531ff13393db0bbbf9fcb4c304bbdd6cb3bbab3bc70d0236c72"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "b8b0bd9691c73ab64a5542c0372d5f2f2e0e96bbc8fae25d5bb278ddde5e49b8"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "2bdf49feadb1e11bf7a5247cb64cf6a0efc6624ef7af0305f11e53bc0463bf77"
   end
 
   depends_on "pandoc" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "rust" => :build
   depends_on "libgit2"
 
@@ -45,11 +45,13 @@ class Eza < Formula
   test do
     testfile = "test.txt"
     touch testfile
-    assert_match testfile, shell_output(bin/"eza")
+    # `eza` is broken when not passed a file or directory name.
+    # https://github.com/eza-community/eza/issues/1568
+    assert_match testfile, shell_output("#{bin}/eza #{testpath}")
 
     # Test git integration
     flags = "--long --git --no-permissions --no-filesize --no-user --no-time --color=never"
-    eza_output = proc { shell_output("#{bin}/eza #{flags}").lines.grep(/#{testfile}/).first.split.first }
+    eza_output = proc { shell_output("#{bin}/eza #{flags} #{testpath}").lines.grep(/#{testfile}/).first.split.first }
     system "git", "init"
     assert_equal "-N", eza_output.call
     system "git", "add", testfile
@@ -57,12 +59,9 @@ class Eza < Formula
     system "git", "commit", "-m", "Initial commit"
     assert_equal "--", eza_output.call
 
-    linkage_with_libgit2 = (bin/"eza").dynamically_linked_libraries.any? do |dll|
-      next false unless dll.start_with?(HOMEBREW_PREFIX.to_s)
-
-      File.realpath(dll) == (Formula["libgit2"].opt_lib/shared_library("libgit2")).realpath.to_s
-    end
-
-    assert linkage_with_libgit2, "No linkage with libgit2! Cargo is likely using a vendored version."
+    require "utils/linkage"
+    library = Formula["libgit2"].opt_lib/shared_library("libgit2")
+    assert Utils.binary_linked_to_library?(bin/"eza", library),
+           "No linkage with #{library.basename}! Cargo is likely using a vendored version."
   end
 end

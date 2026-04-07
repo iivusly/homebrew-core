@@ -1,17 +1,18 @@
 class Nrpe < Formula
   desc "Nagios remote plugin executor"
   homepage "https://www.nagios.org/"
-  url "https://github.com/NagiosEnterprises/nrpe/releases/download/nrpe-4.1.1/nrpe-4.1.1.tar.gz"
-  sha256 "0e716a7d904e0a441be52a0ef82c1138b949bad81c1da93056a81405aabcc0d7"
+  url "https://github.com/NagiosEnterprises/nrpe/releases/download/nrpe-4.1.3/nrpe-4.1.3.tar.gz"
+  sha256 "5a86dfde6b9732681abcd6ea618984f69781c294b8862a45dfc18afaca99a27a"
   license "GPL-2.0-or-later"
 
   bottle do
-    sha256 cellar: :any, arm64_sonoma:   "ed1b4fc625aa2edf55576d46dce47f9d1e25f0b89f8e4f855079d1be44e175d0"
-    sha256 cellar: :any, arm64_ventura:  "66a47ab90443c6996a4c768ab3dd07a8843cfdbc6f94458414fa1418ad41b975"
-    sha256 cellar: :any, arm64_monterey: "a9d6f414b26a3608d12424c3b5434b0e2551e00d76a9e3130784cdbdc9908b59"
-    sha256 cellar: :any, sonoma:         "ada3b8f8a310d1ea89c946b639b7357668478bacf15738e867f3dc2c8a15bdba"
-    sha256 cellar: :any, ventura:        "576e707062926c833070c951194740183cb0c473b6e412142e979aafa6e66c8e"
-    sha256 cellar: :any, monterey:       "df2c2fcc8e1e18a6c47bb5fe5436bf6a6e00786ed46a4d47244e18d01130a562"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "07fee8d6d39bfded2363a9ffb8c95ca5700948e889194f0f5f21d149bbffcf1f"
+    sha256 cellar: :any,                 arm64_sequoia: "13aae650600b1f2bba6c2ae01fb48b20be2ea55382ef85b930b3800ebac3629a"
+    sha256 cellar: :any,                 arm64_sonoma:  "2402923dcc08342f07df2ed6eca7be468ede9ab2446731dc1d6a5d09b445be32"
+    sha256 cellar: :any,                 sonoma:        "a1eb81992236474786db808dc9dfd8b5a605c08a30505c00383a8d2770d06764"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "21b4958641e1851b4cb580603b4cbe0eb4de0441bd01d67baa8f7625ce983cd7"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "777c9bbafb34853267f741afdd9f3e9977c82b2a6e8892e522c582fde5f24e4e"
   end
 
   depends_on "nagios-plugins"
@@ -20,6 +21,11 @@ class Nrpe < Formula
   def install
     user  = `id -un`.chomp
     group = `id -gn`.chomp
+
+    if OS.linux?
+      ENV["tmpfilesd"] = etc/"tmpfiles.d"
+      (etc/"tmpfiles.d").mkpath
+    end
 
     system "./configure", "--prefix=#{prefix}",
                           "--libexecdir=#{HOMEBREW_PREFIX}/sbin",
@@ -42,9 +48,7 @@ class Nrpe < Formula
 
     system "make", "all"
     system "make", "install", "install-config"
-  end
 
-  def post_install
     (var/"run").mkpath
   end
 
@@ -52,18 +56,29 @@ class Nrpe < Formula
     run [opt_bin/"nrpe", "-c", etc/"nrpe.cfg", "-d"]
   end
 
-  test do
-    pid = fork do
-      exec bin/"nrpe", "-n", "-c", "#{etc}/nrpe.cfg", "-d"
+  def port_open?(ip_address, port, seconds = 1)
+    Timeout.timeout(seconds) do
+      TCPSocket.new(ip_address, port).close
     end
+    true
+  rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Timeout::Error
+    false
+  end
+
+  test do
+    port = free_port
+    cp etc/"nrpe.cfg", testpath
+    inreplace "nrpe.cfg", /^server_port=5666$/, "server_port=#{port}"
+
+    pid = spawn bin/"nrpe", "-n", "-c", testpath/"nrpe.cfg", "-d"
     sleep 2
+    sleep 10 if Hardware::CPU.intel?
 
     begin
-      output = shell_output("netstat -an")
-      assert_match(/.*\*\.5666.*LISTEN/, output, "nrpe did not start")
+      assert port_open?("localhost", port), "nrpe did not start"
       pid_nrpe = shell_output("pgrep nrpe").to_i
     ensure
-      Process.kill("SIGINT", pid_nrpe)
+      Process.kill("SIGINT", pid_nrpe) if pid_nrpe
       Process.kill("SIGINT", pid)
       Process.wait(pid)
     end

@@ -1,29 +1,30 @@
 class Yo < Formula
   desc "CLI tool for running Yeoman generators"
   homepage "https://yeoman.io"
-  url "https://registry.npmjs.org/yo/-/yo-5.0.0.tgz"
-  sha256 "4395888eda54803a590d20d92b285c4abebd81402908b5becdf9cbc6cbeba65f"
+  url "https://registry.npmjs.org/yo/-/yo-7.0.0.tgz"
+  sha256 "4ca52e401088fd3931bdb99fd7fa14b0a03a2edb9bf1949eb368e41871b2d86a"
   license "BSD-2-Clause"
+  head "https://github.com/yeoman/yo.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "3952f75866cc905302121f85682493adffe8f27e1f4d32109fecfb1604692cd3"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "3952f75866cc905302121f85682493adffe8f27e1f4d32109fecfb1604692cd3"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "3952f75866cc905302121f85682493adffe8f27e1f4d32109fecfb1604692cd3"
-    sha256 cellar: :any_skip_relocation, sonoma:         "7b66073b40d522594a57debc8312dbbd7799f9ed75fcc7e58f82834428aa41d3"
-    sha256 cellar: :any_skip_relocation, ventura:        "7b66073b40d522594a57debc8312dbbd7799f9ed75fcc7e58f82834428aa41d3"
-    sha256 cellar: :any_skip_relocation, monterey:       "7b66073b40d522594a57debc8312dbbd7799f9ed75fcc7e58f82834428aa41d3"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "3952f75866cc905302121f85682493adffe8f27e1f4d32109fecfb1604692cd3"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "9486d31c4b44bf37322e4308d76ab31be862f46bdf73123731048c1ad4da5365"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "9486d31c4b44bf37322e4308d76ab31be862f46bdf73123731048c1ad4da5365"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "9486d31c4b44bf37322e4308d76ab31be862f46bdf73123731048c1ad4da5365"
+    sha256 cellar: :any_skip_relocation, sonoma:        "9486d31c4b44bf37322e4308d76ab31be862f46bdf73123731048c1ad4da5365"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "be53916a9e49b611ba57c7da357c203339e7cb605b8b5ec55dab608a46a463ce"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "be53916a9e49b611ba57c7da357c203339e7cb605b8b5ec55dab608a46a463ce"
   end
 
   depends_on "node"
 
   def install
     system "npm", "install", *std_npm_args
-    bin.install_symlink Dir["#{libexec}/bin/*"]
+    bin.install_symlink libexec.glob("bin/*")
   end
 
   test do
     assert_match version.to_s, shell_output("#{bin}/yo --version")
-    assert_match "Everything looks all right!", shell_output("#{bin}/yo doctor")
+    assert_match "Couldn't find any generators", shell_output("#{bin}/yo --generators")
+    assert_match "Running sanity checks on your system", shell_output("#{bin}/yo doctor")
   end
 end

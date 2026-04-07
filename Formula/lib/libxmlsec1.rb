@@ -1,29 +1,30 @@
 class Libxmlsec1 < Formula
   desc "XML security library"
   homepage "https://www.aleksey.com/xmlsec/"
-  url "https://www.aleksey.com/xmlsec/download/xmlsec1-1.3.5.tar.gz"
-  sha256 "2ffd4ad1f860ec93e47a680310ab2bc94968bd07566e71976bd96133d9504917"
+  url "https://github.com/lsh123/xmlsec/releases/download/1.3.10/xmlsec1-1.3.10.tar.gz"
+  mirror "https://www.aleksey.com/xmlsec/download/xmlsec1-1.3.10.tar.gz"
+  sha256 "5915590780566dae4b5d13d51a42fc0e34b30b26fda6f2c5f744ec31b363ee1a"
   license "MIT"
+  compatibility_version 2
 
+  # Checking the first-party download page persistently fails in the autobump
+  # environment, so we check GitHub releases as a workaround.
   livecheck do
-    url "https://www.aleksey.com/xmlsec/download/"
-    regex(/href=.*?xmlsec1[._-]v?(\d+(?:\.\d+)+)\.t/i)
+    url :stable
+    strategy :github_latest
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "7731d32c5c2ee494f03870631d070debfa83466f08d72f6d4891144ca0f2fd1b"
-    sha256 cellar: :any,                 arm64_ventura:  "e632fcf2cff2e0b5d3a08cc8ffbb47b339aaa9c57ea517e8a8d99f0ff4450a30"
-    sha256 cellar: :any,                 arm64_monterey: "d6a3ea2f521670b52000d551dc86a1fb0433a16ea976b072d396ecb8cff07e13"
-    sha256 cellar: :any,                 sonoma:         "7cac617ce6a3c41ccc883373d25aa5ecea6316a19650fd675d5b7ae4071b0156"
-    sha256 cellar: :any,                 ventura:        "b65856e9c1f414238c8c7a58d34afc242dc186e931767cf62bd9f962b9990047"
-    sha256 cellar: :any,                 monterey:       "c58bbc73a0c7410edcbb43ad52e1b11913711b5e8ffe5968976d4db562b43824"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "9328a9d91fd609b96f885d27605f56763bf89ff7d4e5da52d4560e93d6c4d780"
+    sha256 cellar: :any,                 arm64_tahoe:   "51f825cb1ff495c3d8cd39537ca620d080a7788baa5666a64e98f34cba2c3c3e"
+    sha256 cellar: :any,                 arm64_sequoia: "18665575c61336c4cd851d105748e8aec6d21830f34cf62503e66368a6ceaa63"
+    sha256 cellar: :any,                 arm64_sonoma:  "c0883ca61525c9a82e3055b0a285557636f6e669f37bf5be0c0465399ead7795"
+    sha256 cellar: :any,                 sonoma:        "8238f04b0ac3ec78153b98780b175f19e8e56f4727b92918d33e91615a06699a"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "0e71121ba7a168102d78e0f0720354395bdb1ba33c5665b3e83c7b05e7b73790"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "386f07f2a718de944530b492a65f1db9e5b832fad084f7505a5f673f2875bb18"
   end
 
-  depends_on "pkg-config" => :build
-  depends_on xcode: :build
+  depends_on "pkgconf" => :build
   depends_on "gnutls" # Yes, it wants both ssl/tls variations
-  depends_on "libgcrypt"
   depends_on "libxml2"
   depends_on "openssl@3"
   uses_from_macos "libxslt"
@@ -32,17 +33,17 @@ class Libxmlsec1 < Formula
   patch :DATA
 
   def install
-    args = ["--disable-dependency-tracking",
-            "--prefix=#{prefix}",
-            "--disable-crypto-dl",
-            "--disable-apps-crypto-dl",
-            "--with-nss=no",
-            "--with-nspr=no",
-            "--enable-mscrypto=no",
-            "--enable-mscng=no",
-            "--with-openssl=#{Formula["openssl@3"].opt_prefix}"]
+    args = %W[
+      --disable-apps-crypto-dl
+      --disable-crypto-dl
+      --disable-mscrypto
+      --disable-mscng
+      --without-nss
+      --without-nspr
+      --with-openssl=#{Formula["openssl@3"].opt_prefix}
+    ]
 
-    system "./configure", *args
+    system "./configure", *args, *std_configure_args
     system "make", "install"
   end
 
@@ -61,7 +62,7 @@ index 6e8a56a..0e7f06b 100644
      }
 
  #ifdef XMLSEC_DL_LIBLTDL
-+    lt_dlsetsearchpath("HOMEBREW_PREFIX/lib");
++    lt_dlsetsearchpath("@@HOMEBREW_PREFIX@@/lib");
      lib->handle = lt_dlopenext((char*)lib->filename);
      if(lib->handle == NULL) {
          xmlSecError(XMLSEC_ERRORS_HERE,

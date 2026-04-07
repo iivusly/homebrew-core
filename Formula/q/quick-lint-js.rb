@@ -4,22 +4,21 @@ class QuickLintJs < Formula
   url "https://c.quick-lint-js.com/releases/3.2.0/source/quick-lint-js-3.2.0.tar.gz"
   sha256 "f17b39726622637946136076c406e89d3a98ae363d5e3c2a93ab1139bf0e828d"
   license "GPL-3.0-or-later"
-  revision 3
+  revision 12
   head "https://github.com/quick-lint/quick-lint-js.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "1c699e9d0d9055c43969f64b41b42e747b072e65e84b758d02ae7997c15e353e"
-    sha256 cellar: :any,                 arm64_ventura:  "5cd781a6b0b50689f316ee6d27d503ec4343bc63c59596828f46867304b4ee76"
-    sha256 cellar: :any,                 arm64_monterey: "69ee58c007063145b36659d42a4c3fa045caabecc20e2a9b4254aa039d29f53a"
-    sha256 cellar: :any,                 sonoma:         "8a1bc3c66806e5072d5eda62708201d7b9a29028f2152d084f23fbb52559f48a"
-    sha256 cellar: :any,                 ventura:        "ec13d355b3a67bfac798e9afc7fe35cd316ee06a568e031e0d73da957b5ba7cd"
-    sha256 cellar: :any,                 monterey:       "586efbd26ac2d272a193fde740c9c626a46fde8b71b8d911b55ae6307b9cf454"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "62079260e74d945d2d2a9f6a23c98212df617e295ed30adfb35c95b43cc7676b"
+    sha256 cellar: :any,                 arm64_tahoe:   "1d8abd1efbf3b612f762dd7a9c8f1b4c8cfb5b0540cb80702df22deccbf22686"
+    sha256 cellar: :any,                 arm64_sequoia: "cf53bcaae51537c3ec29e74e1ca8febb506c7ce3abace2c8bc71d79d16c32ba2"
+    sha256 cellar: :any,                 arm64_sonoma:  "3af1fd83465bcaaceb6549b6446d98f6e010a582dc71722eba853a818803bc08"
+    sha256 cellar: :any,                 sonoma:        "65e5cd9ae5a96af133efec956be0935ed231da0cadeca2d7af18875850b68764"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "c93598fba05a4402479254731c4879cea0d74ded7d889ea395d102e1d56c06cb"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "e0a8d29f50545ba7a100653acf8b9afa9195f8ef498a5f055c6a4a2471635347"
   end
 
   depends_on "cmake" => :build
   depends_on "googletest" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "simdjson"
 
   fails_with :gcc do
@@ -47,11 +46,7 @@ class QuickLintJs < Formula
       const x = 3;
       const x = 4;
     EOF
-    ohai "#{bin}/quick-lint-js errors.js"
-    output = `#{bin}/quick-lint-js errors.js 2>&1`
-    puts output
-    refute_equal $CHILD_STATUS.exitstatus, 0
-    assert_match "E0034", output
+    assert_match "E0034", shell_output("#{bin}/quick-lint-js errors.js 2>&1", 1)
 
     (testpath/"no-errors.js").write 'console.log("hello, world!");'
     assert_empty shell_output("#{bin}/quick-lint-js no-errors.js")

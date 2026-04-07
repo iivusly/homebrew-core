@@ -1,32 +1,36 @@
 class JavaServiceWrapper < Formula
   desc "Simplify the deployment, launch and monitoring of Java applications"
   homepage "https://wrapper.tanukisoftware.com/"
-  url "https://downloads.sourceforge.net/project/wrapper/wrapper_src/Wrapper_3.5.59_20240723/wrapper_3.5.59_src.tar.gz"
-  sha256 "3b47e7facdd1208ae2570eac301da748a006b551744f3e8db3825bf4ea5c6e06"
+  url "https://download.tanukisoftware.com/wrapper/3.6.5/wrapper_3.6.5_src.tar.gz"
+  sha256 "e1368eff719f7e1e358d5a3cb4749759cbdbdc455515eebf45ade646be1f82c0"
   license any_of: ["GPL-2.0-only", "GPL-3.0-only"]
 
+  livecheck do
+    url "https://download.tanukisoftware.com/wrapper/latest"
+    regex(/^v?(\d+(?:\.\d+)+)$/i)
+  end
+
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "f3686c79400a6d08357b9732a90552c682e79d20e0452a7f3fa5ed9a0a9b306c"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "afec02b0f155c2b525aae172c8a4769e8b6083dae7ec542d08c762422c21a8f9"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "d59c6dbb00c3831526d7a2c3d06d559c242ec36c27f527b29d2a7e49e6ded3a3"
-    sha256 cellar: :any_skip_relocation, sonoma:         "77f657d48b8c15e8902bb346d2f3081b5b705cd74f7965bcfe626a7ca0f69e4a"
-    sha256 cellar: :any_skip_relocation, ventura:        "b13c9d5321c9239ad342dc4375203df491e1ec89ff072a9214d6aee1ec131c6f"
-    sha256 cellar: :any_skip_relocation, monterey:       "52d7a21a1b0a06e1b4311718b4926f58a446dc125f761edade0e1898888243f6"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "187b9c59b2589c36223445d0b0fd9d4985dccaeca299ed046ffca2c1b2565f6d"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "02d66dd4cb0b7c091065fe9a4ca074a9f1cde335a118fd78649ab83f2ef6b8a4"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "e5e79a5972a4e23d6a78762f16f5542044a507ff6bfae7f64b82a68ee9b8913b"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "a6706caef4cbceeb709a644463443c0d30d7648b2bf13205864a3bed6d71ccc4"
+    sha256 cellar: :any_skip_relocation, sonoma:        "78dfa3dd0a4ddfa5a47e120eb72ba8b7fb3f64d7f5fe466aecf1237d60e39eac"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "9fa2df42bef313633426f63cf7967f4871d9b18f1cf5ed5c4428b7206ba6618a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "e1884526297eddb52a7b9b445049fb5d58cdadb03fe6890690893a39011d011a"
   end
 
   depends_on "ant" => :build
-  depends_on "openjdk@11" => :build
+  depends_on "openjdk" => [:build, :test]
 
   on_linux do
     depends_on "cunit" => :build
   end
 
   def install
-    ENV["JAVA_HOME"] = Formula["openjdk@11"].opt_prefix
+    ENV["JAVA_HOME"] = Language::Java.java_home
 
-    # Default javac target version is 1.4, use 1.6 which is the minimum available on openjdk@11
-    system "ant", "-Dbits=64", "-Djavac.target.version=1.6"
+    # Default javac target version is 1.4, use 1.8 which is the minimum available on newer openjdk
+    system "ant", "-Dbits=64", "-Djavac.target.version=1.8"
 
     libexec.install "lib", "bin", "src/bin" => "scripts"
 
@@ -40,9 +44,43 @@ class JavaServiceWrapper < Formula
   end
 
   test do
-    ENV["JAVA_HOME"] = Formula["openjdk@11"].opt_prefix
+    ENV["JAVA_HOME"] = java_home = Language::Java.java_home
 
     output = shell_output("#{libexec}/bin/testwrapper status", 1)
-    assert_match("Test Wrapper Sample Application", output)
+    assert_equal "Test Wrapper Sample Application (not installed) is not running.\n", output
+
+    (testpath/"bin").install_symlink libexec/"bin/wrapper"
+    cp libexec/"scripts/App.sh.in", testpath/"bin/helloworld"
+    chmod "+x", testpath/"bin/helloworld"
+    inreplace testpath/"bin/helloworld" do |s|
+      s.gsub! "@app.name@", "helloworld"
+      s.gsub! "@app.long.name@", "Hello World"
+    end
+
+    (testpath/"conf/wrapper.conf").write <<~INI
+      wrapper.java.command=#{java_home}/bin/java
+      wrapper.java.mainclass=org.tanukisoftware.wrapper.WrapperSimpleApp
+      wrapper.jarfile=#{libexec}/lib/wrapper.jar
+      wrapper.java.classpath.1=#{libexec}/lib/wrapper.jar
+      wrapper.java.classpath.2=#{testpath}
+      wrapper.java.library.path.1=#{libexec}/lib
+      wrapper.java.additional.auto_bits=TRUE
+      wrapper.java.additional.1=-Xms128M
+      wrapper.java.additional.2=-Xmx512M
+      wrapper.app.parameter.1=HelloWorld
+      wrapper.logfile=#{testpath}/wrapper.log
+    INI
+
+    (testpath/"HelloWorld.java").write <<~JAVA
+      public class HelloWorld {
+        public static void main(String args[]) {
+          System.out.println("Hello, world!");
+        }
+      }
+    JAVA
+
+    system "#{java_home}/bin/javac", "HelloWorld.java"
+    console_output = shell_output("bin/helloworld console")
+    assert_match "Hello, world!", console_output
   end
 end

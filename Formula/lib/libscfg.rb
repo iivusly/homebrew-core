@@ -1,19 +1,18 @@
 class Libscfg < Formula
   desc "C library for scfg"
-  homepage "https://git.sr.ht/~emersion/libscfg"
-  url "https://git.sr.ht/~emersion/libscfg/archive/v0.1.1.tar.gz"
-  sha256 "621a91bf233176e0052e9444f0a42696ad1bfda24b25c027c99cb6e693f273d7"
+  homepage "https://codeberg.org/emersion/libscfg"
+  url "https://codeberg.org/emersion/libscfg/archive/v0.2.0.tar.gz"
+  sha256 "cf37ef00ac8efb28821dac1ad49e2c6b23b242d9d961fab6fcda72fc73a7291b"
   license "MIT"
-  head "https://git.sr.ht/~emersion/libscfg", branch: "master"
+  head "https://codeberg.org/emersion/libscfg.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "6d14be1b7b275a2200ee9b3805b4e54263a61f59f052103741d54ea9e9e59725"
-    sha256 cellar: :any,                 arm64_ventura:  "151dba4fa8ab28312b907dd4598df11c81cd8ed0986987faff0fce50263c49c5"
-    sha256 cellar: :any,                 arm64_monterey: "e072b64d3301ffa6537dfd489761f376718445c727ae4a29f8d98e06d9f8de11"
-    sha256 cellar: :any,                 sonoma:         "f46bf808c8969460ddbe01818be5a33f0572fe1804be3725e2907499fa820470"
-    sha256 cellar: :any,                 ventura:        "bee4bac2d9a37bb294bb16acbc35f857ff2e6990c793391802bcebcfabfaff25"
-    sha256 cellar: :any,                 monterey:       "d30ecbf9f5ad0e9c5864a8a5c3412311b983a74bf8dd439f0d5948aa9fb39c03"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "fdab5431a3a4c023c5f31b1728107a988eee126552f1860ffbd2ef588edb1243"
+    sha256 cellar: :any,                 arm64_tahoe:   "e2fe577dbd81fcd64b6ac33853c187e28069ff167363f8be5d6ac3507b3cb1f6"
+    sha256 cellar: :any,                 arm64_sequoia: "44fcdc6be6a0003395e4ddacf2c33f312e918c5ede3b88455de3b1bcea6a6a73"
+    sha256 cellar: :any,                 arm64_sonoma:  "8a889b0add828e0e7c3b723a464c40ddb74659e7058d14eee49108eedaa28e24"
+    sha256 cellar: :any,                 sonoma:        "34604bad443610829eb83ba2d145c931f279ec1f12dda0665e5a5496c4164656"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "741d76d2418edf9de7c2b1b1b343982ed7132d16ea88417d8629e746841fe8c4"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "3f8785fc852815aac74b2ee236e1ee4ea058deae1d83546cebfe98b665dc4533"
   end
 
   depends_on "meson" => :build
@@ -31,7 +30,7 @@ class Libscfg < Formula
       key2 = value2
     EOS
 
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <stdio.h>
       #include <stdlib.h>
       #include "scfg.h"
@@ -54,7 +53,7 @@ class Libscfg < Formula
 
         return 0;
       }
-    EOS
+    C
 
     system ENV.cc, "test.c", "-I#{include}", "-L#{lib}", "-lscfg", "-o", "test"
     assert_match "Successfully loaded 'test.cfg'", shell_output("./test")

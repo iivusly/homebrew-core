@@ -1,12 +1,17 @@
 class ElixirLs < Formula
   desc "Language Server and Debugger for Elixir"
   homepage "https://elixir-lsp.github.io/elixir-ls"
-  url "https://github.com/elixir-lsp/elixir-ls/archive/refs/tags/v0.23.0.tar.gz"
-  sha256 "83c49ec9268ad76f9b7f72585e3cb9dd0199338be69a9ebf507d77109c6a5684"
+  url "https://github.com/elixir-lsp/elixir-ls/archive/refs/tags/v0.30.0.tar.gz"
+  sha256 "d8e6c1b7ffc2a122c280ab9790de3cc22b2c12cf98caeabca66e222c8b6a8da1"
   license "Apache-2.0"
 
+  livecheck do
+    url :stable
+    strategy :github_latest
+  end
+
   bottle do
-    sha256 cellar: :any_skip_relocation, all: "ac2c1e3936ae2dd6b89466853db8ec6d08aff1697a450330207d8940a20a1954"
+    sha256 cellar: :any_skip_relocation, all: "4b5a157f08e6591c3d7c969df7004590817eca3b7d2f01dde422c4bdc3af6ffb"
   end
 
   depends_on "elixir"
@@ -25,7 +30,7 @@ class ElixirLs < Formula
   end
 
   test do
-    assert_predicate bin/"elixir-ls", :exist?
+    assert_path_exists bin/"elixir-ls"
     system "mix", "local.hex", "--force"
 
     input =

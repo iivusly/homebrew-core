@@ -3,23 +3,18 @@ class Gprof2dot < Formula
 
   desc "Convert the output from many profilers into a Graphviz dot graph"
   homepage "https://github.com/jrfonseca/gprof2dot"
-  url "https://files.pythonhosted.org/packages/32/11/16fc5b985741378812223f2c6213b0a95cda333b797def622ac702d28e81/gprof2dot-2024.6.6.tar.gz"
-  sha256 "fa1420c60025a9eb7734f65225b4da02a10fc6dd741b37fa129bc6b41951e5ab"
+  url "https://files.pythonhosted.org/packages/bb/fd/cad13fa1f7a463a607176432c4affa33ea162f02f58cc36de1d40d3e6b48/gprof2dot-2025.4.14.tar.gz"
+  sha256 "35743e2d2ca027bf48fa7cba37021aaf4a27beeae1ae8e05a50b55f1f921a6ce"
   license "LGPL-3.0-or-later"
-  head "https://github.com/jrfonseca/gprof2dot.git", branch: "master"
+  head "https://github.com/jrfonseca/gprof2dot.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "a0e000bb5783e8ebe2ae2ed71435424043ccc58a7100b11778e9fe9dfc33f556"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "a0e000bb5783e8ebe2ae2ed71435424043ccc58a7100b11778e9fe9dfc33f556"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "a0e000bb5783e8ebe2ae2ed71435424043ccc58a7100b11778e9fe9dfc33f556"
-    sha256 cellar: :any_skip_relocation, sonoma:         "a0e000bb5783e8ebe2ae2ed71435424043ccc58a7100b11778e9fe9dfc33f556"
-    sha256 cellar: :any_skip_relocation, ventura:        "a0e000bb5783e8ebe2ae2ed71435424043ccc58a7100b11778e9fe9dfc33f556"
-    sha256 cellar: :any_skip_relocation, monterey:       "a0e000bb5783e8ebe2ae2ed71435424043ccc58a7100b11778e9fe9dfc33f556"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "193194c610bdace3071a0923b19dc61d64d27442dcf085d404ebbc17e95cbde1"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, all: "b4fe6eb97205fb481b755d57628c8bcdbd35a8865910bec37ced4a858d460796"
   end
 
   depends_on "graphviz"
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   on_linux do
     depends_on "libx11"
@@ -30,7 +25,7 @@ class Gprof2dot < Formula
   end
 
   test do
-    (testpath/"gprof.output").write <<~EOS
+    (testpath/"gprof.prof").write <<~PROF
       Flat profile:
 
       Each sample counts as 0.01 seconds.
@@ -185,8 +180,8 @@ class Gprof2dot < Formula
 
          [1] manager                 [5] project2                [3] worker2
          [4] project1                [2] worker1
-    EOS
-    system bin/"gprof2dot", testpath/"gprof.output", "-o", testpath/"call_graph.dot"
-    assert_predicate testpath/"call_graph.dot", :exist?
+    PROF
+    system bin/"gprof2dot", testpath/"gprof.prof", "-o", testpath/"call_graph.dot"
+    assert_path_exists testpath/"call_graph.dot"
   end
 end

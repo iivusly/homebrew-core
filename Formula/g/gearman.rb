@@ -1,22 +1,21 @@
 class Gearman < Formula
   desc "Application framework to farm out work to other machines or processes"
   homepage "https://gearman.org/"
-  url "https://github.com/gearman/gearmand/releases/download/1.1.21/gearmand-1.1.21.tar.gz"
-  sha256 "2688b83e48f26fdcd4fbaef2413ff1a76c9ecb067d1621d0e0986196efecd308"
+  url "https://github.com/gearman/gearmand/releases/download/1.1.22/gearmand-1.1.22.tar.gz"
+  sha256 "c5d18f6a13625ebdd7e514596aed39e31203358eee688dfedcedd989a2f02d7a"
   license "BSD-3-Clause"
-  revision 3
+  revision 1
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "9d1da4a4f4163500fa5526812bc3a0568378e01a89001545bf45cee7c61d5ed7"
-    sha256 cellar: :any,                 arm64_ventura:  "4b43f495ded047c9a8bbf9cd1007151049cebf7cefcde392d00b9e3bb16b6bdb"
-    sha256 cellar: :any,                 arm64_monterey: "93ccbc7bf2fe168924a57d16851206fbf781f3ff78460c66f1e97e5551287bfd"
-    sha256 cellar: :any,                 sonoma:         "af960e8b7736a776909060bb4544f46058ab065a4bef2472b02bd4119142f2c1"
-    sha256 cellar: :any,                 ventura:        "30f5a814200b4eef0fa30ed3a26d526c18cf8fd03e9466e37699c1f16a09ad07"
-    sha256 cellar: :any,                 monterey:       "157e08eabcf0400b1f4c79a678b77433fc3d6c10390b372c641478ed4e5352c4"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "285adf59fe86f27e59a6292255c4d62b281db259ec4f6f49a88469a8e0491e3a"
+    sha256 cellar: :any,                 arm64_tahoe:   "5d3c72680496377b84301a11829ce50486c4303b36e6fced1fded664a3e9e884"
+    sha256 cellar: :any,                 arm64_sequoia: "9e6adef3fb88b33c1dafc83b2836780d15ec5dbca6e85426252910d74fb1328d"
+    sha256 cellar: :any,                 arm64_sonoma:  "20e8012a0a1163aec0122be7ede14c1b67d8a9f2029c48fe4b0fd31bf6a7033f"
+    sha256 cellar: :any,                 sonoma:        "34281099e7a338e50184e5297726d0fde308c108f8324cd4c8a807c2079b8525"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "c334d173303374e69d753ac458fbb7499c3bf5b7730bf9a98c9b77f061569531"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "3248cb1b494fc13da4014574ae3be3a88f592862de39ef275ed6a7824a996baf"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "sphinx-doc" => :build
   depends_on "boost"
   depends_on "libevent"
@@ -30,13 +29,6 @@ class Gearman < Formula
   end
 
   def install
-    # Work around "error: no member named 'signbit' in the global namespace"
-    # encountered when trying to detect boost regex in configure
-    if OS.mac? && MacOS.version == :high_sierra
-      ENV.delete("HOMEBREW_SDKROOT")
-      ENV.delete("SDKROOT")
-    end
-
     # https://bugs.launchpad.net/gearmand/+bug/1368926
     Dir["tests/**/*.cc", "libtest/main.cc"].each do |test_file|
       next unless File.read(test_file).include?("std::unique_ptr")

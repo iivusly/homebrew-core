@@ -3,8 +3,8 @@ class Nftables < Formula
 
   desc "Netfilter tables userspace tools"
   homepage "https://netfilter.org/projects/nftables/"
-  url "https://www.netfilter.org/pub/nftables/nftables-1.1.0.tar.xz"
-  sha256 "ef3373294886c5b607ee7be82c56a25bc04e75f802f8e8adcd55aac91eb0aa24"
+  url "https://www.netfilter.org/pub/nftables/nftables-1.1.6.tar.xz"
+  sha256 "372931bda8556b310636a2f9020adc710f9bab66f47efe0ce90bff800ac2530c"
   license "GPL-2.0-or-later"
 
   livecheck do
@@ -13,11 +13,12 @@ class Nftables < Formula
   end
 
   bottle do
-    sha256 x86_64_linux: "57904ed7402df1928d981619a622ac81438b0a92ef80558ed839abb146421ebf"
+    sha256 arm64_linux:  "58f4138191485285a528a4c2e5648dbe07fab4d2769d545f7c2b0fe96e1ff6e4"
+    sha256 x86_64_linux: "02da0add39259afda8f58278a408984fee95b27b711f281e8cfbd6dcbffeec27"
   end
 
-  depends_on "pkg-config" => :build
-  depends_on "python@3.12" => :build
+  depends_on "pkgconf" => :build
+  depends_on "python@3.14" => :build
   depends_on "gmp"
   depends_on "jansson"
   depends_on "libedit"
@@ -28,10 +29,10 @@ class Nftables < Formula
   depends_on "readline"
 
   def install
-    venv = virtualenv_create(libexec, "python3.12")
-    system "./configure", *std_configure_args,
-                          "--disable-silent-rules",
-                          "--with-python-bin=#{venv.root}/bin/python3"
+    venv = virtualenv_create(libexec, "python3.14")
+    system "./configure", "--disable-silent-rules",
+                          "--with-python-bin=#{venv.root}/bin/python3",
+                          *std_configure_args
     system "make", "install"
   end
 

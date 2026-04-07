@@ -7,19 +7,22 @@ class WebpPixbufLoader < Formula
   head "https://github.com/aruiz/webp-pixbuf-loader.git", branch: "mainline"
 
   bottle do
-    sha256 cellar: :any, arm64_sonoma:   "dfdb762a8de403d1f746042b9cd3fd5bfdff4af69c2d9d3667e9926846bc2948"
-    sha256 cellar: :any, arm64_ventura:  "21bcb300a9b98ea69b084a507c0bbc369ae53c56c6ac5baa0e010ea9593d1043"
-    sha256 cellar: :any, arm64_monterey: "9840b14ad81937500f2f3b2e19efc9b057ad5f9cd436277d45bc62df486030ec"
-    sha256 cellar: :any, sonoma:         "df8f65df18ad082ca581be57c2e19d8cac9085582d3de656513b9ae755d78e0f"
-    sha256 cellar: :any, ventura:        "d62be70d360f190c3e4ddd4273db4144f630eab0b13ec1186ca8a9b2e9c4f2f6"
-    sha256 cellar: :any, monterey:       "f1721835505ef98940a6f0c4159adcf4ce7d48385a784b76f94bb74fc67214c0"
-    sha256               x86_64_linux:   "f3e5e25b6df4513520cdd9e082220426cd6d0f2fe6f6b775f9ed126514a82b12"
+    rebuild 1
+    sha256 cellar: :any, arm64_tahoe:   "e3a73f1544d69019b2b351dfe0d77e7d43267dbe80fa5f74afe35f88f1f99618"
+    sha256 cellar: :any, arm64_sequoia: "7416b43e99db50887259c1e57bfa9bf9a63fc087ad56b0c8bdc50f8aeabbc8a0"
+    sha256 cellar: :any, arm64_sonoma:  "2d6760c39d49f2f829631ff7d94e69b08d80fe6e54d1c21c658abb036ee5c7e3"
+    sha256 cellar: :any, arm64_ventura: "aa2f49cc24d6fd4cc3126807ecf76cadc3e46108171fdeb064a52c628b82f780"
+    sha256 cellar: :any, sonoma:        "841913a93d467056a49f176338a660069c6998a4c2e07d04d668569b4f0a6ddf"
+    sha256 cellar: :any, ventura:       "db417e25ee2371e7e22cb11a70e2423e897d79c56826243942894a1456bac099"
+    sha256               arm64_linux:   "11d831a6753d21c518cac32cdc6d67e8f3751cf08bc3cb4f1d887fc6dc1bf44f"
+    sha256               x86_64_linux:  "623c54e77f46a6687ba4662cbec44fde554ea84a43b1bea5432ec759f4e2367a"
   end
 
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => [:build, :test]
+  depends_on "pkgconf" => [:build, :test]
   depends_on "gdk-pixbuf"
+  depends_on "glib"
   depends_on "webp"
 
   # Constants for gdk-pixbuf's multiple version numbers, which are the same as
@@ -38,7 +41,7 @@ class WebpPixbufLoader < Formula
   end
 
   def install
-    system "meson", "setup", "build", *std_meson_args, "-Dgdk_pixbuf_moduledir=#{prefix}/#{module_subdir}"
+    system "meson", "setup", "build", "-Dgdk_pixbuf_moduledir=#{prefix}/#{module_subdir}", *std_meson_args
     system "meson", "compile", "-C", "build", "--verbose"
     system "meson", "install", "-C", "build"
   end
@@ -46,15 +49,15 @@ class WebpPixbufLoader < Formula
   # After the loader is linked in, update the global cache of pixbuf loaders
   def post_install
     ENV["GDK_PIXBUF_MODULEDIR"] = "#{HOMEBREW_PREFIX}/#{module_subdir}"
-    system "#{Formula["gdk-pixbuf"].opt_bin}/gdk-pixbuf-query-loaders", "--update-cache"
+    system Formula["gdk-pixbuf"].opt_bin/"gdk-pixbuf-query-loaders", "--update-cache"
   end
 
   test do
     # Generate a .webp file to test with.
-    system "#{Formula["webp"].opt_bin}/cwebp", test_fixtures("test.png"), "-o", "test.webp"
+    system Formula["webp"].opt_bin/"cwebp", test_fixtures("test.png"), "-o", "test.webp"
 
     # Sample program to load a .webp file via gdk-pixbuf.
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <gdk-pixbuf/gdk-pixbuf.h>
 
       gint main (gint argc, gchar **argv)  {
@@ -70,9 +73,9 @@ class WebpPixbufLoader < Formula
         g_object_unref(pixbuf);
         return 0;
       }
-    EOS
+    C
 
-    flags = shell_output("pkg-config --cflags --libs gdk-pixbuf-#{gdk_so_ver}").chomp.split
+    flags = shell_output("pkgconf --cflags --libs gdk-pixbuf-#{gdk_so_ver}").chomp.split
     system ENV.cc, "test.c", "-o", "test_loader", *flags
     system "./test_loader", "test.webp"
   end

@@ -4,16 +4,15 @@ class Pagmo < Formula
   url "https://github.com/esa/pagmo2/archive/refs/tags/v2.19.1.tar.gz"
   sha256 "ecc180e669fa6bbece959429ac7d92439e89e1fd1c523aa72b11b6c82e414a1d"
   license any_of: ["LGPL-3.0-or-later", "GPL-3.0-or-later"]
-  revision 1
+  revision 7
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "8a0afc6cc97987dbf0d331490c278b4a739306e21d8cdd6abee1595056991cf6"
-    sha256 cellar: :any,                 arm64_ventura:  "8d8ac532e972fc741ef96a550adc2fbbcec5576e750cdf4f28c9edd585b54a98"
-    sha256 cellar: :any,                 arm64_monterey: "553b6d9439f07679e0f7f5819e459d9f8bcd8869328c506755be103b40c59e17"
-    sha256 cellar: :any,                 sonoma:         "deda63403b6b445b4418160f30b8eb48e1e8bf1763b95ece54f0a44e9c559a52"
-    sha256 cellar: :any,                 ventura:        "0ff2034f5a451de4f483e3916842fc559d6665ea3fdaf5ccc01d3f2725370b63"
-    sha256 cellar: :any,                 monterey:       "787a36f0baf71e9c858e114da69902b446447c6d74383292da02b097dc1d54bf"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "033a66f14e5276aa4b64bddc1114539bc2cc99eae1ce4ffd1e84a01413aaff88"
+    sha256 cellar: :any,                 arm64_tahoe:   "d5474b826c3a4d2e4e0a557f8cae80452cf73a24e9ba1b6f375c1d9e78f18f77"
+    sha256 cellar: :any,                 arm64_sequoia: "c3b9817551e40a0827cecef5f15ab2484e5805e0d43db105139a8f2cbaa1adc8"
+    sha256 cellar: :any,                 arm64_sonoma:  "fc7994d99b3d470899d7e6c6a2af827885f4d4fefa4a69d20003cc0199d99454"
+    sha256 cellar: :any,                 sonoma:        "41e957d1c2b853bfeebdfbd0b0b5631a34488f5b978223dad6826dd88f77e7af"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "9c931f2ce4aaa87aa3e902e43a50f3ff5bc00d3edf452b8f06eca47aaa2fdf53"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "4fd3e376bb093f8d4cbd0af34edfbbab0f2d2a637233cce82e9559f5dd92334c"
   end
 
   depends_on "cmake" => :build
@@ -22,17 +21,29 @@ class Pagmo < Formula
   depends_on "nlopt"
   depends_on "tbb"
 
-  fails_with gcc: "5"
+  # Backport support for eigen 5.0.0
+  patch do
+    url "https://github.com/esa/pagmo2/commit/bdd8559d7663536c3a5f56b013f07da11a35c9b8.patch?full_index=1"
+    sha256 "f8679d6ca0d4bd5d9b44382da35ddc6f80404d389813ce05f050d00f5ce3706c"
+  end
+  patch do
+    url "https://github.com/esa/pagmo2/commit/d0e70403179769c326f2694673473e1d3ef0bec7.patch?full_index=1"
+    sha256 "6dcf5ac2cbd8e9b0de20845a51ef5d8eeb0ffd0472f32bcc833ce3f314718f0b"
+  end
 
   def install
-    system "cmake", ".", "-DPAGMO_WITH_EIGEN3=ON", "-DPAGMO_WITH_NLOPT=ON",
-                         *std_cmake_args,
-                         "-DCMAKE_CXX_STANDARD=17"
-    system "make", "install"
+    args = %w[
+      -DPAGMO_WITH_EIGEN3=ON
+      -DPAGMO_WITH_NLOPT=ON
+    ]
+
+    system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
+    system "cmake", "--build", "build"
+    system "cmake", "--install", "build"
   end
 
   test do
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include <iostream>
 
       #include <pagmo/algorithm.hpp>
@@ -70,7 +81,7 @@ class Pagmo < Formula
 
           return 0;
       }
-    EOS
+    CPP
 
     system ENV.cxx, "test.cpp", "-I#{include}", "-L#{lib}", "-lpagmo",
                     "-std=c++17", "-o", "test"

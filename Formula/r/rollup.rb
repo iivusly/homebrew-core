@@ -1,42 +1,43 @@
 class Rollup < Formula
   desc "Next-generation ES module bundler"
   homepage "https://rollupjs.org/"
-  url "https://registry.npmjs.org/rollup/-/rollup-4.21.2.tgz"
-  sha256 "0267d49e19776dcadf1ad0afb0881e0724d4793cf68b756a843ff4532f8808f0"
+  url "https://registry.npmjs.org/rollup/-/rollup-4.60.1.tgz"
+  sha256 "b8996e688ff1542e8aa7f0d07a11a06e58fec2a5ae6fc01c73ef1550b27e0127"
   license all_of: ["ISC", "MIT"]
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "8d6810e47adc91ada51588fc8cc9519f0a3a1a7f568078ae685f5a6529631c98"
-    sha256 cellar: :any,                 arm64_ventura:  "8d6810e47adc91ada51588fc8cc9519f0a3a1a7f568078ae685f5a6529631c98"
-    sha256 cellar: :any,                 arm64_monterey: "8d6810e47adc91ada51588fc8cc9519f0a3a1a7f568078ae685f5a6529631c98"
-    sha256 cellar: :any,                 sonoma:         "0eb5f5e8ec29c77574c7acf4d2f9eeefeb83ad637868af05fb9aa31df6af5fe9"
-    sha256 cellar: :any,                 ventura:        "0eb5f5e8ec29c77574c7acf4d2f9eeefeb83ad637868af05fb9aa31df6af5fe9"
-    sha256 cellar: :any,                 monterey:       "0eb5f5e8ec29c77574c7acf4d2f9eeefeb83ad637868af05fb9aa31df6af5fe9"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "228f1dfe6431e457e2956ede9d58e202fe73c91c83bde00410b53b6ddf483d7b"
+    sha256 cellar: :any,                 arm64_tahoe:   "a630fa508c95250677afeaadf0821ca95ae8914f46332b01fb2601e0de24d877"
+    sha256 cellar: :any,                 arm64_sequoia: "d1a340565032d66690a26d72e4b8259ebcef07c78663a68a23ba19cb4aca57e5"
+    sha256 cellar: :any,                 arm64_sonoma:  "d1a340565032d66690a26d72e4b8259ebcef07c78663a68a23ba19cb4aca57e5"
+    sha256 cellar: :any,                 sonoma:        "efdc23118e932a4a4b9955e983cb602b95c0a76a1ab10affaff19cbbd3c02fc3"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "da92429101f50232a2a9dfc3656ad93252dc6b2110001baa91edb7105c898e0e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "2034c0a711fef988b461139146e54b9f5bdb0fa9cdfdb6507e21bcf6c364547a"
   end
 
   depends_on "node"
 
   def install
     system "npm", "install", *std_npm_args
-    bin.install_symlink Dir["#{libexec}/bin/*"]
+    bin.install_symlink libexec.glob("bin/*")
 
-    deuniversalize_machos
+    # Replace universal binaries with their native slices
+    node_modules = libexec/"lib/node_modules/rollup/node_modules"
+    deuniversalize_machos node_modules/"fsevents/fsevents.node"
   end
 
   test do
-    (testpath/"test/main.js").write <<~EOS
+    (testpath/"test/main.js").write <<~JS
       import foo from './foo.js';
       export default function () {
         console.log(foo);
       }
-    EOS
+    JS
 
-    (testpath/"test/foo.js").write <<~EOS
+    (testpath/"test/foo.js").write <<~JS
       export default 'hello world!';
-    EOS
+    JS
 
-    expected = <<~EOS
+    expected = <<~JS
       'use strict';
 
       var foo = 'hello world!';
@@ -46,7 +47,7 @@ class Rollup < Formula
       }
 
       module.exports = main;
-    EOS
+    JS
 
     assert_equal expected, shell_output("#{bin}/rollup #{testpath}/test/main.js -f cjs")
   end

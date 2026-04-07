@@ -1,28 +1,25 @@
 class Libpqxx < Formula
   desc "C++ connector for PostgreSQL"
   homepage "https://pqxx.org/development/libpqxx/"
-  url "https://github.com/jtv/libpqxx/archive/refs/tags/7.9.2.tar.gz"
-  sha256 "e37d5774c39f6c802e32d7f418e88b8e530404fb54758516e884fc0ebdee6da4"
+  url "https://github.com/jtv/libpqxx/archive/refs/tags/7.10.5.tar.gz"
+  sha256 "a827dc8a02f4b6110bce66a56d8d97e4526a5128e2f36fa698fd2b1dfb1b9044"
   license "BSD-3-Clause"
+  compatibility_version 1
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "4bbe6bc59845beb22347415487ece9596a1547125b25cb79f863a73bd00a4b91"
-    sha256 cellar: :any,                 arm64_ventura:  "1430202c780b48c6105e855ea8d419d8007c64efdb31ab47e470b400d10bc09a"
-    sha256 cellar: :any,                 arm64_monterey: "578bccfc4ad118c1cdb92c1dbe202656db8a284ce3c6ac1cd04112b7b1276902"
-    sha256 cellar: :any,                 sonoma:         "58ac23cc1afda6a9bcaa73888c4f336025cfebfcc95f96a60e041dfb36f4165b"
-    sha256 cellar: :any,                 ventura:        "67b91dc955bef467e00fbe835fc34c4c7026b2c3e113fe7dde43d805fa6e0664"
-    sha256 cellar: :any,                 monterey:       "0fb08adfdcd300f7cc93ee0b5a3fc8ede01ba43afc896091500b29c0adf168a2"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "8434faf947afc1526b6da021efaa8e7d5b4cd5ab680f5eef2f191e797f09b3d7"
+    sha256 cellar: :any,                 arm64_tahoe:   "8c37900dc12a476a4d4c1d6027e28f5bcbd48dd0c13d0d5eef9130365db04f09"
+    sha256 cellar: :any,                 arm64_sequoia: "a167b4c5b35c0e9226475349c2255eb13f471843a7bf2ab5749845ae0cb17b1a"
+    sha256 cellar: :any,                 arm64_sonoma:  "5d6010ea63e22a52c3a57772b928c3db42258e03371d0fadcb342540d5e9f7eb"
+    sha256 cellar: :any,                 sonoma:        "04c3c2f21bfd8c568c4de68c41c6110ec3bd96fbff44a22eec8c1b0cc1c41bbc"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "7e2d5fa38a95abfaee1581de92d57b84b059364ad4d20908aaf53295467d6a76"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "1d837edceff2ce790992504d93fc7c46fbb1856ed6ccc747c78a5ccc8261be89"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "xmlto" => :build
   depends_on "libpq"
-  depends_on macos: :catalina # requires std::filesystem
 
-  uses_from_macos "python" => :build, since: :catalina
-
-  fails_with gcc: "5" # for C++17
+  uses_from_macos "python" => :build
 
   def install
     ENV.append "CXXFLAGS", "-std=c++17"
@@ -33,13 +30,13 @@ class Libpqxx < Formula
   end
 
   test do
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include <pqxx/pqxx>
       int main(int argc, char** argv) {
         pqxx::connection con;
         return 0;
       }
-    EOS
+    CPP
     system ENV.cxx, "-std=c++17", "test.cpp", "-L#{lib}", "-lpqxx",
            "-I#{include}", "-o", "test"
     # Running ./test will fail because there is no running postgresql server

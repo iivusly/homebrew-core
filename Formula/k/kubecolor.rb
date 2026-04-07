@@ -1,18 +1,18 @@
 class Kubecolor < Formula
   desc "Colorize your kubectl output"
   homepage "https://kubecolor.github.io/"
-  url "https://github.com/kubecolor/kubecolor/archive/refs/tags/v0.3.3.tar.gz"
-  sha256 "780dc28a7284881da6e14cc2a9eb33f4be19a0d84c5c9402702c34c720e07ad3"
+  url "https://github.com/kubecolor/kubecolor/archive/refs/tags/v0.5.3.tar.gz"
+  sha256 "68df2c57700095d4598f91807913a6d8052bfe2ff20046052fcc7350a1a34423"
   license "MIT"
+  head "https://github.com/kubecolor/kubecolor.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "ad28aba077f5bacf884caa340cb91e0950c69fe7de459e1223a2e8b5733a9fa2"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "9b99f1cbf4faab2d80dcb23d206fb3d66cb6feb68925769acd11c315a8fcbb1a"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "7eaa3de0ef0726db8368c7c3fa23531a8b139cbbd782520697f8a527710a8fe6"
-    sha256 cellar: :any_skip_relocation, sonoma:         "97f7423e543ebd63a9edb85ce2e25eb74f8e1922c8dfdc597bde27fa79e92379"
-    sha256 cellar: :any_skip_relocation, ventura:        "0618d7b4256db786affb7068af90d1f012745e99ff1c50982d9ed5756d1600ef"
-    sha256 cellar: :any_skip_relocation, monterey:       "455a565f1f06a6b9206d33fc45ea0d04d32c807c16464f50f914efd6e5fdbcf0"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "143d7336a3eb51e8733bf737c944d1969a0d789e90ed961dae0128df7318cfc9"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "d69609824745f1ce761450aa5dfa153237d99e179310816b6bc51d9e30242b50"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "d69609824745f1ce761450aa5dfa153237d99e179310816b6bc51d9e30242b50"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "d69609824745f1ce761450aa5dfa153237d99e179310816b6bc51d9e30242b50"
+    sha256 cellar: :any_skip_relocation, sonoma:        "c15be243a5ee680db0fa939a3aa20f34db76834b9c648f10cd0f5320acb2971b"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "cd0dcb961bf16c19f64a6c3276b7c432ca5c9312aba94871356445014a5c6507"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "79297c1478d18887ebe83fd2078b25403eebbba9cf01550b29954cf5cb9bde4b"
   end
 
   depends_on "go" => :build

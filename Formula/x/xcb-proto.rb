@@ -6,14 +6,15 @@ class XcbProto < Formula
   license "MIT"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, all: "e85c8d57ca43017674ecd1dadce614289e8790768087a73ceef981e65310003e"
+    rebuild 2
+    sha256 cellar: :any_skip_relocation, all: "1907041d187bef23a433c472482195a2cd8a4db3787f9da47db1ae5e5d47894a"
   end
 
-  depends_on "pkg-config" => [:build, :test]
-  depends_on "python@3.12" => [:build, :test]
+  depends_on "pkgconf" => [:build, :test]
+  depends_on "python@3.14" => [:build, :test]
 
   def python3
-    "python3.12"
+    "python3.14"
   end
 
   def install
@@ -32,10 +33,10 @@ class XcbProto < Formula
 
   test do
     assert_match "#{share}/xcb", shell_output("pkg-config --variable=xcbincludedir xcb-proto").chomp
-    system python3, "-c", <<~EOS
+    system python3, "-c", <<~PYTHON
       import collections
       output = collections.defaultdict(int)
       from xcbgen import xtypes
-    EOS
+    PYTHON
   end
 end

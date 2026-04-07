@@ -1,8 +1,8 @@
 class Aespipe < Formula
   desc "AES encryption or decryption for pipes"
   homepage "https://loop-aes.sourceforge.net/"
-  url "https://loop-aes.sourceforge.net/aespipe/aespipe-v2.4h.tar.bz2"
-  sha256 "eab311fc26ea43289bc3adf660d6270492494960725d2026ec4917294a1aba49"
+  url "https://loop-aes.sourceforge.net/aespipe/aespipe-v2.4j.tar.bz2"
+  sha256 "448fe1e58612c184951645ddd926fc5bdb64fc4f2f828c766c82aa1127e9a3e2"
   license "GPL-2.0-or-later"
 
   livecheck do
@@ -12,13 +12,14 @@ class Aespipe < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "c5c732916f232fc66c66042ea3e3e56fbaad0f6180079688318983671f2d0b2f"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "ae9d4bf8be495b08719db9ce0b76e4cca4c633fc42e3c858c2034e3dc380d0b3"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "6f02f0acc25dd503fb39b2497f3c7fc62cf9b920f9525dfabc9e6f17f5585453"
-    sha256 cellar: :any_skip_relocation, sonoma:         "5b19f156c0042ebe13e25ab302c4a6e49a57b7806317661a87348b4b071f6c58"
-    sha256 cellar: :any_skip_relocation, ventura:        "151c9bd206f7b2c720436867f75b543ebb037e3844124ae5e86a726945cf51e3"
-    sha256 cellar: :any_skip_relocation, monterey:       "dff5d59e8ee2b457642e710e267a26157f41a1ed567cf3cc5c012aa62e1e72b2"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "9b16cb6c0e9177020073efa7fc9e94df35df98e00a9724b52f69af90cdd66374"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "5fc60a58b6bd7edc3b66eb41f00db8c6b5cd875ba16451ea1d17cb760e3f9240"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "30d621d103de66d7f34cb29a9b75022c1074d510880d7e953062569a6411c9d1"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "4ca22c2423a32c3060e7a0bff95254c3051fd3a6af36e110620b28d1426bf5c3"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "d0e76b53b8dff2ff1f1141f2c8ba3f1f779019d92ffdd3c18be26850cf60176d"
+    sha256 cellar: :any_skip_relocation, sonoma:        "4af99e0b662569c6d8c11affab727184530d174f3837d209661c59c7d11ff008"
+    sha256 cellar: :any_skip_relocation, ventura:       "0839eb2b3920448d08700403bde7c9ce6c7e6f1c01f0082763e1aa0513c00c34"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "0fa15737620b958cfcd6333d49e868b26d72e4cf6f7908b7129bfcb2b5c5c3cb"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "b78adabc6a957ed1ff8947cda33e32704dcc0104149a0347fcfd735d7ff91b78"
   end
 
   def install
@@ -29,8 +30,8 @@ class Aespipe < Formula
   test do
     (testpath/"secret").write "thisismysecrethomebrewdonttellitplease"
     msg = "Hello this is Homebrew"
-    encrypted = pipe_output("#{bin}/aespipe -P secret", msg)
-    decrypted = pipe_output("#{bin}/aespipe -P secret -d", encrypted)
+    encrypted = pipe_output("#{bin}/aespipe -P secret", msg, 0)
+    decrypted = pipe_output("#{bin}/aespipe -P secret -d", encrypted, 0)
     assert_equal msg, decrypted.gsub(/\x0+$/, "")
   end
 end

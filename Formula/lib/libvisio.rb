@@ -1,10 +1,10 @@
 class Libvisio < Formula
   desc "Interpret and import Visio diagrams"
   homepage "https://wiki.documentfoundation.org/DLP/Libraries/libvisio"
-  url "https://dev-www.libreoffice.org/src/libvisio/libvisio-0.1.7.tar.xz"
-  sha256 "8faf8df870cb27b09a787a1959d6c646faa44d0d8ab151883df408b7166bea4c"
+  url "https://dev-www.libreoffice.org/src/libvisio/libvisio-0.1.10.tar.xz"
+  sha256 "9e9eff75112d4d92d92262ad7fc2599c21e26f8fc5ba54900efdc83c0501e472"
   license "MPL-2.0"
-  revision 9
+  revision 2
 
   livecheck do
     url "https://dev-www.libreoffice.org/src/"
@@ -12,25 +12,26 @@ class Libvisio < Formula
   end
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any,                 arm64_sonoma:   "9bfe32f374fdb4df86bf8ebc699f3aa29812590301e9cf081b2bb84b0b99467b"
-    sha256 cellar: :any,                 arm64_ventura:  "e0c7e7d053872d13fb45dbab46fa56f56da4c1870102af9f099be704abfbed85"
-    sha256 cellar: :any,                 arm64_monterey: "35c16739c618799fba69e03d20f12721acfeb83dde4145cde6858d18c787c71a"
-    sha256 cellar: :any,                 sonoma:         "1b2b6787013e9a518bb237c218d860e229c8b3469d7a1770ced6d94d1ee8d170"
-    sha256 cellar: :any,                 ventura:        "2963b1b99018b111a783072a9d6abd0a02fe229e22a25d3c8ba0f6265069831a"
-    sha256 cellar: :any,                 monterey:       "b253cdf2cecb4346c3f09299e2e4231fede1f68b16bcf4ae81402e2cf0204875"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "0959a2cb94e549f664c6279543101f1a53840892c0155cb3a734cc03f552feb6"
+    sha256 cellar: :any,                 arm64_tahoe:   "e241eb77c998c706f44a477749306d05bbc0b8217679cba715b97ede9f9ec2b6"
+    sha256 cellar: :any,                 arm64_sequoia: "9cdbc5cb4a38eb26f6d184e381df163a62eba6f29611c4f7e7be3bd2b0658ec7"
+    sha256 cellar: :any,                 arm64_sonoma:  "e392fa4282309aa0d095e2a736a1f4e390d74d072edbe27e8b2451779fcdc750"
+    sha256 cellar: :any,                 sonoma:        "26419e2bf884b48b7d94dfdf19de9bbc8f118c89585f1d83818b90e46742c867"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "0f05a917fed1e4685878ed8b3821a5ba5cfc481ce5f4dca4ec6195bb985e4b6c"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "69d9ebc9fa47e7fb49aa8d379935dee191957a24dbabb7b40d23ec0c0bd76159"
   end
 
   depends_on "boost" => :build
-  depends_on "pkg-config" => :build
-  depends_on "icu4c"
+  depends_on "pkgconf" => :build
+  depends_on "icu4c@78"
   depends_on "librevenge"
 
   uses_from_macos "gperf" => :build
   uses_from_macos "libxml2"
 
   def install
+    # icu4c 75+ needs C++17
+    ENV.append "CXXFLAGS", "-std=gnu++17"
+
     system "./configure", "--disable-silent-rules",
                           "--disable-static",
                           "--disable-tests",
@@ -40,7 +41,7 @@ class Libvisio < Formula
   end
 
   test do
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include <librevenge-stream/librevenge-stream.h>
       #include <libvisio/VisioDocument.h>
       int main() {
@@ -48,7 +49,7 @@ class Libvisio < Formula
         libvisio::VisioDocument::isSupported(&docStream);
         return 0;
       }
-    EOS
+    CPP
     system ENV.cxx, "test.cpp", "-o", "test",
                     "-lrevenge-stream-0.0",
                     "-I#{Formula["librevenge"].include}/librevenge-0.0",

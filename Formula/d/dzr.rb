@@ -1,19 +1,19 @@
 class Dzr < Formula
   desc "Command-line Deezer.com player"
   homepage "https://github.com/yne/dzr"
-  url "https://github.com/yne/dzr/archive/refs/tags/240817.tar.gz"
-  sha256 "cea1dacdf600a2e7fab20056071a7ca9efaa6d264dd5b2d56a0d324ad975c675"
+  url "https://github.com/yne/dzr/archive/refs/tags/260315.tar.gz"
+  sha256 "3bf9f3121cbbd35a4d3fb83d1869d3047abe32db157705a4d68aaf441c6ea0fe"
   license "Unlicense"
   head "https://github.com/yne/dzr.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, all: "135205058a22d1265e5846eddb02c73d47ac2f673ae57011e9d4baec953dca14"
+    sha256 cellar: :any_skip_relocation, all: "3cb40f558bc5c55bb3dcde6b46dccd1073e7a72e218646471f261b409be09a15"
   end
 
   depends_on "dialog"
-  depends_on "jq"
   depends_on "mpv"
-  uses_from_macos "curl"
+
+  uses_from_macos "jq", since: :sequoia
 
   def install
     bin.install "dzr", "dzr-url", "dzr-dec", "dzr-srt", "dzr-id3"

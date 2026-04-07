@@ -1,23 +1,20 @@
 class Pocketbase < Formula
   desc "Open source backend for your next project in 1 file"
   homepage "https://pocketbase.io/"
-  url "https://github.com/pocketbase/pocketbase/archive/refs/tags/v0.22.20.tar.gz"
-  sha256 "6bf7003af949c82f489712598b8300dd611554cc26a49a2730b7c69f5d966ed0"
+  url "https://github.com/pocketbase/pocketbase/archive/refs/tags/v0.36.8.tar.gz"
+  sha256 "c0f91bac789bffe64f8bf3afd89e74b35f4ba3146431c34daed83e0a458abcc9"
   license "MIT"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "650a244bd82e255fd39616fcadfb15bab84d698080d980abe209d42080e9c880"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "650a244bd82e255fd39616fcadfb15bab84d698080d980abe209d42080e9c880"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "650a244bd82e255fd39616fcadfb15bab84d698080d980abe209d42080e9c880"
-    sha256 cellar: :any_skip_relocation, sonoma:         "e769e6d9c9208a4120a7d23b69297d9216bd64242b7e6348c96bc6d229b624d6"
-    sha256 cellar: :any_skip_relocation, ventura:        "e769e6d9c9208a4120a7d23b69297d9216bd64242b7e6348c96bc6d229b624d6"
-    sha256 cellar: :any_skip_relocation, monterey:       "e769e6d9c9208a4120a7d23b69297d9216bd64242b7e6348c96bc6d229b624d6"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "2cde62c9e97e5336a91497f02f01f94a1ef119a9db762383fe9ffb21cecaa02c"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "1351166d9e5cd91693b7c5de9d091994ed1988fd2a08c6aeb9b8a4805956c019"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "1351166d9e5cd91693b7c5de9d091994ed1988fd2a08c6aeb9b8a4805956c019"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "1351166d9e5cd91693b7c5de9d091994ed1988fd2a08c6aeb9b8a4805956c019"
+    sha256 cellar: :any_skip_relocation, sonoma:        "368262b44e8bc3af5f720763fc87857fcda8aa9e4de2212bd8446885c968260c"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "3d842ffd782157a8a0a3e6efe0f8203e496621105266adf525b5a7e0458e5dac"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "78b79be406a34b99b6d12bb720c163eeca4dd7dc393d3a43a105dd6b82f0f689"
   end
 
   depends_on "go" => :build
-
-  uses_from_macos "netcat" => :test
 
   def install
     ENV["CGO_ENABLED"] = "0"
@@ -29,19 +26,21 @@ class Pocketbase < Formula
     assert_match "pocketbase version #{version}", shell_output("#{bin}/pocketbase --version")
 
     port = free_port
-    _, _, pid = PTY.spawn("#{bin}/pocketbase serve --dir #{testpath}/pb_data --http 127.0.0.1:#{port}")
-    sleep 5
+    PTY.spawn("#{bin}/pocketbase serve --dir #{testpath}/pb_data --http 127.0.0.1:#{port}") do |_, _, pid|
+      sleep 5
 
-    system "nc", "-z", "localhost", port
-    Process.kill "SIGINT", pid
+      assert_match "API is healthy", shell_output("curl -s http://localhost:#{port}/api/health")
 
-    assert_predicate testpath/"pb_data", :exist?, "pb_data directory should exist"
-    assert_predicate testpath/"pb_data", :directory?, "pb_data should be a directory"
+      assert_path_exists testpath/"pb_data", "pb_data directory should exist"
+      assert_predicate testpath/"pb_data", :directory?, "pb_data should be a directory"
 
-    assert_predicate testpath/"pb_data/data.db", :exist?, "pb_data/data.db should exist"
-    assert_predicate testpath/"pb_data/data.db", :file?, "pb_data/data.db should be a file"
+      assert_path_exists testpath/"pb_data/data.db", "pb_data/data.db should exist"
+      assert_predicate testpath/"pb_data/data.db", :file?, "pb_data/data.db should be a file"
 
-    assert_predicate testpath/"pb_data/logs.db", :exist?, "pb_data/logs.db should exist"
-    assert_predicate testpath/"pb_data/logs.db", :file?, "pb_data/logs.db should be a file"
+      assert_path_exists testpath/"pb_data/auxiliary.db", "pb_data/auxiliary.db should exist"
+      assert_predicate testpath/"pb_data/auxiliary.db", :file?, "pb_data/auxiliary.db should be a file"
+    ensure
+      Process.kill "TERM", pid
+    end
   end
 end

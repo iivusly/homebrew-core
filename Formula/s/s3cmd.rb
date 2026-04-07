@@ -10,20 +10,21 @@ class S3cmd < Formula
   head "https://github.com/s3tools/s3cmd.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "cb8d82a6476daf7e1069516fc934dfdafde4efb90c5b8dc6cc611d312d2910d0"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "4b5e0b92c1081b0b87818b8a6550c7bfba1352af37b8472e71f22912c9c1116a"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "098c363759f09a7beb68b69601b83fd94d4a41cdc5a2dac1d591ebf635d0c03d"
-    sha256 cellar: :any_skip_relocation, sonoma:         "6feed405fafd7adc8d59b976fd079d06b00cf8d4d5cbfe1f662ca2268f84a358"
-    sha256 cellar: :any_skip_relocation, ventura:        "fdfd52a2bccbe6d41e7b5d81deb24a0b64d34030f374db37a3ca3a1c47e0a03c"
-    sha256 cellar: :any_skip_relocation, monterey:       "10fc03d1017f9455592e87d770033594252b0bec8b07c881d9f55e3979ef6a42"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "f61705a20689c0d6ba5480e0fc15970a4951fbdb74e1cb124a81ca047d641fc0"
+    rebuild 2
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "6aeb3a68ea12a0f0a2f8027d4f91d99e6552fa148533c440133a1d1f48c45028"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "6aeb3a68ea12a0f0a2f8027d4f91d99e6552fa148533c440133a1d1f48c45028"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "6aeb3a68ea12a0f0a2f8027d4f91d99e6552fa148533c440133a1d1f48c45028"
+    sha256 cellar: :any_skip_relocation, sonoma:        "e75a71a49e2e70e1fa9028dc92bae05d58d14d808f5dbd23b7c46ed439002992"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "c56660a7bd7d5cb3d0dba4eed501a788dc3931f4693e03517bf5755e9aa53a8c"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "c56660a7bd7d5cb3d0dba4eed501a788dc3931f4693e03517bf5755e9aa53a8c"
   end
 
-  depends_on "python@3.12"
+  depends_on "libmagic" => :no_linkage # for python-magic
+  depends_on "python@3.14"
 
   resource "python-dateutil" do
-    url "https://files.pythonhosted.org/packages/4c/c4/13b4776ea2d76c115c1d1b84579f3764ee6d57204f6be27119f13a61d0a9/python-dateutil-2.8.2.tar.gz"
-    sha256 "0123cacc1627ae19ddf3c27a5de5bd67ee4586fbdd6440d9748f8abb483d3e86"
+    url "https://files.pythonhosted.org/packages/66/c0/0c8b6ad9f17a802ee498c46e004a0eb49bc148f2fd230864601a86dcf6db/python-dateutil-2.9.0.post0.tar.gz"
+    sha256 "37dd54208da7e1cd875388217d5e00ebd4179249f90fb72437e91a35459a0ad3"
   end
 
   resource "python-magic" do
@@ -32,16 +33,23 @@ class S3cmd < Formula
   end
 
   resource "six" do
-    url "https://files.pythonhosted.org/packages/71/39/171f1c67cd00715f190ba0b100d606d440a28c93c7714febeca8b79af85e/six-1.16.0.tar.gz"
-    sha256 "1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"
+    url "https://files.pythonhosted.org/packages/94/e7/b2c673351809dca68a0e064b6af791aa332cf192da575fd474ed7d6f16a2/six-1.17.0.tar.gz"
+    sha256 "ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81"
   end
 
   def install
-    virtualenv_install_with_resources(link_manpages: true)
+    virtualenv_install_with_resources
   end
 
   test do
-    assert_match ".s3cfg: None", shell_output("#{bin}/s3cmd ls s3://brewtest 2>&1", 78)
+    (testpath/".s3cfg").write <<~INI
+      [default]
+      access_key = FAKE_KEY
+      secret_key = FAKE_SECRET
+    INI
+    output = shell_output("#{bin}/s3cmd ls s3://brewtest 2>&1", 77)
+    assert_match "ERROR: S3 error: 403 (InvalidAccessKeyId)", output
+
     assert_match "s3cmd version #{version}", shell_output("#{bin}/s3cmd --version")
   end
 end

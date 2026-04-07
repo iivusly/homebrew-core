@@ -8,6 +8,8 @@ class Ktmpl < Formula
 
   bottle do
     rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:    "7a4f4f2bafee96a36ab50f17f2c89af0c75c46269cd2f1ebb35de8de69984866"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia:  "2dc088f8bdd186bd390a9f26861ce4eaad7188aa36c5d8e269d0db6e4ca8dcb8"
     sha256 cellar: :any_skip_relocation, arm64_sonoma:   "fbc4a95ff205822979bb6e785ae794efdeca86bdede06b3bc8c805a08536ce04"
     sha256 cellar: :any_skip_relocation, arm64_ventura:  "e549a6d1bf1f7d482349d5fcd6b592f7fe2281e2299ac0d8ecc1e8b45c3be605"
     sha256 cellar: :any_skip_relocation, arm64_monterey: "1714ecf6633220ed65b1c3283862d889552d8c189500614586501f72d4a6e863"
@@ -17,6 +19,7 @@ class Ktmpl < Formula
     sha256 cellar: :any_skip_relocation, monterey:       "058e0b3999bd65c216e64d22e57f2fd82d4a602cf4f39ef6d84c3de5d47deb78"
     sha256 cellar: :any_skip_relocation, big_sur:        "8339361fc53cd0ede0a635cb1dfb808068b4615b477de71a3df35607edec9149"
     sha256 cellar: :any_skip_relocation, catalina:       "77dbcd12d216cfa5bfc3ac870046630a86e13ce9936a92c3f7a99d1a91dd3a9d"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "2a12fdd012882fd444cee9c9d8e17f5f1d2a55542bde2a4564b3617a640ebc80"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "ee2d87ec29cf08bcbc3c0c32d4a818f45cda4ce17ae6006e1185b1fa3cd25db1"
   end
 
@@ -27,7 +30,7 @@ class Ktmpl < Formula
   end
 
   test do
-    (testpath/"test.yml").write <<~EOS
+    (testpath/"test.yml").write <<~YAML
       ---
       kind: "Template"
       apiVersion: "v1"
@@ -50,7 +53,7 @@ class Ktmpl < Formula
           description: "The port the service should run on"
           required: true
           parameterType: "int"
-    EOS
+    YAML
     system bin/"ktmpl", "test.yml", "-p", "PORT", "8080"
   end
 end

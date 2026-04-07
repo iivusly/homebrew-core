@@ -1,19 +1,17 @@
 class Libgr < Formula
   desc "GR framework: a graphics library for visualisation applications"
   homepage "https://gr-framework.org/"
-  url "https://github.com/sciapp/gr/archive/refs/tags/v0.73.7.tar.gz"
-  sha256 "2584727b1413a337ef14daae1e61bdc5c946403031695b42ecfbf8bc1888d132"
+  url "https://github.com/sciapp/gr/archive/refs/tags/v0.73.24.tar.gz"
+  sha256 "6cf573ca23cc08e7410355960a36ae9127a4c06241b05341bb974abd2ceb1b32"
   license "MIT"
-  revision 1
 
   bottle do
-    sha256 arm64_sonoma:   "fec336ec1dbb1c3566ce08deee9d7fd7e6b7549132ed2e22d900bf9dbef0c9ce"
-    sha256 arm64_ventura:  "becdedea5be352b8081b27dd59364024963840be9f61f09a2c78bcd355b7b27a"
-    sha256 arm64_monterey: "9815c78d0a03182f7e56b00ec740381394c5f83b0960a9bb8539de046215d93c"
-    sha256 sonoma:         "587f96c372ad04a8d92a541732fc0188abbcc54ddc0ca12435a8e842d9098d08"
-    sha256 ventura:        "bc3a26e21702baa178c3a6e02ba3aca677a57e339aca72ef5750dcb4f50d2769"
-    sha256 monterey:       "fc960efd05a90df2e5a8d05f78de301274ae66774da3ef04c97be5e7149eca43"
-    sha256 x86_64_linux:   "7a26ce524943d35575a9750c014937c626f00bc84d79ee4febb3672cc2d8f065"
+    sha256 arm64_tahoe:   "6b92d7f808bdc4f7391e3753a6be77b0e50eb962360379671abec40de1917c60"
+    sha256 arm64_sequoia: "4d6cf7eb32443dad295b6d1ce362ffb776a653e5ca3c72b46edaff7aa2c00f6c"
+    sha256 arm64_sonoma:  "b800f89319b9fc5a305ba3d5e16b289ce252e1e7c1fd3970af0308b488c06d3b"
+    sha256 sonoma:        "1158e51122c0fd6784f580caf840455a3ee249ce5c3335fb5445c97eb1f3344c"
+    sha256 arm64_linux:   "a1922f441a7f6c2097859b9ff876c8e8c2147d0be8ea0c86606090a5bb67a0aa"
+    sha256 x86_64_linux:  "059ed00ec068a771c925441c64dd1a266f11b4a57f9e9b18e87a4335454c217b"
   end
 
   depends_on "cmake" => :build
@@ -26,15 +24,14 @@ class Libgr < Formula
   depends_on "libtiff"
   depends_on "pixman"
   depends_on "qhull"
-  depends_on "qt"
+  depends_on "qtbase"
   depends_on "zeromq"
-
-  uses_from_macos "zlib"
 
   on_linux do
     depends_on "libx11"
     depends_on "libxt"
     depends_on "mesa"
+    depends_on "zlib-ng-compat"
   end
 
   def install
@@ -44,7 +41,7 @@ class Libgr < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <stdio.h>
       #include <gr.h>
 
@@ -60,11 +57,11 @@ class Libgr < Formula
           gr_emergencyclosegks();
           return 0;
       }
-    EOS
+    C
 
     system ENV.cc, "test.c", "-o", "test", "-I#{include}", "-L#{lib}", "-lGR"
     system "./test"
 
-    assert_predicate testpath/"test.png", :exist?
+    assert_path_exists testpath/"test.png"
   end
 end

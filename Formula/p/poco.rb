@@ -1,10 +1,11 @@
 class Poco < Formula
   desc "C++ class libraries for building network and internet-based applications"
   homepage "https://pocoproject.org/"
-  url "https://pocoproject.org/releases/poco-1.13.3/poco-1.13.3-all.tar.gz"
-  sha256 "4ddb6a8f8c7a2f190eacb27d886f3913fa945cdbd2acd2d66029a0ec7ff06af0"
+  url "https://pocoproject.org/releases/poco-1.15.1/poco-1.15.1-all.tar.bz2"
+  sha256 "4fac8f0faaff69623b742edfe0bdfba1804ddb42286bcd8f5aa83e89b4eb4b4f"
   license "BSL-1.0"
-  head "https://github.com/pocoproject/poco.git", branch: "master"
+  compatibility_version 2
+  head "https://github.com/pocoproject/poco.git", branch: "main"
 
   livecheck do
     url "https://pocoproject.org/releases/"
@@ -12,22 +13,26 @@ class Poco < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "0157b0a09d116cf06b48a3c72b1881b1fbbb5ed8381b3d33d610e8a52704889a"
-    sha256 cellar: :any,                 arm64_ventura:  "14578602e8263f409f53650f350f1b12604f0b1c5d383a3cbe725bb013d33e70"
-    sha256 cellar: :any,                 arm64_monterey: "0ddac0c410ae4736c2b3f08f573a3469c2c1782f3e0319961ee9ced46243a7ca"
-    sha256 cellar: :any,                 sonoma:         "7780757339153f4bcafbc573136672ccb00919940873637d12ee511a7be6b737"
-    sha256 cellar: :any,                 ventura:        "2af274bec83cfe072d1f5dece0f264547c92d00d7f1eab53f7171b5f3e39f365"
-    sha256 cellar: :any,                 monterey:       "a3186ef99d124cfe0d7eae11982a5fac52bbf822aab99350ab3a43ef6fa9336d"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "c13ac64e439e3d4a95988e224aa85fe8d8d8f22edd989100986022252d4288a5"
+    sha256 cellar: :any,                 arm64_tahoe:   "73df2a765bf6fdaeba9b4537bd072d5bb58fecb5022f92e3e4bc6c8b9fefb829"
+    sha256 cellar: :any,                 arm64_sequoia: "450e22a06a2232b0fb280d975e9432fe1a45f678f5a32f188607ecf28c322fd1"
+    sha256 cellar: :any,                 arm64_sonoma:  "f25021d032a7d516562dbc0b2986658b246be9b1e98c8d0d11f0dedbcbd93d9b"
+    sha256 cellar: :any,                 sonoma:        "531651bcf4379fdd5b41fa793efb6edb1ea78c72008c3ce0dc91d436b2ce985d"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "d59ea6fb9f6bd8d6b57d52de086f485cbb2cea71cb29b8f3bfa54a5348675a16"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "94914185a1609bbb7927d4a4cd6f3ed041f62c40d45cf1ec804c5bf5b16f847e"
   end
 
   depends_on "cmake" => :build
+  depends_on "libpng"
   depends_on "openssl@3"
   depends_on "pcre2"
+  depends_on "utf8proc"
 
   uses_from_macos "expat"
   uses_from_macos "sqlite"
-  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     args = %W[

@@ -1,19 +1,18 @@
 class SqlLanguageServer < Formula
   desc "Language Server for SQL"
   homepage "https://github.com/joe-re/sql-language-server"
-  url "https://registry.npmjs.org/sql-language-server/-/sql-language-server-1.7.0.tgz"
-  sha256 "c66e8d94863c52c34cab0865be3bac61f152e8029ba32d95778d984c8e0a49b1"
+  url "https://registry.npmjs.org/sql-language-server/-/sql-language-server-1.7.1.tgz"
+  sha256 "c92fe8ae8756f86bc893ec3dff6d85653de242eb671af0430807064db79d9cd6"
   license "MIT"
+  revision 1
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "236ad1d93cceec6914b58664d6a74deefd1fff1a40e10789c36d150bd7c14686"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "3ecc11126b7d5fb48941ae187fbcd52853d3e7669c4a28f24f4a6a6d458d5812"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "499c3ccad48b255dbdd91736fb19390c712857f25b7940468a6591db647a6af9"
-    sha256 cellar: :any_skip_relocation, sonoma:         "e833963582391c35d8330ef634dd008f0c544df422aa5e420cdb2df5de835bb8"
-    sha256 cellar: :any_skip_relocation, ventura:        "8362d4f1dad11b2b775bd243a7068663b229424b5e78f72cc2b493a097d1186b"
-    sha256 cellar: :any_skip_relocation, monterey:       "27088ae48dbff0d606e82bea3a4e06376576a631bbf9f8dcbf64fecc7f940211"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "1be90ee66b585a15ba9e4360e88d97beda26440fc581b28b2dd3907cabf2dea1"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "cf25118bc997d51a285ac4cbad9ceb6ca1e45ded96ef52c11834a30bf935d5e0"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "1250a7af843e78b2398cdbb217e9625b1f77ecdb695cdc74a173ee377c3f6f25"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "8191b922c90af4dbe2e3fce69ddf818643bd12c8ced97e454a7c0bd28e6458ea"
+    sha256 cellar: :any_skip_relocation, sonoma:        "c24bb22b07a5ba4ce0a6ee838fc5976c7bc50a7d51880f9694ad421fe5faaeb3"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "00eeaa0a119c6512fea47329da49f21c6c04f6d7832eac78d46e0f74f3339d7a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "07b1cdb55cc9429d8f2d34f30bfe5103c93efce6752d4f76cf35053616af74c0"
   end
 
   depends_on "node"

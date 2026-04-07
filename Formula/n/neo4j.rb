@@ -1,8 +1,8 @@
 class Neo4j < Formula
   desc "Robust (fully ACID) transactional property graph database"
   homepage "https://neo4j.com/"
-  url "https://neo4j.com/artifact.php?name=neo4j-community-5.23.0-unix.tar.gz"
-  sha256 "ba71776c80ff5882524e6a535c942776249cffdcd0036baf9e1a1a257722285f"
+  url "https://neo4j.com/artifact.php?name=neo4j-community-2026.03.1-unix.tar.gz"
+  sha256 "419c5a471a8b6918570da687215d7d3406983a6ae209fd3d96c2de2a90a5dcfb"
   license "GPL-3.0-or-later"
 
   livecheck do
@@ -12,31 +12,25 @@ class Neo4j < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "6a96c2cf085392c178fc5178bf4f34f64d771f85f7ecdc757efc4e2415837098"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "6a96c2cf085392c178fc5178bf4f34f64d771f85f7ecdc757efc4e2415837098"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "6a96c2cf085392c178fc5178bf4f34f64d771f85f7ecdc757efc4e2415837098"
-    sha256 cellar: :any_skip_relocation, sonoma:         "acbcc86bd703dd71220ad921843c72df30f8a73b0291d157a7d3d139f27913cf"
-    sha256 cellar: :any_skip_relocation, ventura:        "acbcc86bd703dd71220ad921843c72df30f8a73b0291d157a7d3d139f27913cf"
-    sha256 cellar: :any_skip_relocation, monterey:       "acbcc86bd703dd71220ad921843c72df30f8a73b0291d157a7d3d139f27913cf"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "6a96c2cf085392c178fc5178bf4f34f64d771f85f7ecdc757efc4e2415837098"
+    sha256 cellar: :any_skip_relocation, all: "4fc621d691b3aed7d6543816d142f695f7d0c98a994400e0a7ab4e4979c5dc64"
   end
 
   depends_on "cypher-shell"
   depends_on "openjdk@21"
 
   def install
-    env = {
-      JAVA_HOME:  Formula["openjdk@21"].opt_prefix,
-      NEO4J_HOME: libexec,
-    }
+    env = Language::Java.java_home_env("21").merge(NEO4J_HOME: libexec)
     # Remove windows files
     rm(Dir["bin/*.bat"])
 
     # Install jars in libexec to avoid conflicts
     libexec.install Dir["*"]
 
+    bash_completion.install (libexec/"bin/completion").children
+    rm_r libexec/"bin/completion"
+
     # Symlink binaries
-    bin.install Dir["#{libexec}/bin/neo4j{,-shell,-import,-shared.sh,-admin}"]
+    bin.install libexec.glob("bin/neo4j*")
     bin.env_script_all_files(libexec/"bin", env)
 
     # Adjust UDC props
@@ -46,9 +40,7 @@ class Neo4j < Formula
       server.directories.data=#{var}/neo4j/data
       server.directories.logs=#{var}/log/neo4j
     EOS
-  end
 
-  def post_install
     (var/"log/neo4j").mkpath
     (var/"neo4j").mkpath
   end
@@ -56,7 +48,7 @@ class Neo4j < Formula
   service do
     run [opt_bin/"neo4j", "console"]
     keep_alive false
-    working_dir var
+    working_dir var/"neo4j"
     log_path var/"log/neo4j.log"
     error_log_path var/"log/neo4j.log"
   end

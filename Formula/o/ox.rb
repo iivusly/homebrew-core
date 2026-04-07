@@ -1,19 +1,20 @@
 class Ox < Formula
   desc "Independent Rust text editor that runs in your terminal"
   homepage "https://github.com/curlpipe/ox"
-  url "https://github.com/curlpipe/ox/archive/refs/tags/0.4.3.tar.gz"
-  sha256 "712145c83fe3989c6b54fda685403db09fce0be8dc6a2567bc895fd6d7674d7e"
+  url "https://github.com/curlpipe/ox/archive/refs/tags/0.7.7.tar.gz"
+  sha256 "9dc869836e92beb5806739da25bf929b45bbb4173a6bffac31b762fcece74a0a"
   license "GPL-2.0-only"
   head "https://github.com/curlpipe/ox.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "de4c6ca2037cfc860687c5da09de06ff4dc2a7939b3409fb1b7f04b0fa0fa216"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "f1f0f05d876e139fd3c962f7fbc1f2a94fbdbe1f360eea27e17316cab39ca302"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "b179e21cb562842bbe4262cb856789ac344f10873da338ef90fd9e2131d8ab46"
-    sha256 cellar: :any_skip_relocation, sonoma:         "90cae569cbd52f7168855a829474426eb44a458bd5a0fa81ea58e141f24c7225"
-    sha256 cellar: :any_skip_relocation, ventura:        "760275a65b1af2fd6e706b8c586d43ab5dd7e3ba81177d6111dd64f02c3ff4c6"
-    sha256 cellar: :any_skip_relocation, monterey:       "ee4edab2d79c1f2280164247f6bc816f430b0c660d57e6b498f1cfc3d6379027"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "fb0c294d26e005ab61f3c0bc283f95eef5824e95da8787ea3b7f80b315057f81"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "0a82610add3dfd5db1da081200dc059858b37fce50d927b991f3c6c66a113279"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "8f9eb95e6a465fefc00454f9f2df68ca87ef65122639b18f8b65b2ebbf8b5240"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "23832d0a48c0c8362ec6e5794f03aae01781ded51f96f7d8266365ec24c9a3ba"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "dc6871adc3a09c2ba19334b0fdcaae54ea1eae9d6631763577a613d025385379"
+    sha256 cellar: :any_skip_relocation, sonoma:        "c468c1a3b8020dcc6a5eed5e715c64ed474501016fa48d205a1aa0e8fadadb32"
+    sha256 cellar: :any_skip_relocation, ventura:       "9fd801439a60c7ce8bbcaa72b7c2f69c5fc7d25f58fe392677f07aab9a7ab6c0"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "31fb3bc58c5857cc0aadcef6a5601cc0b4b7bb7ea2fd47b5ca12d3739d044859"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "f56fa97255719ee87aebf29c4ba0b7afdc917e399dd6dcc3788e088699136de9"
   end
 
   depends_on "rust" => :build
@@ -23,23 +24,8 @@ class Ox < Formula
   end
 
   test do
-    # Errno::EIO: Input/output error @ io_fread - /dev/pts/0
-    return if OS.linux? && ENV["HOMEBREW_GITHUB_ACTIONS"].present?
-
-    require "pty"
-    ENV["TERM"] = "xterm"
-
-    PTY.spawn(bin/"ox", "test.txt") do |r, w, pid|
-      sleep 1
-      w.write "Hello Homebrew!\n"
-      w.write "\cS"
-      sleep 1
-      w.write "\cQ"
-      r.read
-
-      assert_match "Hello Homebrew!\n", (testpath/"test.txt").read
-    ensure
-      Process.kill("TERM", pid)
-    end
+    # ox is a TUI application, hard to test in CI
+    # see https://github.com/curlpipe/ox/issues/178 for discussions
+    assert_match version.to_s, shell_output("#{bin}/ox --version")
   end
 end

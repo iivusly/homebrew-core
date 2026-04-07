@@ -1,8 +1,8 @@
 class Bde < Formula
   desc "Basic Development Environment: foundational C++ libraries used at Bloomberg"
   homepage "https://github.com/bloomberg/bde"
-  url "https://github.com/bloomberg/bde/archive/refs/tags/4.8.0.0.tar.gz"
-  sha256 "5dfad6bf701acba16b4ffb1da58d81dc26743288117b0b50ce4d7214603d909a"
+  url "https://github.com/bloomberg/bde/archive/refs/tags/4.37.0.0.tar.gz"
+  sha256 "28dfdf953f3a6864bd7b1fc97cda7ab47ef6949e4c052a1f4adcfa469a4f5021"
   license "Apache-2.0"
 
   livecheck do
@@ -11,58 +11,52 @@ class Bde < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "5795f3e1c52cb98aeec7c2678f060f2e94500fb1a9dd8b68c31dbc347ec05c9e"
-    sha256 cellar: :any,                 arm64_ventura:  "9056bcaab5bd65600019316eb42b502c30e614455faff16c0db65732389b662c"
-    sha256 cellar: :any,                 arm64_monterey: "e0fadd564b1f8dc72f43faee5705e968c3a803b9ba71b7e2a1903c8e73100fa5"
-    sha256 cellar: :any,                 sonoma:         "5d2ff14421850452e4d56031188763267f8005ff4a57fd31fcf27e6340dff60d"
-    sha256 cellar: :any,                 ventura:        "547a50de15385779bdd50fb09603b563fe1c541ba1ed8d15c305ff30db0da45b"
-    sha256 cellar: :any,                 monterey:       "df1954fe0914a593566be37c8f6bdfb69b68826bb3cad44f1352a856332ce904"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "bb2a6523e5adccbfb81cd1bf5594a6c023167a13887b8d1f5f25a5330d5bc228"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "8d6e784c41640c6b2a9b7dcb7e85a8bbd7eeb0d74487e9cad69e2a21cdd66fc1"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "9778317d4b9df7e2b3699a1dc4b50152b442f02ced6d67bfb3318429ecee2b14"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "a560426b57a1bc9e15f2806d42e74d2ac6e888636e3c3f339623ce1813d64ebd"
+    sha256 cellar: :any_skip_relocation, sonoma:        "f7fe416abe94bfd7865070a37a67b90e5bcec3964209a80d871b08b7872bc942"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "46e95e8bc700169456c93be25f402124c65949623f4a97c346d42663c4fc6ad3"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "1be1b7a8eced7a65442ba03a670d2ec47bd8bf8366f8c56b159b385e85b6eeca"
   end
 
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
-  depends_on "python@3.12" => :build
+  depends_on "pkgconf" => :build
+  depends_on "python@3.14" => :build
   depends_on "pcre2"
 
   resource "bde-tools" do
-    url "https://github.com/bloomberg/bde-tools/archive/refs/tags/4.8.0.0.tar.gz"
-    sha256 "49fdfb3a3e2c4803ba8a9bfa680cb50943c41ef1e6b1725087b877557b82bd35"
+    url "https://github.com/bloomberg/bde-tools/archive/refs/tags/4.37.0.0.tar.gz"
+    sha256 "37c0ad6fef5a7f4374005cf7a5310b05380b638b7cec62f4179b6545798ac5f7"
+
+    livecheck do
+      regex(/^v?(\d+\.\d+\.\d+\.\d+)$/i)
+    end
   end
 
   def install
-    odie "bde-tools resource needs to be updated" if version != resource("bde-tools").version
-
     (buildpath/"bde-tools").install resource("bde-tools")
 
     # Use brewed pcre2 instead of bundled sources
-    inreplace "project.cmake", "${listDir}/thirdparty/pcre2\n", ""
+    rm_r buildpath/"thirdparty/pcre2"
+    inreplace "thirdparty/CMakeLists.txt", "add_subdirectory(pcre2)\n", ""
     inreplace "groups/bdl/group/bdl.dep", "pcre2", "libpcre2-posix"
     inreplace "groups/bdl/bdlpcre/bdlpcre_regex.h", "#include <pcre2/pcre2.h>", "#include <pcre2.h>"
 
-    toolchain_file = "bde-tools/cmake/toolchains/#{OS.kernel_name.downcase}/default.cmake"
-    args = std_cmake_args + %W[
-      -DBUILD_BITNESS=64
-      -DUFID=opt_exc_mt_64_shr
-      -DCMAKE_MODULE_PATH=./bde-tools/cmake
+    args = %W[
+      -DBdeBuildSystem_DIR=#{buildpath}/bde-tools/BdeBuildSystem/
       -DCMAKE_INSTALL_RPATH=#{rpath}
-      -DCMAKE_TOOLCHAIN_FILE=#{toolchain_file}
-      -DPYTHON_EXECUTABLE=#{which("python3.12")}
+      -DPython3_EXECUTABLE=#{which("python3.14")}
     ]
 
-    system "cmake", "-S", ".", "-B", "build", *args
+    system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
-
-    # CMake install step does not conform to FHS
-    lib.install Dir[bin/"so/64/*"]
-    lib.install lib/"opt_exc_mt_shr/cmake"
   end
 
   test do
     # bde tests are incredibly performance intensive
     # test below does a simple sanity check for linking against bsl.
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include <bsl_string.h>
       #include <bslma_default.h>
       int main() {
@@ -70,7 +64,7 @@ class Bde < Formula
         bsl::string string(bslma::Default::globalAllocator());
         return 0;
       }
-    EOS
+    CPP
     system ENV.cxx, "-I#{include}", "test.cpp", "-L#{lib}", "-lbsl", "-o", "test"
     system "./test"
   end

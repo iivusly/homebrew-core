@@ -1,31 +1,29 @@
 class Lexbor < Formula
   desc "Fast embeddable web browser engine written in C with no dependencies"
   homepage "https://lexbor.com/"
-  url "https://github.com/lexbor/lexbor/archive/refs/tags/v2.3.0.tar.gz"
-  sha256 "522ad446cd01d89cb870c6561944674e897f8ada523f234d5be1f8d2d7d236b7"
+  url "https://github.com/lexbor/lexbor/archive/refs/tags/v3.0.0.tar.gz"
+  sha256 "eafaa79ef9871f0bbb1978eda8677d184f7ecdcaa203d7cd25b3f86e32c014c2"
   license "Apache-2.0"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "76084d38a071e5e5d39feb88a361e79c7dc06d54ce9e2b3358666c167d8836df"
-    sha256 cellar: :any,                 arm64_ventura:  "eccf6f7558e767bee5354ab18cc6d28c673531999900f56f4785c1e736c23ebd"
-    sha256 cellar: :any,                 arm64_monterey: "c2cfb1247d22a00a0e7f626496c2a8149db81b8e53ef1761f5de864aa76a2456"
-    sha256 cellar: :any,                 arm64_big_sur:  "31d84cbaa368851df3fbd09657e5541bfb1f93b864e197a93779918aa65567e7"
-    sha256 cellar: :any,                 sonoma:         "cdde26bb9cd722c2b56c6ff49a35a07328cd28ccc790e005d42163fe1cb1f874"
-    sha256 cellar: :any,                 ventura:        "46b1f84d2e8facefef717f69eb8da519e79ff45cd4a2d0993d3cb143f23d3e7e"
-    sha256 cellar: :any,                 monterey:       "a7ea7389870f3a69a95b04f58b4fe5ca23ea2c267146ae64ab2ca98411540f1f"
-    sha256 cellar: :any,                 big_sur:        "2a09f42f1bcdb49396ad7ad68f2417387614ff3d1a1727cce5a091fc7284dd05"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "83296bf8b7ae45dcb71f7cb6df21586dd2b026561487e7e65112d7d87a5d2bca"
+    sha256 cellar: :any,                 arm64_tahoe:   "231a737ed10d301c88fcb5c6b372411578faf9cdf22c03f2c0903454e2a0f552"
+    sha256 cellar: :any,                 arm64_sequoia: "273ee0120f9722c3158f7e92a272eb1c606b432eac36b3eed213e51548b69bbf"
+    sha256 cellar: :any,                 arm64_sonoma:  "c11c11c5e9040f456320e0e7a7ac12d9dfe9b251fd13d8a9f4e327cf1a24a752"
+    sha256 cellar: :any,                 sonoma:        "8c7eefc8862cf83d4c79daec3fae265772ce72940cf351cc3ed4c614fe8e4635"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "8eb786dd2780027958e5879c2d58bea437f491eb5fa2aa1ae94e8c03528cdf4f"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "071ce43949be15bc761f9546029b129f7510b219103025d08c069b5cc3a5c9b9"
   end
 
   depends_on "cmake" => :build
 
   def install
-    system "cmake", ".", *std_cmake_args
-    system "make", "install"
+    system "cmake", "-S", ".", "-B", "build", *std_cmake_args
+    system "cmake", "--build", "build"
+    system "cmake", "--install", "build"
   end
 
   test do
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include <lexbor/html/parser.h>
       int main() {
         static const lxb_char_t html[] = "<div>Hello, World!</div>";
@@ -36,7 +34,8 @@ class Lexbor < Formula
         lxb_html_document_destroy(document);
         return EXIT_SUCCESS;
       }
-    EOS
+    CPP
+
     system ENV.cc, "test.cpp", "-L#{lib}", "-llexbor", "-o", "test"
     system "./test"
   end

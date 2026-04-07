@@ -1,28 +1,23 @@
 class ZshFastSyntaxHighlighting < Formula
   desc "Feature-rich syntax highlighting for Zsh"
   homepage "https://github.com/zdharma-continuum/fast-syntax-highlighting"
-  url "https://github.com/zdharma-continuum/fast-syntax-highlighting/archive/refs/tags/v1.55.tar.gz"
-  sha256 "d06cea9c047ce46ad09ffd01a8489a849fc65b8b6310bd08f8bcec9d6f81a898"
+  url "https://github.com/zdharma-continuum/fast-syntax-highlighting/archive/refs/tags/v1.56.tar.gz"
+  sha256 "9e5045510ef86beae658b5fcf58e7b6c76f5b63788498b956d54bc1038faa806"
   license "BSD-3-Clause"
   head "https://github.com/zdharma-continuum/fast-syntax-highlighting.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "83b98c528f9b7705fe70b6b37a13737691f3f6eabdbb8596be5144a786624888"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "5491428e00739fd9a4f66c979e2a1cd132b42279c2088052e071797a88fb9f28"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "5491428e00739fd9a4f66c979e2a1cd132b42279c2088052e071797a88fb9f28"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "5491428e00739fd9a4f66c979e2a1cd132b42279c2088052e071797a88fb9f28"
-    sha256 cellar: :any_skip_relocation, sonoma:         "ea78e1a7342d6765b50bbf1a8a9d3328f8529ebe25f3f4fd5884ae801776f3c3"
-    sha256 cellar: :any_skip_relocation, ventura:        "196df85afadfaeac5121915b914bab28a77e6fdbf6d4bb3e5d0fc6f7e8c4dbbb"
-    sha256 cellar: :any_skip_relocation, monterey:       "196df85afadfaeac5121915b914bab28a77e6fdbf6d4bb3e5d0fc6f7e8c4dbbb"
-    sha256 cellar: :any_skip_relocation, big_sur:        "196df85afadfaeac5121915b914bab28a77e6fdbf6d4bb3e5d0fc6f7e8c4dbbb"
-    sha256 cellar: :any_skip_relocation, catalina:       "196df85afadfaeac5121915b914bab28a77e6fdbf6d4bb3e5d0fc6f7e8c4dbbb"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "5491428e00739fd9a4f66c979e2a1cd132b42279c2088052e071797a88fb9f28"
+    rebuild 2
+    sha256 cellar: :any_skip_relocation, all: "548b80e35f30d83768a48dee91e0f3e39ef7a3b1af70d65560fd15a75a5218ba"
   end
 
   uses_from_macos "zsh" => [:build, :test]
 
   def install
-    pkgshare.install Dir["*"]
+    # build an `:all` bottle.
+    inreplace %w[fast-highlight fast-theme test/parse.zsh test/to-parse.zsh],
+              "/usr/local", HOMEBREW_PREFIX
+    pkgshare.install Dir["*", ".fast-*"]
   end
 
   def caveats

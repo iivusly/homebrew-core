@@ -1,19 +1,20 @@
 class Httpd < Formula
   desc "Apache HTTP server"
   homepage "https://httpd.apache.org/"
-  url "https://dlcdn.apache.org/httpd/httpd-2.4.62.tar.bz2"
-  mirror "https://downloads.apache.org/httpd/httpd-2.4.62.tar.bz2"
-  sha256 "674188e7bf44ced82da8db522da946849e22080d73d16c93f7f4df89e25729ec"
+  url "https://www.apache.org/dyn/closer.lua?path=httpd/httpd-2.4.66.tar.bz2"
+  mirror "https://downloads.apache.org/httpd/httpd-2.4.66.tar.bz2"
+  sha256 "94d7ff2b42acbb828e870ba29e4cbad48e558a79c623ad3596e4116efcfea25a"
   license "Apache-2.0"
+  compatibility_version 1
 
   bottle do
-    sha256 arm64_sonoma:   "e07d024239ee944db52ecebb1997c75e15144b343b347788b36dce01803bd7c0"
-    sha256 arm64_ventura:  "d497edfd46070f9f4552a5535901700cd20f885b48f2a45aa8550ad50b1f7ecc"
-    sha256 arm64_monterey: "f830c872c460dfe78c2a95ac3c21a2e0f432fa7f3e4dadacc0d1026e17d11c8a"
-    sha256 sonoma:         "f487133a012b379bfebc45bc90167a27c47e2a2985623b76f336ccb987638e87"
-    sha256 ventura:        "c3069f33e1bb675a6decd0228263f43a909d0351db6059d70bad2778bc83d36b"
-    sha256 monterey:       "ae984f66ee0b60b8955b6e9720ee7733226248f0bb052d195d9f67dc05b61641"
-    sha256 x86_64_linux:   "5a26f97286ecca3915f6a93910f0c624859205eb27f32756867b03708d98212b"
+    rebuild 1
+    sha256 arm64_tahoe:   "b956fa6f4d92ab06b6722b937c7904c4002498024f18bdd64c0fbeca4c0c9ea6"
+    sha256 arm64_sequoia: "e2caacc4e115672f495eb3899cd63d550d55a9dc1c3510881a2a85e16724a9a3"
+    sha256 arm64_sonoma:  "e2e922180c73164d1a0498d13cf358e0c18143340b5b9fb23e041f33b8533487"
+    sha256 sonoma:        "42096dc5eccd673b58e9ccffc422b30bc1d7b1f467cbf0feefa553b4b1e3c233"
+    sha256 arm64_linux:   "41c524055486b594469f54971c00486545eb7139a34000d6f521c5eeacf1c450"
+    sha256 x86_64_linux:  "21deedd9de715b969402e66662ba9a618183d491b04a55dc75839db4dca38ee0"
   end
 
   depends_on "apr"
@@ -25,12 +26,15 @@ class Httpd < Formula
 
   uses_from_macos "libxcrypt"
   uses_from_macos "libxml2"
-  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     # fixup prefix references in favour of opt_prefix references
     inreplace "Makefile.in",
-      '#@@ServerRoot@@#$(prefix)#', '#@@ServerRoot@@'"##{opt_prefix}#"
+      '#@@ServerRoot@@#$(prefix)#', "\#@@ServerRoot@@##{opt_prefix}#"
     inreplace "docs/conf/extra/httpd-autoindex.conf.in",
       "@exp_iconsdir@", "#{opt_pkgshare}/icons"
     inreplace "docs/conf/extra/httpd-multilang-errordoc.conf.in",
@@ -49,11 +53,11 @@ class Httpd < Formula
     end
 
     if OS.mac?
-      libxml2 = "#{MacOS.sdk_path_if_needed}/usr"
-      zlib = "#{MacOS.sdk_path_if_needed}/usr"
+      libxml2 = "#{MacOS.sdk_for_formula(self).path}/usr"
+      zlib = "#{MacOS.sdk_for_formula(self).path}/usr"
     else
       libxml2 = Formula["libxml2"].opt_prefix
-      zlib = Formula["zlib"].opt_prefix
+      zlib = Formula["zlib-ng-compat"].opt_prefix
     end
 
     system "./configure", "--enable-layout=Slackware-FHS",
@@ -120,9 +124,7 @@ class Httpd < Formula
       s.gsub! "${prefix}/lib/httpd/modules", HOMEBREW_PREFIX/"lib/httpd/modules"
       s.gsub! Superenv.shims_path, HOMEBREW_PREFIX/"bin"
     end
-  end
 
-  def post_install
     (var/"cache/httpd").mkpath
     (var/"www").mkpath
   end
@@ -144,9 +146,9 @@ class Httpd < Formula
 
   test do
     # Ensure modules depending on zlib and xml2 have been compiled
-    assert_predicate lib/"httpd/modules/mod_deflate.so", :exist?
-    assert_predicate lib/"httpd/modules/mod_proxy_html.so", :exist?
-    assert_predicate lib/"httpd/modules/mod_xml2enc.so", :exist?
+    assert_path_exists lib/"httpd/modules/mod_deflate.so"
+    assert_path_exists lib/"httpd/modules/mod_proxy_html.so"
+    assert_path_exists lib/"httpd/modules/mod_xml2enc.so"
 
     begin
       port = free_port
@@ -165,10 +167,10 @@ class Httpd < Formula
         LoadModule mpm_prefork_module #{lib}/httpd/modules/mod_mpm_prefork.so
       EOS
 
-      pid = fork do
-        exec bin/"httpd", "-X", "-f", "#{testpath}/httpd.conf"
-      end
+      pid = spawn bin/"httpd", "-X", "-f", testpath/"httpd.conf"
+
       sleep 3
+      sleep 2 if OS.mac? && Hardware::CPU.intel?
 
       assert_match expected_output, shell_output("curl -s 127.0.0.1:#{port}")
 

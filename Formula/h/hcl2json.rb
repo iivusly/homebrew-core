@@ -1,19 +1,18 @@
 class Hcl2json < Formula
   desc "Convert HCL2 to JSON"
   homepage "https://github.com/tmccombs/hcl2json"
-  url "https://github.com/tmccombs/hcl2json/archive/refs/tags/v0.6.4.tar.gz"
-  sha256 "577009829cb3de548e1ae78f9b934cdcfafb1b5b1f3d5b2a62ceb1f6d88fff62"
+  url "https://github.com/tmccombs/hcl2json/archive/refs/tags/v0.6.9.tar.gz"
+  sha256 "df7361e4ea5f34de02a81afa06f515bc6379efeb5ab86c154c6a31def6bcb3dc"
   license "Apache-2.0"
   head "https://github.com/tmccombs/hcl2json.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "ec9a49b460d45145f06fd5290eeb0e728281e98ef0df96020014a77a224ec4b0"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "ec9a49b460d45145f06fd5290eeb0e728281e98ef0df96020014a77a224ec4b0"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "ec9a49b460d45145f06fd5290eeb0e728281e98ef0df96020014a77a224ec4b0"
-    sha256 cellar: :any_skip_relocation, sonoma:         "58c08e45591dc30fd763446d41470b5dce12ec5f7ff9ce0e170972174fbcde77"
-    sha256 cellar: :any_skip_relocation, ventura:        "58c08e45591dc30fd763446d41470b5dce12ec5f7ff9ce0e170972174fbcde77"
-    sha256 cellar: :any_skip_relocation, monterey:       "58c08e45591dc30fd763446d41470b5dce12ec5f7ff9ce0e170972174fbcde77"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "cbdd19b10ec94ff8c93405c4d482969548f8037d698e460266cacd1fb8230b95"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "c4286ac318a8016bd22785c860b1540c4022ebe1a14f61ea381ddef82035abb4"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "c4286ac318a8016bd22785c860b1540c4022ebe1a14f61ea381ddef82035abb4"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "c4286ac318a8016bd22785c860b1540c4022ebe1a14f61ea381ddef82035abb4"
+    sha256 cellar: :any_skip_relocation, sonoma:        "0647c7dc3494d335a2b583675171f0296c78e0120bbbe493fc42cf41e5cd8301"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "76f5b84b6e187aafa8abca16a9637843b6022bd4f9dcfbc576851d952d31d7b4"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ec49b1d3c0b50d2a5c44a94b605cf016d83ffc19c63bafae18402e221a0d6c83"
   end
 
   depends_on "go" => :build

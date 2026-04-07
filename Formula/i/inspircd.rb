@@ -1,10 +1,9 @@
 class Inspircd < Formula
   desc "Modular C++ Internet Relay Chat daemon"
   homepage "https://www.inspircd.org/"
-  url "https://github.com/inspircd/inspircd/archive/refs/tags/v4.2.0.tar.gz"
-  sha256 "4b07359c5528489cd312a6e1bd27a6e5161f839c62699f4d3113cb3cb50250bb"
+  url "https://github.com/inspircd/inspircd/archive/refs/tags/v4.10.0.tar.gz"
+  sha256 "2db2fb8572437c8f333061cff47c9aea6cc2ba54ad2824b962940cf1b15cc49c"
   license "GPL-2.0-only"
-  revision 1
 
   livecheck do
     url :stable
@@ -12,28 +11,21 @@ class Inspircd < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "c5c8f38c981536f79d27db389742ae2e9b2148899779ee5415bcd77db75f393f"
-    sha256 arm64_ventura:  "d13bf8a49b469297c9e106984c1d17a87b452144f4b84af1385f19c9032aff18"
-    sha256 arm64_monterey: "13cd90bd8c8e1e0788df123afca665ccf8a63ff89a3b6993cbe5753999b385ca"
-    sha256 sonoma:         "e43e20260b535df236d185d9185d45fb98bfd3e2e7517278de3d95fc7ed66313"
-    sha256 ventura:        "00efba30a1da75f9782132f8c93db0ce1ccfce1f2c5ea50c06aede04ed739a98"
-    sha256 monterey:       "4aef9bc42dbcaed6e8ca1ecb7bc8da05ce0556c5fbc4f9e04df48659f8d40b10"
-    sha256 x86_64_linux:   "f8a6aba2f020a8e1f6d65fb5e40b365b1e15a3d8ea5524b38385cb78d959d0d5"
+    sha256 arm64_tahoe:   "8717bbf510b34c120ecb46be55e7ea9fd23f5c24167ca6fc0ed2615d3cb1ef0d"
+    sha256 arm64_sequoia: "7e05298c5eaf3076c42e568101b1e91a107d6c0d514c668ba18758b98d5781d4"
+    sha256 arm64_sonoma:  "5b72ca2524c00523f1a2d796e8fd279238e5917a8d5cc40dcb43b0bffc9e36ba"
+    sha256 sonoma:        "3fd464cf947c58714567667e5d961564ca657440f8dbce7c8a1492271f428cbf"
+    sha256 arm64_linux:   "c568ed35a19ee3d085c3b34999f4f424f5572cde5cc5cdce735ca55e3cc2e0a1"
+    sha256 x86_64_linux:  "f6ad2e398d39809bce2fd10fb4ba233ac703dd05ac376d2d8bb2abf1034d4f3e"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "argon2"
   depends_on "gnutls"
   depends_on "libpq"
-  depends_on "mysql-client"
+  depends_on "mariadb-connector-c"
 
   uses_from_macos "openldap"
-
-  on_macos do
-    depends_on "openssl@3"
-    depends_on "zlib"
-    depends_on "zstd"
-  end
 
   skip_clean "data"
   skip_clean "logs"

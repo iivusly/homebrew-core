@@ -1,23 +1,19 @@
 class Microplane < Formula
   desc "CLI tool to make git changes across many repos"
   homepage "https://github.com/Clever/microplane"
-  url "https://github.com/Clever/microplane/archive/refs/tags/v0.0.34.tar.gz"
-  sha256 "289b3df07b3847fecb0d815ff552dad1b1b1e4f662eddc898ca7b1e7d81d6d7c"
+  url "https://github.com/Clever/microplane/archive/refs/tags/v0.0.37.tar.gz"
+  sha256 "437f65748272de89b8a6990f0f9fca57addf6ff6f8e4de077869976d2ce36154"
   license "Apache-2.0"
   head "https://github.com/Clever/microplane.git", branch: "master"
 
   bottle do
     rebuild 1
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "37602331969805e506841912f3d581e39089a4442ad241d2d009d2ff5bce8ea2"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "bce2fccdf3bad8a263e334f78998abfa7e25153c3bd1c66fff8e538981bd481b"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "895647aa25e00a690a137ab0fae64e72f075d6bedd3d0f9f9105acc7e3c5c90a"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "77690629610337917ade2bca586af39148e89df15ce4b1887018c1fdec12fc7d"
-    sha256 cellar: :any_skip_relocation, sonoma:         "e0da037aee498ba387dcb993b8f6735b70b8ffb98f250e08b391f5635220aa76"
-    sha256 cellar: :any_skip_relocation, ventura:        "6dc454b63246b9866a58af5a0766c074e504c050d38fd3437bdf3dbbc12211d5"
-    sha256 cellar: :any_skip_relocation, monterey:       "a0e54ff13e444e476d6eea2798aa1966937488b4e8f2472be9cf024933b74604"
-    sha256 cellar: :any_skip_relocation, big_sur:        "9b4d8f8734017c00dfb4c94d77b0eba42bc0daf01ab637a1d6b239d40b939daa"
-    sha256 cellar: :any_skip_relocation, catalina:       "bf2395a35907393bb6603b764e1dd748752ca4cd4e93b64033a6c1942e4aa5b7"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "4ca59189a783f9dc449507d44a21773beff53a90ace19c25181a6cce6ea77121"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "6e76d1c6bcd09c9b3bc0d5e70cc0b03a14c26ec0a7514d12c1f39b721c5a6729"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "6e76d1c6bcd09c9b3bc0d5e70cc0b03a14c26ec0a7514d12c1f39b721c5a6729"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "6e76d1c6bcd09c9b3bc0d5e70cc0b03a14c26ec0a7514d12c1f39b721c5a6729"
+    sha256 cellar: :any_skip_relocation, sonoma:        "53e6a5c9e2b0df68456b189f4529acb4045d18e5b22415d8ca7f598d53d4c456"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "62d36f665bd9186d9a9f79b9f4f1112256d0dfb3ec0b7c9fcc6fbd27def5c1c0"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "9f139ba0db65eb05e492aa1b33d11e10808f335dc36058e042db411ba514d7ad"
   end
 
   depends_on "go" => :build
@@ -25,7 +21,7 @@ class Microplane < Formula
   def install
     system "go", "build", *std_go_args(output: bin/"mp", ldflags: "-s -w -X main.version=#{version}")
 
-    generate_completions_from_executable(bin/"mp", "completion", base_name: "mp")
+    generate_completions_from_executable(bin/"mp", shell_parameter_format: :cobra)
   end
 
   test do

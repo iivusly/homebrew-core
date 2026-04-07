@@ -1,25 +1,24 @@
 class LibgeditGfls < Formula
   desc "Gedit Technology - File loading and saving"
   homepage "https://gitlab.gnome.org/World/gedit/libgedit-gfls"
-  url "https://gitlab.gnome.org/World/gedit/libgedit-gfls/-/archive/0.2.0/libgedit-gfls-0.2.0.tar.bz2"
-  sha256 "4a01265feb9764718463ff723d4a9f2287ee118a95739c94415d1d09a2d7a6b5"
+  url "https://gitlab.gnome.org/World/gedit/libgedit-gfls/-/archive/0.4.0/libgedit-gfls-0.4.0.tar.bz2"
+  sha256 "ce6431fa532ae8d5c43f2b84e32913744d0eb8043bd753cf9e23e225f6147d75"
   license "LGPL-3.0-or-later"
   head "https://gitlab.gnome.org/World/gedit/libgedit-gfls.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "82ac1af81efcb7893196f48966640337663111c345e800f6f61724a5d7e76fc9"
-    sha256 cellar: :any,                 arm64_ventura:  "ec53959d595fe8882ad2b174dd27b7e1b4cc95a333160f6a6a84f03b789fa753"
-    sha256 cellar: :any,                 arm64_monterey: "d25070248fbef2ace283f567ff3cbaea9f79ce1f335d5b898136da852f3d67be"
-    sha256 cellar: :any,                 sonoma:         "34f365abbd0cb49584469d32f21fd99e885f1b7981e7da34adc7535c44d781ed"
-    sha256 cellar: :any,                 ventura:        "53cec0319c92047dee1b11b34c93a2a683ff29b74c1ec13261995b87c07353f6"
-    sha256 cellar: :any,                 monterey:       "dba99132697b04b825fa5cc12aaddc490524b06d5fd2d7f5927773716ba84b11"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "0f62b44c9e7e1d3102ab86c0e9807e06ae0366f16e4b72bd704ba64d80f6459d"
+    sha256 cellar: :any, arm64_tahoe:   "91820ae5f87904f923ef6723e3929dc62d63785ebf15710600f4ce47cb705501"
+    sha256 cellar: :any, arm64_sequoia: "34cab0af8812f4ac20e28cb89b2fb5d63e7d126a7de1f2bec249bcca94608e84"
+    sha256 cellar: :any, arm64_sonoma:  "8918d916c908c7da785fd94d0b3eff1b0cd78dcebd1179c32fbdfffd35050a9f"
+    sha256 cellar: :any, sonoma:        "0abd9a21bedeffb94a7f8ca4d14915a9c0adf80ad304ea44790bd081be8d55d7"
+    sha256               arm64_linux:   "35e65f702ee0de556170df628119c689e70613278ffebdbe272b895af18cf986"
+    sha256               x86_64_linux:  "a50e4438a2f1d34617ee014754e09c7248ebf1efc848d0c74b3aec2e609da60a"
   end
 
   depends_on "gobject-introspection" => :build
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => [:build, :test]
+  depends_on "pkgconf" => [:build, :test]
   depends_on "glib"
   depends_on "gtk+3"
 
@@ -30,7 +29,7 @@ class LibgeditGfls < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <stdio.h>
       #include <gfls/gfls.h>
 
@@ -44,9 +43,9 @@ class LibgeditGfls < Formula
         gfls_finalize();
         return 0;
       }
-    EOS
+    C
 
-    flags = shell_output("pkg-config --cflags --libs libgedit-gfls-1").strip.split
+    flags = shell_output("pkgconf --cflags --libs libgedit-gfls-1").strip.split
     system ENV.cc, "test.c", "-o", "test", *flags
     assert_equal "Unsaved Document 1", shell_output("./test")
   end

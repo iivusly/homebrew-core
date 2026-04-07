@@ -1,32 +1,32 @@
 class OpenclIcdLoader < Formula
   desc "OpenCL Installable Client Driver (ICD) Loader"
   homepage "https://www.khronos.org/registry/OpenCL/"
-  url "https://github.com/KhronosGroup/OpenCL-ICD-Loader/archive/refs/tags/v2024.05.08.tar.gz"
-  sha256 "eb2c9fde125ffc58f418d62ad83131ba686cccedcb390cc7e6bb81cc5ef2bd4f"
+  url "https://github.com/KhronosGroup/OpenCL-ICD-Loader/archive/refs/tags/v2025.07.22.tar.gz"
+  sha256 "dff7a0b11ad5b63a669358e3476e3dc889a4a361674e5b69b267b944d0794142"
   license "Apache-2.0"
   head "https://github.com/KhronosGroup/OpenCL-ICD-Loader.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "cd2503a44793a75faaa97c0e50e411eb5bb193ae46eb9322aea7a332a1b1e2bb"
-    sha256 cellar: :any,                 arm64_ventura:  "23c2391187c581d54c6d342e02bdc852ec035a789a1775196363b059a31172a6"
-    sha256 cellar: :any,                 arm64_monterey: "4faca16fca250c2dccbd146e72ac7710fad836633090c2ef9418e37bfd5a63ca"
-    sha256 cellar: :any,                 sonoma:         "7b89c8f1ef6cbd4f9235247edaee7acfc3ff12634b410227b203139f68a987b7"
-    sha256 cellar: :any,                 ventura:        "8ca1ef5cf133482540244be96d726edc64bce47af8cb5455748e00bf9b302005"
-    sha256 cellar: :any,                 monterey:       "0c9ba10ff1fbda6e235e58ab191b2e4982e777a4627c92a2fff7c884182423c9"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "b609a900ab18810a10b32fbc8e25a914131bf473ad614e0d639745130c3e6b78"
+    sha256 cellar: :any,                 arm64_tahoe:   "e0d457a1acf0efbcc69f119d0cebad5a3cb5c073690e94349c3bfdcfde5f6c77"
+    sha256 cellar: :any,                 arm64_sequoia: "bf65ff7f27a7877c993902277e68ff4b88e5e49a15fbd9ceb310352dc16a5793"
+    sha256 cellar: :any,                 arm64_sonoma:  "5d863bc7eb594b7a84db8a789772d4e28fa55564c07ec34b8b2ed9e8f0936149"
+    sha256 cellar: :any,                 arm64_ventura: "3d8ba3a3c64ce7cb9f0c9a3185f8a432cd8e8bd08fb57ab8b5446f7f85db9e9a"
+    sha256 cellar: :any,                 sonoma:        "3b29127cbd3ad9bfd0c59cea68ba772ce5c1c4e323b5d566d5249a1528b869b9"
+    sha256 cellar: :any,                 ventura:       "fd9899b082534a219d434469052716a6a9f016b9a9fdc15a355b8e5ee2ee075a"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "74bad9df1b4a44f9f0675fabf03d7af9225993f5c3144f4104db82cace1d42cb"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "eaff23dec7418eeb114b986687c61f1e00aa3262d1a9d0843d06dbfe900fa4d0"
   end
 
   keg_only :shadowed_by_macos, "macOS provides OpenCL.framework"
 
   depends_on "cmake" => :build
-  depends_on "ninja" => :build
   depends_on "opencl-headers" => [:build, :test]
 
   conflicts_with "ocl-icd", because: "both install `lib/libOpenCL.so` library"
 
   def install
     inreplace "loader/icd_platform.h", "\"/etc/", "\"#{etc}/"
-    system "cmake", "-S", ".", "-B", "build", "-G", "Ninja", *std_cmake_args
+    system "cmake", "-S", ".", "-B", "build", *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
     pkgshare.install "test/loader_test"

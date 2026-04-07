@@ -3,45 +3,47 @@ class Urh < Formula
 
   desc "Universal Radio Hacker"
   homepage "https://github.com/jopohl/urh"
-  url "https://files.pythonhosted.org/packages/d8/dc/a6dcf5686e980530b23bc16936cd9c879c50da133f319f729da6d20bd95b/urh-2.9.6.tar.gz"
-  sha256 "0dee42619009361e8f5f54d48f31e1c6cf24b171c773dd38f99a34111a0945e1"
+  url "https://files.pythonhosted.org/packages/dd/75/e3ce1cd756dc47ab42166d1ecfb9a9f5e34e2fcf78aeed0b9392313dc057/urh-2.10.0.tar.gz"
+  sha256 "c9e2932bc0c7b155cfd9483c058b78d08b51c49cd041ab75a0f4a70fc6cce757"
   license "GPL-3.0-only"
-  revision 1
   head "https://github.com/jopohl/urh.git", branch: "master"
 
+  no_autobump! because: "`update-python-resources` cannot determine dependencies"
+
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "9cf0c985be519cb7a5f1451f28e242d9505aecd69e45f24e6ea5ee5348c13421"
-    sha256 cellar: :any,                 arm64_ventura:  "eb11c4f95f491213e504f5b60504b12a828caa585be5c0aec76feeca62f57ab5"
-    sha256 cellar: :any,                 arm64_monterey: "750206ac26d982f439f424f847ba0836fe8a5dcc38ee6d11365bd4c13515c371"
-    sha256 cellar: :any,                 sonoma:         "c0a2928d954e4db4233ec61cd01b51dd53a97ce5378064645da014ba0809cc2a"
-    sha256 cellar: :any,                 ventura:        "add9e8fa22725e8821e914840d7d9fb7d7264a759aa938ad71e79518f753eeee"
-    sha256 cellar: :any,                 monterey:       "d7ecf3dccb8741f280378988e79477a37b78eb6493f50cf4688582f24c697abd"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "c7249ef337f50461015896cc171db6501f3ca2b3d0b9e0664a2c32ba51fb7629"
+    sha256 cellar: :any,                 arm64_tahoe:   "d045c9c12bfa3c15c40058b62984619e91fc1e7883b39ff2693e140e806f71fc"
+    sha256 cellar: :any,                 arm64_sequoia: "21043800855ce2da2456d600a7710040f1af40e620f6e7269890cd9ce16e0b0f"
+    sha256 cellar: :any,                 arm64_sonoma:  "ac8bf70afb6a48022aa28d9cdc411b6be8d1d7b1bc6e632b25ade589f495f568"
+    sha256 cellar: :any,                 sonoma:        "cb5dc00b8b7b0a563fc01e313b2a42aab04446fb17a02577d115a725ed336e12"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "519ef56378fa53f474781233ceb35cd6fc46b21c9be649aed61089846c3b1ee1"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "07c1c8a80f51c56feeed46ceeb671839ef925ddafffefc669ce3a67fc0c5947f"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "hackrf"
   depends_on "numpy"
-  depends_on "pyqt@5"
-  depends_on "python@3.12"
+  depends_on "pyqt"
+  depends_on "python@3.14"
+
+  pypi_packages exclude_packages: "numpy"
 
   resource "cython" do
-    url "https://files.pythonhosted.org/packages/2a/97/8cc3fe7c6de4796921236a64d00ca8a95565772e57f0d3caae68d880b592/Cython-0.29.37.tar.gz"
-    sha256 "f813d4a6dd94adee5d4ff266191d1d95bf6d4164a4facc535422c021b2504cfb"
+    url "https://files.pythonhosted.org/packages/39/e1/c0d92b1258722e1bc62a12e630c33f1f842fdab53fd8cd5de2f75c6449a9/cython-3.2.3.tar.gz"
+    sha256 "f13832412d633376ffc08d751cc18ed0d7d00a398a4065e2871db505258748a6"
   end
 
   resource "psutil" do
-    url "https://files.pythonhosted.org/packages/90/c7/6dc0a455d111f68ee43f27793971cf03fe29b6ef972042549db29eec39a2/psutil-5.9.8.tar.gz"
-    sha256 "6be126e3225486dff286a8fb9a06246a5253f4c7c53b475ea5f5ac934e64194c"
+    url "https://files.pythonhosted.org/packages/e1/88/bdd0a41e5857d5d703287598cbf08dad90aed56774ea52ae071bae9071b6/psutil-7.1.3.tar.gz"
+    sha256 "6c86281738d77335af7aec228328e944b30930899ea760ecf33a4dba66be5e74"
   end
 
   resource "setuptools" do
-    url "https://files.pythonhosted.org/packages/4d/5b/dc575711b6b8f2f866131a40d053e30e962e633b332acf7cd2c24843d83d/setuptools-69.2.0.tar.gz"
-    sha256 "0ff4183f8f42cd8fa3acea16c45205521a4ef28f73c6391d8a25e92893134f2e"
+    url "https://files.pythonhosted.org/packages/18/5d/3bf57dcd21979b887f014ea83c24ae194cfcd12b9e0fda66b957c69d1fca/setuptools-80.9.0.tar.gz"
+    sha256 "f36b47402ecde768dbfafc46e8e4207b4360c654f1f3bb84475f0a28628fb19c"
   end
 
   def install
-    venv = virtualenv_create(libexec, "python3.12")
+    venv = virtualenv_create(libexec, "python3.14")
     venv.pip_install resources
     # Need to disable build isolation and install Setuptools since `urh` only
     # has a setup.py which assumes Cython and Setuptools are already installed
@@ -49,12 +51,12 @@ class Urh < Formula
   end
 
   test do
-    (testpath/"test.py").write <<~EOS
+    (testpath/"test.py").write <<~PYTHON
       from urh.util.GenericCRC import GenericCRC;
       c = GenericCRC();
       expected = [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0]
       assert(expected == c.crc([0, 1, 0, 1, 1, 0, 1, 0]).tolist())
-    EOS
+    PYTHON
     system libexec/"bin/python3", "test.py"
 
     # test command-line functionality

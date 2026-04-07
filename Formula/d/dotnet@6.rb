@@ -3,27 +3,30 @@ class DotnetAT6 < Formula
   homepage "https://dotnet.microsoft.com/"
   # Source-build tag announced at https://github.com/dotnet/source-build/discussions
   url "https://github.com/dotnet/installer.git",
-      tag:      "v6.0.133",
-      revision: "48ad8f7176f00900ff49df9fb936bc7c8c79d345"
+      tag:      "v6.0.136",
+      revision: "d638663530d923adbe0442604b7a6562127321e9"
   license "MIT"
+  revision 1
 
   bottle do
-    sha256 cellar: :any, arm64_sonoma:   "2f732d33c49d2549ca9bd05907d4e86d7c54cb5264b9bc27844118cde98fe5ea"
-    sha256 cellar: :any, arm64_monterey: "823832e04deadfb006e61f0ad100a20b6e07a38b8214ba924e77a2fe4b00d5af"
-    sha256 cellar: :any, sonoma:         "22e6078e1fc3003cad4a5d3cdcab343c76b0e4463a9f376a69a32c97aaf7d9cf"
-    sha256 cellar: :any, monterey:       "9ded0ea147313c22cc23dc5922266a649c07679321249de3a11f81fbde100be0"
-    sha256               x86_64_linux:   "56bae991404a1dc7441fada6fda22a4197f7847ba977b1734aa39bea044ea75b"
+    sha256 cellar: :any,                 arm64_tahoe:   "82ed4db4fccf6439ffd03275abba8ef8801185780eea042f7f2f445647b2058a"
+    sha256 cellar: :any,                 arm64_sequoia: "17a1b695a3859a75a1379c9ff5aa044a1e0d4517d27454ab699a88992ed4054c"
+    sha256 cellar: :any,                 arm64_sonoma:  "3842fe4efbd79ee741fddf3e27f33e9d3a14533c4a7a8b27ebc9fa6423906cf7"
+    sha256 cellar: :any,                 sonoma:        "10a9849193aa400d0542751ba82dfc7c03721f01c38a143fcf7f7bdd1e762349"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "194441cf808cb24d14994881e2f30fd0bce8f28375430f4c8c75881cc801116f"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "a66fa701d2a875604a253d37f89772910bb6aae1ed402abe5c52444f62264ecf"
   end
 
   keg_only :versioned_formula
 
   # https://dotnet.microsoft.com/en-us/platform/support/policy/dotnet-core#lifecycle
   deprecate! date: "2024-11-12", because: :unsupported
+  disable! date: "2025-11-12", because: :unsupported
 
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
-  depends_on "python@3.12" => :build
-  depends_on "icu4c"
+  depends_on "pkgconf" => :build
+  depends_on "python@3.13" => :build
+  depends_on "icu4c@77"
   depends_on "openssl@3"
 
   uses_from_macos "llvm" => :build
@@ -42,7 +45,6 @@ class DotnetAT6 < Formula
   # Apple Silicon build fails due to latest dotnet-install.sh downloading x64 dotnet-runtime.
   # We work around the issue by using an older working copy of dotnet-install.sh script.
   # Bug introduced with https://github.com/dotnet/install-scripts/pull/314
-  # TODO: Remove once script is fixed.
   # Issue ref: https://github.com/dotnet/install-scripts/issues/318
   resource "dotnet-install.sh" do
     url "https://raw.githubusercontent.com/dotnet/install-scripts/dac53157fcb7e02638507144bf5f8f019c1d23a8/src/dotnet-install.sh"
@@ -50,7 +52,6 @@ class DotnetAT6 < Formula
   end
 
   # Fixes race condition in MSBuild.
-  # TODO: Remove with 6.0.3xx or later.
   resource "homebrew-msbuild-patch" do
     url "https://github.com/dotnet/msbuild/commit/64edb33a278d1334bd6efc35fecd23bd3af4ed48.patch?full_index=1"
     sha256 "5870bcdd12164668472094a2f9f1b73a4124e72ac99bbbe43028370be3648ccd"
@@ -61,15 +62,143 @@ class DotnetAT6 < Formula
   # Issue ref: https://github.com/dotnet/source-build/issues/2795
   patch :DATA
 
+  # Backport fix to build with Clang 19
+  # Ref: https://github.com/dotnet/runtime/commit/043ae8c50dbe1c7377cf5ad436c5ac1c226aef79
+  def clang19_patch
+    <<~PATCH
+      diff --git a/src/coreclr/vm/comreflectioncache.hpp b/src/coreclr/vm/comreflectioncache.hpp
+      index 08d173e61648c6ebb98a4d7323b30d40ec351d94..12db55251d80d24e3765a8fbe6e3b2d24a12f767 100644
+      --- a/src/coreclr/vm/comreflectioncache.hpp
+      +++ b/src/coreclr/vm/comreflectioncache.hpp
+      @@ -26,6 +26,7 @@ template <class Element, class CacheType, int CacheSize> class ReflectionCache
+
+           void Init();
+
+      +#ifndef DACCESS_COMPILE
+           BOOL GetFromCache(Element *pElement, CacheType& rv)
+           {
+               CONTRACTL
+      @@ -102,6 +103,7 @@ template <class Element, class CacheType, int CacheSize> class ReflectionCache
+               AdjustStamp(TRUE);
+               this->LeaveWrite();
+           }
+      +#endif // !DACCESS_COMPILE
+
+       private:
+           // Lock must have been taken before calling this.
+      @@ -141,6 +143,7 @@ template <class Element, class CacheType, int CacheSize> class ReflectionCache
+               return CacheSize;
+           }
+
+      +#ifndef DACCESS_COMPILE
+           void AdjustStamp(BOOL hasWriterLock)
+           {
+               CONTRACTL
+      @@ -170,6 +173,7 @@ template <class Element, class CacheType, int CacheSize> class ReflectionCache
+               if (!hasWriterLock)
+                   this->LeaveWrite();
+           }
+      +#endif // !DACCESS_COMPILE
+
+           void UpdateHashTable(SIZE_T hash, int slot)
+           {
+    PATCH
+  end
+
+  # Backport fix to build with Xcode 16 (copying unixasmmacrosarm64.inc to unixasmmacrosamd64.inc for Intel macOS)
+  # Ref: https://github.com/dotnet/runtime/commit/562efd6824762dd0c1826cc99e006ad34a7e9e85
+  def xcode16_patch
+    <<~'PATCH'
+      diff --git a/src/coreclr/pal/inc/unixasmmacrosamd64.inc b/src/coreclr/pal/inc/unixasmmacrosamd64.inc
+      index 976cc825f2eb4..4997e18b39858 100644
+      --- a/src/coreclr/pal/inc/unixasmmacrosamd64.inc
+      +++ b/src/coreclr/pal/inc/unixasmmacrosamd64.inc
+      @@ -17,7 +17,12 @@
+       .endm
+
+       .macro PATCH_LABEL Name
+      +#if defined(__APPLE__)
+      +        .alt_entry C_FUNC(\Name)
+      +        .private_extern C_FUNC(\Name)
+      +#else
+               .global C_FUNC(\Name)
+      +#endif
+       C_FUNC(\Name):
+       .endm
+
+      diff --git a/src/coreclr/pal/inc/unixasmmacrosarm64.inc b/src/coreclr/pal/inc/unixasmmacrosarm64.inc
+      index 976cc825f2eb4..4997e18b39858 100644
+      --- a/src/coreclr/pal/inc/unixasmmacrosarm64.inc
+      +++ b/src/coreclr/pal/inc/unixasmmacrosarm64.inc
+      @@ -17,7 +17,12 @@
+       .endm
+
+       .macro PATCH_LABEL Name
+      +#if defined(__APPLE__)
+      +        .alt_entry C_FUNC(\Name)
+      +        .private_extern C_FUNC(\Name)
+      +#else
+               .global C_FUNC(\Name)
+      +#endif
+       C_FUNC(\Name):
+       .endm
+
+      diff --git a/src/coreclr/vm/arm64/asmhelpers.S b/src/coreclr/vm/arm64/asmhelpers.S
+      index ebfefd693f074..48c91e65a098d 100644
+      --- a/src/coreclr/vm/arm64/asmhelpers.S
+      +++ b/src/coreclr/vm/arm64/asmhelpers.S
+      @@ -176,8 +176,7 @@ NESTED_END ThePreStub, _TEXT
+
+       LEAF_ENTRY ThePreStubPatch, _TEXT
+           nop
+      -.globl C_FUNC(ThePreStubPatchLabel)
+      -C_FUNC(ThePreStubPatchLabel):
+      +PATCH_LABEL ThePreStubPatchLabel
+           ret lr
+       LEAF_END ThePreStubPatch, _TEXT
+
+      @@ -607,8 +606,12 @@ NESTED_END ResolveWorkerAsmStub, _TEXT
+       #ifdef FEATURE_READYTORUN
+
+       NESTED_ENTRY DelayLoad_MethodCall_FakeProlog, _TEXT, NoHandler
+      -C_FUNC(DelayLoad_MethodCall):
+      +#if defined(__APPLE__)
+      +    .alt_entry C_FUNC(DelayLoad_MethodCall)
+      +#endif
+           .global C_FUNC(DelayLoad_MethodCall)
+      +C_FUNC(DelayLoad_MethodCall):
+      +
+           PROLOG_WITH_TRANSITION_BLOCK
+
+           add x0, sp, #__PWTB_TransitionBlock // pTransitionBlock
+      @@ -627,8 +630,11 @@ NESTED_END DelayLoad_MethodCall_FakeProlog, _TEXT
+
+       .macro DynamicHelper frameFlags, suffix
+       NESTED_ENTRY DelayLoad_Helper\suffix\()_FakeProlog, _TEXT, NoHandler
+      -C_FUNC(DelayLoad_Helper\suffix):
+      +#if defined(__APPLE__)
+      +    .alt_entry C_FUNC(DelayLoad_Helper\suffix)
+      +#endif
+           .global C_FUNC(DelayLoad_Helper\suffix)
+      +C_FUNC(DelayLoad_Helper\suffix):
+
+           PROLOG_WITH_TRANSITION_BLOCK
+
+    PATCH
+  end
+
   def install
     if OS.linux?
-      ENV.append_path "LD_LIBRARY_PATH", Formula["icu4c"].opt_lib
+      icu4c = deps.map(&:to_formula).find { |f| f.name.match?(/^icu4c@\d+$/) }
+      ENV.append_path "LD_LIBRARY_PATH", icu4c.opt_lib if OS.linux?
       ENV.append_to_cflags "-I#{Formula["krb5"].opt_include}"
       ENV.append_to_cflags "-I#{Formula["zlib"].opt_include}"
     end
 
     (buildpath/".dotnet").install resource("dotnet-install.sh")
     (buildpath/"src/SourceBuild/tarball/patches/msbuild").install resource("homebrew-msbuild-patch")
+    (buildpath/"src/SourceBuild/tarball/patches/runtime/clang19.patch").write clang19_patch
+    (buildpath/"src/SourceBuild/tarball/patches/runtime/xcode16.patch").write xcode16_patch if OS.mac?
 
     # The source directory needs to be outside the installer directory
     (buildpath/"installer").install buildpath.children
@@ -84,26 +213,22 @@ class DotnetAT6 < Formula
                 "\\0 --cmakeargs -DCLR_CMAKE_USE_SYSTEM_LIBUNWIND=ON"
 
       # Fix Clang 15 error: definition of builtin function '__cpuid'.
-      # Remove if following fix is backported to .NET 6.0.1xx
       # Ref: https://github.com/dotnet/runtime/commit/992cf8c97cc71d4ca9a0a11e6604a6716ed4cefc
       inreplace "src/runtime/src/coreclr/vm/amd64/unixstubs.cpp",
                 /^ *void (__cpuid|__cpuidex)\([^}]*}$/,
                 "#if !__has_builtin(\\1)\n\\0\n#endif"
 
       # Fix missing macOS conditional for system unwind searching.
-      # Remove if following fix is backported to .NET 6.0.1xx
       # Ref: https://github.com/dotnet/runtime/commit/97c9a11e3e6ca68adf0c60155fa82ab3aae953a5
       inreplace "src/runtime/src/native/corehost/apphost/static/CMakeLists.txt",
                 "if(CLR_CMAKE_USE_SYSTEM_LIBUNWIND)",
                 "if(CLR_CMAKE_USE_SYSTEM_LIBUNWIND AND NOT CLR_CMAKE_TARGET_OSX)"
 
       # Work around arcade build failure with BSD `sed` due to non-compatible `-i`.
-      # Remove if following fix is backported to .NET 6.0.1xx
       # Ref: https://github.com/dotnet/arcade/commit/b8007eed82adabd50c604a9849277a6e7be5c971
       inreplace "src/arcade/eng/SourceBuild.props", "\"sed -i ", "\"sed -i.bak " if OS.mac?
 
       # Rename patch fails on case-insensitive systems like macOS
-      # TODO: Remove whenever patch is no longer used
       rename_patch = "0001-Rename-NuGet.Config-to-NuGet.config-to-account-for-a.patch"
       (Pathname("src/nuget-client/eng/source-build-patches")/rename_patch).unlink if OS.mac?
 
@@ -125,15 +250,15 @@ class DotnetAT6 < Formula
   end
 
   def caveats
-    <<~EOS
+    <<~TEXT
       For other software to find dotnet you may need to set:
         export DOTNET_ROOT="#{opt_libexec}"
-    EOS
+    TEXT
   end
 
   test do
     target_framework = "net#{version.major_minor}"
-    (testpath/"test.cs").write <<~EOS
+    (testpath/"test.cs").write <<~CSHARP
       using System;
 
       namespace Homebrew
@@ -147,8 +272,9 @@ class DotnetAT6 < Formula
           }
         }
       }
-    EOS
-    (testpath/"test.csproj").write <<~EOS
+    CSHARP
+
+    (testpath/"test.csproj").write <<~XML
       <Project Sdk="Microsoft.NET.Sdk">
         <PropertyGroup>
           <OutputType>Exe</OutputType>
@@ -164,7 +290,8 @@ class DotnetAT6 < Formula
           <Compile Include="test.cs" />
         </ItemGroup>
       </Project>
-    EOS
+    XML
+
     system bin/"dotnet", "build", "--framework", target_framework, "--output", testpath, testpath/"test.csproj"
     assert_equal "#{testpath}/test.dll,a,b,c\n",
                  shell_output("#{bin}/dotnet run --framework #{target_framework} #{testpath}/test.dll a b c")

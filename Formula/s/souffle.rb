@@ -1,30 +1,32 @@
 class Souffle < Formula
   desc "Logic Defined Static Analysis"
   homepage "https://souffle-lang.github.io"
-  url "https://github.com/souffle-lang/souffle/archive/refs/tags/2.4.1.tar.gz"
-  sha256 "08d9b19cb4a8f570ac75dea73016b6a326d87ac28fccd4afeba217ace2071587"
+  url "https://github.com/souffle-lang/souffle/archive/refs/tags/2.5.tar.gz"
+  sha256 "5d009ad6c74ccec10207d865c059716afac625759bff7c8070e529bd80385067"
   license "UPL-1.0"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "57c853a352feed0ea976729ac5e299b2422e122f42a9f29e264339586ee8e5a8"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "91fa45ba6431efada4dd59f7876f3ddbc7ccc6e320f1f71104f5c6be6eb97e7d"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "9c23a5cca7622755bea778b9c42645b2ffd747bb385f16e4397d359a6acdd357"
-    sha256 cellar: :any_skip_relocation, sonoma:         "eb94390d08fcf1eeaecab9000dd2bfbbec9c079d6dc5df593acdab40d39d1649"
-    sha256 cellar: :any_skip_relocation, ventura:        "c02a77b4ec1e0c746c6d0e59aa33664110d07ed3a6a07d5cbe03cb861d854615"
-    sha256 cellar: :any_skip_relocation, monterey:       "2992254dd9a9e5c8fca4f7cd3050907a26dd37eb646aa9fff28d0f2eafe5b98f"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "59037bee47f85f284d68fc8c57ee8703d1d79e34c6c2ffeaa004d81cf61230e1"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "9f47ca5761cd191ab3adfc4c9fbe1d9377faeed4b0a650ccdbc1143f18c31b10"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "bb1d96230756607da2975eb34cc009b26c60d83db1bb208c08dca77aa91c3202"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "267ae9e05421940f911a4d2c5a232ead5488653bb17fa08b98675fa337fb8a3e"
+    sha256 cellar: :any_skip_relocation, sonoma:        "e288491afc7774e88e0ae89ce61c994e7311ad04fd5a5cf28e6581a3c29f3493"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "a9a1eea8ebd69b2091c22e5e5e352f9f37748041848a7fcbf140e96fecc7dccb"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "98ee8cb076fe6445ca477511c59ff7407731abd8fe1e8612e1e2d249e86b6526"
   end
 
   depends_on "bison" => :build # Bison included in macOS is out of date.
   depends_on "cmake" => :build
   depends_on "mcpp" => :build
-  depends_on "pkg-config" => :build
-  depends_on macos: :catalina
+  depends_on "pkgconf" => :build
   uses_from_macos "flex" => :build
   uses_from_macos "libffi"
   uses_from_macos "ncurses"
   uses_from_macos "sqlite"
-  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     cmake_args = [
@@ -41,7 +43,7 @@ class Souffle < Formula
       s.gsub!(%r{-I.*?/src/include }, "")
       s.gsub!(%r{"source_include_dir": ".*?/src/include"}, "\"source_include_dir\": \"#{include}\"")
     end
-    system "cmake", "--build", "build", "-j", "--target", "install"
+    system "cmake", "--build", "build", "--target", "install"
     include.install Dir["src/include/*"]
     man1.install Dir["man/*"]
   end
@@ -59,8 +61,8 @@ class Souffle < Formula
     (testpath/"edge.facts").write <<~EOS
       1,2
     EOS
-    system bin/"souffle", "-F", "#{testpath}/.", "-D", "#{testpath}/.", "#{testpath}/example.dl"
-    assert_predicate testpath/"path.csv", :exist?
+    system bin/"souffle", "-F", testpath/".", "-D", testpath/".", testpath/"example.dl"
+    assert_path_exists testpath/"path.csv"
     assert_equal "1,2\n", shell_output("cat #{testpath}/path.csv")
   end
 end

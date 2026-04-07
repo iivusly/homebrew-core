@@ -1,61 +1,59 @@
 class ApachePulsar < Formula
   desc "Cloud-native distributed messaging and streaming platform"
   homepage "https://pulsar.apache.org/"
-  url "https://www.apache.org/dyn/mirrors/mirrors.cgi?action=download&filename=pulsar/pulsar-3.1.2/apache-pulsar-3.1.2-src.tar.gz"
-  mirror "https://archive.apache.org/dist/pulsar/pulsar-3.1.2/apache-pulsar-3.1.2-src.tar.gz"
-  sha256 "82270fa4c224af7979d6d4689d7a77742eb3a32a32630e052dc93739a35624e2"
+  url "https://www.apache.org/dyn/closer.lua?path=pulsar/pulsar-4.2.0/apache-pulsar-4.2.0-src.tar.gz"
+  mirror "https://archive.apache.org/dist/pulsar/pulsar-4.2.0/apache-pulsar-4.2.0-src.tar.gz"
+  sha256 "012f70996330c8c6b47c082d8c0f4028ca0a61f711f3007576c0ac114067f6bb"
   license "Apache-2.0"
-  revision 1
   head "https://github.com/apache/pulsar.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, sonoma:       "84d3eaf420f61cf8d8c1f51dbdc1ad6fcacb1b1631dd22b241ced620b2fa4f91"
-    sha256 cellar: :any_skip_relocation, ventura:      "eaca256d0c8f8152e8696142aae0d0aed390adb7ecb7349e2d61c228c38f4f07"
-    sha256 cellar: :any_skip_relocation, monterey:     "b01912fe86d28f7c4be6d79134b80d93829ac0e172e9743f4c96ad1d3ddc4028"
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "3d0a75a7e0c5167a2407a0a20b090eb6859e44374a95ec4c41a468e6627b2a70"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "ad65e3611379186ba1959a3f20eca8a80d63eabfd277b67523bdcb5b96db7172"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "a44d2bc9211542db5665769338f8da05c711ef598a47176a8fa2325d07bb359c"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "92bd985f330b35194b63ad20eadea45fe17cdc86cf0069cb70f569f11fa59062"
+    sha256 cellar: :any_skip_relocation, sonoma:        "f5568335145842cf866357523e98871c39b15397bd36f3c7e94e26a7abb50843"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "a607599400e03c1700ea8549102c33d6a889a4a6713840d6b8c70cfc4ebd698e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "5cc5a288674c7434ff517c2cd16c2c62cccd6863bf532c666f7341fa200e208d"
   end
 
-  depends_on "autoconf" => :build
-  depends_on "automake" => :build
-  depends_on "cppunit" => :build
-  depends_on "libtool" => :build
   depends_on "maven" => :build
-  depends_on "pkg-config" => :build
-  depends_on "protobuf" => :build
-  depends_on arch: :x86_64 # https://github.com/apache/pulsar/issues/16639
-  depends_on "openjdk@17"
+  depends_on "protoc-gen-grpc-java" => :build
+  depends_on "openjdk@21"
 
   def install
-    with_env("TMPDIR" => buildpath, **Language::Java.java_home_env("17")) do
-      system "mvn", "-X", "clean", "package", "-DskipTests", "-Pcore-modules"
+    # Pin gRPC Java version to that of protoc-gen-grpc-java
+    inreplace "pom.xml",
+              %r{<grpc.version>\d+(?:\.\d+)+</grpc.version>},
+              "<grpc.version>#{Formula["protoc-gen-grpc-java"].version}</grpc.version>"
+
+    # Avoid using pre-built `protoc-gen-grpc-java`
+    grpc_java_files = ["pulsar-client/pom.xml", "pulsar-functions/proto/pom.xml"]
+    plugin_artifact = "io.grpc:protoc-gen-grpc-java:${protoc-gen-grpc-java.version}:exe:${os.detected.classifier}"
+    inreplace grpc_java_files, %r{<pluginArtifact>#{Regexp.escape(plugin_artifact)}\s*</pluginArtifact>}, ""
+
+    java_home_env = Language::Java.java_home_env("21")
+    with_env(TMPDIR: buildpath, **java_home_env) do
+      system "mvn", "clean", "package", "-DskipTests", "-Pcore-modules"
     end
 
-    built_version = if build.head?
-      # This script does not need any particular version of py3 nor any libs, so both
-      # brew-installed python and system python will work.
-      Utils.safe_popen_read("python3", "src/get-project-version.py").strip
+    tarball = if build.head?
+      Dir["distribution/server/target/apache-pulsar-*-bin.tar.gz"].first
     else
-      version
+      "distribution/server/target/apache-pulsar-#{version}-bin.tar.gz"
     end
 
-    binpfx = "apache-pulsar-#{built_version}"
-    system "tar", "-xf", "distribution/server/target/#{binpfx}-bin.tar.gz"
-    libexec.install "#{binpfx}/bin", "#{binpfx}/lib", "#{binpfx}/instances", "#{binpfx}/conf", "#{binpfx}/trino"
-    libexec.glob("bin/*.cmd").map(&:unlink)
-    rm_r(libexec/"trino/bin/procname/Linux-aarch64")
-    rm_r(libexec/"trino/bin/procname/Linux-ppc64le")
-    pkgshare.install "#{binpfx}/examples"
+    libexec.mkpath
+    system "tar", "--extract", "--file", tarball, "--directory", libexec, "--strip-components=1"
+    pkgshare.install libexec/"examples"
     (etc/"pulsar").install_symlink libexec/"conf"
 
+    rm libexec.glob("bin/*.cmd")
     libexec.glob("bin/*") do |path|
-      if !path.fnmatch?("*common.sh") && !path.directory?
-        bin_name = path.basename
-        (bin/bin_name).write_env_script libexec/"bin"/bin_name, Language::Java.java_home_env("17")
-      end
-    end
-  end
+      next if !path.file? || path.fnmatch?("*common.sh")
 
-  def post_install
+      (bin/path.basename).write_env_script path, java_home_env
+    end
+
     (var/"log/pulsar").mkpath
   end
 
@@ -70,12 +68,11 @@ class ApachePulsar < Formula
     ENV["PULSAR_LOG_DIR"] = testpath
     ENV["PULSAR_STANDALONE_USE_ZOOKEEPER"] = "1"
 
-    fork do
-      exec bin/"pulsar", "standalone", "--zookeeper-dir", "#{testpath}/zk", " --bookkeeper-dir", "#{testpath}/bk"
-    end
+    spawn bin/"pulsar", "standalone", "--zookeeper-dir", testpath/"zk", "--bookkeeper-dir", testpath/"bk"
     # The daemon takes some time to start; pulsar-client will retry until it gets a connection, but emit confusing
     # errors until that happens, so sleep to reduce log spam.
     sleep 30
+    sleep 30 if OS.mac? && Hardware::CPU.intel?
 
     output = shell_output("#{bin}/pulsar-client produce my-topic --messages 'hello-pulsar'")
     assert_match "1 messages successfully produced", output

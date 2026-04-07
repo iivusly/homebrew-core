@@ -1,25 +1,31 @@
 class Cfengine < Formula
   desc "Help manage and understand IT infrastructure"
   homepage "https://cfengine.com/"
-  url "https://cfengine-package-repos.s3.amazonaws.com/tarballs/cfengine-community-3.24.0.tar.gz"
-  sha256 "5bda099d7db16dc33fee137ca8768dd9544e3c345e803289c3576bb8e2c99391"
+  url "https://cfengine-package-repos.s3.amazonaws.com/tarballs/cfengine-community-3.27.0.tar.gz"
+  sha256 "d793e830b02e09843bf8ece1efd538cd65fa0428f249bbf7e371ca52d5f97b43"
   license all_of: ["BSD-3-Clause", "GPL-2.0-or-later", "GPL-3.0-only", "LGPL-2.0-or-later"]
 
   livecheck do
     url "https://cfengine-package-repos.s3.amazonaws.com/release-data/community/releases.json"
-    regex(/["']version["']:\s*["'](\d+(?:\.\d+)+)["']/i)
+    strategy :json do |json|
+      json["releases"]&.map do |release|
+        next if release["beta"] || release["debug"]
+
+        release["version"]
+      end
+    end
   end
 
   bottle do
-    sha256 arm64_sonoma:   "18719079eb21bc965564edc3b4bd68cf3efab30ed315b03a5aae9fd85d1f466f"
-    sha256 arm64_ventura:  "119f1b3f3a22031fb2d4e3c642cc07b359f671b195759ddcdb6eb2eb40006c43"
-    sha256 arm64_monterey: "9aa1cd2fb9135ebc8ebd5c2f4b0c7ca3d759d4879ba209c08cdf3ce0137940ef"
-    sha256 sonoma:         "270fd431b6fad619d4d3184668ce7af7490710936ae42e6f52ea6b55fd6e70a1"
-    sha256 ventura:        "dfa881b76a8944a39d8f0b65740ff9a300c22106cdd586f69d25002d0fb40fc0"
-    sha256 monterey:       "c729c653b85d0470709964c2d400105182519556e885e90456000d705811c081"
-    sha256 x86_64_linux:   "191903064ba2fd218876311949c1f555f95f9e11874681021eccfbae1d8e94be"
+    sha256 arm64_tahoe:   "88253c85fccbca421d2196a0f5bc2f90156d48fe00f30da27b5f35b2710981da"
+    sha256 arm64_sequoia: "e9a9d144edc93a46a5d22e950081937a61834c5c855d6587f9dd19ee9e2f5f8a"
+    sha256 arm64_sonoma:  "d819919d8817ed210999d70b3ff83e268c628bd2ad6bb2047bcacfb9ec281bef"
+    sha256 sonoma:        "e0e0d90a26cbd07bdf1909a034fb4c928baf2e445a26b22964e1aa8a61ab05d0"
+    sha256 arm64_linux:   "8903b84dc6823ed93ce4efd43b3c8fb634690dccd7f8011526cf21b91914293b"
+    sha256 x86_64_linux:  "2d141b557648c744e4ff619b81d2590e27d1568d2bf6ad9939ce718c55c1832b"
   end
 
+  depends_on "librsync"
   depends_on "lmdb"
   depends_on "openssl@3"
   depends_on "pcre2"
@@ -32,8 +38,12 @@ class Cfengine < Formula
   end
 
   resource "masterfiles" do
-    url "https://cfengine-package-repos.s3.amazonaws.com/tarballs/cfengine-masterfiles-3.24.0.tar.gz"
-    sha256 "0611c3137cc3142d46b45055ea4473b1c115593d013ebe02121bd7304bc7ab79"
+    url "https://cfengine-package-repos.s3.amazonaws.com/tarballs/cfengine-masterfiles-3.27.0.tar.gz"
+    sha256 "84803035168af3e43c1fb25ba5f90561dec33b151ef5d5359a108a06c4c7c61d"
+
+    livecheck do
+      formula :parent
+    end
   end
 
   def install

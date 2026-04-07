@@ -7,6 +7,8 @@ class Vde < Formula
   head "https://github.com/virtualsquare/vde-2.git", branch: "master"
 
   bottle do
+    sha256 arm64_tahoe:    "7d38316ce1948eb727d590d88e81fb5c74f2ae4f0dcd9b7161266a4af1ff2e3b"
+    sha256 arm64_sequoia:  "1e3ffe05a0f354b3909f74d3374fc036156c438147f5ac8dd34a8f747071e9f8"
     sha256 arm64_sonoma:   "3d2231810ad7229ba6a68178d648ab1f13bdfe50b214cb2d299d644d66e03762"
     sha256 arm64_ventura:  "982a56825cbd1bd374001330e3492e83a1d82825ed7228d33705ffad3b927e8e"
     sha256 arm64_monterey: "0cd674a5b677c8e4deb2735884366f6a384b0867aa7483e7293e361cbaab350e"
@@ -16,6 +18,7 @@ class Vde < Formula
     sha256 monterey:       "88cc1ceea76bdf304ec6750a2c54c979b34869d853fe6942aff1b23ea213f83e"
     sha256 big_sur:        "05e4b0a57c14a91bf9fbf6afc1cda903fe07504da5545ba4de72c7bf09d53893"
     sha256 catalina:       "ff106fafad478b7380d270d0969584e753b0f3592f59b2f43dca8bc86246b2e0"
+    sha256 arm64_linux:    "522952a405fbeafae167b3a044c95156d29ee89adbe317818906e750c0edf557"
     sha256 x86_64_linux:   "d9ab4e00d44ce831749d0d4363ffee5332295292a5ebcf2d5379d64796b549d9"
   end
 
@@ -24,7 +27,7 @@ class Vde < Formula
   depends_on "libtool" => :build
 
   def install
-    system "autoreconf", "--install"
+    system "autoreconf", "--force", "--install", "--verbose"
     system "./configure", *std_configure_args
     system "make", "install"
   end

@@ -1,10 +1,9 @@
 class KimApi < Formula
   desc "Knowledgebase of Interatomic Models (KIM) API"
   homepage "https://openkim.org"
-  url "https://s3.openkim.org/kim-api/kim-api-2.3.0.txz", using: :homebrew_curl
-  sha256 "93673bb8fbc0625791f2ee67915d1672793366d10cabc63e373196862c14f991"
+  url "https://s3.openkim.org/kim-api/kim-api-2.4.2.txz"
+  sha256 "1710bd6ceaea093062e000d2308719c51cc0a2d2def1bdcb0a03df8ed867b11f"
   license "CDDL-1.0"
-  revision 1
 
   livecheck do
     url "https://openkim.org/kim-api/previous-versions/"
@@ -12,16 +11,12 @@ class KimApi < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "38c367b05aa6f93acdc85720ff28641867cf76675fe1c3f971c5490fce66e9cb"
-    sha256 cellar: :any,                 arm64_ventura:  "86f1c14a312882376a61772792e0da4265f84bdd432db6db42afd2355b4c142f"
-    sha256 cellar: :any,                 arm64_monterey: "a18d11cf459f99ca0c0f8a1d08d3f6a2ea762a1ca029e282b77227cdd3f432a9"
-    sha256 cellar: :any,                 arm64_big_sur:  "c4d038b0db6fc374be824cfa325a775f8dd8556b406b69f8bce1cd51edab6ed5"
-    sha256 cellar: :any,                 sonoma:         "92b6449a564453976bb94d098a7a04cd6542ac62f8e2245b47d604005c27b8ca"
-    sha256 cellar: :any,                 ventura:        "0ee35d2e4ef210881f5245363970d59d6ca3a8f77a03f6c09f9e229e66649b59"
-    sha256 cellar: :any,                 monterey:       "bfd052878e3b8a58ea1c496cc5c13499056af16c9ccdcdb95fa69db2f28b2525"
-    sha256 cellar: :any,                 big_sur:        "f59251974403a7a5396aef8cd77cbe28d5a614fcadfa414c3d6a41de9e7863b1"
-    sha256 cellar: :any,                 catalina:       "a02ca35858e1449c7022ca563b87367b639bd2905e1a9476029a2d01ab51d503"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "1ee5ac6fe8da70f2734003c6348e8f094b354324bd7b6976e2ceaeb0d09c6ea1"
+    sha256 cellar: :any,                 arm64_tahoe:   "f0d402382a7e3acc25fadf264e845cfd38ce6d90f3655c378131733b12b423ca"
+    sha256 cellar: :any,                 arm64_sequoia: "1181985a7e96785c5ddc7260827b287d0d0903252dc8b3322f0a99cff91be5ea"
+    sha256 cellar: :any,                 arm64_sonoma:  "a1c9e33c70217ca4bab42c68fcd75dc9f3fe85cde8b93921068d907bb66e7d56"
+    sha256 cellar: :any,                 sonoma:        "7c2d3a557941e0592e68277f76e7313d3c29587622e5c073fed418c68de78f01"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "be9b43027b8e9b74b00523c55967e4473cdf1d8eb0502d30e591b804d76a0512"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "89ab47d448baf6377f979a0c78ba00c1b5b85faa8d14a3a74026ba40df4edfea"
   end
 
   depends_on "cmake" => :build
@@ -31,8 +26,8 @@ class KimApi < Formula
   uses_from_macos "xz"
 
   def install
-    args = std_cmake_args + [
-      "-DCMAKE_INSTALL_RPATH=#{rpath}",
+    args = [
+      "-DCMAKE_INSTALL_RPATH=#{rpath};#{loader_path}/../../..",
       # adjust libexec dir
       "-DCMAKE_INSTALL_LIBEXECDIR=lib",
       # adjust directories for system collection
@@ -52,12 +47,10 @@ class KimApi < Formula
       args << "-DKIM_API_CMAKE_CXX_COMPILER=/usr/bin/g++"
     end
 
-    mkdir "build" do
-      system "cmake", "..", *args
-      system "make"
-      system "make", "docs"
-      system "make", "install"
-    end
+    system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
+    system "cmake", "--build", "build"
+    system "cmake", "--build", "build", "--target", "docs"
+    system "cmake", "--install", "build"
   end
 
   test do

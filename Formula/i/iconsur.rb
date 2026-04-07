@@ -3,20 +3,18 @@ class Iconsur < Formula
 
   desc "macOS Big Sur Adaptive Icon Generator"
   homepage "https://github.com/rikumi/iconsur"
-  # Keep extra_packages in pypi_formula_mappings.json aligned with
+  # Keep extra `pypi_packages` aligned with
   # https://github.com/rikumi/iconsur/blob/#{version}/src/fileicon.sh#L230
   url "https://registry.npmjs.org/iconsur/-/iconsur-1.7.0.tgz"
   sha256 "d732df6bbcaf1418c6f46f9148002cbc1243814692c1c0e5c0cebfcff001c4a1"
   license "MIT"
 
   bottle do
-    rebuild 2
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "41e638854049735d75d8a5817f49c5751f423ecb8d4da508fa2546c0af6092e4"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "04e27b7499dedbce8368ea0bf753b37dc0ba0aa1e40afa60fbe1200f7c07363f"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "bc350d8b15f1417e7b52a8ea40b7a3331d9153194a43e332878d5ea89dd1fb12"
-    sha256 cellar: :any_skip_relocation, sonoma:         "44693cd5a395695bf5900720a3049b9d87753c3b36d16807acf012bba65b422f"
-    sha256 cellar: :any_skip_relocation, ventura:        "83853903cd670285e187e2119a6ec16dea4a834bc36558a5821354d03391600c"
-    sha256 cellar: :any_skip_relocation, monterey:       "036e74c813e250b333a2ad2f767cfda92deacc144dad0f30e12ec6bc414ef439"
+    rebuild 5
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "3ed36e4e583cfc13793ba7b84a20be55acd4c399f16d736fccd5db0f6fba3346"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "6e69e2cec7e1593543a7ea270b85527e30397ad6adb9e6cbca698ba598592094"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "02c6747a94e5f9022f44b0c0c289df651a3090075f75aa1606247cac05c79293"
+    sha256 cellar: :any_skip_relocation, sonoma:        "395551a9edc345cfcaf5741a75d6d5b117f7a4e34691c542ae880ed7d2511359"
   end
 
   depends_on :macos
@@ -27,29 +25,41 @@ class Iconsur < Formula
   # this causes issues if a user has Homebrew Python installed (EXTERNALLY-MANAGED).
   # We instead prepare a virtualenv with all missing packages.
   on_monterey :or_newer do
-    depends_on "python@3.12"
+    depends_on "llvm" => :build if DevelopmentTools.clang_build_version <= 1699
+    depends_on "python@3.14"
+
+    fails_with :clang do
+      build 1699
+      cause "pyobjc-core uses `-fdisable-block-signature-string`"
+    end
   end
 
+  pypi_packages package_name:   "",
+                extra_packages: ["pyobjc-core", "pyobjc-framework-cocoa"]
+
   resource "pyobjc-core" do
-    url "https://files.pythonhosted.org/packages/50/d5/0b93cb9dc94ab4b78b2b7aa54c80f037e4de69897fff81a5ededa91d2704/pyobjc-core-10.1.tar.gz"
-    sha256 "1844f1c8e282839e6fdcb9a9722396c1c12fb1e9331eb68828a26f28a3b2b2b1"
+    url "https://files.pythonhosted.org/packages/e8/e9/0b85c81e2b441267bca707b5d89f56c2f02578ef8f3eafddf0e0c0b8848c/pyobjc_core-11.1.tar.gz"
+    sha256 "b63d4d90c5df7e762f34739b39cc55bc63dbcf9fb2fb3f2671e528488c7a87fe"
   end
 
   resource "pyobjc-framework-cocoa" do
-    url "https://files.pythonhosted.org/packages/5d/1d/964a0da846d49511489bd99ed705f9d85c5081fc832d0dba384c4c0d2fb2/pyobjc-framework-Cocoa-10.1.tar.gz"
-    sha256 "8faaf1292a112e488b777d0c19862d993f3f384f3927dc6eca0d8d2221906a14"
+    url "https://files.pythonhosted.org/packages/4b/c5/7a866d24bc026f79239b74d05e2cf3088b03263da66d53d1b4cf5207f5ae/pyobjc_framework_cocoa-11.1.tar.gz"
+    sha256 "87df76b9b73e7ca699a828ff112564b59251bb9bbe72e610e670a4dc9940d038"
   end
 
   def install
     system "npm", "install", *std_npm_args
 
     if MacOS.version >= :monterey
-      venv = virtualenv_create(libexec/"venv", "python3.12")
+      # Help `pyobjc-framework-cocoa` pick correct SDK after removing -isysroot from Python formula
+      ENV.append_to_cflags "-isysroot #{MacOS.sdk_path}"
+
+      venv = virtualenv_create(libexec/"venv", "python3.14")
       venv.pip_install resources
-      bin.install Dir["#{libexec}/bin/*"]
+      bin.install libexec.glob("bin/*")
       bin.env_script_all_files libexec/"bin", PATH: "#{venv.root}/bin:${PATH}"
     else
-      bin.install_symlink Dir["#{libexec}/bin/*"]
+      bin.install_symlink libexec.glob("bin/*")
     end
   end
 

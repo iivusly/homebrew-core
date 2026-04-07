@@ -1,8 +1,8 @@
 class OpenlibertyMicroprofile4 < Formula
   desc "Lightweight open framework for Java (Micro Profile 4)"
   homepage "https://openliberty.io"
-  url "https://public.dhe.ibm.com/ibmdl/export/pub/software/openliberty/runtime/release/24.0.0.8/openliberty-microProfile4-24.0.0.8.zip"
-  sha256 "9d30570471c976a7664eee9067915a19f9b5bdf4872f2e5e91da201e1e8c2a9f"
+  url "https://public.dhe.ibm.com/ibmdl/export/pub/software/openliberty/runtime/release/26.0.0.3/openliberty-microProfile4-26.0.0.3.zip"
+  sha256 "f838a95121d28469cd277a68542de9769105c4e74e79c84e14276e32d9af6dca"
   license "EPL-1.0"
 
   livecheck do
@@ -11,7 +11,7 @@ class OpenlibertyMicroprofile4 < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, all: "8a61963f4e311e01689c803154ad982bd9156b166125a866b1616c2589e3e4fd"
+    sha256 cellar: :any_skip_relocation, all: "3286f43e2e7266b2829b28ca43d10ddf676aaba6a656584c4580cd338be15fcc"
   end
 
   depends_on "openjdk"
@@ -36,12 +36,12 @@ class OpenlibertyMicroprofile4 < Formula
 
     begin
       system bin/"openliberty-microprofile4", "start"
-      assert_predicate testpath/"servers/.pid/defaultServer.pid", :exist?
+      assert_path_exists testpath/"servers/.pid/defaultServer.pid"
     ensure
       system bin/"openliberty-microprofile4", "stop"
     end
 
-    refute_predicate testpath/"servers/.pid/defaultServer.pid", :exist?
+    refute_path_exists testpath/"servers/.pid/defaultServer.pid"
     assert_match "<feature>microProfile-4.1</feature>", (testpath/"servers/defaultServer/server.xml").read
   end
 end

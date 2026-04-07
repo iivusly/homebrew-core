@@ -1,8 +1,8 @@
 class KymaCli < Formula
   desc "Kyma command-line interface"
   homepage "https://kyma-project.io"
-  url "https://github.com/kyma-project/cli/archive/refs/tags/2.20.5.tar.gz"
-  sha256 "6c39252cc15aeb4828831d040819297c9cd7a5235844ae9c9ea91dad8db02551"
+  url "https://github.com/kyma-project/cli/archive/refs/tags/3.3.1.tar.gz"
+  sha256 "6b51be95f4c2f5e7d1edc0d4b0dd60662dfcb01309ce8fd32b6bffdcf7b12cbb"
   license "Apache-2.0"
   head "https://github.com/kyma-project/cli.git", branch: "main"
 
@@ -15,13 +15,12 @@ class KymaCli < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "bff4fcdeda28c0ff582c34aa30ee171319b4478b9d6af175d949d525c6cbf5d5"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "9f4d62bc61545db83c20e731e14ed0de8d35856f88bc9d0f3ae2008f6c72f8fb"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "c5193a6b23e406ef87e9c6829e63de28888199ffdbe5bff65dec95bd9e87e07b"
-    sha256 cellar: :any_skip_relocation, sonoma:         "51ea7ae1f069f4ae9b80044ba461c314c5c8e68b1fbbcb1dfb4ab03c2aa160ed"
-    sha256 cellar: :any_skip_relocation, ventura:        "6ee34b3498729c5069494b95b08a589d4468834a2001c17e45131ed2ce53e647"
-    sha256 cellar: :any_skip_relocation, monterey:       "adafe8dcaf3bf488a2df29c7e92647fb45f097f3c532b78d7a60074a49bc60e5"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "9cb2e46ef5d6cb0ca12ae214815c9c40b6e233f403a0574f4833df8d413ff37c"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "2b2857650aad511a6859bbd23f0a8dfbc9d844b9bdfd2fd13ffed7c07d7d8e08"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "8f597a01e25e8357d2554b96a3d197bab7db3188a80e28e9a740a79043e54be3"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "bf8ca2fb70efb03f01becc66662a02ce5887fa802c8f1503b4de84b686f711b5"
+    sha256 cellar: :any_skip_relocation, sonoma:        "c36e4fb091e8ca9a70c3cf4bec4b0fa1a059f99463b64b4b8ed2a29c28322300"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "e78168e250054f1ddb267b060adab1e4c096ecebf334c674dc05b9c36254514f"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "e9e3a3051c0ab24d090f521d47063c93537c175cb0bd2abb4169c42107cefbd7"
   end
 
   depends_on "go" => :build
@@ -29,19 +28,18 @@ class KymaCli < Formula
   def install
     ldflags = %W[
       -s -w
-      -X github.com/kyma-project/cli/cmd/kyma/version.Version=#{version}
+      -X github.com/kyma-project/cli.v#{version.major}/internal/cmd/version.version=#{version}
     ]
 
-    system "go", "build", *std_go_args(output: bin/"kyma", ldflags:), "./cmd"
+    system "go", "build", *std_go_args(output: bin/"kyma", ldflags:)
 
-    generate_completions_from_executable(bin/"kyma", "completion", base_name: "kyma")
+    generate_completions_from_executable(bin/"kyma", shell_parameter_format: :cobra)
   end
 
   test do
-    touch testpath/"kubeconfig"
-    assert_match "invalid configuration",
-      shell_output("#{bin}/kyma deploy --kubeconfig ./kubeconfig 2>&1", 2)
+    assert_match "Kyma-CLI Version: #{version}", shell_output("#{bin}/kyma version")
 
-    assert_match "Kyma CLI version: #{version}", shell_output("#{bin}/kyma version 2>&1", 2)
+    output = shell_output("#{bin}/kyma alpha kubeconfig generate --token test-token --skip-extensions 2>&1", 1)
+    assert_match "try setting KUBERNETES_MASTER environment variable", output
   end
 end

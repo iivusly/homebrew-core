@@ -1,20 +1,19 @@
 class Passenger < Formula
   desc "Server for Ruby, Python, and Node.js apps via Apache/NGINX"
   homepage "https://www.phusionpassenger.com/"
-  url "https://github.com/phusion/passenger/releases/download/release-6.0.23/passenger-6.0.23.tar.gz"
-  sha256 "897555224fb11340677780d929b5099da62303b1ae15f2e7c65cd3f6d3e7920c"
+  url "https://github.com/phusion/passenger/releases/download/release-6.1.2/passenger-6.1.2.tar.gz"
+  sha256 "94400a52e536cfdd8acf2accb47badb7a67dc309452f1b05600da67343f25bf8"
   license "MIT"
-  revision 1
-  head "https://github.com/phusion/passenger.git", branch: "stable-6.0"
+  revision 3
+  head "https://github.com/phusion/passenger.git", branch: "stable-6.1"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "79f60c4023ee36c7e47b1801445cf4ba38b350cf25fcb26fe7ddc2198e52bf09"
-    sha256 cellar: :any,                 arm64_ventura:  "6c184a9ae2b1a922b6f23174b3d067ac03eab16710cd7d92d3115869c8d96446"
-    sha256 cellar: :any,                 arm64_monterey: "885f4d69b85b038c933c112df4678378bf46ad99b5a13f7c6ee1282585ab65d9"
-    sha256 cellar: :any,                 sonoma:         "5e96513e5869fcf3fcd927cfa48a43182a4f90112f825c5cfc7a181ac8ca8105"
-    sha256 cellar: :any,                 ventura:        "1311f6dba4092fc24a590aae6baef40b81a08a414ed596782ee3f60486b338aa"
-    sha256 cellar: :any,                 monterey:       "34ae177cedc8c215f6c348ec26af94ef1e1552abc86f2d8cfb341b4f66c04c2e"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "73dc0accc1d2762db2aa5fd7e91fb6216e83d3976b49c09de9569c8011acf227"
+    sha256 cellar: :any,                 arm64_tahoe:   "6b0b8243a22c0a278ac845b58d1e6d4ce75be6e9eb584dcba9215c97d958addd"
+    sha256 cellar: :any,                 arm64_sequoia: "8a002e14547aaaa78082d41ec90acd7607a7def4410a1a01a42bfe0213af6ca5"
+    sha256 cellar: :any,                 arm64_sonoma:  "ed8ba07c7da2c610cd429950d458225a4eb6e5f484c4b7c42ccaf6f7a77a806d"
+    sha256 cellar: :any,                 sonoma:        "57b8a327bd4915c0c1254b4368bf9997906ce29f94088a8ae0f7c84d537c7f74"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "6fd40d3b9ed267af8217b88dbf10a8d70403cb9dc1404bb5195158132b999434"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "d2ebfd7bddb0070acde2cfe9766db1f6f54f3d680ab5f34e294a6610d7034ea9"
   end
 
   depends_on "httpd" => :build # to build the apache2 module
@@ -22,17 +21,19 @@ class Passenger < Formula
   depends_on "apr"
   depends_on "apr-util"
   depends_on "openssl@3"
-  depends_on "pcre"
   depends_on "pcre2"
 
   uses_from_macos "xz" => :build
   uses_from_macos "curl"
   uses_from_macos "libxcrypt"
-  uses_from_macos "ruby", since: :catalina
-  uses_from_macos "zlib"
+  uses_from_macos "ruby"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
-    if OS.mac? && MacOS.version >= :mojave && MacOS::CLT.installed?
+    if OS.mac? && MacOS::CLT.installed?
       ENV["SDKROOT"] = MacOS::CLT.sdk_path(MacOS.version)
     else
       ENV.delete("SDKROOT")
@@ -72,7 +73,7 @@ class Passenger < Formula
     cp_r necessary_files, libexec, preserve: true
 
     # Allow Homebrew to create symlinks for the Phusion Passenger commands.
-    bin.install_symlink Dir["#{libexec}/bin/*"]
+    bin.install_symlink libexec.glob("bin/*")
 
     # Ensure that the Phusion Passenger commands can always find their library
     # files.
@@ -103,9 +104,6 @@ class Passenger < Formula
 
     man1.install Dir["man/*.1"]
     man8.install Dir["man/*.8"]
-
-    # See https://github.com/Homebrew/homebrew-core/pull/84379#issuecomment-910179525
-    deuniversalize_machos
   end
 
   def caveats

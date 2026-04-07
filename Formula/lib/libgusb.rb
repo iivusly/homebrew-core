@@ -18,27 +18,26 @@ class Libgusb < Formula
   end
 
   bottle do
-    rebuild 1
-    sha256 arm64_sonoma:   "83ac555e356ba4a1346d728424414da892d8b4693eb61c3e939aeb5830013f5f"
-    sha256 arm64_ventura:  "f30ca967b5667b68650b83c13dbbeb9408847264f41360610db34a4925b3421e"
-    sha256 arm64_monterey: "bc3aebd0f1043eeaa0b5b74ecaf344ac8b925cdffd427a315870ef47334f680d"
-    sha256 sonoma:         "a429e31987ac68dd367e24bec5bb34ee03342b9d438e3f11cb5d2f7245924703"
-    sha256 ventura:        "a4d2be814b655b27f7411afffbda19de4fc6c861b8f50d15b172130877c85be0"
-    sha256 monterey:       "bb83a40b7d94d2dcd8757fe253d370f66e84218139e1ba165b71c78f6301714a"
-    sha256 x86_64_linux:   "bd686b7dbf07628218465b63b67421110b24eb55e1a6d71a5aa422acb6fdd6c2"
+    rebuild 3
+    sha256 arm64_tahoe:   "b72850ea01c8cd29ea25f54a76a4bc4fc30f04fef9a8c2deb858a767f32aed60"
+    sha256 arm64_sequoia: "10c0f65e769b39908359972bacb28a546dba331e8ace790ccc1a0673fc936889"
+    sha256 arm64_sonoma:  "d5152328e9ccc7008d88d58dfaa1e9d82e18d538f999341d266e7c30c8a13e1f"
+    sha256 sonoma:        "f48eb8f462d0554baec1356735687801ab24af570a1de7d35d252147a0ebd67d"
+    sha256 arm64_linux:   "de8939012f87fd944217bd85fdbdf9edacdb7505cfe6fac9cf2e6da70e41a257"
+    sha256 x86_64_linux:  "8acc7113d4d8e45b58c64078881669fed44358d7d3d03fc9fc6852a66d5dca78"
   end
 
   depends_on "gobject-introspection" => :build
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => [:build, :test]
+  depends_on "pkgconf" => [:build, :test]
   depends_on "python-setuptools" => :build
   depends_on "vala" => :build
 
   depends_on "glib"
   depends_on "json-glib"
   depends_on "libusb"
-  depends_on "python@3.12"
+  depends_on "python@3.14"
   depends_on "usb.ids"
 
   def install
@@ -55,7 +54,7 @@ class Libgusb < Formula
   test do
     system bin/"gusbcmd", "-h"
 
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <gusb.h>
 
       int main(int argc, char *argv[]) {
@@ -63,10 +62,10 @@ class Libgusb < Formula
         g_assert_nonnull(context);
         return 0;
       }
-    EOS
+    C
 
-    pkg_config_flags = shell_output("pkg-config --cflags --libs gusb").chomp.split
-    system ENV.cc, "test.c", "-o", "test", *pkg_config_flags
+    flags = shell_output("pkgconf --cflags --libs gusb").chomp.split
+    system ENV.cc, "test.c", "-o", "test", *flags
     system "./test"
   end
 end

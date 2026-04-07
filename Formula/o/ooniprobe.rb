@@ -1,9 +1,10 @@
 class Ooniprobe < Formula
   desc "Network interference detection tool"
   homepage "https://ooni.org/"
-  url "https://github.com/ooni/probe-cli/archive/refs/tags/v3.23.0.tar.gz"
-  sha256 "ff4717e8fd0075bcb011d738e12a47a5be17deaa0b23346f354ddd6d95fed728"
+  url "https://github.com/ooni/probe-cli/archive/refs/tags/v3.29.0.tar.gz"
+  sha256 "5c5fd7aac8875f6e825b615d99b0890e6a9856b8647702318c32b1e43a6a1149"
   license "GPL-3.0-or-later"
+  head "https://github.com/ooni/probe-cli.git", branch: "master"
 
   livecheck do
     url :stable
@@ -11,19 +12,20 @@ class Ooniprobe < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "113d42d4783092e36169acf440ac6cd8d041a182d7909fd7ecc86afb6c55c3b0"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "7c4247526d2395b129b4d670badedc7fad394035980ff9268a2105b502d49693"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "db583fd8073b3bc8347768758909b9e98516e6e0cd160e40590bdfd5ba425cee"
-    sha256 cellar: :any_skip_relocation, sonoma:         "f93a68b4ea2bbea9b508800550cb0f97f798bd94c38fad34bbbbbb75c3cabc20"
-    sha256 cellar: :any_skip_relocation, ventura:        "157806bdb6f5e50a2915bd3711fb5287a0f9f90d4862fcfc992252ff48cd389d"
-    sha256 cellar: :any_skip_relocation, monterey:       "aa5eb7017a42cedc5b3317b49d07e45182ceb03641404bc6e3133e5ca44a2225"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "a3c0eea0d5b13174c5086f46bf340372f39e9d00cd00deb9e43fc9f5df6d040d"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "132117e055ba6054b4a0791a5c59ca80b094bc0e68910111aa753ca31a2b1d95"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "5d35b9e61dfc02ba4173b1303f673db3acc23fb7872af94253c15d76568f0461"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "3a93e0aa92e8bf9a26cfb80ac141087c824665a5770d67b063893f07d831a6c3"
+    sha256 cellar: :any_skip_relocation, sonoma:        "eb606d21d089fdda86cfc0e3eef4b5c671f1156a395b8c318c9998d1337585e7"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "81ad7442bbc972fe3c8a5c4be4c891f226089f6518a09eb6209a14fb6f53a5da"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "414a8e8fa70fb813587b2464c8c7b4fafab381fbdce587fa4068cc33095519f5"
   end
 
   depends_on "go" => :build
   depends_on "tor"
 
   def install
+    ENV["CGO_ENABLED"] = "1" if OS.linux? && Hardware::CPU.arm?
+
     system "go", "build", *std_go_args(ldflags: "-s -w"), "./cmd/ooniprobe"
     (var/"ooniprobe").mkpath
   end
@@ -34,7 +36,7 @@ class Ooniprobe < Formula
     # failed to sufficiently increase receive buffer size (was: 208 kiB, wanted: 2048 kiB, got: 416 kiB).
     return if OS.linux?
 
-    (testpath/"config.json").write <<~EOS
+    (testpath/"config.json").write <<~JSON
       {
         "_version": 3,
         "_informed_consent": false,
@@ -54,7 +56,7 @@ class Ooniprobe < Formula
           "collect_usage_stats": false
         }
       }
-    EOS
+    JSON
 
     mkdir_p "#{testpath}/ooni_home"
     ENV["OONI_HOME"] = "#{testpath}/ooni_home"

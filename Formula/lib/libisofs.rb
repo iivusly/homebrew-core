@@ -1,39 +1,56 @@
 class Libisofs < Formula
   desc "Library to create an ISO-9660 filesystem with various extensions"
   homepage "https://dev.lovelyhq.com/libburnia/libisofs"
-  url "https://files.libburnia-project.org/releases/libisofs-1.5.6.pl01.tar.gz"
-  version "1.5.6"
-  sha256 "ac1fd338d641744ca1fb1567917188b79bc8c2506832dd56885fec98656b9f25"
   license "GPL-2.0-or-later"
+
+  stable do
+    url "https://files.libburnia-project.org/releases/libisofs-1.5.8.tar.gz"
+    sha256 "910532653e6a56b5e4c2ef8717500d913debd5fd29f616fed15134b7522059a6"
+
+    # Fix -flat_namespace being used on Big Sur and later.
+    patch do
+      url "https://raw.githubusercontent.com/Homebrew/homebrew-core/1cf441a0/Patches/libtool/configure-pre-0.4.2.418-big_sur.diff"
+      sha256 "83af02f2aa2b746bb7225872cab29a253264be49db0ecebb12f841562d9a2923"
+    end
+  end
 
   livecheck do
     url "https://files.libburnia-project.org/releases/"
-    regex(/href=.*?libisofs[._-]v?(\d+(?:\.\d+)+)(?:[._-]pl\d+)?\.t/i)
+    regex(/href=.*?libisofs[._-]v?(\d+(?:\.\d+)+(?:[._-]pl\d+)?)\.t/i)
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "34b5564fd603417946cc498df54e7b8b59380b08259728709446efd2be7680c5"
-    sha256 cellar: :any,                 arm64_ventura:  "3ecb31fd37dae4b455187e9fafc86b965d76d998a011b9559bd3bf4b6a422e77"
-    sha256 cellar: :any,                 arm64_monterey: "3c9c7c449618b5c4325821877d77d30797b2f972c7247918efeb60456cb99c47"
-    sha256 cellar: :any,                 arm64_big_sur:  "bd20a575b9908265074276c6e008a7885dda3d5818da99e4714141da1461d205"
-    sha256 cellar: :any,                 sonoma:         "56e6b4f827a9c2b3a3a2a4773a89bac741567e242a5b69fad9b2d02aac33ee34"
-    sha256 cellar: :any,                 ventura:        "c04b4a231f71dccffcca4e4fade48e05c898e22860dc73630c8326dcc5688d23"
-    sha256 cellar: :any,                 monterey:       "fee8ce45cc44667d25010c2fcb268e4c9e3c3a0200330618513ca3eaad19cb58"
-    sha256 cellar: :any,                 big_sur:        "30b05cc10a096c6c8ba9a04b4884a83690abe966cb9604b85fb2cd139e572b46"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "f3d23202a09bdce26182a94e00cc3c412373f30a7396dbe73d6abf2dcd21d5ec"
+    sha256 cellar: :any,                 arm64_tahoe:   "7aa1c6b0014287eeb32e00df255d513edbb924f27ac4211f6a43e740af5e0ab1"
+    sha256 cellar: :any,                 arm64_sequoia: "6599e191c4349560c2cfa69fac3366517e9a4b9e4210940657717812147c9cd5"
+    sha256 cellar: :any,                 arm64_sonoma:  "1e6c244eb84c438601a29b21eb50bec77c44e5940a248f0ad24179d5d8833fb0"
+    sha256 cellar: :any,                 sonoma:        "13bfe4b276b3a352354364e99cc5f009cf8286e362d1575bdd24af551330e556"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "429afaf2deeeb76cc4e42d3d6e5e743955c4261984f9807592150e88f0967a73"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "4f4c52c8c9655e6310ab81fe2c14669a7cd24e928ec0211ff1616e678d487e47"
   end
 
-  depends_on "autoconf" => :build
-  depends_on "automake" => :build
-  depends_on "libtool"  => :build
+  head do
+    url "https://dev.lovelyhq.com/libburnia/libisofs.git", branch: "master"
+
+    depends_on "autoconf" => :build
+    depends_on "automake" => :build
+    depends_on "libtool"  => :build
+  end
+
   depends_on "libzip"
 
+  on_linux do
+    depends_on "acl"
+    depends_on "zlib-ng-compat"
+  end
+
   def install
-    # use gnu libtool instead of apple libtool
-    inreplace "bootstrap", "libtool", "glibtool"
-    # regenerate configure as release uses old version of libtool
-    # which causes flat_namespace
-    system "./bootstrap"
+    if build.head?
+      # use gnu libtool instead of apple libtool
+      inreplace "bootstrap", "libtool", "glibtool"
+      # regenerate configure as release uses old version of libtool
+      # which causes flat_namespace
+      system "./bootstrap"
+    end
 
     system "./configure", *std_configure_args
     system "make"
@@ -41,7 +58,7 @@ class Libisofs < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <stdint.h>
       #include <libisofs/libisofs.h>
 
@@ -50,7 +67,7 @@ class Libisofs < Formula
         iso_lib_version(&major, &minor, &micro);
         return 0;
       }
-    EOS
+    C
     system ENV.cc, "test.c", "-L#{lib}", "-I#{include}", "-lisofs", "-o", "test"
     system "./test"
   end

@@ -2,34 +2,33 @@ class Lc0 < Formula
   desc "Open source neural network based chess engine"
   homepage "https://lczero.org/"
   url "https://github.com/LeelaChessZero/lc0.git",
-      tag:      "v0.31.1",
-      revision: "8229737a73fff12498828d90db099914adaa4a08"
+      tag:      "v0.32.1",
+      revision: "fd71a2d921b689c5f479d3227c3806c8e272d9c5"
   license "GPL-3.0-or-later"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "4b20580ad124635d2565de067f55fab0d6663e37115b06ff75ad2cdf0b61322d"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "c2998b62f8be1dcf216104dbc1ed18156fb139811e37bf6bead68607f5cf74ee"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "2d118b214854355d4f480ccc5951afc51d4397b98fee0957d0f64b009e56f2d8"
-    sha256 cellar: :any_skip_relocation, sonoma:         "15fc89e21bf23719ba83534d1d84b9649f9421f20dad4039bd3b800c9e4e193e"
-    sha256 cellar: :any_skip_relocation, ventura:        "4efba4aa60d5d2c8b256680a75fbd87ad1631b0d613cd5ecd6802d5d6f262f46"
-    sha256 cellar: :any_skip_relocation, monterey:       "cf2605d4e7a521fa245742b315c57c0fb60050c976c1de7bc3c7b6ae81f271c9"
-    sha256                               x86_64_linux:   "fe1dabe4d6b203d5f48510a08af48fe5b644fbead57a64c47c4a27d2652421de"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "9af0c3404413f7d61bdabebed5b36f18cd46d38d67435add1737ea07c0c09849"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "d26534ed3db2d70eeb6b02f404defdfa04bc3a402437d2fc334bdac71baff11e"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "4210f76c40249e7e81c682f80edb881bbba6e6e9508d484e4fb4649ac45b42df"
+    sha256 cellar: :any_skip_relocation, tahoe:         "0864f484b7eec673ec082e6979c258db9e33243def5d23b9d003ff3d7877a42c"
+    sha256 cellar: :any_skip_relocation, sonoma:        "685a0fcf141311b503520396025e4296f9f3656582d030e854667ac07d5d4bd4"
+    sha256                               arm64_linux:   "01f90bf4ae497e1a3c8de9db65a7a85f3d3366e056eff269d2f6b0497fcda731"
+    sha256                               x86_64_linux:  "a37761e31c707318e6c92cb6b7c11567e3e1e925146270f86ec344fa0b038419"
   end
 
   depends_on "cmake" => :build
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "eigen"
 
   uses_from_macos "python" => :build # required to compile .pb files
-  uses_from_macos "zlib"
 
   on_linux do
     depends_on "openblas"
+    depends_on "zlib-ng-compat"
   end
-
-  fails_with gcc: "5" # for C++17
 
   # We use "753723" network with 15 blocks x 192 filters (from release notes)
   # Downloaded from https://training.lczero.org/networks/?show_all=0
@@ -39,6 +38,8 @@ class Lc0 < Formula
   end
 
   def install
+    ENV.append_to_cflags "-I#{Formula["eigen"].opt_include}/eigen3"
+
     args = ["-Dgtest=false", "-Dbindir=libexec"]
 
     if OS.mac?
@@ -59,9 +60,9 @@ class Lc0 < Formula
   end
 
   test do
-    assert_match "Creating backend [blas]",
+    assert_match "BLAS vendor:",
       shell_output("#{bin}/lc0 benchmark --backend=blas --nodes=1 --num-positions=1 2>&1")
-    assert_match "Creating backend [eigen]",
+    assert_match "Using Eigen",
       shell_output("#{bin}/lc0 benchmark --backend=eigen --nodes=1 --num-positions=1 2>&1")
   end
 end

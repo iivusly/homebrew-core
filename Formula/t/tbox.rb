@@ -1,22 +1,33 @@
 class Tbox < Formula
   desc "Glib-like multi-platform C library"
-  homepage "https://tboox.org/"
-  url "https://github.com/tboox/tbox/archive/refs/tags/v1.7.5.tar.gz"
-  sha256 "6382cf7d6110cbe6f29e8346d0e4eb078dd2cbf7e62913b96065848e351eb15e"
+  homepage "https://github.com/tboox/tbox"
+  url "https://github.com/tboox/tbox/archive/refs/tags/v1.8.0.tar.gz"
+  sha256 "3b919f61055b75fe9cb3796477468f6fe7524801d429e6ac48933ddde9caafbd"
   license "Apache-2.0"
-  head "https://github.com/tboox/tbox.git", branch: "master"
+  head "https://github.com/tboox/tbox.git", branch: "dev"
+
+  livecheck do
+    url :stable
+    strategy :github_latest
+  end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "0cba603567a21c953c379d310ef4e739ab85e89166ee9ca0820e6de954377c97"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "2142d282316e44304970e782ded4fd7e0a8452e6ad73d0a6cf1b9a0545ec531b"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "692c95557e62dda6982466fbe66a22d7ed64549f2c158d928a520c8a0ea3fedb"
-    sha256 cellar: :any_skip_relocation, sonoma:         "772cb2e215b8aba72180a7703bc94bd42514e65f79abb16f6c29d57f038c26fb"
-    sha256 cellar: :any_skip_relocation, ventura:        "cefd8cdb4944f9559e7e36b29b2b544fd993ef5e9b3923ab077625bbd65fe4f0"
-    sha256 cellar: :any_skip_relocation, monterey:       "7232c7cb489e7cf1a66375b4cabf4697c4ab1824835ed051b0fd5d067bdbcc65"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "32e69718b923819a194a1fba1efdfd0393602ea4048da27f5d519a09e02d4158"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "b2e54884a4e796cfcf80f0626c4709cfb2457a7f55322620087960dd3898dc43"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "191ed24e6b0df03c2f5d2de83f4fbae1f3471ef00ebd52e4fcad6cc8d49716e9"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "78bc0408e71342dfbdd429ff61b6958bafb01dcb2fd243a29b52a5a1337e04d1"
+    sha256 cellar: :any_skip_relocation, sonoma:        "d43414168d16c5dcc7b64f140cc6a6bdc1dff6284e6115267aea03d7a5982192"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "988c17883fa3616f79372ae9e8856ca03249c33a8feee0ccbcfceedcc3d33c01"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "1cfd614c4c971f8b922e37ae936cb23625adc02c47c4f570587a5274ee357e26"
   end
 
   depends_on "xmake" => :build
+
+  # Fix an error for misleading indentation in wcscat.c
+  # PR ref: https://github.com/tboox/tbox/pull/309
+  patch do
+    url "https://github.com/tboox/tbox/commit/057b9247239ec930bb3b742b2c0ec96aec95fdc8.patch?full_index=1"
+    sha256 "d1384e7a285751777a73a24f1ca8de09bd1ff77f5e39049db6e6103220b3ae35"
+  end
 
   def install
     system "xmake", "config", "--charset=y", "--demo=n", "--small=y", "--xml=y"
@@ -25,7 +36,7 @@ class Tbox < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <tbox/tbox.h>
       int main()
       {
@@ -36,7 +47,7 @@ class Tbox < Formula
         }
         return 0;
       }
-    EOS
+    C
     system ENV.cc, "test.c", "-I#{include}", "-L#{lib}", "-ltbox", "-lm", "-pthread", "-o", "test"
     assert_equal "hello tbox!\n", shell_output("./test")
   end

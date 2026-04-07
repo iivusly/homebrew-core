@@ -11,17 +11,24 @@ class Opentsdb < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, sonoma:   "3679873487a1086a93faff26d0e11d60073452bba842535113f618c7cc8f6ce4"
-    sha256 cellar: :any_skip_relocation, ventura:  "64369af5327cbbbed6c3f3845e6e60f399a9876cacef624682e8d7cfc9d804b9"
-    sha256 cellar: :any_skip_relocation, monterey: "98c4251b26aaa0d592c976615aa53d4d4ff0a464b342421e91354a4138dcd208"
-    sha256 cellar: :any_skip_relocation, big_sur:  "e29c00cec680bfc711c31d40aa5f04e5c62ebf9219c3adddcc84dff74b1922cc"
-    sha256 cellar: :any_skip_relocation, catalina: "61cd7a6e22f917bd544d427d77e7236c82735406ea384134ba0551a70ce10b27"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, sonoma:       "1e94a2ce5cc95c944f5763df3442cc2fe71d12279f134b0a051549c6b4bd902a"
+    sha256 cellar: :any_skip_relocation, ventura:      "022671a452bff9bacb3c84213f26adfb9d4fc50bdfbd28e2997262f6f5936607"
+    sha256 cellar: :any_skip_relocation, arm64_linux:  "e3cb78193f508228b2918205e3c4303febb1c2dd525e4a6f8d503866b41407f4"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "8c51dd6ebd008e6868a745d85dfe01374ef3b4e3ada22a54d4015d89e7973443"
   end
+
+  # Deprecated since:
+  # * No arm64 macOS support: https://docs.brew.sh/Support-Tiers#future-macos-support
+  # * CVE in stable release: https://nvd.nist.gov/vuln/detail/CVE-2023-36812
+  # * Still needs OpenJDK 8 to build
+  deprecate! date: "2025-09-25", because: :unmaintained
+  disable! date: "2026-09-25", because: :unmaintained
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
   depends_on "openjdk@8" => :build
-  depends_on "python@3.12" => :build
+  depends_on "python@3.13" => :build
   depends_on "gnuplot"
   depends_on "hbase"
   depends_on "lzo"
@@ -33,13 +40,13 @@ class Opentsdb < Formula
 
   def install
     with_env(JAVA_HOME: Language::Java.java_home("1.8")) do
-      ENV.prepend_path "PATH", Formula["python@3.12"].opt_libexec/"bin"
+      ENV.prepend_path "PATH", Formula["python@3.13"].opt_libexec/"bin"
       system "autoreconf", "--force", "--install", "--verbose"
-      system "./configure", *std_configure_args,
-                            "--disable-silent-rules",
+      system "./configure", "--disable-silent-rules",
+                            "--localstatedir=#{var}/opentsdb",
                             "--mandir=#{man}",
                             "--sysconfdir=#{etc}",
-                            "--localstatedir=#{var}/opentsdb"
+                            *std_configure_args
       system "make"
       bin.mkpath
       (pkgshare/"static/gwt/opentsdb/images/ie6").mkpath
@@ -60,7 +67,7 @@ class Opentsdb < Formula
     etc.install pkgshare/"etc/opentsdb"
     (pkgshare/"plugins/.keep").write ""
 
-    (bin/"start-tsdb.sh").write <<~EOS
+    (bin/"start-tsdb.sh").write <<~SH
       #!/bin/sh
       exec "#{opt_bin}/tsdb" tsd \\
         --config="#{etc}/opentsdb/opentsdb.conf" \\
@@ -71,7 +78,7 @@ class Opentsdb < Formula
         --zkbasedir=/hbase \\
         --auto-metric \\
         "$@"
-    EOS
+    SH
     (bin/"start-tsdb.sh").chmod 0755
 
     libexec.mkpath
@@ -108,7 +115,7 @@ class Opentsdb < Formula
     ENV["HBASE_CONF_DIR"] = testpath/"conf"
     ENV["HBASE_PID_DIR"]  = testpath/"pid"
 
-    system "#{Formula["hbase"].opt_bin}/start-hbase.sh"
+    system Formula["hbase"].opt_bin/"start-hbase.sh"
     begin
       sleep 10
 
@@ -123,7 +130,11 @@ class Opentsdb < Formula
       end
       sleep 15
 
-      pipe_output("nc localhost 4242 2>&1", "put homebrew.install.test 1356998400 42.5 host=webserver01 cpu=0\n")
+      TCPSocket.open("localhost", 4242) do |sock|
+        sock.puts("put homebrew.install.test 1356998400 42.5 host=webserver01 cpu=0\n")
+      ensure
+        sock.close
+      end
 
       system bin/"tsdb", "query", "1356998000", "1356999000", "sum",
              "homebrew.install.test", "host=webserver01", "cpu=0"

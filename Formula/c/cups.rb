@@ -3,9 +3,10 @@ class Cups < Formula
   homepage "https://github.com/OpenPrinting/cups"
   # This is the author's fork of CUPS. Debian have switched to this fork:
   # https://lists.debian.org/debian-printing/2020/12/msg00006.html
-  url "https://github.com/OpenPrinting/cups/releases/download/v2.4.10/cups-2.4.10-source.tar.gz"
-  sha256 "d75757c2bc0f7a28b02ee4d52ca9e4b1aa1ba2affe16b985854f5336940e5ad7"
+  url "https://github.com/OpenPrinting/cups/releases/download/v2.4.16/cups-2.4.16-source.tar.gz"
+  sha256 "0339587204b4f9428dd0592eb301dec0bf9ea6ea8dce5d9690d56be585aba92d"
   license "Apache-2.0"
+  revision 1
   head "https://github.com/OpenPrinting/cups.git", branch: "master"
 
   livecheck do
@@ -14,39 +15,40 @@ class Cups < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "58df6136f3aa5f3a1d634892ee4b742e5170f6aaa7b91ab8ca041af5baf5cf54"
-    sha256 arm64_ventura:  "bd58946f6e800d91d6a08cafe8910941885563a70855356ff21777bcd7f17ab1"
-    sha256 arm64_monterey: "2846fedb1ef7d4333ea499a08fbb267507633089d5152a68df6c07ca90709889"
-    sha256 sonoma:         "fac480f1a065d47433e18718383686596d7b646902afa45b14fd50ee7c61f63b"
-    sha256 ventura:        "67251db05865a0bab70a1d3ad170eba578b031b034b82012b5c78dd49c37cfbf"
-    sha256 monterey:       "3c488b7f512b7122c274465d849b023bb1c906c57d46ef3a60ee52fd5510aa15"
-    sha256 x86_64_linux:   "6a3a570c6a30876b79da8c94e64f0e75a523a24ee6146adb7cc4d4cb8835db9b"
+    sha256 arm64_tahoe:   "8424841fac4c8cafb8179f5226928bfb2fcef71860f63dc6fa44d661e351ec63"
+    sha256 arm64_sequoia: "32622111c9f460aa8be40ec7231c93521376f2fe260c505f680dd4cde3481659"
+    sha256 arm64_sonoma:  "831347b2bacc22aa8c4b12a2150d58ee8fd86985ba649845762a62f4a5a4d7ea"
+    sha256 sonoma:        "56eff0f29e06651f360fe67b1879137b50239bbbad6ea67123f5b706b4912070"
+    sha256 arm64_linux:   "573d09a9645a35852d77d7f134a810898ee2ff81333f6ecebe811ee92016100d"
+    sha256 x86_64_linux:  "4f8fd899d1f1801fe74efed50f91e52a16287d2e60d2417a58d66e97bfa3077e"
   end
 
   keg_only :provided_by_macos
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "openssl@3"
 
   uses_from_macos "krb5"
-  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
-    system "./configure", *std_configure_args,
-                          "--with-components=core",
+    system "./configure", "--with-components=core",
                           "--with-tls=openssl",
-                          "--without-bundledir"
+                          "--without-bundledir",
+                          *std_configure_args
     system "make", "install"
   end
 
   test do
     port = free_port.to_s
-    pid = fork do
-      exec "#{bin}/ippeveprinter", "-p", port, "Homebrew Test Printer"
-    end
+    pid = spawn "#{bin}/ippeveprinter", "-p", port, "Homebrew Test Printer"
 
     begin
       sleep 2
+      sleep 2 if OS.mac? && Hardware::CPU.intel?
       assert_match("Homebrew Test Printer", shell_output("curl localhost:#{port}"))
     ensure
       Process.kill("TERM", pid)

@@ -2,26 +2,29 @@ class Sourcekitten < Formula
   desc "Framework and command-line tool for interacting with SourceKit"
   homepage "https://github.com/jpsim/SourceKitten"
   url "https://github.com/jpsim/SourceKitten.git",
-      tag:      "0.36.0",
-      revision: "fbd6bbcddffa97dca4b8a6b5d5a8246a430be9c7"
+      tag:      "0.37.3",
+      revision: "6529c17fe80dd94843a3df7ed3e6a239790d5c91"
   license "MIT"
+  compatibility_version 1
   head "https://github.com/jpsim/SourceKitten.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "de09af7ebff8f1fefb5daa5656ceb3d768b06ed9c1825783680acdcce96acb86"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "b1b65a68b37177be39565b54be6149dba1f3ba42fcabc26ced151c7f7803edc0"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "8dffc8ba081641777ef1d0606130582d2eb2a505926c9dd3230d17acf9336850"
-    sha256 cellar: :any_skip_relocation, sonoma:         "a75f960c137193ded31c765fb96ecda9bc1c6f8893f32a5becd02c090a35463f"
-    sha256 cellar: :any_skip_relocation, ventura:        "a3e70dc9ec689ee44363e943f3ef32020bffdb894debab04f52b24a7f993c462"
-    sha256 cellar: :any_skip_relocation, monterey:       "803e0dfba2e8333141c7dd5fd6bda0310f0a917a6c79f16aa929bae56c3adcde"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "71dca54d095d7003f38fe2080dc3d8e8d314da72781efaf03cdd59102c9ebac9"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "d72ada65c485a6a1d2d82eed64d5de56155db0e3dca8239fe5438815caa34ece"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "3d3b6c3cfd3255bfb1582329d4e9eb4087c706c87d31e293a1a323150b154e1b"
+    sha256 cellar: :any_skip_relocation, sonoma:        "8ad122b1a44d7336032fa6ef2336b278cc84ce58affc6ffffb56e6db80ced889"
+    sha256                               arm64_linux:   "084e6b26f19c3418216080ab0f2acce96b062432bc5bf9029922b7b41c7ff00c"
+    sha256                               x86_64_linux:  "674dce3aee8329342d41dcf0b513f74390979eb62b97315a4ac27843c8a46091"
   end
 
   depends_on xcode: ["14.0", :build]
-  depends_on :macos
   depends_on xcode: "6.0"
+
+  uses_from_macos "swift"
 
   def install
     system "make", "prefix_install", "PREFIX=#{prefix}", "TEMPORARY_FOLDER=#{buildpath}/SourceKitten.dst"
+    generate_completions_from_executable(bin/"sourcekitten", "--generate-completion-script")
   end
 
   test do

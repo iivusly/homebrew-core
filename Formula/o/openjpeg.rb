@@ -1,19 +1,19 @@
 class Openjpeg < Formula
   desc "Library for JPEG-2000 image manipulation"
   homepage "https://www.openjpeg.org/"
-  url "https://github.com/uclouvain/openjpeg/archive/refs/tags/v2.5.2.tar.gz"
-  sha256 "90e3896fed910c376aaf79cdd98bdfdaf98c6472efd8e1debf0a854938cbda6a"
+  url "https://github.com/uclouvain/openjpeg/archive/refs/tags/v2.5.4.tar.gz"
+  sha256 "a695fbe19c0165f295a8531b1e4e855cd94d0875d2f88ec4b61080677e27188a"
   license "BSD-2-Clause"
+  compatibility_version 1
   head "https://github.com/uclouvain/openjpeg.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "eef55952d48f1852f5e95a4f8bf336019ebf3800d5dc0fba79cf85ae1fe475d6"
-    sha256 cellar: :any,                 arm64_ventura:  "23d1814c74d0e84518faa642272a7b88a8b4e2e78e9fe8b3f3313483c180cbbe"
-    sha256 cellar: :any,                 arm64_monterey: "f9aa864e7bb14b36df6d7f83f5f5a10a65c9fb6b4227d7e6edcdecb9af2263dc"
-    sha256 cellar: :any,                 sonoma:         "db5e5cb9eac6d4f910b9845d8decbd3eb19ef25570eddaaec235a29c637ba929"
-    sha256 cellar: :any,                 ventura:        "02d67cf70fb174e35ce003e3914b0c867ce8b5f0aafde47eb34d24edd4e5443a"
-    sha256 cellar: :any,                 monterey:       "cf986cc726d5f07c6d033653ae19c27cc3cccc7e30dafc7cbb054ffe56fd0f57"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "28c920d3a84fbe6254d89f3a2a15db655d700066565701e57ce3e9210a56b343"
+    sha256 cellar: :any,                 arm64_tahoe:   "e9becf9b440b08fd771dbaa75d4f5b06a49119f9ce163e6ad08f272f4f3b9c9d"
+    sha256 cellar: :any,                 arm64_sequoia: "8e3ac331458daccf876225a4236bad7d28689ea197c6bb7d2640ec47d78a510d"
+    sha256 cellar: :any,                 arm64_sonoma:  "0eff9d5aae88cd27eaaedb4a4f56804ae14c4ed9df1c856846ff81ebc3dcb4c2"
+    sha256 cellar: :any,                 sonoma:        "29b22e2c699765b32b3511f65bd87f6860d6bbf5f5f75e3b3ed5e268f6a547bb"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "b570231cdd2898452318819d0dc97662145a463e0ba3162a113163e0f0066e2e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ea1906cdeecd5edc87703596cc084dc305834b030af3847a8520f9eb8566eb1e"
   end
 
   depends_on "cmake" => :build
@@ -31,7 +31,7 @@ class Openjpeg < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <openjpeg.h>
 
       int main () {
@@ -44,7 +44,7 @@ class Openjpeg < Formula
         opj_image_destroy(image);
         return 0;
       }
-    EOS
+    C
     system ENV.cc, "-I#{include.children.first}",
            testpath/"test.c", "-L#{lib}", "-lopenjp2", "-o", "test"
     system "./test"

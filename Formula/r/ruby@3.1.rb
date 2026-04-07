@@ -1,35 +1,38 @@
 class RubyAT31 < Formula
   desc "Powerful, clean, object-oriented scripting language"
   homepage "https://www.ruby-lang.org/"
-  url "https://cache.ruby-lang.org/pub/ruby/3.1/ruby-3.1.6.tar.gz"
-  sha256 "0d0dafb859e76763432571a3109d1537d976266be3083445651dc68deed25c22"
+  url "https://cache.ruby-lang.org/pub/ruby/3.1/ruby-3.1.7.tar.gz"
+  sha256 "0556acd69f141ddace03fa5dd8d76e7ea0d8f5232edf012429579bcdaab30e7b"
   license "Ruby"
-
-  livecheck do
-    url "https://www.ruby-lang.org/en/downloads/releases/"
-    regex(/href=.*?ruby[._-]v?(3\.1(?:\.\d+)+)\.t/i)
-  end
+  revision 1
 
   bottle do
-    sha256 arm64_sonoma:   "7c5a047c339ba80d2a14b34ef244ed9e0af7102d340b8e5f91eca4d7a0a853bf"
-    sha256 arm64_ventura:  "4440ac18c954c2f1d0cbfa0f470fb87c26ac1aa7a6734b83e87ab9d0ef630c7c"
-    sha256 arm64_monterey: "0fdd2a2e9f8297ca292959540012c00392205312b865d1c7aeb18a09c16db428"
-    sha256 sonoma:         "33a2ac7835348d4812760725fffeacdc1e6d15a5673b6230f2337196054e2b1e"
-    sha256 ventura:        "20e409cb7b524b04e9248c9addb2e2d8a52027a8ddd3c07eb7e594b0e94fd2bf"
-    sha256 monterey:       "015c58f56f84a419659b6e777683c9ac82d87cb3da3e428614ea63161e173084"
-    sha256 x86_64_linux:   "a282cbc26752e31cc3957ee74991e08f6e12b736ecf41d5d56ff7435e8f6027c"
+    rebuild 1
+    sha256 arm64_tahoe:   "599b781fb1c4c6efb4b391ae920a91d681fb7de8b4797a4d7972bb4a13103775"
+    sha256 arm64_sequoia: "40428a63bf4793b3cc0ba899ea3e8fd64c9fca1e786b77f8c5654772e3acd0d7"
+    sha256 arm64_sonoma:  "1685cef921b0e3b6fbc61b910f40decf7709e858d057b12730aeda7f1ba741f2"
+    sha256 sonoma:        "46f36ad68e85c489f34a1c2833afd34e95b2d8dcb5dd83f1febbec479b95a0ce"
+    sha256 arm64_linux:   "f63534986a1584661658d8426703011e66b6094827758717ade41850cc26deb7"
+    sha256 x86_64_linux:  "228ce2398e2abab192f28e456c2e1c2a9e8cc65933b775eda58b3084efab79c0"
   end
 
   keg_only :versioned_formula
 
-  depends_on "pkg-config" => :build
+  # EOL: 2025-03-26
+  deprecate! date: "2025-04-08", because: :unsupported
+
+  depends_on "pkgconf" => :build
   depends_on "libyaml"
   depends_on "openssl@3"
   depends_on "readline"
 
   uses_from_macos "libffi"
   uses_from_macos "libxcrypt"
-  uses_from_macos "zlib"
+  uses_from_macos "ncurses"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   # Should be updated only when Ruby is updated (if an update is available).
   # The exception is Rubygem security fixes, which mandate updating this
@@ -37,6 +40,13 @@ class RubyAT31 < Formula
   resource "rubygems" do
     url "https://rubygems.org/rubygems/rubygems-3.5.11.tgz"
     sha256 "4521b52f843620a9fc5ca7414526b7463b0989564c3ae80b26b68fbd1304c818"
+  end
+
+  # Update the bundled openssl gem for compatibility with OpenSSL 3.6+
+  # Using 3.1.x series to minimize chances of breakage from upgrading bundled 3.0.x
+  resource "openssl" do
+    url "https://github.com/ruby/openssl/archive/refs/tags/v3.1.2.tar.gz"
+    sha256 "0abb96cdeaef1c0a2bfc8e0a4557467d7f2e93cabdd00d0d387afb1d0e1569a9"
   end
 
   def api_version
@@ -48,6 +58,13 @@ class RubyAT31 < Formula
   end
 
   def install
+    rm_r(%w[ext/openssl test/openssl])
+    resource("openssl").stage do
+      (buildpath/"ext").install "ext/openssl"
+      (buildpath/"ext/openssl").install "lib", "History.md", "openssl.gemspec"
+      (buildpath/"test").install "test/openssl"
+    end
+
     # otherwise `gem` command breaks
     ENV.delete("SDKROOT")
 
@@ -92,6 +109,19 @@ class RubyAT31 < Formula
     # A newer version of ruby-mode.el is shipped with Emacs
     elisp.install Dir["misc/*.el"].reject { |f| f == "misc/ruby-mode.el" }
 
+    if OS.linux?
+      arch = Utils.safe_popen_read(
+        bin/"ruby", "-rrbconfig", "-e", 'print RbConfig::CONFIG["arch"]'
+      ).chomp
+      # Don't restrict to a specific GCC compiler binary we used (e.g. gcc-5).
+      inreplace lib/"ruby/#{api_version}/#{arch}/rbconfig.rb" do |s|
+        s.gsub! ENV.cxx, "c++"
+        s.gsub! ENV.cc, "cc"
+        # Change e.g. `CONFIG["AR"] = "gcc-ar-11"` to `CONFIG["AR"] = "ar"`
+        s.gsub!(/(CONFIG\[".+"\] = )"(?:gcc|g\+\+)-(.*)-\d+"/, '\\1"\\2"')
+      end
+    end
+
     # This is easier than trying to keep both current & versioned Ruby
     # formulae repeatedly updated with Rubygem patches.
     resource("rubygems").stage do
@@ -115,9 +145,14 @@ class RubyAT31 < Formula
       (rg_gems_in/"gems").install Dir[buildpath/"vendor_gem/gems/*"]
       (rg_gems_in/"specifications/default").install Dir[buildpath/"vendor_gem/specifications/default/*"]
       bin.install buildpath/"vendor_gem/bin/gem" => "gem"
-      (libexec/"gembin").install buildpath/"vendor_gem/bin/bundle" => "bundle"
-      (libexec/"gembin").install_symlink "bundle" => "bundler"
+      bin.install buildpath/"vendor_gem/bin/bundle" => "bundle"
+      bin.install buildpath/"vendor_gem/bin/bundler" => "bundler"
     end
+
+    # Customize rubygems to look/install in the global gem directory
+    # instead of in the Cellar, making gems last across reinstalls
+    config_file = lib/"ruby/#{api_version}/rubygems/defaults/operating_system.rb"
+    config_file.write rubygems_config
   end
 
   def post_install
@@ -129,22 +164,10 @@ class RubyAT31 < Formula
       #{rubygems_bindir}/bundler
     ].select { |file| File.exist?(file) })
     rm_r(Dir[HOMEBREW_PREFIX/"lib/ruby/gems/#{api_version}/gems/bundler-*"])
-    rubygems_bindir.install_symlink Dir[libexec/"gembin/*"]
-
-    # Customize rubygems to look/install in the global gem directory
-    # instead of in the Cellar, making gems last across reinstalls
-    config_file = lib/"ruby/#{api_version}/rubygems/defaults/operating_system.rb"
-    config_file.unlink if config_file.exist?
-    config_file.write rubygems_config(api_version)
-
-    # Create the sitedir and vendordir that were skipped during install
-    %w[sitearchdir vendorarchdir].each do |dir|
-      mkdir_p `#{bin}/ruby -rrbconfig -e 'print RbConfig::CONFIG["#{dir}"]'`
-    end
   end
 
-  def rubygems_config(api_version)
-    <<~EOS
+  def rubygems_config
+    <<~RUBY
       module Gem
         class << self
           alias :old_default_dir :default_dir
@@ -160,7 +183,7 @@ class RubyAT31 < Formula
             "lib",
             "ruby",
             "gems",
-            "#{api_version}"
+            RbConfig::CONFIG['ruby_version']
           ]
 
           @homebrew_path ||= File.join(*path)
@@ -213,7 +236,7 @@ class RubyAT31 < Formula
           File.join(Gem.old_default_dir, "specifications", "default")
         end
       end
-    EOS
+    RUBY
   end
 
   def caveats
@@ -240,6 +263,6 @@ class RubyAT31 < Formula
     EOS
     system bin/"bundle", "exec", "ls" # https://github.com/Homebrew/homebrew-core/issues/53247
     system bin/"bundle", "install", "--binstubs=#{testpath}/bin"
-    assert_predicate testpath/"bin/github-markup", :exist?, "github-markup is not installed in #{testpath}/bin"
+    assert_path_exists testpath/"bin/github-markup", "github-markup is not installed in #{testpath}/bin"
   end
 end

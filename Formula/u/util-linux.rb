@@ -1,8 +1,8 @@
 class UtilLinux < Formula
   desc "Collection of Linux utilities"
   homepage "https://github.com/util-linux/util-linux"
-  url "https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.40/util-linux-2.40.2.tar.xz"
-  sha256 "d78b37a66f5922d70edf3bdfb01a6b33d34ed3c3cafd6628203b2a2b67c8e8b3"
+  url "https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.42/util-linux-2.42.tar.xz"
+  sha256 "3452b260bbaa775d6e749ac3bb22111785003fc1f444970025c8da26dfa758e9"
   license all_of: [
     "BSD-3-Clause",
     "BSD-4-Clause-UC",
@@ -12,6 +12,7 @@ class UtilLinux < Formula
     "LGPL-2.1-or-later",
     :public_domain,
   ]
+  compatibility_version 1
 
   # The directory listing where the `stable` archive is found uses major/minor
   # version directories, where it's necessary to check inside a directory to
@@ -24,24 +25,21 @@ class UtilLinux < Formula
   end
 
   bottle do
-    rebuild 1
-    sha256 arm64_sonoma:   "ae2f7c6c2a844f8cbd3522f85e51cb929d03a8c9eed9a66d14a81b2632f9dcb4"
-    sha256 arm64_ventura:  "b933894463178a94495ced95268b2d66ccdc0c9e2e408b7fdc4b5a36016f228a"
-    sha256 arm64_monterey: "4b0c25db0dcd8f13e1d881b7ecf5eb80ebd53453b56fd0c096a2745b97c90d42"
-    sha256 sonoma:         "ad20c2beac16f7d241569f93d0edd5b19f0bb2fafd62c227747ea20d9f615892"
-    sha256 ventura:        "0b62fc43806131f0b9f96916b0887ad85ae47db2418386721fc3da6d3f49dec7"
-    sha256 monterey:       "1fed3dce8f5487a95fab00de380f3ff3320a43b94ad9949a102466bb6fbc3bbd"
-    sha256 x86_64_linux:   "773c91eea7c86a3a5a18ae1b43a43c9346b190ccf7640bb811e4cadb77a42874"
+    sha256 arm64_tahoe:   "22c68cf329077a00f5c2eb9ea3030c305be6837e1a1dd8fc87da1329d57cef26"
+    sha256 arm64_sequoia: "a4100e6dc75510d4820b3fcbecf3f224a37a97299aafb2380a9bb29948b976ab"
+    sha256 arm64_sonoma:  "7145241dd73fc2d948dafdae4e4b8da48954dff12bca3bd277c33d64377897b9"
+    sha256 sonoma:        "9488d859b2612179a1085086d8df291f307c9c4473fec0a20718da8aa8f237b6"
+    sha256 arm64_linux:   "9237db9b3c08580b2e6d13c386b7fa282d80a4038861dab51276a993f196a5dd"
+    sha256 x86_64_linux:  "e97b24d7baa64ffc4a3a61aedd8daf41d3a3559be823910a9ca218dc24d62497"
   end
 
   keg_only :shadowed_by_macos, "macOS provides the uuid.h header"
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
 
   uses_from_macos "libxcrypt"
   uses_from_macos "ncurses"
   uses_from_macos "sqlite"
-  uses_from_macos "zlib"
 
   on_macos do
     depends_on "gettext" # for libintl
@@ -49,6 +47,7 @@ class UtilLinux < Formula
 
   on_linux do
     depends_on "readline"
+    depends_on "zlib-ng-compat"
 
     conflicts_with "bash-completion", because: "both install `mount`, `rfkill`, and `rtcwake` completions"
     conflicts_with "flock", because: "both install `flock` binaries"
@@ -56,21 +55,22 @@ class UtilLinux < Formula
     conflicts_with "rename", because: "both install `rename` binaries"
   end
 
-  # uuid_time function compatibility fix on macos
-  # upstream patch PR, https://github.com/util-linux/util-linux/pull/3013
+  # Fix macOS builds
+  # https://github.com/util-linux/util-linux/pull/4173
   patch do
-    url "https://github.com/util-linux/util-linux/commit/9445f477cfcfb3615ffde8f93b1b98c809ee4eca.patch?full_index=1"
-    sha256 "7a7fe4d32806e59f90ca0eb33a9b4eb306e59c9c148493cd6a57f0dea3eafc64"
+    url "https://github.com/util-linux/util-linux/commit/d22edc2f100eb8dd83d3515758565cb73b0d2eed.patch?full_index=1"
+    sha256 "2fb01154faa3fd8b0fce27eb88049ed9c8f839e706e412399c19c087f7f3b5e1"
   end
 
   def install
-    args = %w[--disable-silent-rules --disable-asciidoc]
+    args = %W[--disable-silent-rules --disable-asciidoc --with-bashcompletiondir=#{bash_completion}]
 
     if OS.mac?
       # Support very old ncurses used on macOS 13 and earlier
       # https://github.com/util-linux/util-linux/issues/2389
       ENV.append_to_cflags "-D_XOPEN_SOURCE_EXTENDED" if MacOS.version <= :ventura
 
+      args << "--disable-bits" # does not build on macOS
       args << "--disable-ipcs" # does not build on macOS
       args << "--disable-ipcrm" # does not build on macOS
       args << "--disable-wall" # already comes with macOS
@@ -81,7 +81,6 @@ class UtilLinux < Formula
       args << "--disable-use-tty-group" # Fix chgrp: changing group of 'wall': Operation not permitted
       args << "--disable-kill" # Conflicts with coreutils.
       args << "--without-systemd" # Do not install systemd files
-      args << "--with-bashcompletiondir=#{bash_completion}"
       args << "--disable-chfn-chsh"
       args << "--disable-login"
       args << "--disable-su"
@@ -91,13 +90,11 @@ class UtilLinux < Formula
       args << "--without-python"
     end
 
-    system "./configure", *args, *std_configure_args.reject { |s| s["--disable-debug"] }
-    system "make", "install"
+    system "./configure", *args, *std_configure_args
 
-    # install completions only for installed programs
-    Pathname.glob("bash-completion/*") do |prog|
-      bash_completion.install prog if (bin/prog.basename).exist? || (sbin/prog.basename).exist?
-    end
+    install_args = []
+    install_args << "LDFLAGS=-lm" if OS.linux?
+    system "make", "install", *install_args
   end
 
   def caveats
@@ -137,7 +134,7 @@ class UtilLinux < Formula
 
     flags = ["x", "w", "r"] * 3
     perms = flags.each_with_index.reduce("") do |sum, (flag, index)|
-      sum.insert 0, ((stat.mode & (2 ** index)).zero? ? "-" : flag)
+      sum.insert 0, (stat.mode.nobits?(2 ** index) ? "-" : flag)
     end
 
     out = shell_output("#{bin}/namei -lx /usr").split("\n").last.split

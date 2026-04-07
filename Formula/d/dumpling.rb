@@ -1,10 +1,19 @@
 class Dumpling < Formula
   desc "Creating SQL dump from a MySQL-compatible database"
   homepage "https://github.com/pingcap/tidb"
-  url "https://github.com/pingcap/tidb/archive/refs/tags/v8.3.0.tar.gz"
-  sha256 "3380265ac8d9ccc41b88315c07e05ba28ec78871296300be9a6e64281facec54"
   license "Apache-2.0"
   head "https://github.com/pingcap/tidb.git", branch: "master"
+
+  stable do
+    url "https://github.com/pingcap/tidb/archive/refs/tags/v8.5.5.tar.gz"
+    sha256 "2dee41c6e6f1251ef5aa820cbb8c47950069e3e2baeb26072604d6be25498ecd"
+
+    # Support Go 1.26: https://github.com/pingcap/tidb/pull/66254
+    patch do
+      url "https://github.com/pingcap/tidb/commit/f641265e809082c88161f92d5c38cb6caa700ed3.patch?full_index=1"
+      sha256 "3484b5c03bc2169f5408d9f95776b3f57a4c6bb6bc7a01cfa50e2da00494821d"
+    end
+  end
 
   livecheck do
     url :stable
@@ -12,13 +21,12 @@ class Dumpling < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "190389975f1d3e786b865856044a9c2e32dbe111e8f0b72bb530670c05590b46"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "610833b93188649c92c779c4e1005353293e362b08b776101df4c1b89f626fd9"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "6a342d6eedb98eab02b5070d951e80af36dd0684eec8a2c586ae5100be1b5dbe"
-    sha256 cellar: :any_skip_relocation, sonoma:         "b17e5de9f59422168ca05d0071e13e359c67664d499c9e5884d87c7042c45781"
-    sha256 cellar: :any_skip_relocation, ventura:        "1d72a292853127c68109cd6714e592a6146f1fa5c731f0b2fca7925cf66f6a0f"
-    sha256 cellar: :any_skip_relocation, monterey:       "bb0129ba6dceac05138b9ced19e19f4105bf6410af6582ad506c9153a46e84cf"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "a10557ac5fdff15ea0d8127faaf6f503f0424099038a04a39d2efd902c6b9d0a"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "5844a11f18582d626238f91d0a2aa0e5df9067b14b4ff6481d76751c49ca6bae"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "e61551c2cc9561b920bfb1fae76a34453fd9e4b2342111b2cf38b8552a595119"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "89b16c443161aa8af29d9d67c2bfba4a2c3c1bd83934deae7db40f660a7834ce"
+    sha256 cellar: :any_skip_relocation, sonoma:        "4e379fc76aad5816a8b9bf3711a12c47c0b64e67de8271670b1467f9ba6ff623"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "be17bd146f8d0e5214ad39a850dc55d2f741bbcf495a968e3857024df44fd664"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "cfc64eb60af9ecd9ba221226e92abf183890db5e55ebfca027681ec52c0a2700"
   end
 
   depends_on "go" => :build
@@ -29,18 +37,18 @@ class Dumpling < Formula
       -s -w
       -X #{project}/cli.ReleaseVersion=#{version}
       -X #{project}/cli.BuildTimestamp=#{time.iso8601}
-      -X #{project}/cli.GitHash=brew
+      -X #{project}/cli.GitHash=#{tap.user}
       -X #{project}/cli.GitBranch=#{version}
-      -X #{project}/cli.GoVersion=go#{Formula["go"].version}
+      -X #{project}/cli.GoVersion=go#{Formula["go@1.25"].version}
     ]
 
     system "go", "build", *std_go_args(ldflags:), "./dumpling/cmd/dumpling"
   end
 
   test do
-    output = shell_output("#{bin}/dumpling --database db 2>&1", 1)
-    assert_match "create dumper failed", output
+    assert_match version.to_s, shell_output("#{bin}/dumpling --version 2>&1")
 
-    assert_match "Release version: #{version}", shell_output("#{bin}/dumpling --version 2>&1")
+    output = shell_output("#{bin}/dumpling --host does-not-exist.invalid --port 1 --database db 2>&1", 1)
+    assert_match "create dumper failed", output
   end
 end

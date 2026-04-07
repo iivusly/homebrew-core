@@ -1,20 +1,27 @@
 class Lowdown < Formula
   desc "Simple markdown translator"
   homepage "https://kristaps.bsd.lv/lowdown"
-  url "https://github.com/kristapsdz/lowdown/archive/refs/tags/VERSION_1_1_0.tar.gz"
-  sha256 "5cc997f742fd9e3268a2bf15cb9c58bfa173b303bc13f5c61f67dedfff3bccce"
+  url "https://kristaps.bsd.lv/lowdown/snapshots/lowdown-3.0.1.tar.gz"
+  sha256 "ac9ea2b51c8bd59350c7bf8db5e2067e9d961b1f48d362cd8a56b022850e965c"
   license "ISC"
+  compatibility_version 1
+  head "https://github.com/kristapsdz/lowdown.git", branch: "master"
+
+  livecheck do
+    url "https://kristaps.bsd.lv/lowdown/snapshots/"
+    regex(/href=.*?lowdown[._-]v?(\d+(?:\.\d+)+)\.t/i)
+  end
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any,                 arm64_sonoma:   "9064bbd0e8bdcd10df4f8a1d3f8bdcd27a6224b82731e847983039ca51d3e499"
-    sha256 cellar: :any,                 arm64_ventura:  "dd24024c11c3428f24dd59166bd50fc789f3772bdd6bf9240f2fdf78b06a8ba2"
-    sha256 cellar: :any,                 arm64_monterey: "a4bce83c1f08f75c32fcf579793df1a50394d864b33021ecf70db2e4411a2efe"
-    sha256 cellar: :any,                 sonoma:         "2f0b741ea7d64e05661184e180eed830debd898f51ec19a64b566476c8267743"
-    sha256 cellar: :any,                 ventura:        "d31e6f38b70f15eac77f125317f07ec82d77130093e6519d651bfd37bf4a9293"
-    sha256 cellar: :any,                 monterey:       "dae8c835158aed0264c27acc70ce419adfa26854b997700335ce89444d47c58b"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "c31000c8f9ff4b60b2ba703ea57231d11bfe0ad774eba558aac98c2a7aaee474"
+    sha256 cellar: :any,                 arm64_tahoe:   "fe8e1e3344dbc3cd2c0aa1b74815d81e1eb6ab4593379d3c2634d05402a06966"
+    sha256 cellar: :any,                 arm64_sequoia: "7ab2eecbe8f5ffe11c3e31d77be3183b18a60ca2e06aee1fe582c8b85675e9c8"
+    sha256 cellar: :any,                 arm64_sonoma:  "464efd261b8b65e91ceca6e140bce86caeed72df2f6ed2d8b0db8b97a93828a5"
+    sha256 cellar: :any,                 sonoma:        "6ea5d37031313bb5bec5b0623486d0e5c290dcea3adf1855cb7d7268c051d705"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "f81db6a9741bde23c65a3875f85da875eb2a169be84fd0f884410569477b74de"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "b99741588edcdd41f5da276b2e8abcd821aa9587bde5a04edd653495677f1ccd"
   end
+
+  depends_on "bmake" => :build
 
   def install
     configure_args = %W[MANDIR=#{man} PREFIX=#{prefix}]
@@ -26,12 +33,12 @@ class Lowdown < Formula
     end
 
     system "./configure", *configure_args
-    system "make"
-    system "make", "install", "install_libs"
+    system "bmake"
+    system "bmake", "install", "install_libs"
   end
 
   test do
-    expected_html = <<~EOS
+    expected_html = <<~HTML
       <!DOCTYPE html>
       <html>
       <head>
@@ -44,12 +51,12 @@ class Lowdown < Formula
       <p>Hello, World</p>
       </body>
       </html>
-    EOS
-    markdown = <<~EOS
+    HTML
+    markdown = <<~MARKDOWN
       # Title
 
       Hello, World
-    EOS
+    MARKDOWN
     html = pipe_output("#{bin}/lowdown -s", markdown)
     assert_equal expected_html, html
   end

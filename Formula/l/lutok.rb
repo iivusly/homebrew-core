@@ -1,42 +1,58 @@
 class Lutok < Formula
   desc "Lightweight C++ API for Lua"
   homepage "https://github.com/freebsd/lutok"
-  url "https://github.com/freebsd/lutok/releases/download/lutok-0.4/lutok-0.4.tar.gz"
-  sha256 "2cec51efa0c8d65ace8b21eaa08384b77abc5087b46e785f78de1c21fb754cd5"
+  url "https://github.com/freebsd/lutok/releases/download/lutok-0.6.2/lutok-0.6.2.tar.gz"
+  sha256 "1ef51f3741d28e27b09dfaee61ab432966cff56f50940eca1cbacffc11baa2ad"
   license "BSD-3-Clause"
-  revision 2
+  revision 1
+  head "https://github.com/freebsd/lutok.git", branch: "master"
+
+  livecheck do
+    url :stable
+    strategy :github_latest
+  end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "e97f0fa9ac92630fe607079cf1d65836e756bc2bb7779400f4193296609a4c96"
-    sha256 cellar: :any,                 arm64_ventura:  "3303d39bfed8576c90cdc019ab9b6984f90e57b5e5a7facc955dc06fc0664d02"
-    sha256 cellar: :any,                 arm64_monterey: "22ff0adc8a95ee3329f51de5b49dfa78ea41651b449877317b1ad631f6c1a210"
-    sha256 cellar: :any,                 arm64_big_sur:  "97cc58e57eb823ca7be58be09b8f36e5bd431150391ccb50e1d0647205089430"
-    sha256 cellar: :any,                 sonoma:         "3adda74213f15c14a57537ffdae932a3369268580e71f5fff878ac97d08a8ac7"
-    sha256 cellar: :any,                 ventura:        "926ae8331c4eda228aa5c90c7684999b5bfb0d0da256c3a5981c6d64ad3fa0e2"
-    sha256 cellar: :any,                 monterey:       "06a97c8c728734827f019dac9cf01f0e7ec06652bd436f531332c93e0682f77d"
-    sha256 cellar: :any,                 big_sur:        "5d0c028406ba39fe3f26f3994d3454935e5f38f07018b03a953f9aff81999b6a"
-    sha256 cellar: :any,                 catalina:       "83f0706e4b12f54145a8fded793efcbde5cf16ca8c53122987f4c22bc5f87fd5"
-    sha256 cellar: :any,                 mojave:         "cfaf7b932bb1eba280ae9353377e7069b8e73585bced5aff0fb4cc9e501f7055"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "8d8ce236e89a71233f9ff42e9d6ad46c4ac504f3c6684e1af98d6659f07c59f8"
+    sha256 cellar: :any,                 arm64_tahoe:   "5375d9b2d49d55cda41f53ba11c44a47b6c9fe76e52a5b3592bf48afda9b9871"
+    sha256 cellar: :any,                 arm64_sequoia: "cf023d7cb40f5d1a0fbb65a3c937a1bca17828e2e2356960af0a119bfeca6e81"
+    sha256 cellar: :any,                 arm64_sonoma:  "02acd0a9b44150ba2297dddee6eb3ca10f244ca63a093e5a655e2cf8eec1fad6"
+    sha256 cellar: :any,                 sonoma:        "0f73bf9da21d6a0a923303f03d2ae52373a1885e39eb050ed291e35d33a1934a"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "6d750bc1a48d2b4b621462e267437c33c32b0305ad4acb72c51900759068f5a5"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "e216fa951f1f38a59d2a4962c6d58e61ec90ac9d7f27403940cbd9a79c06c4ad"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "autoconf" => :build
+  depends_on "automake" => :build
+  depends_on "libtool" => :build
+  depends_on "pkgconf" => [:build, :test]
+
   depends_on "lua"
 
-  # Fix -flat_namespace being used on Big Sur and later.
-  patch do
-    url "https://raw.githubusercontent.com/Homebrew/formula-patches/03cf8088210822aa2c1ab544ed58ea04c897d9c4/libtool/configure-pre-0.4.2.418-big_sur.diff"
-    sha256 "83af02f2aa2b746bb7225872cab29a253264be49db0ecebb12f841562d9a2923"
-  end
-
   def install
-    system "./configure", "--disable-dependency-tracking",
-                          "--disable-silent-rules",
-                          "--prefix=#{prefix}"
+    system "glibtoolize", "--force", "--install"
+    system "autoreconf", "--force", "--install", "--verbose"
+
+    system "./configure", "--disable-silent-rules", *std_configure_args
     system "make"
     ENV.deparallelize
-    system "make", "check"
     system "make", "install"
-    system "make", "installcheck"
+  end
+
+  test do
+    (testpath/"test.cpp").write <<~CPP
+      #include <lutok/state.hpp>
+      #include <iostream>
+      int main() {
+          lutok::state lua;
+          lua.open_base();
+          lua.load_string("print('Hello from Lua')");
+          lua.pcall(0, 0, 0);
+          return 0;
+      }
+    CPP
+
+    flags = shell_output("pkgconf --cflags --libs lutok").chomp.split
+    system ENV.cxx, "test.cpp", "-std=c++11", "-o", "test", *flags
+    system "./test"
   end
 end

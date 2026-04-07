@@ -11,26 +11,25 @@ class Fastjar < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "fc54e682bbb9eed396f0cd21f3ee472ff5473e49932cabd827a224ed01961e68"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "b0499cae7fac86fbe57a98cbceffb53e2ff047cdadbcca9a103083a0cc6e9a20"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "c5fa05b957bd369862d66cefb2cfe2ec5fdb86bf6ea3bcde2b8f95c1d872a293"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "d9bb50e8b725164441e747625b381631edf82e0040babda6f187466295f80e3f"
-    sha256 cellar: :any_skip_relocation, sonoma:         "c44006f54e184a7e71c094a93027ce855a2f352c2217b7aab2f9a2732dc4e6ea"
-    sha256 cellar: :any_skip_relocation, ventura:        "9581595d1660096f047ee3c601481f6877a209c4cfd9fcfb9860fbfd79adad60"
-    sha256 cellar: :any_skip_relocation, monterey:       "06ceeffa38b10f099a521d5ea3ac4dd52d6d0d5740c3fc64f6b4e8509a842cef"
-    sha256 cellar: :any_skip_relocation, big_sur:        "1cbf953373b3d48accd872aa603fa66fb3b96e1ec33d4a17dfe6da2f97ad5cbb"
-    sha256 cellar: :any_skip_relocation, catalina:       "ee758c76cb694c96ea30cb9e6ac204f2797c78be36610dcdf36c2a75301b5835"
-    sha256 cellar: :any_skip_relocation, mojave:         "2dba61ec801db3d83692b9c9dd26eab247cb4bb6a6d6afc27f059bb6ba6052e5"
-    sha256 cellar: :any_skip_relocation, high_sierra:    "87b2c870895191b309b595481f73346e763b87c661e64ef35b821e54395d5cc1"
-    sha256 cellar: :any_skip_relocation, sierra:         "35230e788987e3a3c63d126af24c634bcbf58c0a320223d61f0eae69f6cbcc00"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "3ac2c41e11f88db5dd88b6cfceb7620f9f2dc26a6f7a89f224f8bd874774c6d3"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "1cb7800d86e7f8733755399304f9ccc3ea3d44c7d7ca6fd81b2f6aeaf5cc6061"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "329d6b5ec4a5bf54fff26334797bac30f2205512ae96f20b873e2f1722936272"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "64d57548564e62bfb5596526292bcd91bfcfa98d738a3cc2dfa6ffb15ef6e7f1"
+    sha256 cellar: :any_skip_relocation, sonoma:        "10e990e3753d3b28c8921e6b9005389da42ee4967ae7ba85f266364068208847"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "640961ee6c8698dd49deb1426d811811f9a65aa31e7baa565780c2b51914cbb0"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "7cf0d96826dfa9aa1ed077add9271eb0be8da1d8af8b0a31344d8fb9bce550ba"
   end
 
-  uses_from_macos "zlib"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
-    system "./configure", "--disable-debug", "--disable-dependency-tracking",
-                          "--prefix=#{prefix}"
+    args = []
+    # Help old config scripts identify arm64 linux
+    args << "--build=aarch64-unknown-linux-gnu" if OS.linux? && Hardware::CPU.arm64?
+
+    system "./configure", *args, *std_configure_args
     system "make", "install"
   end
 

@@ -3,25 +3,22 @@ class Regipy < Formula
 
   desc "Offline registry hive parsing tool"
   homepage "https://github.com/mkorman90/regipy"
-  url "https://files.pythonhosted.org/packages/99/03/e54da3d86e833d728322ffcf8d13d7af8aa1bc81c9b5f072e9496897628b/regipy-5.0.0.tar.gz"
-  sha256 "386470a3d4187e69bafbbfef6476aea439b5fd58d1e825df921d95ee81cc849a"
+  url "https://files.pythonhosted.org/packages/ba/80/dd0a588b1762c9e1016f96ae59e3c984269cbcc94ca7b63a3d097bb96416/regipy-6.2.1.tar.gz"
+  sha256 "4e09623cdeb23ba4ad9bd73a0f107c9c60aab2fe9a5dea0ba48c71af1e070dfd"
   license "MIT"
   head "https://github.com/mkorman90/regipy.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, all: "0d46a9f6669c11fdb20a6cabd09d9469778dbfdaf606e33ae41cf97e427c1cde"
+    sha256 cellar: :any_skip_relocation, all: "8ec1159e08804b9ee54ad2a19973f0f8f609aac806c07b9f6ad3fb1880311638"
   end
 
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
-  resource "attrs" do
-    url "https://files.pythonhosted.org/packages/fc/0f/aafca9af9315aee06a89ffde799a10a582fe8de76c563ee80bbcdc08b3fb/attrs-24.2.0.tar.gz"
-    sha256 "5cfb1b9148b5b086569baec03f20d7b6bf3bcacc9a42bebf87ffaaca362f6346"
-  end
+  pypi_packages package_name: "regipy[cli]"
 
   resource "click" do
-    url "https://files.pythonhosted.org/packages/96/d3/f04c7bfcf5c1862a2a5b845c6b2b360488cf47af55dfa79c98f6a6bf98b5/click-8.1.7.tar.gz"
-    sha256 "ca9853ad459e787e2192211578cc907e7594e294c7ccc834310722b41b9ca6de"
+    url "https://files.pythonhosted.org/packages/3d/fa/656b739db8587d7b5dfa22e22ed02566950fbfbcdc20311993483657a5c0/click-8.3.1.tar.gz"
+    sha256 "12ff4785d337a1bb490bb7e9c2b1ee5da3112e94a8622f26a6c77f5d2fc6842a"
   end
 
   resource "construct" do
@@ -35,8 +32,8 @@ class Regipy < Formula
   end
 
   resource "pytz" do
-    url "https://files.pythonhosted.org/packages/90/26/9f1f00a5d021fff16dee3de13d43e5e978f3d58928e129c3a62cf7eb9738/pytz-2024.1.tar.gz"
-    sha256 "2a29735ea9c18baf14b448846bde5a48030ed267578472d8955cd0e7443a9812"
+    url "https://files.pythonhosted.org/packages/f8/bf/abbd3cdfb8fbc7fb3d4d38d320f2441b1e7cbe29be4f23797b4a2b5d8aac/pytz-2025.2.tar.gz"
+    sha256 "360b9e3dbb49a209c21ad61809c7fb453643e048b38924c765813546746e81c3"
   end
 
   resource "tabulate" do
@@ -46,6 +43,14 @@ class Regipy < Formula
 
   def install
     virtualenv_install_with_resources
+
+    cmds = %w[
+      regipy-parse-header regipy-dump regipy-plugins-run
+      regipy-plugins-list regipy-diff regipy-process-transaction-logs
+    ]
+    cmds.each do |cmd|
+      generate_completions_from_executable(bin/cmd, shell_parameter_format: :click)
+    end
   end
 
   test do

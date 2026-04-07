@@ -1,10 +1,10 @@
 class Qjackctl < Formula
   desc "Simple Qt application to control the JACK sound server daemon"
   homepage "https://qjackctl.sourceforge.io/"
-  url "https://downloads.sourceforge.net/project/qjackctl/qjackctl/1.0.1/qjackctl-1.0.1.tar.gz"
-  sha256 "b955b00e72272da027f8fffa02822529d6d993b3c4782a764cda9c4c2f27c13d"
+  url "https://downloads.sourceforge.net/project/qjackctl/qjackctl/1.0.5/qjackctl-1.0.5.tar.gz"
+  sha256 "ce6056dd17fd5c1e8cca928754357f3cc6a6ff8464c9e05b07f8011b2597ec61"
   license "GPL-2.0-or-later"
-  head "https://git.code.sf.net/p/qjackctl/code.git", branch: "master"
+  head "https://git.code.sf.net/p/qjackctl/code.git", branch: "main"
 
   livecheck do
     url :stable
@@ -12,25 +12,24 @@ class Qjackctl < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "d2b4f3d2fc1f20737038f46923b69d58430311f70625dbe5cdc5d0560539849e"
-    sha256 arm64_ventura:  "4f04e90f76523e8414a5b244312cdd904dc34c9093e1772a77ce399c97d39d3f"
-    sha256 arm64_monterey: "266768bb56752ce2f4fe00c1b1c435d65862f5c54488fb46864cea7ec1bfce59"
-    sha256 sonoma:         "5a027183f6de199940c5249edf44987af3d99bd7e891f9e99cdc0b47ddb7cea1"
-    sha256 ventura:        "40f0c941db668440ff18b89a135ce774f6ce46f3d8ea66a609a6983f6dd3878f"
-    sha256 monterey:       "89714da9564ac51f1f8b34781a6a42eb52f4b5f75ce2116fa769b1e75a5918f2"
-    sha256 x86_64_linux:   "b67771519473cf1c45880a6724d507dbbe2849599b92f4f744d952dca879aa28"
+    sha256 arm64_tahoe:   "920a75fe7293a69246900ad32076b30664108d832355a537f03ad4b9dffc74c0"
+    sha256 arm64_sequoia: "a0a31424e3de8d51f1dee15e5e92fea5a03d453731042707943758fba2d589a4"
+    sha256 arm64_sonoma:  "c8d960f0ba5c1de5ecef6fc877570098ec77125c603a1d3247ce48fc2aab2598"
+    sha256 sonoma:        "1b68ec180377ed8a00935ef037e7ff50a70738f03f5a5c46ccb4e4bbf8bf1fe5"
+    sha256 arm64_linux:   "dca44237f1bae122b317740ec831d3d68e132415b53cfd10c62db236117315f6"
+    sha256 x86_64_linux:  "06145fdf9dc0b34aaa2aac747efe52df93590b72f9916ee15fcf14b7c75797e8"
   end
 
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
+  depends_on "qttools" => :build
   depends_on "jack"
-  depends_on "qt"
+  depends_on "qtbase"
+  depends_on "qtsvg"
 
   on_linux do
     depends_on "alsa-lib"
   end
-
-  fails_with gcc: "5"
 
   def install
     args = %w[
@@ -50,9 +49,12 @@ class Qjackctl < Formula
   end
 
   test do
+    # Detected locale "C" with character encoding "US-ASCII", which is not UTF-8.
+    ENV["LC_ALL"] = "en_US.UTF-8"
+
     # Set QT_QPA_PLATFORM to minimal to avoid error "qt.qpa.xcb: could not connect to display"
     ENV["QT_QPA_PLATFORM"] = "minimal" if OS.linux? && ENV["HOMEBREW_GITHUB_ACTIONS"]
 
-    assert_match version.to_s, shell_output("#{bin}/qjackctl --version 2>&1")
+    assert_match version.to_s, shell_output("#{bin}/qjackctl --version 2>&1", 1)
   end
 end

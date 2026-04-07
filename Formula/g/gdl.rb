@@ -1,25 +1,27 @@
 class Gdl < Formula
   desc "GNOME Docking Library provides docking features for GTK+ 3"
-  homepage "https://gitlab.gnome.org/GNOME/gdl"
+  homepage "https://gitlab.gnome.org/Archive/gdl"
   url "https://download.gnome.org/sources/gdl/3.40/gdl-3.40.0.tar.xz"
   sha256 "3641d4fd669d1e1818aeff3cf9ffb7887fc5c367850b78c28c775eba4ab6a555"
   license "LGPL-2.0-or-later"
-  revision 1
+  revision 2
 
   bottle do
-    sha256                               arm64_sonoma:   "1cfd6543098b8fbd77e7fd87c1c16f37d6f486c50323e39bf2d52605409b0f11"
-    sha256                               arm64_ventura:  "d896433e025e9c24f986d70fbd82afca5692a82a1a94613b6f4542f341a9896d"
-    sha256                               arm64_monterey: "b3769eef48ccbaf262852d48819309afac933d962c7464d4fa3e28a1449b0334"
-    sha256                               sonoma:         "4696c6de941ce9c03db4631ce5bc3a53d83f5edfdbff117b3d9c4cba1af3ca1f"
-    sha256                               ventura:        "9485abd2cefbb7793c73f8de136bed12524f5e54452bc89b386bc19274f09b1b"
-    sha256                               monterey:       "96f6f072cd160b556e5f3e02eb8ffd5cbbe1d4a77877d8f1f4b0d9d986bdfc19"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "83b01e8322122e6bbca3d696cb820b83409a1320a3439ef5aa3f56a2de3e908f"
+    sha256                               arm64_tahoe:   "d3c6f207816d35acd3038740b15ec3147330ebe7d50090878d003def62673900"
+    sha256                               arm64_sequoia: "926e80bc2182e0bdb36a4ca054d212955ad221c792cf7b17a15f75315a802046"
+    sha256                               arm64_sonoma:  "cfe7f704c7686a258efdad7a4b4406f47dc6e807f55b658fb16dd84ee227c920"
+    sha256                               sonoma:        "e3c86df3e2c6aff4656165ddba3a9ee68d501a42779d114b390a6cc98310873b"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "368bec5f86eb60574abaa8d9dfbe5ceb6fa4049689baf884ce2402fa81d8667c"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "6a1f91ac57eab7c7e0c1a185480776b795e6ad722631064c280d5ced4ac83bdf"
   end
+
+  deprecate! date: "2025-01-15", because: :repo_archived
+  disable! date: "2026-01-15", because: :repo_archived
 
   depends_on "gettext" => :build
   depends_on "gobject-introspection" => :build
   depends_on "intltool" => :build
-  depends_on "pkg-config" => [:build, :test]
+  depends_on "pkgconf" => [:build, :test]
 
   depends_on "cairo"
   depends_on "gdk-pixbuf"
@@ -48,29 +50,24 @@ class Gdl < Formula
   end
 
   def install
-    if OS.linux?
-      ENV.prepend_path "PERL5LIB", Formula["perl-xml-parser"].libexec/"lib/perl5"
-      ENV["INTLTOOL_PERL"] = Formula["perl"].bin/"perl"
-    end
-
     system "./configure", "--disable-silent-rules",
                           "--enable-introspection=yes",
-                          *std_configure_args.reject { |s| s["--disable-debug"] }
+                          *std_configure_args
     system "make", "install"
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <gdl/gdl.h>
 
       int main(int argc, char *argv[]) {
         GType type = gdl_dock_object_get_type();
         return 0;
       }
-    EOS
+    C
 
-    pkg_config_flags = shell_output("pkg-config --cflags --libs gdl-3.0").chomp.split
-    system ENV.cc, "test.c", *pkg_config_flags, "-o", "test"
+    pkgconf_flags = shell_output("pkgconf --cflags --libs gdl-3.0").chomp.split
+    system ENV.cc, "test.c", *pkgconf_flags, "-o", "test"
     system "./test"
   end
 end

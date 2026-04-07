@@ -6,23 +6,24 @@ class Bashate < Formula
   url "https://files.pythonhosted.org/packages/4d/0c/35b92b742cc9da7788db16cfafda2f38505e19045ae1ee204ec238ece93f/bashate-2.1.1.tar.gz"
   sha256 "4bab6e977f8305a720535f8f93f1fb42c521fcbc4a6c2b3d3d7671f42f221f4c"
   license "Apache-2.0"
-  revision 1
+  revision 2
+  head "https://github.com/openstack/bashate.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "cef7fcf0ee622eac38ae68dab65871fefe0b97e31f5c814f8d158627c61ff497"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "81782b93d1a81a96621647b41c65a720c0cf26d995bdce0d5fea85572adc365f"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "77db33d9a146b930bee954a0ea2d42eff50fe0ffde1fa7c82d1c199d600750ab"
-    sha256 cellar: :any_skip_relocation, sonoma:         "d6af41973ffa58f39fbdb94f146cde5ac30bb198688264ca9a58d711c3bc2b23"
-    sha256 cellar: :any_skip_relocation, ventura:        "6db4c350ffbccdf07cd35aa8bf82045ada101b44c77cac84666af30e560da92c"
-    sha256 cellar: :any_skip_relocation, monterey:       "a100cd15d96ec8c367311de80f9561d2db4334a261d30ac8623f50a00311ba2e"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "26d84e8ccddbbcefd2d6de2b2d45c44613f795e2f94c400730666dfec9fab539"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, all: "12db36a43a4acf2fd613077ac65f7a2b8f1ca6bd5e57bc8fb988ec2c6a3ca2f4"
   end
 
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   resource "pbr" do
-    url "https://files.pythonhosted.org/packages/8d/c2/ee43b3b11bf2b40e56536183fc9f22afbb04e882720332b6276ee2454c24/pbr-6.0.0.tar.gz"
-    sha256 "d1377122a5a00e2f940ee482999518efe16d745d423a670c27773dfbc3c9a7d9"
+    url "https://files.pythonhosted.org/packages/5e/ab/1de9a4f730edde1bdbbc2b8d19f8fa326f036b4f18b2f72cfbea7dc53c26/pbr-7.0.3.tar.gz"
+    sha256 "b46004ec30a5324672683ec848aed9e8fc500b0d261d40a3229c2d2bbfcedc29"
+  end
+
+  resource "setuptools" do
+    url "https://files.pythonhosted.org/packages/82/f3/748f4d6f65d1756b9ae577f329c951cda23fb900e4de9f70900ced962085/setuptools-82.0.0.tar.gz"
+    sha256 "22e0a2d69474c6ae4feb01951cb69d515ed23728cf96d05513d36e42b62b37cb"
   end
 
   def install
@@ -30,13 +31,13 @@ class Bashate < Formula
   end
 
   test do
-    (testpath/"test.sh").write <<~EOS
+    assert_match version.to_s, shell_output("#{bin}/bashate --version")
+
+    (testpath/"test.sh").write <<~SHELL
       #!/bin/bash
         echo "Testing Bashate"
-    EOS
-    assert_match "E003 Indent not multiple of 4", shell_output(bin/"bashate #{testpath}/test.sh", 1)
-    assert_empty shell_output(bin/"bashate -i E003 #{testpath}/test.sh")
-
-    assert_match version.to_s, shell_output(bin/"bashate --version")
+    SHELL
+    assert_match "E003 Indent not multiple of 4", shell_output("#{bin}/bashate #{testpath}/test.sh", 1)
+    assert_empty shell_output("#{bin}/bashate -i E003 #{testpath}/test.sh")
   end
 end

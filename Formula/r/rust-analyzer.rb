@@ -2,18 +2,17 @@ class RustAnalyzer < Formula
   desc "Experimental Rust compiler front-end for IDEs"
   homepage "https://rust-analyzer.github.io/"
   url "https://github.com/rust-lang/rust-analyzer.git",
-       tag:      "2024-09-02",
-       revision: "779d9eee2ea403da447278a7007c9627c8878856"
+      tag:      "2026-04-06",
+      revision: "38fb8f92ac15853d7fa9fb47fc2d81fdd5cd6c7e"
   license any_of: ["Apache-2.0", "MIT"]
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "ff83bc2b42f61739e2e5a51489738c0b17b9d27e0fb3318ef308249bff6f775d"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "12ff38c2b7cd8f6693efbc30362d4fd29bf62daa8e9d3b64c38ed79c1d65f5b8"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "91fa8ac2eaa944f94836d0bbdedc3ed881bb14f96b05b6db3bafffe187261da3"
-    sha256 cellar: :any_skip_relocation, sonoma:         "6699bc6fca8ab2d52247c68d8260aa2cd25f63187c421fd28f652b01ebc73824"
-    sha256 cellar: :any_skip_relocation, ventura:        "c936b96b2e161577d90f8ba22cb1a38e9904065288501ecbe886aca3ab17144a"
-    sha256 cellar: :any_skip_relocation, monterey:       "cdd0766b2e0c03a82bf6080bd4856aebbdb9b2b74329ba88206de2a4779ad11b"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "06be2e67ba19d4eac70ed18c50ded80fdbb2f9d00481c6fd8925c7d8e6b82609"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "2c3e46b4877001c67680069bf9ea2c41579ec234a9470c0a277644cf705e37fa"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "6e264f958125f028b0e884dd81db044aa7e90e1ad7ff35d086fb662757298521"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "1555f2e5602e05aa15b1044b0e86c70da906646a4949e055bd1a947537618217"
+    sha256 cellar: :any_skip_relocation, sonoma:        "af78a0a0f999148d0f2ede023d435d18e234fa04c695ab2ad27ba8dee2634f73"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "fc683226082a14ce13658221290882160423e8668c5983e458cac1333c8d42f6"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "73bc4fb3432b523faf6dd2ea765465a43125f3fd1c15e7e6fca36fe9c3cf1963"
   end
 
   depends_on "rust" => :build
@@ -31,42 +30,42 @@ class RustAnalyzer < Formula
   end
 
   test do
-    input = rpc <<-EOF
-    {
-      "jsonrpc":"2.0",
-      "id":1,
-      "method":"initialize",
-      "params": {
-        "rootUri": "file:/dev/null",
-        "capabilities": {}
+    input = rpc <<~JSON
+      {
+        "jsonrpc":"2.0",
+        "id":1,
+        "method":"initialize",
+        "params": {
+          "rootUri": "file:/dev/null",
+          "capabilities": {}
+        }
       }
-    }
-    EOF
+    JSON
 
-    input += rpc <<-EOF
-    {
-      "jsonrpc":"2.0",
-      "method":"initialized",
-      "params": {}
-    }
-    EOF
+    input += rpc <<~JSON
+      {
+        "jsonrpc":"2.0",
+        "method":"initialized",
+        "params": {}
+      }
+    JSON
 
-    input += rpc <<-EOF
-    {
-      "jsonrpc":"2.0",
-      "id": 1,
-      "method":"shutdown",
-      "params": null
-    }
-    EOF
+    input += rpc <<~JSON
+      {
+        "jsonrpc":"2.0",
+        "id": 1,
+        "method":"shutdown",
+        "params": null
+      }
+    JSON
 
-    input += rpc <<-EOF
-    {
-      "jsonrpc":"2.0",
-      "method":"exit",
-      "params": {}
-    }
-    EOF
+    input += rpc <<~JSON
+      {
+        "jsonrpc":"2.0",
+        "method":"exit",
+        "params": {}
+      }
+    JSON
 
     output = /Content-Length: \d+\r\n\r\n/
 

@@ -1,85 +1,102 @@
 class Dovecot < Formula
   desc "IMAP/POP3 server"
   homepage "https://dovecot.org/"
-  url "https://dovecot.org/releases/2.3/dovecot-2.3.21.tar.gz"
-  sha256 "05b11093a71c237c2ef309ad587510721cc93bbee6828251549fc1586c36502d"
+  url "https://dovecot.org/releases/2.4/dovecot-2.4.3.tar.gz"
+  sha256 "e0b30330fe51e47ecfcf641bc16041184d91bdd0ac3db789b7cef54e3a75ac9b"
   license all_of: ["BSD-3-Clause", "LGPL-2.1-or-later", "MIT", "Unicode-DFS-2016", :public_domain]
 
   livecheck do
-    url "https://www.dovecot.org/download/"
-    regex(/href=.*?dovecot[._-]v?(\d+(?:\.\d+)+)\.t/i)
+    url "https://dovecot.org/releases/"
+    regex(/v?(\d+(?:[._-]\d+)+)/i)
+    strategy :page_match do |page, regex|
+      major_minor = page.scan(regex)&.flatten&.last
+      next if major_minor.blank?
+
+      # Check the page for the newest major/minor version, which links to the
+      # latest tarball (containing the full version in the file name)
+      version_page = Homebrew::Livecheck::Strategy.page_content(
+        URI.join("https://dovecot.org/releases/", major_minor).to_s,
+      )
+      next if version_page[:content].blank?
+
+      version_page[:content].scan(regex)&.flatten&.last
+    end
   end
 
   bottle do
-    sha256 arm64_sonoma:   "b3d70604dcf10caaf9cf9505f3bd90ed48bdee2ba891ef891ae1c10fe0a7a4e2"
-    sha256 arm64_ventura:  "b89589ccfe9620e87c163c99ed504fb875585dd23d4a53487dc7935b02866c0e"
-    sha256 arm64_monterey: "5ae2a7172bf487a36f90ee0115e57572f7a52e5b1dabdfd8929ee4f01b78d2be"
-    sha256 arm64_big_sur:  "ff928eaeb4ec664bd5e8cba3060a4745a9f6a34f667ff288e0f119c930692f3a"
-    sha256 sonoma:         "5f21b1c455dc089610cf936add3d7e6c3318da234aa945c3e98191663b9b6022"
-    sha256 ventura:        "5c6db5e542ce460ccfc2168b3f14ec80279a621cd076fc5836bad88eb93f5d55"
-    sha256 monterey:       "dd17baa57200f7d95ebc5f8870cca4cf9e48c570840e42c9b1f51d02ec1dbbec"
-    sha256 big_sur:        "e3cba8498560c19191205b503aad5093a1dde6bf45c3e01319f94d89f554321d"
-    sha256 x86_64_linux:   "9740a847f5221216150086de18bd43e93500f6d988ad8989f9f98f9458392097"
+    sha256 arm64_tahoe:   "33d00f9e5aa9aa95297325dac2ad87c6551e5c703e1f0799524d10ad4ea1a2c7"
+    sha256 arm64_sequoia: "4c9f732d67423229e91d66d09a23db271a177487ef48c9e2bb4f063a84604e1e"
+    sha256 arm64_sonoma:  "5f5065b7ea5eca7665268d801f4eb95b0278d7aab53aabbce0882a86319d8280"
+    sha256 sonoma:        "f32f1eeedcfc044bd5993b879cccec41acbb2b41edbccba8bd781d9bcc23c4ae"
+    sha256 arm64_linux:   "b775760a632ba0794ab7bd5f0e65d1b06dd00e25278b348461c1f00d4803bea0"
+    sha256 x86_64_linux:  "5c4c4725815b329a0aef8bca76ba442bef55b57602eb021d4aa0adb15b66b97f"
   end
 
+  depends_on "pkgconf" => :build
+  depends_on "lua@5.4"
+  depends_on "openldap"
   depends_on "openssl@3"
 
+  uses_from_macos "python" => :build
+  uses_from_macos "netcat" => :test
   uses_from_macos "bzip2"
   uses_from_macos "libxcrypt"
   uses_from_macos "sqlite"
-  uses_from_macos "zlib"
 
   on_linux do
+    depends_on "libtirpc"
     depends_on "linux-pam"
     depends_on "lz4"
     depends_on "xz"
+    depends_on "zlib-ng-compat"
     depends_on "zstd"
   end
 
   resource "pigeonhole" do
-    url "https://pigeonhole.dovecot.org/releases/2.3/dovecot-2.3-pigeonhole-0.5.21.tar.gz"
-    sha256 "1ca71d2659076712058a72030288f150b2b076b0306453471c5261498d3ded27"
+    url "https://pigeonhole.dovecot.org/releases/2.4/dovecot-pigeonhole-2.4.3.tar.gz"
+    sha256 "219c472a5fa3e6f7a6cb76ff5118bcbead73e14cd4157d3701425245756cb5f8"
+
+    livecheck do
+      formula :parent
+    end
   end
 
-  # dbox-storage.c:296:32: error: no member named 'st_atim' in 'struct stat'
-  # dbox-storage.c:297:24: error: no member named 'st_ctim' in 'struct stat'
-  # Following two patches submitted upstream at https://github.com/dovecot/core/pull/211
+  # `uoff_t` and `plugins/var-expand-crypt` patches, upstream pr ref, https://github.com/dovecot/core/pull/232
   patch do
-    url "https://github.com/dovecot/core/commit/6b2eb995da62b8eca9d8f713bd5858d3d9be8062.patch?full_index=1"
-    sha256 "3e3f74b95f95a1587a804e9484467b1ed77396376b0a18be548e91e1b904ae1b"
+    url "https://github.com/dovecot/core/commit/bbfab4976afdf38a7fa966752de33481f9d2c2e5.patch?full_index=1"
+    sha256 "f5a77eeaf5978b75a6c7d1d9d4b7623679aec047c3dae63516105774ae6c04de"
   end
-
-  patch do
-    url "https://github.com/dovecot/core/commit/eca7b6b9984dd1cb5fcd28f7ebccaa5301aead1e.patch?full_index=1"
-    sha256 "cedfeadd1cd43df3eebfcf3f465314fad4f6785c33000cbbd1349e3e0eb8c0ee"
-  end
+  # `plugins/var-expand-crypt` and `lib-storage-lua` missing `lib-var-expand` in LIBADD
+  patch :DATA
 
   def install
+    # Re-generate file as only Linux has inotify support for imap-hibernate
+    rm "src/config/all-settings.c" unless OS.linux?
+
+    ENV.append "LIBS", "-liconv" if OS.mac?
+
     args = %W[
-      --prefix=#{prefix}
-      --disable-dependency-tracking
       --libexecdir=#{libexec}
       --sysconfdir=#{etc}
       --localstatedir=#{var}
       --with-bzlib
+      --with-ldap
+      --with-lua=yes
       --with-pam
       --with-sqlite
-      --with-ssl=openssl
-      --with-zlib
       --without-icu
     ]
 
-    system "./configure", *args
+    system "./configure", *args, *std_configure_args
     system "make", "install"
 
     resource("pigeonhole").stage do
       args = %W[
-        --disable-dependency-tracking
         --with-dovecot=#{lib}/dovecot
-        --prefix=#{prefix}
+        --with-ldap
       ]
 
-      system "./configure", *args
+      system "./configure", *args, *std_configure_args
       system "make"
       system "make", "install"
     end
@@ -103,11 +120,78 @@ class Dovecot < Formula
   test do
     assert_match version.to_s, shell_output("#{sbin}/dovecot --version")
 
-    cp_r share/"doc/dovecot/example-config", testpath/"example"
-    inreplace testpath/"example/conf.d/10-master.conf" do |s|
-      s.gsub! "#default_login_user = dovenull", "default_login_user = #{ENV["USER"]}"
-      s.gsub! "#default_internal_user = dovecot", "default_internal_user = #{ENV["USER"]}"
+    port = free_port.to_s
+    cp_r share/"doc/dovecot/example-config", testpath/"config"
+    (testpath/"config/dovecot.conf").write <<~EOS
+      dovecot_config_version = #{version}
+      dovecot_storage_version = #{version}
+
+      base_dir = #{testpath}/run
+      state_dir = #{testpath}/state
+      listen = *
+      ssl = no
+      protocols = imap
+      service imap-login {
+        inet_listener imap {
+          port = #{port}
+        }
+      }
+
+      default_login_user = #{ENV["USER"]}
+      default_internal_user = #{ENV["USER"]}
+      default_internal_group = #{Etc.getgrgid(Process.egid).name}
+      auth_mechanisms = plain
+      log_path = #{testpath}/dovecot.log
+    EOS
+
+    system bin/"doveconf", "-c", testpath/"config/dovecot.conf"
+
+    pid = spawn sbin/"dovecot", "-c", testpath/"config/dovecot.conf", "-F"
+    begin
+      sleep 5
+      system "nc", "-z", "localhost", port
+    ensure
+      Process.kill "TERM", pid
+      Process.wait pid
     end
-    system bin/"doveconf", "-c", testpath/"example/dovecot.conf"
   end
 end
+
+__END__
+diff --git a/src/lib-var-expand-crypt/Makefile.in b/src/lib-var-expand-crypt/Makefile.in
+index 6c8b1ad..b721ad5 100644
+--- a/src/lib-var-expand-crypt/Makefile.in
++++ b/src/lib-var-expand-crypt/Makefile.in
+@@ -177,7 +177,11 @@ am__uninstall_files_from_dir = { \
+ am__installdirs = "$(DESTDIR)$(moduledir)" \
+ 	"$(DESTDIR)$(pkginc_libdir)"
+ LTLIBRARIES = $(module_LTLIBRARIES)
+-var_expand_crypt_la_LIBADD =
++var_expand_crypt_la_LIBADD = \
++  ../lib/liblib.la \
++  ../lib-json/libjson.la \
++  ../lib-dcrypt/libdcrypt.la \
++  ../lib-var-expand/libvar_expand.la
+ am_var_expand_crypt_la_OBJECTS = var-expand-crypt.lo
+ var_expand_crypt_la_OBJECTS = $(am_var_expand_crypt_la_OBJECTS)
+ AM_V_lt = $(am__v_lt_@AM_V@)
+diff --git a/src/lib-storage-lua/Makefile.in b/src/lib-storage-lua/Makefile.in
+--- a/src/lib-storage-lua/Makefile.in
++++ b/src/lib-storage-lua/Makefile.in
+@@ -521,11 +521,14 @@
+ 
+ libdovecot_storage_lua_la_LIBADD = \
+ 	../lib-dovecot-storage/libdovecot-storage.la \
+-	../lib-lua/libdovecot-lua.la
++	../lib-lua/libdovecot-lua.la \
++	$(LIBDOVECOT) \
++	$(LUA_LIBS)
+ 
+ libdovecot_storage_lua_la_DEPENDENCIES = \
+ 	../lib-dovecot-storage/libdovecot-storage.la \
+-	../lib-lua/libdovecot-lua.la
++	../lib-lua/libdovecot-lua.la \
++	$(LIBDOVECOT_DEPS)
+ 
+ libdovecot_storage_lua_la_LDFLAGS = -export-dynamic
+ headers = \

@@ -1,27 +1,24 @@
 class Tfel < Formula
   desc "Code generation tool dedicated to material knowledge for numerical mechanics"
   homepage "https://thelfer.github.io/tfel/web/index.html"
-  url "https://github.com/thelfer/tfel/archive/refs/tags/TFEL-4.2.1.tar.gz"
-  sha256 "14f27257014a992a4e511f35390e4b9a086f6a5ed74087f891f8c00306f1758f"
+  url "https://github.com/thelfer/tfel/archive/refs/tags/TFEL-5.1.0.tar.gz"
+  sha256 "1afd98200de332e97e86d109ce0e1aaa8f18cc6c6c81daec3218809509cdfad7"
   license "GPL-1.0-or-later"
-  revision 1
-  head "https://github.com/thelfer/tfel.git", using: :git, branch: "master"
+  head "https://github.com/thelfer/tfel.git", branch: "master"
 
   bottle do
-    sha256 arm64_sonoma:   "2c83f17aafe4803c5dcb76e75a1f0e065ddeb0c2a98cdde5284307c762850b73"
-    sha256 arm64_ventura:  "e151a64d0af704275ff311cfef7d56d653d9ede613dc8f66b5ab44cf471d9afa"
-    sha256 arm64_monterey: "349346beb4bc75a8275d72fc334d5788cf722d28675018259b61edebc9bd40e1"
-    sha256 sonoma:         "8622ce53d1eba3091833e9d490ef783d28ff79a880cd7b067d3de70e3f6fcd00"
-    sha256 ventura:        "f67f8d672f2eed887c9fb27db78f61bb5dfa6ae5275b9de38543e77c5d01e92c"
-    sha256 monterey:       "b372fb99af0111007958b9bd88687e5cb9b67efb131888bd8b3ff55964974cb1"
-    sha256 x86_64_linux:   "2d188e271109fa6cac8ef90708b3f3d4a83f20ec2d56b5d0fd99d14f7bad14c9"
+    sha256 arm64_tahoe:   "6c176029b0f9a9a97eba1a77309303a6e21d06f9b732dd36b21a6a906c0af94e"
+    sha256 arm64_sequoia: "c6df35305057ba120a952044049c3b11ec4036453ed0bfe6034ba3ee998b0677"
+    sha256 arm64_sonoma:  "2af5946f1175cfd3ee7e78b27ecca53257c45128b71782bc08692a6c6280965e"
+    sha256 sonoma:        "24947bbb4aa4789ba475114643e7e27301d1c5848963dc79f3cf2c6f827cb2d0"
+    sha256 arm64_linux:   "b0a9c7bbfe1fde48bd5bc46a8504dd1b1337063ab86e215779b3367f9f634607"
+    sha256 x86_64_linux:  "bb7e42bbd5f89718c0be51a12c9ab0af0236dd1bdbdc4eb6a7e48a633d144949"
   end
 
   depends_on "cmake" => :build
-  depends_on "gcc" => :build
-  depends_on "boost-python3"
-  depends_on "python@3.12"
-  fails_with gcc: "5"
+  depends_on "gcc" => :build # for gfortran
+  depends_on "pybind11" => :build
+  depends_on "python@3.14"
 
   def install
     args = [
@@ -30,7 +27,8 @@ class Tfel < Formula
       "-Denable-website=OFF",
       "-Dlocal-castem-header=ON",
       "-Denable-python=ON",
-      "-Denable-python-bindings=ON", # requires boost-python
+      "-Denable-python-bindings=ON",
+      "-Denable-pybind11=ON", # requires pybind11
       "-Denable-numpy-support=OFF",
       "-Denable-fortran=ON",
       "-Denable-cyrano=ON",
@@ -42,8 +40,8 @@ class Tfel < Formula
       "-Denable-diana-fea=ON",
       "-Denable-ansys=ON",
       "-Denable-europlexus=ON",
+      "-Denable-testing=OFF",
       "-Dpython-static-interpreter-workaround=ON",
-
     ]
     system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
     system "cmake", "--build", "build"
@@ -51,7 +49,7 @@ class Tfel < Formula
   end
 
   test do
-    (testpath/"test.mfront").write <<~EOS
+    (testpath/"test.mfront").write <<~MFRONT
       @Parser Implicit;
       @Behaviour Norton;
       @Algorithm NewtonRaphson_NumericalJacobian ;
@@ -71,8 +69,8 @@ class Tfel < Formula
         feel += dp*n-deto ;
         fp -= dt*A*pow(seq,m) ;
       }
-    EOS
+    MFRONT
     system bin/"mfront", "--obuild", "--interface=generic", "test.mfront"
-    assert_predicate testpath/"src"/shared_library("libBehaviour"), :exist?
+    assert_path_exists testpath/"src"/shared_library("libBehaviour")
   end
 end

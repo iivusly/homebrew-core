@@ -1,45 +1,32 @@
 class Grails < Formula
   desc "Web application framework for the Groovy language"
-  homepage "https://grails.org"
-  url "https://github.com/grails/grails-core/releases/download/v6.2.0/grails-6.2.0.zip"
-  sha256 "c2e7c0aa55a18bf07f0b0fba493c679261c4dd88cfa4a60fd6e142081aec616e"
+  homepage "https://grails.apache.org/"
+  url "https://github.com/apache/grails-core/releases/download/v7.0.9/apache-grails-7.0.9-bin.zip"
+  sha256 "5425a3d3b0095b3bcf2e38925ebe724b4103027cd68c0256a4f1086c00eca680"
   license "Apache-2.0"
 
   livecheck do
     url :stable
-    regex(/^v?(\d+(?:\.\d+)+)$/i)
+    strategy :github_latest
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "fd812c9a9d82a9520388c50bd217b79c54005af8d4c746738ed7818318b63d3b"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "fd812c9a9d82a9520388c50bd217b79c54005af8d4c746738ed7818318b63d3b"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "fd812c9a9d82a9520388c50bd217b79c54005af8d4c746738ed7818318b63d3b"
-    sha256 cellar: :any_skip_relocation, sonoma:         "5d0db416139b3cfc043c8b19d0bf002f59b1c2156d21309301ced52fa561d90c"
-    sha256 cellar: :any_skip_relocation, ventura:        "5d0db416139b3cfc043c8b19d0bf002f59b1c2156d21309301ced52fa561d90c"
-    sha256 cellar: :any_skip_relocation, monterey:       "5d0db416139b3cfc043c8b19d0bf002f59b1c2156d21309301ced52fa561d90c"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "fd812c9a9d82a9520388c50bd217b79c54005af8d4c746738ed7818318b63d3b"
+    sha256 cellar: :any_skip_relocation, all: "ef204a9cc00f41f49385b0b10abd81604c976b1ed8756ca43b6fe80e091c2eff"
   end
 
-  depends_on "openjdk@11"
+  depends_on "openjdk@21"
 
-  resource "cli" do
-    url "https://github.com/grails/grails-forge/releases/download/v6.2.0/grails-cli-6.2.0.zip"
-    sha256 "de6eaa4389ce4cb08081e219f8838b6cb1a0445c8e6a4dd66cb4cc2fa7652776"
+  def java_version
+    "21"
   end
 
   def install
-    odie "cli resource needs to be updated" if version != resource("cli").version
+    # Remove Windows files
+    rm Dir["bin/*.bat"]
 
     libexec.install Dir["*"]
-
-    resource("cli").stage do
-      rm("bin/grails.bat")
-      (libexec/"lib").install Dir["lib/*.jar"]
-      bin.install "bin/grails"
-      bash_completion.install "bin/grails_completion" => "grails"
-    end
-
-    bin.env_script_all_files libexec/"bin", Language::Java.overridable_java_home_env("11")
+    bin.install libexec.glob("bin/*")
+    bin.env_script_all_files libexec/"bin", Language::Java.java_home_env(java_version)
   end
 
   def caveats
@@ -50,10 +37,37 @@ class Grails < Formula
   end
 
   test do
+    assert_match "Grails Version: #{version}", shell_output("#{bin}/grails --version")
+
     system bin/"grails", "create-app", "brew-test"
-    assert_predicate testpath/"brew-test/gradle.properties", :exist?
+    assert_path_exists testpath/"brew-test/gradle.properties"
     assert_match "brew.test", File.read(testpath/"brew-test/build.gradle")
 
-    assert_match "Grails Version: #{version}", shell_output("#{bin}/grails --version")
+    cd "brew-test" do
+      system bin/"grails", "create-controller", "greeting"
+      rm "grails-app/controllers/brew/test/GreetingController.groovy"
+      Pathname("grails-app/controllers/brew/test/GreetingController.groovy").write <<~GROOVY
+        package brew.test
+        class GreetingController {
+            def index() {
+                render "Hello Homebrew"
+            }
+        }
+      GROOVY
+
+      # Test that scripts are compatible with OpenJDK version
+      port = free_port
+      ENV["JAVA_HOME"] = Language::Java.java_home(java_version)
+      system "./gradlew", "--no-daemon", "assemble"
+      pid = spawn "./gradlew", "--no-daemon", "bootRun", "-Dgrails.server.port=#{port}"
+      begin
+        sleep 20
+        sleep 20 if OS.mac? && Hardware::CPU.intel?
+        assert_equal "Hello Homebrew", shell_output("curl --silent http://localhost:#{port}/greeting/index")
+      ensure
+        Process.kill "TERM", pid
+        Process.wait pid
+      end
+    end
   end
 end

@@ -3,30 +3,32 @@ class PodmanCompose < Formula
 
   desc "Alternative to docker-compose using podman"
   homepage "https://github.com/containers/podman-compose"
-  url "https://files.pythonhosted.org/packages/bd/67/0f8cf5ef346a22ce73dfdd0e60cf81342329b71a7fc118128929f0c07b62/podman_compose-1.2.0.tar.gz"
-  sha256 "e47665546598a48d83d30ca2709a679412824bbe84b93f61779bc863e1a6f060"
+  url "https://files.pythonhosted.org/packages/24/91/b168a685ca6813ff9b467d76a7365a099aec16a1032b6edf39b0cd19f6c3/podman_compose-1.5.0.tar.gz"
+  sha256 "5cc09362852711ce5d27648e41cb5fd058ea5a75acbcdec2f8d0b0c114a18e8e"
   license "GPL-2.0-only"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:  "10dde7d6207bd40143e7e2c57ea1c46dab8599d541ed7fb04e3a8c673d96936a"
-    sha256 cellar: :any,                 arm64_ventura: "e795544ff6e7ec30ffe28e8f27f8533f3e08d3ee587b540d5dcd95ea6a785eaa"
-    sha256 cellar: :any,                 sonoma:        "030a9bd00b8ba60f8c91450d2d138f6a022503e178ac48993ddf6b9136dce7e4"
-    sha256 cellar: :any,                 ventura:       "77bc7b087a72453dfde46e5e22988403fe472bd06691b0a89e7f723d4a898092"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:  "9adcf18992eccc71f72b3652959d6ac65dd9710dd4bf823d3e1334648a5f9042"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "6d9765042f7c657a9988eba299ea87413ebc88b51dd301bf0824eb2f42cb5fbf"
+    sha256 cellar: :any,                 arm64_sequoia: "64ec31c99c8f3eef79b7bff65d15f3aa9fee7c3d2cf10db798934655650b2eb7"
+    sha256 cellar: :any,                 arm64_sonoma:  "b090788eeecfb9762576fc0579cca1e237dbe78fe81d1bf83ec5027ce654550c"
+    sha256 cellar: :any,                 sonoma:        "0c3fef86a51ea1e01f3b292042a21721adbb26b2d3220be6a4cf3d4a64ee1b9a"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "fca19cda30ccd74d9837a3fadcc36b637d85a38fa42ba765f39ebaaabda87f79"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "2225e553f4109c8f560ede2cb744456f8c53e625ad1f168cc66f9d4cad789835"
   end
 
   depends_on "libyaml"
   depends_on "podman"
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   resource "python-dotenv" do
-    url "https://files.pythonhosted.org/packages/bc/57/e84d88dfe0aec03b7a2d4327012c1627ab5f03652216c63d49846d7a6c58/python-dotenv-1.0.1.tar.gz"
-    sha256 "e324ee90a023d808f1959c46bcbc04446a10ced277783dc6ee09987c37ec10ca"
+    url "https://files.pythonhosted.org/packages/f6/b0/4bc07ccd3572a2f9df7e6782f52b0c6c90dcbb803ac4a167702d7d0dfe1e/python_dotenv-1.1.1.tar.gz"
+    sha256 "a8a6399716257f45be6a007360200409fce5cda2661e3dec71d23dc15f6189ab"
   end
 
   resource "pyyaml" do
-    url "https://files.pythonhosted.org/packages/cd/e5/af35f7ea75cf72f2cd079c95ee16797de7cd71f29ea7c68ae5ce7be1eda0/PyYAML-6.0.1.tar.gz"
-    sha256 "bfdf460b1736c775f2ba9f6a92bca30bc2095067b8a9d77876d1fad6cc3b4a43"
+    url "https://files.pythonhosted.org/packages/05/8e/961c0007c59b8dd7729d542c61a4d537767a59645b82a0b521206e1e25c2/pyyaml-6.0.3.tar.gz"
+    sha256 "d76623373421df22fb4cf8817020cbb7ef15c725b9d5e45f17e189bfc384190f"
   end
 
   def install
@@ -38,7 +40,7 @@ class PodmanCompose < Formula
 
     port = free_port
 
-    (testpath/"compose.yml").write <<~EOS
+    (testpath/"compose.yml").write <<~YAML
       version: "3"
       services:
         test:
@@ -47,13 +49,13 @@ class PodmanCompose < Formula
             - #{port}:80
           environment:
             - NGINX_PORT=80
-    EOS
+    YAML
 
     assert_match "podman ps --filter label=io.podman.compose.project=brewtest",
       shell_output("#{bin}/podman-compose up -d 2>&1", 1)
     # If it's trying to connect to Podman, we know it at least found the
     # compose.yml file and parsed/validated the contents
     expected = OS.linux? ? "Error: cannot re-exec process" : "Cannot connect to Podman"
-    assert_match expected, shell_output("#{bin}/podman-compose down 2>&1")
+    assert_match expected, shell_output("#{bin}/podman-compose down 2>&1", 1)
   end
 end

@@ -1,32 +1,32 @@
 class Xorriso < Formula
   desc "ISO9660+RR manipulation tool"
   homepage "https://www.gnu.org/software/xorriso/"
-  url "https://ftp.gnu.org/gnu/xorriso/xorriso-1.5.6.tar.gz"
-  mirror "https://ftpmirror.gnu.org/xorriso/xorriso-1.5.6.tar.gz"
-  sha256 "d4b6b66bd04c49c6b358ee66475d806d6f6d7486e801106a47d331df1f2f8feb"
+  url "https://ftpmirror.gnu.org/gnu/xorriso/xorriso-1.5.8.tar.gz"
+  mirror "https://ftp.gnu.org/gnu/xorriso/xorriso-1.5.8.tar.gz"
+  sha256 "319e3675cd7d986bf71d36596ca7b03dac172a758462bedcbbd298a7f86f36cc"
   license "GPL-2.0-or-later"
 
-  bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "4231bedc678f7cbb7151e5dd846ade6123811b472b7a378164b29d0edaaf8680"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "3e64ea078ab6659f5892db71cf6d2c72825cbefb80956ee88a8aaf5d0080594d"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "0c7004800a9d909e5cbe3373dbb2d8fb71a943d022901f8a5b950c34c52215b5"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "b6a4f6c99d783a4c6c7b32438aae079f7d769b34ad831310868309fe275ff585"
-    sha256 cellar: :any_skip_relocation, sonoma:         "f9020ad45bcbf572393a1a95377c38fb8aaf861aaa09510d379fdd19e0f9a598"
-    sha256 cellar: :any_skip_relocation, ventura:        "3865faab160986fdaa7e94f37056a15a1b790a32501118e4d6ab91abeb9543ce"
-    sha256 cellar: :any_skip_relocation, monterey:       "b0d7600730ba18eab8cdc658ddeb80f849906fbd505694a7603e57650568b392"
-    sha256 cellar: :any_skip_relocation, big_sur:        "b69459a4b5cbf28b29730e7b79ee89f1fd916d2c7f05c4de83826296c576a79f"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "af398fe111c552f7c70837d0179cd5f42784a79444fb9dc913c4fdf4b0eb8da6"
+  livecheck do
+    url :stable
+    regex(/href=.*?xorriso[._-]v?(\d+(?:\.\d+)+(?:\.pl\d+)?)\.t/i)
   end
 
-  uses_from_macos "zlib"
+  bottle do
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "629036e47e08270cae6d7f8fb3458362c13fa65fcf0eff184f9b7e16fa88d924"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "0870121ca2a235cf92df9b033c5185397ed34627385c88d067be0a5abd5a030d"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "a15a3ec01f7900d30dafcc7e47027dfb9f9eca88144760e7a62ce46d71e62e18"
+    sha256 cellar: :any_skip_relocation, sonoma:        "ef488f42015efaeeecca1d86e66d25f2bb34e6051be0e10ebdcc8ac662088ed5"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "aec46fc839997683dd3d971c7e680af63a5e9d4872f29e38fc5bc332976fc905"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "263686a59bb925025a40ca2a0bfaf1b1e37b29a43ca68e056b33c4385196d30d"
+  end
 
-  # Submit the patch into the upstream, see:
-  # https://lists.gnu.org/archive/html/bug-xorriso/2023-06/msg00000.html
-  patch :DATA
+  on_linux do
+    depends_on "acl"
+    depends_on "zlib-ng-compat"
+  end
 
   def install
-    system "./configure", "--disable-debug", "--disable-dependency-tracking",
-                          "--prefix=#{prefix}"
+    system "./configure", "--disable-silent-rules", *std_configure_args
     system "make"
 
     # `make install` has to be deparallelized due to the following error:
@@ -41,17 +41,3 @@ class Xorriso < Formula
     assert_match version.to_s, shell_output("#{bin}/xorriso -version")
   end
 end
-
-__END__
-diff --git a/libisofs/rockridge.h b/libisofs/rockridge.h
-index 5649eb7..01c4224 100644
---- a/libisofs/rockridge.h
-+++ b/libisofs/rockridge.h
-@@ -41,6 +41,8 @@
-
- #include "ecma119.h"
-
-+/* For ssize_t */
-+#include <unistd.h>
-
- #define SUSP_SIG(entry, a, b) ((entry->sig[0] == a) && (entry->sig[1] == b))

@@ -4,16 +4,16 @@ class Libbi < Formula
   url "https://github.com/lawmurray/LibBi/archive/refs/tags/1.4.5.tar.gz"
   sha256 "af2b6d30e1502f99a3950d63ceaf7d7275a236f4d81eff337121c24fbb802fbe"
   license "GPL-2.0-only"
-  revision 5
+  revision 6
   head "https://github.com/lawmurray/LibBi.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "a6cacb6474adcb43e3e4cc0434721b474a8a9749102c397fd0e69fe3ff4e8333"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "ccf5a58e1570912775cc3899a89e5567ac5f657956833947bb2888c4949b4169"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "c0882b756fb10921769635c9c858998d5cf85630a954af71eb7e2380c888937a"
-    sha256 cellar: :any_skip_relocation, sonoma:         "d5dcac53e5859b062603ed726c70d2d4fb9d46e317a9238ec5e4ff3c973f41cc"
-    sha256 cellar: :any_skip_relocation, ventura:        "ef73bed34be4fd7cb1579190d6422266e84aca5bb7da499720bce3ff3f56f7c9"
-    sha256 cellar: :any_skip_relocation, monterey:       "70f2987d8bc35f8d6dc5004e02c46e4d8936e30dd2472821f2247126b56bba10"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "8f3492d6763bd53c9d705448646ae73c947d565cd274b66a3b134a9caa208377"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "067ddc67e0af1fb1760fa56d6ae5439c2ab0e4ca132ea3c7aba98d09fd68ac2c"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "3f97ef0e0721b96a280aae2ed862671aa24bca3196a425f7f157888d6a3fe69f"
+    sha256 cellar: :any_skip_relocation, sonoma:        "e1f3d23667728f04406e6805caca846da06390fa314cbd8a3850043ccbbe7e48"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "a91700fec63d29480a0137368f5541355c294fbe6124fff98aa8599a575aa0c4"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "a5883454a2aa5566a18586e365924c1b2ea48cbd153e545cf41fb5404eba8106"
   end
 
   depends_on "automake"
@@ -135,22 +135,17 @@ class Libbi < Formula
     end
 
     system "perl", "Makefile.PL", "INSTALL_BASE=#{libexec}", "INSTALLSITESCRIPT=#{bin}"
-
-    # Disable dynamic selection of perl which may cause segfault when an
-    # incompatible perl is picked up.
-    # See, e.g., https://github.com/Homebrew/homebrew-core/issues/4936
-    inreplace "script/libbi", "#!/usr/bin/env perl", "#!/usr/bin/perl"
-
     system "make"
     system "make", "install"
 
     pkgshare.install "Test.bi", "test.conf"
-    bin.env_script_all_files(libexec+"bin", PERL5LIB: ENV["PERL5LIB"])
+    bin.env_script_all_files(libexec/"bin", PERL5LIB: ENV["PERL5LIB"])
   end
 
   test do
+    ENV.append "LDFLAGS", "-Wl,-rpath,#{HOMEBREW_PREFIX}/lib" if OS.linux?
     cp Dir[pkgshare/"Test.bi", pkgshare/"test.conf"], testpath
     system bin/"libbi", "sample", "@test.conf"
-    assert_predicate testpath/"test.nc", :exist?
+    assert_path_exists testpath/"test.nc"
   end
 end

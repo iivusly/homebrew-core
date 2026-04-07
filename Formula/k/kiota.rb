@@ -1,42 +1,38 @@
 class Kiota < Formula
   desc "OpenAPI based HTTP Client code generator"
   homepage "https://aka.ms/kiota/docs"
-  url "https://github.com/microsoft/kiota/archive/refs/tags/v1.11.1.tar.gz"
-  sha256 "cab39c2bffd20db3c8f31653ba1f0cb9fa3be785f38ff62422be76a34030dee6"
+  url "https://github.com/microsoft/kiota/archive/refs/tags/v1.30.0.tar.gz"
+  sha256 "826d22b65abcc01f86b781019635a7ecf1a9aa79417eb6adb10ce9a5d0f2a04b"
   license "MIT"
   head "https://github.com/microsoft/kiota.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "b6d3834ef9059ec491aa9ac378b0bf4917167c88b0d4296061cdc5c06bd6a799"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "6c2e623027cd4168564aab495ea0bcedf87b932b0c158dceaa2bd517e60a30db"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "1fda10609af91d6a2b002826836ca5c0d5573ab9d6de9ec258e1127fc6259e10"
-    sha256 cellar: :any_skip_relocation, sonoma:         "5eaa149956c37d895ad1d655726c08117ad0ece152d30027c5f929d8c5ed12c0"
-    sha256 cellar: :any_skip_relocation, ventura:        "845ca55139c474e03109361fcb87b5a67eac1d4ef05bc147c0b59891ce8afb4e"
-    sha256 cellar: :any_skip_relocation, monterey:       "ec703101371a665c8e625ba124ba3d15ade91e10eb144060b07f02987090cb27"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "827b2e9eaf626071c263ba62d7a5ceb14a79d613561844b31b9a152b58e3e2db"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "9c5500ff8a56608219d158610e26dab90aeb9f53ea3a3f5140fc142fb39f4587"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "0cdc292c3952ddc65e3cd3c162300c48b8629d13bf761048e0957e6349bacd0f"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "874246ba9c5aad57364ace1e2c764ab8767a2fbecde992826838e266e5aa5827"
+    sha256 cellar: :any_skip_relocation, sonoma:        "88746020930e45e44a550802b00916b63ea908c95be49018b0af018cf38b87a7"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "32d80309a623dea753c02a76f67c19ec5cce37d67c22a52ec1efe26297734bdb"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "6fd24d5f53bfbc3bd56db1e4df2641974685e5d270f1e50faad5072eb9576e9c"
   end
 
   depends_on "dotnet"
 
   def install
     dotnet = Formula["dotnet"]
-    os = OS.mac? ? "osx" : OS.kernel_name.downcase
-    arch = Hardware::CPU.intel? ? "x64" : Hardware::CPU.arch.to_s
 
     args = %W[
       --configuration Release
       --framework net#{dotnet.version.major_minor}
       --output #{libexec}
-      --runtime #{os}-#{arch}
       --no-self-contained
+      --use-current-runtime
+      -p:TargetFramework=net#{dotnet.version.major_minor}
       -p:PublishSingleFile=true
-      -p:Version=#{version}
     ]
+    args << "-p:Version=#{version}" if build.stable?
 
     system "dotnet", "publish", "src/kiota/kiota.csproj", *args
-
-    (bin/"kiota").write_env_script libexec/"kiota",
-      DOTNET_ROOT: "${DOTNET_ROOT:-#{dotnet.opt_libexec}}"
+    (bin/"kiota").write_env_script libexec/"kiota", DOTNET_ROOT: dotnet.opt_libexec
   end
 
   test do

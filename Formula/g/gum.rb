@@ -1,19 +1,21 @@
 class Gum < Formula
   desc "Tool for glamorous shell scripts"
   homepage "https://github.com/charmbracelet/gum"
-  url "https://github.com/charmbracelet/gum/archive/refs/tags/v0.14.4.tar.gz"
-  sha256 "0570d76f513f749e64e02d56eaff4f5e9987dcf5aeeba7ed36a09af7517fb2ac"
+  url "https://github.com/charmbracelet/gum/archive/refs/tags/v0.17.0.tar.gz"
+  sha256 "763a7f89dfebf8e77f86e680bace48a09423cfb9e4b4f4ba22d2c9836d311f95"
   license "MIT"
+  compatibility_version 1
   head "https://github.com/charmbracelet/gum.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "582c9cd177eb047b75da262f3d201c6e9e554d7c996607eeb23ce221170c55f8"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "582c9cd177eb047b75da262f3d201c6e9e554d7c996607eeb23ce221170c55f8"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "582c9cd177eb047b75da262f3d201c6e9e554d7c996607eeb23ce221170c55f8"
-    sha256 cellar: :any_skip_relocation, sonoma:         "734cbfcad8f74ec515f4116dde738a44704f69aec673905a05fcd3df5a07ea00"
-    sha256 cellar: :any_skip_relocation, ventura:        "734cbfcad8f74ec515f4116dde738a44704f69aec673905a05fcd3df5a07ea00"
-    sha256 cellar: :any_skip_relocation, monterey:       "734cbfcad8f74ec515f4116dde738a44704f69aec673905a05fcd3df5a07ea00"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "2890323046503cfc2940e0e82e1a951dba921af47a4a4c92f1172758460091bf"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "fe88a443c148f8f6fc401cf6dfe57ad4af214feb85163c8b15c6d6423edb6c1f"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "901cb800319abaade91650d15c8023b6b810ef61eca36750880eb084269161eb"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "901cb800319abaade91650d15c8023b6b810ef61eca36750880eb084269161eb"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "901cb800319abaade91650d15c8023b6b810ef61eca36750880eb084269161eb"
+    sha256 cellar: :any_skip_relocation, sonoma:        "e56fe5dc19856295e738967aa43c63ee61afb66df20b51aa1076531aa849db40"
+    sha256 cellar: :any_skip_relocation, ventura:       "e56fe5dc19856295e738967aa43c63ee61afb66df20b51aa1076531aa849db40"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "754abdb73b22a1d828430072b07fffd9314d8db96cd3ef92dffb4c794c7c3a10"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "f4606f16bda2cdeea33c9b4528617d4262eda00905892440d8d438f13fd27dab"
   end
 
   depends_on "go" => :build

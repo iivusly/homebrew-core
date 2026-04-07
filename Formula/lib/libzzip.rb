@@ -1,26 +1,29 @@
 class Libzzip < Formula
   desc "Library providing read access on ZIP-archives"
   homepage "https://github.com/gdraheim/zziplib"
-  url "https://github.com/gdraheim/zziplib/archive/refs/tags/v0.13.78.tar.gz"
-  sha256 "feaeee7c34f18aa27bd3da643cc6a47d04d2c41753a59369d09102d79b9b0a31"
+  url "https://github.com/gdraheim/zziplib/archive/refs/tags/v0.13.80.tar.gz"
+  sha256 "21f40d111c0f7a398cfee3b0a30b20c5d92124b08ea4290055fbfe7bdd53a22c"
   license any_of: ["LGPL-2.0-or-later", "MPL-1.1"]
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "dfe584a561bf184555dd1cb0f5fce07d900a466444cdde7d968e756abcd03c79"
-    sha256 cellar: :any,                 arm64_ventura:  "830a5c48de37071f87aabff06fef3bbd19e9ffacb06a550621eb3ec38858f730"
-    sha256 cellar: :any,                 arm64_monterey: "59aed17c6a583e3a6d7b9d500c0eff2cd79e6f9c8c8e7f9a96b55152b0a0b5ab"
-    sha256 cellar: :any,                 sonoma:         "193c19913f3d8f32c917dc5bec67cb7d6b5faed07c9342f8d03f54d2eed23b90"
-    sha256 cellar: :any,                 ventura:        "95b6daea1b5be5ca6101f342874d207aef6c8b8186970438cadb144f9c33564b"
-    sha256 cellar: :any,                 monterey:       "b81fae11a942992eb933f8d9ee2391727363009ec9dbc5521b07546606031f5c"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "e595cd977c07fdbde35b70ab99fd3f65f1f919c436d999506eb8117f875d0d99"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "69735dbc14d4c13a8f0c66f8dd6012e2f9618a79033d87a899cac0c84e31cf22"
+    sha256 cellar: :any,                 arm64_sequoia: "41c0248393555b1c550213bb84e033a57182585de9f305a2834b371911842261"
+    sha256 cellar: :any,                 arm64_sonoma:  "284eb1a2fba26c513f28eb79f8a2126f4ef419393d0f6a5ad7acbe791502277c"
+    sha256 cellar: :any,                 sonoma:        "ea36297cb31148dec501489f673b73bd6975582c6ceab0cef2c1958c02a0bfad"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "4e9eb837697a4f0bbaf369811bf8a58f0598c333886438a3ed5934b163f0cb99"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "893de6dc5addc31b890f9815d24a1f4f1fa4dfc4a497132ecc12f224c205e4de"
   end
 
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
-  depends_on "python@3.12" => :build
+  depends_on "pkgconf" => :build
 
+  uses_from_macos "python" => :build
   uses_from_macos "zip" => :test
-  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     args = %W[

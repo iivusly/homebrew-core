@@ -1,8 +1,8 @@
 class Fnm < Formula
   desc "Fast and simple Node.js version manager"
   homepage "https://github.com/Schniz/fnm"
-  url "https://github.com/Schniz/fnm/archive/refs/tags/v1.37.1.tar.gz"
-  sha256 "56a170304ab281439a71e541c4db878848c3a891078ae3c2dcc84017cd0306b4"
+  url "https://github.com/Schniz/fnm/archive/refs/tags/v1.39.0.tar.gz"
+  sha256 "224081a677a02acd9f972885e824a98fa3843f5b778b28400ad5af97752f6127"
   license "GPL-3.0-only"
   head "https://github.com/Schniz/fnm.git", branch: "master"
 
@@ -12,18 +12,19 @@ class Fnm < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "b76925bd68d73812fa50dcf9768dbc08f9cdbcad5fd1d54a4824551f9924cb77"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "be21cbd78b04ac291aba99b4044c644c3b25462acfd581d7d8a321f98e13db1b"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "023f0243f9f181da44311a19d4371156fd4a2fdde891f2e9f3d74b4727bc63da"
-    sha256 cellar: :any_skip_relocation, sonoma:         "5e47c4ff6ae6abf8e814b0dab30e80a1e26f1b71ce0bc70709c802b1cbdf44d0"
-    sha256 cellar: :any_skip_relocation, ventura:        "5f03d2930e7c35f46853990183cb6ba49ecc666da19c5519b90e555a3fbd1021"
-    sha256 cellar: :any_skip_relocation, monterey:       "24f90f9dd3b446a33594a728d7e74ed0f07b1ea32b14ce8d740a121354fc4a9d"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "0da3ea9b80b434ff1097927a2f4701b8cff8c327e111972d9e990ab0fc8a1422"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "504d89f4004b37c19fdbffd786c99982451c54d9112357f1f8bab27d85336ffc"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "30de486e778435421c94b5596ecf1fd009851f484b6147c4ceaa01c5bbc72506"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "95d65ae8a17147eae7eca5b839ec16a4dbcee2d0a6bb4495ebb20dc721075b65"
+    sha256 cellar: :any_skip_relocation, sonoma:        "4733aee6c9507e4100bbdb83ab062e421893ac53538dde7809d17ff619d3bd99"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "00c561bcdf8ad5c79b0be0dcc46ffcc3aae48fe5ac587530c9411de6ba1c6ed8"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "05e590e196d8cda53779aa9e9dd0aeb8eab19bfa1fcc699b3f11c15c70ea6b94"
   end
 
   depends_on "rust" => :build
 
-  uses_from_macos "zlib"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     system "cargo", "install", *std_cargo_args

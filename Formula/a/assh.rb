@@ -1,19 +1,18 @@
 class Assh < Formula
   desc "Advanced SSH config - Regex, aliases, gateways, includes and dynamic hosts"
-  homepage "https://manfred.life/assh"
-  url "https://github.com/moul/assh/archive/refs/tags/v2.16.0.tar.gz"
-  sha256 "9635d4123d344779728299627be57ee7ca26aa3ca65ed2fd4510a4fdd508b3cf"
+  homepage "https://v1.manfred.life/assh/"
+  url "https://github.com/moul/assh/archive/refs/tags/v2.17.1.tar.gz"
+  sha256 "9571e3424dcfa5d52e32f3f7dd19995e3d1f30c9d80420e77d47681d4a201744"
   license "MIT"
   head "https://github.com/moul/assh.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "0d4c84e457f4a186f199a65311f8ddaaf8c05f60387eb71f16d7608d05afd75e"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "6b8d0b50314b10b93181797d66523827c575c3bfdba89045969cc26badadaddd"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "68f821488002a3aec14d7de7ceb122e61b83ace0ff2f7de08aaa757c469a7c29"
-    sha256 cellar: :any_skip_relocation, sonoma:         "58b30be37e3af425f3074bad8582766f14845de9d8c79454d6a41dec8d98ad10"
-    sha256 cellar: :any_skip_relocation, ventura:        "469bfcb0438ab525e6522cd1041e3aec3aae29b7e8b7515ebc6557c034d6b31d"
-    sha256 cellar: :any_skip_relocation, monterey:       "2c5ef162523ae4a15d8cb5800666aad11a55bce998ac76805f0cf3a57455ef87"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "598e7c71ca8a20aec8985f1aee880fb6076081ed91622aa3983b41f3103f628f"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "dfda9601a1a38d79acb4283392253abcca6922a651c7f3e37766bded440af19e"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "84b25532eba743cebccebf5819911f2808e468b81117385537bdff21f095080d"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "a812ac12e89c0d6ebf286a698dbd12203b42387697b18e1e5ddd504d14cf014f"
+    sha256 cellar: :any_skip_relocation, sonoma:        "498ae24af8078005e9c6094f79be928fda04fa153be40640c37ee89db47deeba"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "230436b583369233054a88d78be4e51a5c75509e9c50dfb609a89e8de632433e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "e1bb3a17a7f35cb82a642adb348100d00a69c220576402ad8bb8d500056bab90"
   end
 
   depends_on "go" => :build
@@ -21,17 +20,17 @@ class Assh < Formula
   def install
     system "go", "build", *std_go_args(ldflags: "-s -w")
 
-    generate_completions_from_executable(bin/"assh", "completion")
+    generate_completions_from_executable(bin/"assh", shell_parameter_format: :cobra)
   end
 
   test do
     assh_config = testpath/"assh.yml"
-    assh_config.write <<~EOS
+    assh_config.write <<~YAML
       hosts:
         hosta:
           Hostname: 127.0.0.1
       asshknownhostfile: /dev/null
-    EOS
+    YAML
 
     output = "hosta assh ping statistics"
     assert_match output, shell_output("#{bin}/assh --config #{assh_config} ping -c 4 hosta 2>&1")

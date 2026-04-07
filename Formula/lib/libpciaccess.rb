@@ -1,29 +1,34 @@
 class Libpciaccess < Formula
   desc "Generic PCI access library"
   homepage "https://www.x.org/"
-  url "https://www.x.org/pub/individual/lib/libpciaccess-0.18.1.tar.xz"
-  sha256 "4af43444b38adb5545d0ed1c2ce46d9608cc47b31c2387fc5181656765a6fa76"
+  url "https://www.x.org/pub/individual/lib/libpciaccess-0.19.tar.xz"
+  sha256 "3c55aa86c82e54a4e3109786f0463530d53b36b6d1cfd14616454f985dd2aa43"
   license "MIT"
+  compatibility_version 1
 
   bottle do
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "3433b90a4f960f70e9203327f632387b5ada5017be2500ab8098f9142406a075"
+    sha256 cellar: :any_skip_relocation, arm64_linux:  "1700b1d65d3a49ac94b93387a02771c27f6b799fdf1dced68a9440bb7731d995"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "0cce5ea337da65fd2e78188adbfaf895ed72fbef1efe0e3a62680777980ef592"
   end
 
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "util-macros" => :build
   depends_on :linux
-  depends_on "zlib"
+  depends_on "zlib-ng-compat"
 
   def install
+    # Work around Meson's automatic removal of RPATHs by explicitly passing in LDFLAGS
+    ENV.append "LDFLAGS", "-Wl,-rpath,#{Formula["zlib-ng-compat"].opt_lib}"
+
     system "meson", "setup", "build", *std_meson_args
     system "meson", "compile", "-C", "build", "--verbose"
     system "meson", "install", "-C", "build"
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include "pciaccess.h"
       int main(int argc, char* argv[]) {
         int pci_system_init(void);
@@ -32,7 +37,7 @@ class Libpciaccess < Formula
         struct pci_device *dev;
         return 0;
       }
-    EOS
+    C
     system ENV.cc, "test.c", "-I#{include}", "-L#{lib}", "-lpciaccess"
   end
 end

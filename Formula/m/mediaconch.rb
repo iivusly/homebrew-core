@@ -1,9 +1,10 @@
 class Mediaconch < Formula
   desc "Conformance checker and technical metadata reporter"
   homepage "https://mediaarea.net/MediaConch"
-  url "https://mediaarea.net/download/binary/mediaconch/24.06/MediaConch_CLI_24.06_GNU_FromSource.tar.bz2"
-  sha256 "2dd68a260ea84fe23031c2caa121ede850f34a8c733e53237205bd018af0b9d9"
+  url "https://mediaarea.net/download/binary/mediaconch/25.04/MediaConch_CLI_25.04_GNU_FromSource.tar.bz2"
+  sha256 "800d076ca374a0c954c928f471761fb000b36b7df9d8e1d1bb03b233edff8857"
   license "BSD-2-Clause"
+  revision 1
 
   livecheck do
     url "https://mediaarea.net/MediaConch/Download/Source"
@@ -11,55 +12,33 @@ class Mediaconch < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "939859b3e6b27cea95e30dd0249430f53e50dd2482d9e5910089372e1442bc2b"
-    sha256 cellar: :any,                 arm64_ventura:  "e377a3a11dd83320786791b39c255446d8097c154a61d5bcb49409a156faf526"
-    sha256 cellar: :any,                 arm64_monterey: "aa33f61f409e854a4a03ca69de8371ed7a47b872b33928b650662325776ad206"
-    sha256 cellar: :any,                 sonoma:         "5d2cec68e7f1e6b3b5ca0fbbbbcbba2a40dd88c258f4149d8462ddd34100b1e9"
-    sha256 cellar: :any,                 ventura:        "056b82ae9504a3eb15b18d66fe79e94c12c837ed3714faa88009793a93052b52"
-    sha256 cellar: :any,                 monterey:       "70c1594d43d848825434efaf63b21ac294cf0758b53f0fb5bb0da6a22f87f8aa"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "bc3b5ed1de5f34d66934807b79a38a3fb34b9bde991a6b7172db384e1da19a86"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "8364c862db65aa723612eea3215ea4399c074701e4321b4f1a6a705b8cf6c925"
+    sha256 cellar: :any,                 arm64_sequoia: "ed8e4aadeb2a94ca31f5fa04ac4409db8a3cc9f1365b4e89d0dba789e6fbff15"
+    sha256 cellar: :any,                 arm64_sonoma:  "2470bb7d06e3613e3c319a2afeba16ac513e0422f7e2f898fbfbe293859dc016"
+    sha256 cellar: :any,                 sonoma:        "5168de6b8b71887d861dab17f49e835d8467de0f765018b0b7cdc9380f10080e"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "f14fccda9ccb8ec1d160149e1a2c6ecb8cecdb62d615a7af0c622397a4232520"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "75fa4fbd9aaebac202c91e5966d8054cb80ac5da0251e6954dd050649d4ed888"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "jansson"
   depends_on "libevent"
+  depends_on "libmediainfo"
+  depends_on "libzen"
   depends_on "sqlite"
 
   uses_from_macos "curl"
   uses_from_macos "libxml2"
   uses_from_macos "libxslt"
-  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
-    cd "ZenLib/Project/GNU/Library" do
-      args = ["--disable-debug",
-              "--disable-dependency-tracking",
-              "--enable-shared",
-              "--enable-static",
-              "--prefix=#{prefix}",
-              # mediaconch installs libs/headers at the same paths as mediainfo
-              "--libdir=#{lib}/mediaconch",
-              "--includedir=#{include}/mediaconch"]
-      system "./configure", *args
-      system "make", "install"
-    end
-
-    cd "MediaInfoLib/Project/GNU/Library" do
-      args = ["--disable-debug",
-              "--disable-dependency-tracking",
-              "--enable-static",
-              "--enable-shared",
-              "--with-libcurl",
-              "--prefix=#{prefix}",
-              "--libdir=#{lib}/mediaconch",
-              "--includedir=#{include}/mediaconch"]
-      system "./configure", *args
-      system "make", "install"
-    end
-
     cd "MediaConch/Project/GNU/CLI" do
-      system "./configure", "--disable-debug", "--disable-dependency-tracking",
-                            "--prefix=#{prefix}"
+      system "./configure", *std_configure_args
       system "make", "install"
     end
   end

@@ -1,38 +1,32 @@
 class Wasmedge < Formula
   desc "Lightweight, high-performance, and extensible WebAssembly runtime"
   homepage "https://WasmEdge.org/"
+  url "https://github.com/WasmEdge/WasmEdge/releases/download/0.16.1/WasmEdge-0.16.1-src.tar.gz"
+  sha256 "fc256b8be022eb0487549cc2119c57fd12ad402e4130a05263b7aa85e2df89b9"
   license "Apache-2.0"
   revision 1
   head "https://github.com/WasmEdge/WasmEdge.git", branch: "master"
 
-  stable do
-    url "https://github.com/WasmEdge/WasmEdge/releases/download/0.14.0/WasmEdge-0.14.0-src.tar.gz"
-    sha256 "3fc518c172329d128ab41671b86e3de0544bcaacdec9c9b47bfc4ce8b421dfd5"
-
-    # fmt 11 compat
-    patch do
-      url "https://github.com/WasmEdge/WasmEdge/commit/3fda0d46a8fee41cc77eddd8a49ca3f423cf7d95.patch?full_index=1"
-      sha256 "23f5555ffebed864796922376004ae5c3a95043921e2e6dae5f8fb6ac9789439"
-    end
-  end
-
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "ae12e87e096683ebc626bb18acaf435696a9dd065d982dbed2e09a0e52339934"
-    sha256 cellar: :any,                 arm64_ventura:  "5dce766cd381efbbff709ca04ff314bb495552f2ee19c7ef7d8540d349ce4b28"
-    sha256 cellar: :any,                 arm64_monterey: "415cea5846fc9a53a52c9cbb97b91658a5dac871b9768a1d58282b7b09d6f1da"
-    sha256 cellar: :any,                 sonoma:         "34eb565999cba9d2f50828923c54dcb6e11048b78f53a3f50b7ddc5bebad8905"
-    sha256 cellar: :any,                 ventura:        "0c752b84ea5482c70b6574fff0ef04eaa4a279edf06233d9a1af6ba9fc21dc6d"
-    sha256 cellar: :any,                 monterey:       "414ca41d8b8ecd0d91105c70e151ac2abb542d44fbde4fce4ab5b8c7f894ac26"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "1cb31c218e277356e0435a036566961491c752886d0a11bb3dce945b2c4b3f27"
+    sha256 cellar: :any,                 arm64_tahoe:   "b74cd16cf0d26056adf5ff7045b7fc62a22786717933f1f49d50b6cf5fd21d2a"
+    sha256 cellar: :any,                 arm64_sequoia: "2051e0817c645a6dda47f6a4e7aa620b61f7035f1897bd2387657708c5c134ab"
+    sha256 cellar: :any,                 arm64_sonoma:  "f6a5895f3068e70639a9ab825d3c4cc4d2c0b9c32deaccb55894827209204cd7"
+    sha256 cellar: :any,                 sonoma:        "6af51419bc3294ade55e569848c81818d668df0b1a47ca39dbe8e3d8683f4fc5"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "f106a5e86dc8482c9844b7588157e62b222f7a27531efbb4902e57e1017f624e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "bae8285dce0643fd38456fb163ecc2e1a0869e841c979d5f87d9bbf8898274cb"
   end
 
   depends_on "cmake" => :build
   depends_on "fmt"
+  depends_on "lld"
   depends_on "llvm"
   depends_on "spdlog"
 
   def install
-    system "cmake", "-S", ".", "-B", "build", *std_cmake_args
+    # Use CMAKE_BUILD_WITH_INSTALL_RPATH to keep versioned LLVM in RPATH on Linux
+    args = ["-DCMAKE_BUILD_WITH_INSTALL_RPATH=ON"] if OS.linux?
+
+    system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
   end

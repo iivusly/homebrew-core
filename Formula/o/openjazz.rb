@@ -1,26 +1,27 @@
 class Openjazz < Formula
   desc "Open source Jazz Jackrabit engine"
   homepage "https://www.alister.eu/jazz/oj/"
-  url "https://github.com/AlisterT/openjazz/archive/refs/tags/20231028.tar.gz"
-  sha256 "c45ff414dc846563ad7ae4b6c848f938ab695eb4ae6f958856b3fa409da0b8ac"
+  url "https://github.com/AlisterT/openjazz/archive/refs/tags/20260301.tar.gz"
+  sha256 "9c117a8d9aa539c4dcb3fb5788130563a83ca1d9819e538f233721d823f7a650"
   license "GPL-2.0-only"
   head "https://github.com/AlisterT/openjazz.git", branch: "master"
 
   bottle do
-    sha256 arm64_sonoma:   "07a222337046a16eb095259f2a5952d2893279bb5dea456df5db6a04d0a464a3"
-    sha256 arm64_ventura:  "c5c520f1a957586f0d8a9a624db938ab0310f1beaa6b89e5b0ed8a64cef6337c"
-    sha256 arm64_monterey: "df4726038828be4f5c0297724794355b57988a3418d82f184d26345c3fe29bcf"
-    sha256 sonoma:         "bee571f4da0e9d27a0e165e349fe3bb0987e781367bd6e1d951ac841d63973a7"
-    sha256 ventura:        "319618c494484856acb274b82f8a32232e9a2a022bf704ad638b599885b4009a"
-    sha256 monterey:       "a420f6753dd4676cd8c2952e81c46d75f9c558d1ea07dfb5de95f1c69b272cff"
-    sha256 x86_64_linux:   "f6f7b98ac0aa8679388825ae164c71441c5b4e54c24344d7041b2c178a22a51c"
+    sha256 arm64_tahoe:   "6bfc89162e63bb17558bc08624c060105ff815e076fbb396d145b5e635ca2ea6"
+    sha256 arm64_sequoia: "74de474ee4ceb88b075a6c6a512e3248a25c74f6009002f89dd0b156812be670"
+    sha256 arm64_sonoma:  "6dd6527671c8191ea8b206a3808f10108cd56c3ce4e4cae4ecb6f3ad79304164"
+    sha256 sonoma:        "12c74f58ca66e40d408c048acf972ce3ab9da5dabfc49ecfa3ea490e46e98ef3"
+    sha256 arm64_linux:   "07bf3d6746df890feac5085f6172c230e4f00b316730068de499795786ff2aeb"
+    sha256 x86_64_linux:  "f616f9102db1c8e95a380643842bee98afda25af124666c3b4734437070d47c6"
   end
 
   depends_on "cmake" => :build
   depends_on "sdl2"
   depends_on "sdl2_net"
 
-  uses_from_macos "zlib"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   # From LICENSE.DOC:
   # "Epic MegaGames allows and encourages all bulletin board systems and online
@@ -32,8 +33,6 @@ class Openjazz < Formula
   end
 
   def install
-    # see https://github.com/AlisterT/openjazz/pull/100, can be removed once merged
-    inreplace "ext/psmplug/stdafx.h", "#include <malloc.h>", ""
     system "cmake", "-S", ".", "-B", "build", "-DDATAPATH=#{pkgshare}", *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
@@ -53,5 +52,6 @@ class Openjazz < Formula
 
   test do
     system bin/"OpenJazz", "--version"
+    assert_path_exists testpath/"openjazz.log"
   end
 end

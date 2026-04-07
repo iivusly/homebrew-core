@@ -1,21 +1,20 @@
 class Typescript < Formula
   desc "Language for application scale JavaScript development"
   homepage "https://www.typescriptlang.org/"
-  url "https://registry.npmjs.org/typescript/-/typescript-5.5.4.tgz"
-  sha256 "2680b6354d462a1d90a2cf10c790e071f1c45081c9d4561cb47ce23c934d8586"
+  url "https://registry.npmjs.org/typescript/-/typescript-6.0.2.tgz"
+  sha256 "0ae5c188a2f5db22df72fe5e74dcbc122afb52031a86dbac33e78a86db39c65e"
   license "Apache-2.0"
-  head "https://github.com/Microsoft/TypeScript.git", branch: "main"
+  compatibility_version 1
 
   bottle do
-    rebuild 2
-    sha256 cellar: :any_skip_relocation, all: "822f45e678ec43dbfecc36a60c127f287df0f5d6f53f81095be64d38427bc957"
+    sha256 cellar: :any_skip_relocation, all: "5500c2e7017bcc00e58c4b03d522c81727dccb7cc49fd576ffc1a996c7c5b1b2"
   end
 
   depends_on "node"
 
   def install
     system "npm", "install", *std_npm_args
-    bin.install_symlink Dir["#{libexec}/bin/*"]
+    bin.install_symlink libexec.glob("bin/*")
   end
 
   test do
@@ -30,6 +29,6 @@ class Typescript < Formula
     EOS
 
     system bin/"tsc", "test.ts"
-    assert_predicate testpath/"test.js", :exist?, "test.js was not generated"
+    assert_path_exists testpath/"test.js", "test.js was not generated"
   end
 end

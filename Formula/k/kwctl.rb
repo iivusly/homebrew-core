@@ -1,40 +1,37 @@
 class Kwctl < Formula
   desc "CLI tool for the Kubewarden policy engine for Kubernetes"
   homepage "https://www.kubewarden.io/"
-  url "https://github.com/kubewarden/kwctl/archive/refs/tags/v1.16.1.tar.gz"
-  sha256 "62052d7b6a691da0d8d9c731d52eeee4a0487c0efc6e09e9996388d071354b64"
+  url "https://github.com/kubewarden/kubewarden-controller/archive/refs/tags/v1.33.1.tar.gz"
+  sha256 "8bdc59d34dcc2b94f9c82b8996c9735b58733b7f279cfefebf3be50074dd2c85"
   license "Apache-2.0"
-  head "https://github.com/kubewarden/kwctl.git", branch: "main"
+  head "https://github.com/kubewarden/kubewarden-controller.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "f62e0067b4a0f43ba12b8ed8ca1814ead7e8c7b5bd83393c9c7216230eb4704b"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "e5bfbf3b8e326d10f2d4bf85cb5b8be7e178e11c15d1acbaf5f9777df6016003"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "73cb11228575a059f487e76f0bb5223cf9c101fcb6464f2a4801c2b60107c772"
-    sha256 cellar: :any_skip_relocation, sonoma:         "5e2dad9c25e235b476f60cc3a252e9a243f0dd5a41d74e886070c2bb029655c6"
-    sha256 cellar: :any_skip_relocation, ventura:        "7661b97874d8b84cf90f1cf8b570ff21c461ca0900cf22b051b94f45b2d1199a"
-    sha256 cellar: :any_skip_relocation, monterey:       "8cfbaae8e6312d9d9243f97caec92b4d265a46cd19f17f6624bc52e54e0c8fbd"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "fb15087d5705074918a5599db801347159390f61776a1907f9ba1212097cac77"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "b753565e38474273b4df3e1411ee2101e82b12dfe42113471508bc7adb0b104e"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "0c0e310ff186f7c701fc56b164242004e537552213dc488cd20a7e66de6fd763"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "e0720b88636645c4c4451bf9ce8ecd43d7f130f3b507d19fc2368f43751fa84a"
+    sha256 cellar: :any_skip_relocation, sonoma:        "d0b3a42bc40f2fb7146f3ad18f7d426b6880bd7f7acff86571c5613a0ecbef21"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "609fc9b73e6c5c135e96d235b74911fb8839bdeb2a092b50a80e3b4da395d095"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "c88e7a6712ca927f36457bdc1e681d89fd25ac09002a5e145f3060b9ca1c8dca"
   end
 
+  depends_on "pkgconf" => :build
   depends_on "rust" => :build
 
-  on_linux do
-    depends_on "pkg-config" => :build
-  end
-
   def install
-    system "cargo", "install", *std_cargo_args
+    system "cargo", "install", *std_cargo_args(path: "crates/kwctl")
 
     generate_completions_from_executable(bin/"kwctl", "completions", "--shell")
   end
 
   test do
+    assert_match version.to_s, shell_output("#{bin}/kwctl --version")
+
     test_policy = "ghcr.io/kubewarden/policies/safe-labels:v0.1.7"
-    assert_equal "kwctl #{version}", shell_output("#{bin}/kwctl --version").strip.split("\n")[0]
     system bin/"kwctl", "pull", test_policy
     assert_match test_policy, shell_output("#{bin}/kwctl policies")
 
-    (testpath/"ingress.json").write <<~EOS
+    (testpath/"ingress.json").write <<~JSON
       {
         "uid": "1299d386-525b-4032-98ae-1949f69f9cfc",
         "kind": {
@@ -69,14 +66,14 @@ class Kwctl < Formula
           }
         }
       }
-    EOS
-    (testpath/"policy-settings.json").write <<~EOS
+    JSON
+    (testpath/"policy-settings.json").write <<~JSON
       {
         "denied_labels": [
           "owner"
         ]
       }
-    EOS
+    JSON
 
     output = shell_output(
       "#{bin}/kwctl run " \

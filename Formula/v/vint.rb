@@ -10,18 +10,17 @@ class Vint < Formula
   head "https://github.com/Vimjas/vint.git", branch: "master"
 
   bottle do
-    rebuild 5
-    sha256 cellar: :any,                 arm64_sonoma:   "e2b4843f23ddcae97ec2eec6912274d2863faffb3e6f33f262f3f4814fec94fb"
-    sha256 cellar: :any,                 arm64_ventura:  "f0cd321fba48f328e3c13dab7aecf72ad8c7461b52cf007220d3b24fbf986edb"
-    sha256 cellar: :any,                 arm64_monterey: "81fbb3743b862c733415a7487a2c94d94efd047adbcac284c71e1f151b04cd95"
-    sha256 cellar: :any,                 sonoma:         "96a23e4d02eabbfc64e0085e078a1249095c675ab9129e6f8f913c874649e8d1"
-    sha256 cellar: :any,                 ventura:        "0dd3fe045ce35748872c0d023d58cff039f7637485a68a4500d419b90b298637"
-    sha256 cellar: :any,                 monterey:       "6f214063ba0784a2adb96138a19003def055f2a9b99cad00c6f5947a847238f1"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "933837ebcda670e4b4a7ca57e3352212f75d5152565e482cd4e37577e8eb4013"
+    rebuild 7
+    sha256 cellar: :any,                 arm64_tahoe:   "253fc8481dee8ad20013ec07a09d1de0857b361f4ea4b9109e1d042720be995a"
+    sha256 cellar: :any,                 arm64_sequoia: "162fc8f95662794610623e833c5dc3b8a8b4061b96e051ece9df831c35b6857f"
+    sha256 cellar: :any,                 arm64_sonoma:  "03f615049167d33b5ab100cbbaff0d4461503392d550b895c98438ba5e5855e4"
+    sha256 cellar: :any,                 sonoma:        "0f54ebab62e360237f7dbb53db433dbf7270a94a57f63f6fbca5b7ce4dc06618"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "627fcee4eb35a20a7af92b2e52e4dd278ce997a1107406cfc45fb07aefa4bc21"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "a203916188f247d771f950c352eb7d70c5483651a612e2366ff9804da26b00c2"
   end
 
   depends_on "libyaml"
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   resource "ansicolor" do
     url "https://files.pythonhosted.org/packages/79/74/630817c7eb1289a1412fcc4faeca74a69760d9c9b0db94fc09c91978a6ac/ansicolor-0.3.2.tar.gz"
@@ -34,8 +33,8 @@ class Vint < Formula
   end
 
   resource "pyyaml" do
-    url "https://files.pythonhosted.org/packages/cd/e5/af35f7ea75cf72f2cd079c95ee16797de7cd71f29ea7c68ae5ce7be1eda0/PyYAML-6.0.1.tar.gz"
-    sha256 "bfdf460b1736c775f2ba9f6a92bca30bc2095067b8a9d77876d1fad6cc3b4a43"
+    url "https://files.pythonhosted.org/packages/05/8e/961c0007c59b8dd7729d542c61a4d537767a59645b82a0b521206e1e25c2/pyyaml-6.0.3.tar.gz"
+    sha256 "d76623373421df22fb4cf8817020cbb7ef15c725b9d5e45f17e189bfc384190f"
   end
 
   # Drop setuptools dep. Next release will switch to setuptools_scm,
@@ -49,18 +48,18 @@ class Vint < Formula
 
   test do
     system bin/"vint", "--help"
-    (testpath/"bad.vim").write <<~EOS
+    (testpath/"bad.vim").write <<~VIM
       not vimscript
-    EOS
+    VIM
     assert_match "E492", shell_output("#{bin}/vint bad.vim", 1)
 
-    (testpath/"good.vim").write <<~EOS
+    (testpath/"good.vim").write <<~VIM
       " minimal vimrc
       syntax on
       set backspace=indent,eol,start
       filetype plugin indent on
-    EOS
-    assert_equal "", shell_output("#{bin}/vint good.vim")
+    VIM
+    assert_empty shell_output("#{bin}/vint good.vim")
   end
 end
 

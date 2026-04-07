@@ -1,65 +1,46 @@
 class Mpd < Formula
   desc "Music Player Daemon"
-  homepage "https://github.com/MusicPlayerDaemon/MPD"
+  homepage "https://www.musicpd.org/"
+  url "https://github.com/MusicPlayerDaemon/MPD/archive/refs/tags/v0.24.9.tar.gz"
+  sha256 "8a3e7af8e203e561527e07be09aa98b94fb8f6befd7ec4c884e3bbac6bc8c744"
   license "GPL-2.0-or-later"
-  revision 3
   head "https://github.com/MusicPlayerDaemon/MPD.git", branch: "master"
 
-  stable do
-    url "https://github.com/MusicPlayerDaemon/MPD/archive/refs/tags/v0.23.15.tar.gz"
-    sha256 "d2865d8f8ea79aa509b1465b99a2b8f3f449fe894521c97feadc2dca85a6ecd2"
-
-    # Compatibility with fmt 11
-    patch do
-      url "https://github.com/MusicPlayerDaemon/MPD/commit/3648475f871c33daa9e598c102a16e5a1a4d4dfc.patch?full_index=1"
-      sha256 "5733f66678b3842c8721c75501f6c25085808efc42881847af11696cc545848e"
-    end
-
-    # Fix missing include
-    patch do
-      url "https://github.com/MusicPlayerDaemon/MPD/commit/e380ae90ebb6325d1820b6f34e10bf3474710899.patch?full_index=1"
-      sha256 "661492a420adc11a3d8ca0c4bf15e771f56e2dcf1fd0042eb6ee4fb3a736bd12"
-    end
-  end
-
   bottle do
-    sha256 cellar: :any, arm64_sonoma:   "a0c5ec95e9166169ff6f6cde2f41d7c5af4aba7f96f69c09843706f811c18b02"
-    sha256 cellar: :any, arm64_ventura:  "a53881cb62b2a4a5ffb73c3ada4d68ae81d7b83fdd3bddbcdb0f621289e2ca45"
-    sha256 cellar: :any, arm64_monterey: "79e0919e8c4439882903acb722454e7b90ccf83b3c53c1343db1d2c37eba7484"
-    sha256 cellar: :any, sonoma:         "8e89240bcd8df2bdf4b1c77365f8bde9234b23196ca5886d511e62a4a6202637"
-    sha256 cellar: :any, ventura:        "eecfcd3df5af3e08b03eb11308b95a81188f886f8fd770847254351ba7c3defc"
-    sha256 cellar: :any, monterey:       "89927c46ef03920991d68708b95d4449a2772797e2e88e689b15d915fbcfd169"
-    sha256               x86_64_linux:   "75d0d90d316c773424592fec34f88647029259f8f71b7b3547481bfa0250c2b3"
+    sha256 cellar: :any, arm64_tahoe:   "8d0332213c26540e5b26aa2b6603bf123b3650c8a1fc00d1ca5b89200aa7322c"
+    sha256 cellar: :any, arm64_sequoia: "fd96e5bca800e7563e4a770e7aa4c8591263c8a41124cdf6573fa0c5948c449c"
+    sha256 cellar: :any, arm64_sonoma:  "6dd4d39f7e6844bd15eca3b0c97b5c9a39324ed2a419fd04342e9ac12c0db116"
+    sha256 cellar: :any, sonoma:        "c3af6ecf454b0194a244eede1db75fb2fc17e1f05bab36189479ae68b0789f98"
+    sha256               arm64_linux:   "8ee5978ec6ae1385d82153344e06e03b30690aa4b7e79cf653aa9e777b592d06"
+    sha256               x86_64_linux:  "52180e68ad44aa59725ad53e1401e5db04000d6f5f331101c0a08b8f9e5e9aef"
   end
 
-  depends_on "boost" => :build
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => :build
+  depends_on "nlohmann-json" => :build
+  depends_on "pkgconf" => :build
 
   depends_on "chromaprint"
-  depends_on "expat"
   depends_on "faad2"
   depends_on "ffmpeg"
   depends_on "flac"
   depends_on "fluid-synth"
   depends_on "fmt"
-  depends_on "glib"
-  depends_on "icu4c"
+  depends_on "game-music-emu"
+  depends_on "icu4c@78"
   depends_on "lame"
   depends_on "libao"
-  depends_on "libgcrypt"
   depends_on "libid3tag"
+  depends_on "libmikmod"
   depends_on "libmpdclient"
   depends_on "libnfs"
+  depends_on "libnpupnp"
   depends_on "libogg"
   depends_on "libsamplerate"
   depends_on "libshout"
   depends_on "libsndfile"
   depends_on "libsoxr"
-  depends_on "libupnp"
   depends_on "libvorbis"
-  depends_on macos: :mojave # requires C++17 features unavailable in High Sierra
   depends_on "mpg123"
   depends_on "opus"
   depends_on "pcre2"
@@ -68,7 +49,15 @@ class Mpd < Formula
 
   uses_from_macos "bzip2"
   uses_from_macos "curl"
-  uses_from_macos "zlib"
+  uses_from_macos "expat"
+
+  on_ventura :or_older do
+    depends_on "llvm"
+
+    fails_with :clang do
+      cause "Needs C++20 std::make_unique_for_overwrite"
+    end
+  end
 
   on_linux do
     depends_on "systemd" => :build
@@ -77,21 +66,31 @@ class Mpd < Formula
     depends_on "jack"
     depends_on "pulseaudio"
     depends_on "systemd"
+    depends_on "zlib-ng-compat"
   end
 
-  fails_with gcc: "5"
+  # Work around superenv to avoid mixing `expat` usage in libraries across dependency tree.
+  # Brew `expat` usage in Python has low impact as it isn't loaded unless pyexpat is used.
+  # TODO: Consider adding a DSL for this or change how we handle Python's `expat` dependency
+  def remove_brew_expat
+    env_vars = %w[CMAKE_PREFIX_PATH HOMEBREW_INCLUDE_PATHS HOMEBREW_LIBRARY_PATHS PATH PKG_CONFIG_PATH]
+    ENV.remove env_vars, /(^|:)#{Regexp.escape(Formula["expat"].opt_prefix)}[^:]*/
+    ENV.remove "HOMEBREW_DEPENDENCIES", "expat"
+  end
 
   def install
-    # mpd specifies -std=gnu++0x, but clang appears to try to build
-    # that against libstdc++ anyway, which won't work.
-    # The build is fine with G++.
-    ENV.libcxx
+    if OS.mac? && MacOS.version <= :ventura
+      remove_brew_expat
+      ENV.append "LDFLAGS", "-L#{Formula["llvm"].opt_lib}/unwind -lunwind"
+      # When using Homebrew's superenv shims, we need to use HOMEBREW_LIBRARY_PATHS
+      # rather than LDFLAGS for libc++ in order to correctly link to LLVM's libc++.
+      ENV.prepend_path "HOMEBREW_LIBRARY_PATHS", Formula["llvm"].opt_lib/"c++"
+    end
 
     args = %W[
       --sysconfdir=#{etc}
       -Dmad=disabled
       -Dmpcdec=disabled
-      -Dsoundcloud=disabled
       -Dao=enabled
       -Dbzip2=enabled
       -Dchromaprint=enabled
@@ -100,9 +99,12 @@ class Mpd < Formula
       -Dfluidsynth=enabled
       -Dnfs=enabled
       -Dshout=enabled
-      -Dupnp=pupnp
+      -Dupnp=npupnp
       -Dvorbisenc=enabled
       -Dwavpack=enabled
+      -Dgme=enabled
+      -Dmikmod=enabled
+      -Dnlohmann_json=enabled
       -Dsystemd_system_unit_dir=#{lib}/systemd/system
       -Dsystemd_user_unit_dir=#{lib}/systemd/user
     ]
@@ -133,10 +135,6 @@ class Mpd < Formula
   end
 
   test do
-    # oss_output: Error opening OSS device "/dev/dsp": No such file or directory
-    # oss_output: Error opening OSS device "/dev/sound/dsp": No such file or directory
-    return if OS.linux? && ENV["HOMEBREW_GITHUB_ACTIONS"]
-
     assert_match "[wavpack] wv", shell_output("#{bin}/mpd --version")
 
     require "expect"
@@ -148,8 +146,10 @@ class Mpd < Formula
       port "#{port}"
     EOS
 
+    plugin = OS.mac? ? "osx" : "pulse"
+
     io = IO.popen("#{bin}/mpd --stdout --no-daemon #{testpath}/mpd.conf 2>&1", "r")
-    io.expect("output: Successfully detected a osx audio device", 30)
+    io.expect("output: Successfully detected a #{plugin} audio device", 30)
 
     ohai "Connect to MPD command (localhost:#{port})"
     TCPSocket.open("localhost", port) do |sock|

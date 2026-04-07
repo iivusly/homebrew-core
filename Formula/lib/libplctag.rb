@@ -1,8 +1,8 @@
 class Libplctag < Formula
   desc "Portable and simple API for accessing AB PLC data over Ethernet"
   homepage "https://github.com/libplctag/libplctag"
-  url "https://github.com/libplctag/libplctag/archive/refs/tags/v2.6.3.tar.gz"
-  sha256 "ebbcd659d5137d1299780e49b139d1e991b5a731df6dca0d7130b58555673a6d"
+  url "https://github.com/libplctag/libplctag/archive/refs/tags/v2.6.16.tar.gz"
+  sha256 "467d76fd8847819d412762df7ec70dbc2fc4f8f0ef4ce6d79bb0349ed3a4ea61"
   license any_of: ["LGPL-2.0-or-later", "MPL-2.0"]
 
   livecheck do
@@ -11,24 +11,30 @@ class Libplctag < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "dc6b380ddabd0deb6356e5c4858539d5d93c467521127541c1178c60fdce213c"
-    sha256 cellar: :any,                 arm64_ventura:  "f05b40f9a1a1e7ce4836a9aafefccb0f0637293457b50af1011138df5115b72b"
-    sha256 cellar: :any,                 arm64_monterey: "8ee7a04c8066496aa7519a12acfca94b4e49d18fddfeb4b39722277146516ab0"
-    sha256 cellar: :any,                 sonoma:         "56c790736952cfeec473004b11a6e802a64632fbe0b6310137e24fd6ea27e034"
-    sha256 cellar: :any,                 ventura:        "c2f745ee79bbf95b4c48a80942954618c77a429ffeb9fb8525165f3ab8682d30"
-    sha256 cellar: :any,                 monterey:       "b6a35d8303c4198bc22f38a4f60ad6aba6cf4ec5593cd77eaa207dbb2779a13d"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "fceb54a005681b6071a970c62cf2e0ce0e2f1719bca67aaf34d648f22349a510"
+    sha256 cellar: :any,                 arm64_tahoe:   "d3f745eb3e7792b7327de8c94ee99459ff54f45cecbb6b5c8bb65024e5bd30d7"
+    sha256 cellar: :any,                 arm64_sequoia: "afba7335b90edde759d68698c3f093970bce3e5a4bf4889aa90c24a156cf85e4"
+    sha256 cellar: :any,                 arm64_sonoma:  "fd1adab23619ccf16b8311445a1b6ddf821ada8b6ebd6143073422028b38c87b"
+    sha256 cellar: :any,                 sonoma:        "8eed7d78cee2d90bd9f7a3c0552b28aaedc60f063ba5a8413c94d87d97b8a677"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "559885be94842ee2f91a872aabe47b395849d428bde1ed8c53f9cf481c19d415"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "effba46edd11f2a975567c884e281992a150a143136cfc2a98395c22bdde4ade"
   end
 
   depends_on "cmake" => :build
 
+  # Backport "ab_server: scope CIP_SRV_UNCONNECTED_SEND case body", upstream pr ref, https://github.com/libplctag/libplctag/pull/618
+  patch do
+    url "https://github.com/chenrui333/libplctag/commit/b19081bc35bd93893b343091add7d638ee3fe532.patch?full_index=1"
+    sha256 "7b84abb42b4ba7b72b2b391f471acc56719481b590634cd1afd0576e7d1e1432"
+  end
+
   def install
-    system "cmake", ".", *std_cmake_args
-    system "make", "install"
+    system "cmake", "-S", ".", "-B", "build", *std_cmake_args
+    system "cmake", "--build", "build"
+    system "cmake", "--install", "build"
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <stdlib.h>
       #include <libplctag.h>
 
@@ -38,7 +44,8 @@ class Libplctag < Formula
         plc_tag_destroy(tag);
         return 0;
       }
-    EOS
+    C
+
     system ENV.cc, "test.c", "-L#{lib}", "-lplctag", "-o", "test"
     system "./test"
   end

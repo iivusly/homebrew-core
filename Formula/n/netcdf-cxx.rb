@@ -4,18 +4,17 @@ class NetcdfCxx < Formula
   url "https://github.com/Unidata/netcdf-cxx4/archive/refs/tags/v4.3.1.tar.gz"
   sha256 "e3fe3d2ec06c1c2772555bf1208d220aab5fee186d04bd265219b0bc7a978edc"
   license "NetCDF"
-  revision 1
+  revision 3
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "e84953471784443be7fdd3f1f5bc295e2bcdad7b4a926b4e76f6f02ff205484f"
-    sha256 cellar: :any,                 arm64_ventura:  "8d967dce894b455bc5647dc9416e5a4eceefbf9a710cce01d80491f5c67a6d1f"
-    sha256 cellar: :any,                 arm64_monterey: "055b3191f34e7f1d0c15bd63a50a65fd496a1dd402255d47189908abb8bb6514"
-    sha256 cellar: :any,                 arm64_big_sur:  "f95e7cca5e6398b0ac4484cf8b89df1dec5dc2602e57ee7454a80d4d2df9291f"
-    sha256 cellar: :any,                 sonoma:         "b36c23e394909bc2d5ec136e8816485b9230d99aa37115e4e3d5c240fb1a568a"
-    sha256 cellar: :any,                 ventura:        "4142616c7c72e986bd6ae0159c20e6702db7a8c5044c7540043a6ff57c7fe04b"
-    sha256 cellar: :any,                 monterey:       "8e67f665695d5e0131db1fdb2f11030ef8fe462270652c7b1ff05a0e14664bc1"
-    sha256 cellar: :any,                 big_sur:        "447ab5ac1c323952c6378b92e52c280f84c7fa7e5bd0c3cbc673b8c9146022b0"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "7db97776cfe5cf54f458816719e1f031b2349004eca65460dc370bfc51cfe627"
+    sha256 cellar: :any,                 arm64_tahoe:   "a193f027eaaa1c1586f10397427d5729fe0d653d569226ea02c85990d00bb449"
+    sha256 cellar: :any,                 arm64_sequoia: "50dfd3ba9dea12a4a355e8643a74ca53b6c184c96e3bcdf0e24e3052491be0c8"
+    sha256 cellar: :any,                 arm64_sonoma:  "e80f685cdd7fd31e72e0fdeb96a8770a243f4729d0a2f0417808782dfd2d5bc9"
+    sha256 cellar: :any,                 arm64_ventura: "f6c50e7a23adf951aae09e8a600f560a4679fb9ce19eabfd692f92442a5a5314"
+    sha256 cellar: :any,                 sonoma:        "34da3acc3752fc50b9315b33f90624e2e51eb450af0974d88a3f3895da320d92"
+    sha256 cellar: :any,                 ventura:       "7c452e7a0b055cd09f127c86be95fdc41b5f2fdf75f0c00b480a19f79f362ef8"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "fa7a0a059a0a2951e4d07f41a085babd677b0295dd49a02b693e5015ce2a4a29"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "4ab172c8268b7d323e568565c3eddaba2596c6990f9465bdeed7823cbfc81354"
   end
 
   depends_on "cmake" => :build
@@ -27,11 +26,18 @@ class NetcdfCxx < Formula
   end
 
   def install
-    args = std_cmake_args + %w[-DBUILD_TESTING=OFF -DNCXX_ENABLE_TESTS=OFF -DENABLE_TESTS=OFF -DENABLE_NETCDF_4=ON
-                               -DENABLE_DOXYGEN=OFF]
+    args = std_cmake_args + %w[
+      -DNCXX_ENABLE_TESTS=OFF
+      -DENABLE_TESTS=OFF
+      -DENABLE_NETCDF_4=ON
+      -DENABLE_DOXYGEN=OFF
+    ]
 
     # https://github.com/Unidata/netcdf-cxx4/issues/151#issuecomment-2041111870
     args << "-DHDF5_C_LIBRARY_hdf5=#{Formula["hdf5"].opt_lib}"
+
+    # Workaround to build with CMake 4
+    args << "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
 
     system "cmake", "-S", ".", "-B", "build_shared", *args, "-DBUILD_SHARED_LIBS=ON"
     system "cmake", "--build", "build_shared"
@@ -49,7 +55,7 @@ class NetcdfCxx < Formula
   end
 
   test do
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include <iostream>
       #include <netcdf>
 
@@ -69,7 +75,7 @@ class NetcdfCxx < Formula
           auto data = dataFile.addVar("data", netCDF::ncInt, {xDim, yDim});
           data.putVar(dataOut);
       }
-    EOS
+    CPP
     system ENV.cxx, "test.cpp", "-std=c++11", "-L#{lib}", "-I#{include}", "-lnetcdf-cxx4", "-o", "test"
     system "./test"
   end

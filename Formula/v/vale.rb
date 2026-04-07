@@ -1,42 +1,43 @@
 class Vale < Formula
   desc "Syntax-aware linter for prose"
   homepage "https://vale.sh/"
-  url "https://github.com/errata-ai/vale/archive/refs/tags/v3.7.1.tar.gz"
-  sha256 "e6a4cc2eff9c6645f26ca51b66df66a088045b8084949bb8c61c4a6cbe10673d"
+  url "https://github.com/errata-ai/vale/archive/refs/tags/v3.14.1.tar.gz"
+  sha256 "2b56cb18274a881c8d18d4751cd8c05283529ca8e4934fc0ff8f059113131c86"
   license "MIT"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "449a8e17c33966be99b1fee2ac8ea85ce466346f7a3964e98c24a00d00476abc"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "fa78ca45cf8fb6eb8dad509856f5713bc026173a230a36d80720fbddfbbb2d3b"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "5f126f70f182e5cd8ee2c5a33180cedd901da4d7be4096e2a3cd4e5cf74af210"
-    sha256 cellar: :any_skip_relocation, sonoma:         "df08c65351060d38fb823606838e889e7c4291b81f637dadb0b170f754eba979"
-    sha256 cellar: :any_skip_relocation, ventura:        "6d603ae88be242da7eea2de44bdb854da0bcd43746915e39541d5be0ed0a978c"
-    sha256 cellar: :any_skip_relocation, monterey:       "12f921b42cfd158d9f3777032607a5a92c16558192faf84351fac19774c56722"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "cc302691858be4b28014eed9b5d21c7343f64ae35b8cceaa96066320969a3b53"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "6619a7bc66253b207fafdffa6b28df6d4aa1378f1f4ee54ae4f27bcf1b8a960e"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "c104224bef2de6a2b088c9937b783a5829e49a7e9753f18ee106221b239d9a27"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "6a85e4120641673acdfe27ffa108fdf8a9c3ec8fdcb0aafeecd010fd2cc1087e"
+    sha256 cellar: :any_skip_relocation, sonoma:        "02374cad828327521c74a84913e65f6e95411b55e2cb100176488f2aba11d8ac"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "6875424c14089f3588dca004379e3b61f1b6164b9c1046c844b5afe677f7c34c"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "b9d077e7fd506ffd74bbb83897d58798762202d3af03e0d511243e15d69565cc"
   end
 
   depends_on "go" => :build
 
   def install
+    ENV["CGO_ENABLED"] = "1" if OS.linux? && Hardware::CPU.arm?
+
     ldflags = "-X main.version=#{version} -s -w"
     system "go", "build", *std_go_args, "-ldflags=#{ldflags}", "./cmd/vale"
   end
 
   test do
     mkdir_p "styles/demo"
-    (testpath/"styles/demo/HeadingStartsWithCapital.yml").write <<~EOS
+    (testpath/"styles/demo/HeadingStartsWithCapital.yml").write <<~YAML
       extends: capitalization
       message: "'%s' should be in title case"
       level: warning
       scope: heading.h1
       match: $title
-    EOS
+    YAML
 
-    (testpath/"vale.ini").write <<~EOS
+    (testpath/"vale.ini").write <<~INI
       StylesPath = styles
       [*.md]
       BasedOnStyles = demo
-    EOS
+    INI
 
     (testpath/"document.md").write("# heading is not capitalized")
 

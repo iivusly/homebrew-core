@@ -1,8 +1,8 @@
 class Cracklib < Formula
   desc "LibCrack password checking library"
   homepage "https://github.com/cracklib/cracklib"
-  url "https://github.com/cracklib/cracklib/releases/download/v2.10.2/cracklib-2.10.2.tar.bz2"
-  sha256 "e157c78e6f26a97d05e04b6fe9ced468e91fa015cc2b2b7584889d667a958887"
+  url "https://github.com/cracklib/cracklib/releases/download/v2.10.3/cracklib-2.10.3.tar.bz2"
+  sha256 "f3dcb54725d5604523f54a137b378c0427c1a0be3e91cfb8650281a485d10dae"
   license "LGPL-2.1-only"
 
   livecheck do
@@ -11,13 +11,13 @@ class Cracklib < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "0c5f49a46e9db39c735041120c5e89b06b1ec2b0e37ba2090973f2067ebee3ef"
-    sha256 arm64_ventura:  "c03e267a7d0d790f718537b89fa25c6aac1f7f75a3f23addfd07e059305d97b1"
-    sha256 arm64_monterey: "e76849125f0b2ee7631f381249e9b0acae465b5128c0d255a76fc0112a78539b"
-    sha256 sonoma:         "9da52404b23c1520018c0c412aefc7464d7cb0a088be20fc8105dd0df3577eb4"
-    sha256 ventura:        "65bf3c3f8b218c977b4bec89d25b27e21f5ffed8329510ba8227b7b0208375b6"
-    sha256 monterey:       "cd6d93ae08c1d7c2459f8bc95f3274f2d34c862ea5c1eceeb025ca74fce180a7"
-    sha256 x86_64_linux:   "9ecde5232f61599c25890b9056d7abfb6a15e30569eda7fb96eb5e447fe651d7"
+    rebuild 1
+    sha256 arm64_tahoe:   "bfe6f4fcc9715b80c772bc82847977a8514960010c677c3f497cef0ffe571338"
+    sha256 arm64_sequoia: "05e23a17250844d8ce26720dbda596db1c5957b0886e44648ba957c85af67a21"
+    sha256 arm64_sonoma:  "4160ab423c5ae473533dccee9580626706f964231cfb8f1693ebaae91ce23a7b"
+    sha256 sonoma:        "35c49fa815da588e05b06289ef462503741f92ade3897d01fcf1f5cb1726d14c"
+    sha256 arm64_linux:   "707b67a337adda7425720a25ba33911c531845c3db75097e48151e6189117685"
+    sha256 x86_64_linux:  "92844634f5c499f9b31242fa1f05dd4657ac68fb2d335e3cbe5bd6002970e2c2"
   end
 
   head do
@@ -28,24 +28,32 @@ class Cracklib < Formula
     depends_on "libtool" => :build
   end
 
-  depends_on "gettext"
+  on_macos do
+    depends_on "gettext"
+  end
 
-  uses_from_macos "zlib"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   resource "cracklib-words" do
-    url "https://github.com/cracklib/cracklib/releases/download/v2.10.2/cracklib-words-2.10.2.bz2"
+    url "https://github.com/cracklib/cracklib/releases/download/v2.10.3/cracklib-words-2.10.3.bz2"
     sha256 "ec25ac4a474588c58d901715512d8902b276542b27b8dd197e9c2ad373739ec4"
+
+    livecheck do
+      formula :parent
+    end
   end
 
   def install
     buildpath.install (buildpath/"src").children if build.head?
     system "autoreconf", "--force", "--install", "--verbose" if build.head?
 
-    system "./configure", *std_configure_args,
-                          "--disable-silent-rules",
+    system "./configure", "--disable-silent-rules",
                           "--sbindir=#{bin}",
                           "--without-python",
-                          "--with-default-dict=#{var}/cracklib/cracklib-words"
+                          "--with-default-dict=#{var}/cracklib/cracklib-words",
+                          *std_configure_args
     system "make", "install"
 
     share.install resource("cracklib-words")

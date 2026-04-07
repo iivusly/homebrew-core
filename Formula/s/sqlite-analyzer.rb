@@ -1,38 +1,35 @@
 class SqliteAnalyzer < Formula
   desc "Analyze how space is allocated inside an SQLite file"
   homepage "https://www.sqlite.org/"
-  url "https://www.sqlite.org/2024/sqlite-src-3460100.zip"
-  version "3.46.1"
-  sha256 "def3fc292eb9ecc444f6c1950e5c79d8462ed5e7b3d605fd6152d145e1d5abb4"
+  url "https://sqlite.org/2026/sqlite-src-3510300.zip"
+  version "3.51.3"
+  sha256 "f8a67a1f5b5cae7c6d42f0994ca7bf1a4a5858868c82adc9fc1340bed5eb8cd2"
   license "blessing"
 
   livecheck do
     formula "sqlite"
   end
 
+  no_autobump! because: :incompatible_version_format
+
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "c7ce6728deffcb45dea25ba6921622ccde1d1ab4bf4bb1bc51ee60a7006732cb"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "b00a5bafcfa9c81567fec9e2007f85b55ca580f5caaf59a00c20288550620c88"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "e31e40ffd4812d5137099279bc29c74d14f15c30d3e1c765b25aa4513424d31a"
-    sha256 cellar: :any_skip_relocation, sonoma:         "a7ee7b8a0d9967a8a0bf002f29ef188e3d577f91edbde418b3077cd94170b68a"
-    sha256 cellar: :any_skip_relocation, ventura:        "140b7f60ab6ac6637d84c5a3571ba8f7b561352205b280ba8ebea9eef30248d3"
-    sha256 cellar: :any_skip_relocation, monterey:       "3f9b5c2acd7ecc8617d3e072f444ba38eebf907e28bfdb0e29c78a11b75ab61f"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "c359a37822510fec0e67c9c909c7bffd9c2632c783cfd505f73050f40a5dd199"
+    sha256 cellar: :any,                 arm64_tahoe:   "47ba7ae3b965af371df60ca1983ec977eea991ca623d286e0e35bad6195e67d8"
+    sha256 cellar: :any,                 arm64_sequoia: "8a3b2ad75ac91a99d07afac6e6223b515dae73efa16e70c8720ff1c3e5ae3b79"
+    sha256 cellar: :any,                 arm64_sonoma:  "9f95fe480a57131dcf127ded6a718c8e79a257a80348131875c6388b14a03742"
+    sha256 cellar: :any,                 sonoma:        "fa3fd0e9f8c5abbdf1542723d1e1520b89b7cd9b5584330269ae639fbb9fc1df"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "66eb695dced8b9b31a6387b3e2ea9b5768b54869510d499c0bb2e2bafae51ce9"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "d1f3a46ecba766cd5db581e97ad9623617e54209fc97700212e596bcaf8eeea7"
   end
 
+  depends_on "tcl-tk"
   uses_from_macos "sqlite" => :test
-  uses_from_macos "tcl-tk"
+
+  on_macos do
+    depends_on "libtommath"
+  end
 
   def install
-    tcl = if OS.mac?
-      MacOS.sdk_path/"System/Library/Frameworks/Tcl.framework"
-    else
-      Formula["tcl-tk"].opt_lib
-    end
-
-    system "./configure", "--disable-debug",
-                          "--with-tcl=#{tcl}",
-                          "--prefix=#{prefix}"
+    system "./configure", "--with-tcl=#{Formula["tcl-tk"].opt_lib}", *std_configure_args
     system "make", "sqlite3_analyzer"
     bin.install "sqlite3_analyzer"
   end
@@ -40,12 +37,12 @@ class SqliteAnalyzer < Formula
   test do
     dbpath = testpath/"school.sqlite"
     sqlpath = testpath/"school.sql"
-    sqlpath.write <<~EOS
+    sqlpath.write <<~SQL
       create table students (name text, age integer);
       insert into students (name, age) values ('Bob', 14);
       insert into students (name, age) values ('Sue', 12);
       insert into students (name, age) values ('Tim', 13);
-    EOS
+    SQL
     system "sqlite3 #{dbpath} < #{sqlpath}"
     system bin/"sqlite3_analyzer", dbpath
   end

@@ -1,22 +1,19 @@
 class Libtasn1 < Formula
   desc "ASN.1 structure parser library"
   homepage "https://www.gnu.org/software/libtasn1/"
-  url "https://ftp.gnu.org/gnu/libtasn1/libtasn1-4.19.0.tar.gz"
-  mirror "https://ftpmirror.gnu.org/libtasn1/libtasn1-4.19.0.tar.gz"
-  sha256 "1613f0ac1cf484d6ec0ce3b8c06d56263cc7242f1c23b30d82d23de345a63f7a"
+  url "https://ftpmirror.gnu.org/gnu/libtasn1/libtasn1-4.21.0.tar.gz"
+  mirror "https://ftp.gnu.org/gnu/libtasn1/libtasn1-4.21.0.tar.gz"
+  sha256 "1d8a444a223cc5464240777346e125de51d8e6abf0b8bac742ac84609167dc87"
   license "LGPL-2.1-or-later"
+  compatibility_version 1
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "975eaba8f266020c3c82a667a0e693a1c6b1f76e317a95bb79b6906fd248bcc5"
-    sha256 cellar: :any,                 arm64_ventura:  "9fcf93a7992888a29caf2bc3ad37fb27ee8ceef180367797f4a11040fa761eac"
-    sha256 cellar: :any,                 arm64_monterey: "cf95a18e2fabf1675d77ec8a1abb41fdb091cef689dec3318a420ad2f25beb76"
-    sha256 cellar: :any,                 arm64_big_sur:  "19c6df6badb6b13631670b917595f63a49a06cadd73e2484e5546129cadcf04c"
-    sha256 cellar: :any,                 sonoma:         "7218661c69488f1147868d53d6bf50d53ad5eafe3020b07a7846ddcd8743fc50"
-    sha256 cellar: :any,                 ventura:        "ee3b036d7d82561e743131c0ec97d4a425e18a593253830753c519a04db6b200"
-    sha256 cellar: :any,                 monterey:       "2aa4f8396ba40b05b237d503eb4de02c37175903d3e0f26d7a48a031707a71b5"
-    sha256 cellar: :any,                 big_sur:        "45a9352536560b5a69bef3e85ca615bad19d44eab23c6ad797c4305a27bd15d8"
-    sha256 cellar: :any,                 catalina:       "7bf11a4603037c490e83caaddc03fba59dfae11385e2f6bd4555b8ee9aaf1507"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "e994c7b8c16afb59368d8d09a3f193451c9deab1e4a83f8a94650e27674d9278"
+    sha256 cellar: :any,                 arm64_tahoe:   "ae01713eec0bd922b903ed2bf514dc085ec3108636c4ead84614b23a2c33f267"
+    sha256 cellar: :any,                 arm64_sequoia: "973e0fd7d529808f53fa9ae281020bcbcc750a1dff60e5e5bc37c0da274cca5e"
+    sha256 cellar: :any,                 arm64_sonoma:  "2dceab4bf93738bd4f3efd9063a5cf60ccd96e5b0e5a3ac9fca508e42b5f3336"
+    sha256 cellar: :any,                 sonoma:        "71c5d144fdce79e4cfe7bbd5863da5171a13d892a26475c5ea183e7e3ef21d8f"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "c8b7973e5f6822f25876da6b60138eec386a3d3b9f0a694dff7b5a7073fcf82d"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "c0394c5c9c0b278c37eb9f817a282054d64654f7b27eb86100bb5b307a0d72b5"
   end
 
   def install

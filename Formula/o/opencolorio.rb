@@ -1,36 +1,41 @@
 class Opencolorio < Formula
   desc "Color management solution geared towards motion picture production"
   homepage "https://opencolorio.org/"
-  url "https://github.com/AcademySoftwareFoundation/OpenColorIO/archive/refs/tags/v2.3.2.tar.gz"
-  sha256 "6bbf4e7fa4ea2f743a238cb22aff44890425771a2f57f62cece1574e46ceec2f"
+  url "https://github.com/AcademySoftwareFoundation/OpenColorIO/archive/refs/tags/v2.5.1.tar.gz"
+  sha256 "08cb6213ea4edee550ab050509d38204004bee6742c658166b1cf825d0a9381b"
   license "BSD-3-Clause"
-  head "https://github.com/AcademySoftwareFoundation/OpenColorIO.git", branch: "master"
+  revision 1
+  head "https://github.com/AcademySoftwareFoundation/OpenColorIO.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "0db0e5ebd3e423f988a351de2677cde0a027ab10212dd6535263e16900530f69"
-    sha256 cellar: :any,                 arm64_ventura:  "0a35033f31e6aa593f141238895b3fe383527f662592e106a76e175d919d0815"
-    sha256 cellar: :any,                 arm64_monterey: "68193cb0f8b28037f26bfcf1ade5e1ffcc757da8dd9d4782a47307e2f5183e5f"
-    sha256 cellar: :any,                 sonoma:         "583e1b16d1981250865d052511160b254ce71485b82107da6896e4642c254d76"
-    sha256 cellar: :any,                 ventura:        "1841a51311fce945dff91344b05fad32c1ca2e2e96a094ebc6b60b5cc74d0d2a"
-    sha256 cellar: :any,                 monterey:       "3f97660a1b3dff405779ed4480475da7c5389c345f35c4d5837f08fe53c4a725"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "fd944816b1ccf312cd3471d87f0cee4fe2d85712a661d1bf13fa10be77d6a3b8"
+    rebuild 2
+    sha256 cellar: :any,                 arm64_tahoe:   "0ca624f3788e11cefd2b246e8154b85a819c2a40ed83e618abdb93c00dbedc16"
+    sha256 cellar: :any,                 arm64_sequoia: "a253b7d210772a5f07acdae83b8707e2c27da64f5dd883f5428e6b5e72afd456"
+    sha256 cellar: :any,                 arm64_sonoma:  "24f7868c7417b93233c10265dc9f594e07331d9a00c515a63d27c3baffb339ab"
+    sha256 cellar: :any,                 sonoma:        "c1b9c2d7eda1ec4613cd573a4c16414f286155f91f25715f7e0c204053e85fa3"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "9169481ded19f10e1b7c82e7c694d34c30dd78e0ab44107149b303208d869fd1"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "5d91f280ab35dd2bfb6c30bf2480f9370fb33fd44aec3b542d2fd28ccd4680f2"
   end
 
   depends_on "cmake" => :build
   depends_on "pybind11" => :build
+  depends_on "python@3.14" => [:build, :test]
   depends_on "imath"
   depends_on "little-cms2"
   depends_on "minizip-ng"
   depends_on "openexr"
   depends_on "pystring"
-  depends_on "python@3.12"
   depends_on "yaml-cpp"
+  depends_on "zlib-ng-compat"
 
-  uses_from_macos "expat"
-  uses_from_macos "zlib"
+  uses_from_macos "expat", since: :sequoia # expat 2.6.0+ (Apple expat-37)
+
+  on_arm do
+    depends_on "sse2neon" => :build
+  end
 
   def python3
-    "python3.12"
+    "python3.14"
   end
 
   def install

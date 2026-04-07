@@ -1,8 +1,8 @@
 class Libgsm < Formula
   desc "Lossy speech compression library"
   homepage "https://www.quut.com/gsm/"
-  url "https://www.quut.com/gsm/gsm-1.0.22.tar.gz"
-  sha256 "f0072e91f6bb85a878b2f6dbf4a0b7c850c4deb8049d554c65340b3bf69df0ac"
+  url "https://www.quut.com/gsm/gsm-1.0.24.tar.gz"
+  sha256 "a3c40c6471928383f4abfcb2e8f24012a1f562be2f17b8d672145d5986681a92"
   license "TU-Berlin-2.0"
 
   livecheck do
@@ -11,16 +11,12 @@ class Libgsm < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "7733596095803d3248e23e37224e5914d39560ae476b9d282f79b59f6a5b05c5"
-    sha256 cellar: :any,                 arm64_ventura:  "99fc0cf57ca6ccb2fca847f53f5201347e58c10b2a50c9f766319029d57a6556"
-    sha256 cellar: :any,                 arm64_monterey: "3adbd0618b07bd0546aed790ae76275b5a5c4ea4f822f5375b358339f8c73e53"
-    sha256 cellar: :any,                 arm64_big_sur:  "a65d58777535fd4113ba3d9b667d4b7710e51311e218b947f0977d279288fcda"
-    sha256 cellar: :any,                 sonoma:         "15fde999ee045e12dadcc18c5eed373cdf485d78ba97174c8587c4031e317910"
-    sha256 cellar: :any,                 ventura:        "17604726bbc6db357dfb44a26a2c8ca4cde02c7ff11fc547b940e15c6ae68350"
-    sha256 cellar: :any,                 monterey:       "b7746165e220e043311776189b8739dd8bc6c2b83cb101d409b563a647195ad6"
-    sha256 cellar: :any,                 big_sur:        "60591d316a866bb64d58b718627103ffe1adf71d4665baf491c9c5454bc172ca"
-    sha256 cellar: :any,                 catalina:       "fc559f8e94bc509708df438b830ec4276260e108f91ece47b5a7d3a1293fa498"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "2398c2265658796adac35f2494dc97e0bd4fa6e20d1fd7bd70d15ea389782a05"
+    sha256 cellar: :any,                 arm64_tahoe:   "e637baca84f26ef74730d06d4eed5cf3ea69730afb45a598f1b7a50a2aa91136"
+    sha256 cellar: :any,                 arm64_sequoia: "40de9bf0cb4821fca993112eadbdd1eaf40c9e71d48fc66dbb1f67ab9987ead7"
+    sha256 cellar: :any,                 arm64_sonoma:  "abbc1deea6a1453dd8bf458874fab528f6f1d672ef77dafe6fde9ae43651fc4f"
+    sha256 cellar: :any,                 sonoma:        "816cc99acd5699c74b201af8ae8df58090bcb71ffa3b07a37d36aae031c250c8"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "70194c209b3f6b130ab8b04450ee8ffb0f4f5463395191023ac19eb16007920c"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ea4c6fb171d2c66eeaad24385c753a5bac62732a15700090b311248b6509d029"
   end
 
   conflicts_with "toast", because: "both install `toast` binaries"
@@ -41,7 +37,10 @@ class Libgsm < Formula
         -install_name #{lib/shared_library("libgsm", version.major.to_s)}
       ]
     else
-      ["-shared"]
+      %W[
+        -shared
+        -Wl,-soname,#{shared_library("libgsm", version.major.to_s)}
+      ]
     end
     arflags << "-o"
 
@@ -75,7 +74,7 @@ class Libgsm < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <gsm.h>
 
       int main()
@@ -87,7 +86,7 @@ class Libgsm < Formula
         }
         return 0;
       }
-    EOS
+    C
     system ENV.cc, "test.c", "-L#{lib}", "-lgsm", "-o", "test"
     system "./test"
   end

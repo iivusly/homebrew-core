@@ -4,19 +4,24 @@ class RonnNg < Formula
   url "https://github.com/apjanke/ronn-ng/archive/refs/tags/v0.10.1.tar.gz"
   sha256 "180f18015ce01be1d10c24e13414134363d56f9efb741fda460358bb67d96684"
   license "MIT"
+  revision 2
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "f31d048c5ebca214ad11c695656894dc560ca865000a78e659985289abcd31ab"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "4bee63a22338f66fedbcca8ba2c67035ef78024d8b44462819737c37ff2f62cf"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "a1c684641c1b5361e3100e634364d39823eaa4067c7ce2b99993c15c7a9f952f"
-    sha256 cellar: :any_skip_relocation, sonoma:         "a8d059eec73a18c2e2a887d0158c6be288be08be86038e9cbe65d437a68e89d7"
-    sha256 cellar: :any_skip_relocation, ventura:        "bc2e51f2b46864a3997b53c9652d68732639b3d9fa70d59ad872b97b1faf073b"
-    sha256 cellar: :any_skip_relocation, monterey:       "edb291c1f1fd2744613fb4e6ebe61ced523410143b2fc385845a850a29d79935"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "ad7f030d0d67dcf77826a7362288d99b334d783a255fd7670d20cbbe417d4148"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "cde2a1921cd09603374d28ee44d9c470f0b187add7b9d9eb0b526d7dbe5a3305"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "cde2a1921cd09603374d28ee44d9c470f0b187add7b9d9eb0b526d7dbe5a3305"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "cde2a1921cd09603374d28ee44d9c470f0b187add7b9d9eb0b526d7dbe5a3305"
+    sha256 cellar: :any_skip_relocation, sonoma:        "e81143c3c8d224765b7db5c39a07caa7c2d7d2c9a291064f99186a1b6a7578d5"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "43cce7ff99b681bb070ad22d1b9ee17a4c2093c79921cd5211095242a05222a1"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "e4fd9f3b447f24382a9d97e7a1aa2cfdda53eed5ad75f19b0e6d2ae6e210938e"
   end
 
-  # Nokogiri 1.9 requires a newer Ruby
   depends_on "ruby"
+  depends_on "xz"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   conflicts_with "ronn", because: "both install `ronn` binaries"
 
@@ -34,12 +39,12 @@ class RonnNg < Formula
   end
 
   test do
-    (testpath/"test.ronn").write <<~EOS
+    (testpath/"test.ronn").write <<~MARKDOWN
       helloworld
       ==========
 
       Hello, world!
-    EOS
+    MARKDOWN
 
     assert_match "Hello, world", shell_output("#{bin}/ronn --roff --pipe test.ronn")
   end

@@ -1,8 +1,8 @@
 class ScmManager < Formula
   desc "Manage Git, Mercurial, and Subversion repos over HTTP"
   homepage "https://www.scm-manager.org"
-  url "https://packages.scm-manager.org/repository/releases/sonia/scm/packaging/unix/3.4.1/unix-3.4.1.tar.gz"
-  sha256 "0951d1492f37acd9636e00d873a19814774ea13b09209b5bc2a972415b6df177"
+  url "https://packages.scm-manager.org/repository/releases/sonia/scm/packaging/unix/3.11.7/unix-3.11.7.tar.gz"
+  sha256 "a6bbfa075361c90a35a74f477bc555c10a1261f4b5929d97747884727342b991"
   license all_of: ["Apache-2.0", "MIT"]
 
   livecheck do
@@ -11,7 +11,7 @@ class ScmManager < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, all: "ffb5d509247575bdc516d4e1d3442cdcba0580d94fa0f788ddf6417cd81ccc67"
+    sha256 cellar: :any_skip_relocation, all: "076288965c03b7a3f10608bb7bd2fc3b00a38821733271c38d4ec9c9fd5cfcf7"
   end
 
   depends_on "jsvc"
@@ -42,10 +42,11 @@ class ScmManager < Formula
       s.gsub! "port: 8080", "port: #{port}"
     end
     ENV["JETTY_BASE"] = testpath
-    pid = fork { exec bin/"scm-server" }
-    sleep 15
-    assert_match "<title>SCM-Manager</title>", shell_output("curl http://localhost:#{port}/scm/")
+    pid = spawn bin/"scm-server"
+    output = shell_output("curl --silent --retry 5 --retry-connrefused http://localhost:#{port}/scm/")
+    assert_match "<title>SCM-Manager</title>", output
   ensure
     Process.kill "TERM", pid
+    Process.wait pid
   end
 end

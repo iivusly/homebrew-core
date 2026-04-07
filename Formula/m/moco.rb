@@ -23,7 +23,7 @@ class Moco < Formula
   end
 
   test do
-    (testpath/"config.json").write <<~EOS
+    (testpath/"config.json").write <<~JSON
       [
         {
           "response" :
@@ -32,15 +32,12 @@ class Moco < Formula
           }
         }
       ]
-    EOS
+    JSON
 
     port = free_port
+    pid = spawn bin/"moco", "http", "-p", port.to_s, "-c", testpath/"config.json"
     begin
-      pid = fork do
-        exec "#{bin}/moco http -p #{port} -c #{testpath}/config.json"
-      end
       sleep 10
-
       assert_match "Hello, Moco", shell_output("curl -s http://127.0.0.1:#{port}")
     ensure
       Process.kill "SIGTERM", pid

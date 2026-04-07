@@ -1,47 +1,44 @@
 class Libopusenc < Formula
   desc "Convenience library for creating .opus files"
-  homepage "https://opus-codec.org/"
-  url "https://archive.mozilla.org/pub/opus/libopusenc-0.2.1.tar.gz", using: :homebrew_curl
-  sha256 "8298db61a8d3d63e41c1a80705baa8ce9ff3f50452ea7ec1c19a564fe106cbb9"
+  homepage "https://www.opus-codec.org/"
+  url "https://ftp.osuosl.org/pub/xiph/releases/opus/libopusenc-0.3.tar.gz"
+  mirror "https://archive.mozilla.org/pub/opus/libopusenc-0.3.tar.gz"
+  sha256 "f616d3aff9b2034547894ccb8ab56c36cf1a4acb0d922c5d7119f97bbe58642c"
   license "BSD-3-Clause"
 
+  livecheck do
+    url "https://ftp.osuosl.org/pub/xiph/releases/opus/?C=M&O=D"
+    regex(%r{href=(?:["']?|.*?/)libopusenc[._-]v?(\d+(?:\.\d+)+)\.t}i)
+  end
+
   bottle do
-    rebuild 1
-    sha256 cellar: :any,                 arm64_sonoma:   "c96d078c67fa9ad9ae0398e4c7979c6506c4438ed426d224c8480a5cddd1d919"
-    sha256 cellar: :any,                 arm64_ventura:  "2d9e6657c2d76d193da5cd687e5c95e4c13702cd9f5c08945b7a316b63786112"
-    sha256 cellar: :any,                 arm64_monterey: "5b28442f84fbd88cfd6cacf35ad6df119cc1dcfb89851c7b81bd77f07402a70c"
-    sha256 cellar: :any,                 arm64_big_sur:  "f8d28846ea6d21358ef7768f94241a0f94327d4edcdd5223be2da96c2f0d6841"
-    sha256 cellar: :any,                 sonoma:         "340d398550ddcfdf633eb19d78a9f044e810ca5bcf0789fe66caec6a1c546269"
-    sha256 cellar: :any,                 ventura:        "5b2a64d3c64ec7e14f7a9f2adbe46dddf4f3ad51876dea2c28010e6f4e4e55f1"
-    sha256 cellar: :any,                 monterey:       "636d36637bb7e7cc098dfe6ba078fb4fb1fbc5fce4bd93ea6a7c08ad4c49d2f4"
-    sha256 cellar: :any,                 big_sur:        "48157970f8bebbd7ad54d099531397cb3d81797e7715ed5523865d7d1b19df8b"
-    sha256 cellar: :any,                 catalina:       "593106e48c86436fd1908c79f1ef54f206bb37f0983ccb3901190cebe6e78cea"
-    sha256 cellar: :any,                 mojave:         "96a05dd8d0071fb38ed14f4f5b64af576baee3719a16fc8fc331ddfa1a4d65ec"
-    sha256 cellar: :any,                 high_sierra:    "e5cfb0433abe565b11351f9d6ec3fb44852a8aeb99ef8f6710ee9d899eb97ab3"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "2545d8277065ed72d4a382d804569d27c55e9d8eb6ffc9511140bda90721edb3"
+    sha256 cellar: :any,                 arm64_tahoe:   "92b42832d01a85d2be1e22d430d80fe57e02987ebf6b4e77f425891f4c1ae3e0"
+    sha256 cellar: :any,                 arm64_sequoia: "cf8745f39fc22033d57343bc4d985d7797f6733d882c4a7fc1f47d76b306180d"
+    sha256 cellar: :any,                 arm64_sonoma:  "ef3d476998cfb36e1ce4020f565fba423bf866578fded146753b03a8f224c8b6"
+    sha256 cellar: :any,                 sonoma:        "4c4fd7d3596d74477da965719a66a3684007ae2ba31dc482a8a25ec6f57feb90"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "96d744e47f001702d08a26bccbeeda29d1ddfd1b14efd323ab0c9117e6d701c1"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "090f5e5a9c1ff5dc82c371154d4c1394d3e85d4dbbb27759552766734c3f1750"
   end
 
   head do
-    url "https://gitlab.xiph.org/xiph/libopusenc.git"
+    url "https://gitlab.xiph.org/xiph/libopusenc.git", branch: "master"
 
     depends_on "autoconf" => :build
     depends_on "automake" => :build
     depends_on "libtool" => :build
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "opus"
 
   def install
     system "./autogen.sh" if build.head?
-    system "./configure", "--disable-dependency-tracking",
-                          "--disable-silent-rules",
-                          "--prefix=#{prefix}"
+    system "./configure", "--disable-silent-rules", *std_configure_args
     system "make", "install"
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <opusenc.h>
       #include <assert.h>
       #include <stdint.h>
@@ -69,7 +66,7 @@ class Libopusenc < Formula
 
         return 0;
       }
-    EOS
+    C
     system ENV.cc, "test.c", "-o", "test", "-Wall",
                    "-I#{Formula["opus"].opt_include}/opus",
                    "-I#{include}/opus",

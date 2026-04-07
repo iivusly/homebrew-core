@@ -1,18 +1,13 @@
 class DependencyCheck < Formula
   desc "OWASP dependency-check"
   homepage "https://owasp.org/www-project-dependency-check/"
-  url "https://github.com/jeremylong/DependencyCheck/releases/download/v10.0.2/dependency-check-10.0.2-release.zip"
-  sha256 "c8b6089911586a4d2b1044be42ba497bce248867cdddf90875aab9b5e39aad68"
+  url "https://github.com/dependency-check/DependencyCheck/releases/download/v12.2.0/dependency-check-12.2.0-release.zip"
+  sha256 "090b203d287f5518776d522640b63c4af0625e34b1b5c9ceb612f57c31d5361d"
   license "Apache-2.0"
-
-  livecheck do
-    url :homepage
-    regex(/href=.*?dependency-check[._-]v?(\d+(?:\.\d+)+)-release\.zip/i)
-  end
+  head "https://github.com/dependency-check/DependencyCheck.git", branch: "main"
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, all: "5c6b82070703cf6c0602c7a57109ca2849ea57393aa0f77acee6a834fcd63c7a"
+    sha256 cellar: :any_skip_relocation, all: "f67e89eb23cd3a39da862deb5bfeed010bb1c22b3c88544c07ffb4d2f44d2b50"
   end
 
   depends_on "openjdk"
@@ -40,7 +35,7 @@ class DependencyCheck < Formula
     # wait a random amount of time as multiple tests are being on different OS
     # the sleep 1 seconds to 30 seconds assists with the NVD Rate Limiting issues
     sleep(rand(1..30))
-    output = shell_output("#{bin}/dependency-check --version").strip
+    output = shell_output("#{bin}/dependency-check --version")
     assert_match "Dependency-Check Core version #{version}", output
 
     (testpath/"temp-props.properties").write <<~EOS
@@ -51,8 +46,9 @@ class DependencyCheck < Formula
     EOS
     system bin/"dependency-check", "-P", "temp-props.properties", "-f", "XML",
               "--project", "dc", "-s", libexec, "-d", testpath, "-o", testpath,
-              "--nvdDatafeed", "https://jeremylong.github.io/DependencyCheck/hb_nvd/",
-              "--disableKnownExploited"
-    assert_predicate testpath/"dependency-check-report.xml", :exist?
+              "--nvdDatafeed", "https://dependency-check.github.io/DependencyCheck/hb_nvd/",
+              "--disableKnownExploited",
+              "--disableOssIndex" # disable oss index due to username/password requirement
+    assert_path_exists testpath/"dependency-check-report.xml"
   end
 end

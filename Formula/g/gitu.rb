@@ -1,24 +1,25 @@
 class Gitu < Formula
   desc "TUI Git client inspired by Magit"
   homepage "https://github.com/altsem/gitu"
-  url "https://github.com/altsem/gitu/archive/refs/tags/v0.25.0.tar.gz"
-  sha256 "f7415c459d31e0ea499c76a39386f59523370dc6c8b571aa9118f8f3ce176935"
+  url "https://github.com/altsem/gitu/archive/refs/tags/v0.41.0.tar.gz"
+  sha256 "eba1cd649339ee1c6f02c39bcd9fc3092df8e374bfbcd194750a966b09cb5e55"
   license "MIT"
   head "https://github.com/altsem/gitu.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "3bcaa13532af67654d5c2339aad05606d7262476e9b218d014883cba03b9755c"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "aac2f03166686a4d49219ba54070105b0da35db019bdf3ebbd7c69adee1e8082"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "24b17c5204a7eaa20d89938d9c3706b5c907dbb88ef81936b0546293002fead2"
-    sha256 cellar: :any_skip_relocation, sonoma:         "1598e9636f26de7ed77151531fb67a72497ee4742bf4806af09983b9418a6ce3"
-    sha256 cellar: :any_skip_relocation, ventura:        "fe7da6f10d1a52c5f5e7fb0c905db80f58b2a059a2608e260ea707349e4a8be8"
-    sha256 cellar: :any_skip_relocation, monterey:       "4a15d8d3c2d2841c9ef007d491a45ce5a3622a670f683f940c7b5737f57d0f2f"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "bb2fbd91a83fb5aa08260886d2e50a30c44ea76195a2bdda3179d0ba8eeb01aa"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "e26a16a99458e8ba03255708da91ace7d2412990bbaa07f406ace1832a10c312"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "64139abb25b6584ac88caaee6ec40ec0d7897b6c3e806f723216bf79102d2cb1"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "1a8f3f9192d82ad1ae655e43334fb65015a9203c27cabe05ca85fa879c5392e7"
+    sha256 cellar: :any_skip_relocation, sonoma:        "dd8756d20bb8aefc83f82b9f1cdb99b77df4c5426857bee2e3cc5c2291e7b0c1"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "934a83b1dbf1b243fc07cd615cf14caba3254e468ec9bdd0d137f13f726f56c3"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "56115a186420b966d1ebb0c245d6c7ef552dc16c93da418e568b3c47e4296907"
   end
 
   depends_on "rust" => :build
 
-  uses_from_macos "zlib"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     system "cargo", "install", *std_cargo_args
@@ -27,11 +28,11 @@ class Gitu < Formula
   test do
     assert_match version.to_s, shell_output("#{bin}/gitu --version")
 
-    output = shell_output(bin/"gitu 2>&1", 1)
+    output = shell_output("#{bin}/gitu 2>&1", 1)
     if OS.linux? && ENV["HOMEBREW_GITHUB_ACTIONS"]
       assert_match "No such device or address", output
     else
-      assert_match "No .git found in the current directory", output
+      assert_match "could not find repository at '.'", output
     end
   end
 end

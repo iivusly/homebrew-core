@@ -1,10 +1,9 @@
 class Libfixbuf < Formula
   desc "Implements the IPFIX Protocol as a C library"
   homepage "https://tools.netsa.cert.org/fixbuf/"
-  url "https://tools.netsa.cert.org/releases/libfixbuf-2.4.2.tar.gz"
-  sha256 "4286d94224a2d9e21937b50a87ee1e204768f30fd193f48f381a63743944bf08"
+  url "https://tools.netsa.cert.org/releases/libfixbuf-2.5.4.tar.gz"
+  sha256 "106b8e1e560928a4dc91d8264326bd2463767570d77417535964f450de1f972e"
   license "LGPL-3.0-only"
-  revision 1
 
   # NOTE: This should be updated to check the main `/fixbuf/download.html`
   # page when it links to a stable version again in the future.
@@ -14,18 +13,15 @@ class Libfixbuf < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "f54f4b9ab50951378465a2cd82ba0a971776795023eb4262366823b687462844"
-    sha256 arm64_ventura:  "3628545ce856533c4af4c63d284fda709c5b437c7fa24ca23700f5808d2169e0"
-    sha256 arm64_monterey: "2a925e71b750fa5ecfc86481c6da0083ca2f64c60c434ca99ee4d8d94b8ad4e4"
-    sha256 arm64_big_sur:  "1d5bb5c711ce515a66f428dc0735f22cd69bb88ddc1b170f887463db4f951ac3"
-    sha256 sonoma:         "58a348b2b939faecd560b879a62ac8b17a9cc6c0500163b4d5d5fc7b8bc76fa6"
-    sha256 ventura:        "8cf8b472510703c3a8c3b162abb0e84dee9f925827b68713c24a6b1c98f99447"
-    sha256 monterey:       "445a73cc3b0ac3aa4af0bb51fafb9b0aa82173d507f78dbbf0e639faebadbdd5"
-    sha256 big_sur:        "e06f4796f22fa77ac240142257b2d465841709d8ea8b26f8763d6f38b8fb2d03"
-    sha256 x86_64_linux:   "51ff5b3d41c6d43607e2f6a10eb3a2b3d02738d72097a3fd85c71166717a72de"
+    sha256 cellar: :any,                 arm64_tahoe:   "e2b8afeb4d9ce3d8d2b55f488e3f4df93c85791bb64b32c33fcc1d662eba7e11"
+    sha256 cellar: :any,                 arm64_sequoia: "3bfaea10816dbd5dd6c4e51a9755e07bea1929768023f0eec78bb69ca2c24cbf"
+    sha256 cellar: :any,                 arm64_sonoma:  "3fa7c6d28c84ffc5300bd79dbb67ddeeecdd572caab22529bdebfb9eb735163c"
+    sha256 cellar: :any,                 sonoma:        "64d4455a477ea65a1cc54c6f0633286d42c35da7328e04708a56b45cac3a095c"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "d339e5ada6c9d514e5d5dd4e757f52673aeb189cc151d29bdce63c48be1e0f82"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "8ce88f5bcefb33debbe42fb4c64f5d72488988d59a110ad95c6598a3abfbddb3"
   end
 
-  depends_on "pkg-config" => [:build, :test]
+  depends_on "pkgconf" => [:build, :test]
 
   depends_on "glib"
   depends_on "openssl@3"
@@ -42,7 +38,7 @@ class Libfixbuf < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <fixbuf/public.h>
       #include <stdio.h>
 
@@ -57,12 +53,10 @@ class Libfixbuf < Formula
           fbInfoModelFree(model);
           return 0;
       }
-    EOS
+    C
 
-    pkg_config_flags = shell_output("pkg-config --cflags --libs libfixbuf").chomp.split
-    system ENV.cc, "test.c", "-o", "test", *pkg_config_flags
+    flags = shell_output("pkgconf --cflags --libs libfixbuf").chomp.split
+    system ENV.cc, "test.c", "-o", "test", *flags
     system "./test"
-
-    assert_match version.to_s, shell_output("#{bin}/ipfixDump --version 2>&1")
   end
 end

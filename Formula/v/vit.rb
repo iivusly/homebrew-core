@@ -2,23 +2,17 @@ class Vit < Formula
   include Language::Python::Virtualenv
 
   desc "Full-screen terminal interface for Taskwarrior"
-  homepage "https://taskwarrior.org/news/news.20140406.html"
-  url "https://files.pythonhosted.org/packages/a2/24/71ef618e17ced54d3ad706215165ebeb6ebc86f5d71ded58c4dbcba62b83/vit-2.3.2.tar.gz"
-  sha256 "a837d8e865a70d0e384a1e78d314330f000d108fa62e3a72d9aec6dec7ca233c"
+  homepage "https://github.com/vit-project/vit"
+  url "https://files.pythonhosted.org/packages/1c/11/5a62bb49c3f5086d0e3eb85cb66eae9c2cc49123b9eb9dadfa032ea9c67a/vit-2.3.4.tar.gz"
+  sha256 "346a210aa0de754cf7adaf73723bf7d2cc8ee754eeb785eb18370d33f74e5ce2"
   license "MIT"
   head "https://github.com/vit-project/vit.git", branch: "2.x"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "07c6838801cde2043cc4be85222d134f3add125a7e0e8f6bda6f718bf9a6fb73"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "ba5c6afa83e6004a5be6038e6a58691a249b6594529e68c2ed7117bb463030b2"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "93cdfa799ccc23594cc64d1d20d4a5b20b0a06597e1afa000153a54a838e24e8"
-    sha256 cellar: :any_skip_relocation, sonoma:         "970a532408b8900ddb3b56d4966c3624640e76421cff3a4fa83c692d279406df"
-    sha256 cellar: :any_skip_relocation, ventura:        "9d6aa4c94be62db3242d2235b94149f2f027a23fe50a379c6da6e7d868e67936"
-    sha256 cellar: :any_skip_relocation, monterey:       "1c8173fcdebfe49c05d0029f9313e3631ab110c242540eb75b568365373fb62a"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "c05e79958401ba5fd6399a0afa23721e433c26b2dd0a169e3fe6868416aefaab"
+    sha256 cellar: :any_skip_relocation, all: "56250211c7aa958b772115443fed096ec4ce0ac2383a511ea7145d5c6e8f6666"
   end
 
-  depends_on "python@3.12"
+  depends_on "python@3.14"
   depends_on "task"
 
   resource "tasklib" do
@@ -27,8 +21,13 @@ class Vit < Formula
   end
 
   resource "urwid" do
-    url "https://files.pythonhosted.org/packages/5f/cf/2f01d2231e7fb52bd8190954b6165c89baa17e713c690bdb2dfea1dcd25d/urwid-2.2.2.tar.gz"
-    sha256 "5f83b241c1cbf3ec6c4b8c6b908127e0c9ad7481c5d3145639524157fc4e1744"
+    url "https://files.pythonhosted.org/packages/b1/59/67cd42db7c549c0c106d2b56d2d2ec1915c459e0a92722029efc5359e871/urwid-3.0.5.tar.gz"
+    sha256 "24be27ffafdb68c09cd95dc21b60ccfd02843320b25ce5feee1708b34fad5a23"
+  end
+
+  resource "wcwidth" do
+    url "https://files.pythonhosted.org/packages/35/a2/8e3becb46433538a38726c948d3399905a4c7cabd0df578ede5dc51f0ec2/wcwidth-0.6.0.tar.gz"
+    sha256 "cdc4e4262d6ef9a1a57e018384cbeb1208d8abbc64176027e2c2455c81313159"
   end
 
   def install
@@ -43,8 +42,9 @@ class Vit < Formula
     require "pty"
     PTY.spawn(bin/"vit") do |_stdout, _stdin, pid|
       sleep 3
+      sleep 10 if OS.mac? && Hardware::CPU.intel?
       Process.kill "TERM", pid
     end
-    assert_predicate testpath/".task", :exist?
+    assert_path_exists testpath/".task"
   end
 end

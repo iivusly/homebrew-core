@@ -4,52 +4,62 @@ class Cassandra < Formula
 
   desc "Eventually consistent, distributed key-value store"
   homepage "https://cassandra.apache.org"
-  url "https://www.apache.org/dyn/closer.lua?path=cassandra/4.1.6/apache-cassandra-4.1.6-bin.tar.gz"
-  mirror "https://archive.apache.org/dist/cassandra/4.1.6/apache-cassandra-4.1.6-bin.tar.gz"
-  sha256 "2f51ce787812cce2ffb3db83a9a23248537fb52123884b0855551a0555ae8d03"
+  # TODO: Switch to `python@3.13` after https://github.com/apache/cassandra/pull/4628
+  url "https://www.apache.org/dyn/closer.lua?path=cassandra/5.0.7/apache-cassandra-5.0.7-bin.tar.gz"
+  mirror "https://archive.apache.org/dist/cassandra/5.0.7/apache-cassandra-5.0.7-bin.tar.gz"
+  sha256 "556be693f1941aeb8ec1538fe6224cbefdca7bc3729f87ff0e24a0052eb98c33"
   license "Apache-2.0"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "2ace5138682d1969c48ad11c39749a239aa2cefb1a6fcbfedfa112ff05cbedd7"
-    sha256 cellar: :any,                 arm64_ventura:  "a3b34cd9c7374fef974caeace7ffd91fc6cdd56e7f1efd6cfd6f95d84b1001ba"
-    sha256 cellar: :any,                 arm64_monterey: "6746ed2cff35a8ccb4a5a302d6d42f82d6930811264ef865f6f6212168cee12d"
-    sha256 cellar: :any,                 sonoma:         "83ad7e4db3584bfa7602cc68d74aa47c8831f3bdb5a47b968f6e89560e812805"
-    sha256 cellar: :any,                 ventura:        "97b9c8919e0a267a618d7925ce887288b21d471a0f0f2337aca1429ccabd3650"
-    sha256 cellar: :any,                 monterey:       "a5f592f9469270b5e6eaa5352081ebbe96cebbf43a1dd2115bbfdde03a3d1ed2"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "243e8ffd3cc36824a52d27606e2ca1e06e3c2246d808aab84961a14415d667b8"
+    sha256 cellar: :any,                 arm64_tahoe:   "69447b29380473bb63260335e820c5dd360753a590bbfe1d9c9630e41a84d54d"
+    sha256 cellar: :any,                 arm64_sequoia: "48e2aaffd02a67bf892bfcad198c81fdf1bf79422fe95a4e1d0cba6583f03e4f"
+    sha256 cellar: :any,                 arm64_sonoma:  "4569c6b3d2975083cb538f640fa6b2e992acbf8ed4f95dbe552bba2b10ce130f"
+    sha256 cellar: :any,                 sonoma:        "7eae9fc3ddddf212d502896470a4e70aaa64f73a0e81eda8d99555fc4217a878"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "524816714602d2fc2d1a7071f884b04e2c08520bf2223fdc5a511085a5d21b47"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ad31007a1f33a574ea466f8fcddf21602c0be345b098024aa0883574254a3e02"
   end
 
   depends_on "libev"
-  depends_on "openjdk@11"
-  depends_on "python@3.12"
+  depends_on "openjdk@17"
+  depends_on "python@3.11" # required 3.8-3.11, https://github.com/apache/cassandra/blob/trunk/bin/cqlsh#L65-L73
 
   conflicts_with "emqx", because: "both install `nodetool` binaries"
 
+  pypi_packages package_name:   "",
+                extra_packages: ["cassandra-driver", "wcwidth"]
+
   resource "cassandra-driver" do
-    url "https://files.pythonhosted.org/packages/07/46/cdf1e69263d8c2fe7a05a8f16ae67910b62cc40ba313ffbae3bc5025519a/cassandra-driver-3.29.1.tar.gz"
-    sha256 "38e9c2a2f2a9664bb03f1f852d5fccaeff2163942b5db35dffcf8bf32a51cfe5"
+    url "https://files.pythonhosted.org/packages/06/47/4e0fbdf02a7a418997f16f59feba26937d9973b979d3f23d79fbd8f6186f/cassandra_driver-3.29.3.tar.gz"
+    sha256 "ff6b82ee4533f6fd4474d833e693b44b984f58337173ee98ed76bce08721a636"
+
+    # Remove `ez_setup.py` to be compatible with setuptools 82+, remove in next release
+    patch do
+      url "https://github.com/apache/cassandra-python-driver/commit/7d8015e3c1cff543a5f64c70cff3e14216e58037.patch?full_index=1"
+      sha256 "66a5a714aed117306e6c0e78b51615b56ca655e12cb9ea5718b0c1ae384ceef6"
+    end
+    patch :DATA
   end
 
   resource "click" do
-    url "https://files.pythonhosted.org/packages/96/d3/f04c7bfcf5c1862a2a5b845c6b2b360488cf47af55dfa79c98f6a6bf98b5/click-8.1.7.tar.gz"
-    sha256 "ca9853ad459e787e2192211578cc907e7594e294c7ccc834310722b41b9ca6de"
+    url "https://files.pythonhosted.org/packages/3d/fa/656b739db8587d7b5dfa22e22ed02566950fbfbcdc20311993483657a5c0/click-8.3.1.tar.gz"
+    sha256 "12ff4785d337a1bb490bb7e9c2b1ee5da3112e94a8622f26a6c77f5d2fc6842a"
   end
 
   resource "geomet" do
-    url "https://files.pythonhosted.org/packages/cf/21/58251b3de99e0b5ba649ff511f7f9e8399c3059dd52a643774106e929afa/geomet-0.2.1.post1.tar.gz"
-    sha256 "91d754f7c298cbfcabd3befdb69c641c27fe75e808b27aa55028605761d17e95"
+    url "https://files.pythonhosted.org/packages/2a/8c/dde022aa6747b114f6b14a7392871275dea8867e2bd26cddb80cc6d66620/geomet-1.1.0.tar.gz"
+    sha256 "51e92231a0ef6aaa63ac20c443377ba78a303fd2ecd179dc3567de79f3c11605"
   end
 
-  resource "six" do
-    url "https://files.pythonhosted.org/packages/71/39/171f1c67cd00715f190ba0b100d606d440a28c93c7714febeca8b79af85e/six-1.16.0.tar.gz"
-    sha256 "1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"
+  resource "wcwidth" do
+    url "https://files.pythonhosted.org/packages/35/a2/8e3becb46433538a38726c948d3399905a4c7cabd0df578ede5dc51f0ec2/wcwidth-0.6.0.tar.gz"
+    sha256 "cdc4e4262d6ef9a1a57e018384cbeb1208d8abbc64176027e2c2455c81313159"
   end
 
   def install
     (var/"lib/cassandra").mkpath
     (var/"log/cassandra").mkpath
 
-    python3 = "python3.12"
+    python3 = "python3.11"
     venv = virtualenv_create(libexec/"vendor", python3)
     venv.pip_install resources
 
@@ -75,7 +85,7 @@ class Cassandra < Formula
               "cassandra_storagedir=\"#{var}/lib/cassandra\""
 
       s.gsub! "#JAVA_HOME=/usr/local/jdk6",
-              "JAVA_HOME=#{Language::Java.overridable_java_home_env("11")[:JAVA_HOME]}"
+              "JAVA_HOME=#{Language::Java.overridable_java_home_env("17")[:JAVA_HOME]}"
     end
 
     rm Dir["bin/*.bat", "bin/*.ps1"]
@@ -129,6 +139,7 @@ class Cassandra < Formula
     # Make sure tools are available
     bin.install Dir[buildpath/"tools/bin/*"]
     bin.write_exec_script Dir[libexec/"bin/*"]
+    rm bin/"cqlsh"
     (bin/"cqlsh").write_env_script libexec/"bin/cqlsh", PATH: "#{venv_bin}:$PATH"
   end
 
@@ -145,3 +156,19 @@ class Cassandra < Formula
     assert_match "Connection error", output
   end
 end
+
+__END__
+diff --git a/setup.py b/setup.py
+index ef735b7..891d192 100644
+--- a/setup.py
++++ b/setup.py
+@@ -16,9 +16,6 @@ import os
+ import sys
+ import warnings
+ 
+-import ez_setup
+-ez_setup.use_setuptools()
+-
+ from setuptools import setup
+ from distutils.command.build_ext import build_ext
+ from distutils.core import Extension

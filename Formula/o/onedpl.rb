@@ -1,19 +1,18 @@
 class Onedpl < Formula
   desc "C++ standard library algorithms with support for execution policies"
-  homepage "https://software.intel.com/content/www/us/en/develop/tools/oneapi/components/dpc-library.html"
-  url "https://github.com/oneapi-src/oneDPL/archive/refs/tags/oneDPL-2022.0.0-release.tar.gz"
-  sha256 "e22eb0155258abdccd810dc131baa3eac4a856507b6eef37462a077d37cd810e"
+  homepage "https://github.com/uxlfoundation/oneDPL"
+  url "https://github.com/uxlfoundation/oneDPL/archive/refs/tags/oneDPL-2022.11.0-release.tar.gz"
+  sha256 "aa14be44914d3e067b9879f3736319fe9f3cd3e5123b33ffb626550455e67620"
   # Apache License Version 2.0 with LLVM exceptions
   license "Apache-2.0" => { with: "LLVM-exception" }
 
   livecheck do
     url :stable
-    regex(/^oneDPL[._-](\d+(?:\.\d+)+)(?:[._-]release)?$/i)
+    strategy :github_latest
   end
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, all: "41a83601bb2bb9542dcdbfa8c3f8dcfd542834ef0277013c85d21199759f9af7"
+    sha256 cellar: :any_skip_relocation, all: "f5ca5ee144a9525adf9b9a9f8ad5e480d08e5f159893cf51446e2c8a4e8b7177"
   end
 
   depends_on "cmake" => :build
@@ -28,7 +27,7 @@ class Onedpl < Formula
   test do
     tbb = Formula["tbb"]
 
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include <oneapi/dpl/execution>
       #include <oneapi/dpl/algorithm>
       #include <array>
@@ -41,7 +40,7 @@ class Onedpl < Formula
           assert(i==arr.at(i));
         return 0;
       }
-    EOS
+    CPP
     system ENV.cxx, "test.cpp", "-std=c++17", "-L#{tbb.opt_lib}", "-ltbb", "-I#{tbb.opt_include}",
                     "-I#{prefix}/stdlib", "-I#{include}", "-o", "test"
     system "./test"

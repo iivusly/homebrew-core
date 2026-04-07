@@ -2,21 +2,18 @@ class Mage < Formula
   desc "Make/rake-like build tool using Go"
   homepage "https://magefile.org"
   url "https://github.com/magefile/mage.git",
-      tag:      "v1.15.0",
-      revision: "9e91a03eaa438d0d077aca5654c7757141536a60"
+      tag:      "v1.17.1",
+      revision: "00dd13d9f6e84a3d212618dc1456cef0c661b231"
   license "Apache-2.0"
   head "https://github.com/magefile/mage.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "97099907714e6c713ed43d40e4a67ca112a7a9a9d84bfaabb69d680c92db5c68"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "d5edee3b01ecc1dc26cf07372e9cbcfd7bc0c6c98ad8f5d89ab6255efe1af28c"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "d5edee3b01ecc1dc26cf07372e9cbcfd7bc0c6c98ad8f5d89ab6255efe1af28c"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "d5edee3b01ecc1dc26cf07372e9cbcfd7bc0c6c98ad8f5d89ab6255efe1af28c"
-    sha256 cellar: :any_skip_relocation, sonoma:         "591710efff0b81f7e371a19a1f0cd6bc858975638fa2c99efd53d30688700140"
-    sha256 cellar: :any_skip_relocation, ventura:        "0fe71622f956586e54e08ec69f49dd719c16bca43fe62370720f32e8cb015a71"
-    sha256 cellar: :any_skip_relocation, monterey:       "0fe71622f956586e54e08ec69f49dd719c16bca43fe62370720f32e8cb015a71"
-    sha256 cellar: :any_skip_relocation, big_sur:        "0fe71622f956586e54e08ec69f49dd719c16bca43fe62370720f32e8cb015a71"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "f4c08f1a7d6d80eeda6054fcdaea66ef2d344a952d9e249561781f8fabe54fff"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "7b86c1d12ddf4a3243537779a577e842aca4b236c7d8202f140fd0d31d9b9d10"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "7b86c1d12ddf4a3243537779a577e842aca4b236c7d8202f140fd0d31d9b9d10"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "7b86c1d12ddf4a3243537779a577e842aca4b236c7d8202f140fd0d31d9b9d10"
+    sha256 cellar: :any_skip_relocation, sonoma:        "fd6567e6a710fb2000096e0d2421fa683a9eca5490dd8b24efd5f4c5c152f104"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "814b387fc7abe5f40947223bcce3f266b6286b2de046f5b8c9ba49d0992618f6"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "b3070fb30f4eb907ec1ee93fc777d6ca38185269845c886d4694ec0114e79526"
   end
 
   depends_on "go"
@@ -33,6 +30,6 @@ class Mage < Formula
 
   test do
     assert_match "magefile.go created", shell_output("#{bin}/mage -init 2>&1")
-    assert_predicate testpath/"magefile.go", :exist?
+    assert_path_exists testpath/"magefile.go"
   end
 end

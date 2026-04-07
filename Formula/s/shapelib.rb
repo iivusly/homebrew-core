@@ -1,8 +1,8 @@
 class Shapelib < Formula
   desc "Library for reading and writing ArcView Shapefiles"
   homepage "http://shapelib.maptools.org/"
-  url "https://download.osgeo.org/shapelib/shapelib-1.6.1.tar.gz"
-  sha256 "5da90a60e25440f108f4e8e95732bfa83ede13c8e0c2bcf80ae41006cc8ebc20"
+  url "https://download.osgeo.org/shapelib/shapelib-1.6.3.tar.gz"
+  sha256 "3ff5ead18ca6d2fe249f0e80b361e1ad6782165115268ed4a58c780a60c1e0eb"
   license any_of: ["LGPL-2.0-or-later", "MIT"]
 
   livecheck do
@@ -11,13 +11,12 @@ class Shapelib < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "3b896b17d9691d399ea9f0d7350eef3c43b4c03b0616e2dc5bb4f17060e51b3a"
-    sha256 cellar: :any,                 arm64_ventura:  "b3cc3ed80a625c61930c2ae5f8629556fe9b34a2b36568c6c887b3e0de3a561f"
-    sha256 cellar: :any,                 arm64_monterey: "cefd09ed4bc3d75842d93c83d30a3746a145e80c19f0ff736f52fae534b8d6ac"
-    sha256 cellar: :any,                 sonoma:         "fcd168887712a91344618537d20c0579ff2907b9d887017b07aca2b921526306"
-    sha256 cellar: :any,                 ventura:        "87e9ad2a1b66cb3c589db6f95f83ba7605363e8441a1f64b7453d99f8511fe2c"
-    sha256 cellar: :any,                 monterey:       "f4ccafad07023f98b85e7477224151f098a792404c52e84d2c5150998cd1e020"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "10c1872d151e320089896c49d5234ba25355d660d0e4b440a1e1ea989f99c8f3"
+    sha256 cellar: :any,                 arm64_tahoe:   "1d270fad05338b3a2420a96a2b7e5b084a935e840e8deb0038369fffa7ef8586"
+    sha256 cellar: :any,                 arm64_sequoia: "bac4ff987b17640f93f9e9d0ad0c7d046ba6ea780e8804f59a6ea2ebb63c13a8"
+    sha256 cellar: :any,                 arm64_sonoma:  "d5ed7bbd8744d95d97f8d613fa5a4c2181477b02c087c5c104d4ea59a60f22c4"
+    sha256 cellar: :any,                 sonoma:        "8301afafe682bc0ef1ad02da6a875a9f17e349c448145de7cab3af3bd306f3c2"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "cbe48e25f669a84512d7dde1882fabf63c287cb001041308cd3d1c130a2a64ec"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "8bf7deccc48ed28fd9a051b66dd668737cb9842bf9bcf8d48766ddbf52e14722"
   end
 
   depends_on "cmake" => :build

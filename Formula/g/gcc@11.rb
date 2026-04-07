@@ -1,14 +1,15 @@
 class GccAT11 < Formula
   desc "GNU compiler collection"
   homepage "https://gcc.gnu.org/"
-  url "https://ftp.gnu.org/gnu/gcc/gcc-11.5.0/gcc-11.5.0.tar.xz"
-  mirror "https://ftpmirror.gnu.org/gcc/gcc-11.5.0/gcc-11.5.0.tar.xz"
+  # TODO: Remove maximum_macos if Xcode 16 support is added to https://github.com/iains/gcc-11-branch
+  url "https://ftpmirror.gnu.org/gnu/gcc/gcc-11.5.0/gcc-11.5.0.tar.xz"
+  mirror "https://ftp.gnu.org/gnu/gcc/gcc-11.5.0/gcc-11.5.0.tar.xz"
   sha256 "a6e21868ead545cf87f0c01f84276e4b5281d672098591c1c896241f09363478"
   license "GPL-3.0-or-later" => { with: "GCC-exception-3.1" }
 
+  # https://gcc.gnu.org/gcc-11/
   livecheck do
-    url :stable
-    regex(%r{href=["']?gcc[._-]v?(11(?:\.\d+)+)(?:/?["' >]|\.t)}i)
+    skip "No longer developed or maintained"
   end
 
   bottle do
@@ -18,6 +19,7 @@ class GccAT11 < Formula
     sha256                               sonoma:         "9c0f839a23e3b7f12c72f3833823ca9cbd9d2b0e3a744e1d436daeeffc77cc82"
     sha256                               ventura:        "ceae737d0fe4ec0e8fc10356007d09c9250401443b5ccd632ee960a00004cba1"
     sha256                               monterey:       "af5d635ec43e4fc786abafe5f963ea26ac147ac10880d3ab4e2eea49948051cc"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "9fa75aed2c4162b36bf22a2cfd19adf582f0e68e7f658bb4d02e07e0ee2d6b06"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "c7f02fea0754abb9c33f142cfc8d30bdc16d5d80a27ad2ca72ba562540bb1a44"
   end
 
@@ -25,25 +27,22 @@ class GccAT11 < Formula
   # out of the box on Xcode-only systems due to an incorrect sysroot.
   pour_bottle? only_if: :clt_installed
 
+  depends_on maximum_macos: [:ventura, :build] # Xcode < 16
   depends_on "gmp"
   depends_on "isl"
   depends_on "libmpc"
   depends_on "mpfr"
   depends_on "zstd"
 
-  uses_from_macos "zlib"
-
   on_linux do
     depends_on "binutils"
+    depends_on "zlib-ng-compat"
   end
-
-  # GCC bootstraps itself, so it is OK to have an incompatible C++ stdlib
-  cxxstdlib_check :skip
 
   # Branch from the Darwin maintainer of GCC, with a few generic fixes and
   # Apple Silicon support, located at https://github.com/iains/gcc-11-branch
   patch do
-    url "https://raw.githubusercontent.com/Homebrew/formula-patches/5c9419923ddb3e5302ddd277bc524f4d4b0f8722/gcc/gcc-11.5.0.diff"
+    url "https://raw.githubusercontent.com/Homebrew/homebrew-core/1cf441a0/Patches/gcc/gcc-11.5.0.diff"
     sha256 "213b332bd09452e0cf081f874f32d028911fa871875f85b200b55c5b588ce193"
   end
 
@@ -103,6 +102,7 @@ class GccAT11 < Formula
       # Change the default directory name for 64-bit libraries to `lib`
       # https://stackoverflow.com/a/54038769
       inreplace "gcc/config/i386/t-linux64", "m64=../lib64", "m64="
+      inreplace "gcc/config/aarch64/t-aarch64-linux", "lp64=../lib64", "lp64="
     end
 
     mkdir "build" do
@@ -220,18 +220,18 @@ class GccAT11 < Formula
   end
 
   test do
-    (testpath/"hello-c.c").write <<~EOS
+    (testpath/"hello-c.c").write <<~C
       #include <stdio.h>
       int main()
       {
         puts("Hello, world!");
         return 0;
       }
-    EOS
+    C
     system bin/"gcc-#{version.major}", "-o", "hello-c", "hello-c.c"
     assert_equal "Hello, world!\n", shell_output("./hello-c")
 
-    (testpath/"hello-cc.cc").write <<~EOS
+    (testpath/"hello-cc.cc").write <<~CPP
       #include <iostream>
       struct exception { };
       int main()
@@ -242,11 +242,11 @@ class GccAT11 < Formula
           catch (...) { }
         return 0;
       }
-    EOS
+    CPP
     system bin/"g++-#{version.major}", "-o", "hello-cc", "hello-cc.cc"
     assert_equal "Hello, world!\n", shell_output("./hello-cc")
 
-    (testpath/"test.f90").write <<~EOS
+    (testpath/"test.f90").write <<~FORTRAN
       integer,parameter::m=10000
       real::a(m), b(m)
       real::fact=0.5
@@ -256,20 +256,20 @@ class GccAT11 < Formula
       end do
       write(*,"(A)") "Done"
       end
-    EOS
+    FORTRAN
     system bin/"gfortran-#{version.major}", "-o", "test", "test.f90"
     assert_equal "Done\n", shell_output("./test")
 
     return unless Hardware::CPU.intel?
 
-    (testpath/"hello_d.d").write <<~EOS
+    (testpath/"hello_d.d").write <<~D
       import std.stdio;
       int main()
       {
         writeln("Hello, world!");
         return 0;
       }
-    EOS
+    D
     system bin/"gdc-#{version.major}", "-o", "hello-d", "hello_d.d"
     assert_equal "Hello, world!\n", shell_output("./hello-d")
   end

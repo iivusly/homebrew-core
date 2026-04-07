@@ -1,8 +1,8 @@
 class DosboxX < Formula
   desc "DOSBox with accurate emulation and wide testing"
   homepage "https://dosbox-x.com/"
-  url "https://github.com/joncampbell123/dosbox-x/archive/refs/tags/dosbox-x-v2024.07.01.tar.gz"
-  sha256 "23462a3398303f8558e86973af9ba5d3d6d53bdaf324ec749610f2baf1dd449b"
+  url "https://github.com/joncampbell123/dosbox-x/archive/refs/tags/dosbox-x-v2026.03.29.tar.gz"
+  sha256 "c244c1910444a0ad886d9bae05cc72b3ef036e340d5e2fc33edf364c0dce344e"
   license "GPL-2.0-or-later"
   version_scheme 1
   head "https://github.com/joncampbell123/dosbox-x.git", branch: "master"
@@ -19,28 +19,26 @@ class DosboxX < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "7a1799bfeb379368eada7999470ec97561992190d0efdafc9bec2ebdeddc1169"
-    sha256 arm64_ventura:  "d06034ea8c332aff03917656d4dc9eae12332f187466bc399be6d0357cb1ec05"
-    sha256 arm64_monterey: "0ddb17ee7afe510d74420bb6c689b6da2a1f7897ad44248b4c72d1068f34c28c"
-    sha256 sonoma:         "db5e1a4c59b8c8a9d4be01112bfaade0b90391fef49d7aafec424dd3d8068b09"
-    sha256 ventura:        "143e759651f1d7f8f8f905a1faefe14b22d66f87f57f35ee6ecf4fa1f846efbc"
-    sha256 monterey:       "c8e06ad5769214ee34bc7c09f424415e5a134da58469fbfbbbdb60f072ffd313"
-    sha256 x86_64_linux:   "0ec1091bad54cf93e3658cc989b46280e1b9a21ca338c7119dc3874bf68cae65"
+    sha256                               arm64_tahoe:   "abfe3c35d1a3a979b7ffba33d3935bfdd2d9f7d66d99d584bba15146cdb00826"
+    sha256                               arm64_sequoia: "25910f23fb9886b8d53eef621d04e1bba16ffca3208539909535c59e8b4acd04"
+    sha256                               arm64_sonoma:  "ee50d893c8d2a91fd4bf2499839907f5c44a4593a62b8adefee498031fd67f81"
+    sha256                               sonoma:        "adf6f26f58dda10a72fbe863da1d020e8f5324a11cbd2d38c2d969cfa366ec4c"
+    sha256                               arm64_linux:   "8f1a3554eb1c1f31fde14c65d85c47e799edd76633d3070c796117a3af5aa657"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "d40415deaa37d47ce17b189af832bbf90902e9486891157219bc0a354325ebdd"
   end
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
 
+  depends_on xcode: :build # For metal
   depends_on "fluid-synth"
   depends_on "freetype"
   depends_on "libpng"
   depends_on "libslirp"
-  depends_on macos: :high_sierra # needs futimens
   depends_on "sdl2"
 
   uses_from_macos "ncurses"
-  uses_from_macos "zlib"
 
   on_macos do
     depends_on "gettext"
@@ -48,18 +46,19 @@ class DosboxX < Formula
   end
 
   on_linux do
-    depends_on "linux-headers@5.15" => :build
     depends_on "alsa-lib"
     depends_on "libx11"
     depends_on "libxrandr"
+    depends_on "zlib-ng-compat"
   end
-
-  fails_with gcc: "5"
 
   def install
     ENV.cxx11
 
-    # See flags in `build-macos-sdl2`.
+    # Set `LDFLAGS` to link against the Metal and QuartzCore frameworks on macOS Ventura and later
+    # during ./configure to detect the Metal framework
+    ENV.append "LDFLAGS", "-framework Metal -framework QuartzCore" if OS.mac? && MacOS.version >= :ventura
+
     args = %w[
       --enable-debug=heavy
       --enable-sdl2
@@ -69,7 +68,7 @@ class DosboxX < Formula
     ]
 
     system "./autogen.sh"
-    system "./configure", *args, *std_configure_args
+    system "./configure", *args, *std_configure_args.reject { |s| s["--disable-debug"] }
     system "make" # Needs to be called separately from `make install`.
     system "make", "install"
   end

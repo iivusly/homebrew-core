@@ -2,8 +2,10 @@ class Openconnect < Formula
   desc "Open client for Cisco AnyConnect VPN"
   homepage "https://www.infradead.org/openconnect/"
   url "https://www.infradead.org/openconnect/download/openconnect-9.12.tar.gz"
+  mirror "https://deb.debian.org/debian/pool/main/o/openconnect/openconnect_9.12.orig.tar.gz"
   sha256 "a2bedce3aa4dfe75e36e407e48e8e8bc91d46def5335ac9564fbf91bd4b2413e"
   license "LGPL-2.1-only"
+  revision 1
 
   livecheck do
     url "https://www.infradead.org/openconnect/download.html"
@@ -12,13 +14,12 @@ class Openconnect < Formula
 
   bottle do
     rebuild 1
-    sha256 arm64_sonoma:   "9d866635b379a1657a60581d2de060c2521cb0949b37de5d7390efbf6148e4db"
-    sha256 arm64_ventura:  "ad530a711e9dd67b9f57c6be4bf6329ad15b81fe0f9ac068ad158d92c59a1039"
-    sha256 arm64_monterey: "732c9c632480ca2bf48cf1235bbc381b710a4973b02b935b5ae2937e56c2ee87"
-    sha256 sonoma:         "7116a890b91af980f559b80db6ec2a728053d7b1f8de7b30001622bc10caf536"
-    sha256 ventura:        "2686a07bce4e89465c0c4e4adedb2cffe3672216cf248213741e2ab853ce1e3d"
-    sha256 monterey:       "ad97ba79e7db7a465c49504d7f9bd87db6d63e09e6c761475589ab3273c1c292"
-    sha256 x86_64_linux:   "e71c4302f659b47151247aa77eab2c7c9e4ce181e3e84e480a4bdda42c920009"
+    sha256 arm64_tahoe:   "fbcb589590fc3a10a33601e2dfafabaec8e58000357a655b0976e95a80f42aaf"
+    sha256 arm64_sequoia: "b5067d6b52fc350aa1391393cf637643fb8f4eb0f70536575099d8451a068123"
+    sha256 arm64_sonoma:  "5b3b175974886107af03dc6cd3ef87e69f3265123fd0ebddb6bd67f40715c2b4"
+    sha256 sonoma:        "968aca8e8f7d13c995ca44e15dbcb98bec6d7449186d47e64fc7cf2f3fcf31d1"
+    sha256 arm64_linux:   "9edbd927405417ac939217c28428d0e12fef1d3d4cb70e4d5bc5cb629d7fa5d1"
+    sha256 x86_64_linux:  "16f82b8f546ddd8a65a41c40a68e71d90829a928d567cd72f7c41ad5380fd0ed"
   end
 
   head do
@@ -30,7 +31,7 @@ class Openconnect < Formula
   end
 
   depends_on "gettext" => :build # for msgfmt
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
 
   depends_on "gmp"
   depends_on "gnutls"
@@ -39,15 +40,18 @@ class Openconnect < Formula
   depends_on "stoken"
 
   uses_from_macos "libxml2"
-  uses_from_macos "zlib"
 
   on_macos do
     depends_on "gettext"
   end
 
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
+
   resource "vpnc-script" do
-    url "https://gitlab.com/openconnect/vpnc-scripts/-/raw/473d3e810b8fe8223058ab580fac20c53204e677/vpnc-script"
-    sha256 "4e0d4367806c8b54da76aaae4bb550993d8155894006705d21b16eabdbf47559"
+    url "https://gitlab.com/openconnect/vpnc-scripts/-/raw/5b9e7e4c8e813cc6d95888e7e1d2992964270ec8/vpnc-script"
+    sha256 "dee08feb571dc788018b5d599e4a79177e6acc144d196a776a521ff5496fddb8"
   end
 
   # Fix for GnuTLS v3.8.1
@@ -72,24 +76,23 @@ class Openconnect < Formula
       --with-vpnc-script=#{etc}/vpnc/vpnc-script
     ]
 
-    system "./configure", *args, *std_configure_args.reject { |s| s["--disable-debug"] }
+    system "./configure", *args, *std_configure_args
     system "make", "install"
   end
 
-  def caveats
-    s = <<~EOS
-      A `vpnc-script` has been installed at #{etc}/vpnc/vpnc-script.
-    EOS
-
-    s += if (etc/"vpnc/vpnc-script.default").exist?
-      <<~EOS
-
-        To avoid destroying any local changes you have made, a newer version of this script has
+  def post_install
+    if (etc/"vpnc/vpnc-script.default").exist?
+      opoo <<~EOS
+        To avoid destroying any local changes you have made, a newer version of `vpnc-script` has
         been installed as `vpnc-script.default`.
       EOS
-    end.to_s
+    end
+  end
 
-    s
+  def caveats
+    <<~EOS
+      A `vpnc-script` has been installed at #{etc}/vpnc/vpnc-script.
+    EOS
   end
 
   test do

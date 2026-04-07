@@ -6,23 +6,18 @@ class Sickle < Formula
   license "MIT"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "9c820fd16930b4e385a72a92abd1f57386b87ac03fee2ec19fb02996e22fc3ae"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "e777fe310603467d2feaa5702bca61f2444c2b2e1e82cd2ba0bc21dfb7a2ccd7"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "520c9e80b25890a25bb12baca208128352164a31aa7cb76111d9a4a918106c48"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "26c645faa585ff21ef7eee6c62ac906df4bef93dcceb3647168a7c89bcb7ed48"
-    sha256 cellar: :any_skip_relocation, sonoma:         "3c5e65e60096e30d3b7fd852784a9c1ca888a368bc07d62a2308e2e677877c53"
-    sha256 cellar: :any_skip_relocation, ventura:        "aa3b3a6e43a41be578a83db5967567233ae0958695485dba360ca79343b2e110"
-    sha256 cellar: :any_skip_relocation, monterey:       "015b2cdfc919a31988a727c52852cef682f9ea2de7826f8e90b346071d32330c"
-    sha256 cellar: :any_skip_relocation, big_sur:        "49cf432d5190d21d61d741d5d10c44e42d0fe5e40222f8af9dec1b35ff916029"
-    sha256 cellar: :any_skip_relocation, catalina:       "f33fa7f23d66b928b117a8c3ccfd54a30dc5a798ed6444350be47ced2bebc49e"
-    sha256 cellar: :any_skip_relocation, mojave:         "dc6b4eea0f8da0b1611e12197157c9985c931567d466e3a47f89250a8180b879"
-    sha256 cellar: :any_skip_relocation, high_sierra:    "3aeaaa4393148876cc55cc9defbe82ae0fe0dabea18e418413b2aa8cff23dd0b"
-    sha256 cellar: :any_skip_relocation, sierra:         "844b063d1496d2a7c7f8a12b2239ae32766a538557d44f712c584a30b9775fae"
-    sha256 cellar: :any_skip_relocation, el_capitan:     "138b38a20aefc55ec4005ee4c4622ec332cbb13ff4ebc39ff45d91a2c12afde8"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "d084fefaf95e4433a64685c9c332964389911bbbdbb038aeeb87c2d16f06f2ab"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "d4472a3191002f70094fb8bc4356ed355a05d141439be1354b33693c8bdfafcf"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "8308015c2c4e6f6dca8a7e24996a0f75cec75690b26c26b1bd0bca68abc4df58"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "969833aabfa228fbbe0914363ac07b376c317410b5bb532bcff2b712ab59c98e"
+    sha256 cellar: :any_skip_relocation, sonoma:        "68038c77f837ba7f1beab356675cae487b9d85cf31c2b9ed949daa07a46708f1"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "0a94828e78e520c5217f5fda4dfc8ac427367e3fc306baad03aa34e03f7f223a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "43b822b5c393959eb2946ba1c0647f004e4197ab6e0cfe5235ec70aa9365a7bd"
   end
 
-  uses_from_macos "zlib"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     system "make"

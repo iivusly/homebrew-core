@@ -1,12 +1,13 @@
 class Strace < Formula
   desc "Diagnostic, instructional, and debugging tool for the Linux kernel"
   homepage "https://strace.io/"
-  url "https://github.com/strace/strace/releases/download/v6.10/strace-6.10.tar.xz"
-  sha256 "765ec71aa1de2fe37363c1e40c7b7669fc1d40c44bb5d38ba8e8cd82c4edcf07"
+  url "https://github.com/strace/strace/releases/download/v6.19/strace-6.19.tar.xz"
+  sha256 "e076c851eec0972486ec842164fdc54547f9d17abd3d1449de8b120f5d299143"
   license "LGPL-2.1-or-later"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "0c5266d9539a9afcf361fa248ad7b7bf20b4c4a66b77a2223be99e47c7b108c8"
+    sha256 cellar: :any_skip_relocation, arm64_linux:  "f62141e40b16421c2670fe54d40dca1144226058b247e341d66f82d40ed425e1"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "fa3032d5b83560f504e2d961df94ccca05c77f9a2447f2cae0316a98b1d65f6d"
   end
 
   head do
@@ -15,9 +16,7 @@ class Strace < Formula
     depends_on "automake" => :build
   end
 
-  depends_on "glibc"
   depends_on :linux
-  depends_on "linux-headers@5.15"
 
   def install
     system "./bootstrap" if build.head?

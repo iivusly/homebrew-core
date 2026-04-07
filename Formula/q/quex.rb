@@ -15,14 +15,14 @@ class Quex < Formula
   end
 
   bottle do
-    rebuild 3
-    sha256 cellar: :any_skip_relocation, all: "864333dd8486308ea1852916508cc7a79c813158a345d0de0865549ec5fc8802"
+    rebuild 4
+    sha256 cellar: :any_skip_relocation, all: "f2d44465311851dc3bf25c68adc4d5041315e089d91ba9fce5d34a47f8a26782"
   end
 
-  depends_on "python@3.12"
+  uses_from_macos "python"
 
   def install
-    rewrite_shebang detected_python_shebang, "quex-exe.py"
+    rewrite_shebang detected_python_shebang(use_python_from_path: true), "quex-exe.py"
     libexec.install "quex", "quex-exe.py"
     doc.install "README", "demo"
 
@@ -38,6 +38,6 @@ class Quex < Formula
 
   test do
     system bin/"quex", "-i", doc/"demo/C/01-Trivial/easy.qx", "-o", "tiny_lexer"
-    assert_predicate testpath/"tiny_lexer", :exist?
+    assert_path_exists testpath/"tiny_lexer"
   end
 end

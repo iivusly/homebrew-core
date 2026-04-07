@@ -3,69 +3,67 @@ class Khard < Formula
 
   desc "Console carddav client"
   homepage "https://github.com/lucc/khard"
-  url "https://files.pythonhosted.org/packages/0d/00/215a69d2ae96cac511a6594116958bf13e210dd24f78c48f5ffaf039edec/khard-0.19.1.tar.gz"
-  sha256 "59f30a0da3c3da3eb04f4dbe18ee4763913b685d99ec8418fd574a88c491c490"
+  url "https://files.pythonhosted.org/packages/7d/10/01f3f4d875d3908d0d34fa32bb55d5015f68bc391257cfa1ceac27da763e/khard-0.20.1.tar.gz"
+  sha256 "b3e5bfadf6b5d7e8f168d0c320c74b954e4d0ef4194b28791140fe577a48f948"
   license "GPL-3.0-only"
 
   bottle do
-    rebuild 2
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "12c493c9abf94b3f10b017495a3b449c4cc39157d9fb0011e8883f5ad74e3dc1"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "c5b035c1c64cb832d196d05d31e19e560e634563911a24e27bdc6b7cfe5bcdc3"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "be118a4d08c2218ca87117c9736e19d022c62e610d511853eb6c28df2234f805"
-    sha256 cellar: :any_skip_relocation, sonoma:         "1036b2f525fdd11fa8403a8df63cfa70564c732b4e229759bc8469da1f4c6c32"
-    sha256 cellar: :any_skip_relocation, ventura:        "da152b6cbeb428e9f78d5441f4a1634008058400a4d179e7faf5456843300b4c"
-    sha256 cellar: :any_skip_relocation, monterey:       "07e0937662235e3fd83a9003ee0b429f605657d1ad7870cf431178fc1d46ab35"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "3424b22114f87f72ce97b058b29852a940af162d93695c1905ad5522a6580b0d"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "5518339fb9e38d369d0f5c16dde65f96e628e66fee456fabb2b1f1300146f270"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "7d369c1710a688b2d4b88ffb4ae7722e1856ee365ab832cbd02fd96caec98831"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "0bb265a3d491639f98b2d79a922ca6d9a2d64984eabb20771593f1e518e9aa88"
+    sha256 cellar: :any_skip_relocation, sonoma:        "b36a867168a0ec439838d2f400c20f3c5601190ae0f43906635fd3e6cd24383d"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "edcb3d36eaec81549a894614250bd2a1c9fe32aca283f04a804bd8f9cde9cf35"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "7d06c2fe4f7dc9be8bae61d3572bc77e670aebefc93c84e23f74a97376aa65f5"
   end
 
-  depends_on "python@3.12"
-
-  resource "atomicwrites" do
-    url "https://files.pythonhosted.org/packages/87/c6/53da25344e3e3a9c01095a89f16dbcda021c609ddb42dd6d7c0528236fb2/atomicwrites-1.4.1.tar.gz"
-    sha256 "81b2c9071a49367a7f770170e5eec8cb66567cfbbc8c73d20ce5ca4a8d71cf11"
-  end
+  depends_on "python@3.14"
 
   resource "configobj" do
-    url "https://files.pythonhosted.org/packages/cb/87/17d4c6d634c044ab08b11c0cd2a8a136d103713d438f8792d7be2c5148fb/configobj-5.0.8.tar.gz"
-    sha256 "6f704434a07dc4f4dc7c9a745172c1cad449feb548febd9f7fe362629c627a97"
+    url "https://files.pythonhosted.org/packages/f5/c4/c7f9e41bc2e5f8eeae4a08a01c91b2aea3dfab40a3e14b25e87e7db8d501/configobj-5.0.9.tar.gz"
+    sha256 "03c881bbf23aa07bccf1b837005975993c4ab4427ba57f959afdd9d1a2386848"
   end
 
   resource "python-dateutil" do
-    url "https://files.pythonhosted.org/packages/4c/c4/13b4776ea2d76c115c1d1b84579f3764ee6d57204f6be27119f13a61d0a9/python-dateutil-2.8.2.tar.gz"
-    sha256 "0123cacc1627ae19ddf3c27a5de5bd67ee4586fbdd6440d9748f8abb483d3e86"
+    url "https://files.pythonhosted.org/packages/66/c0/0c8b6ad9f17a802ee498c46e004a0eb49bc148f2fd230864601a86dcf6db/python-dateutil-2.9.0.post0.tar.gz"
+    sha256 "37dd54208da7e1cd875388217d5e00ebd4179249f90fb72437e91a35459a0ad3"
+  end
+
+  resource "pytz" do
+    url "https://files.pythonhosted.org/packages/f8/bf/abbd3cdfb8fbc7fb3d4d38d320f2441b1e7cbe29be4f23797b4a2b5d8aac/pytz-2025.2.tar.gz"
+    sha256 "360b9e3dbb49a209c21ad61809c7fb453643e048b38924c765813546746e81c3"
   end
 
   resource "ruamel-yaml" do
-    url "https://files.pythonhosted.org/packages/29/81/4dfc17eb6ebb1aac314a3eb863c1325b907863a1b8b1382cdffcb6ac0ed9/ruamel.yaml-0.18.6.tar.gz"
-    sha256 "8b27e6a217e786c6fbe5634d8f3f11bc63e0f80f6a5890f28863d9c45aac311b"
+    url "https://files.pythonhosted.org/packages/0c/5d/8a1de57b5a11245c61c906d422cd1e66b6778e134a1c68823a451be5759c/ruamel_yaml-0.19.0.tar.gz"
+    sha256 "ff19233e1eb3e9301e7a3d437847713e361a80faace167639327efbe8c0e5f95"
   end
 
-  resource "ruamel-yaml-clib" do
-    url "https://files.pythonhosted.org/packages/46/ab/bab9eb1566cd16f060b54055dd39cf6a34bfa0240c53a7218c43e974295b/ruamel.yaml.clib-0.2.8.tar.gz"
-    sha256 "beb2e0404003de9a4cab9753a8805a8fe9320ee6673136ed7f04255fe60bb512"
+  resource "ruamel-yaml-clibz" do
+    url "https://files.pythonhosted.org/packages/8f/95/9bcc25e84703180c3941062796572e0fc73bd659086efdc4ef9b8af19e36/ruamel_yaml_clibz-0.3.4.tar.gz"
+    sha256 "e99077ac6aa4943af1000161a0cb793a379c5c8cd03ea8dd3803e0b58739b685"
   end
 
   resource "six" do
-    url "https://files.pythonhosted.org/packages/71/39/171f1c67cd00715f190ba0b100d606d440a28c93c7714febeca8b79af85e/six-1.16.0.tar.gz"
-    sha256 "1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"
-  end
-
-  resource "unidecode" do
-    url "https://files.pythonhosted.org/packages/f7/89/19151076a006b9ac0dd37b1354e031f5297891ee507eb624755e58e10d3e/Unidecode-1.3.8.tar.gz"
-    sha256 "cfdb349d46ed3873ece4586b96aa75258726e2fa8ec21d6f00a591d98806c2f4"
+    url "https://files.pythonhosted.org/packages/94/e7/b2c673351809dca68a0e064b6af791aa332cf192da575fd474ed7d6f16a2/six-1.17.0.tar.gz"
+    sha256 "ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81"
   end
 
   resource "vobject" do
-    url "https://files.pythonhosted.org/packages/da/ce/27c48c0e39cc69ffe7f6e3751734f6073539bf18a0cfe564e973a3709a52/vobject-0.9.6.1.tar.gz"
-    sha256 "96512aec74b90abb71f6b53898dd7fe47300cc940104c4f79148f0671f790101"
+    url "https://files.pythonhosted.org/packages/d0/8a/15c34b3d27c43fc81a467d0f66577afc5542326804c42f30557e31c3259e/vobject-0.9.9.tar.gz"
+    sha256 "ac44e5d7e2079d84c1d52c50a615b9bec4b1ba958608c4c7fe40cbf33247b38e"
   end
 
   def install
-    # Work around ruamel.yaml.clib not building on Xcode 15.3, remove after a new release
-    # has resolved: https://sourceforge.net/p/ruamel-yaml-clib/tickets/32/
-    ENV.append_to_cflags "-Wno-incompatible-function-pointer-types" if DevelopmentTools.clang_build_version >= 1500
+    venv = virtualenv_install_with_resources without: "vobject"
 
-    virtualenv_install_with_resources
+    # Workaround broken dynamic version: https://github.com/py-vobject/vobject/issues/121
+    # Upstream has unreleased fix by migrating to pyproject.toml
+    # https://github.com/py-vobject/vobject/commit/6d907ee2c986b065794c3a50afdfb5f5677830f1
+    resource("vobject").stage do |r|
+      inreplace "setup.cfg", "attr: vobject.VERSION", r.version.to_s
+      venv.pip_install Pathname.pwd
+    end
+
     (etc/"khard").install "doc/source/examples/khard.conf.example"
     zsh_completion.install "misc/zsh/_khard"
     pkgshare.install (buildpath/"misc").children - [buildpath/"misc/zsh"]

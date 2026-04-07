@@ -3,23 +3,18 @@ class GitBigPicture < Formula
 
   desc "Visualization tool for Git repositories"
   homepage "https://github.com/git-big-picture/git-big-picture"
-  url "https://github.com/git-big-picture/git-big-picture/archive/refs/tags/v1.3.0.tar.gz"
-  sha256 "cccbd3e35dfe6d0ce86d06079e80cf9219cb25f887c7a782e2808e740dc23c3a"
+  url "https://files.pythonhosted.org/packages/bb/df/15392f049576f9b3989ffe9d5ec12135f8d9618c089a6259c5a2c16556c9/git-big-picture-1.3.0.tar.gz"
+  sha256 "a36539d20059d24516bcb6bbf6bca0a6932a7a8ac480b4b5b68e9e863a2666a5"
   license "GPL-3.0-or-later"
+  head "https://github.com/git-big-picture/git-big-picture.git", branch: "main"
 
   bottle do
-    rebuild 2
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "6f349a70b4e1696b630b31953b156b2aa60905b3e572b1f203ca72bc507caac8"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "6f349a70b4e1696b630b31953b156b2aa60905b3e572b1f203ca72bc507caac8"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "6f349a70b4e1696b630b31953b156b2aa60905b3e572b1f203ca72bc507caac8"
-    sha256 cellar: :any_skip_relocation, sonoma:         "6f349a70b4e1696b630b31953b156b2aa60905b3e572b1f203ca72bc507caac8"
-    sha256 cellar: :any_skip_relocation, ventura:        "6f349a70b4e1696b630b31953b156b2aa60905b3e572b1f203ca72bc507caac8"
-    sha256 cellar: :any_skip_relocation, monterey:       "6f349a70b4e1696b630b31953b156b2aa60905b3e572b1f203ca72bc507caac8"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "bc1843e072083aad22f5f576c2077ea634d391d8c525dd7304362b4b0d4c5d3c"
+    rebuild 5
+    sha256 cellar: :any_skip_relocation, all: "21d63dfe6fd24c36ac844dbbf358e78e09d1ac3ebb10ff067ffdcea518464338"
   end
 
   depends_on "graphviz"
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   def install
     virtualenv_install_with_resources

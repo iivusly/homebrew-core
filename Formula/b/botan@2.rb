@@ -4,21 +4,15 @@ class BotanAT2 < Formula
   url "https://botan.randombit.net/releases/Botan-2.19.5.tar.xz"
   sha256 "dfeea0e0a6f26d6724c4af01da9a7b88487adb2d81ba7c72fcaf52db522c9ad4"
   license "BSD-2-Clause"
-  head "https://github.com/randombit/botan.git", branch: "release-2"
-
-  livecheck do
-    url :homepage
-    regex(/href=.*?Botan[._-]v?(2(?:\.\d+)+)\.t/i)
-  end
 
   bottle do
-    sha256 arm64_sonoma:   "26123f333ae9d3b9370ac9c25537f01905e7bd6f1d4d87efd186be3128dbf78f"
-    sha256 arm64_ventura:  "a3827282841699000756d03c5d5e53c5224e67f340c7e7c5fc43d93e19a4e370"
-    sha256 arm64_monterey: "291b91e6418c3be4e290f42f72bf690f05867ab19cb6d7b5a2af031a65ccf960"
-    sha256 sonoma:         "354bea166821d3957ad270afe95798cb159e1117b45d55664f2a67c51b931a1b"
-    sha256 ventura:        "2eb567dfa4a898b0d99d06c6219d5098f74ba77c72258f7b580d0facdb6d769c"
-    sha256 monterey:       "f5d51f622c5146a9e830274f3a0a94f6570029824b938d91ebed895fc6d93c88"
-    sha256 x86_64_linux:   "eca2b5787826800519a4b0d51e28818b93cc9f8c2136af9b70c9ebb2dd3a7952"
+    rebuild 2
+    sha256 arm64_tahoe:   "dd852d6fe3cc65e68fe497d5582c7f3dbaa4c2afced2acea3a9b0f412042bd82"
+    sha256 arm64_sequoia: "3b52c4abedf724426066b343384e553b586d7a3d69e437a85839ad1adde27868"
+    sha256 arm64_sonoma:  "dc8d1646e46dab1be1f4f53b46f2e111b92610998ec700579c702abe3bee9baf"
+    sha256 sonoma:        "534d9389e8a96ed9c171e1c457c931f70783c94515ff502c6fd876c369666f09"
+    sha256 arm64_linux:   "faf67b146845389405939b4803884a521fd4210e441b078fea28cdeca78e78ac"
+    sha256 x86_64_linux:  "a4d30c4277c84df5b6a0e51b82e049df3bbe90204151143bf68bf214f44cbd86"
   end
 
   keg_only :versioned_formula
@@ -26,18 +20,17 @@ class BotanAT2 < Formula
   # Botan2 is currently scheduled to reach end of life at the end of 2024
   # Ref: https://botan.randombit.net/#releases
   deprecate! date: "2024-12-31", because: :unsupported
+  disable! date: "2025-12-31", because: :unsupported
 
-  depends_on "pkg-config" => :build
-  depends_on "python@3.12"
+  depends_on "pkgconf" => :build
+  depends_on "python@3.14"
   depends_on "sqlite"
 
   uses_from_macos "bzip2"
   uses_from_macos "zlib"
 
-  fails_with gcc: "5"
-
   def python3
-    which("python3.12")
+    which("python3.14")
   end
 
   def install

@@ -1,9 +1,10 @@
 class Libjwt < Formula
   desc "JSON Web Token C library"
-  homepage "https://github.com/benmcollins/libjwt"
-  url "https://github.com/benmcollins/libjwt/releases/download/v1.17.2/libjwt-1.17.2.tar.bz2"
-  sha256 "f11c4544f61a31f105720b8329409fea009d6f9ef41c9361f98c2de48152eeae"
+  homepage "https://libjwt.io/"
+  url "https://github.com/benmcollins/libjwt/archive/refs/tags/v3.3.2.tar.gz"
+  sha256 "d1b16df8e7484d1856c21f770c6317cee3881c435a563160be76cf29d3142c8c"
   license "MPL-2.0"
+  head "https://github.com/benmcollins/libjwt.git", branch: "master"
 
   livecheck do
     url :stable
@@ -11,43 +12,39 @@ class Libjwt < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "e5e42db60707d394e7b75f12fbd4e893af044e6b8f95f0965d2360be945f54b8"
-    sha256 cellar: :any,                 arm64_ventura:  "7155a77451afa2502504166ee1f993d2940491307655baae26574a1e11ad79d4"
-    sha256 cellar: :any,                 arm64_monterey: "d146d780d78e589e25e65b60ad3b7d8690919fe5431eba07ef993f2355d9cd87"
-    sha256 cellar: :any,                 sonoma:         "88f76ba6d0b19bf5ce7b55606e091bfc3961dc86c63a5316dfd8863bbbc8962f"
-    sha256 cellar: :any,                 ventura:        "f2d43fd72ea4c4ddadc55897c08e42d5956e438dae7c4b7761938c86b889d0e5"
-    sha256 cellar: :any,                 monterey:       "27b7c6378fadd9a458e54ed4588b14f1f1fd6c9c596302a2853116d4f2249249"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "91c1b7a6dcfb8a65387ffef2f66c3902510b6e78c00cfa46077b853eb605022e"
+    sha256 cellar: :any,                 arm64_tahoe:   "7b3c0e59441fd61310838be3bf56431278f62a40088bb2aa08e34aa367af07c2"
+    sha256 cellar: :any,                 arm64_sequoia: "9d425b9d346a749652903b4200a72540177c973bc9e6464effc62444035d38d0"
+    sha256 cellar: :any,                 arm64_sonoma:  "577c707c5d4555e57c08122a3ac9a06ef224263fd14260361d56c0a1943ea0e4"
+    sha256 cellar: :any,                 sonoma:        "339ea2208717503a08ad98e08f65208bf9fb87f9be98a1413a9a490511a64d32"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "c914225e05eadba04a87bce03a0b47de2bf17164a868c82a13718838d2b2a3b7"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "25e5ac26862c2ef56da81d43d666485124126a9164aa5188e449058709e5768b"
   end
 
-  head do
-    url "https://github.com/benmcollins/libjwt.git", branch: "master"
-    depends_on "autoconf" => :build
-    depends_on "automake" => :build
-    depends_on "libtool" => :build
-  end
-
-  depends_on "pkg-config" => :build
+  depends_on "cmake" => :build
+  depends_on "pkgconf" => :build
+  depends_on "gnutls"
   depends_on "jansson"
   depends_on "openssl@3"
 
   def install
-    system "autoreconf", "--force", "--install", "--verbose" if build.head?
-    system "./configure", *std_configure_args, "--disable-silent-rules"
-    system "make", "install"
+    system "cmake", "-S", ".", "-B", "build", "-DWITH_TESTS=OFF", *std_cmake_args
+    system "cmake", "--build", "build"
+    system "cmake", "--install", "build"
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <stdlib.h>
       #include <jwt.h>
 
-      int main() {
-        jwt_t *jwt = NULL;
-        if (jwt_new(&jwt) != 0) return 1;
+      int main(void) {
+        jwt_builder_t *builder = jwt_builder_new();
+        char *token = jwt_builder_generate(builder);
+        free(token);
+        jwt_builder_free(builder);
         return 0;
       }
-    EOS
+    C
     system ENV.cc, "test.c", "-L#{lib}", "-I#{include}", "-ljwt", "-o", "test"
     system "./test"
   end

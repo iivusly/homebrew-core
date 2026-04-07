@@ -1,36 +1,44 @@
 class F2 < Formula
   desc "Command-line batch renaming tool"
   homepage "https://github.com/ayoisaiah/f2"
-  url "https://github.com/ayoisaiah/f2/archive/refs/tags/v1.9.1.tar.gz"
-  sha256 "fbeb4540c4afe4aa25565685ee7ef7498449da7fc5f5b70a0e303b15c6e35f71"
+  url "https://github.com/ayoisaiah/f2/archive/refs/tags/v2.2.2.tar.gz"
+  sha256 "0785e40b1fd2adb55165f668dc2635d47559fd7534b0f1da33849f155c4e539b"
   license "MIT"
   head "https://github.com/ayoisaiah/f2.git", branch: "master"
 
+  # Upstream may add/remove tags before releasing a version, so we check
+  # GitHub releases instead of the Git tags.
+  livecheck do
+    url :stable
+    strategy :github_latest
+  end
+
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "880773abf1e0dad9df8028ad85e46ed692da2a2df022aadb9dce65831afe5ccc"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "05a3ff917d9aaab41874915d0270151d14b03d2b45b30346338ba0bc6bbe7aa8"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "05a3ff917d9aaab41874915d0270151d14b03d2b45b30346338ba0bc6bbe7aa8"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "05a3ff917d9aaab41874915d0270151d14b03d2b45b30346338ba0bc6bbe7aa8"
-    sha256 cellar: :any_skip_relocation, sonoma:         "f3cff57e22dcad2cf8dce94843c59d4a23fd505afe60e3587fc49ffb1540e71e"
-    sha256 cellar: :any_skip_relocation, ventura:        "640ad76f6012ed3c7d4dcc4f054e6edfa44621f3594303d32c3cd3c8763351ed"
-    sha256 cellar: :any_skip_relocation, monterey:       "640ad76f6012ed3c7d4dcc4f054e6edfa44621f3594303d32c3cd3c8763351ed"
-    sha256 cellar: :any_skip_relocation, big_sur:        "640ad76f6012ed3c7d4dcc4f054e6edfa44621f3594303d32c3cd3c8763351ed"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "00ebec8aaa2a5d08b8516bc009e658923f3a55eb9df0d92ee8effd98207fabed"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "60199512555005b0c455a318294ce2461fca14fe73055d6a3d79c557f3e33a55"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "60199512555005b0c455a318294ce2461fca14fe73055d6a3d79c557f3e33a55"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "60199512555005b0c455a318294ce2461fca14fe73055d6a3d79c557f3e33a55"
+    sha256 cellar: :any_skip_relocation, sonoma:        "91a8f2cbed065c6ad0e976f8c9a672cd7cd831a65b268423f6eb8348502703af"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "68b82c40b03fc395853ffaacbe371320c9a7b23c240111c4c78199a1580f0a95"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "eb89b5ee0b534374db45f86c91b162cdb2d524a4522ac92e5157343b79e0d3ea"
   end
 
   depends_on "go" => :build
 
   def install
-    system "go", "build", *std_go_args, "./cmd..."
+    system "go", "build", *std_go_args(ldflags: "-s -w"), "./cmd/f2"
+
+    bash_completion.install "scripts/completions/f2.bash" => "f2"
+    fish_completion.install "scripts/completions/f2.fish"
+    zsh_completion.install "scripts/completions/f2.zsh" => "_f2"
   end
 
   test do
     touch "test1-foo.foo"
     touch "test2-foo.foo"
     system bin/"f2", "-s", "-f", ".foo", "-r", ".bar", "-x"
-    assert_predicate testpath/"test1-foo.bar", :exist?
-    assert_predicate testpath/"test2-foo.bar", :exist?
-    refute_predicate testpath/"test1-foo.foo", :exist?
-    refute_predicate testpath/"test2-foo.foo", :exist?
+    assert_path_exists testpath/"test1-foo.bar"
+    assert_path_exists testpath/"test2-foo.bar"
+    refute_path_exists testpath/"test1-foo.foo"
+    refute_path_exists testpath/"test2-foo.foo"
   end
 end

@@ -1,28 +1,17 @@
 class Mhonarc < Formula
   desc "Mail-to-HTML converter"
   homepage "https://www.mhonarc.org/"
-  url "https://www.mhonarc.org/release/MHonArc/tar/MHonArc-2.6.19.tar.bz2"
-  sha256 "08912eae8323997b940b94817c83149d2ee3ed11d44f29b3ef4ed2a39de7f480"
+  url "https://cpan.metacpan.org/authors/id/L/LD/LDIDRY/MHonArc-2.6.24.tar.gz"
+  sha256 "457dc7374ee59cb75a0729e51cef2f2c52b48180f739d8fd956ea19882815f33"
   license "GPL-2.0-or-later"
-  revision 5
-
-  livecheck do
-    url :homepage
-    regex(/href=.*?MHonArc[._-]v?(\d+(?:\.\d+)+)\.t/i)
-  end
+  revision 1
+  head "https://github.com/sympa-community/mhonarc.git", branch: "master"
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, all: "d0ee54ecef8975c8f168d0013f1266a4441661180be9475d858f712e40f78c8b"
+    sha256 cellar: :any_skip_relocation, all: "d648abb0708b23fccab9dc49db5ced470814ee385962ab662f7209b657fe05e3"
   end
 
   depends_on "perl"
-
-  # Apply a bugfix for syntax. https://savannah.nongnu.org/bugs/?49997
-  patch do
-    url "https://file.savannah.gnu.org/file/monharc.patch?file_id=39391"
-    sha256 "723ef1779474c6728fbc88b1f6e9a4ca2c22d76a8adc4d3bd8838793852e60c4"
-  end
 
   def install
     # Using Perl's `installprefix` rather than `prefix` allows install.me to use

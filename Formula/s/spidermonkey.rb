@@ -1,42 +1,43 @@
 class Spidermonkey < Formula
   desc "JavaScript-C Engine"
   homepage "https://spidermonkey.dev"
-  url "https://archive.mozilla.org/pub/firefox/releases/128.2.0esr/source/firefox-128.2.0esr.source.tar.xz"
-  version "128.2.0"
-  sha256 "9617a1e547d373fe25c2f5477ba1b2fc482b642dc54adf28d815fc36ed72d0c2"
+  url "https://archive.mozilla.org/pub/firefox/releases/140.9.0esr/source/firefox-140.9.0esr.source.tar.xz"
+  version "140.9.0"
+  sha256 "b972b2a4c17244d51c10123cbd6c936e2cf26ebc29eb724570d285c283e9e92c"
   license "MPL-2.0"
+  compatibility_version 1
   head "https://hg.mozilla.org/mozilla-central", using: :hg
 
   # Spidermonkey versions use the same versions as Firefox, so we simply check
   # Firefox ESR release versions.
   livecheck do
-    url "https://www.mozilla.org/en-US/firefox/organizations/notes/"
+    url "https://download.mozilla.org/?product=firefox-esr-latest-ssl"
     strategy :header_match
   end
 
   bottle do
-    sha256 cellar: :any, arm64_sonoma:   "cbea1e2cff3267795eeac7b12c1033c2e1159bcf0fb2aaba19db5df928419e18"
-    sha256 cellar: :any, arm64_ventura:  "364079dc6acbed8160fda49345ce9028fc9f1b1d3a536bdfd14913f5693db4d4"
-    sha256 cellar: :any, arm64_monterey: "e63fd223d1d8b83fe4082a0b0bd194376a625559b7d5c74cef621f7953ae1a07"
-    sha256 cellar: :any, sonoma:         "3e023d4431f7d23e72db93475d90a7e557c9a384d441978caa4fb00f1375189d"
-    sha256 cellar: :any, ventura:        "d0ca7fb0c5eb46034d8071c688335aa3e160c3eae6573ef3f849669c5bb54257"
-    sha256 cellar: :any, monterey:       "047654f00524d97eb78fc4e3a468f04c05246a0b6cdda4ba635a4fb3692c98ca"
-    sha256               x86_64_linux:   "a0a206d3d430733f9567c7b435e719bb4f3a3708b3f096391624f1d3fa69fc1a"
+    sha256 cellar: :any, arm64_tahoe:   "8094f46e9b9fa2b910f5e1e2cf6ed7996052ca21fd81754d898b6e1fb2f77496"
+    sha256 cellar: :any, arm64_sequoia: "ab98ead74434fff0efd4906769a4d6d4084b538ef95cef14c1903685054d616d"
+    sha256 cellar: :any, arm64_sonoma:  "62721a6e5cbeb2dd4d06a032cbdc4646a27846aa9064b27a3ddb7cb114d29f42"
+    sha256 cellar: :any, sonoma:        "c9c1fb867c8065b57bb9f4c6820e73fbfaa9ca62dbb4d15fc0575ae6c81e2a7b"
+    sha256               arm64_linux:   "c953febb7f74bcbeba1b0b3a45d316c9bfbe2735809a2a7b15ba7cfffe7adc23"
+    sha256               x86_64_linux:  "91ca3b4499a8c8759947636c7b0c92aec73b2179be0b77b802e221cad8bc5d4f"
   end
 
   depends_on "cbindgen" => :build
-  depends_on "pkg-config" => :build
-  depends_on "python@3.12" => :build
+  depends_on "pkgconf" => :build
+  depends_on "python@3.14" => :build
   depends_on "rust" => :build
-  depends_on "icu4c"
+  depends_on "icu4c@78"
   depends_on "nspr"
   depends_on "readline"
 
   uses_from_macos "llvm" => :build # for llvm-objdump
   uses_from_macos "m4" => :build
-  uses_from_macos "zlib"
 
-  conflicts_with "narwhal", because: "both install a js binary"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   # From python/mozbuild/mozbuild/test/configure/test_toolchain_configure.py
   fails_with :gcc do
@@ -57,13 +58,26 @@ class Spidermonkey < Formula
     end
   end
 
+  # Apply patch used by `gjs` to work around https://bugzilla.mozilla.org/show_bug.cgi?id=1973994
+  patch do
+    url "https://github.com/ptomato/mozjs/commit/9aa8b4b051dd539e0fbd5e08040870b3c712a846.patch?full_index=1"
+    sha256 "5c2a8c804322ccacbc37f152a4a3d48a5fc2becffb1720a41e32c03899af0be6"
+  end
+
+  # Backport support for Python 3.14
+  patch do
+    url "https://github.com/mozilla-firefox/firefox/commit/d497aa4f770ca02f6083e93b94996a8fe32c2ff4.patch?full_index=1"
+    sha256 "026f91a56cd60907a87c62dd4143eac8300d6fc7433b94888229c632a43c34bf"
+  end
+
   def install
     ENV.runtime_cpu_detection
 
     if OS.mac?
       inreplace "build/moz.configure/toolchain.configure" do |s|
         # Help the build script detect ld64 as it expects logs from LD_PRINT_OPTIONS=1 with -Wl,-version
-        s.sub! '"-Wl,--version"', '"-Wl,-ld_classic,--version"' if DevelopmentTools.clang_build_version >= 1500
+        # Issue ref: https://bugzilla.mozilla.org/show_bug.cgi?id=1844694
+        s.sub! '"-Wl,--version"', '"-Wl,-ld_classic,-v"' if DevelopmentTools.clang_build_version >= 1500
         # Allow using brew libraries on macOS (not officially supported)
         s.sub!(/^(\s*def no_system_lib_in_sysroot\(.*\n\s*if )bootstrapped and value:/, "\\1False:")
         # Work around upstream only allowing build on limited macOS SDK (14.4 as of Spidermonkey 128)

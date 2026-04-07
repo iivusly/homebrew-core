@@ -3,32 +3,34 @@ class LuaLanguageServer < Formula
   homepage "https://github.com/LuaLS/lua-language-server"
   # pull from git tag to get submodules
   url "https://github.com/LuaLS/lua-language-server.git",
-      tag:      "3.10.5",
-      revision: "ba8f90eb0fab18ce8aee2bdbf7007dc63050381d"
+      tag:      "3.18.0",
+      revision: "893236922450748e10bc2e62a666b6af9c5ff4fe"
   license "MIT"
   head "https://github.com/LuaLS/lua-language-server.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "74f7df994d4b3bd30589ab00fb86e2e6391d84a69230b5f22a2a665e19b4090c"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "50cfb357efebf86c0da6ac6b8c822c42a35397bcc5d1aac2320f87b266f87ee8"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "7756ac690dd789676861a81515de3d9dbad2ecd07c1bdb78f6527f3bdba7a979"
-    sha256 cellar: :any_skip_relocation, sonoma:         "cc0196e956f31d1c300a7b59360d88ca681155f58e7c53246efddb56ea602d74"
-    sha256 cellar: :any_skip_relocation, ventura:        "84b29ce5c28e9f3218d61227346487d8ed5a8a4bece8f05241ae8ffba564b060"
-    sha256 cellar: :any_skip_relocation, monterey:       "25ff6b9776bf423893cf7394984f1a516d8a53a75549967e85d8fe5b82321df5"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "bd0e93c01821ea6bb5638fdb8f51faee0509c92e5188cf6064ff7b4b5801910c"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "cf751fe76710eec9b82ad1ff80e2135bea7618cced05e099c227f82d94c7f6bf"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "86adeccbe938be184ed26462dc3948e9d330b0dae3226d86f20d613c74b6b410"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "c161008bef134ff36b6b9db24254664c50d4e6bd4c56f865ae30b9670ab6cc4b"
+    sha256 cellar: :any_skip_relocation, sonoma:        "c470d05580b39ea86ffb6facc4490ae7c930d4fd3bd9752de8e03eb84b4b0ad1"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "8137a1b93ea98a5887bf1203c88e4a5c701bd555fd5db39f0c79aec5b7387b81"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "88a44e62a0780ccf36068933c74c079d3c6469c432f8dd0daf3fa18a0c8f97c1"
   end
 
   depends_on "ninja" => :build
 
-  fails_with gcc: 5 # For C++17
-
   def install
-    ENV.cxx11
+    # Workaround until upstream can update bee.lua submodule
+    color_h = ["3rd/bee.lua/3rd/fmt/fmt/color.h", "3rd/luamake/bee.lua/3rd/fmt/fmt/color.h"]
+    inreplace color_h, '#include "format.h"', "\\0\n#include <algorithm>"
 
     # disable all tests by build script (fail in build environment)
     inreplace buildpath.glob("**/3rd/bee.lua/test/test.lua"),
       "os.exit(lt.run(), true)",
       "os.exit(true, true)"
+
+    # remove git metadata from submodules
+    rm_r Dir["meta/3rd/*/.git"]
 
     chdir "3rd/luamake" do
       system "compile/install.sh"
@@ -46,12 +48,14 @@ class LuaLanguageServer < Formula
         --metapath="${XDG_CACHE_HOME:-${HOME}/.cache}/lua-language-server/meta" \
         "$@"
     BASH
+    libexec.install_symlink prefix/"changelog.md"
   end
 
   test do
+    assert_match version.to_s, shell_output("#{bin}/lua-language-server --version")
     pid = spawn bin/"lua-language-server", "--logpath=."
     sleep 5
-    assert_predicate testpath/"service.log", :exist?
+    assert_path_exists testpath/"service.log"
     refute_predicate testpath/"service.log", :empty?
   ensure
     Process.kill "TERM", pid

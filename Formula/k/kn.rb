@@ -2,35 +2,35 @@ class Kn < Formula
   desc "Command-line interface for managing Knative Serving and Eventing resources"
   homepage "https://github.com/knative/client"
   url "https://github.com/knative/client.git",
-      tag:      "knative-v1.15.0",
-      revision: "59dd72a2407e6ce6d12e9df7a5bf4e87941a550e"
+      tag:      "knative-v1.21.0",
+      revision: "382000a93f176980bf5ef182d4f8a2682a167e65"
   license "Apache-2.0"
   head "https://github.com/knative/client.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "f214605c37805783058d0e347cba6118e33885c807d343af05cf4fdb09984cae"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "f214605c37805783058d0e347cba6118e33885c807d343af05cf4fdb09984cae"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "f214605c37805783058d0e347cba6118e33885c807d343af05cf4fdb09984cae"
-    sha256 cellar: :any_skip_relocation, sonoma:         "732bf96fdc66572095563d4e4b1a7d62fccb294d34c5af84fd8dc0a89363a406"
-    sha256 cellar: :any_skip_relocation, ventura:        "732bf96fdc66572095563d4e4b1a7d62fccb294d34c5af84fd8dc0a89363a406"
-    sha256 cellar: :any_skip_relocation, monterey:       "732bf96fdc66572095563d4e4b1a7d62fccb294d34c5af84fd8dc0a89363a406"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "daab235040f375a78e92474dfa2cee922e8f642afd1d5f8c8fbda5c0b8e5aeb7"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "cf30b69b4f1c305714768b732015dd7a703bd536e4a0a5021274fc0f17a991a3"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "438be7588ddfd635912a6130d68de906cf7db3f8c655a5f97b990d892a6ece55"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "4e51cc4c2f46c0eda809247edb27dee4c010994858051362e70721758e8ab5f9"
+    sha256 cellar: :any_skip_relocation, sonoma:        "5ff6f8b240ea7e60bf2b022b6cc9d65ae7ec8506cc190465eafa34ce48312283"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "2d3c49ba8034b4b91f75e8427d829f9d470506c5cbeacae309a8083f52f3bbb9"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "d74f940af91492cee17f8547b8fe03a0805e1d32858604326bc20bfd932b8bba"
   end
 
   depends_on "go" => :build
 
   def install
-    ENV["CGO_ENABLED"] = "0"
+    ENV["CGO_ENABLED"] = OS.mac? ? "1" : "0"
 
     ldflags = %W[
-      -X knative.dev/client/pkg/kn/commands/version.Version=v#{version}
-      -X knative.dev/client/pkg/kn/commands/version.GitRevision=#{Utils.git_head(length: 8)}
-      -X knative.dev/client/pkg/kn/commands/version.BuildDate=#{time.iso8601}
+      -s -w
+      -X knative.dev/client/pkg/commands/version.Version=v#{version}
+      -X knative.dev/client/pkg/commands/version.GitRevision=#{Utils.git_head(length: 8)}
+      -X knative.dev/client/pkg/commands/version.BuildDate=#{time.iso8601}
     ]
 
-    system "go", "build", "-mod=vendor", *std_go_args(ldflags:), "./cmd/..."
+    system "go", "build", *std_go_args(ldflags:), "./cmd/kn"
 
-    generate_completions_from_executable(bin/"kn", "completion", shells: [:bash, :zsh])
+    generate_completions_from_executable(bin/"kn", shell_parameter_format: :cobra)
   end
 
   test do

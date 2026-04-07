@@ -1,13 +1,13 @@
 class Interface99 < Formula
   desc "Full-featured interfaces for C99"
   homepage "https://github.com/Hirrolot/interface99"
-  url "https://github.com/Hirrolot/interface99/archive/refs/tags/v1.0.1.tar.gz"
-  sha256 "ddc7cd979cf9c964a4313a5e6bdc87bd8df669142f29c8edb71d2f2f7822d9aa"
+  url "https://github.com/Hirrolot/interface99/archive/refs/tags/v1.0.2.tar.gz"
+  sha256 "8bd007c48cf05436ced60884e8e3a05ede46105f3efae9bf29e0f4d30f938f9e"
   license "MIT"
   head "https://github.com/Hirrolot/interface99.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, all: "332dcbf6cb579b176aaa88edb543da80015b8f47b83c9c7b5f15c7cdeef9082d"
+    sha256 cellar: :any_skip_relocation, all: "cdcd1817a2f31b433c04ed591b2f5de07141a3e783de280b0c7431b68dec2556"
   end
 
   depends_on "metalang99"
@@ -17,7 +17,7 @@ class Interface99 < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <interface99.h>
       #include <stdio.h>
 
@@ -58,7 +58,7 @@ class Interface99 < Formula
         VCALL(t, scale, 5);
         printf("%d %d", VCALL(r, perim), VCALL(t, perim));
       }
-    EOS
+    C
     system ENV.cc, "test.c", "-I#{include}", "-I#{Formula["metalang99"].opt_include}", "-o", "test"
     assert_equal "24 60 120 300", shell_output("./test")
   end

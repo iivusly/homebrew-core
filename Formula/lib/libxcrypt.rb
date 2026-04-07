@@ -1,9 +1,10 @@
 class Libxcrypt < Formula
   desc "Extended crypt library for descrypt, md5crypt, bcrypt, and others"
   homepage "https://github.com/besser82/libxcrypt"
-  url "https://github.com/besser82/libxcrypt/releases/download/v4.4.36/libxcrypt-4.4.36.tar.xz"
-  sha256 "e5e1f4caee0a01de2aee26e3138807d6d3ca2b8e67287966d1fefd65e1fd8943"
+  url "https://github.com/besser82/libxcrypt/releases/download/v4.5.2/libxcrypt-4.5.2.tar.xz"
+  sha256 "71513a31c01a428bccd5367a32fd95f115d6dac50fb5b60c779d5c7942aec071"
   license "LGPL-2.1-or-later"
+  compatibility_version 1
 
   livecheck do
     url :stable
@@ -11,34 +12,33 @@ class Libxcrypt < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "605b2d35f9ca3ef6adb5d0d4a9f0de1549d00bff742b8243fbb14e1dae38dee9"
-    sha256 cellar: :any,                 arm64_ventura:  "95e6481674d9f4cd29bdeb45f0efb5eda7c96cab827212acceda923d27a52a66"
-    sha256 cellar: :any,                 arm64_monterey: "aecdd70eeff240670db9c78bb147623ba1d23e2b2ebbe7cb92e57ea1d03b8d20"
-    sha256 cellar: :any,                 arm64_big_sur:  "81f38fded3d8f8a10657051bfbe8a0660b5b60d691c42177638c72d6181e092e"
-    sha256 cellar: :any,                 sonoma:         "d918088f5ae5c728ee3da95dbff9b4eb2454c2d9b6cb0a61aa1b20aaa67c6428"
-    sha256 cellar: :any,                 ventura:        "6fc07249ae12fef0b10f26aa56d3a52b26c285593ed416d6cb5589e8455c58b9"
-    sha256 cellar: :any,                 monterey:       "92fdac7885e9f441437725c76059b58386445951fec07bad2bc88af873333e2b"
-    sha256 cellar: :any,                 big_sur:        "ca6918b378488e583071841562c5ce1632053124b2916951bb968478033b99f1"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "ad1c4b570d7a66046038c13345b54337d858a2db78dcfb7e90a2b21adc1d6802"
+    sha256 cellar: :any,                 arm64_tahoe:   "45b16874ed374eda84779a795aa32640f86759dd480f470567949b7639a8e3ee"
+    sha256 cellar: :any,                 arm64_sequoia: "04b6d0459d587d4137b8fdc9d7a711bf5df1405afae64997d4d8f6016df50e20"
+    sha256 cellar: :any,                 arm64_sonoma:  "6f459775883ffb7e1cd95dfeef36d3f490f20e3dcaa79055d318c46991d31f5f"
+    sha256 cellar: :any,                 sonoma:        "909d2e42bae6c62c05e5c52f6f45aa3da6a4c668c6a88f90a0cc6ebb6794f212"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "591376dcb066e3abf120b46895aabe9409aadf8f9577bd2672e52524f05a1952"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "9319e1e70e1e3e476e421956baaeebc0d7be9c3030897844a3c348fe4dd116a5"
   end
 
   keg_only :provided_by_macos
+
+  depends_on "pkgconf" => :build
 
   link_overwrite "include/crypt.h"
   link_overwrite "lib/libcrypt.so"
 
   def install
-    system "./configure", *std_configure_args,
-                          "--disable-static",
+    system "./configure", "--disable-static",
                           "--disable-obsolete-api",
                           "--disable-xcrypt-compat-files",
                           "--disable-failure-tokens",
-                          "--disable-valgrind"
+                          "--disable-valgrind",
+                          *std_configure_args
     system "make", "install"
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <crypt.h>
       #include <errno.h>
       #include <stdio.h>
@@ -63,7 +63,7 @@ class Libxcrypt < Formula
 
         return 0;
       }
-    EOS
+    C
     system ENV.cc, "test.c", "-I#{include}", "-L#{lib}", "-lcrypt", "-o", "test"
     system "./test"
   end

@@ -1,25 +1,33 @@
 class Aravis < Formula
   desc "Vision library for genicam based cameras"
   homepage "https://github.com/AravisProject/aravis"
-  url "https://github.com/AravisProject/aravis/releases/download/0.8.31/aravis-0.8.31.tar.xz"
-  sha256 "9c4ebe6273ed3abe466cb6ed8fa5c132bdd7e9a9298ca43fa0212c4311a084da"
+  url "https://github.com/AravisProject/aravis/releases/download/0.8.35/aravis-0.8.35.tar.xz"
+  sha256 "8089af991fc3a2644ab04b2ddf82623cd663d80c7ebbdefa93ddbc17ea702ddb"
   license "LGPL-2.1-or-later"
+  revision 1
 
-  bottle do
-    sha256 arm64_sonoma:   "92d2a832735db576610b78b26efa529f9ed0ae5e61f7d86588e5955f9e64a26d"
-    sha256 arm64_ventura:  "c1bf4f1146b3658960e09736d3fb08cd640ecd597b89665d175e51b5a5bd3cd0"
-    sha256 arm64_monterey: "2879866705ce34022653cf6838751e79b55c198dc7733ce19a75d41f48382aa9"
-    sha256 sonoma:         "973c99a6806dac2ae3eb7447655e7108eb681033d3947557934892efd24e1ded"
-    sha256 ventura:        "11d8e8bed23ea7cfd6cf8b72e2c54f3e85151b659d185468da508259753b20b1"
-    sha256 monterey:       "63a17a0c9ab56dc2eb8b30d7a2fd99f3bf0eac141c2f5e17aa906db66567cb4c"
-    sha256 x86_64_linux:   "d81bad462d46b7940211234830014a1c7b37f38cb09fe2792bd4e6a718282385"
+  livecheck do
+    url :stable
+    strategy :github_latest
   end
 
+  bottle do
+    rebuild 1
+    sha256 arm64_tahoe:   "492161d546798277f669e70c6f78ac95077a13c894763f8c065659ef74d13084"
+    sha256 arm64_sequoia: "cb3a147a799c2cdb9b63908ea49e2c4ffd0bf104b0d0ef4bf19f6bc8881c7efc"
+    sha256 arm64_sonoma:  "07bd55beb08861d9fdec88a7dc05a036a296803f9ec6641b24b3a3f6751edf75"
+    sha256 sonoma:        "a7186ae6439613f44eda3f24a922aec342fd2698a54106b1e83ebee24452e7c1"
+    sha256 arm64_linux:   "940d5509ecceedb89321147d1ead8f983fc2da277f9942dde3ba1e4e262781e3"
+    sha256 x86_64_linux:  "514c289ee6432c01ea54e3577ac3ea47849389e1ea848549cc99b29037619e9f"
+  end
+
+  depends_on "gettext" => :build
   depends_on "gobject-introspection" => :build
   depends_on "gtk-doc" => :build
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
+
   depends_on "adwaita-icon-theme"
   depends_on "glib"
   depends_on "gstreamer"
@@ -29,7 +37,6 @@ class Aravis < Formula
   depends_on "libusb"
 
   uses_from_macos "libxml2"
-  uses_from_macos "zlib"
 
   on_macos do
     depends_on "at-spi2-core"
@@ -38,6 +45,10 @@ class Aravis < Formula
     depends_on "gettext"
     depends_on "harfbuzz"
     depends_on "pango"
+  end
+
+  on_linux do
+    depends_on "zlib-ng-compat"
   end
 
   def install
@@ -60,6 +71,12 @@ class Aravis < Formula
   end
 
   test do
+    # The initial plugin load takes a long time without extra permissions on
+    # macOS, which frequently causes the slower Intel macOS runners to time out.
+    #
+    # Ref: https://gitlab.freedesktop.org/gstreamer/gstreamer/-/issues/1119
+    ENV["GST_PLUGIN_SYSTEM_PATH"] = testpath if OS.mac? && Hardware::CPU.intel? && ENV["HOMEBREW_GITHUB_ACTIONS"]
+
     lib_ext = OS.mac? ? "dylib" : "so"
     output = shell_output("gst-inspect-1.0 #{lib}/gstreamer-1.0/libgstaravis.#{version.major_minor}.#{lib_ext}")
     assert_match(/Description *Aravis Video Source/, output)

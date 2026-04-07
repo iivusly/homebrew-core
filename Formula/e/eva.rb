@@ -7,6 +7,8 @@ class Eva < Formula
   head "https://github.com/oppiliappan/eva.git", branch: "master"
 
   bottle do
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:    "0e042caaa2bc756aa092a2a29655f08516836c8f945654bd2fe1c1876a6fa8e2"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia:  "7aab4759863c03125626a08fca970c20fd337228da45f2e77a6f39040306ca1e"
     sha256 cellar: :any_skip_relocation, arm64_sonoma:   "6d968de7427eee52b9958b820535eecdbb11c1fba0f8eb1c9e0623468b813255"
     sha256 cellar: :any_skip_relocation, arm64_ventura:  "244898ede20bf08ca17f739fd850699b99e8940a010007f8084d2ad3e6b6c12e"
     sha256 cellar: :any_skip_relocation, arm64_monterey: "9d600eb8e8e278101a902807941e3417a5508bb90352ddaadbab09b889b6499f"
@@ -16,6 +18,7 @@ class Eva < Formula
     sha256 cellar: :any_skip_relocation, monterey:       "16b3a5a30dc5aeb1a91c1ff219924f758df52eb763c33dd713a54487d0e5a309"
     sha256 cellar: :any_skip_relocation, big_sur:        "97fc21bb2c1e5e7094c8b1f5e073271845b3d54928a4a41c15063aeb6a102cef"
     sha256 cellar: :any_skip_relocation, catalina:       "a2a2e8826e0a8a23815c811fb034c7c315b0df0a83790887c6d57f6f62df08e6"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "936591ea0016a4154b9f48a7b341639982e6c57b5f53562abc4f9c09366ff8d8"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "b35ce00d707f0e3f494d1e4708ae37653472874166b3b7d8dec6bd7972085459"
   end
 

@@ -12,26 +12,33 @@ class Daemontools < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "a4d55eb82da586265d67f9fdb355715ee396417a002ed2e121d40b51ac3d0863"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "991fcc92f0c958384e3f434fab21761059a51fa58cac8c345ce61cfc98972863"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "5c9a82746468fb2b1eaea00ff04d1202099d6a0af27dc7e6287f1745a44028e9"
-    sha256 cellar: :any_skip_relocation, sonoma:         "6835770574462a78160eb7c9d9139b18a493804b5984409a549b394eb90c5fe5"
-    sha256 cellar: :any_skip_relocation, ventura:        "265702ded875f506c1e35e56c8620cb108fce3dd6ed2b5809e792e15c26a0509"
-    sha256 cellar: :any_skip_relocation, monterey:       "e57d6d6f618a545f245c2465038d63946310aa08e887eda8526dd154aff9db21"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "0b6e2a4ebdbbc3105db2cc0425d85d782a5f0cccd10def1e0a7c63c05e13c2b1"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "4d2dc1ed742ae4b8ab911aef610c8315ea79b9dce79a4a9d21028f413352bd6c"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "1caba2a88c37b416bf48c950f376693b1412a06f54bc62c815a6e8679f30b41d"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "4079bdac80d383b3423b5daf190a2abc5583db2d5e33939ccd0e3c637ab57033"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "414c519a3f46d28c74e28d95f882b68dae09dcd9604b8f207c93539d4af34cd3"
+    sha256 cellar: :any_skip_relocation, sonoma:        "b2fbc29b09bf37004b7a31ff2a7f57bd705e757cef0b1970b2b9723f624bc8d9"
+    sha256 cellar: :any_skip_relocation, ventura:       "813c64aa076209409ab420484007a7d43e7bfa86ce26842829d8800501e9b138"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "78eeabb0f8b6f6d678f97dfcf0a84e51c1b0f667e5fba8c6a1ef4707f85a91ce"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "2f527c08fac6754686403613d81fe344434ead8477130d596ffa05862b4962fe"
+  end
+
+  resource "man" do
+    url "https://deb.debian.org/debian/pool/main/d/daemontools/daemontools_0.76-8.1.debian.tar.xz"
+    sha256 "b9a1ed0ea88172d921738237c48e67cbe3b04e5256fea8ec00f32116c9ef74c0"
   end
 
   # Fix build failure due to missing #include <errno.h> on Linux.
   # Patch submitted to author by email.
   patch do
-    url "https://raw.githubusercontent.com/Homebrew/formula-patches/212baeaf8232802cf3dfbfcc531efa5741325bfa/daemontools/errno.patch"
+    url "https://raw.githubusercontent.com/Homebrew/homebrew-core/1cf441a0/Patches/daemontools/errno.patch"
     sha256 "b7beb4cfe150b5cad1f50f4879d91cd8fc72e581940da4a716b99467d3a14937"
   end
 
   # Fix build failure due to missing headers for POSIX-related functions.
   patch do
-    url "https://raw.githubusercontent.com/Homebrew/formula-patches/36d482722d0959abc80a8b0b944c9bc266e6fe5f/daemontools/posix-headers.patch"
-    sha256 "4c8f57406e5d077dbcaf7c92ba0febf59a5ac00b96309220f7723d135ea82c42"
+    url "https://raw.githubusercontent.com/Homebrew/homebrew-core/1cf441a0/Patches/daemontools/posix-headers.patch"
+    sha256 "288afdf9b7ba4f05a791f714ddea22b0a18020f54face020e45311135f0c92c1"
   end
 
   def install
@@ -48,6 +55,10 @@ class Daemontools < Formula
 
       system "package/compile"
       bin.install Dir["command/*"]
+    end
+
+    resource("man").stage do
+      man8.install Dir["daemontools-man/*.8"]
     end
   end
 

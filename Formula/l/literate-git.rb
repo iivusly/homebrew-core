@@ -3,67 +3,50 @@ class LiterateGit < Formula
 
   desc "Render hierarchical git repositories into HTML"
   homepage "https://github.com/bennorth/literate-git"
-  url "https://files.pythonhosted.org/packages/7b/cc/1a6c994c90fa34cfa8e90e017c80f838b149fd0262daa24cdb930c091b48/literategit-0.5.0.tar.gz"
-  sha256 "88f9e95749d427c98a397a9c38a845d9760cf3451424441bc217c53c1ec835bd"
+  url "https://files.pythonhosted.org/packages/61/ef/443d7a7db6d72b4f905fe43ea34b3f7f6ca5b2edc0ad241290671ef6c454/literategit-0.5.3.tar.gz"
+  sha256 "bd634cb4305d1e99f9f994c07aac2d68492f939598f776e9abb7376488378b47"
   license "GPL-3.0-or-later"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "b0a3f5a47383da7bec77d1b5b767fc1a345926b490b347ea650c082e87aa4797"
-    sha256 cellar: :any,                 arm64_ventura:  "49ae359bfc9d5d3742e637bc5189bf67e2fa43741b553fa89dc6b35973f5cc52"
-    sha256 cellar: :any,                 arm64_monterey: "8fdbe2da2f31c81d2c47db219d3f0d92f7e4f1896c3d8a25c6219b05b52aae1d"
-    sha256 cellar: :any,                 sonoma:         "3c16c62933a94a0528218288753fdd1c170637a09ff2bc7fedd9c92f41d2559c"
-    sha256 cellar: :any,                 ventura:        "b937c36af05b123ca4eea2fbf567aab095831e9ae1f28e2ec8d7319637f249d2"
-    sha256 cellar: :any,                 monterey:       "9dc8482f8220023295f0da1171a0678fc8e1b193d5a3a4ca208c33ba3b587ba4"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "15d36127509cce2264db73fc650ab5d434221008e735e7fbf098b7e9b511b1bd"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "7b6925bcc4d2cd98ca66c9718c64bba3e9ce9e33ac52dcab9071393f29048e07"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "89c8e458d420f64da110eb59f24849b9f516a79252b81fe1e0c76ff611c71031"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "8a2fa92954da47c45de82d1c1cb98b5c131ba8ad46c317fc0f2ee3948406f9f8"
+    sha256 cellar: :any_skip_relocation, sonoma:        "24ed1b94875f33458ec2e45542878931124892c57ae25a92a62647a719c07ce1"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "1e790764cf320e398f5ed43ccdfb58281ef18c75dde3e9a4f48fe988cf054613"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "7c1c7daf0837e9b7b13cda7e128e01a950a073c55093e94a6dbf31ce286493b4"
   end
 
-  depends_on "libgit2"
-  depends_on "python@3.12"
+  depends_on "pkgconf" => :build
+  depends_on "pygit2" => :no_linkage
+  depends_on "python@3.14"
 
   uses_from_macos "libffi"
 
-  on_linux do
-    depends_on "pkg-config" => :build
-  end
-
-  resource "cffi" do
-    url "https://files.pythonhosted.org/packages/1e/bf/82c351342972702867359cfeba5693927efe0a8dd568165490144f554b18/cffi-1.17.0.tar.gz"
-    sha256 "f3157624b7558b914cb039fd1af735e5e8049a87c817cc215109ad1c8779df76"
-  end
+  pypi_packages exclude_packages: "pygit2"
 
   resource "click" do
-    url "https://files.pythonhosted.org/packages/96/d3/f04c7bfcf5c1862a2a5b845c6b2b360488cf47af55dfa79c98f6a6bf98b5/click-8.1.7.tar.gz"
-    sha256 "ca9853ad459e787e2192211578cc907e7594e294c7ccc834310722b41b9ca6de"
+    url "https://files.pythonhosted.org/packages/3d/fa/656b739db8587d7b5dfa22e22ed02566950fbfbcdc20311993483657a5c0/click-8.3.1.tar.gz"
+    sha256 "12ff4785d337a1bb490bb7e9c2b1ee5da3112e94a8622f26a6c77f5d2fc6842a"
   end
 
   resource "jinja2" do
-    url "https://files.pythonhosted.org/packages/ed/55/39036716d19cab0747a5020fc7e907f362fbf48c984b14e62127f7e68e5d/jinja2-3.1.4.tar.gz"
-    sha256 "4a3aee7acbbe7303aede8e9648d13b8bf88a429282aa6122a993f0ac800cb369"
+    url "https://files.pythonhosted.org/packages/df/bf/f7da0350254c0ed7c72f3e33cef02e048281fec7ecec5f032d4aac52226b/jinja2-3.1.6.tar.gz"
+    sha256 "0137fb05990d35f1275a587e9aee6d56da821fc83491a0fb838183be43f66d6d"
   end
 
   resource "markdown2" do
-    url "https://files.pythonhosted.org/packages/da/00/3c708de5bffa0494daf894d2e8e2b6165f866ef3ae7939546fae039b5f0e/markdown2-2.5.0.tar.gz"
-    sha256 "9bff02911f8b617b61eb269c4c1a5f9b2087d7ff051604f66a61b63cab30adc2"
+    url "https://files.pythonhosted.org/packages/e4/ae/07d4a5fcaa5509221287d289323d75ac8eda5a5a4ac9de2accf7bbcc2b88/markdown2-2.5.5.tar.gz"
+    sha256 "001547e68f6e7fcf0f1cb83f7e82f48aa7d48b2c6a321f0cd20a853a8a2d1664"
   end
 
   resource "markupsafe" do
-    url "https://files.pythonhosted.org/packages/87/5b/aae44c6655f3801e81aa3eef09dbbf012431987ba564d7231722f68df02d/MarkupSafe-2.1.5.tar.gz"
-    sha256 "d283d37a890ba4c1ae73ffadf8046435c76e7bc2247bbb63c00bd1a709c6544b"
-  end
-
-  resource "pycparser" do
-    url "https://files.pythonhosted.org/packages/1d/b2/31537cf4b1ca988837256c910a668b553fceb8f069bedc4b1c826024b52c/pycparser-2.22.tar.gz"
-    sha256 "491c8be9c040f5390f5bf44a5b07752bd07f56edf992381b05c701439eec10f6"
-  end
-
-  resource "pygit2" do
-    url "https://files.pythonhosted.org/packages/53/77/d33e2c619478d0daea4a50f9ffdd588db2ca55817c7e9a6c796fca3b80ef/pygit2-1.15.1.tar.gz"
-    sha256 "e1fe8b85053d9713043c81eccc74132f9e5b603f209e80733d7955eafd22eb9d"
+    url "https://files.pythonhosted.org/packages/7e/99/7690b6d4034fffd95959cbe0c02de8deb3098cc577c67bb6a24fe5d7caa7/markupsafe-3.0.3.tar.gz"
+    sha256 "722695808f4b6457b320fdc131280796bdceb04ab50fe1795cd540799ebe1698"
   end
 
   resource "pygments" do
-    url "https://files.pythonhosted.org/packages/8e/62/8336eff65bcbc8e4cb5d05b55faf041285951b6e80f33e2bff2024788f31/pygments-2.18.0.tar.gz"
-    sha256 "786ff802f32e91311bff3889f6e9a86e81505fe99f2735bb6d60ae0c5004f199"
+    url "https://files.pythonhosted.org/packages/c3/b2/bc9c9196916376152d655522fdcebac55e66de6603a76a02bca1b6414f6c/pygments-2.20.0.tar.gz"
+    sha256 "6757cd03768053ff99f3039c1a36d6c0aa0b263438fcab17520b30a303a82b5f"
   end
 
   def install
@@ -80,7 +63,7 @@ class LiterateGit < Formula
     system "git", "add", "bar.txt"
     system "git", "commit", "-m", "bar"
     system "git", "branch", "two"
-    (testpath/"create_url.py").write <<~EOS
+    (testpath/"create_url.py").write <<~PYTHON
       class CreateUrl:
         @staticmethod
         def result_url(sha1):
@@ -88,7 +71,7 @@ class LiterateGit < Formula
         @staticmethod
         def source_url(sha1):
           return ''
-    EOS
+    PYTHON
     assert_match "<!DOCTYPE html>",
       shell_output("git literate-render test one two create_url.CreateUrl")
   end

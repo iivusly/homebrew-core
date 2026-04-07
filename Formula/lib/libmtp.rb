@@ -1,30 +1,27 @@
 class Libmtp < Formula
   desc "Implementation of Microsoft's Media Transfer Protocol (MTP)"
   homepage "https://libmtp.sourceforge.net/"
-  url "https://downloads.sourceforge.net/project/libmtp/libmtp/1.1.21/libmtp-1.1.21.tar.gz"
-  sha256 "c4ffa5ab8c8f48c91b0047f2e253c101c418d5696a5ed65c839922a4280872a7"
+  url "https://downloads.sourceforge.net/project/libmtp/libmtp/1.1.23/libmtp-1.1.23.tar.gz"
+  sha256 "74a2b6e8cb4a0304e95b995496ea3ac644c29371649b892b856e22f12a0bdeed"
   license "LGPL-2.1-or-later"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "e5fcc63cb5a7c844f964a1bca0e6e55f072d0d117bfcc2b7683e0d1bab4e39b2"
-    sha256 cellar: :any,                 arm64_ventura:  "e410f7a6dab05b9bf74a0c179450d8e563f60802a2789da986841dcefd493f56"
-    sha256 cellar: :any,                 arm64_monterey: "f0127838120cb34a56434b2ff8b267f4f280cbb2d06ab48fb959d0f641e92f13"
-    sha256 cellar: :any,                 arm64_big_sur:  "a247cada4841c6a16d507ab969cf60f31dab5cd91f94d10a8a390be3b02df110"
-    sha256 cellar: :any,                 sonoma:         "4d46d38ea7378ab959fc439310264ab5ed42377729185d694406654fb5ff8b2a"
-    sha256 cellar: :any,                 ventura:        "af43ad4feaf03b0c822219131261fb5d24a2bebf39c198778229d9488c1040cd"
-    sha256 cellar: :any,                 monterey:       "330cb763b3a708340527235e892a0b45e086bdc559021ad7b06b6e9c230be21c"
-    sha256 cellar: :any,                 big_sur:        "65dff5ee98c8f7701e2b2e646509ac37a2420d07f384f762e4653c6f526f0ecd"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "b2c0baeb49e12c024050db966e3e8f9562131eed2a378ff29c0ed04e51ba812e"
+    sha256 cellar: :any,                 arm64_tahoe:   "6bd6b1027d7491cce853f34578cfecad1645e95c5002619c51f28e261122b7ba"
+    sha256 cellar: :any,                 arm64_sequoia: "a8fccff1e5fb87a33287fdccd00ff301e97377a899db19e200b0101a40631c8b"
+    sha256 cellar: :any,                 arm64_sonoma:  "e5cd66757ea323741414b6d0a52f8d5e29ed105d1ac35f8855484e655c90367c"
+    sha256 cellar: :any,                 sonoma:        "8ee478d393d41ac7c4299fd2f8c0ba640307707a9c85910b326db3770b30439e"
+    sha256                               arm64_linux:   "7379c6c656432162f854e5e6fd415564bf9d9f8469fca427709405653b82be30"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "2f842da301974cc07cd11563aaace91d6259f244a507caa6b17ccd14951c1dc7"
   end
 
-  depends_on "pkg-config" => :build
-  depends_on "libusb-compat"
+  depends_on "pkgconf" => :build
+  depends_on "libusb"
 
   def install
-    system "./configure", "--disable-dependency-tracking",
-                          "--prefix=#{prefix}",
-                          "--disable-mtpz",
-                          "--with-udev=#{lib}/udev"
+    system "./configure", "--disable-mtpz",
+                          "--disable-silent-rules",
+                          "--with-udev=#{lib}/udev",
+                          *std_configure_args
     system "make", "install"
   end
 

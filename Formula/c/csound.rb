@@ -2,8 +2,8 @@ class Csound < Formula
   desc "Sound and music computing system"
   homepage "https://csound.com"
   license "LGPL-2.1-or-later"
-  revision 9
-  head "https://github.com/csound/csound.git", branch: "master"
+  revision 14
+  head "https://github.com/csound/csound.git", branch: "develop"
 
   # Remove `stable` block when patches are no longer needed
   stable do
@@ -21,21 +21,29 @@ class Csound < Formula
       url "https://github.com/csound/csound/commit/2a071ae8ca89bc21b5c80037f8c95a01bb670ac9.patch?full_index=1"
       sha256 "c7026330b5c89ab399e74aff17019067705011b7e35b9c75f9ed1a5878f53b4b"
     end
+
+    # Fix build failure due to incorrect member name on macOS 15+
+    patch do
+      url "https://github.com/csound/csound/commit/bb9bafcfa17a87d3733eda1e25a812fd0be08ac6.patch?full_index=1"
+      sha256 "b1492e344a7cc067989ef600a08319d388bebb344fee616d83dce969f3afe8cb"
+    end
   end
 
+  # Latest version is in beta, e.g. 7.0.0-beta.10
   livecheck do
     url :stable
-    strategy :github_latest
+    regex(/^v?(\d+(?:\.\d+)+)$/i)
+    strategy :github_releases
   end
 
   bottle do
-    sha256 arm64_sonoma:   "ef04baac87bf252c3d3b05df83c2bfcd4442346f0854e6aee5fe3071dd03283a"
-    sha256 arm64_ventura:  "f9f57bacdbec6c5f51af768ca70824710a9e5e5bc912d356c901536ffc3766cf"
-    sha256 arm64_monterey: "c9b6460d1c22a445fd06ab88da81dcd3b18178b5090582d9c259c33b7eb5aaa8"
-    sha256 sonoma:         "41e9bc70cd76f290aad97fe4d37f314a168fba2e4b47f54022d8aba3b0fd6d1f"
-    sha256 ventura:        "0a6adbf53c7990f15adf996b36903b0d6922dbbcd5e315adf16848c7e2c9ac69"
-    sha256 monterey:       "9607a4cc2e210683496097d997929ba38134aa3d207b253895036572412bc0c9"
-    sha256 x86_64_linux:   "b86d4424af45b3ebb857b7b3aa5dd85b04f6d815fcc0f462e9f5ca90d194f823"
+    rebuild 1
+    sha256 arm64_tahoe:   "ab2e032068bcb6eb84a7d800801f07f692e71098c85f07c210f1099a5eb9a2c5"
+    sha256 arm64_sequoia: "a3edba10cdd780018153558ffe5dffbed7263e816893d9da6eb6bb3e89efb703"
+    sha256 arm64_sonoma:  "6671ef9e52fcfd4d56f91d69a59f8976bbda0e7e59747960215662d1e44b6d64"
+    sha256 sonoma:        "efe809093c9c64f6c6138fdb6a9d798f84ab50608375b98b19e1d023e69c3edc"
+    sha256 arm64_linux:   "842704687c6bac3621aa2982b5c12bb0f8f15196648f6e3d12c2d847fae8307d"
+    sha256 x86_64_linux:  "1b214b5db904191d97bed11533e7e1da53528a9ca8f2ac3fb9394da683315cf6"
   end
 
   depends_on "asio" => :build
@@ -59,27 +67,25 @@ class Csound < Formula
   depends_on "openssl@3"
   depends_on "portaudio"
   depends_on "portmidi"
-  depends_on "python@3.12"
+  depends_on "python@3.14"
   depends_on "stk"
   depends_on "wiiuse"
 
   uses_from_macos "bison" => :build
   uses_from_macos "flex" => :build
   uses_from_macos "curl"
-  uses_from_macos "zlib"
 
   on_linux do
     depends_on "alsa-lib"
     depends_on "libx11"
+    depends_on "zlib-ng-compat"
   end
 
   conflicts_with "libextractor", because: "both install `extract` binaries"
 
-  fails_with gcc: "5"
-
   resource "ableton-link" do
-    url "https://github.com/Ableton/link/archive/refs/tags/Link-3.1.2.tar.gz"
-    sha256 "2673dfad75b1484e8388deb8393673c3304b3ab5662dd5828e08e029ca8797aa"
+    url "https://github.com/Ableton/link/archive/refs/tags/Link-3.1.3.tar.gz"
+    sha256 "b0eba86d40a46b01ab821cdfb53041bfc693f0266538ea8163f1cea7ac42f476"
   end
 
   resource "csound-plugins" do
@@ -91,6 +97,15 @@ class Csound < Formula
       url "https://github.com/csound/plugins/commit/13800c4dd58e3c214e5d7207180ad7115b4e2f27.patch?full_index=1"
       sha256 "e088cc300845408f3956f070fa34a900b700c7860678bc6d37f7506d615787a6"
     end
+
+    # Apply Arch Linux patch to fix build with HDF5 2.0.0
+    patch do
+      url "https://gitlab.archlinux.org/archlinux/packaging/packages/csound-plugins/-/raw/e0a3b3162a4f61445ea993e7e8abba091458a0ba/hdf5-2.0.patch"
+      sha256 "ea1bddc8fe921a7deed49756d91b8e0e7b4dd822617877520a36d0c42730ef27"
+    end
+
+    # Fix Eigen detection to work with Homebrew's Eigen formula
+    patch :DATA
   end
 
   resource "getfem" do
@@ -99,7 +114,7 @@ class Csound < Formula
   end
 
   def python3
-    which("python3.12")
+    which("python3.14")
   end
 
   def install
@@ -132,7 +147,11 @@ class Csound < Formula
       resource("ableton-link").stage buildpath/"ableton-link"
       resource("getfem").stage { cp_r "src/gmm", buildpath }
 
+      # Can remove minimum policy in a release with
+      # https://github.com/csound/plugins/commit/0a95ad72b5eb0a81bc680c2ac04da9a7c220715b
       args = %W[
+        -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+        -DCMAKE_CXX_STANDARD=17
         -DABLETON_LINK_HOME=#{buildpath}/ableton-link
         -DBUILD_ABLETON_LINK_OPCODES=ON
         -DBUILD_CHUA_OPCODES=ON
@@ -203,10 +222,9 @@ class Csound < Formula
   end
 
   test do
-    (testpath/"test.orc").write <<~EOS
+    (testpath/"test.orc").write <<~ORC
       0dbfs = 1
       gi_peer link_create
-      gi_programHandle faustcompile "process = _;", "--vectorize --loop-variant 1"
       FLrun
       gi_fluidEngineNumber fluidEngine
       gi_realVector la_i_vr_create 1
@@ -219,12 +237,12 @@ class Csound < Formula
           mp3out a_signal, a_signal, "test.mp3"
           out a_signal
       endin
-    EOS
+    ORC
 
-    (testpath/"test.sco").write <<~EOS
+    (testpath/"test.sco").write <<~SCO
       i 1 0 1
       e
-    EOS
+    SCO
 
     if OS.mac?
       ENV["OPCODE6DIR64"] = frameworks/"CsoundLib64.framework/Resources/Opcodes64"
@@ -237,40 +255,77 @@ class Csound < Formula
 
     system bin/"csound", "test.orc", "test.sco"
 
-    assert_predicate testpath/"test.#{OS.mac? ? "aif" : "wav"}", :exist?
-    assert_predicate testpath/"test.h5", :exist?
-    assert_predicate testpath/"test.mp3", :exist?
+    assert_path_exists testpath/"test.#{OS.mac? ? "aif" : "wav"}"
+    assert_path_exists testpath/"test.h5"
+    assert_path_exists testpath/"test.mp3"
 
-    (testpath/"opcode-existence.orc").write <<~EOS
+    (testpath/"opcode-existence.orc").write <<~ORC
+      gi_programHandle faustcompile "process = _;", "--vectorize --loop-variant 1"
       JackoInfo
       instr 1
           i_ websocket 8888, 0
           i_ wiiconnect 1, 1
       endin
-    EOS
+    ORC
     system bin/"csound", "--orc", "--syntax-check-only", "opcode-existence.orc"
 
     if OS.mac?
-      (testpath/"mac-opcode-existence.orc").write <<~EOS
+      (testpath/"mac-opcode-existence.orc").write <<~ORC
         instr 1
             p5gconnect
         endin
-      EOS
+      ORC
       system bin/"csound", "--orc", "--syntax-check-only", "mac-opcode-existence.orc"
     end
 
     system python3, "-c", "import ctcsound"
 
-    (testpath/"test.java").write <<~EOS
+    (testpath/"test.java").write <<~JAVA
       import csnd6.*;
       public class test {
           public static void main(String args[]) {
               csnd6.csoundInitialize(csnd6.CSOUNDINIT_NO_ATEXIT | csnd6.CSOUNDINIT_NO_SIGNAL_HANDLER);
           }
       }
-    EOS
+    JAVA
     system Formula["openjdk"].bin/"javac", "-classpath", "#{libexec}/csnd6.jar", "test.java"
     system Formula["openjdk"].bin/"java", "-classpath", "#{libexec}/csnd6.jar:.",
                                           "-Djava.library.path=#{libexec}", "test"
   end
 end
+
+__END__
+diff --git a/cmake/Modules/FindEIGEN3.cmake b/cmake/Modules/FindEIGEN3.cmake
+index 9eec7b4..40c3af0 100644
+--- a/cmake/Modules/FindEIGEN3.cmake
++++ b/cmake/Modules/FindEIGEN3.cmake
+@@ -36,27 +36,8 @@ if(NOT Eigen3_FIND_VERSION)
+ endif(NOT Eigen3_FIND_VERSION)
+ 
+ macro(_eigen3_check_version)
+-  file(READ "${EIGEN3_INCLUDE_DIR}/Eigen/src/Core/util/Macros.h" _eigen3_version_header)
+-
+-  string(REGEX MATCH "define[ \t]+EIGEN_WORLD_VERSION[ \t]+([0-9]+)" _eigen3_world_version_match "${_eigen3_version_header}")
+-  set(EIGEN3_WORLD_VERSION "${CMAKE_MATCH_1}")
+-  string(REGEX MATCH "define[ \t]+EIGEN_MAJOR_VERSION[ \t]+([0-9]+)" _eigen3_major_version_match "${_eigen3_version_header}")
+-  set(EIGEN3_MAJOR_VERSION "${CMAKE_MATCH_1}")
+-  string(REGEX MATCH "define[ \t]+EIGEN_MINOR_VERSION[ \t]+([0-9]+)" _eigen3_minor_version_match "${_eigen3_version_header}")
+-  set(EIGEN3_MINOR_VERSION "${CMAKE_MATCH_1}")
+-
+-  set(EIGEN3_VERSION ${EIGEN3_WORLD_VERSION}.${EIGEN3_MAJOR_VERSION}.${EIGEN3_MINOR_VERSION})
+-  if(${EIGEN3_VERSION} VERSION_LESS ${Eigen3_FIND_VERSION})
+-    set(EIGEN3_VERSION_OK FALSE)
+-  else(${EIGEN3_VERSION} VERSION_LESS ${Eigen3_FIND_VERSION})
+-    set(EIGEN3_VERSION_OK TRUE)
+-  endif(${EIGEN3_VERSION} VERSION_LESS ${Eigen3_FIND_VERSION})
+-
+-  if(NOT EIGEN3_VERSION_OK)
+-
+-    message(STATUS "Eigen3 version ${EIGEN3_VERSION} found in ${EIGEN3_INCLUDE_DIR}, "
+-                   "but at least version ${Eigen3_FIND_VERSION} is required")
+-  endif(NOT EIGEN3_VERSION_OK)
++  set(EIGEN3_VERSION "5.0.1")
++  set(EIGEN3_VERSION_OK TRUE)
+ endmacro(_eigen3_check_version)
+ 
+ if (EIGEN3_INCLUDE_DIR)

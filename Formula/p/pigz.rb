@@ -4,7 +4,8 @@ class Pigz < Formula
   url "https://zlib.net/pigz/pigz-2.8.tar.gz"
   sha256 "eb872b4f0e1f0ebe59c9f7bd8c506c4204893ba6a8492de31df416f0d5170fd0"
   license "Zlib"
-  head "https://github.com/madler/pigz.git", branch: "develop"
+  revision 1
+  head "https://github.com/madler/pigz.git", branch: "master"
 
   livecheck do
     url :homepage
@@ -12,23 +13,21 @@ class Pigz < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "97752b6fd2b65df80d73068299789a714fb01b6b904fd843c142677e4f2c3db7"
-    sha256 cellar: :any,                 arm64_ventura:  "ddd9fed16f07f42285d3a4a46b6d769f4ca2e902827dbd44a3f69597eca5cb77"
-    sha256 cellar: :any,                 arm64_monterey: "043af6f4e17cb7776003f982331552ed3b6ce10a46fdce4687952fa9443fbab8"
-    sha256 cellar: :any,                 arm64_big_sur:  "1f4b378d4427db80c89231ddf0ca710f11c6a300d36687b30025dcd263c9441e"
-    sha256 cellar: :any,                 sonoma:         "cd7b739570e228afbea2ad719c4789607d41a441d6c03dd4115a97e67cae729c"
-    sha256 cellar: :any,                 ventura:        "0d30f581ef66c28103ccec510b9df46f2cd761bc9f9ce76af0422b60256739f7"
-    sha256 cellar: :any,                 monterey:       "0ef362a072b9e707ee292162d44d46a23e9f04c1e239d05f462d20fad9c8c1b2"
-    sha256 cellar: :any,                 big_sur:        "cd36e7d4ec7c3f373a4e74f280ac1001aa834d035f20a3ec3a2e3140f75fd525"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "ca1011cd83d5acec7b50fd581f4efa9d189c22058d652736f3dc565a0165c67b"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "042145d01637ec82b2da2e4c2ef05ff1391b39c5aaafdebbe46d43f2b595404a"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "3dfeb313ced9d0f068c33679c38a50db0a2a26a9177ffd0d6845d1320cea3879"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "671f18fa88cf17e1eed437f51b85b97ef54b0d650222d3a905d60fe4399a57f0"
+    sha256 cellar: :any_skip_relocation, sonoma:        "1b7fedaf53aad7b5d257fe1789ad82d864979a70dc6b1a2b51ca913b131c1673"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "2d4c423ba93d711357705b6f4bd87d39c83ec4d60a94fd0ef08a2c875532eeee"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "9daa1d45e359ca4ff5c166c27c17803b3218ca73446e957df017614671ee9690"
   end
 
-  depends_on "zopfli"
-  uses_from_macos "zlib"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
-    libzopfli = Formula["zopfli"].opt_lib/shared_library("libzopfli")
-    system "make", "CC=#{ENV.cc}", "CFLAGS=#{ENV.cflags}", "ZOP=#{libzopfli}"
+    system "make", "CC=#{ENV.cc}", "CFLAGS=#{ENV.cflags}"
     bin.install "pigz", "unpigz"
     man1.install "pigz.1"
     man1.install_symlink "pigz.1" => "unpigz.1"
@@ -38,7 +37,7 @@ class Pigz < Formula
     test_data = "a" * 1000
     (testpath/"example").write test_data
     system bin/"pigz", testpath/"example"
-    assert (testpath/"example.gz").file?
+    assert_predicate testpath/"example.gz", :file?
     system bin/"unpigz", testpath/"example.gz"
     assert_equal test_data, (testpath/"example").read
     system "/bin/dd", "if=/dev/random", "of=foo.bin", "bs=1024k", "count=10"

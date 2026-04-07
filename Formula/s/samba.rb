@@ -4,9 +4,10 @@ class Samba < Formula
   # option. The shared folder appears in the guest as "\\10.0.2.4\qemu".
   desc "SMB/CIFS file, print, and login server for UNIX"
   homepage "https://www.samba.org/"
-  url "https://download.samba.org/pub/samba/stable/samba-4.21.0.tar.gz"
-  sha256 "09bb56db4ce003cafdbebe9bad368c4f4ff1945f732d18077d52f36ab20cef88"
+  url "https://download.samba.org/pub/samba/stable/samba-4.24.0.tar.gz"
+  sha256 "1b1e457fd651a612cd08226cc6efd04e5d01e36d918c8b4c4e470e74e86881ea"
   license "GPL-3.0-or-later"
+  compatibility_version 1
 
   livecheck do
     url "https://www.samba.org/samba/download/"
@@ -14,24 +15,25 @@ class Samba < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "1313554b2cea443140277e014635f42b24f4ad327ed76a54abab98e0328ce50f"
-    sha256 arm64_ventura:  "52ba8d7910f9ef238b2bbf1d98fcc438deb7de2da727e31b0fe3641d21d9fd30"
-    sha256 arm64_monterey: "353d457204f8de6214fc10632b7af2946e2299cd050b3a2cb480ed3ab5a1b590"
-    sha256 sonoma:         "4e32f0d36741ef7ed0e84fb171938e15d33c6f8a3cf14b73a02a5df39f272bbc"
-    sha256 ventura:        "a6bd43a549aded7a993e9f64e0072cc1142ac3ef4cf18d6c7bf42c8207065c61"
-    sha256 monterey:       "e01579d1da7e89347842cacee7b673bb721fc93ddaa547db720dd91bed4facf9"
-    sha256 x86_64_linux:   "00fcc92aaf20aca13f869d84a999545a0bfa2a6059d97425928f31fa7faa6e87"
+    sha256 arm64_tahoe:   "74448233be190512589ccc4663b988a577591ec6658dc972d6bea2beb3525d24"
+    sha256 arm64_sequoia: "05b9b152a4b06ffdd8a6b2a934b847c7961b4723f66c504062ab9ad24ab3335b"
+    sha256 arm64_sonoma:  "6f522b148a9755a086d5ae272a8d04a872edfa615867a8d4c9c8ab1a73bfc624"
+    sha256 sonoma:        "433a9b3f63b849a573cb9ea508a923cf54f291355db25d4db4de0e677ade7455"
+    sha256 arm64_linux:   "57feb751bd0bf4727a9149a7a28c74e49bb6a99cfc3deca2c91e72992481fbb4"
+    sha256 x86_64_linux:  "58240489d5be582badc09e76c22ceadd7a63983708daaa1062ed8ccf8933d9a7"
   end
 
   depends_on "bison" => :build
   depends_on "cmocka" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "gnutls"
   # icu4c can get linked if detected by pkg-config and there isn't a way to force disable
   # without disabling spotlight support. So we just enable the feature for all systems.
-  depends_on "icu4c"
+  depends_on "icu4c@78"
   depends_on "krb5"
   depends_on "libtasn1"
+  depends_on "libxcrypt"
+  depends_on "lmdb"
   depends_on "popt"
   depends_on "readline"
   depends_on "talloc"
@@ -42,7 +44,6 @@ class Samba < Formula
   uses_from_macos "perl" => :build
   uses_from_macos "python" => :build # configure requires python3 binary
   uses_from_macos "libxcrypt"
-  uses_from_macos "zlib"
 
   on_macos do
     depends_on "gettext"
@@ -51,6 +52,7 @@ class Samba < Formula
 
   on_linux do
     depends_on "libtirpc"
+    depends_on "zlib-ng-compat"
   end
 
   conflicts_with "jena", because: "both install `tdbbackup` binaries"
@@ -59,6 +61,15 @@ class Samba < Formula
   resource "Parse::Yapp" do
     url "https://cpan.metacpan.org/authors/id/W/WB/WBRASWELL/Parse-Yapp-1.21.tar.gz"
     sha256 "3810e998308fba2e0f4f26043035032b027ce51ce5c8a52a8b8e340ca65f13e5"
+  end
+
+  # upstream bug report, https://bugzilla.samba.org/show_bug.cgi?id=10791
+  # https://bugzilla.samba.org/show_bug.cgi?id=10626
+  # https://bugzilla.samba.org/show_bug.cgi?id=9665
+  # upstream pr ref, https://gitlab.com/samba-team/samba/-/merge_requests/3902
+  patch do
+    url "https://gitlab.com/samba-team/samba/-/commit/a2736fe78a4e75e71b9bc53dc24c36d71b911d2a.diff"
+    sha256 "7d1bf9eb26211e2ab9e3e67ae32308a3704ff9904ab2369e5d863e079ea8a03f"
   end
 
   def install
@@ -76,8 +87,16 @@ class Samba < Formula
       end
     end
     ENV.append "LDFLAGS", "-Wl,-rpath,#{lib}/private" if OS.linux?
+
+    bundled_libs_list = []
+    # Upstream (https://github.com/lxin/quic) has no tagged releases, so we would have to add an arbitrary
+    # commit as a resource. That's not really better than just using the vendored copy. Consider breaking
+    # it out into a resource or formula once tagged releases become available.
+    bundled_libs_list << "libquic" if OS.linux?
+    bundled_libs = bundled_libs_list.empty? ? "NONE" : bundled_libs_list.join(",")
+
     system "./configure",
-           "--bundled-libraries=NONE",
+           "--bundled-libraries=#{bundled_libs}",
            "--private-libraries=!ldb",
            "--disable-cephfs",
            "--disable-cups",
@@ -123,9 +142,9 @@ class Samba < Formula
 
   test do
     smbd = if OS.mac?
-      "#{sbin}/samba-dot-org-smbd"
+      sbin/"samba-dot-org-smbd"
     else
-      "#{sbin}/smbd"
+      sbin/"smbd"
     end
 
     system smbd, "--build-options", "--configfile=/dev/null"

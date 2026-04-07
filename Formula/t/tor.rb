@@ -1,9 +1,10 @@
 class Tor < Formula
   desc "Anonymizing overlay network for TCP"
   homepage "https://www.torproject.org/"
-  url "https://www.torproject.org/dist/tor-0.4.8.12.tar.gz"
-  mirror "https://www.torservers.net/mirrors/torproject.org/dist/tor-0.4.8.12.tar.gz"
-  sha256 "ca7cc735d98e3747b58f2f3cc14f804dd789fa0fb333a84dcb6bd70adbb8c874"
+  url "https://www.torproject.org/dist/tor-0.4.9.6.tar.gz"
+  mirror "https://www.torservers.net/mirrors/torproject.org/dist/tor-0.4.9.6.tar.gz"
+  mirror "https://fossies.org/linux/misc/tor-0.4.9.6.tar.gz"
+  sha256 "a89aba97052e9963a654b40df2d46be07e8a6b6e24e5437917fd81acd90a7017"
   # Complete list of licenses:
   # https://gitweb.torproject.org/tor.git/plain/LICENSE
   license all_of: [
@@ -12,6 +13,7 @@ class Tor < Formula
     "MIT",
     "NCSA",
   ]
+  compatibility_version 1
 
   livecheck do
     url "https://dist.torproject.org/"
@@ -19,21 +21,22 @@ class Tor < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "08619f6e0f621afa6eb43c65c0ac4ffaa31568f89dfa428afd467b1a55eb9a6f"
-    sha256 arm64_ventura:  "c69f50f0e4607d5c0e2ce6e8360370d23a7d27247fd59303c5bdea52d0c263e6"
-    sha256 arm64_monterey: "ede75266f6688ec46c38caeab8c6a1fb0e4dd0bbbbe102813256afc98f2d545c"
-    sha256 sonoma:         "d890388b853cf2bf5b5f8ace59b1e536e0bee8a25b6ad7a51d1fb9090da29cf0"
-    sha256 ventura:        "bf5aec6c7472b065f01f6ebc4566e5317f2a0e882428a0bf443e5871523ce583"
-    sha256 monterey:       "dba1976ae5d9556c3756a0cfea1581b370c11d92805d19d8a07724a537bf7cc0"
-    sha256 x86_64_linux:   "731735eab74edb5048994957d64222b39323d1e03cc122cafa74f7670555b72b"
+    sha256 arm64_tahoe:   "0ef89fbe46ae01eb13535f136f86905a7c1cf6d709a16bf42a2b4a0ee0321935"
+    sha256 arm64_sequoia: "152bc133e9a02aa116a0648c25372f067f0a7dda8ea8121713811567176fe854"
+    sha256 arm64_sonoma:  "804870529d75fe0e9960094756d88a4448c44e3f234365d0960a78466a748e79"
+    sha256 sonoma:        "c03763050f73ea726be00e05c06bbad6cfacf21a7a4362c101589dbfb9faf820"
+    sha256 arm64_linux:   "e27de03c84dfe6a69ae6641ad5beed0282152e8849b34faa36403c0946edad09"
+    sha256 x86_64_linux:  "64e22323a9d0b8f9581c8f56071b58faab8c615379eee21b7977da8678964b8b"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "libevent"
   depends_on "libscrypt"
   depends_on "openssl@3"
 
-  uses_from_macos "zlib"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     args = %W[
@@ -57,8 +60,8 @@ class Tor < Formula
 
   test do
     pipe_output("#{bin}/tor-gencert --create-identity-key --passphrase-fd 0")
-    assert_predicate testpath/"authority_certificate", :exist?
-    assert_predicate testpath/"authority_identity_key", :exist?
-    assert_predicate testpath/"authority_signing_key", :exist?
+    assert_path_exists testpath/"authority_certificate"
+    assert_path_exists testpath/"authority_identity_key"
+    assert_path_exists testpath/"authority_signing_key"
   end
 end

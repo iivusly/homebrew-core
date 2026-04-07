@@ -1,10 +1,11 @@
 class Librist < Formula
   desc "Reliable Internet Stream Transport (RIST)"
   homepage "https://code.videolan.org/rist/"
-  url "https://code.videolan.org/rist/librist/-/archive/v0.2.10/librist-v0.2.10.tar.gz"
-  sha256 "797e486961cd09bc220c5f6561ca5a08e7747b313ec84029704d39cbd73c598c"
+  url "https://code.videolan.org/rist/librist/-/archive/v0.2.11/librist-v0.2.11.tar.gz"
+  sha256 "84e413fa9a1bc4e2607ecc0e51add363e1bc5ad42f7cc5baec7b253e8f685ad3"
   license "BSD-2-Clause"
   revision 1
+  compatibility_version 1
   head "https://code.videolan.org/rist/librist.git", branch: "master"
 
   livecheck do
@@ -13,22 +14,21 @@ class Librist < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "a008dc6bced0ba4ac31a79da417afa539d4ab0d25b9d22769ea396a17b355c8c"
-    sha256 cellar: :any,                 arm64_ventura:  "0033aff814342a0a4900ea6914411e7a9b506c938038017aa49f197c33283bd2"
-    sha256 cellar: :any,                 arm64_monterey: "2604a28b6b7cec24badaf0ea472cae1b3524fcf1a082098394279867e5ad30ee"
-    sha256 cellar: :any,                 sonoma:         "323c1b0e5a44a85657052208a0ed481a0a7aba20ab8e2d06c7e3fb5593c4cc4e"
-    sha256 cellar: :any,                 ventura:        "cb36444b6c786bcfbbe40af9579f68a88e153e5d8192b8f55a8a8d6f0d5b4c4f"
-    sha256 cellar: :any,                 monterey:       "c89029f1a47bae2ef37f7488942a86da57e2d49048f385df1442ee666f90a24e"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "d94498117f55c482ad621f50696c9592e8d7226ed92ef8d3028faf0afd3a69fc"
+    sha256 cellar: :any,                 arm64_tahoe:   "a3ec6f80dbc0c4a2f462a6e1485383684404cbc2cf0bef1e8893a847cf40cbc0"
+    sha256 cellar: :any,                 arm64_sequoia: "bad9e900548801c915eb830471b6c77e87a9dc98b813625c81de70fbbed0432f"
+    sha256 cellar: :any,                 arm64_sonoma:  "a7b306a05984387478ebd318c5eadd09303bec36d67cc9830d49d85a1b2e9938"
+    sha256 cellar: :any,                 sonoma:        "de3c3d22ff646e823a60df6e77fee66031de804e73dc7580fc6ba89972acdf27"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "18175c43e2082dfff0edb5f4a0d9c3558d792995bf9985fb0bf4aa059cd0cc9c"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "1f293ec4fefab0d33b17e43019ad4593e764506d5fdb336d1884d829ba9fe531"
   end
 
   depends_on "meson" => :build
   depends_on "ninja" => :build
   depends_on "cjson"
   depends_on "libmicrohttpd"
-  depends_on "mbedtls"
+  depends_on "mbedtls@3"
 
-  # Add build macos build patch
+  # remove brew setup
   patch :DATA
 
   def install
@@ -45,19 +45,19 @@ class Librist < Formula
 end
 
 __END__
-diff --git a/tools/srp_shared.c b/tools/srp_shared.c
-index f782126..900db41 100644
---- a/tools/srp_shared.c
-+++ b/tools/srp_shared.c
-@@ -173,7 +173,11 @@ void user_verifier_lookup(char * username,
- 	if (stat(srpfile, &buf) != 0)
- 		return;
+diff --git a/meson.build b/meson.build
+index 05d00b3..254d0ab 100755
+--- a/meson.build
++++ b/meson.build
+@@ -39,11 +39,6 @@ deps = []
+ platform_files = []
+ inc = []
+ inc += include_directories('.', 'src', 'include/librist', 'include', 'contrib')
+-if (host_machine.system() == 'darwin')
+-	r = run_command('brew', '--prefix', check: true)
+-	brewoutput = r.stdout().strip()
+-	inc += include_directories(brewoutput + '/include')
+-endif
 
-+#ifdef __APPLE__
-+	*generation = ((uint64_t)buf.st_mtimespec.tv_sec << 32) | buf.st_mtimespec.tv_nsec;
-+#else
- 	*generation = ((uint64_t)buf.st_mtim.tv_sec << 32) | buf.st_mtim.tv_nsec;
-+#endif
- #endif
-
- 	if (!lookup_data || !hashversion)
+ #builtin_lz4 = get_option('builtin_lz4')
+ builtin_cjson = get_option('builtin_cjson')

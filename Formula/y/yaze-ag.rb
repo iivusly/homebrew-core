@@ -1,7 +1,7 @@
 class YazeAg < Formula
   desc "Yet Another Z80 Emulator (by AG)"
-  homepage "https://www.mathematik.uni-ulm.de/users/ag/yaze-ag/"
-  url "https://www.mathematik.uni-ulm.de/users/ag/yaze-ag/devel/yaze-ag-2.51.3.tar.gz"
+  homepage "https://agl.yaze-ag.de/"
+  url "https://agl.yaze-ag.de/devel/yaze-ag-2.51.3.tar.gz"
   sha256 "2b0a90c3bf3a27574b0427cf4579dc2347b371bec3fea5739e1527edf74b2809"
   license "GPL-2.0-or-later"
 
@@ -11,6 +11,8 @@ class YazeAg < Formula
   end
 
   bottle do
+    sha256 arm64_tahoe:    "6e9592d8cca859c7bf9b18bb4adb4a00a24a9476091bb813739b4234897a6edd"
+    sha256 arm64_sequoia:  "bfd9c7701ebbea4917f2874690b38b6c1cf129bc228305dfd64d5e56222d69e3"
     sha256 arm64_sonoma:   "7c92d3d3d2b899192243ca7951d22183d4f2ebdcc5ab999c51742797b5f52d7d"
     sha256 arm64_ventura:  "dfde75b6e01c854c6e368e7c0b1e6ad1041595c7f7c3c4564aee651a3db1e239"
     sha256 arm64_monterey: "e16e79f90ea2bc48a220d2e4d3ce8e72acefe6a3f6382709d1d69b0cc4e0f221"
@@ -20,6 +22,7 @@ class YazeAg < Formula
     sha256 monterey:       "0b4e934e85cea0db946cf6df95393be56e2e330665786fde9437e091197379d9"
     sha256 big_sur:        "32ef5add9479aef13177444a6a148e1fb2ae9719f2b043b1c235804b461f3e84"
     sha256 catalina:       "4954f1099ce8a6ed84a8f074221f4bd75a7abcc8e6303c733ff02221651f36bd"
+    sha256 arm64_linux:    "fe1573637f8de598f6aa135717d263ddbb580d7a5ab5e8295e7bef85ce5b8109"
     sha256 x86_64_linux:   "7a3cfeda8e67249ed33bdc5c6d37c037895967530f1f416cb8dbe908cfb922fe"
   end
 

@@ -1,10 +1,11 @@
 class Octave < Formula
   desc "High-level interpreted language for numerical computing"
   homepage "https://octave.org/index.html"
-  url "https://ftp.gnu.org/gnu/octave/octave-9.2.0.tar.xz"
-  mirror "https://ftpmirror.gnu.org/octave/octave-9.2.0.tar.xz"
-  sha256 "21417afb579105b035cac0bea09201522e384893ae90a781b8727efa32765807"
+  url "https://ftpmirror.gnu.org/gnu/octave/octave-11.1.0.tar.xz"
+  mirror "https://ftp.gnu.org/gnu/octave/octave-11.1.0.tar.xz"
+  sha256 "8b3e2d0ec1809e8a2bed11de779014b6eb6a469c0caad1b339d29a6126e3cb6a"
   license "GPL-3.0-or-later"
+  compatibility_version 1
 
   # New tarballs appear on https://ftp.gnu.org/gnu/octave/ before a release is
   # announced, so we check the octave.org download page instead.
@@ -14,17 +15,16 @@ class Octave < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "02f7cc330a2375c96920796a281e93087399509754c41fdd25f83794f1396690"
-    sha256 arm64_ventura:  "f89bc978f60040fdc82e5d1f2fe16ff26c5ab94fe2795ad75bd0bd776f9772ff"
-    sha256 arm64_monterey: "4878ff0d0ff235453053b256207c625cfda8133440eb1edceacfbc5c4f2a8685"
-    sha256 sonoma:         "4fbbbdc08918039d20113559a8daaad2edeca34581784fc6c5c0ec93d379c28d"
-    sha256 ventura:        "e5ddc3cba4721722c34a319bb097b4c84c4c4e29a3318139af1513ff8a905612"
-    sha256 monterey:       "939a246d08b1bae6d6682700cbb8c361867544046dce81efeade8a544963a212"
-    sha256 x86_64_linux:   "6287c397454f4d4c2c6e1871d0cbcd92e363fbb26f605242f264572c1be4c7f6"
+    sha256 arm64_tahoe:   "eb9e33aae3eda5c4c6f317c870051bf760af6e8baffcabf495ec096a1ac552db"
+    sha256 arm64_sequoia: "60710c4bccda4b8d3758a9901ee362325a88f302ef037526a7ae765bcef931df"
+    sha256 arm64_sonoma:  "3718cbdecc5fd7e80b4cdb02fc132dc38a0ed985e49a0916d184bdeb6eae3f8b"
+    sha256 sonoma:        "b6da3844e5b5a94578bdca36291c38d84e0e163da6fd9ac118b737ea08615749"
+    sha256 arm64_linux:   "9c891f169b5a0bd821550baa5f63c7007e46b404acf526d912fdbf49e83422ca"
+    sha256 x86_64_linux:  "ae513c984d980c0ced1b4d3be890f5183b59cae6712b49162fdd65d57f412d2a"
   end
 
   head do
-    url "https://hg.savannah.gnu.org/hgweb/octave", branch: "default", using: :hg
+    url "https://hg.octave.org/octave", using: :hg
 
     depends_on "autoconf" => :build
     depends_on "automake" => :build
@@ -36,7 +36,7 @@ class Octave < Formula
   # Complete list of dependencies at https://wiki.octave.org/Building
   depends_on "gnu-sed" => :build # https://lists.gnu.org/archive/html/octave-maintainers/2016-09/msg00193.html
   depends_on "openjdk" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "arpack"
   depends_on "epstool"
   depends_on "fftw"
@@ -59,7 +59,9 @@ class Octave < Formula
   depends_on "qhull"
   depends_on "qrupdate"
   depends_on "qscintilla2"
-  depends_on "qt"
+  depends_on "qt5compat"
+  depends_on "qtbase"
+  depends_on "qttools"
   depends_on "rapidjson"
   depends_on "readline"
   depends_on "suite-sparse"
@@ -68,10 +70,13 @@ class Octave < Formula
 
   uses_from_macos "bzip2"
   uses_from_macos "curl"
-  uses_from_macos "zlib"
 
   on_macos do
     depends_on "little-cms2"
+  end
+
+  on_sequoia :or_older do
+    depends_on "fast_float" => :build
   end
 
   on_linux do
@@ -79,23 +84,11 @@ class Octave < Formula
     depends_on "automake"
     depends_on "mesa"
     depends_on "mesa-glu"
+    depends_on "wayland"
+    depends_on "zlib-ng-compat"
   end
 
-  # Dependencies use Fortran, leading to spurious messages about GCC
-  cxxstdlib_check :skip
-
-  fails_with gcc: "5"
-
   def install
-    # Default configuration passes all linker flags to mkoctfile, to be
-    # inserted into every oct/mex build. This is unnecessary and can cause
-    # cause linking problems.
-    inreplace "src/mkoctfile.in.cc",
-              /%OCTAVE_CONF_OCT(AVE)?_LINK_(DEPS|OPTS)%/,
-              '""'
-
-    ENV.prepend_path "PKG_CONFIG_PATH", Formula["qt"].opt_libexec/"lib/pkgconfig" if OS.mac?
-
     system "./bootstrap" if build.head?
     args = [
       "--disable-silent-rules",
@@ -126,7 +119,10 @@ class Octave < Formula
     end
 
     system "./configure", *args, *std_configure_args
-    system "make", "all"
+    # https://github.com/Homebrew/homebrew-core/pull/170959#issuecomment-2351023470
+    ENV.deparallelize do
+      system "make", "all"
+    end
 
     # Avoid revision bumps whenever fftw's, gcc's or OpenBLAS' Cellar paths change
     inreplace "src/mkoctfile.cc" do |s|
@@ -143,27 +139,39 @@ class Octave < Formula
 
   test do
     ENV["LC_ALL"] = "en_US.UTF-8"
+    ENV.delete "CXX" # make sure Octave's default works without manual -std=...
+
     system bin/"octave", "--eval", "(22/7 - pi)/pi"
     # This is supposed to crash octave if there is a problem with BLAS
     system bin/"octave", "--eval", "single ([1+i 2+i 3+i]) * single ([ 4+i ; 5+i ; 6+i])"
+
     # Test basic compilation
-    (testpath/"oct_demo.cc").write <<~EOS
+    (testpath/"oct_demo.cc").write <<~CPP
       #include <octave/oct.h>
       DEFUN_DLD (oct_demo, args, /*nargout*/, "doc str")
       { return ovl (42); }
-    EOS
-    system bin/"octave", "--eval", <<~EOS
-      mkoctfile ('-v', '-std=c++11', '-L#{lib}/octave/#{version}', 'oct_demo.cc');
+    CPP
+    system bin/"octave", "--eval", <<~MATLAB
+      mkoctfile ('-v', '-L#{lib}/octave/#{version}', 'oct_demo.cc');
       assert(oct_demo, 42)
-    EOS
+    MATLAB
+
     # Test FLIBS environment variable
-    system bin/"octave", "--eval", <<~EOS
+    system bin/"octave", "--eval", <<~MATLAB
       args = strsplit (mkoctfile ('-p', 'FLIBS'));
       args = args(~cellfun('isempty', args));
-      mkoctfile ('-v', '-std=c++11', '-L#{lib}/octave/#{version}', args{:}, 'oct_demo.cc');
+      mkoctfile ('-v', '-L#{lib}/octave/#{version}', args{:}, 'oct_demo.cc');
       assert(oct_demo, 42)
-    EOS
-    ENV["QT_QPA_PLATFORM"] = "minimal"
-    system bin/"octave", "--gui"
+    MATLAB
+
+    if OS.linux?
+      ENV["QT_QPA_PLATFORM"] = "minimal"
+      system bin/"octave", "--gui"
+    else
+      pid = spawn(bin/"octave", "--gui")
+      sleep 5
+      system "pkill", "-KILL", "octave-gui"
+      Process.wait(pid)
+    end
   end
 end

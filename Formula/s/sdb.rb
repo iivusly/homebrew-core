@@ -1,24 +1,23 @@
 class Sdb < Formula
   desc "Ondisk/memory hashtable based on CDB"
-  homepage "https://github.com/radareorg/sdb"
-  url "https://github.com/radareorg/sdb/archive/refs/tags/2.0.1.tar.gz"
-  sha256 "053dd19eb642135d5726fa2b9cbeb394befe95e9fe607bed823de501cca34365"
+  homepage "https://www.radare.org/"
+  url "https://github.com/radareorg/sdb/archive/refs/tags/2.4.2.tar.gz"
+  sha256 "4b5c1c387307759aeeb76704d130a9bbe98bf68ae7bbab796efeb052e5e25e47"
   license "MIT"
   head "https://github.com/radareorg/sdb.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "93290582465ed3ba9fb67a8e9a609da68038bb657490a4735b8ddb75859f30ba"
-    sha256 cellar: :any,                 arm64_ventura:  "97e8c8df5c36921224815910ccd8aa3fdce8f66f7b51ab2658404b16d026c659"
-    sha256 cellar: :any,                 arm64_monterey: "930c20bd65468d75d7ad9c56573e19c11faf811e94300cde2aea8c14b77f7987"
-    sha256 cellar: :any,                 sonoma:         "e0aff0b588c6e3366646183995697338c5802536b7974f454d6454dd4f050001"
-    sha256 cellar: :any,                 ventura:        "85b9a8dcd0ad7e465c2dcdec26b62691bbd3be8458e7fcc87c4b0b46807c5d08"
-    sha256 cellar: :any,                 monterey:       "ea2dc0465223cc6149eb74bf30ebe01874dacb484b40a2a74169bf629cdc8bc0"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "755428c13355b296d6bea89f02587b1252f29c05a73f1cdf2d88f71af73177d8"
+    sha256 cellar: :any,                 arm64_tahoe:   "4af94e6653f3b456b749f2f545ffe63e0f99553ab645cab9c5f7811fc33a74a1"
+    sha256 cellar: :any,                 arm64_sequoia: "0f45bd45d169121dcf9b6749eaab1b62163fad8c44848458c125c4b551a1dc41"
+    sha256 cellar: :any,                 arm64_sonoma:  "090254bae8959c6c519d3da1aed26058f594563af78560ee0bfa9ca20022a893"
+    sha256 cellar: :any,                 sonoma:        "9bc15183746966b8280bfa577e6dd81e232441dc6b9c4cd22fed099686f36477"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "267a5a3b9a20139f936cb95a2ecb1f1a660d2d886cd7f3e45babd2120c76f96d"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "9034e5f06a9692dbc708521e226cf319c995c0511765322c9ee600fdf86237de"
   end
 
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "vala" => :build
   depends_on "glib"
 

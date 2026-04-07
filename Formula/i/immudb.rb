@@ -1,9 +1,10 @@
 class Immudb < Formula
   desc "Lightweight, high-speed immutable database"
-  homepage "https://www.codenotary.io"
-  url "https://github.com/codenotary/immudb/archive/refs/tags/v1.9.4.tar.gz"
-  sha256 "5b0ab816e64bc1fd9d1b86366e78a551a0ed3644771f4c409ad268ab3a651282"
+  homepage "https://immudb.io/"
+  url "https://github.com/codenotary/immudb/archive/refs/tags/v1.10.0.tar.gz"
+  sha256 "9d4cebe7fa2885580e0ec4bdbf3c5ef45dd543c1d473a984f64d56c7267dac5e"
   license "Apache-2.0"
+  head "https://github.com/codenotary/immudb.git", branch: "master"
 
   livecheck do
     url :stable
@@ -11,13 +12,13 @@ class Immudb < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "cf3b477a86914bea123c32ea594b66f090b711888a259cc6c2ec0f0e0ed47419"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "4d5ce1e1bcaad65754b451d2c0c485e3624a8e8b12338f54e3be3788e542ddd7"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "d2da507966ae4c6a9f9f938b633f41c9169b06536415867aedc8d7e400c726ae"
-    sha256 cellar: :any_skip_relocation, sonoma:         "b95f29677bd302d795374b826600470f3f38e881fad23e069b1427b177d3d8e6"
-    sha256 cellar: :any_skip_relocation, ventura:        "82ff44a5ac64eaf8ded21d6605fdcbf376515d113d88ed3ab6bf60512044db83"
-    sha256 cellar: :any_skip_relocation, monterey:       "77a893e1d6fa1360939edc8096c47af6dcddc37b8d022b0979b5e3ec092e87c5"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "56340b5c3c9c4710d9d3632a820e7dd072aafd83c9b631cbffa5a4df6b9d4eaf"
+    rebuild 2
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "57adcb7a7632dec66da3c2b4e3fa7ce595792344cf56184945fa2b6c43f9c5d4"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "25b86bfdee9da2132bd163a915ff854fddf0ae4088456896a1c68236f4ae14e0"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "70cad33673c8782eff8c6be315a0369b032136bb8ce4533419e2b7ef924144fd"
+    sha256 cellar: :any_skip_relocation, sonoma:        "757fcfe0a1ae956a994ecd3bfdcfa2d625c821d8fb3acbcbc242594a56c02710"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "5d5c3ca6b77702e93cda0ac7b5df13097fdd7e7f80f8c94a30a468ea7056c049"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "e5e7341bd110bd04d6d3cbaa92c723df5108b3ba65893e1882b420fd714af05d"
   end
 
   depends_on "go" => :build
@@ -28,11 +29,9 @@ class Immudb < Formula
 
     %w[immudb immuclient immuadmin].each do |binary|
       bin.install binary
-      generate_completions_from_executable(bin/binary, "completion", base_name: binary)
+      generate_completions_from_executable(bin/binary, shell_parameter_format: :cobra)
     end
-  end
 
-  def post_install
     (var/"immudb").mkpath
   end
 
@@ -47,9 +46,7 @@ class Immudb < Formula
   test do
     port = free_port
 
-    fork do
-      exec bin/"immudb", "--port=#{port}"
-    end
+    spawn bin/"immudb", "--port=#{port}"
     sleep 3
 
     assert_match "immuclient", shell_output("#{bin}/immuclient version")

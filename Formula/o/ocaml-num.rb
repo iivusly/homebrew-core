@@ -1,31 +1,28 @@
 class OcamlNum < Formula
   desc "OCaml legacy Num library for arbitrary-precision arithmetic"
   homepage "https://github.com/ocaml/num"
-  url "https://github.com/ocaml/num/archive/refs/tags/v1.5.tar.gz"
-  sha256 "7ae07c8f5601e2dfc5008a62dcaf2719912ae596a19365c5d7bdf2230515959a"
+  url "https://github.com/ocaml/num/archive/refs/tags/v1.6.tar.gz"
+  sha256 "b5cce325449aac746d5ca963d84688a627cca5b38d41e636cf71c68b60495b3e"
   license "LGPL-2.1-only" => { with: "OCaml-LGPL-linking-exception" }
   revision 1
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "7e7b2d6adfef7295f25999b02b580412d2fa696c6930b664c012a3de467d3573"
-    sha256 cellar: :any,                 arm64_ventura:  "75917ef34c2d9db4edb9e26c4032ed90e88b5b9c60d269a9d3eeec2d064b0010"
-    sha256 cellar: :any,                 arm64_monterey: "9e62643f96acfd3196326a958182691dac900fab5968460d4b94278e90c5a862"
-    sha256 cellar: :any,                 sonoma:         "82b313f948966c3e7ac0871dec7b2a086454c52701010a88a2f3eafea402db7b"
-    sha256 cellar: :any,                 ventura:        "3efd7a7c5e693579e750fbdf013e1cf709b31abe7bf41085b2223a31fcae5741"
-    sha256 cellar: :any,                 monterey:       "6d0fcf3f73719c755a40b41ca397a0210ac1ee336fb37685a3674673ae526de8"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "a8bd4fec57bb98c82767df5d77937b67170256cf20a67b9335ed30de3248ab75"
+    sha256 cellar: :any,                 arm64_tahoe:   "76c722dd8ad6f12ccdda09f952f5f6b0ac5d240c4bbb4ded7d78915cea582c3f"
+    sha256 cellar: :any,                 arm64_sequoia: "6e7f4d21c10922367590c1edce13ed4864b6aa7b75ed33d5533f0b08f9b3c101"
+    sha256 cellar: :any,                 arm64_sonoma:  "93da978a25ffe78f43852b07dd2dee9c06de67534ffaf389e96e8b5d3d152a2b"
+    sha256 cellar: :any,                 sonoma:        "b7eb0c9fbb0d0c9fc3234011c0954abea2c44774aeda331094897ed1363f37d8"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "1582f04ba6900e23021d99ef4450ae945935fde491e4fae1a24f05c22a690417"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "594ea85e889f5063ea86712ffc6930e71597c8b438b5d82663e925fdfdebd47b"
   end
 
   depends_on "ocaml-findlib" => :build
   depends_on "ocaml"
 
   def install
-    # Work around for https://github.com/Homebrew/homebrew-test-bot/issues/805
-    if ENV["HOMEBREW_GITHUB_ACTIONS"] && !(Formula["ocaml-findlib"].etc/"findlib.conf").exist?
-      ENV["OCAMLFIND_CONF"] = Formula["ocaml-findlib"].opt_libexec/"findlib.conf"
-    end
-
     ENV["OCAMLFIND_DESTDIR"] = lib/"ocaml"
+
+    # Work around https://github.com/ocaml/num/issues/43
+    inreplace "src/Makefile", "cp META.num META", "mv META.num META"
 
     (lib/"ocaml").mkpath
     cp Formula["ocaml"].opt_lib/"ocaml/Makefile.config", lib/"ocaml"
@@ -35,7 +32,7 @@ class OcamlNum < Formula
       s.change_make_var! "prefix", prefix
     end
 
-    system "make"
+    ENV.deparallelize { system "make" }
     (lib/"ocaml/stublibs").mkpath # `make install` assumes this directory exists
     system "make", "install", "STDLIBDIR=#{lib}/ocaml"
 

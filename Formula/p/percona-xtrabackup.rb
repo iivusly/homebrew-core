@@ -1,15 +1,16 @@
 class PerconaXtrabackup < Formula
   desc "Open source hot backup tool for InnoDB and XtraDB databases"
   homepage "https://www.percona.com/software/mysql-database/percona-xtrabackup"
-  # TODO: Check if we can use unversioned `protobuf` at version bump
-  url "https://downloads.percona.com/downloads/Percona-XtraBackup-LATEST/Percona-XtraBackup-8.0.35-31/source/tarball/percona-xtrabackup-8.0.35-31.tar.gz"
-  sha256 "c6bda1e7f983e5a667bff22d1d67d33404db4e741676d03c9c60bbd4b263cabf"
+  url "https://downloads.percona.com/downloads/Percona-XtraBackup-8.4/Percona-XtraBackup-8.4.0-5/source/tarball/percona-xtrabackup-8.4.0-5.tar.gz"
+  sha256 "fadcf27efd2a2596f689388659e2ff5c36debcc051a55974ac8bb4a83c015f57"
   license "GPL-2.0-only"
-  revision 1
+  revision 4
 
   livecheck do
-    url "https://docs.percona.com/percona-xtrabackup/latest/"
-    regex(/href=.*?v?(\d+(?:[.-]\d+)+)\.html/i)
+    url "https://www.percona.com/products-api.php", post_form: {
+      version: "Percona-XtraBackup-#{version.major_minor}",
+    }
+    regex(/value=["']?[^"' >]*?v?(\d+(?:[.-]\d+)+)[|"' >]/i)
     strategy :page_match do |page, regex|
       page.scan(regex).map do |match|
         # Convert a version like 1.2.3-4.0 to 1.2.3-4 (but leave a version like
@@ -20,40 +21,31 @@ class PerconaXtrabackup < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "b5c06024f4c828b0f32b02ffae20618aaf49f68f29ea6e76447e78e8ea4dad95"
-    sha256 arm64_ventura:  "2ed8789709352a980495715cbea9250df93ea6dce312d5467f6291725630941c"
-    sha256 arm64_monterey: "e4d5dcf4b5a416efaaf07d84dbecb7947ce4bc7a300cbb1bf8312db6c97d512f"
-    sha256 sonoma:         "a571ccf5981b0ca05d3ddf313ac273191b52f0a88ce757c7b1d9f2e29ab08be1"
-    sha256 ventura:        "94ac98979fb87f800d8dd9e473d3a27825b20263895a5a8b78ee78239bd10696"
-    sha256 monterey:       "463d67d569e0ee402ef0192f6c6c51d485c955e50c73398c1c224bce7e710812"
-    sha256 x86_64_linux:   "9b680005cf3231ce6a6760aa4e580af5fe90be024702f9eb939815a0bc25b017"
+    sha256 arm64_tahoe:   "3761b41bd8e03d2f81072c8898f5328c4b8d2621cf77d1fea8bbe1ab0ac8f2e4"
+    sha256 arm64_sequoia: "f74b6a6a8036924867a913c644817c4467319d6c5335f8295bf6ef8c9272d1dd"
+    sha256 arm64_sonoma:  "0dbc02bf51a23235a3810fd95a359ae0adfdbcb330f0f512888bc6d42ab484e0"
+    sha256 sonoma:        "eb307fce2c6b745218caf03fe7f431dcf9cf7581c728a57c87ae915a9f20a3c7"
+    sha256 arm64_linux:   "c3939b570c03accefb300fef63b5adefda6ae1c4daae6756dccd323918b8016b"
+    sha256 x86_64_linux:  "6f77346cbc5ec41f88eb12b66b03dd698cbf73549563baa95a7f7fd55b0f19c8"
   end
 
   depends_on "bison" => :build # needs bison >= 3.0.4
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "sphinx-doc" => :build
-  depends_on "icu4c"
+  depends_on "mysql@8.4" => :test
+  depends_on "icu4c@78"
   depends_on "libev"
-  depends_on "libevent"
-  depends_on "libfido2"
   depends_on "libgcrypt"
   depends_on "lz4"
-  depends_on "mysql-client"
   depends_on "openssl@3"
-  depends_on "protobuf@21"
-  depends_on "zlib"
+  depends_on "protobuf"
+  depends_on "zlib-ng-compat" # Zlib 1.2.13+
   depends_on "zstd"
 
-  uses_from_macos "vim" => :build # needed for xxd
+  uses_from_macos "cyrus-sasl" => :build
+  uses_from_macos "libedit" => :build
   uses_from_macos "curl"
-  uses_from_macos "cyrus-sasl"
-  uses_from_macos "libedit"
-  uses_from_macos "perl"
-
-  on_macos do
-    depends_on "libgpg-error"
-  end
 
   on_linux do
     depends_on "patchelf" => :build
@@ -61,68 +53,114 @@ class PerconaXtrabackup < Formula
     depends_on "procps"
   end
 
-  fails_with :gcc do
-    version "6"
-    cause "The build requires GCC 7.1 or later."
+  # Apply fix for newer protobuf from MySQL repo. Remove once Percona syncs with MySQL 8.0.40 / 8.4.3
+  patch do
+    url "https://github.com/mysql/mysql-server/commit/941e4ac8cfdacc7c2cd1c11b4d72329b70c46564.patch?full_index=1"
+    sha256 "1c39061a6c90e25a542f547ff8e5463d84c446009b4ab317c2c52184a4f931b8"
   end
 
-  # Should be installed before DBD::mysql
-  resource "Devel::CheckLib" do
-    url "https://cpan.metacpan.org/authors/id/M/MA/MATTN/Devel-CheckLib-1.16.tar.gz"
-    sha256 "869d38c258e646dcef676609f0dd7ca90f085f56cf6fd7001b019a5d5b831fca"
+  # FreeBSD patches to fix build with newer Clang
+  patch :p0 do
+    url "https://raw.githubusercontent.com/freebsd/freebsd-ports/9832739877772d46b4affedf9f796d6e70be4254/databases/mysql84-server/files/patch-libs_mysql_serialization_archive.h"
+    sha256 "d0e2cf2c2b4c71fc905a6a88936c7c9d6750b624c57c86ead7a73bbc1fd659c8"
   end
 
-  # This is not part of the system Perl on Linux and on macOS since Mojave
-  resource "DBI" do
-    url "https://cpan.metacpan.org/authors/id/T/TI/TIMB/DBI-1.643.tar.gz"
-    sha256 "8a2b993db560a2c373c174ee976a51027dd780ec766ae17620c20393d2e836fa"
+  patch :p0 do
+    url "https://raw.githubusercontent.com/freebsd/freebsd-ports/9832739877772d46b4affedf9f796d6e70be4254/databases/mysql84-server/files/patch-libs_mysql_serialization_serializer__default__impl.hpp"
+    sha256 "62293818c44f0a97a3233e4ab3d82d9abcc826c57981aa40acecdcd92dd6a934"
   end
 
-  resource "DBD::mysql" do
-    url "https://cpan.metacpan.org/authors/id/D/DV/DVEEDEN/DBD-mysql-5.008.tar.gz"
-    sha256 "a2324566883b6538823c263ec8d7849b326414482a108e7650edc0bed55bcd89"
+  patch :p0 do
+    url "https://raw.githubusercontent.com/freebsd/freebsd-ports/9832739877772d46b4affedf9f796d6e70be4254/databases/mysql84-server/files/patch-libs_mysql_serialization_serializer__impl.hpp"
+    sha256 "91b0a8381c00600695110c8ec90488a22fa0c211cbe304eca44de7602f3a097b"
   end
 
-  # https://github.com/percona/percona-xtrabackup/blob/percona-xtrabackup-#{version}/cmake/boost.cmake
-  resource "boost" do
-    url "https://boostorg.jfrog.io/artifactory/main/release/1.77.0/source/boost_1_77_0.tar.bz2"
-    sha256 "fc9f85fc030e233142908241af7a846e60630aa7388de9a5fafb1f3a26840854"
+  patch :p0 do
+    url "https://raw.githubusercontent.com/freebsd/freebsd-ports/9832739877772d46b4affedf9f796d6e70be4254/databases/mysql84-server/files/patch-sql_binlog__ostream.cc"
+    sha256 "5bbb82ff9d9594ce1c19d34c83e22b088684057fca7c4357a0ba43dcb1ede0fc"
+  end
+
+  patch :p0 do
+    url "https://raw.githubusercontent.com/freebsd/freebsd-ports/9832739877772d46b4affedf9f796d6e70be4254/databases/mysql84-server/files/patch-sql_mdl__context__backup.cc"
+    sha256 "557db2bb30ff8a985f8b4d016b1e2909b7127ea77fdcd2f7611fd66dcea58e4f"
+  end
+
+  patch :p0 do
+    url "https://raw.githubusercontent.com/freebsd/freebsd-ports/9832739877772d46b4affedf9f796d6e70be4254/databases/mysql84-server/files/patch-sql_mdl__context__backup.h"
+    sha256 "1352f0290fb3acb031f743bdb72d8483c42f47ba2e0d08a33617a280c2f6771f"
+  end
+
+  patch :p0 do
+    url "https://raw.githubusercontent.com/freebsd/freebsd-ports/9832739877772d46b4affedf9f796d6e70be4254/databases/mysql84-server/files/patch-sql_range__optimizer_index__range__scan__plan.cc"
+    sha256 "8ca65706fd386d2837c0a32a763553a24a248d8ffb518176627bdf735fcbfa9d"
+  end
+
+  patch :p0 do
+    url "https://raw.githubusercontent.com/freebsd/freebsd-ports/9832739877772d46b4affedf9f796d6e70be4254/databases/mysql84-server/files/patch-sql_rpl__log__encryption.cc"
+    sha256 "f5e993a1b56ae86f3c63ea75799493c875d6a08c81f319fede707bbe16a2e59f"
+  end
+
+  patch :p0 do
+    url "https://raw.githubusercontent.com/freebsd/freebsd-ports/9832739877772d46b4affedf9f796d6e70be4254/databases/mysql84-server/files/patch-sql_stream__cipher.cc"
+    sha256 "ac74c60f6051223993c88e7a11ddd9512c951ac1401d719a2c3377efe1bee3cf"
+  end
+
+  patch :p0 do
+    url "https://raw.githubusercontent.com/freebsd/freebsd-ports/9832739877772d46b4affedf9f796d6e70be4254/databases/mysql84-server/files/patch-sql_stream__cipher.h"
+    sha256 "5c8646a2fdce4eb317df4f77cb582705a44e0c61485cc6c268f808e25da682b3"
+  end
+
+  patch :p0 do
+    url "https://raw.githubusercontent.com/freebsd/freebsd-ports/9832739877772d46b4affedf9f796d6e70be4254/databases/mysql84-server/files/patch-unittest_gunit_binlogevents_transaction__compression-t.cc"
+    sha256 "b0f7eb7524a5115bf7eaa0fdd928d1db18a274547adf8cfc8003da97fcf82b8f"
+  end
+
+  patch :p0 do
+    url "https://raw.githubusercontent.com/freebsd/freebsd-ports/9832739877772d46b4affedf9f796d6e70be4254/databases/mysql84-server/files/patch-unittest_gunit_stream__cipher-t.cc"
+    sha256 "fe23c4098e1b8c5113486800e37bb74683be0b7dd61a9608603428f395588e96"
   end
 
   # Patch out check for Homebrew `boost`.
   # This should not be necessary when building inside `brew`.
   # https://github.com/Homebrew/homebrew-test-bot/pull/820
+  #
+  # Also, add a few fixes not covered in the FreeBSD patches.
+  # These fixes are analogous to the changes made by the FreeBSD patches.
   patch :DATA
 
   def install
+    # Remove bundled libraries other than explicitly allowed below.
+    # `boost` and `rapidjson` must use bundled copy due to patches.
+    # `lz4` is still needed due to xxhash.c used by mysqlgcs
+    keep = %w[boost libbacktrace libcno libkmip lz4 rapidjson unordered_dense]
+    (buildpath/"extra").each_child { |dir| rm_r(dir) unless keep.include?(dir.basename.to_s) }
+
     # Disable ABI checking
     inreplace "cmake/abi_check.cmake", "RUN_ABI_CHECK 1", "RUN_ABI_CHECK 0" if OS.linux?
 
+    icu4c = deps.map(&:to_formula).find { |f| f.name.match?(/^icu4c@\d+$/) }
+    # -DWITH_FIDO=system isn't set as feature isn't enabled and bundled copy was removed.
+    # Formula paths are set to avoid HOMEBREW_HOME logic in CMake scripts
     cmake_args = %W[
       -DBUILD_CONFIG=xtrabackup_release
       -DCOMPILATION_COMMENT=Homebrew
       -DINSTALL_PLUGINDIR=lib/percona-xtrabackup/plugin
-      -DINSTALL_MANDIR=share/man
+      -DINSTALL_MANDIR=#{man}
       -DWITH_MAN_PAGES=ON
       -DINSTALL_MYSQLTESTDIR=
+      -DBISON_EXECUTABLE=#{Formula["bison"].opt_bin}/bison
+      -DOPENSSL_ROOT_DIR=#{Formula["openssl@3"].opt_prefix}
+      -DWITH_ICU=#{icu4c.opt_prefix}
       -DWITH_SYSTEM_LIBS=ON
       -DWITH_EDITLINE=system
-      -DWITH_FIDO=system
-      -DWITH_ICU=system
-      -DWITH_LIBEVENT=system
       -DWITH_LZ4=system
       -DWITH_PROTOBUF=system
       -DWITH_SSL=system
-      -DOPENSSL_ROOT_DIR=#{Formula["openssl@3"].opt_prefix}
       -DWITH_ZLIB=system
       -DWITH_ZSTD=system
     ]
-    # Work around build script incorrectly looking for procps on macOS.
-    # Issue ref: https://jira.percona.com/browse/PXB-3210
-    cmake_args << "-DPROCPS_INCLUDE_DIR=/dev/null" if OS.mac?
-
-    (buildpath/"boost").install resource("boost")
-    cmake_args << "-DWITH_BOOST=#{buildpath}/boost"
+    # Reduce overlinking on macOS
+    cmake_args += %w[EXE MODULE].map { |type| "-DCMAKE_#{type}_LINKER_FLAGS=-Wl,-dead_strip_dylibs" } if OS.mac?
 
     # Remove conflicting manpages
     rm (Dir["man/*"] - ["man/CMakeLists.txt"])
@@ -138,54 +176,54 @@ class PerconaXtrabackup < Formula
     (lib/"libkmippp.a").unlink
     (include/"kmip.h").unlink
     (include/"kmippp.h").unlink
-
-    ENV.prepend_create_path "PERL5LIB", buildpath/"build_deps/lib/perl5"
-
-    resource("Devel::CheckLib").stage do
-      system "perl", "Makefile.PL", "INSTALL_BASE=#{buildpath}/build_deps"
-      system "make", "install"
-    end
-
-    ENV.prepend_create_path "PERL5LIB", libexec/"lib/perl5"
-
-    # This is not part of the system Perl on Linux and on macOS since Mojave
-    if OS.linux? || MacOS.version >= :mojave
-      resource("DBI").stage do
-        system "perl", "Makefile.PL", "INSTALL_BASE=#{libexec}"
-        system "make", "install"
-      end
-    end
-
-    resource("DBD::mysql").stage do
-      system "perl", "Makefile.PL", "INSTALL_BASE=#{libexec}"
-      system "make", "install"
-    end
-
-    bin.env_script_all_files(libexec/"bin", PERL5LIB: libexec/"lib/perl5")
   end
 
   test do
+    mysql = Formula["mysql@8.4"]
+    common_args = %W[--no-defaults --port=#{free_port} --socket=#{testpath}/mysql.sock]
+    client_args = %w[--user=root --password=]
+    server_args = %W[--datadir=#{testpath}/mysql --tmpdir=#{testpath}/tmp]
+    mysqld_args = common_args + server_args + %W[--mysqlx=OFF --user=#{ENV["USER"]}]
+    mysqladmin_args = common_args + client_args
+    xtrabackup_args = common_args + client_args + server_args + %W[--target-dir=#{testpath}/backup --backup]
+
+    (testpath/"backup").mkpath
+    (testpath/"mysql").mkpath
+    (testpath/"tmp").mkpath
+
     assert_match version.to_s, shell_output("#{bin}/xtrabackup --version 2>&1")
 
-    mkdir "backup"
-    output = shell_output("#{bin}/xtrabackup --target-dir=backup --backup 2>&1", 1)
+    output = shell_output("#{bin}/xtrabackup #{xtrabackup_args.join(" ")} 2>&1", 1)
     assert_match "Failed to connect to MySQL server", output
+
+    system mysql.bin/"mysqld", *mysqld_args, "--initialize-insecure"
+    pid = spawn(mysql.bin/"mysqld", *mysqld_args)
+    begin
+      sleep 5
+      output = shell_output("#{bin}/xtrabackup #{xtrabackup_args.join(" ")} 2>&1")
+      refute_match "[ERROR]", output
+      assert_match "[Xtrabackup] completed OK!", output
+      assert_path_exists testpath/"backup/xtrabackup_info"
+    ensure
+      system mysql.bin/"mysqladmin", *mysqladmin_args, "shutdown"
+      Process.kill "TERM", pid
+    end
   end
 end
 
 __END__
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 42e63d0..5d21cc3 100644
+index 438dff720c5..47863c17e23 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -1942,31 +1942,6 @@ MYSQL_CHECK_RAPIDJSON()
+@@ -1948,31 +1948,6 @@ MYSQL_CHECK_RAPIDJSON()
  MYSQL_CHECK_FIDO()
  MYSQL_CHECK_FIDO_DLLS()
- 
+
 -IF(APPLE)
 -  GET_FILENAME_COMPONENT(HOMEBREW_BASE ${HOMEBREW_HOME} DIRECTORY)
 -  IF(EXISTS ${HOMEBREW_BASE}/include/boost)
--    FOREACH(SYSTEM_LIB ICU LIBEVENT LZ4 PROTOBUF ZSTD FIDO)
+-    FOREACH(SYSTEM_LIB ICU LZ4 PROTOBUF ZSTD FIDO)
 -      IF(WITH_${SYSTEM_LIB} STREQUAL "system")
 -        MESSAGE(FATAL_ERROR
 -          "WITH_${SYSTEM_LIB}=system is not compatible with Homebrew boost\n"
@@ -199,7 +237,7 @@ index 42e63d0..5d21cc3 100644
 -    ENDFOREACH()
 -  ENDIF()
 -  # Ensure that we look in /usr/local/include or /opt/homebrew/include
--  FOREACH(SYSTEM_LIB ICU LIBEVENT LZ4 PROTOBUF ZSTD FIDO)
+-  FOREACH(SYSTEM_LIB ICU LZ4 PROTOBUF ZSTD FIDO)
 -    IF(WITH_${SYSTEM_LIB} STREQUAL "system")
 -      INCLUDE_DIRECTORIES(SYSTEM ${HOMEBREW_BASE}/include)
 -      BREAK()
@@ -207,6 +245,32 @@ index 42e63d0..5d21cc3 100644
 -  ENDFOREACH()
 -ENDIF()
 -
- IF(WITH_AUTHENTICATION_FIDO OR WITH_AUTHENTICATION_CLIENT_PLUGINS)
+ IF(WITH_AUTHENTICATION_WEBAUTHN OR
+   WITH_AUTHENTICATION_CLIENT_PLUGINS)
    IF(WITH_FIDO STREQUAL "system" AND
-     NOT WITH_SSL STREQUAL "system")
+diff --git i/sql/rpl_log_encryption.cc w/sql/rpl_log_encryption.cc
+index 862e769c..d761bd7f 100644
+--- i/sql/rpl_log_encryption.cc
++++ w/sql/rpl_log_encryption.cc
+@@ -213,7 +213,7 @@ bool Rpl_encryption::recover_master_key() {
+         Rpl_encryption_header::seqno_to_key_id(m_master_key_seqno);
+     auto master_key =
+         get_key(m_master_key.m_id, Rpl_encryption_header::get_key_type());
+-    m_master_key.m_value.assign(master_key.second);
++    m_master_key.m_value = master_key.second;
+     /* No keyring error */
+     if (master_key.first == Keyring_status::KEYRING_ERROR_FETCHING) goto err1;
+   }
+diff --git i/storage/innobase/xtrabackup/src/keyring_plugins.cc w/storage/innobase/xtrabackup/src/keyring_plugins.cc
+index 6d169078..3247f95d 100644
+--- i/storage/innobase/xtrabackup/src/keyring_plugins.cc
++++ w/storage/innobase/xtrabackup/src/keyring_plugins.cc
+@@ -863,7 +863,7 @@ bool xb_binlog_password_reencrypt(const char *binlog_file_path) {
+     return (false);
+   }
+ 
+-  Key_string file_password(key, Encryption::KEY_LEN);
++  Key_string file_password(key, key + Encryption::KEY_LEN);
+   header->encrypt_file_password(file_password);
+ 
+   IO_CACHE_ostream ostream;

@@ -1,18 +1,18 @@
 class TerraformDocs < Formula
   desc "Tool to generate documentation from Terraform modules"
-  homepage "https://github.com/terraform-docs/terraform-docs"
-  url "https://github.com/terraform-docs/terraform-docs/archive/refs/tags/v0.18.0.tar.gz"
-  sha256 "ed4c51a8f8be8f9cf5117331005b200d807f362604447ddeb6781c744e5f4743"
+  homepage "https://terraform-docs.io/"
+  url "https://github.com/terraform-docs/terraform-docs/archive/refs/tags/v0.21.0.tar.gz"
+  sha256 "e8180d74662707b2643930aee7ba012a29ad767ef55fd3321d6a9f3ce7fa79b8"
   license "MIT"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "68cf1b1fd3b7d2319ef71cc52d6c2451f24f83cb8a84e5c5f8744f2250e8ddb7"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "7d965fcf82e94ec71374efd71f2017e40395136b8302f316c7bc837b96c1e148"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "876c0662c9d6443a04f8a1144ca2ffd6c9fd0d2200b70d0e8a993191ef2c57a2"
-    sha256 cellar: :any_skip_relocation, sonoma:         "d09f055d80890bea3fe6ea50acc910dfce0fad93fc6dc01bcf31586419dc3c84"
-    sha256 cellar: :any_skip_relocation, ventura:        "b84693b845e45a61debfb2b28e173722d9912726cfc5549d3cc7dfeedbd9f3c8"
-    sha256 cellar: :any_skip_relocation, monterey:       "639164d4790ec82ba8bb9e68fbdca92174f244d9426266a2f5499eff7eabeb18"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "dd7a2f2f7492b986deeda404c41568d14bec7d37ccf240f4b4652ee518564f05"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "e0d3dc055f2dec3731d78b46495b133ff703f1552380f32020ab8efcc59f6f82"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "2d35e1bb260d8ec2fd27135ffddaa6d59a41b7fba788c99f4fdd9f7f9157b82b"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "efbfbfdbad330848c4b3e1f7165765aed9616a65a438fb90de41af9243f97eda"
+    sha256 cellar: :any_skip_relocation, sonoma:        "e1b1e387eb27ef167275c66f73dc3019c082777c333ef8c03f93372594394c7f"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "728494fc61676afd9396d470988588a9961c4609820bb2028194864f37f2ed1e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ef78dd170f5f0e90ab3b71116d50949545fb6b5c7de883749f9f9fc151f2c3ac"
   end
 
   depends_on "go" => :build
@@ -24,11 +24,11 @@ class TerraformDocs < Formula
 
     bin.install "bin/#{os}-#{cpu}/terraform-docs"
 
-    generate_completions_from_executable(bin/"terraform-docs", "completion", shells: [:bash, :zsh])
+    generate_completions_from_executable(bin/"terraform-docs", "completion")
   end
 
   test do
-    (testpath/"main.tf").write <<~EOS
+    (testpath/"main.tf").write <<~HCL
       /**
        * Module usage:
        *
@@ -63,7 +63,7 @@ class TerraformDocs < Formula
       output "vpc_id" {
         value = "vpc-5c1f55fd"
       }
-    EOS
+    HCL
     system bin/"terraform-docs", "json", testpath
   end
 end

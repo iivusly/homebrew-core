@@ -1,81 +1,40 @@
 class Supermodel < Formula
   desc "Sega Model 3 arcade emulator"
-  homepage "https://www.supermodel3.com/"
+  homepage "https://github.com/trzy/Supermodel"
+  url "https://github.com/trzy/Supermodel/archive/refs/tags/v0.3a-20260228-git-d6dec3d.tar.gz"
+  version "0.3a-20260228-git-d6dec3d"
+  sha256 "4b99ca451379436ad284d682c6849a925d8810daa229271be2e63d24c0cf340b"
   license "GPL-3.0-or-later"
-  revision 1
-
-  stable do
-    url "https://www.supermodel3.com/Files/Supermodel_0.2a_Src.zip"
-    sha256 "ecaf3e7fc466593e02cbf824b722587d295a7189654acb8206ce433dcff5497b"
-
-    depends_on "sdl12-compat"
-  end
-
-  livecheck do
-    url "https://www.supermodel3.com/Download.html"
-    regex(/href=.*?Supermodel[._-]v?(\d+(?:\.\d+)+[a-z]?)[._-]Src\.zip/i)
-  end
+  head "https://github.com/trzy/Supermodel.git", branch: "master"
 
   bottle do
-    sha256 arm64_sonoma:   "f1f9c99d443bc8fe3cfef3f8a060e8ea8ae2df8aa9c1a4a22d8eb127ba389e8b"
-    sha256 arm64_ventura:  "cce8095f8cc08e5688537edbc9e77641805d6230f1cabf064437670aeec34ea9"
-    sha256 arm64_monterey: "a4b9894c3b40d398cd55ec7a80dc6573fd4f69a063ad1053df35e629be9512e9"
-    sha256 arm64_big_sur:  "a885561dcf107c129b845f6b6ed74af3a77c3316dae3b764c1a330e604eb94aa"
-    sha256 sonoma:         "a8e105a560d012fd0374da37522afbd2f2979dc326f8fdf12e942eff9d272812"
-    sha256 ventura:        "4820fa35df55ad3da2514e3f2de96f28fc522335ab62446749b12b8e96e5875b"
-    sha256 monterey:       "339da803650d68029618c577e5c57a374af2da9521badd82d0de76897c51eeef"
-    sha256 big_sur:        "37277a5568532cf6deb7ec130c67f5f66c7f9538d96cfdf59c3117eb91a4a18d"
-    sha256 catalina:       "8978ed55cf9121291601384e24462932fed8fd12a59ad815384edd200b860e75"
-    sha256 x86_64_linux:   "da80611e54278fe44c3869c876fbe0d7955901e5bd0df86e99c67b358d60172d"
+    sha256 cellar: :any,                 arm64_tahoe:   "0371f7d2f4c880a1cb0be485e0cce84256540a1000d203cbf0cfccc3dea7aa79"
+    sha256 cellar: :any,                 arm64_sequoia: "f7e3f881dfc4c4010bbde38779f7b28ff9ea53d8ea623d07a935c39e6e1154ca"
+    sha256 cellar: :any,                 arm64_sonoma:  "e4e7f42b1a731d17984fb9ffa48e02e5439280e625ecdf50da9566482f1dd54d"
+    sha256 cellar: :any,                 sonoma:        "cd2c90c6b7e2459b867b92476255d138093871804c562b2455e97405b88878b6"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "b5c42ecc38e0cf4ccd479739c8f33a20e1feb0689530e552155bb956a6bb95c4"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "61f47cc3b5ada785aeabd68913e9bab259ec7a3af3ce6715e512b9173e91e81b"
   end
 
-  head do
-    url "https://github.com/trzy/Supermodel.git", branch: "master"
-
-    depends_on "sdl2"
-  end
-
-  uses_from_macos "zlib"
+  depends_on "sdl2"
 
   on_linux do
     depends_on "mesa"
     depends_on "mesa-glu"
+    depends_on "zlib-ng-compat"
   end
 
   def install
     os = OS.mac? ? "OSX" : "UNIX"
-    makefile_dir = build.head? ? "Makefiles/Makefile.#{os}" : "Makefiles/Makefile.SDL.#{os}.GCC"
+    makefile_dir = "Makefiles/Makefile.#{os}"
 
-    if build.stable?
-      inreplace makefile_dir do |s|
-        if OS.mac?
-          # Set up SDL library correctly
-          s.gsub! "-framework SDL", "`sdl-config --libs`"
-          s.gsub!(/(\$\(COMPILER_FLAGS\))/, "\\1 -I#{Formula["sdl12-compat"].opt_prefix}/include")
-        end
-        # Fix missing label issue for auto-generated code
-        s.gsub! %r{(\$\(OBJ_DIR\)/m68k\w+)\.o: \1.c (.*)\n(\s*\$\(CC\)) \$<}, "\\1.o: \\2\n\\3 \\1.c"
-        # Add -std=c++14
-        s.gsub! "$(CPPFLAGS)", "$(CPPFLAGS) -std=c++14" if OS.linux?
-        # Fix compile with newer Clang.
-        if DevelopmentTools.clang_build_version >= 1403
-          s.gsub!(/^COMPILER_FLAGS = /, "\\0 -Wno-implicit-function-declaration ")
-        end
-      end
-      # Use /usr/local/var/supermodel for saving runtime files
-      inreplace "Src/OSD/SDL/Main.cpp" do |s|
-        s.gsub! %r{(Config|Saves|NVRAM)/}, "#{var}/supermodel/\\1/"
-        s.gsub!(/(\w+\.log)/, "#{var}/supermodel/Logs/\\1")
-      end
-    else
-      ENV.deparallelize
-      # Set up SDL2 library correctly
-      inreplace makefile_dir, "-framework SDL2", "`sdl2-config --libs`" if OS.mac?
-    end
+    ENV.deparallelize
+    # Set up SDL2 library correctly
+    inreplace makefile_dir, "-framework SDL2", "`sdl2-config --libs`" if OS.mac?
 
     system "make", "-f", makefile_dir
-    bin.install "bin/Supermodel" => "supermodel"
-    (var/"supermodel/Config").install "Config/Supermodel.ini"
+    bin.install "bin/supermodel"
+
     (var/"supermodel/Saves").mkpath
     (var/"supermodel/NVRAM").mkpath
     (var/"supermodel/Logs").mkpath

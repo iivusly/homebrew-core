@@ -1,9 +1,9 @@
 class Clzip < Formula
   desc "C language version of lzip"
   homepage "https://www.nongnu.org/lzip/clzip.html"
-  url "https://download.savannah.gnu.org/releases/lzip/clzip/clzip-1.14.tar.gz"
-  mirror "https://download-mirror.savannah.gnu.org/releases/lzip/clzip/clzip-1.14.tar.gz"
-  sha256 "f63fe1245b832fe07ff679e9b9b8687e9379ab613a26bfb0aca3754c8b162d73"
+  url "https://download.savannah.gnu.org/releases/lzip/clzip/clzip-1.16.tar.gz"
+  mirror "https://download-mirror.savannah.gnu.org/releases/lzip/clzip/clzip-1.16.tar.gz"
+  sha256 "f339a3a5dfc2220532dc36f937a7a58e3a3278b174f2815cc5615107e55966e4"
   license "GPL-2.0-or-later"
 
   livecheck do
@@ -12,13 +12,12 @@ class Clzip < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "9744ed7fe88f28d0566511d46bb9b882216c0c38d0a43b7dacb8640adf2b7ec4"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "a60e73764e4b9e0baa0397319cca7efae34975e443f28f91d4302592485aa04d"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "5a6879494e96d4479321c02a397728f038b545dfaf7b55233c373e377bf79f70"
-    sha256 cellar: :any_skip_relocation, sonoma:         "7f96e349cd33b83f0a919f124468c98c6edff253070854c7d7ad636800c71a97"
-    sha256 cellar: :any_skip_relocation, ventura:        "7e827ac3e9a1af8641959f23d5ca9e2f08aa10ee3100df39cd2b41bc3ed13e9e"
-    sha256 cellar: :any_skip_relocation, monterey:       "547c5212a1f2aa403bac98a074e4eded599c94ea4c8d571471daec77914a38af"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "0a464cac0f82326baa343a47b8c66c75d935548e13adcdd30edcaafcb08a2861"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "6ee9c3f89bcd79ff5f4c8b6618d5b33183e049d42c294b39c9f8f49e27642f0b"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "42c127aabcf849b0535467eb2a49acb2c53a3140c82c36aba605a8d80666e44a"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "ba35ec502cc419efd0e97c7ca5d71776398e4cd5c1ab32dc197a6b4633f83352"
+    sha256 cellar: :any_skip_relocation, sonoma:        "9511e3a7bd3933091134aebf40781224f50904fc0a9deee4a6613003033bc2b6"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "cedbc869236e712a5d6b548799f81e4f5e8c0bdb9e789f06e3d8afab8dac9655"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "172b8fcc9ba87b1ccc92bacc37a41ac8ddc2080e40d9ed553d8e49f33d1b2c49"
   end
 
   def install

@@ -3,34 +3,32 @@ class NicotinePlus < Formula
 
   desc "Graphical client for the Soulseek peer-to-peer network"
   homepage "https://nicotine-plus.org"
-  url "https://files.pythonhosted.org/packages/63/1c/73f765da20b5b7e3579f6099490a9c4ac93e7c6341f97cf51d53ea0df49f/nicotine_plus-3.3.4.tar.gz"
-  sha256 "512bf4aea9b42d5f3d58e0c96ed90efc2af568f8d0a624bf957ffb5f84ab9b7c"
+  url "https://files.pythonhosted.org/packages/bb/91/b7d2f353828d1bc57bb43cfe9006b0fde4d6ffe1458d5045c58f567ed33a/nicotine_plus-3.3.10.tar.gz"
+  sha256 "a4f4cbfade9cf48af10ecb7bde1eac8b5c1b0194f9cd01c814349ddba453dd12"
   license "GPL-3.0-or-later"
   head "https://github.com/nicotine-plus/nicotine-plus.git", branch: "master"
 
+  no_autobump! because: "`update-python-resources` cannot determine dependencies"
+
   bottle do
     rebuild 1
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "ee66410a793440590408fc0524157aa98814d693bcf5173321eee17ed31bbf29"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "ee66410a793440590408fc0524157aa98814d693bcf5173321eee17ed31bbf29"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "ee66410a793440590408fc0524157aa98814d693bcf5173321eee17ed31bbf29"
-    sha256 cellar: :any_skip_relocation, sonoma:         "ee66410a793440590408fc0524157aa98814d693bcf5173321eee17ed31bbf29"
-    sha256 cellar: :any_skip_relocation, ventura:        "ee66410a793440590408fc0524157aa98814d693bcf5173321eee17ed31bbf29"
-    sha256 cellar: :any_skip_relocation, monterey:       "ee66410a793440590408fc0524157aa98814d693bcf5173321eee17ed31bbf29"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "603be73b6c65bf171d66df59924bb95264b65836e32a69e0a8c523dd5d076207"
+    sha256 cellar: :any_skip_relocation, all: "80edf82b7afa3a964e69c28edab21a4a588144096efaa10f555b567b1c0bfa3e"
   end
 
   depends_on "adwaita-icon-theme"
   depends_on "gtk4"
   depends_on "libadwaita"
-  depends_on "py3cairo"
-  depends_on "pygobject3"
-  depends_on "python@3.12"
+  depends_on "py3cairo" => :no_linkage
+  depends_on "pygobject3" => :no_linkage
+  depends_on "python@3.14"
 
   on_linux do
     depends_on "gettext" => :build # for `msgfmt`
   end
 
   conflicts_with "httm", because: "both install `nicotine` binaries"
+
+  pypi_packages exclude_packages: %w[pycairo pygobject]
 
   def install
     virtualenv_install_with_resources

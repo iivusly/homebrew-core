@@ -5,7 +5,14 @@ class Sdlpop < Formula
   sha256 "41a9aa64b4e8d0a9d7a84ffced48f74f9528d81adbffc08593ecf84776c5d77a"
   license "GPL-3.0-or-later"
 
+  livecheck do
+    url :stable
+    regex(/^v?(\d+(?:\.\d+)+)$/i)
+  end
+
   bottle do
+    sha256 cellar: :any,                 arm64_tahoe:    "6e3cea82ac70bf426add75f5a387ca949deda5662ba1dbf3a5e0d22ac4f88270"
+    sha256 cellar: :any,                 arm64_sequoia:  "b71553517e9b05d247c8d440606ece9cb18ed9362e2dacdda29ff653158777fb"
     sha256 cellar: :any,                 arm64_sonoma:   "1100bae067cd7cee5b4846be8718e0ecb2a9ada163c97b681cf767be47fc6c8a"
     sha256 cellar: :any,                 arm64_ventura:  "07ea2286bb9e2e5aefd579d7125882d5d744f3e3f7f5bbe1d67ce23242d8463f"
     sha256 cellar: :any,                 arm64_monterey: "5678d9cd2ecb1de029c137d281034b891215f98ee9a2cc47c4597dd7d3467c92"
@@ -14,10 +21,11 @@ class Sdlpop < Formula
     sha256 cellar: :any,                 ventura:        "21793456afcbac882492103a1f0f3b5d2a4b88c26df8df93be46c7ace3d96251"
     sha256 cellar: :any,                 monterey:       "30ac230fb6c1f6fdd28d539c779428b5249e98f3984f4a8aba4ea4eba1038b61"
     sha256 cellar: :any,                 big_sur:        "82fc8922689771f58c21f1fd08f1fc2b39c4cd32aee875c21152178ce5ef448a"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "9daa7ef72865e7a540bdf684c5e58c59aa510ba5719c361abceac75f401006e1"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "8ef6448ced32c9d812689e9103bce4cf3df4eba04d34325898b205438fd73bc8"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "sdl2"
   depends_on "sdl2_image"
 

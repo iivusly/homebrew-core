@@ -7,7 +7,7 @@ class Ffms2 < Formula
   # The FFMS2 source is licensed under the MIT license, but its binaries
   # are licensed under the GPL because GPL components of FFmpeg are used.
   license "GPL-2.0-or-later"
-  revision 1
+  revision 3
   head "https://github.com/FFMS/ffms2.git", branch: "master"
 
   livecheck do
@@ -16,24 +16,24 @@ class Ffms2 < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "13954ff5340289c90c5db2366c1893cd48b30c62a65625df74a8df0e3340a891"
-    sha256 cellar: :any,                 arm64_ventura:  "64fc6597466170a7d8c595ab3a3c9b56005f5a47c571111944012aa7dbd1e047"
-    sha256 cellar: :any,                 arm64_monterey: "563a1537a4c8573205e5ca1bdaf03928c5dac901ecbdd9a2a85b6a51a300e2a1"
-    sha256 cellar: :any,                 sonoma:         "8d659a7c438d83d9894c177e6f3b66aaf77535732761f9fc8db04aa4c2837f6a"
-    sha256 cellar: :any,                 ventura:        "5fd68b4056bbc5a74134479eff08729bbb9cc0c3bcd0f4917236feaea232ae62"
-    sha256 cellar: :any,                 monterey:       "61cd167e26cca0414ba2d91c7d09a2a9cd7056e845dc67b1f3136ebddb28abd3"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "0c34b82acbfacbdddbf99efb5fd55d7b6e2d27498f76e62f354d275af69da706"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "762d4b37cda59b4d929851bb8a206922fe2b5e59919152dd78f4a53e27082217"
+    sha256 cellar: :any,                 arm64_sequoia: "e3982aedb8762c68a69e4f0e8ec2f6bf36f72ef6d8970b0bc2ad6b0c652f394d"
+    sha256 cellar: :any,                 arm64_sonoma:  "0ebad5227e698f8a477de1eec61e08f39afd387a08bf6d68812cea68a79f8174"
+    sha256 cellar: :any,                 sonoma:        "4bbc6ca72fa21c5ba1ab5cf8cc380ed30c4fce7983890ad55e169b942cb60655"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "fd0c0cbf02ecdc775ec98aa0db63dff6bbac02e3c1fbbefecba4eb12d1085098"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "122322cb5af8f95bfac1fda7cfe7043b91d4205c940382f17ab463037b1fb43a"
   end
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
   depends_on "libtool" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "ffmpeg"
 
-  uses_from_macos "zlib"
-
-  fails_with gcc: "5" # ffmpeg is compiled with GCC
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     system "./autogen.sh", "--enable-avresample", *std_configure_args
@@ -49,7 +49,7 @@ class Ffms2 < Formula
     # download small sample and check that the index was created
     resource("homebrew-videosample").stage do
       system bin/"ffmsindex", "lm20.avi"
-      assert_predicate Pathname.pwd/"lm20.avi.ffindex", :exist?
+      assert_path_exists Pathname.pwd/"lm20.avi.ffindex"
     end
   end
 end

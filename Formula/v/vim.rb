@@ -2,9 +2,10 @@ class Vim < Formula
   desc "Vi 'workalike' with many additional features"
   homepage "https://www.vim.org/"
   # vim should only be updated every 50 releases on multiples of 50
-  url "https://github.com/vim/vim/archive/refs/tags/v9.1.0700.tar.gz"
-  sha256 "497dcbc529144d48ba0f4d26c62e37c483ee4a7a811213ee67b8ad248955b186"
+  url "https://github.com/vim/vim/archive/refs/tags/v9.2.0300.tar.gz"
+  sha256 "02d376f7d588c664742512aef724e7435e3b991bc8e9ed914123a624165598ff"
   license "Vim"
+  compatibility_version 1
   head "https://github.com/vim/vim.git", branch: "master"
 
   # The Vim repository contains thousands of tags and the `Git` strategy isn't
@@ -25,41 +26,44 @@ class Vim < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "2d92ee06491ac41c6c1fe0e6f7c3e5ab01a8d01dbca38d2c98efc421d4419862"
-    sha256 arm64_ventura:  "32561daf533f6e9dd27e639da59907d2e52809819baefdb5d64b55e0b62f6eb1"
-    sha256 arm64_monterey: "9eddf896d5f4497c688191a47bcd7af93f80625772c3731e10f67b750a7a5d4b"
-    sha256 sonoma:         "66f81a933c00057b36e8d19f261006da0435988d7e3e6eacc3ff1d70117c9d5e"
-    sha256 ventura:        "eb050f208f53ca87d6d83cccab0d894013e3375ed746ee8e676def132ccbc354"
-    sha256 monterey:       "e50c222bc92921fd9502a35087047c7dbc41e09fd0ae6cf676b6db5bf1a032d9"
-    sha256 x86_64_linux:   "4fcdf11c4ff064cbff8e96a7059061bb093ad19ca68cea09736f1eac29762525"
+    sha256 arm64_tahoe:   "fefd81b64aa8e9b8e1974ec0261ea0f524583f1463b865dcce5b95b284095a8e"
+    sha256 arm64_sequoia: "5be334357ed3960ca8f6f5dee8cb05f45aae72d750ed519a6ebf5630b7a2d9c0"
+    sha256 arm64_sonoma:  "79fce27a8b555eb1d7b072999efa9f44c6e559178681d201467d324816b474e0"
+    sha256 sonoma:        "0df37313cee806c5729d75ca45c2923dc5d61ef3e34dd319cdd04ee130cf0815"
+    sha256 arm64_linux:   "f686891721d04155e04b711643cf34679ef91a7f0657936c58461936f42301ef"
+    sha256 x86_64_linux:  "b67aba436b1671cba706c7f09f3ce11cc098c7fc4c035ef3e35200e3fd340733"
   end
 
-  depends_on "gettext"
+  depends_on "gettext" => :build
   depends_on "libsodium"
-  depends_on "lua"
+  depends_on "lua@5.4" # Lua 5.5 doesn't work for now, see https://github.com/vim/vim/issues/19639
   depends_on "ncurses"
-  depends_on "perl"
-  depends_on "python@3.12"
+  depends_on "python@3.14"
   depends_on "ruby"
+
+  uses_from_macos "perl"
+
+  on_macos do
+    depends_on "gettext"
+  end
 
   on_linux do
     depends_on "acl"
   end
 
-  conflicts_with "ex-vi",
-    because: "vim and ex-vi both install bin/ex and bin/view"
-
-  conflicts_with "macvim",
-    because: "vim and macvim both install vi* binaries"
+  conflicts_with "ex-vi", because: "vim and ex-vi both install bin/ex and bin/view"
+  conflicts_with "macvim", because: "vim and macvim both install vi* binaries"
 
   def install
-    ENV.prepend_path "PATH", Formula["python@3.12"].opt_libexec/"bin"
+    ENV.prepend_path "PATH", Formula["python@3.14"].opt_libexec/"bin"
 
     # https://github.com/Homebrew/homebrew-core/pull/1046
     ENV.delete("SDKROOT")
 
     # vim doesn't require any Python package, unset PYTHONPATH.
     ENV.delete("PYTHONPATH")
+
+    ENV.append_to_cflags "-mllvm -enable-constraint-elimination=0" if DevelopmentTools.clang_build_version == 1600
 
     # We specify HOMEBREW_PREFIX as the prefix to make vim look in the
     # the right place (HOMEBREW_PREFIX/share/vim/{vimrc,vimfiles}) for
@@ -80,7 +84,7 @@ class Vim < Formula
                           "--disable-gui",
                           "--without-x",
                           "--enable-luainterp",
-                          "--with-lua-prefix=#{Formula["lua"].opt_prefix}"
+                          "--with-lua-prefix=#{Formula["lua@5.4"].opt_prefix}"
     system "make"
     # Parallel install could miss some symlinks
     # https://github.com/vim/vim/issues/1031
@@ -93,10 +97,10 @@ class Vim < Formula
   end
 
   test do
-    (testpath/"commands.vim").write <<~EOS
+    (testpath/"commands.vim").write <<~VIM
       :python3 import vim; vim.current.buffer[0] = 'hello python3'
       :wq
-    EOS
+    VIM
     system bin/"vim", "-T", "dumb", "-s", "commands.vim", "test.txt"
     assert_equal "hello python3", File.read("test.txt").chomp
     assert_match "+gettext", shell_output("#{bin}/vim --version")

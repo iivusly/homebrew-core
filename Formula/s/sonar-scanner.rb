@@ -1,14 +1,13 @@
 class SonarScanner < Formula
   desc "Launcher to analyze a project with SonarQube"
   homepage "https://docs.sonarqube.org/latest/analysis/scan/sonarscanner/"
-  url "https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-6.1.0.4477.zip"
-  sha256 "6928d282b22381d37865c725293f8d03613f81104bc2461ed3318fac2f345cdc"
+  url "https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-8.0.1.6346.zip"
+  sha256 "8fbfb1eb546b734a60fc3e537108f06e389a8ca124fbab3a16236a8a51edcc15"
   license "LGPL-3.0-or-later"
   head "https://github.com/SonarSource/sonar-scanner-cli.git", branch: "master"
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, all: "a10087db59cb0d0d6b3badbd8de1250781122107fc6c36fb7a84046bc58e9ffb"
+    sha256 cellar: :any_skip_relocation, all: "74918eb4cfe5982943894284e8e6b40b38af09c4f91c014cff0506c0e6530b1d"
   end
 
   depends_on "openjdk"
@@ -21,7 +20,7 @@ class SonarScanner < Formula
     ln_s etc/"sonar-scanner.properties", libexec/"conf/sonar-scanner.properties"
     bin.env_script_all_files libexec/"bin/",
                               SONAR_SCANNER_HOME: libexec,
-                              JAVA_HOME:          Formula["openjdk"].opt_prefix
+                              JAVA_HOME:          Language::Java.overridable_java_home_env[:JAVA_HOME]
   end
 
   test do

@@ -1,9 +1,10 @@
 class UserspaceRcu < Formula
   desc "Library for userspace RCU (read-copy-update)"
   homepage "https://liburcu.org"
-  url "https://lttng.org/files/urcu/userspace-rcu-0.14.1.tar.bz2"
-  sha256 "231acb13dc6ec023e836a0f0666f6aab47dc621ecb1d2cd9d9c22f922678abc0"
+  url "https://lttng.org/files/urcu/userspace-rcu-0.15.6.tar.bz2"
+  sha256 "850b192096eb11ebf2c70e8f97bc7da7479ee41da1bebeb44e3986908bac414f"
   license all_of: ["LGPL-2.1-or-later", "MIT"]
+  compatibility_version 1
 
   livecheck do
     url "https://lttng.org/files/urcu/"
@@ -11,13 +12,12 @@ class UserspaceRcu < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "2ed8fcd800628a4ddbc7cf232c63a30418f54ddbab8850a9ea5545d0ba381ced"
-    sha256 cellar: :any,                 arm64_ventura:  "8206685594f05c7e98e72dbc992c2071f53ef365d88702b8e5fdc0a117ada212"
-    sha256 cellar: :any,                 arm64_monterey: "f1ed0e9b4723760d12af588e6b8f1b8a3cd999c6c00711f930a08dd08df67365"
-    sha256 cellar: :any,                 sonoma:         "b858e19e7ac159dfa8e359b7b9266e7e857f05a0970de371134bf5a2c865de70"
-    sha256 cellar: :any,                 ventura:        "6e63de2ba3d3f2834fec3b7cbf3f3d33da14b8688b7336b71af0a5bb1a580971"
-    sha256 cellar: :any,                 monterey:       "44770bb923e56f01f834089fcf7b7f27a6da1ccbb0a3efb93630e884008ab25e"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "6cd1530224968195efa1996713ce9e76241ab247a686ae4d3efba8f04a1108d6"
+    sha256 cellar: :any,                 arm64_tahoe:   "97c106090ca81cb3e86be9ea95d52cb8a91b6652e5c4e4049a4ec06d66f05d07"
+    sha256 cellar: :any,                 arm64_sequoia: "665d47e0ef64f5c3b29bc9788501ff9fbdae84d489bb3cbde5965140759a1b3e"
+    sha256 cellar: :any,                 arm64_sonoma:  "0cf9cd46e22eb9b4002522f4dda0bfc92f6290901b13d97d033654d7151fa1b7"
+    sha256 cellar: :any,                 sonoma:        "7a6692c07a9ab4ec2d9061def09dc3ddb0170702be741b4e563c00e9285df6c6"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "a7ba41748b5ed3ee19e34487067d2708cb80aa5050daacd24259c2f38fa31448"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "e0ed3d7bc023151f2d4d73c30d3e3b1dc0a49ebd853c752233d8b1032e49e696"
   end
 
   def install

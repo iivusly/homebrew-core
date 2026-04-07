@@ -1,25 +1,25 @@
 class Fx < Formula
   desc "Terminal JSON viewer"
   homepage "https://fx.wtf"
-  url "https://github.com/antonmedv/fx/archive/refs/tags/35.0.0.tar.gz"
-  sha256 "5ab642bb91ad9c1948de1add2d62acec22d82398e420957c191c1549999eb351"
+  url "https://github.com/antonmedv/fx/archive/refs/tags/39.2.0.tar.gz"
+  sha256 "cdb98177f956615c961bc615fab0b30e73167295152d4f2d4cb70b16cdf47d6e"
   license "MIT"
+  head "https://github.com/antonmedv/fx.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "2ac980c80f98aa4a5ea9bd21d1a17b0080ada804f9e189d0dd91810f4f829048"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "2ac980c80f98aa4a5ea9bd21d1a17b0080ada804f9e189d0dd91810f4f829048"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "2ac980c80f98aa4a5ea9bd21d1a17b0080ada804f9e189d0dd91810f4f829048"
-    sha256 cellar: :any_skip_relocation, sonoma:         "4b04e666a49281880912c45d2867df85f1bc699e0472161f83f017a2e5e8472c"
-    sha256 cellar: :any_skip_relocation, ventura:        "4b04e666a49281880912c45d2867df85f1bc699e0472161f83f017a2e5e8472c"
-    sha256 cellar: :any_skip_relocation, monterey:       "4b04e666a49281880912c45d2867df85f1bc699e0472161f83f017a2e5e8472c"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "70b778921a29c92bb09b7f9e6a889100b90173b49c66c674beec0974fe8d30be"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "5f79f0091b2439d09a282e4731414ca240b479b9ee1dce7017808b3b793b53fe"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "5f79f0091b2439d09a282e4731414ca240b479b9ee1dce7017808b3b793b53fe"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "5f79f0091b2439d09a282e4731414ca240b479b9ee1dce7017808b3b793b53fe"
+    sha256 cellar: :any_skip_relocation, sonoma:        "3b489b6facee5fad90c296a0b9368296b41c592bea225f7da4806f077675954b"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "beedcca6635c1c157d142ec0728a1b4cf0e9dd60d933e59ad003d69120532643"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "323e237254fe3e24924684401b371bd6ec9a6eab779e0a0b8dcc6c7ed43b0c02"
   end
 
   depends_on "go" => :build
-  depends_on "node"
 
   def install
     system "go", "build", *std_go_args(ldflags: "-s -w")
+    generate_completions_from_executable(bin/"fx", "--comp")
   end
 
   test do

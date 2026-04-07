@@ -1,24 +1,25 @@
 class Rizin < Formula
   desc "UNIX-like reverse engineering framework and command-line toolset"
   homepage "https://rizin.re"
-  url "https://github.com/rizinorg/rizin/releases/download/v0.7.3/rizin-src-v0.7.3.tar.xz"
-  sha256 "e0ed25ada6be42098d38da9ccef4befbd549e477e80f8dffa5ca1b8ff9fbda74"
+  url "https://github.com/rizinorg/rizin/releases/download/v0.8.2/rizin-src-v0.8.2.tar.xz"
+  sha256 "1630ca52bae86f2ff37eb220699fc82f951b5b18080edfa3f50dd36a526c2d95"
   license "LGPL-3.0-only"
   head "https://github.com/rizinorg/rizin.git", branch: "dev"
 
   bottle do
-    sha256 arm64_sonoma:   "b6d421f03bb42ad27a0538a7e24e2ff658332864d3f0bcbdc9da49e4ef43b8e3"
-    sha256 arm64_ventura:  "d45f434a310b2f37e931664b2f318b8c60e5d2dcad34d7bc908df53ddfe8a856"
-    sha256 arm64_monterey: "5fa93764282c486581b950a2cafdcf7f5707d4dd8de72cf88ce42395db818e26"
-    sha256 sonoma:         "94a12a06e37d4d51bffb71fdd62e26733d12742391019d462468c8d80e81d079"
-    sha256 ventura:        "0ee89920c5c0cffafd62ad5659e448078975fd43c006caafebfaf3f287107c9b"
-    sha256 monterey:       "7274efb7cffd09774ee1fdd79828e7084243cb0b8b6f25628bdc0c1a0bece648"
-    sha256 x86_64_linux:   "6ea8d1b38387b296225cc5e2fab8e46853477c4388902faa8f68423d42fe1760"
+    rebuild 1
+    sha256 arm64_tahoe:   "b46c736276c060f36dccbb6bafc5216d7010b8ec4d5864b5f4ec8536d611bfde"
+    sha256 arm64_sequoia: "72fb388c5879904773c4e4da645ede12114e1c0e678fd20019477256d6b58f1c"
+    sha256 arm64_sonoma:  "9fe0bec7ad14cf2256eb8161792dc4e7c7652e7356d404726c19b2eea0c645d1"
+    sha256 sonoma:        "4af3b7d816afea6cd2c8410faed4ba8b4239820b1927eb599f4633a7d3f6318c"
+    sha256 arm64_linux:   "c7546ce2d1464e6f8650a589e503466e789aacf59c368ba076ea9d66021fd12e"
+    sha256 x86_64_linux:  "07d86a1c8573f66cc6b7f0f76a7cc04dc98a1d46d4788986ad8a644458ee6be0"
   end
 
+  depends_on "cmake" => :build
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "capstone"
   depends_on "libmagic"
   depends_on "libzip"
@@ -30,7 +31,9 @@ class Rizin < Formula
   depends_on "xz" # for lzma
   depends_on "zstd"
 
-  uses_from_macos "zlib"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     args = %W[
@@ -47,17 +50,16 @@ class Rizin < Formula
       -Duse_sys_pcre2=enabled
       -Duse_sys_xxhash=enabled
       -Duse_sys_zlib=enabled
+      -Duse_sys_tree_sitter=enabled
       -Dextra_prefix=#{HOMEBREW_PREFIX}
       -Denable_tests=false
       -Denable_rz_test=false
       --wrap-mode=nodownload
     ]
 
-    args << if OS.mac?
-      "--force-fallback-for=rzgdb,rzwinkd,rzar,rzqnx,tree-sitter-c,rzspp,rizin-shell-parser,rzheap"
-    else
-      "--force-fallback-for=rzgdb,rzwinkd,rzar,rzqnx,tree-sitter-c,rzspp,rizin-shell-parser,rzheap,ptrace-wrap"
-    end
+    fallback = %w[rzgdb rzwinkd rzar rzqnx tree-sitter-c rzspp rizin-shell-parser rzheap]
+    fallback << "ptrace-wrap" unless OS.mac?
+    args << "--force-fallback-for=#{fallback.join(",")}"
 
     system "meson", "setup", "build", *args, *std_meson_args
     system "meson", "compile", "-C", "build", "--verbose"

@@ -1,18 +1,18 @@
 class Vegeta < Formula
   desc "HTTP load testing tool and library"
   homepage "https://github.com/tsenart/vegeta"
-  url "https://github.com/tsenart/vegeta/archive/refs/tags/v12.12.0.tar.gz"
-  sha256 "d756cbe93ccedab4519e27234640a7bcfb90efa24c63b21676b025faa62ba66e"
+  url "https://github.com/tsenart/vegeta/archive/refs/tags/v12.13.0.tar.gz"
+  sha256 "4a360c815f5a8bdcae6db184860788696bb1c63d6999cc676e47690fc8b659e5"
   license "MIT"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "9c119a2544ff7ab95aaa931f1e17d5748598eca95f929c720ec87094d8e3fbcf"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "416e192e973c3090db2ff15f0671289baf9a5c1c22c1dce1bc0f595fc52e220d"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "b4f4c70fece8eecd588b5f99e1d1ae28143f71542d65396516a09d197dd5acc3"
-    sha256 cellar: :any_skip_relocation, sonoma:         "eaea67ec73efa19c37adfe621075a3def71ca93cb48f71a5ca0d69723de28549"
-    sha256 cellar: :any_skip_relocation, ventura:        "7094b429a7a5977b2b494ef2f3a927b80ff9646ca00a5793c9379b40b87ed679"
-    sha256 cellar: :any_skip_relocation, monterey:       "53867eb75b76dabfc099c5106bf9553573aa174344412307d326dba9d750e411"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "c7e09f0126fe57216b63aea61c05ab241b771aae8d309e5e045844f37d679a12"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "9e4af909ecd68850af6c7bb8718c06f9e4dc48fbf2a7021cec0ef576d97ed1d5"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "9e4af909ecd68850af6c7bb8718c06f9e4dc48fbf2a7021cec0ef576d97ed1d5"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "9e4af909ecd68850af6c7bb8718c06f9e4dc48fbf2a7021cec0ef576d97ed1d5"
+    sha256 cellar: :any_skip_relocation, sonoma:        "56a755a49808c3f74dd663f44a2351bcacfc4d3b136018a919306ab2220814f3"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "10970097c0ed9c5510b90456da34ab992b56ae7a5ce92cd1bf253d872e25461e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "7cfe4f159486a5ad26348f9c70b190d33252d91ae315e2a98e486c60aae8602d"
   end
 
   depends_on "go" => :build

@@ -1,32 +1,34 @@
 class Wasmer < Formula
   desc "Universal WebAssembly Runtime"
   homepage "https://wasmer.io"
-  url "https://github.com/wasmerio/wasmer/archive/refs/tags/v4.3.6.tar.gz"
-  sha256 "b19456d33958d36709ba252c8bb76cbfbbd214bc8bb105e44d04f4204ea42fe8"
+  url "https://github.com/wasmerio/wasmer.git",
+    tag:      "v7.1.0",
+    revision: "7a01a2680beba20eb2e719732973ed49a3763636"
   license "MIT"
-  head "https://github.com/wasmerio/wasmer.git", branch: "master"
+  head "https://github.com/wasmerio/wasmer.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "677601a5844b1c3d4514a5f669ff1c205b66fd8e80c83ff7d9f5c9ad46b8fdba"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "2c3e1dc32cbc721ff6837866b74e3df55548890270eb65afea599172711d4874"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "ba41f85daf6a3e0cc97eb6bd3f6ab25eaf5702429aefe1868dd368b12594fdf0"
-    sha256 cellar: :any_skip_relocation, sonoma:         "16e2033ed7c11a9875802796153e7234a2b2f0717f13d85a03209bb32f5476f4"
-    sha256 cellar: :any_skip_relocation, ventura:        "327b3c2fce1dea54af78b48036f76460054798bcb43bf7d4a92faf193dd56d93"
-    sha256 cellar: :any_skip_relocation, monterey:       "b6fe9cefdfaadfd850c6faeb2f610c088b84e889ec9e3082f4262a7ef0f63dca"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "9a40e67ecebbb1e34149daaa69317f4a40ef54424a6b1e8edee5519f7567262b"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "7448b61cd72d3982351d36bb511ef5faa9c8534addc6f09ccee15f0fa4820502"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "3840fca3ecfce9f5ca3b44545547447deae1bb8615592ad8e1c76c2a695d9cb9"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "52158a8b0febc9f09cc81a9d0545ec600d938ae1599b99254335cddb2d357f5d"
+    sha256 cellar: :any_skip_relocation, sonoma:        "b430acb5ef9f87b9712ece4fd903305ce7c27c4fe6e728ccbf04c8f2cf11d52b"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "6e7bb3f5d6de27ac7e83a3c1c2c864d13e8420ece00da547978ebdd0737e852e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "3915150f773d17ab813b713ce177b6047cc1a94eaea101d6eeb950b2ce58bc1e"
   end
 
   depends_on "cmake" => :build
+  depends_on "pkgconf" => :build
   depends_on "rust" => :build
   depends_on "wabt" => :build
 
   on_linux do
-    depends_on "pkg-config" => :build
     depends_on "libxkbcommon"
   end
 
   def install
-    system "cargo", "install", "--features", "cranelift", *std_cargo_args(path: "lib/cli")
+    system "cargo", "install", *std_cargo_args(path: "lib/cli", features: "cranelift")
+
+    generate_completions_from_executable(bin/"wasmer", "gen-completions")
   end
 
   test do

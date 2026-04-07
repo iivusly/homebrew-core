@@ -1,10 +1,9 @@
 class Pyside < Formula
-  include Language::Python::Virtualenv
-
   desc "Official Python bindings for Qt"
   homepage "https://wiki.qt.io/Qt_for_Python"
-  url "https://download.qt.io/official_releases/QtForPython/pyside6/PySide6-6.7.0-src/pyside-setup-everywhere-src-6.7.0.tar.xz"
-  sha256 "82eae370737df5ecf539c165d09d7c81d5fc6153a541b8d3d37b11275f9e3e8f"
+  url "https://download.qt.io/official_releases/QtForPython/pyside6/PySide6-6.11.0-src/pyside-setup-everywhere-src-6.11.0.tar.xz"
+  mirror "https://cdimage.debian.org/mirror/qt.io/qtproject/official_releases/QtForPython/pyside6/PySide6-6.11.0-src/pyside-setup-everywhere-src-6.11.0.tar.xz"
+  sha256 "48d5c44d7c3ed861055d5491486e6a220ef5006573cae01a5fae3fb69d786336"
   # NOTE: We omit some licenses even though they are in SPDX-License-Identifier or LICENSES/ directory:
   # 1. LicenseRef-Qt-Commercial is removed from "OR" options as non-free
   # 2. GFDL-1.3-no-invariants-only is only used by not installed docs, e.g. sources/{pyside6,shiboken6}/doc
@@ -21,72 +20,110 @@ class Pyside < Formula
   end
 
   bottle do
-    sha256 cellar: :any, arm64_sonoma:   "f2b5371e496b5bf5c63c2fc225791d66b37905cdd3b1d2a5482b46d08bba977e"
-    sha256 cellar: :any, arm64_ventura:  "2fdb4b589dbd66c6ca3c213ff04ac4135b7ddbf7b5fc049f780b19546a992db0"
-    sha256 cellar: :any, arm64_monterey: "8206ec1cb131fdf33d48bf3e30c434d5ec7d16121603bf130ee92fd48ce1778f"
-    sha256 cellar: :any, sonoma:         "03d185bb327a05d2e842eee24f99e9fd481f4539634a9d7897657b9edacca502"
-    sha256 cellar: :any, ventura:        "0d7af02711c1e15479bf821ec62575c25a10e9d04470dcaefea8d81d70cd5252"
-    sha256 cellar: :any, monterey:       "5b9832524e7f3e2bc3d60cc5676bd8b444f873a8c7640cb0e596a8bac52086cb"
+    sha256                               arm64_tahoe:   "03512803455b2775535c47a6945ae7bcf84f6631f1ca5bfc2aaa95b141770a2e"
+    sha256                               arm64_sequoia: "10e77347cf7dfd38f62379dffd98d749b8dcfc7e129841659c6c96248c9ca15d"
+    sha256                               arm64_sonoma:  "884f528ffc724dc2b8556481d36c9eb3d09f6a5c83da5489765a80652991b82b"
+    sha256 cellar: :any,                 sonoma:        "47c83f6c0174a63f0c1e31e7e81ab1ed92a8ba2d04a89a6cad01175e279110c9"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "e12ac78636758b76581e17da03d61f1fa8ec78c02c5977901cc241ec06cba4c6"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "c8911cfb4c34770f42717b86b5d16ffaf4fc10fd28b61caacbc2474876de8764"
   end
 
   depends_on "cmake" => :build
   depends_on "ninja" => :build
   depends_on "python-setuptools" => :build
+  depends_on "qtshadertools" => :build
   depends_on xcode: :build
-  depends_on "llvm"
-  depends_on "python@3.12"
-  depends_on "qt"
+  depends_on "pkgconf" => :test
+
+  depends_on "llvm@21"
+  depends_on "python@3.14"
+  depends_on "qt3d"
+  depends_on "qtbase"
+  depends_on "qtcanvaspainter"
+  depends_on "qtcharts"
+  depends_on "qtconnectivity"
+  depends_on "qtdatavis3d"
+  depends_on "qtdeclarative"
+  depends_on "qtgraphs"
+  depends_on "qthttpserver"
+  depends_on "qtlocation"
+  depends_on "qtmultimedia"
+  depends_on "qtnetworkauth"
+  depends_on "qtpositioning"
+  depends_on "qtquick3d"
+  depends_on "qtremoteobjects"
+  depends_on "qtscxml"
+  depends_on "qtsensors"
+  depends_on "qtserialbus"
+  depends_on "qtserialport"
+  depends_on "qtspeech"
+  depends_on "qtsvg"
+  depends_on "qttools"
+  depends_on "qtwebchannel"
+  depends_on "qtwebsockets"
 
   uses_from_macos "libxml2"
   uses_from_macos "libxslt"
 
-  on_linux do
-    depends_on "mesa"
+  on_macos do
+    depends_on "qtshadertools"
   end
 
-  fails_with gcc: "5"
+  on_sonoma :or_newer do
+    depends_on "qtwebengine"
+    depends_on "qtwebview"
+  end
 
-  # Fix .../sources/pyside6/qtexampleicons/module.c:4:10: fatal error: 'Python.h' file not found
-  # Upstream issue: https://bugreports.qt.io/browse/PYSIDE-2491
-  patch :DATA
+  on_linux do
+    depends_on "mesa"
+
+    # TODO: Add dependencies on all Linux when `qtwebengine` is bottled on arm64 Linux
+    on_intel do
+      depends_on "qtwebengine"
+      depends_on "qtwebview"
+    end
+  end
 
   def python3
-    "python3.12"
+    "python3.14"
   end
 
   def install
+    # TODO: Remove following when using unversioned LLVM
+    ENV["CLANG_INSTALL_DIR"] = ENV["LLVM_INSTALL_DIR"] = Formula["llvm@21"].opt_prefix
+    if OS.linux?
+      # Workaround to search versioned LLVM path before HOMEBREW_PREFIX/lib
+      ENV.append "LDFLAGS", "-Wl,-rpath,#{rpath(target: Formula["llvm@21"].opt_lib)}"
+      inreplace "sources/shiboken6/cmake/ShibokenHelpers.cmake",
+                'list(APPEND path_dirs "${libclang_lib_dir}")',
+                'list(PREPEND path_dirs "${libclang_lib_dir}")'
+    end
+
     ENV.append_path "PYTHONPATH", buildpath/"build/sources"
 
-    extra_include_dirs = [Formula["qt"].opt_include]
-    extra_include_dirs << Formula["mesa"].opt_include if OS.linux?
+    extra_include_dirs = [Formula["qttools"].opt_include]
 
     # upstream issue: https://bugreports.qt.io/browse/PYSIDE-1684
     inreplace "sources/pyside6/cmake/Macros/PySideModules.cmake",
               "${shiboken_include_dirs}",
               "${shiboken_include_dirs}:#{extra_include_dirs.join(":")}"
 
-    # Fix build failure on macOS because `CMAKE_BINARY_DIR` points to /tmp but
-    # `location` points to `/private/tmp`, which makes this conditional fail.
-    # Submitted upstream here: https://codereview.qt-project.org/c/pyside/pyside-setup/+/416706.
-    inreplace "sources/pyside6/PySide6/__init__.py.in",
-              "in_build = Path(\"@CMAKE_BINARY_DIR@\") in location.parents",
-              "in_build = Path(\"@CMAKE_BINARY_DIR@\").resolve() in location.parents"
-
     # Install python scripts into pkgshare rather than bin
     inreplace "sources/pyside-tools/CMakeLists.txt", "DESTINATION bin", "DESTINATION #{pkgshare}"
 
     # Avoid shim reference
-    inreplace "sources/shiboken6/ApiExtractor/CMakeLists.txt", "${CMAKE_CXX_COMPILER}", ENV.cxx
+    inreplace "sources/shiboken6_generator/ApiExtractor/CMakeLists.txt", "${CMAKE_CXX_COMPILER}", ENV.cxx
+
+    shiboken6_module = prefix/Language::Python.site_packages(python3)/"shiboken6"
 
     system "cmake", "-S", ".", "-B", "build",
-                     "-DCMAKE_INSTALL_RPATH=#{lib}",
-                     "-DCMAKE_PREFIX_PATH=#{Formula["qt"].opt_lib}",
-                     "-DPYTHON_EXECUTABLE=#{which(python3)}",
-                     "-DBUILD_TESTS=OFF",
-                     "-DNO_QT_TOOLS=yes",
-                     "-DFORCE_LIMITED_API=yes",
-                     *std_cmake_args
-
+                    "-DCMAKE_MODULE_LINKER_FLAGS=-Wl,-rpath,#{rpath(source: shiboken6_module)}",
+                    "-DPython_EXECUTABLE=#{which(python3)}",
+                    "-DBUILD_TESTS=OFF",
+                    "-DNO_QT_TOOLS=yes",
+                    # Limited API (maybe combined with keg relocation) breaks the Linux bottle
+                    "-DFORCE_LIMITED_API=#{OS.mac? ? "yes" : "no"}",
+                    *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
   end
@@ -105,7 +142,7 @@ class Pyside < Formula
       Widgets
       Xml
     ]
-    modules << "WebEngineCore" if OS.linux? || (DevelopmentTools.clang_build_version > 1200)
+    modules << "WebEngineCore" if (OS.linux? && Hardware::CPU.intel?) || (OS.mac? && MacOS.version >= :sonoma)
     modules.each { |mod| system python3, "-c", "import PySide6.Qt#{mod}" }
 
     pyincludes = shell_output("#{python3}-config --includes").chomp.split
@@ -119,7 +156,7 @@ class Pyside < Formula
       ]
     end
 
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include <shiboken.h>
       int main()
       {
@@ -128,26 +165,9 @@ class Pyside < Formula
         assert(!module.isNull());
         return 0;
       }
-    EOS
-    system ENV.cxx, "-std=c++17", "test.cpp",
-                    "-I#{include}/shiboken6",
-                    "-L#{lib}", "-lshiboken6.abi3",
-                    *pyincludes, *pylib, "-o", "test"
+    CPP
+    shiboken_flags = shell_output("pkgconf --cflags --libs shiboken6").chomp.split
+    system ENV.cxx, "-std=c++17", "test.cpp", *shiboken_flags, *pyincludes, *pylib, "-o", "test"
     system "./test"
   end
 end
-
-__END__
-diff --git a/sources/pyside6/qtexampleicons/CMakeLists.txt b/sources/pyside6/qtexampleicons/CMakeLists.txt
-index 1562f7b..0611399 100644
---- a/sources/pyside6/qtexampleicons/CMakeLists.txt
-+++ b/sources/pyside6/qtexampleicons/CMakeLists.txt
-@@ -32,6 +32,8 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
-     target_compile_definitions(QtExampleIcons PRIVATE "-DNDEBUG")
- endif()
-
-+get_property(SHIBOKEN_PYTHON_INCLUDE_DIRS GLOBAL PROPERTY shiboken_python_include_dirs)
-+
- target_include_directories(QtExampleIcons PRIVATE ${SHIBOKEN_PYTHON_INCLUDE_DIRS})
-
- get_property(SHIBOKEN_PYTHON_LIBRARIES GLOBAL PROPERTY shiboken_python_libraries)

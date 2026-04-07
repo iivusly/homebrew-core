@@ -1,19 +1,20 @@
 class Trurl < Formula
   desc "Command-line tool for URL parsing and manipulation"
   homepage "https://curl.se/trurl/"
-  url "https://github.com/curl/trurl/releases/download/trurl-0.15/trurl-0.15.tar.gz"
-  sha256 "e58d9a698c009b2b1381f5636b5334ce7704ad2cd5ae8d30da97d483518a7f25"
+  url "https://github.com/curl/trurl/releases/download/trurl-0.16.1/trurl-0.16.1.tar.gz"
+  sha256 "aac947d4fb421a58abc19a3771e87942cd4721b8f855c433478c94c11a8203ba"
   license "curl"
   head "https://github.com/curl/trurl.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "1b3827a4d44bc0021723de929450bd35af9513126aac0c4ecf92960fc1ad8cd3"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "3a4bc38d1d291c68340106a048aaa3ec79a43709f167d2a55d7705d7071a952e"
-    sha256 cellar: :any,                 arm64_monterey: "f2e84b971dc4acc0efb3d106bf4cb61442d9440373341d1aa2cbfa00eb56abcf"
-    sha256 cellar: :any_skip_relocation, sonoma:         "1417e4455377b012e44588b5d45377a3591fbf26d2960b01f0f72a7c0e7d69d6"
-    sha256 cellar: :any_skip_relocation, ventura:        "4e3990113944427367a33f6c628999195c70a4754e9c92e8475b7b7853312205"
-    sha256 cellar: :any,                 monterey:       "b4aa49f3b0a0b8eba1d4a742f5c41cc813604969f0bcc7d8afb659735377dba9"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "25679b3441558a6b23d76c8ae18308dc8f67c5ed8c0a490cddd90be20507e38f"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "b85273354bcc4088546ae4bef82d933579d8c81fd9f77c0403e2a4402c63a476"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "2e77852df0afaaf260ec8a9bba1c4b0536866a72c0d6d4070fea5f344aa81070"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "cd620f42f89c0bb12b9db5a1f139a949c8db111752e951f40089c9221c9c2ef3"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "fb1195a085b9698e6b1989fe970d8156d75041e1e0b57a035ca198398ca4abae"
+    sha256 cellar: :any_skip_relocation, sonoma:        "f7e5d221285006395dcc352f22faa4f34600b73cc012d3686bce0584c74f703e"
+    sha256 cellar: :any_skip_relocation, ventura:       "76a64a6398d7e7ef61f8140c04a6d777b3248326579aa5a22c0ba276e69ab042"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "9d50283a36a33f49b589c407d7c5dde5081b4f2aab28f4a499804914d0d247c6"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "3cdfb216b12de94af1ec6da70bf70ff6260f5638c8efb552c503082ba86ec230"
   end
 
   uses_from_macos "curl", since: :ventura # uses CURLUE_NO_ZONEID, available since curl 7.81.0

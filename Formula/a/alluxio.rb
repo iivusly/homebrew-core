@@ -11,13 +11,8 @@ class Alluxio < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "3d18718fb624fd2db394d87aaca2d4a35b81530e6c78f85970a08fc8c8cb9f74"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "3d18718fb624fd2db394d87aaca2d4a35b81530e6c78f85970a08fc8c8cb9f74"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "3d18718fb624fd2db394d87aaca2d4a35b81530e6c78f85970a08fc8c8cb9f74"
-    sha256 cellar: :any_skip_relocation, sonoma:         "3a6e404c0c07fc013a139a7ac6e4020b82b15ed3a0d162e3ad2ebddbd3810979"
-    sha256 cellar: :any_skip_relocation, ventura:        "3a6e404c0c07fc013a139a7ac6e4020b82b15ed3a0d162e3ad2ebddbd3810979"
-    sha256 cellar: :any_skip_relocation, monterey:       "3a6e404c0c07fc013a139a7ac6e4020b82b15ed3a0d162e3ad2ebddbd3810979"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "13898f6e04b21f80fe62ce9bdeff3b46b13e855324870471b1810255ec37b520"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, all: "5063a69bf2f9fb8db4f197d44aa9098e206c9b69ab03c2c7f3a2698c94c21f8c"
   end
 
   # Alluxio requires Java 8 or Java 11
@@ -31,9 +26,9 @@ class Alluxio < Formula
 
   def install
     libexec.install Dir["*"]
-    bin.install Dir["#{libexec}/bin/*"]
+    bin.install libexec.glob("bin/*")
     bin.env_script_all_files libexec/"bin", Language::Java.overridable_java_home_env("11")
-    chmod "+x", Dir["#{libexec}/bin/*"]
+    chmod "+x", libexec.glob("bin/*")
 
     rm_r(Dir["#{etc}/alluxio/*"])
 
@@ -43,6 +38,9 @@ class Alluxio < Formula
     defaults = etc/"alluxio/alluxio-site.properties"
     defaults.write(default_alluxio_conf) unless defaults.exist?
     ln_sf "#{etc}/alluxio/alluxio-site.properties", "#{libexec}/conf/alluxio-site.properties"
+
+    # Build `:all` bottle.
+    rm_r libexec/"integration/docker"
   end
 
   def caveats

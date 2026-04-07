@@ -1,9 +1,10 @@
 class Ldns < Formula
   desc "DNS library written in C"
   homepage "https://nlnetlabs.nl/projects/ldns/"
-  url "https://nlnetlabs.nl/downloads/ldns/ldns-1.8.4.tar.gz"
-  sha256 "838b907594baaff1cd767e95466a7745998ae64bc74be038dccc62e2de2e4247"
+  url "https://nlnetlabs.nl/downloads/ldns/ldns-1.9.0.tar.gz"
+  sha256 "abaeed2858fbea84a4eb9833e19e7d23380cc0f3d9b6548b962be42276ffdcb3"
   license "BSD-3-Clause"
+  compatibility_version 1
 
   # https://nlnetlabs.nl/downloads/ldns/ since the first-party site has a
   # tendency to lead to an `execution expired` error.
@@ -13,24 +14,25 @@ class Ldns < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "7dfc3b636d9b41f1697678de47415fee711f497f9e837708027b8e401435e006"
-    sha256 cellar: :any,                 arm64_ventura:  "741fa5c80857655f1df62a4016591b17ec8d6cbff9aac4bdf28d4ffc6e0c8d93"
-    sha256 cellar: :any,                 arm64_monterey: "dc37a2cbf234ba5d639dd7bde6fba7768a8cd27dca2e7e253706fef90df732e4"
-    sha256 cellar: :any,                 sonoma:         "c14da9be67894ff294e802e10415237300b92f970afcd223113c9e066a27c155"
-    sha256 cellar: :any,                 ventura:        "e51669bed782dd848c7f66af9c13ce1b580b33b0dea3797fa42721bb28ca871d"
-    sha256 cellar: :any,                 monterey:       "6541a7aeae1dc75afe6a9a7e41e63a57b8eb13713e13c2f97b203f1d44d85a0a"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "18e17dee3c78315e4b42f3aa15d8cb2b1f2efbc21b3fb444f373e3afa119ff84"
+    sha256 cellar: :any,                 arm64_tahoe:   "629f7a51a1a2803dd5416db7237b7c640e72b04614f2012df5fe08cd9639636f"
+    sha256 cellar: :any,                 arm64_sequoia: "714d554e3c767062e77498ba92c0ff91b0871d86197ad91f90da65d9db3ab254"
+    sha256 cellar: :any,                 arm64_sonoma:  "81f4fd69ea66890b1b1db8122b5da93744270950657363ba40c32dec57b0df80"
+    sha256 cellar: :any,                 sonoma:        "190aaba1359ad4d26285d31902e53da00ee506610528baafdc1fbf539fb4f9a7"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "5ee79e560ef1f4d78924cf2070eb8dadca89a504f0f5417a99d3bd3730589d70"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "4ad62627c746df971912e4cafba581db58e81f0bd90cb93bba6292213467237f"
   end
 
-  depends_on "python-setuptools" => :build
   depends_on "swig" => :build
   depends_on "openssl@3"
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   conflicts_with "drill", because: "both install a `drill` binary"
 
+  def python3
+    "python3.14"
+  end
+
   def install
-    python3 = "python3.12"
     args = %W[
       --with-drill
       --with-examples

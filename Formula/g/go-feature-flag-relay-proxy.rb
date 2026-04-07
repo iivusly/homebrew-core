@@ -1,19 +1,18 @@
 class GoFeatureFlagRelayProxy < Formula
   desc "Stand alone server to run GO Feature Flag"
   homepage "https://gofeatureflag.org"
-  url "https://github.com/thomaspoignant/go-feature-flag/archive/refs/tags/v1.33.0.tar.gz"
-  sha256 "cc3a9fa4ced091f61058846c77305b8d0bb32fb211c475bc37cab74dc8ce7a59"
+  url "https://github.com/thomaspoignant/go-feature-flag/archive/refs/tags/v1.52.0.tar.gz"
+  sha256 "623bef2ed51e70f432979fbe459296b2bed6b1247493fa07c94d2078c405bfbb"
   license "MIT"
   head "https://github.com/thomaspoignant/go-feature-flag.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "32f24b35785ce3792d4c68bb66767aeac265b606a223fb8cdf3376af98bbc06f"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "6ae75c145d14893ba48be88a40db577bd3b2453d13964ad561dca02b94ea6859"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "f8429ac096c1e380c280f69b677f1ed2d40a774aa71ee6510da1a1e769d937a4"
-    sha256 cellar: :any_skip_relocation, sonoma:         "c62aef33a4f64c5d0d61eaf00619aaa634fdaf956213cfd8b8b6f50767aa8891"
-    sha256 cellar: :any_skip_relocation, ventura:        "6c2f8dc080d5dd9ba8fd011d527e2618d97b4f500bf5258a39092e14563fd0fa"
-    sha256 cellar: :any_skip_relocation, monterey:       "c80f9604430b8aca271b925e88e8a44cf4150283c385058f13ba911add06616c"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "0eed405f7a9c8d33664a89f7199c8db3260aabc5529ca0ec56ea3f2291484b7b"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "3bcf84b34a331e431cfede3b80ef365b47a0aa1144d35e36cf695ecac7895bca"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "d888d76a6be00c46503f9c2bc70cf5d7baa6fac6636798ea3251b4c21cb125c1"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "b658a56a2169efe96d7e3a2f050a1413d9e88101912c5361876b97015ac4bfa0"
+    sha256 cellar: :any_skip_relocation, sonoma:        "ffefb6c739bd41ede09f8897f28b84ec9b1a46835d71765708a3d1f3f7b4208d"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "ddea071945b4db081d69166fe92cdd289a0af7828fe6789018c3756a6c0a646d"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "b016e0d6c8f08b5e6a12509c965f394796aacea3a248b9690987561bce96d76c"
   end
 
   depends_on "go" => :build
@@ -26,32 +25,26 @@ class GoFeatureFlagRelayProxy < Formula
   test do
     port = free_port
 
-    (testpath/"flags.yml").write <<~EOS
+    (testpath/"flags.yml").write <<~YAML
       test-flag:
         variations:
           true-var: true
           false-var: false
         defaultRule:
           variation: true-var
-    EOS
+    YAML
 
-    (testpath/"test.yml").write <<~EOS
+    (testpath/"test.yml").write <<~YAML
       listen: #{port}
       pollingInterval: 1000
       retriever:
         kind: file
         path: #{testpath}/flags.yml
-    EOS
+    YAML
 
+    pid = spawn bin/"go-feature-flag-relay-proxy", "--config", testpath/"test.yml"
     begin
-      pid = fork do
-        exec bin/"go-feature-flag-relay-proxy", "--config", "#{testpath}/test.yml"
-      end
-      sleep 10
-
-      expected_output = /true/
-
-      assert_match expected_output, shell_output("curl -s http://localhost:#{port}/health")
+      assert_match "true", shell_output("curl --silent --retry 5 --retry-connrefused http://localhost:#{port}/health")
     ensure
       Process.kill("TERM", pid)
       Process.wait(pid)

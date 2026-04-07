@@ -3,35 +3,32 @@ class Sip < Formula
 
   desc "Tool to create Python bindings for C and C++ libraries"
   homepage "https://python-sip.readthedocs.io/en/latest/"
-  url "https://files.pythonhosted.org/packages/6e/52/36987b182711104d5e9f8831dd989085b1241fc627829c36ddf81640c372/sip-6.8.6.tar.gz"
-  sha256 "7fc959e48e6ec5d5af8bd026f69f5e24d08b3cb8abb342176f5ab8030cc07d7a"
+  url "https://files.pythonhosted.org/packages/02/b1/79bff1c49a9e19ffe0211cb8905cc514c3f6b8f3f7ae55a40403d346c076/sip-6.15.3.tar.gz"
+  sha256 "bb2516983f9f716d321e5157c00d0de0c12422eba73b8f43a44610a0f6622438"
   license "BSD-2-Clause"
   head "https://github.com/Python-SIP/sip.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "ba635ba462ce21105b7e3782421c7a40c7b6a554178144be0acba3bb8031decf"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "ba635ba462ce21105b7e3782421c7a40c7b6a554178144be0acba3bb8031decf"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "ba635ba462ce21105b7e3782421c7a40c7b6a554178144be0acba3bb8031decf"
-    sha256 cellar: :any_skip_relocation, sonoma:         "20dba74bbafa429c4fb25e5c42828cef2f3ff9be981e6ab7c8589d65a01db7c4"
-    sha256 cellar: :any_skip_relocation, ventura:        "20dba74bbafa429c4fb25e5c42828cef2f3ff9be981e6ab7c8589d65a01db7c4"
-    sha256 cellar: :any_skip_relocation, monterey:       "20dba74bbafa429c4fb25e5c42828cef2f3ff9be981e6ab7c8589d65a01db7c4"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "809c6158e572522f9e427ed3100b8a5c9a5a0389a803d11f9d5b0592ee6e0a90"
+    sha256 cellar: :any_skip_relocation, all: "45b3408f75b00c082f77836c19426004f329f511bb916e39d0e568a3d3c0d1fa"
   end
 
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   resource "packaging" do
-    url "https://files.pythonhosted.org/packages/51/65/50db4dda066951078f0a96cf12f4b9ada6e4b811516bf0262c0f4f7064d4/packaging-24.1.tar.gz"
-    sha256 "026ed72c8ed3fcce5bf8950572258698927fd1dbda10a5e981cdf0ac37f4f002"
+    url "https://files.pythonhosted.org/packages/65/ee/299d360cdc32edc7d2cf530f3accf79c4fca01e96ffc950d8a52213bd8e4/packaging-26.0.tar.gz"
+    sha256 "00243ae351a257117b6a241061796684b084ed1c516a08c48a3f7e147a9d80b4"
   end
 
   resource "setuptools" do
-    url "https://files.pythonhosted.org/packages/65/d8/10a70e86f6c28ae59f101a9de6d77bf70f147180fbf40c3af0f64080adc3/setuptools-70.3.0.tar.gz"
-    sha256 "f171bab1dfbc86b132997f26a119f6056a57950d058587841a0082e8830f9dc5"
+    url "https://files.pythonhosted.org/packages/4f/db/cfac1baf10650ab4d1c111714410d2fbb77ac5a616db26775db562c8fab2/setuptools-82.0.1.tar.gz"
+    sha256 "7d872682c5d01cfde07da7bccc7b65469d3dca203318515ada1de5eda35efbf9"
+  end
+
+  def python3
+    "python3.14"
   end
 
   def install
-    python3 = "python3.12"
     venv = virtualenv_install_with_resources
 
     # Modify the path sip-install writes in scripts as we install into a
@@ -40,7 +37,7 @@ class Sip < Formula
   end
 
   test do
-    (testpath/"pyproject.toml").write <<~EOS
+    (testpath/"pyproject.toml").write <<~TOML
       # Specify sip v6 as the build system for the package.
       [build-system]
       requires = ["sip >=6, <7"]
@@ -49,7 +46,7 @@ class Sip < Formula
       # Specify the PEP 566 metadata for the project.
       [tool.sip.metadata]
       name = "fib"
-    EOS
+    TOML
 
     (testpath/"fib.sip").write <<~EOS
       // Define the SIP wrapper to the (theoretical) fib library.

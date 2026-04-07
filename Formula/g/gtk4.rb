@@ -1,9 +1,11 @@
 class Gtk4 < Formula
   desc "Toolkit for creating graphical user interfaces"
   homepage "https://gtk.org/"
-  url "https://download.gnome.org/sources/gtk/4.14/gtk-4.14.5.tar.xz"
-  sha256 "5547f2b9f006b133993e070b87c17804e051efda3913feaca1108fa2be41e24d"
+  url "https://download.gnome.org/sources/gtk/4.22/gtk-4.22.2.tar.xz"
+  sha256 "b1c987370a0c30780cde351bdbee02eef816728f1c1c2ec7c8093281c0709ee8"
   license "LGPL-2.1-or-later"
+  compatibility_version 1
+  head "https://gitlab.gnome.org/GNOME/gtk.git", branch: "main"
 
   livecheck do
     url :stable
@@ -11,13 +13,12 @@ class Gtk4 < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "91707419b88b5d666898ba30a059897110641293f6ce1d602dfd51076e129258"
-    sha256 arm64_ventura:  "abf0b4b61f5d3c87328986dcb08ebd821879909367bf9fa9feff758e97f3bb52"
-    sha256 arm64_monterey: "b2eca390766bbe96317aed281103636b391a5948cedd24b0128aad012e2e66e3"
-    sha256 sonoma:         "77f5bef853a8cf40afe4d38e2bf5ae4c365ff24634c9d5f2b7170750408fb162"
-    sha256 ventura:        "8da15fe0eba18ef4b952dbf104b00649bbb30554b35be0c5c9800f0424fbf84c"
-    sha256 monterey:       "3a51a6b4bd19c22fe04f4c8145f826962d5687a58861dde56d70184f963c8c4e"
-    sha256 x86_64_linux:   "9e53798297c2c6e3988a73aecf5e431f5164cb3bc959a553fc84dac76001707a"
+    sha256 arm64_tahoe:   "629aad16613de3d3c52a7b319e2b3b523c1cc107484b6967f860e2140aeff6eb"
+    sha256 arm64_sequoia: "05ed86ffb535047afa7e3f178358ddcd0e8c411df5be5b6711f8cdfab0749209"
+    sha256 arm64_sonoma:  "c1ed38af4735867e2f71f58aa72b1931240159fc0f6fce94faee9489efa904e4"
+    sha256 sonoma:        "b4e793432f03c317c8adc9cd518dea27394a301c755f45cebcdda8e568acd3c2"
+    sha256 arm64_linux:   "9933655624b796b21e1f5f3dcf3da514877f72d9603a83a6ea415a3e2949cced"
+    sha256 x86_64_linux:  "4977c56351fea5ee4954229a0906a56cb249ad2055133877ace71056dd97c10e"
   end
 
   depends_on "docbook" => :build
@@ -27,7 +28,7 @@ class Gtk4 < Formula
   depends_on "gobject-introspection" => :build
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => [:build, :test]
+  depends_on "pkgconf" => [:build, :test]
   depends_on "sassc" => :build
   depends_on "cairo"
   depends_on "fontconfig"
@@ -40,6 +41,7 @@ class Gtk4 < Formula
   depends_on "jpeg-turbo"
   depends_on "libepoxy"
   depends_on "libpng"
+  depends_on "librsvg"
   depends_on "libtiff"
   depends_on "pango"
 
@@ -51,6 +53,7 @@ class Gtk4 < Formula
   end
 
   on_linux do
+    depends_on "wayland-protocols" => :build
     depends_on "libx11"
     depends_on "libxcursor"
     depends_on "libxdamage"
@@ -65,11 +68,10 @@ class Gtk4 < Formula
 
   def install
     args = %w[
-      -Dgtk_doc=false
-      -Dman-pages=true
-      -Dintrospection=enabled
       -Dbuild-examples=false
       -Dbuild-tests=false
+      -Dintrospection=enabled
+      -Dman-pages=true
       -Dmedia-gstreamer=disabled
       -Dvulkan=disabled
     ]
@@ -77,7 +79,6 @@ class Gtk4 < Formula
     if OS.mac?
       args << "-Dx11-backend=false"
       args << "-Dmacos-backend=true"
-      args << "-Dprint-cups=disabled" if MacOS.version <= :mojave
     end
 
     # ensure that we don't run the meson post install script
@@ -101,16 +102,16 @@ class Gtk4 < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <gtk/gtk.h>
 
       int main(int argc, char *argv[]) {
         gtk_disable_setlocale();
         return 0;
       }
-    EOS
+    C
 
-    flags = shell_output("#{Formula["pkg-config"].opt_bin}/pkg-config --cflags --libs gtk4").strip.split
+    flags = shell_output("#{Formula["pkgconf"].opt_bin}/pkgconf --cflags --libs gtk4").strip.split
     system ENV.cc, "test.c", "-o", "test", *flags
     system "./test"
     # include a version check for the pkg-config files

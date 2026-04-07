@@ -1,45 +1,38 @@
 class Kafka < Formula
   desc "Open-source distributed event streaming platform"
   homepage "https://kafka.apache.org/"
-  url "https://www.apache.org/dyn/closer.lua?path=kafka/3.8.0/kafka_2.13-3.8.0.tgz"
-  mirror "https://archive.apache.org/dist/kafka/3.8.0/kafka_2.13-3.8.0.tgz"
-  sha256 "e0297cc6fdb09ef9d9905751b25d2b629c17528f8629b60561eeff87ce29099c"
+  url "https://www.apache.org/dyn/closer.lua?path=kafka/4.2.0/kafka_2.13-4.2.0.tgz"
+  mirror "https://archive.apache.org/dist/kafka/4.2.0/kafka_2.13-4.2.0.tgz"
+  sha256 "6649427c2d062908a1fa0b941d8d2274f52536202faa1b13e3545b395a2285fb"
   license "Apache-2.0"
 
   livecheck do
-    url "https://kafka.apache.org/downloads"
+    url "https://kafka.apache.org/community/downloads/"
     regex(/href=.*?kafka[._-]v?\d+(?:\.\d+)+-(\d+(?:\.\d+)+)\.t/i)
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "984a7b573108f604aad841331000689f5100ebdbbcb4db3e76030159d9547f1b"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "984a7b573108f604aad841331000689f5100ebdbbcb4db3e76030159d9547f1b"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "984a7b573108f604aad841331000689f5100ebdbbcb4db3e76030159d9547f1b"
-    sha256 cellar: :any_skip_relocation, sonoma:         "5a163cdf3ee921fe33b456949870a1acd47c3748afdefee93a092b4eb5b3d15c"
-    sha256 cellar: :any_skip_relocation, ventura:        "5a163cdf3ee921fe33b456949870a1acd47c3748afdefee93a092b4eb5b3d15c"
-    sha256 cellar: :any_skip_relocation, monterey:       "5a163cdf3ee921fe33b456949870a1acd47c3748afdefee93a092b4eb5b3d15c"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "edcb7c39f2aedf2dba46e68fe1d63de0cfa88ed96202cc56316cc33c657442d3"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "7ee46368fdc79460ab6daf0fddd2c77fb0cacaeb443c15709df4b3e04ecb655e"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "7ee46368fdc79460ab6daf0fddd2c77fb0cacaeb443c15709df4b3e04ecb655e"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "7ee46368fdc79460ab6daf0fddd2c77fb0cacaeb443c15709df4b3e04ecb655e"
+    sha256 cellar: :any_skip_relocation, sonoma:        "7465df0f80bf5e807516380472d47e9c3c272ad1ec6d2f32f9ed25998076299b"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "7ee46368fdc79460ab6daf0fddd2c77fb0cacaeb443c15709df4b3e04ecb655e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "7ee46368fdc79460ab6daf0fddd2c77fb0cacaeb443c15709df4b3e04ecb655e"
   end
 
   depends_on "openjdk"
-  depends_on "zookeeper"
 
   def install
     data = var/"lib"
+
     inreplace "config/server.properties",
-      "log.dirs=/tmp/kafka-logs", "log.dirs=#{data}/kafka-logs"
-
-    inreplace "config/kraft/server.properties",
       "log.dirs=/tmp/kraft-combined-logs", "log.dirs=#{data}/kraft-combined-logs"
-
-    inreplace "config/kraft/controller.properties",
+    inreplace "config/controller.properties",
       "log.dirs=/tmp/kraft-controller-logs", "log.dirs=#{data}/kraft-controller-logs"
-
-    inreplace "config/kraft/broker.properties",
+    inreplace "config/connect-standalone.properties",
+      "filename=/tmp/connect.offsets", "filename=#{data}/connect.offsets"
+    inreplace "config/broker.properties",
       "log.dirs=/tmp/kraft-broker-logs", "log.dirs=#{data}/kraft-broker-logs"
-
-    inreplace "config/zookeeper.properties",
-      "dataDir=/tmp/zookeeper", "dataDir=#{data}/zookeeper"
 
     # remove Windows scripts
     rm_r("bin/windows")
@@ -53,9 +46,19 @@ class Kafka < Formula
     mv "config", "kafka"
     etc.install "kafka"
     libexec.install_symlink etc/"kafka" => "config"
+  end
 
+  def post_install
     # create directory for kafka stdout+stderr output logs when run by launchd
-    (var+"log/kafka").mkpath
+    (var/"log/kafka").mkpath
+
+    generate_log_dir(etc/"kafka/server.properties") unless (var/"lib/kraft-combined-logs/meta.properties").exist?
+  end
+
+  def generate_log_dir(path)
+    uuid = Utils.safe_popen_read(bin/"kafka-storage", "random-uuid").strip
+    system bin/"kafka-storage", "format", "--standalone",
+           "-t", uuid, "-c", path
   end
 
   service do
@@ -74,27 +77,23 @@ class Kafka < Formula
     ENV.delete "COLUMNS"
 
     (testpath/"kafka").mkpath
-    cp "#{etc}/kafka/zookeeper.properties", testpath/"kafka"
     cp "#{etc}/kafka/server.properties", testpath/"kafka"
-    inreplace "#{testpath}/kafka/zookeeper.properties", "#{var}/lib", testpath
-    inreplace "#{testpath}/kafka/server.properties", "#{var}/lib", testpath
 
-    zk_port = free_port
     kafka_port = free_port
-    inreplace "#{testpath}/kafka/zookeeper.properties", "clientPort=2181", "clientPort=#{zk_port}"
+    controller_port = free_port
     inreplace "#{testpath}/kafka/server.properties" do |s|
-      s.gsub! "zookeeper.connect=localhost:2181", "zookeeper.connect=localhost:#{zk_port}"
-      s.gsub! "#listeners=PLAINTEXT://:9092", "listeners=PLAINTEXT://:#{kafka_port}"
+      s.gsub! "#{var}/lib", testpath
+      s.gsub! "controller.quorum.bootstrap.servers=localhost:9093",
+              "controller.quorum.bootstrap.servers=localhost:#{controller_port}"
+      s.gsub! "listeners=PLAINTEXT://:9092,CONTROLLER://:9093",
+              "listeners=PLAINTEXT://:#{kafka_port},CONTROLLER://:#{controller_port}"
+      s.gsub! "advertised.listeners=PLAINTEXT://localhost:9092,CONTROLLER://localhost:9093",
+              "advertised.listeners=PLAINTEXT://localhost:#{kafka_port},CONTROLLER://localhost:#{controller_port}"
     end
 
+    generate_log_dir(testpath/"kafka/server.properties")
+
     begin
-      fork do
-        exec "#{bin}/zookeeper-server-start #{testpath}/kafka/zookeeper.properties " \
-             "> #{testpath}/test.zookeeper-server-start.log 2>&1"
-      end
-
-      sleep 15
-
       fork do
         exec "#{bin}/kafka-server-start #{testpath}/kafka/server.properties " \
              "> #{testpath}/test.kafka-server-start.log 2>&1"
@@ -113,7 +112,6 @@ class Kafka < Formula
              ">> #{testpath}/kafka/demo.out 2>/dev/null"
     ensure
       system bin/"kafka-server-stop"
-      system bin/"zookeeper-server-stop"
       sleep 10
     end
 

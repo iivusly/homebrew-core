@@ -1,19 +1,25 @@
 class Rage < Formula
   desc "Simple, modern, secure file encryption"
   homepage "https://str4d.xyz/rage"
-  url "https://github.com/str4d/rage/archive/refs/tags/v0.10.0.tar.gz"
-  sha256 "34c39c28f8032c144a43aea96e58159fe69526f5ff91cb813083530adcaa6ea4"
+  url "https://github.com/str4d/rage/archive/refs/tags/v0.11.1.tar.gz"
+  sha256 "b00559285c9fa5779b2908726d7a952cbf7cb629008e4c4c23a5c137c98f3f09"
   license any_of: ["MIT", "Apache-2.0"]
   head "https://github.com/str4d/rage.git", branch: "main"
 
+  livecheck do
+    url :stable
+    regex(/^v?(\d+(?:\.\d+)+)$/i)
+  end
+
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "fe679e4dd957148d5c62d465aae7f451c0160ef7ec02629abecc31ef48a76355"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "5528b1d13be084d4889823a2343aa3ce5c194add31ddb1f845f9b48673ecdd8a"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "a6c1eb10260bdc634ff9e9c6a0ccd160b8d6761d0f60cf4a134b166b04de8499"
-    sha256 cellar: :any_skip_relocation, sonoma:         "be1b5a328299875623fcb7b72469eb8522d3ff549e0f263442bf313f60b51bcb"
-    sha256 cellar: :any_skip_relocation, ventura:        "b4d186b9ef6805e18cd695adfd9eb5608797a3332633f73cdcae1fe8401106d5"
-    sha256 cellar: :any_skip_relocation, monterey:       "6b92ec9a3f5c4413663aa63c657d22c63b75c66a146f860c4e36f6c9d83955d5"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "a7c4f61c4674059a51330260e541601e4b639a65805c22c9e42c5e7764f4353d"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "25f8887b6d990b955f190d9ed8dcbdea5b812b984c69b7adc1b5604233f607ab"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "e67f141f38b2b412b46128c485063801adcbcf959b07534a8f551a52c4a60ecc"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "66ae99a18be59aaf0e4320d5730dd614b255c2dbb7dfb983ca99458c8853f8c7"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "8c083e92caadb55e63ba0a77f37e06a6e2c0d8bfdc8a60a3e19ccc4de0102745"
+    sha256 cellar: :any_skip_relocation, sonoma:        "5030ea9c84062928ec800a5101edf75e70ec4459984aaa51858b9d250e80bcdb"
+    sha256 cellar: :any_skip_relocation, ventura:       "c1ef3aec2a5cb8148d8928a1585142e9b761e2d0f35c1acaee7da19c0e3a876e"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "e76cd438e4e721db962eb18c5e7d2d22c134be7b38fb9a3c2c197fa56a429399"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "87a45f4a404552dd7911b5f35180e7ca31a130628b420607d32c8699849deaa4"
   end
 
   depends_on "rust" => :build
@@ -34,15 +40,15 @@ class Rage < Formula
 
   test do
     # Test key generation
-    system bin/"rage-keygen", "-o", "#{testpath}/output.txt"
-    assert_predicate testpath/"output.txt", :exist?
+    system bin/"rage-keygen", "-o", testpath/"output.txt"
+    assert_path_exists testpath/"output.txt"
 
     # Test encryption
     (testpath/"test.txt").write("Hello World!\n")
     system bin/"rage", "-r", "age1y8m84r6pwd4da5d45zzk03rlgv2xr7fn9px80suw3psrahul44ashl0usm",
-      "-o", "#{testpath}/test.txt.age", "#{testpath}/test.txt"
-    assert_predicate testpath/"test.txt.age", :exist?
-    assert File.read(testpath/"test.txt.age").start_with?("age-encryption.org")
+      "-o", testpath/"test.txt.age", testpath/"test.txt"
+    assert_path_exists testpath/"test.txt.age"
+    assert_equal "age-encryption.org/v1", File.open(testpath/"test.txt.age", &:gets).chomp
 
     # Test decryption
     (testpath/"test.key").write("AGE-SECRET-KEY-1TRYTV7PQS5XPUYSTAQZCD7DQCWC7Q77YJD7UVFJRMW4J82Q6930QS70MRX\n")

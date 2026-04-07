@@ -1,26 +1,31 @@
 class Docfx < Formula
   desc "Tools for building and publishing API documentation for .NET projects"
   homepage "https://dotnet.github.io/docfx/"
-  url "https://github.com/dotnet/docfx/archive/refs/tags/v2.77.0.tar.gz"
-  sha256 "03c13ca2cdb4a476365ef8f5b7f408a6cf6e35f0193c959d7765c03dd4884bfb"
+  url "https://github.com/dotnet/docfx/archive/refs/tags/v2.78.5.tar.gz"
+  sha256 "79f9e2c4bb8de2225d91a812a4e9d2cc71a8ed5613b3b4b2940d2a1d5db38793"
   license "MIT"
 
-  bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "4a7d1a6e441d983071dd1cb2f1a945ee55cb05cdb6cedd57d29a68c886794490"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "be98269aced336adee7567f5bce4b75316b650595b2ff71d0059a259323b9ce5"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "d6d7c94288c97591bea4b1eb37066663c1e1e3469c506babd95ea42fff52cf6f"
-    sha256 cellar: :any_skip_relocation, sonoma:         "8cbf338809fb49538a7d0776e571ddf58da4815f9bfa643209d5c68259b3d7d9"
-    sha256 cellar: :any_skip_relocation, ventura:        "812bf6ad4c29682b276a1464febff524b0eff3d72482d3e55120613f4b86f3c8"
-    sha256 cellar: :any_skip_relocation, monterey:       "d831a32f78422ac08b69b3458ab9425fb2ec7bf6d201742d927b8656a2ff478b"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "c55f049d46aacabdfd83aed28a7834e88c566f7d3f1affbad9de3f19f0e93217"
+  livecheck do
+    url :stable
+    strategy :github_latest
   end
 
+  bottle do
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "523bb3a1bb69486ba96ed04a14cf5275a03eaee24666548664367c6ec751008b"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "4285f72a9207278e027124dacd47cfca73a31697f318a55699b27f5a0f586231"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "a2ea16f5a93cabc62e5206f4b58fc4962f7193502983909d8d8706ff1011153e"
+    sha256 cellar: :any_skip_relocation, sonoma:        "74dd5ee74560f786debd8cbda5021834c5b2199b9890f385325de614f6be39be"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "ef38f65f11a369979e4a188ba5677a49831eac7d2c5160f65b80bd324d8ea38c"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "f703a20bc12c55ae2083dadc0364892ee5aa0bec6b34c53aa2758fa48cd0d762"
+  end
+
+  depends_on "node" => :build
   depends_on "dotnet"
 
   def install
+    ENV["DOTNET_CLI_TELEMETRY_OPTOUT"] = "1"
+
     dotnet = Formula["dotnet"]
-    os = OS.mac? ? "osx" : OS.kernel_name.downcase
-    arch = Hardware::CPU.intel? ? "x64" : Hardware::CPU.arch.to_s
 
     # specify the target framework to only target the currently used version of
     # .NET, otherwise additional frameworks will be added due to this running
@@ -30,12 +35,16 @@ class Docfx < Formula
       --configuration Release
       --framework net#{dotnet.version.major_minor}
       --output #{libexec}
-      --runtime #{os}-#{arch}
       --no-self-contained
+      --use-current-runtime
       -p:Version=#{version}
       -p:TargetFrameworks=net#{dotnet.version.major_minor}
     ]
 
+    cd "templates" do
+      system "npm", "install", *std_npm_args(prefix: false)
+      system "npm", "run", "build"
+    end
     system "dotnet", "publish", "src/docfx", *args
 
     (bin/"docfx").write_env_script libexec/"docfx",
@@ -44,7 +53,7 @@ class Docfx < Formula
 
   test do
     system bin/"docfx", "init", "--yes", "--output", testpath/"docfx_project"
-    assert_predicate testpath/"docfx_project/docfx.json", :exist?,
-                     "Failed to generate project"
+    assert_path_exists testpath/"docfx_project/docfx.json", "Failed to generate project"
+    assert_match "modern", shell_output("#{bin}/docfx template list")
   end
 end

@@ -1,38 +1,43 @@
 class Fourstore < Formula
   desc "Efficient, stable RDF database"
   homepage "https://github.com/4store/4store"
-  # NOTE: Try building without `avahi` at version bump.
   url "https://github.com/4store/4store/archive/refs/tags/v1.1.7.tar.gz"
   sha256 "e511f1adb094e2506545d4773a6005a462f6b4532731e91f1115b038ab25a8f0"
   license "GPL-3.0-or-later"
 
   bottle do
-    sha256 arm64_sonoma:   "bae32c0d87c821c1f2bc596ec4c40a3cf0f9de0c9e664e1f3a69f3cfc2b37127"
-    sha256 arm64_ventura:  "905ddab5e6fd155e2feb625631c5a6361b1375733d73bd133489812622db1a3d"
-    sha256 arm64_monterey: "654280dc9f6aa7d50013a146db3bd7f77c1f3ca288718d5dea2f6dc9e75670cc"
-    sha256 sonoma:         "2814fa83d67d9ea064801194bb973aba7af059c593af3a6d1392a578b45283ef"
-    sha256 ventura:        "b4ee510fc81c7a204a28aff547cae9dfd48902137cf189d262d7c249abda656c"
-    sha256 monterey:       "172b0d12bcbd2d1109280aa3f9366bdcb8fdee66e0fa9b25e2108b657f179b6f"
-    sha256 x86_64_linux:   "5bef880ded18c7328064abc7bda9914dd0b4a6294b9719b041bc2eefc151c84e"
+    rebuild 2
+    sha256 arm64_tahoe:   "b5bfc32e285c9053a23c919b79ac99292f2a32f398b0df4f5170958980c51c74"
+    sha256 arm64_sequoia: "c92babcce0a867b6e4f2de75872cde122080806cb9c3e25617bbdf1e315949db"
+    sha256 arm64_sonoma:  "75dd61e3fd948f8333871e6d754cbcbf165cbe1cf3de532c468249e90173431b"
+    sha256 sonoma:        "e545cbc9634a29e02332ae7cb504d78cbb484f0d15570a419a768a134f523b33"
+    sha256 arm64_linux:   "b59ab5aab501077629783f0222cbfcfb0a5ae19b67305b65a698a072b60b3af1"
+    sha256 x86_64_linux:  "a62ef47eb3830f72cb11136f3806c4aaa712564825bd91bf31e2f02362e8b05e"
   end
+
+  # Last release on 2024-05-10 and needs EOL `pcre`
+  deprecate! date: "2026-01-12", because: "needs EOL `pcre`"
+  disable! date: "2027-01-12", because: "needs EOL `pcre`"
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
   depends_on "libtool" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
 
   depends_on "dbus"
-  depends_on "gettext"
   depends_on "glib"
-  depends_on "pcre"
+  depends_on "pcre" # https://github.com/4store/4store/issues/167
   depends_on "raptor"
   depends_on "rasqal"
   depends_on "readline"
 
-  uses_from_macos "zlib"
+  on_macos do
+    depends_on "gettext"
+  end
 
   on_linux do
     depends_on "util-linux"
+    depends_on "zlib-ng-compat"
   end
 
   def install
@@ -44,13 +49,11 @@ class Fourstore < Formula
     (buildpath/".version").write version.to_s
 
     system "./autogen.sh"
-    system "./configure", "--prefix=#{prefix}",
-                          "--with-storage-path=#{var}/fourstore",
-                          "--sysconfdir=#{etc}/fourstore"
+    system "./configure", "--with-storage-path=#{var}/fourstore",
+                          "--sysconfdir=#{pkgetc}",
+                          *std_configure_args
     system "make", "install"
-  end
 
-  def post_install
     (var/"fourstore").mkpath
   end
 

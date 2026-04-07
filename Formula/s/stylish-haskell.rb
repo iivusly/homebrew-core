@@ -1,31 +1,39 @@
 class StylishHaskell < Formula
   desc "Haskell code prettifier"
   homepage "https://github.com/haskell/stylish-haskell"
-  url "https://github.com/haskell/stylish-haskell/archive/refs/tags/v0.14.6.0.tar.gz"
-  sha256 "0c0f34271670c23cc4feec7da04487a169a3cd0fde995721503bb5379755b91a"
+  url "https://github.com/haskell/stylish-haskell/archive/refs/tags/v0.15.1.0.tar.gz"
+  sha256 "0187bb335205f6b5c9c78d3fc27deb59ce7122c7eb7429b88971d8cb25d7be51"
   license "BSD-3-Clause"
   head "https://github.com/haskell/stylish-haskell.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "b021fdde87163cb6d75aab1c0cecd36484309e51823a9aad8951f628d82adb98"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "d0d2da6f59fc1a29e6a6545ae586331ca53e6418ffde85a96dc9e94e230f9ec6"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "92a69d8d9bdb376f73cfc90bec09b4d009010496d8eff8ba0ddc8c88db1014f6"
-    sha256 cellar: :any_skip_relocation, sonoma:         "4ad14d6df5d417f7ca72f754950b9653c8f84f9cfc1eaf534bd769935dc328f5"
-    sha256 cellar: :any_skip_relocation, ventura:        "d88200ce18cf61fdced6097fe0cf88df5bcff75a5bf557e19ce83a9cfba64e0c"
-    sha256 cellar: :any_skip_relocation, monterey:       "d7d36832ae99a50e67b3051d648826ee404bc4334d57e61b602ebb10d727c12b"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "1742bbfd81d2f9ae39b6f52a08144b81d02f1be07c57ccbfc741f66c10c47219"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "636a0426df19f6ff5e1bf0ce1256bf57b69c9e8563653e984bce28d75a04c6c4"
+    sha256 cellar: :any,                 arm64_sequoia: "cd766c7c8c5cb06debbe9c331916280058dfa6245a8a22ff3b055859dc982909"
+    sha256 cellar: :any,                 arm64_sonoma:  "7a470983136a1c6ec36b477f9dfac734781afcf907a33d85d83d1faa17bb5501"
+    sha256 cellar: :any,                 arm64_ventura: "44d4be8b570687514592eef731c60ad2f34e6e48d6ee57141ae90eaa28d89a10"
+    sha256 cellar: :any,                 sonoma:        "adb984643626bd491580f169f3578f22639d4f1532a22a97c88f32a057996b33"
+    sha256 cellar: :any,                 ventura:       "4bbdbc8b5a5cc050f6a6cb47297c3f9f77ab3f90da7d56758e750a3ddc499fa8"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "3be00f8a82099f4031c5068c33f6be734a36b2a21c30941805a9238f84e12849"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "442f39eb248892c063cc1dc89aa2ed7b1acb33e99d8ce76fc1493b8f63d9886e"
   end
 
   depends_on "cabal-install" => :build
-  depends_on "ghc@9.8" => :build
+  depends_on "ghc" => :build
+  depends_on "gmp"
+
+  uses_from_macos "libffi"
 
   def install
+    # Workaround to build aeson with GHC 9.14, https://github.com/haskell/aeson/issues/1155
+    args = ["--allow-newer=base,containers,template-haskell"]
+
     system "cabal", "v2-update"
-    system "cabal", "v2-install", *std_cabal_v2_args
+    system "cabal", "v2-install", *args, *std_cabal_v2_args
   end
 
   test do
-    (testpath/"test.hs").write <<~EOS
+    (testpath/"test.hs").write <<~HASKELL
       {-# LANGUAGE ViewPatterns, TemplateHaskell #-}
       {-# LANGUAGE GeneralizedNewtypeDeriving,
                   ViewPatterns,
@@ -38,8 +46,8 @@ class StylishHaskell < Formula
 
       import qualified Data.Map as M
       import      Data.Map    ((!), keys, Map)
-    EOS
-    expected = <<~EOS
+    HASKELL
+    expected = <<~HASKELL
       {-# LANGUAGE GeneralizedNewtypeDeriving #-}
       {-# LANGUAGE ScopedTypeVariables        #-}
       {-# LANGUAGE TemplateHaskell            #-}
@@ -51,7 +59,7 @@ class StylishHaskell < Formula
 
       import           Data.Map            (Map, keys, (!))
       import qualified Data.Map            as M
-    EOS
+    HASKELL
     assert_equal expected, shell_output("#{bin}/stylish-haskell test.hs")
   end
 end

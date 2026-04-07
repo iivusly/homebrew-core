@@ -1,18 +1,25 @@
 class Wavpack < Formula
   desc "Hybrid lossless audio compression"
   homepage "https://www.wavpack.com/"
-  url "https://www.wavpack.com/wavpack-5.7.0.tar.bz2"
-  sha256 "8944b237968a1b3976a1eb47cd556916e041a2aa8917495db65f82c3fcc2a225"
+  url "https://www.wavpack.com/wavpack-5.9.0.tar.bz2"
+  sha256 "b0038f515d322042aaa6bd352d437729c6f5f904363cc85bbc9b0d8bd4a81927"
   license "BSD-3-Clause"
+  compatibility_version 1
+
+  # The first-party download page also links to `xmms-wavpack` releases, so
+  # we have to avoid those versions.
+  livecheck do
+    url "https://www.wavpack.com/downloads.html"
+    regex(%r{href=(?:["']/?|.*?/)wavpack[._-]v?(\d+(?:\.\d+)+)\.t}i)
+  end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "a52595d292c101c9976c2ef02756e0d90b985a10e58a7305d9a4a31279eecf57"
-    sha256 cellar: :any,                 arm64_ventura:  "18dc138bdded56a9eeb9b246b5a1c2b809ab27be62b55fbd19f3a04f96517dc5"
-    sha256 cellar: :any,                 arm64_monterey: "d920574d1f4493faf11e8d772ed39821159349c22c6de11be99f8058bfbea686"
-    sha256 cellar: :any,                 sonoma:         "8595bdb5181479ab687368280cf55758afde4017d67a15b93923a6dff487734c"
-    sha256 cellar: :any,                 ventura:        "139b76fb2ed0c471294576ea6ba387fbed526c3c228bee05a2bfced748f6788f"
-    sha256 cellar: :any,                 monterey:       "e0d0a48bca189c2a28edd80c406f3c09693d1f6d351ff21b6bf74b7210bc72e3"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "fb9564559131803d0e34f4d72c42ea6d20046197ea49b5fc58250cba812cfb66"
+    sha256 cellar: :any,                 arm64_tahoe:   "5371e8c937d28291ca590221a137a8f1f049538a6352f89373831c2ad1f06485"
+    sha256 cellar: :any,                 arm64_sequoia: "32423cac61dcc601979167b1be681f1713540ec321e3d215c70809af8a602075"
+    sha256 cellar: :any,                 arm64_sonoma:  "219edda109ba98caeca085aabcdf600bf05926e11fb39d9ab9824f0af2a4d92a"
+    sha256 cellar: :any,                 sonoma:        "69543fc68256b5bff54d6fb7353dabd5ba424af3cf88f3c3422f8cd7ca9468fd"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "87a54977cdf0fe059aacf5944a758978d5f055d3bbbd777f6e972a3392744413"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "912012e083e4a78f3ccb633cf0f5bad73826068a588d27e500be4ce907838b4a"
   end
 
   head do
@@ -40,6 +47,6 @@ class Wavpack < Formula
 
   test do
     system bin/"wavpack", test_fixtures("test.wav"), "-o", testpath/"test.wv"
-    assert_predicate testpath/"test.wv", :exist?
+    assert_path_exists testpath/"test.wv"
   end
 end

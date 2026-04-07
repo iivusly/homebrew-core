@@ -1,8 +1,8 @@
 class Intercal < Formula
   desc "Esoteric, parody programming language"
   homepage "http://catb.org/~esr/intercal/"
-  url "http://catb.org/~esr/intercal/intercal-0.31.tar.gz"
-  sha256 "93d842b81ecdc82b352beb463fbf688749b0c04445388a999667e1958bba4ffc"
+  url "http://catb.org/~esr/intercal/intercal-0.34.tar.gz"
+  sha256 "7ef6148c351df668466e2dcbd79517722f91c33caa3915957137f383371f8d55"
   license "GPL-2.0-or-later"
 
   # The latest version tags in the Git repository are `0.31` (2019-06-12) and
@@ -18,15 +18,9 @@ class Intercal < Formula
   end
 
   bottle do
-    sha256 sonoma:       "bdbcb6b6741a84e30ab923c62dc0dbced0348ba9c35b95f9441bdc4bb821130a"
-    sha256 ventura:      "996598c6c8145f0a45dac7109aa3cb39b5854396b58c3b7ab75c784844160877"
-    sha256 monterey:     "a691470666ee0f15af22265be65eda2757fabd8f6fbc5fa8341f8c3059749d34"
-    sha256 big_sur:      "487fc70071a54c09cccdbba0284db23c156983b76416a4b4c03f44130531213c"
-    sha256 catalina:     "a2c1673fbed3d331e725694196acf9ea4cd6bc6df3b86568af3e67ee90d70b30"
-    sha256 mojave:       "d048d5c58fd1fc3b17c44103b3bbddd445a657415c215916587d9eb8e7f9c2da"
-    sha256 high_sierra:  "c0569e08915adc912bdc3fb149d0d3c50e7a2d941fff8b2d951b22fcfaf4539f"
-    sha256 sierra:       "b00c959878aaead39f9106ef199d7082b4e1a62ef6957f11796a99650678c9b2"
-    sha256 x86_64_linux: "31105eaa4a4800c562060caa8fa7c241b946c8dca2e92f0b2e101c34830787e8"
+    sha256 sonoma:       "6ae9e10b4ae86c8b1cd011b7762aefad1fc610999dc43174ac2789a471f682e3"
+    sha256 arm64_linux:  "a3fff58fc3e959f8734522f969880199394b1ab2c384cf03ba57cbd3f1232ca1"
+    sha256 x86_64_linux: "ff300582cea9c994562655e7afa1a6ad8a785dff09afeee5a26ca460cfd5340c"
   end
 
   head do
@@ -39,12 +33,31 @@ class Intercal < Formula
   uses_from_macos "bison" => :build
   uses_from_macos "flex" => :build
 
+  on_macos do
+    depends_on arch: :x86_64 # test fails on arm64
+
+    # Can be undeprecated if upstream decides to support arm64 macOS
+    # https://docs.brew.sh/Support-Tiers#future-macos-support
+    # TODO: Make `depends_on :linux` when removing macOS support
+    deprecate! date: "2025-09-25", because: :unsupported
+    disable! date: "2026-09-25", because: :unsupported
+  end
+
   def install
+    # clang doesn't support -fno-toplevel-reorder, so we
+    # edit it out for macOS only.
+    if OS.mac?
+      %w[buildaux/Makefile.in buildaux/Makefile.am].each do |file|
+        inreplace file, /\\\s*\n\s*-fno-toplevel-reorder/, "" if File.exist?(file)
+      end
+    end
+
     if build.head?
       cd "buildaux" do
         system "./regenerate-build-system.sh"
       end
     end
+
     system "./configure", "--disable-dependency-tracking",
                           "--prefix=#{prefix}"
     system "make", "install"
@@ -57,7 +70,7 @@ class Intercal < Formula
     (testpath/"test").mkpath
     cp pkgshare/"pit/beer.i", "test"
     cd "test" do
-      system bin/"ick", "beer.i"
+      system bin/"ick", "-b", "beer.i"
       system "./beer"
     end
   end

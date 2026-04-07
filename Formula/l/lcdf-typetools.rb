@@ -12,6 +12,8 @@ class LcdfTypetools < Formula
   end
 
   bottle do
+    sha256 arm64_tahoe:    "014a5797b27475c13f3b8511f5e5c76db375fdd5b1a7aabbca35a2d020918aec"
+    sha256 arm64_sequoia:  "5e354428d6719b3944d45a3836a61964221ae31b65a35cdc04d92a89c72bcd10"
     sha256 arm64_sonoma:   "adebc013b9cd122099069d78f3da8eca8c86f585e2e08476f4fafe852acc6414"
     sha256 arm64_ventura:  "8236a9837f726de7f4134db255df5df0c74b6d3aa0827a583e5c3d121e2170c1"
     sha256 arm64_monterey: "be7523e73f08148f0848d41a93ae2443227d06d88da621f576c7fe346070224d"
@@ -20,6 +22,7 @@ class LcdfTypetools < Formula
     sha256 ventura:        "1dd345c1b3f20d16d2303573c9324047172f728999ecb497cb6e13c56e31c96a"
     sha256 monterey:       "81daa75ad3bfaf2257c2967749981284d2a9076bbdd60176f6ee845b6419a90e"
     sha256 big_sur:        "34f194d4996198a1c3f5ffb49b65c2e00af73e88db861d49a22f7ee9dcf3ea3c"
+    sha256 arm64_linux:    "934b2e2900efd242c6ca0f1d6a4b4c25e92e5ba0f6548fb6899fd8ae83a529f6"
     sha256 x86_64_linux:   "bc299e560c0228488ee8205b9e9a91d007d205beddd06c0461fa6e8d4e9d2589"
   end
 
@@ -34,7 +37,7 @@ class LcdfTypetools < Formula
 
   test do
     if OS.mac?
-      font_name = (MacOS.version >= :catalina) ? "Arial Unicode" : "Arial"
+      font_name = "Arial Unicode"
       font_dir = "/Library/Fonts"
     else
       font_name = "DejaVuSans"

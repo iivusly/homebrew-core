@@ -1,25 +1,24 @@
 class Cava < Formula
   desc "Console-based Audio Visualizer for ALSA"
   homepage "https://github.com/karlstav/cava"
-  url "https://github.com/karlstav/cava/archive/refs/tags/0.10.2.tar.gz"
-  sha256 "853ee78729ed3501d0cdf9c1947967ad3bfe6526d66a029b4ddf9adaa6334d4f"
+  url "https://github.com/karlstav/cava/archive/refs/tags/0.10.7.tar.gz"
+  sha256 "43f994f7e609fab843af868d8a7bc21471ac62c5a4724ef97693201eac42e70a"
   license "MIT"
   head "https://github.com/karlstav/cava.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any, arm64_sonoma:   "aa62a4d58c42b5b95be8d6f996728308730bb70eaabc4d0bf26f2599fe23e2c7"
-    sha256 cellar: :any, arm64_ventura:  "480f4fb722f970d56afd1d626df91d276f0b6d8c762c53436f835dfbf8bb4df5"
-    sha256 cellar: :any, arm64_monterey: "498ee144ce314d844962eef7df12b139aa5fab106dc20b6437e2ca1346bfc4a3"
-    sha256 cellar: :any, sonoma:         "70e9e1476a708fe482f568f9b2f621b17eb76437e390c2ac2eaf7dc233f62edc"
-    sha256 cellar: :any, ventura:        "9fad2eb551ddb104fca1a0de695586bafdd598a0189dd00156955f704d1b6921"
-    sha256 cellar: :any, monterey:       "80f5dde55a22dc3e162f11f0131ed4829158f5f748c466dbed34adcf304ce8fc"
-    sha256               x86_64_linux:   "9d951035501e2b9a741d8b470119a9a3223e2a361161996a4f82322664002f8b"
+    sha256 cellar: :any, arm64_tahoe:   "40bfbe3b8229358b42a646fad6d31616cf84ecc6f758d0cdf17b32f88b2e2430"
+    sha256 cellar: :any, arm64_sequoia: "1016458731ecffadbafeb4a10ad4aacc307b67a11568cfb8842344012893938b"
+    sha256 cellar: :any, arm64_sonoma:  "48381551d630ab4220cc39267c036c552f0ddea37afcfdfdb62f7d234009bacc"
+    sha256 cellar: :any, sonoma:        "e012cc6ab3a2bbf0f76244641e809882eea9190d94f34668d2dabfe83d6401d2"
+    sha256               arm64_linux:   "1e38d63792ba6bbbb12c1a1fe5d700e676f403bcce6c21681f000be9402d44e5"
+    sha256               x86_64_linux:  "43eda213bfc5d7e6f33894e04be08f1a32fcea5c230a65de659d73967ee6bf6e"
   end
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
   depends_on "libtool"  => :build
-  depends_on "pkg-config"  => :build
+  depends_on "pkgconf"  => :build
 
   depends_on "fftw"
   depends_on "iniparser"
@@ -67,7 +66,7 @@ class Cava < Formula
 
     pid = spawn(bin/"cava", "-p", cava_config, [:out, :err] => cava_stdout.to_s)
 
-    sleep 2
+    sleep 5
 
     assert_match "0;0;\n", cava_stdout.read
   ensure

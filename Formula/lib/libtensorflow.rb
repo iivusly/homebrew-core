@@ -1,45 +1,41 @@
 class Libtensorflow < Formula
   desc "C interface for Google's OS library for Machine Intelligence"
   homepage "https://www.tensorflow.org/"
-  url "https://github.com/tensorflow/tensorflow/archive/refs/tags/v2.17.0.tar.gz"
-  sha256 "9cc4d5773b8ee910079baaecb4086d0c28939f024dd74b33fc5e64779b6533dc"
+  url "https://github.com/tensorflow/tensorflow/archive/refs/tags/v2.20.0.tar.gz"
+  sha256 "a640d1f97be316a09301dfc9347e3d929ad4d9a2336e3ca23c32c93b0ff7e5d0"
   license "Apache-2.0"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "8e4a82146a74aa096d1be11656c92759e830fb83313e6d2bb5719e8fcbe3dde8"
-    sha256 cellar: :any,                 arm64_ventura:  "40ce21dfab8a35c13f70085321879d099ce7e73d12079f9fe2290d4d59928212"
-    sha256 cellar: :any,                 arm64_monterey: "0c8b7bfa030bc4f473a031b439d867fbcb0d50665f70d710722eb243a97c26f0"
-    sha256 cellar: :any,                 sonoma:         "80185f9442e34c44f22050d45e240ac18b3b8a9ecdaceac88e59226735570608"
-    sha256 cellar: :any,                 ventura:        "62bcbe8e635620043db0ffbf8c325af8abb6af956f04789f5ffe38e270b42527"
-    sha256 cellar: :any,                 monterey:       "2d0cab07fa85225d28caf185aed68819793645515c731c2b253136dbdb6b6dc4"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "159e6c5e1f543cb01ab3dae0019e6a8211aec0985ec8273cb5e4b34832cdfae1"
+    sha256 cellar: :any,                 arm64_tahoe:   "8a15daed2bb63f7178d5ae590a2f6790b24a8339c47f95fcb6e47e1a5837866d"
+    sha256 cellar: :any,                 arm64_sequoia: "655650a749f31f659213bba3147b8fccd0f3c15f81380e753f41958b41d9fa9f"
+    sha256 cellar: :any,                 arm64_sonoma:  "0aa1ef478705d4a5e1148482bc2f0cee12d1448e1fde9a2146349b5988f8a989"
+    sha256 cellar: :any,                 sonoma:        "f6a05fbd2c75dcda4be2adf38a1da8a20cce45a7f87bb48c57ddb7101391db50"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "8307fca51801bf44da97554ca97a0e574ea5838d7e91bc05f45c5f2ed6b88c4e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "be3f850fea6e58fce4a67eaa74ff884239e8180433eda0ef228eadf696f86739"
   end
 
   depends_on "bazelisk" => :build
   depends_on "numpy" => :build
-  depends_on "python@3.12" => :build
+  depends_on "python@3.13" => :build # Python 3.14 support: https://github.com/tensorflow/tensorflow/issues/102890
 
   on_macos do
     depends_on "gnu-getopt" => :build
   end
 
-  resource "homebrew-test-model" do
-    url "https://github.com/tensorflow/models/raw/v1.13.0/samples/languages/java/training/model/graph.pb"
-    sha256 "147fab50ddc945972818516418942157de5e7053d4b67e7fca0b0ada16733ecb"
-  end
-
-  # Backport fix for installation of some headers
-  patch do
-    url "https://github.com/tensorflow/tensorflow/commit/364b0cae088b7199a479899ef7bd99ddb9441728.patch?full_index=1"
-    sha256 "86a225177dcee2965a1d2aa7cd5df3179365cf8ba637ba94d7fd61693f9a9fbb"
-  end
-
   def install
-    python3 = "python3.12"
-    optflag = if Hardware::CPU.arm? && OS.mac?
+    # Workaround to build on Tahoe by using newer apple_support with following commit:
+    # https://github.com/bazelbuild/apple_support/commit/44c43c715aa58d16dc713ec0daa0a4373c39245a
+    # Issue ref: https://github.com/tensorflow/tensorflow/issues/100434
+    inreplace "tensorflow/workspace2.bzl" do |s|
+      s.gsub! "/1.18.1/apple_support.1.18.1.tar.gz", "/1.19.0/apple_support.1.19.0.tar.gz"
+      s.gsub! '"d71b02d6df0500f43279e22400db6680024c1c439115c57a9a82e9effe199d7b"',
+              '"dca96682317cc7112e6fae87332e13a8fefbc232354c2939b11b3e06c09e5949"'
+    end
+
+    python3 = "python3.13"
+    optflag = ENV["HOMEBREW_OPTFLAGS"].presence
+    optflag ||= if Hardware::CPU.arm? && OS.mac?
       "-mcpu=apple-m1"
-    elsif build.bottle?
-      "-march=#{Hardware.oldest_cpu}"
     else
       "-march=native"
     end
@@ -67,27 +63,34 @@ class Libtensorflow < Formula
     ENV["TF_CONFIGURE_IOS"] = "0"
     system "./configure"
 
+    # Bazel clears environment variables which breaks superenv shims.
+    # Bazel already dodges our superenv on macOS by using its own shim.
+    ENV.remove "PATH", Superenv.shims_path if OS.linux?
+
     bazel_args = %W[
       --jobs=#{ENV.make_jobs}
       --compilation_mode=opt
       --copt=#{optflag}
       --linkopt=-Wl,-rpath,#{rpath}
       --verbose_failures
+      --config=monolithic
+      --repo_env=USE_PYWRAP_RULES=
+      --repo_env=ML_WHEEL_TYPE=release
     ]
-    if OS.linux?
-      pyver = Language::Python.major_minor_version python3
-      env_path = "#{Formula["python@#{pyver}"].opt_libexec}/bin:#{HOMEBREW_PREFIX}/bin:/usr/bin:/bin"
-      bazel_args += %W[
-        --action_env=PATH=#{env_path}
-        --host_action_env=PATH=#{env_path}
-      ]
-    end
+    # //tensorflow/tools/lib_package:libtensorflow target was removed in 2.20.0.
+    # For now, the deps used by original target still exist so use those to build.
+    # https://github.com/tensorflow/tensorflow/commit/724f36e00941ad3abf3c32209adc2ee186602b70
+    libtensorflow_deps = %w[
+      cheaders
+      clib
+      clicenses
+      eager_cheaders
+    ]
     targets = %w[
-      //tensorflow/tools/lib_package:libtensorflow
       //tensorflow/tools/benchmark:benchmark_model
       //tensorflow/tools/graph_transforms:summarize_graph
       //tensorflow/tools/graph_transforms:transform_graph
-    ]
+    ] + libtensorflow_deps.map { |dep| "//tensorflow/tools/lib_package:#{dep}" }
     system Formula["bazelisk"].opt_bin/"bazelisk", "build", *bazel_args, *targets
 
     bin.install %w[
@@ -95,21 +98,29 @@ class Libtensorflow < Formula
       bazel-bin/tensorflow/tools/graph_transforms/summarize_graph
       bazel-bin/tensorflow/tools/graph_transforms/transform_graph
     ]
-    system "tar", "-C", prefix, "-xzf", "bazel-bin/tensorflow/tools/lib_package/libtensorflow.tar.gz"
+    libtensorflow_deps.each do |dep|
+      system "tar", "-C", prefix, "-xf", "bazel-bin/tensorflow/tools/lib_package/#{dep}.tar"
+    end
 
     ENV.prepend_path "PATH", Formula["gnu-getopt"].opt_prefix/"bin" if OS.mac?
-    system "tensorflow/c/generate-pc.sh", "--prefix", prefix, "--version", version.to_s
+    system "tensorflow/c/generate-pc.sh", "--prefix", opt_prefix, "--version", version.to_s
     (lib/"pkgconfig").install "tensorflow.pc"
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    resource "homebrew-test-model" do
+      url "https://github.com/tensorflow/models/raw/v1.13.0/samples/languages/java/training/model/graph.pb"
+      sha256 "147fab50ddc945972818516418942157de5e7053d4b67e7fca0b0ada16733ecb"
+    end
+
+    (testpath/"test.c").write <<~C
       #include <stdio.h>
       #include <tensorflow/c/c_api.h>
       int main() {
         printf("%s", TF_Version());
       }
-    EOS
+    C
+
     system ENV.cc, "test.c", "-L#{lib}", "-ltensorflow", "-o", "test_tf"
     assert_equal version, shell_output("./test_tf")
 
@@ -131,7 +142,7 @@ class Libtensorflow < Formula
     ].join(" ")
     shell_output(transform_command)
 
-    assert_predicate testpath/"graph-new.pb", :exist?, "transform_graph did not create an output graph"
+    assert_path_exists testpath/"graph-new.pb", "transform_graph did not create an output graph"
 
     new_summarize_graph_output = shell_output("#{bin}/summarize_graph --in_graph=#{testpath}/graph-new.pb 2>&1")
     new_variables_match = /Found \d+ variables:.+$/.match(new_summarize_graph_output)

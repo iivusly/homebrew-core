@@ -3,9 +3,9 @@ class Jdtls < Formula
 
   desc "Java language specific implementation of the Language Server Protocol"
   homepage "https://github.com/eclipse-jdtls/eclipse.jdt.ls"
-  url "https://www.eclipse.org/downloads/download.php?file=/jdtls/milestones/1.39.0/jdt-language-server-1.39.0-202408291433.tar.gz"
-  version "1.39.0"
-  sha256 "f046d8f08974e6e773f2ed474266eab09889c6459f2663579f8b7d497bd34729"
+  url "https://www.eclipse.org/downloads/download.php?file=/jdtls/milestones/1.57.0/jdt-language-server-1.57.0-202602261110.tar.gz"
+  version "1.57.0"
+  sha256 "f7ffa93fe1bbbea95dac13dd97cdcd25c582d6e56db67258da0dcceb2302601e"
   license "EPL-2.0"
   version_scheme 1
 
@@ -14,12 +14,14 @@ class Jdtls < Formula
     regex(%r{href=.*?/v?(\d+(?:\.\d+)+)/?["' >]}i)
   end
 
+  no_autobump! because: :incompatible_version_format
+
   bottle do
-    sha256 cellar: :any_skip_relocation, all: "2b6351545fc3984ec8c311694ddbea31074cb2f745415ca6bcc0976269d16dd2"
+    sha256 cellar: :any_skip_relocation, all: "5516b1b93b0abce41dc3ccfe23d61dfe6cf0c6f1d5f16756a5d83f3832b9d00e"
   end
 
   depends_on "openjdk"
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   def install
     libexec.install buildpath.glob("*") - buildpath.glob("config*win*")

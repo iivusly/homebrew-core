@@ -1,26 +1,20 @@
 class GulpCli < Formula
   desc "Command-line utility for Gulp"
   homepage "https://github.com/gulpjs/gulp-cli"
-  url "https://registry.npmjs.org/gulp-cli/-/gulp-cli-3.0.0.tgz"
-  sha256 "f90ba044fd1486dcc0f5e7ec07aba39fc62079cd0f3df78f2ba123b404f8094b"
+  url "https://registry.npmjs.org/gulp-cli/-/gulp-cli-3.1.0.tgz"
+  sha256 "683fa88d8d15b49a8adf760f25e4e46f068f1e065fe234e1199b27fe6bf0376e"
   license "MIT"
 
   bottle do
     rebuild 1
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "b6b78b8a649dc8b662a2fa39814d039991950450e52b20692ff9756955f642d6"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "b6b78b8a649dc8b662a2fa39814d039991950450e52b20692ff9756955f642d6"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "b6b78b8a649dc8b662a2fa39814d039991950450e52b20692ff9756955f642d6"
-    sha256 cellar: :any_skip_relocation, sonoma:         "97e82d635666e3f778dd12285f8881701110370eaefe6c22fb902b493ae2ba58"
-    sha256 cellar: :any_skip_relocation, ventura:        "97e82d635666e3f778dd12285f8881701110370eaefe6c22fb902b493ae2ba58"
-    sha256 cellar: :any_skip_relocation, monterey:       "97e82d635666e3f778dd12285f8881701110370eaefe6c22fb902b493ae2ba58"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "7ca11835e27a0ab600dc0ce1c92b06791fb15b3f7c75d71d97ca4984983deff8"
+    sha256 cellar: :any_skip_relocation, all: "240302d96e2d2ded3a74ad80abc51db6c8539e32421a6026a081879c1387dc3c"
   end
 
   depends_on "node"
 
   def install
     system "npm", "install", *std_npm_args
-    bin.install_symlink Dir["#{libexec}/bin/*"]
+    bin.install_symlink libexec.glob("bin/*")
   end
 
   test do
@@ -31,12 +25,12 @@ class GulpCli < Formula
     assert_match "CLI version: #{version}", output
     assert_match "Local version: ", output
 
-    (testpath/"gulpfile.js").write <<~EOS
+    (testpath/"gulpfile.js").write <<~JS
       function defaultTask(cb) {
         cb();
       }
       exports.default = defaultTask
-    EOS
+    JS
     assert_match "Finished 'default' after ", shell_output("#{bin}/gulp")
   end
 end

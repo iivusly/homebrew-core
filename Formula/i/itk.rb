@@ -1,11 +1,11 @@
 class Itk < Formula
   desc "Insight Toolkit is a toolkit for performing registration and segmentation"
   homepage "https://itk.org"
-  url "https://github.com/InsightSoftwareConsortium/ITK/releases/download/v5.3.0/InsightToolkit-5.3.0.tar.gz"
-  sha256 "57a4471133dc8f76bde3d6eb45285c440bd40d113428884a1487472b7b71e383"
+  url "https://github.com/InsightSoftwareConsortium/ITK/releases/download/v5.4.5/InsightToolkit-5.4.5.tar.gz"
+  sha256 "ecab9119664e2571b90740ba9ab3ca11cb46942dbd7bb87c0de5bb15309a36c9"
   license "Apache-2.0"
-  revision 3
-  head "https://github.com/InsightSoftwareConsortium/ITK.git", branch: "master"
+  revision 1
+  head "https://github.com/InsightSoftwareConsortium/ITK.git", branch: "main"
 
   livecheck do
     url :stable
@@ -13,13 +13,13 @@ class Itk < Formula
   end
 
   bottle do
-    sha256                               arm64_sonoma:   "d5f95ad376eb26081d40eca0efdba2fb7b6a15df074cfab5bbf3f06965727919"
-    sha256                               arm64_ventura:  "ada973d67e4b9dc0dc9a82092f5ec755eae037cd1e70812ea8e8a4dace07554e"
-    sha256                               arm64_monterey: "4ea639bad2e0d5bf87110ac50e13e3fff20f69bf464d3788a77dee1a2d0ded6a"
-    sha256                               sonoma:         "4a8187ea203c233ff05606538d7a6dd38982aca6097d996de3cbbbbdd213c0a9"
-    sha256                               ventura:        "ed8c3bd3abe75f831ddb49f6cd23bfee252849b76ff233677edcb42965700bf6"
-    sha256                               monterey:       "8a50879df1c4307ce4f3aa3ccffdd2996ed417f7a2beaad13190f7894ca2e629"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "c676b97afc20d8e34a8b47de1d67522989ef21312c602afe008ee9091ad0ae28"
+    rebuild 1
+    sha256 arm64_tahoe:   "b2a8f96cd226af1a815933d1daee93c710ceaafaac326c8820a9104427df3917"
+    sha256 arm64_sequoia: "23133969310686e96f33a55f517f0fb41e20d13211cae77bcfaf9a9072385faa"
+    sha256 arm64_sonoma:  "4f9be429fe1e5c8f5e86a3aaf829223407acf93f9fa6f88fdc7fafc691acd8ee"
+    sha256 sonoma:        "b1a1409ea3e92ab6adcb31ae2d234ae0eddd7b835a267ea026f578f876377c3e"
+    sha256 arm64_linux:   "da238b4ffceb9c53fd94bba8ba720d714173fd072c31729008bec80314c81b4f"
+    sha256 x86_64_linux:  "94c87addcf68107b478da8dde5df4ae2c5d82f98c104765dc8cfed670adbb6ec"
   end
 
   depends_on "cmake" => :build
@@ -34,20 +34,30 @@ class Itk < Formula
   depends_on "vtk"
 
   uses_from_macos "expat"
-  uses_from_macos "zlib"
 
   on_macos do
+    depends_on "freetype"
     depends_on "glew"
   end
 
   on_linux do
     depends_on "alsa-lib"
     depends_on "unixodbc"
+    depends_on "zlib-ng-compat"
   end
 
-  fails_with gcc: "5"
+  # Work around superenv to avoid mixing `expat` usage in libraries across dependency tree.
+  # Brew `expat` usage in Python has low impact as it isn't loaded unless pyexpat is used.
+  # TODO: Consider adding a DSL for this or change how we handle Python's `expat` dependency
+  def remove_brew_expat
+    env_vars = %w[CMAKE_PREFIX_PATH HOMEBREW_INCLUDE_PATHS HOMEBREW_LIBRARY_PATHS PATH PKG_CONFIG_PATH]
+    ENV.remove env_vars, /(^|:)#{Regexp.escape(Formula["expat"].opt_prefix)}[^:]*/
+    ENV.remove "HOMEBREW_DEPENDENCIES", "expat"
+  end
 
   def install
+    remove_brew_expat if OS.mac? && MacOS.version < :sequoia
+
     # Avoid CMake trying to find GoogleTest even though tests are disabled
     rm_r(buildpath/"Modules/ThirdParty/GoogleTest")
 
@@ -100,7 +110,7 @@ class Itk < Formula
   end
 
   test do
-    (testpath/"test.cxx").write <<-EOS
+    (testpath/"test.cxx").write <<~CPP
       #include "itkImage.h"
       int main(int argc, char* argv[])
       {
@@ -109,13 +119,13 @@ class Itk < Formula
         image->Update();
         return EXIT_SUCCESS;
       }
-    EOS
+    CPP
 
     v = version.major_minor
     # Build step
-    system ENV.cxx, "-std=c++14", "-isystem", "#{include}/ITK-#{v}", "-o", "test.cxx.o", "-c", "test.cxx"
+    system ENV.cxx, "-std=c++17", "-isystem", "#{include}/ITK-#{v}", "-o", "test.cxx.o", "-c", "test.cxx"
     # Linking step
-    system ENV.cxx, "-std=c++14", "test.cxx.o", "-o", "test",
+    system ENV.cxx, "-std=c++17", "test.cxx.o", "-o", "test",
                     lib/shared_library("libITKCommon-#{v}", 1),
                     lib/shared_library("libITKVNLInstantiation-#{v}", 1),
                     lib/shared_library("libitkvnl_algo-#{v}", 1),

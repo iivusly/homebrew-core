@@ -1,91 +1,84 @@
 class QtPostgresql < Formula
   desc "Qt SQL Database Driver"
   homepage "https://www.qt.io/"
-  url "https://download.qt.io/official_releases/qt/6.7/6.7.0/submodules/qtbase-everywhere-src-6.7.0.tar.xz"
-  sha256 "11b2e29e2e52fb0e3b453ea13bbe51a10fdff36e1c192d8868c5a40233b8b254"
+  url "https://download.qt.io/official_releases/qt/6.11/6.11.0/submodules/qtbase-everywhere-src-6.11.0.tar.xz"
+  mirror "https://qt.mirror.constant.com/archive/qt/6.11/6.11.0/submodules/qtbase-everywhere-src-6.11.0.tar.xz"
+  mirror "https://mirrors.ukfast.co.uk/sites/qt.io/archive/qt/6.11/6.11.0/submodules/qtbase-everywhere-src-6.11.0.tar.xz"
+  sha256 "231ad85979864d914dc9568a1b71c91d6cf20d7b2021d059103bf0eb51cb755e"
   license any_of: ["GPL-2.0-only", "GPL-3.0-only", "LGPL-3.0-only"]
 
   livecheck do
-    formula "qt"
+    formula "qtbase"
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "e6f073765a42dda11f1cdab9ca2fb66e7c890f4d72562e82fbeeb6ed290fcf33"
-    sha256 cellar: :any,                 arm64_ventura:  "3ffcc647516380404e0d7ceb7bffba1b375b938a3fc7bb9f8bd87c83bff42399"
-    sha256 cellar: :any,                 arm64_monterey: "881013d2a4c49285248404b58806e3bc3c9acabdad6583fa770686c1ff27ae80"
-    sha256 cellar: :any,                 sonoma:         "330f4ac789b655f692f2e2dca1b35dd902c1562da008f4bd025c2eaf375d0e5c"
-    sha256 cellar: :any,                 ventura:        "1b088f9703c3868a2362d30d0371e92414755b88e42d6e55d3d7f6bd530e1021"
-    sha256 cellar: :any,                 monterey:       "3d40b375f8ba4d85f2ae0a34504c745dde53f3be6526be5d38ca2762c02972f1"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "ddf52e24abb8a3def2c3a12886a62da390df6e5a8acddc8cc41fe94b046f0728"
+    sha256 cellar: :any,                 arm64_tahoe:   "69614c5fecfd71343662758ca842e77c740b246cf33ae17365418630282ffc49"
+    sha256 cellar: :any,                 arm64_sequoia: "a335421e0bbcf5c7c2c5dbf624b66aa36afcc726478136cc09f5f22f90e1cf5f"
+    sha256 cellar: :any,                 arm64_sonoma:  "031950c50552544ebf5a50ce3de237297fcc722b43d336a321d680df7c73ef88"
+    sha256 cellar: :any,                 sonoma:        "d29455560bdc399354fd9f6bd4f058d051a98e82b28d26f8649af068295c582d"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "a69d8ed5ddf60f6402fb15242390d937514f4a87cfa7316cb2573e09d4a466a0"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "8af105418135ee81b1830051276af909322028e70608704bc9144e764c96abc6"
   end
 
   depends_on "cmake" => [:build, :test]
+  depends_on "ninja" => :build
 
   depends_on "libpq"
-  depends_on "qt"
-
-  fails_with gcc: "5"
+  depends_on "qtbase"
 
   def install
-    args = std_cmake_args + %W[
+    args = %W[
       -DCMAKE_STAGING_PREFIX=#{prefix}
-
       -DFEATURE_sql_ibase=OFF
       -DFEATURE_sql_mysql=OFF
       -DFEATURE_sql_oci=OFF
       -DFEATURE_sql_odbc=OFF
       -DFEATURE_sql_psql=ON
       -DFEATURE_sql_sqlite=OFF
+      -DQT_GENERATE_SBOM=OFF
     ]
+    args << "-DQT_NO_APPLE_SDK_AND_XCODE_CHECK=ON" if OS.mac?
 
-    cd "src/plugins/sqldrivers" do
-      system "cmake", ".", *args
-      system "cmake", "--build", "."
-      system "cmake", "--install", "."
-    end
+    system "cmake", "-S", "src/plugins/sqldrivers", "-B", "build", "-G", "Ninja", *args, *std_cmake_args
+    system "cmake", "--build", "build"
+    system "cmake", "--install", "build"
   end
 
   test do
-    (testpath/"CMakeLists.txt").write <<~EOS
-      cmake_minimum_required(VERSION #{Formula["cmake"].version})
+    (testpath/"CMakeLists.txt").write <<~CMAKE
+      cmake_minimum_required(VERSION 4.0)
       project(test VERSION 1.0.0 LANGUAGES CXX)
-      set(CMAKE_CXX_STANDARD 17)
-      set(CMAKE_CXX_STANDARD_REQUIRED ON)
-      set(CMAKE_AUTOMOC ON)
-      set(CMAKE_AUTORCC ON)
-      set(CMAKE_AUTOUIC ON)
       find_package(Qt6 COMPONENTS Core Sql REQUIRED)
-      add_executable(test
-          main.cpp
-      )
+      qt_standard_project_setup()
+      qt_add_executable(test main.cpp)
       target_link_libraries(test PRIVATE Qt6::Core Qt6::Sql)
-    EOS
+    CMAKE
 
-    (testpath/"test.pro").write <<~EOS
-      QT       += core sql
-      QT       -= gui
-      TARGET = test
-      CONFIG   += console debug
-      CONFIG   -= app_bundle
+    (testpath/"test.pro").write <<~QMAKE
+      QT      += core sql
+      QT      -= gui
+      TARGET   = test
+      CONFIG  += console debug
+      CONFIG  -= app_bundle
       TEMPLATE = app
       SOURCES += main.cpp
-    EOS
+    QMAKE
 
-    (testpath/"main.cpp").write <<~EOS
+    (testpath/"main.cpp").write <<~CPP
       #include <QCoreApplication>
       #include <QtSql>
       #include <cassert>
       int main(int argc, char *argv[])
       {
-        QCoreApplication::addLibraryPath("#{share}/qt/plugins");
         QCoreApplication a(argc, argv);
         QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL");
         assert(db.isValid());
         return 0;
       }
-    EOS
+    CPP
 
-    system "cmake", "-S", ".", "-B", "build", "-DCMAKE_BUILD_TYPE=Debug"
+    ENV["LC_ALL"] = "en_US.UTF-8"
+    system "cmake", "-S", ".", "-B", "build"
     system "cmake", "--build", "build"
     system "./build/test"
 

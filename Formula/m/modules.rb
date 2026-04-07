@@ -1,8 +1,8 @@
 class Modules < Formula
   desc "Dynamic modification of a user's environment via modulefiles"
   homepage "https://modules.sourceforge.net/"
-  url "https://downloads.sourceforge.net/project/modules/Modules/modules-5.4.0/modules-5.4.0.tar.bz2"
-  sha256 "c494f70cb533b5f24ad69803aa053bb4a509bec4632d6a066e7ac041db461a72"
+  url "https://downloads.sourceforge.net/project/modules/Modules/modules-5.6.1/modules-5.6.1.tar.bz2"
+  sha256 "5d36fd90b83a06fd3ed0ff951ab1101f22eb310fde3492f9d0455a68569abe5b"
   license "GPL-2.0-or-later"
 
   livecheck do
@@ -11,13 +11,12 @@ class Modules < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "4ddaf539544c8f1517733ceddf0c1573d6a4caa3778b1aeb08aa889b2d384b63"
-    sha256 cellar: :any,                 arm64_ventura:  "507bddc8fdab17470d830eeadb5f24d10f606a7b4ad826e4c9fb22f8ac62a9dd"
-    sha256 cellar: :any,                 arm64_monterey: "1880dfbab7812d4ade82d23498daff830f7985173b4538cb587137b64325cb90"
-    sha256 cellar: :any,                 sonoma:         "59f7699c5b3a4aae9de29e0be0185f83495b73fc5300f0b3c210afe4acef39bb"
-    sha256 cellar: :any,                 ventura:        "907d341c7bcd83ad6a2d3f02311585b1aa3ad0150ebdfeeb090d6f655b6ad4a0"
-    sha256 cellar: :any,                 monterey:       "de88a0bb8dda06d5ac93d16b7b0a2d2e197c765aaabb4ad8847fe47b58aac9c0"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "d01c5ac7e9fdd7fcf80e195809215244ab183da70646a6be1d62b0920ac6aba1"
+    sha256 cellar: :any,                 arm64_tahoe:   "9ad57749f2e5147af68bd14cb793daf5a1248a5066fabf5849bcc61eb81310b3"
+    sha256 cellar: :any,                 arm64_sequoia: "73c1507d3f613e2e8f362e0fa372879c7308ff0a4da5c8c29552de478bda1541"
+    sha256 cellar: :any,                 arm64_sonoma:  "4d6895e9c911eca582b3d8126621b990467b1c15949fd4047f5f06b3c77b2b3c"
+    sha256 cellar: :any,                 sonoma:        "850380e3da9b8041f097dad78915d0e707bc22e926e6213a37923f6fb2203b87"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "a28e814c89976354ce48751ef27b4c3dc36ca7418e53490f78a8df71b49fd69a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "a00c5618052a36dca03fef4a0e2ca0239b98615ea959b928621bef9da92fc2c0"
   end
 
   depends_on "tcl-tk"
@@ -25,17 +24,15 @@ class Modules < Formula
   uses_from_macos "less"
 
   def install
+    tcltk = Formula["tcl-tk"]
     args = %W[
       --prefix=#{prefix}
       --datarootdir=#{share}
-      --with-tcl=#{Formula["tcl-tk"].opt_lib}
+      --with-tcl=#{tcltk.opt_lib}
+      --with-tclsh=#{tcltk.opt_bin}/tclsh
       --without-x
     ]
-
-    if OS.linux?
-      args << "--with-pager=#{Formula["less"].opt_bin}/less"
-      args << "--with-tclsh=#{Formula["tcl-tk"].opt_bin}/tclsh"
-    end
+    args << "--with-pager=#{Formula["less"].opt_bin}/less" if OS.linux?
 
     system "./configure", *args
     system "make", "install"

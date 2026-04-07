@@ -1,19 +1,18 @@
 class Qshell < Formula
   desc "Shell Tools for Qiniu Cloud"
   homepage "https://github.com/qiniu/qshell"
-  url "https://github.com/qiniu/qshell/archive/refs/tags/v2.14.0.tar.gz"
-  sha256 "1bb1eb9c7c71c0af7714fa49b04b5e27c851e49a0f8fb0360254cb3c9f4ee472"
+  url "https://github.com/qiniu/qshell/archive/refs/tags/v2.19.1.tar.gz"
+  sha256 "00a61af4d8dc5907bfd96538f6c9c9c5756be86dc5cab0202692b79d2f69534a"
   license "MIT"
   head "https://github.com/qiniu/qshell.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "6fa3a186562a263f6980f38a10decd812898833623b8904a17fb158c1bee4bd1"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "b56d1e101453ac0992e72ba41d6cb8099ff533f288c436532d345060e0e82286"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "8e5bcc911371e247f82f2912116b50ae9a8ba4e1c4a54c82df92313fad722955"
-    sha256 cellar: :any_skip_relocation, sonoma:         "bb055ae85801b90f89fac758ce9df6cf8afc69dc225346bae6f8087a1d0185fa"
-    sha256 cellar: :any_skip_relocation, ventura:        "4f6b122851a0661bc2dc2b7ce834d2c755436b28d4046355fe2fdc4dd50d0027"
-    sha256 cellar: :any_skip_relocation, monterey:       "ca14664cb34be1b80cd2e542043b95b44d1a8f5c4930aa29fc7d6340f606e4cf"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "daa3155554a6de7acf972805fbf4352bcabe27f8b930c07812f885f02740c57d"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "10f059d2b59aa1b2e4c9939e575be7cbf64de6f9ea5756e4ab0c0ae7530796cf"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "10f059d2b59aa1b2e4c9939e575be7cbf64de6f9ea5756e4ab0c0ae7530796cf"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "10f059d2b59aa1b2e4c9939e575be7cbf64de6f9ea5756e4ab0c0ae7530796cf"
+    sha256 cellar: :any_skip_relocation, sonoma:        "ae0b03af16382ca2951deb4543558757f9e463101bef1511b26570ee3813107d"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "6fb18c27ab166618f8e8e030d8648c848705c034ad0d91c54f8e5a40cd839200"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "054f29d58fd27be18b916a6be84ad7e9c00536367b20ff09e5510c0ef7146dd2"
   end
 
   depends_on "go" => :build
@@ -24,7 +23,7 @@ class Qshell < Formula
       -X github.com/qiniu/qshell/v2/iqshell/common/version.version=v#{version}
     ]
     system "go", "build", *std_go_args(ldflags:), "./main"
-    generate_completions_from_executable(bin/"qshell", "completion")
+    generate_completions_from_executable(bin/"qshell", shell_parameter_format: :cobra)
   end
 
   test do

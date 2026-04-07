@@ -22,7 +22,7 @@ end
 class LinuxKernelRequirement < Requirement
   fatal true
 
-  MINIMUM_LINUX_KERNEL_VERSION = "2.6.32".freeze
+  MINIMUM_LINUX_KERNEL_VERSION = "3.2".freeze
 
   satisfy(build_env: false) do
     OS.kernel_version >= MINIMUM_LINUX_KERNEL_VERSION
@@ -43,69 +43,131 @@ end
 class Glibc < Formula
   desc "GNU C Library"
   homepage "https://www.gnu.org/software/libc/"
-  url "https://ftp.gnu.org/gnu/glibc/glibc-2.35.tar.gz"
-  mirror "https://ftpmirror.gnu.org/gnu/glibc/glibc-2.35.tar.gz"
-  sha256 "3e8e0c6195da8dfbd31d77c56fb8d99576fb855fafd47a9e0a895e51fd5942d4"
+  url "https://ftpmirror.gnu.org/gnu/glibc/glibc-2.39.tar.gz"
+  mirror "https://ftp.gnu.org/gnu/glibc/glibc-2.39.tar.gz"
+  sha256 "97f84f3b7588cd54093a6f6389b0c1a81e70d99708d74963a2e3eab7c7dc942d"
   license all_of: ["GPL-2.0-or-later", "LGPL-2.1-or-later"]
-  revision 1
 
   livecheck do
     skip "glibc is pinned to the version present in Homebrew CI"
   end
 
   bottle do
-    rebuild 1
-    sha256 x86_64_linux: "91e866deda35d20e5e5e7a288ae0902b7692ec4398d4267c74c84a6ebcc7cdd9"
+    sha256 arm64_linux:  "cde6809e25a013784fc921bac3217758655a49c72c7290a75649a98f9e0b2b4a"
+    sha256 x86_64_linux: "d36660b7cd74c76ad3770aa9817c48ea4cfcb0d226095e38f9cc9b414730bef0"
   end
 
   keg_only "it can shadow system glibc if linked"
 
   depends_on BrewedGlibcNotOlderRequirement
   depends_on :linux
-  depends_on "linux-headers@5.15"
+  depends_on "linux-headers@6.8"
   depends_on LinuxKernelRequirement
 
-  # Automatic bootstrapping is only supported for Intel.
-  on_intel do
-    resource "bootstrap-binutils" do
-      url "https://github.com/Homebrew/glibc-bootstrap/releases/download/1.0.0/bootstrap-binutils-2.38.tar.gz"
-      sha256 "a2971fd77743a1d82242736c646bfa201137a4df28d829b1aa7f556fc57215e2"
+  resource "bootstrap-binutils" do
+    on_arm do
+      url "https://github.com/Homebrew/glibc-bootstrap/releases/download/1.1.1/bootstrap-aarch64-binutils-2.43.1.tar.gz"
+      sha256 "4eb48a302fd501a57be0c842c1657080abe96c1314473244f814df2ae676d951"
     end
-
-    resource "bootstrap-bison" do
-      url "https://github.com/Homebrew/glibc-bootstrap/releases/download/1.0.0/bootstrap-bison-3.8.2.tar.gz"
-      sha256 "f914c0dee9fc8a200f6607d52a2d25c253b665d02aaac360711ebd5fbd9cb346"
-    end
-
-    resource "bootstrap-gawk" do
-      url "https://github.com/Homebrew/glibc-bootstrap/releases/download/1.0.0/bootstrap-gawk-5.1.1.tar.gz"
-      sha256 "ec3f0115b156b418a189f9868aaa0655f18c40f5c40f437e407ac60b7c749e0a"
-    end
-
-    resource "bootstrap-gcc" do
-      url "https://github.com/Homebrew/glibc-bootstrap/releases/download/1.0.0/bootstrap-gcc-9.5.0.tar.gz"
-      sha256 "d549cf096864de5da77b4f068fab3741636206f3b7ace593b46a226d726f4538"
-    end
-
-    resource "bootstrap-make" do
-      url "https://github.com/Homebrew/glibc-bootstrap/releases/download/1.0.0/bootstrap-make-4.3.tar.gz"
-      sha256 "aa684eff83e5a986391475547c29b3ade04a307aa5730866aa5d2caa905e7166"
-    end
-
-    resource "bootstrap-python3" do
-      url "https://github.com/Homebrew/glibc-bootstrap/releases/download/1.0.0/bootstrap-python3-3.9.13.tar.gz"
-      sha256 "93d258ab9240d247a66322926deb6728e2aa7877711196fde02d716c20ada490"
-    end
-
-    resource "bootstrap-sed" do
-      url "https://github.com/Homebrew/glibc-bootstrap/releases/download/1.0.0/bootstrap-sed-4.8.tar.gz"
-      sha256 "404f86a92a15303f9b08960712ee8a8b398efc345d80b4e0401dd9ef82452046"
+    on_intel do
+      url "https://github.com/Homebrew/glibc-bootstrap/releases/download/1.1.1/bootstrap-x86_64-binutils-2.43.1.tar.gz"
+      sha256 "56e5fdc9aa18d3b609969a60f03f103e99dde3a32bfc7139c66d83e185f4dfec"
     end
   end
 
+  resource "bootstrap-bison" do
+    on_arm do
+      url "https://github.com/Homebrew/glibc-bootstrap/releases/download/1.1.1/bootstrap-aarch64-bison-3.8.2.tar.gz"
+      sha256 "59f5bacacc32fda6aa16427a3a894d5a1d0bc30cfc8b5e22f8b25580473e571e"
+    end
+    on_intel do
+      url "https://github.com/Homebrew/glibc-bootstrap/releases/download/1.1.1/bootstrap-x86_64-bison-3.8.2.tar.gz"
+      sha256 "29c9763dbcb94e0816fc43ccc38835f2a6f17574eb23559e2f497bcef9d3e6ae"
+    end
+  end
+
+  resource "bootstrap-gawk" do
+    on_arm do
+      url "https://github.com/Homebrew/glibc-bootstrap/releases/download/1.1.1/bootstrap-aarch64-gawk-5.3.1.tar.gz"
+      sha256 "8e966760d81396b118ad84f228e2c26dc72264aad20edbd34428f743c3a202e3"
+    end
+    on_intel do
+      url "https://github.com/Homebrew/glibc-bootstrap/releases/download/1.1.1/bootstrap-x86_64-gawk-5.3.1.tar.gz"
+      sha256 "f209cf49bcb141a7f4b3e16a01492f23a2da59351e85f0ccc1757fae91ff63cd"
+    end
+  end
+
+  resource "bootstrap-gcc" do
+    on_arm do
+      url "https://github.com/Homebrew/glibc-bootstrap/releases/download/1.2.0/bootstrap-aarch64-gcc-10.5.0.tar.gz"
+      sha256 "5fd88bb507f91930d04230094a8ac0611519cbc49b19084c0577eb92722862d4"
+    end
+    on_intel do
+      url "https://github.com/Homebrew/glibc-bootstrap/releases/download/1.1.1/bootstrap-x86_64-gcc-9.5.0.tar.gz"
+      sha256 "f7f0c7293bb60644b2463351a4ba748b0b108ccda49d4a098aa13e331d26b8c3"
+    end
+  end
+
+  resource "bootstrap-make" do
+    on_arm do
+      url "https://github.com/Homebrew/glibc-bootstrap/releases/download/1.1.1/bootstrap-aarch64-make-4.4.1.tar.gz"
+      sha256 "a0bf6d77a11763581f1236947fa1c7a89a4d6e4b5d0afbb019f7e2e48928580a"
+    end
+    on_intel do
+      url "https://github.com/Homebrew/glibc-bootstrap/releases/download/1.1.1/bootstrap-x86_64-make-4.4.1.tar.gz"
+      sha256 "54a22f00ba061b6018cc14f4c1472eba5adf7045418d1993aebd35cd446851f7"
+    end
+  end
+
+  resource "bootstrap-python3" do
+    on_arm do
+      url "https://github.com/Homebrew/glibc-bootstrap/releases/download/1.1.1/bootstrap-aarch64-python3-3.11.10.tar.gz"
+      sha256 "b8c30cfe774238c01e22a57718fbb7049c66d1d0236ac7e10079556633d0c1fe"
+    end
+    on_intel do
+      url "https://github.com/Homebrew/glibc-bootstrap/releases/download/1.1.1/bootstrap-x86_64-python3-3.11.10.tar.gz"
+      sha256 "2de6cdd4e8a239fb18d70c140abf17708e32e34cf1a29c5754474201a206b1d8"
+    end
+  end
+
+  resource "bootstrap-sed" do
+    on_arm do
+      url "https://github.com/Homebrew/glibc-bootstrap/releases/download/1.1.1/bootstrap-aarch64-sed-4.9.tar.gz"
+      sha256 "90558ff86eb9c4fa8046bed69ee9fb764905ed4022c99e21d6cb502f960fc6c2"
+    end
+    on_intel do
+      url "https://github.com/Homebrew/glibc-bootstrap/releases/download/1.1.1/bootstrap-x86_64-sed-4.9.tar.gz"
+      sha256 "ba9d8b41362c9f7cf85bc36a7b685be8206d4cb32b364b6ca323621b976e89bb"
+    end
+  end
+
+  # Apply CVE patches from Ubuntu
+  patch do
+    url "https://archive.ubuntu.com/ubuntu/pool/main/g/glibc/glibc_2.39-0ubuntu8.7.debian.tar.xz"
+    mirror "https://launchpad.net/ubuntu/+archive/primary/+sourcefiles/glibc/2.39-0ubuntu8.7/glibc_2.39-0ubuntu8.7.debian.tar.xz"
+    sha256 "9642284fbb90ca3b56af777e3e5d6989bf3f80ba5d0c37c4ec0c94fb37912b70"
+    apply "patches/any/CVE-2024-2961.patch",
+          "patches/any/CVE-2024-33599.patch",
+          "patches/any/CVE-2024-33600_1.patch",
+          "patches/any/CVE-2024-33600_2.patch",
+          "patches/any/CVE-2024-33601_33602.patch",
+          "patches/any/CVE-2025-0395.patch",
+          "patches/any/CVE-2025-5702.patch",
+          "patches/any/CVE-2025-8058.patch",
+          "patches/CVE-2025-15281.patch",
+          "patches/CVE-2026-0861.patch",
+          "patches/CVE-2026-0915.patch"
+  end
+
+  # Backport of various test suite fixes
+  patch do
+    url "https://raw.githubusercontent.com/Homebrew/homebrew-core/431b170696708f36aa0bd51139406e26ade0a7eb/Patches/glibc/2.39-test-fixes.patch"
+    sha256 "1a7a6481d03ce23bdc2385413ac1784684e3e1f72f68ce7f720755abfae2f4e9"
+  end
+
   def install
-    # Automatic bootstrapping is only supported for Intel.
-    if Hardware::CPU.intel?
+    # Automatic bootstrapping is only supported for x86_64 and aarch64.
+    if (Hardware::CPU.intel? || Hardware::CPU.arm?) && Hardware::CPU.is_64_bit?
       # Set up bootstrap resources in /tmp/homebrew.
       bootstrap_dir = Pathname.new("/tmp/homebrew")
       bootstrap_dir.mkpath
@@ -123,8 +185,6 @@ class Glibc < Formula
       ENV["CXX"] = bootstrap_dir/"bin/g++"
       # The MAKE variable must be set to the bootstrap make - including it in the path is not enough.
       ENV["MAKE"] = bootstrap_dir/"bin/make"
-      # Add -march=core2 and -O2 when building in CI since we are not using the compiler shim.
-      ENV.append "CFLAGS", "-march=core2 -O2" if ENV["HOMEBREW_GITHUB_ACTIONS"]
     end
 
     # Setting RPATH breaks glibc.
@@ -136,6 +196,9 @@ class Glibc < Formula
     # Use brewed ld.so.preload rather than the hotst's /etc/ld.so.preload
     inreplace "elf/rtld.c", '= "/etc/ld.so.preload";', '= SYSCONFDIR "/ld.so.preload";'
 
+    # Changing this will change the ABI so we want to keep this stable.
+    localedir = opt_share/"locale"
+
     mkdir "build" do
       args = [
         "--disable-crypt",
@@ -144,15 +207,52 @@ class Glibc < Formula
         "--disable-silent-rules",
         "--prefix=#{prefix}",
         "--sysconfdir=#{etc}",
-        "--enable-obsolete-rpc",
+        "--localedir=#{localedir}",
         "--without-gd",
         "--without-selinux",
         "--with-binutils=#{bootstrap_dir}/bin",
-        "--with-headers=#{Formula["linux-headers@5.15"].include}",
+        "--with-headers=#{Formula["linux-headers@6.8"].include}",
+        "--with-bugurl=#{tap.issues_url}",
+        "--with-pkgversion=Homebrew glibc (#{pkg_version})",
       ]
-      system "../configure", *args
+
+      cflags = "-O2 #{ENV["HOMEBREW_OPTFLAGS"]}"
+      cflags += " -mbranch-protection=standard" if Hardware::CPU.arm64?
+
+      if build.bottle?
+        # Some tests need some gcc libraries to be present.
+        # However these must be built with glibc - unlike our stage0 bootstrap without glibc.
+        # We are strongly assuming here that the host GCC is newer or equal to the bootstrap GCC,
+        # but that's okay given this is just for the tests and is scoped to bottle builds only.
+        # For real runtime usage, `brew` will automatically install Homebrew GCC after glibc.
+        # Some of this might be simplified in Glibc 2.41+ when we can use `TEST_CC`.
+        %w[libgcc_s.so.1 libstdc++.so.6 libgcc_eh.a].each do |lib|
+          ln_s Utils.safe_popen_read("/usr/bin/cc", "-print-file-name=#{lib}").chomp, Pathname.pwd
+        end
+        gcc_eh = File.dirname(Utils.safe_popen_read("/usr/bin/cc", "-print-file-name=libgcc_eh.a").chomp)
+        inreplace "../Makeconfig", /static-gnulib-tests := /, "\\0-L#{gcc_eh} "
+
+        # We do break the ABI in one unavoidable way.
+        # This is because `_nl_default_dirname` ABI varies based on the length of the install prefix.
+        sysv_dir = if Hardware::CPU.arm64?
+          "aarch64"
+        elsif Hardware::CPU.intel? && Hardware::CPU.is_64_bit?
+          "x86_64/64"
+        end
+        if sysv_dir
+          inreplace "../sysdeps/unix/sysv/linux/#{sysv_dir}/libc.abilist",
+                    /(_nl_default_dirname.*?)0x12/,
+                    "\\10x#{(localedir.to_s.length + 1).to_s(16)}"
+        end
+
+        # Avoid Intel CI runner timeout on tst-malloc-too-large-malloc-hugetlb2
+        ENV["TIMEOUTFACTOR"] = "4" if Hardware::CPU.intel?
+      end
+
+      system "../configure", *args, "CFLAGS=#{cflags}"
       system "make", "all"
-      system "make", "install"
+      system "make", "check" if build.bottle?
+      system "make", "install", "localedir=#{share}/locale"
       prefix.install_symlink "lib" => "lib64"
     end
 
@@ -198,7 +298,7 @@ class Glibc < Formula
     rm(etc/"ld.so.cache")
   ensure
     # Delete bootstrap binaries after build is finished.
-    rm_r(bootstrap_dir)
+    rm_r(bootstrap_dir) if bootstrap_dir
   end
 
   def post_install

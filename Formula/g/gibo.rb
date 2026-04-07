@@ -1,18 +1,18 @@
 class Gibo < Formula
   desc "Access GitHub's .gitignore boilerplates"
   homepage "https://github.com/simonwhitaker/gibo"
-  url "https://github.com/simonwhitaker/gibo/archive/refs/tags/v3.0.12.tar.gz"
-  sha256 "6bc51d54587234b8d223c392ec9c88478780de4ae5851d493ab10acaacf65ed1"
+  url "https://github.com/simonwhitaker/gibo/archive/refs/tags/v3.0.20.tar.gz"
+  sha256 "29ec9443a83256c8c78ff42724c1e35cc3cbcf4cb91a4823383125c75e1e89c2"
   license "Unlicense"
+  head "https://github.com/simonwhitaker/gibo.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "55c7e709c07a5611634d54925fc457b7d1ef199913e2c2452c74597f005466b8"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "28820935ff881cb175dd68db249241b33b470ff5a112441f34e94f17869852a1"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "63289331b1fcee840c80627e90ab7161071332e653bda826057a1add291d19d8"
-    sha256 cellar: :any_skip_relocation, sonoma:         "9ba85c273ba563633f4c2b20ca74f2e74e8c8be82a321bd521b7831f8b986ac8"
-    sha256 cellar: :any_skip_relocation, ventura:        "b1ad375442dd98976d82054f1fdd8af6e68c3923fadde7537d9f394bd3828946"
-    sha256 cellar: :any_skip_relocation, monterey:       "4b86011e1e5292846ae6886d432830fc3be8aba954589e3ab20549acc2d5c1df"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "e63a095a734201c7a6bb43e49cbd3c925514308a4876b1c1a9c25af57548c594"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "efd799aee3f1f9db69f25f8dfc389e40bcf2985705593d31593b576e49be93f1"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "efd799aee3f1f9db69f25f8dfc389e40bcf2985705593d31593b576e49be93f1"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "efd799aee3f1f9db69f25f8dfc389e40bcf2985705593d31593b576e49be93f1"
+    sha256 cellar: :any_skip_relocation, sonoma:        "25db33f4f269291e3d440bfc699ff0c02f45d808252e5ed6ed11870bfe14c76f"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "a5a953a02849c4b714e7be8ac456d889ed52037e0669dc0ae2c15da1894d8350"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "317bbb6430fc5a7653b29b91f9ca7d213bac5c59e46dfb296f41d89c53f896b2"
   end
 
   depends_on "go" => :build
@@ -21,11 +21,9 @@ class Gibo < Formula
     ldflags = %W[
       -s -w
       -X github.com/simonwhitaker/gibo/cmd.version=#{version}
-      -X github.com/simonwhitaker/gibo/cmd.commit=brew
-      -X github.com/simonwhitaker/gibo/cmd.date=#{time.iso8601}
     ]
     system "go", "build", *std_go_args(ldflags:)
-    generate_completions_from_executable(bin/"gibo", "completion")
+    generate_completions_from_executable(bin/"gibo", shell_parameter_format: :cobra)
   end
 
   test do

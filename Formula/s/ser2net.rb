@@ -1,10 +1,9 @@
 class Ser2net < Formula
   desc "Allow network connections to serial ports"
   homepage "https://ser2net.sourceforge.net/"
-  url "https://downloads.sourceforge.net/project/ser2net/ser2net/ser2net-4.6.2.tar.gz"
-  sha256 "63bafcd65bb9270a93b7d5cdde58ccf4d279603ff6d044ac4b484a257cda82ce"
+  url "https://downloads.sourceforge.net/project/ser2net/ser2net/ser2net-4.6.7.tar.gz"
+  sha256 "6b921bc7efb1b9a8a78268d63332701902cc1c8dbac51842d46ede6ffb5fa2a4"
   license "GPL-2.0-only"
-  revision 1
 
   livecheck do
     url :stable
@@ -12,13 +11,12 @@ class Ser2net < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "8b7b88a0bbbf4325b6f47ece8462d1750a624430d22cf86dd1ce04dc3c403fed"
-    sha256 arm64_ventura:  "6cb048373bba9403792c7516530d82f16f55546f4ffd28834552f3cc3863a8e8"
-    sha256 arm64_monterey: "84daf687cbd1d5a3868eacb728e89c836ed61c53317d72e66d87ed5f41926e40"
-    sha256 sonoma:         "9c80d4349d5cf1cf5468868dd002368e9e056e62e09c29e1554dd152ef561704"
-    sha256 ventura:        "d263b99458dc09221aa815d54ad59ce0515f73ff509814e858994f126a99930f"
-    sha256 monterey:       "37ebafecddf088adca232725b8ee53f43b42ce7a44599b25b8e7d921f1bcb397"
-    sha256 x86_64_linux:   "63c7c475b026aa201173d79bafbe0b50522e902da600c22466fa7f97aed52394"
+    sha256               arm64_tahoe:   "826a5c4d76bc78574fbf69dc9fba7c15bcd24efc78a2db3749389b3ba25a662e"
+    sha256               arm64_sequoia: "b2a4a4a84f7dd3011ba5a9c7ac1817bf725f847241b951edc7baa0fb26949fac"
+    sha256               arm64_sonoma:  "905a3d6cb27b9ee2eb89bde470232112695067f626fb5d623c9fdc93f76ed8c3"
+    sha256 cellar: :any, sonoma:        "956a9630a71d18386912c344979746f842c234c05919cd8959a00c70a7c31677"
+    sha256               arm64_linux:   "a6a11cc4e843769d9c58aff84407bbf482443fb8bfcad51f209d178bd9f38847"
+    sha256               x86_64_linux:  "e151fb33658fdea88474c879275d6b4fa26caf8f97a12600a00b4ce3fcb71807"
   end
 
   depends_on "gensio"

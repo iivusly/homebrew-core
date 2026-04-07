@@ -1,19 +1,19 @@
 class Ncnn < Formula
   desc "High-performance neural network inference framework"
   homepage "https://github.com/Tencent/ncnn"
-  url "https://github.com/Tencent/ncnn/archive/refs/tags/20240820.tar.gz"
-  sha256 "21e7897c7a332894934800a15189915b5131dddc84b2c8d5669ff53de8c5efa4"
+  url "https://github.com/Tencent/ncnn/archive/refs/tags/20260113.tar.gz"
+  sha256 "2fdc5c6e37f8552921a9daad498a1be54a6fa6edd32c1a9e3030b27fab253b47"
   license "BSD-3-Clause"
+  revision 4
   head "https://github.com/Tencent/ncnn.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "016732f1055a90f9d2b7ddf5db615a67bac594e3267f3cd3bea4b2c79e6c3dbb"
-    sha256 cellar: :any,                 arm64_ventura:  "29645728bb4c0f1cfa9c6172cd5e52aa6b2dc2f15e68da23719fcebd9e789a50"
-    sha256 cellar: :any,                 arm64_monterey: "1fc3c5a13edfe50b2b5907442d5cf5cded68ed16f9e9c0d1448e71f870420a77"
-    sha256 cellar: :any,                 sonoma:         "c2e792f098072b29ae924cc65862abf0ceca537c17456ea7a9684cdf14723701"
-    sha256 cellar: :any,                 ventura:        "989aca3dc0f9b52286fd8dc2f8b9704bf9f71928fc89306d73138e920d30a46c"
-    sha256 cellar: :any,                 monterey:       "c93c26e3910c3e94e8b7b0475a2a8676ed48dbfb766dbcf23248a06eb03018bf"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "0294e4ffb63184b232b9099fab2f59b2dd42fb81d0646248c3f28302c757ab0f"
+    sha256 cellar: :any, arm64_tahoe:   "32a3ae7eca14922823925b1c28d705510320366701f9ae0bf8c41adc408188b9"
+    sha256 cellar: :any, arm64_sequoia: "699a86a1bdeb0c9ee5f96ca2456c2724ecf332e95a82dea148c23af773e9ace5"
+    sha256 cellar: :any, arm64_sonoma:  "3d16f91290dec7ecf6cac1371a3502cd7897c4de8f4d5e411707f8f315712c0b"
+    sha256 cellar: :any, sonoma:        "1df71d2f7c96bb19c3d6c72e1677035b8f7d5b40815bf865a589c8f460b606b0"
+    sha256               arm64_linux:   "4e00671612b1b942aa589e0ff38b6a1ebd7151c1f9d2ad30a9f647d69fd843ba"
+    sha256               x86_64_linux:  "941bd38539d20bb2adcccd1af07157e0c37ef04f50da1c4db5bf44551ccec351"
   end
 
   depends_on "cmake" => :build
@@ -69,9 +69,12 @@ class Ncnn < Formula
     elsif ENV["HOMEBREW_GITHUB_ACTIONS"] && Hardware::CPU.intel?
       # Don't test Vulkan on GitHub Intel macOS runners as they fail with: "vkCreateInstance failed -9"
       vulkan = 0
+    elsif Hardware::CPU.arm? && MacOS.version == :sonoma
+      # Disable Metal argument buffers for macOS Sonoma on arm
+      ENV["MVK_CONFIG_USE_METAL_ARGUMENT_BUFFERS"] = "0"
     end
 
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include <cassert>
       #include <ncnn/gpu.h>
       #include <ncnn/mat.h>
@@ -91,7 +94,7 @@ class Ncnn < Formula
 
           return 0;
       }
-    EOS
+    CPP
 
     system ENV.cxx, "test.cpp", "-std=c++11",
                     "-I#{include}", "-L#{lib}", "-lncnn",

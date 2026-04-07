@@ -7,6 +7,8 @@ class Diskonaut < Formula
 
   bottle do
     rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:    "46ddaf75fd4b61414cb76fa4ac54aabb931aac13253e52e68888852468c14ede"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia:  "519af087c51cd668213e975d31f7da4255f12c7be476a81ceb4bb448404c2286"
     sha256 cellar: :any_skip_relocation, arm64_sonoma:   "ae7e9d12dc33dcb7424f760021b2e85168f349771f81e48fe8ef6dc747738d1c"
     sha256 cellar: :any_skip_relocation, arm64_ventura:  "c286351912c9d217e5c1d5cce7ee3222d3b55558f114cc59f50c98f56ff0d2b9"
     sha256 cellar: :any_skip_relocation, arm64_monterey: "607b84f58d50e14ca2bdac82a0d53f7e701a6673ee6d63d20b5a3c85e7232ee3"
@@ -16,6 +18,7 @@ class Diskonaut < Formula
     sha256 cellar: :any_skip_relocation, monterey:       "ca2ead79bbdce41e8b1a5b2ded6422c27a71e0c9ccc119d4b3eb6ca2697a5e8c"
     sha256 cellar: :any_skip_relocation, big_sur:        "4db6857d320a4d03ab6a2df8de8604d6918ffce4aa6b4f36951bddd94656aaa3"
     sha256 cellar: :any_skip_relocation, catalina:       "8e6ed47ccdb395b2f461a1e12376ee463bbdca05e572fe2aa33dba49df81f3fd"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "01640068ad07f5330d00b480b129e6c39558740133453c80002f9f0485654c88"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "af43639e44daac484d6b43f33400310a21abf9632c85c198d41aad2edd34a0bc"
   end
 

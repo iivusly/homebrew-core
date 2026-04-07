@@ -3,52 +3,51 @@ class Img2pdf < Formula
 
   desc "Convert images to PDF via direct JPEG inclusion"
   homepage "https://gitlab.mister-muffin.de/josch/img2pdf"
-  url "https://files.pythonhosted.org/packages/36/92/6ac4d61951ba507b499f674c90dfa7b48fa776b56f6f068507f8751c03f1/img2pdf-0.5.1.tar.gz"
-  sha256 "73847e47242f4b5bd113c70049e03e03212936c2727cd2a8bf564229a67d0b95"
+  url "https://files.pythonhosted.org/packages/8e/97/ca44c467131b93fda82d2a2f21b738c8bcf63b5259e3b8250e928b8dd52a/img2pdf-0.6.3.tar.gz"
+  sha256 "219518020f5bd242bdc46493941ea3f756f664c2e86f2454721e74353f58cd95"
   license "LGPL-3.0-or-later"
-  revision 1
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any,                 arm64_sonoma:   "409163d7e755470e90dd99f6ecd43e8ea3667bc7055f515cb674c1c4dc193ee4"
-    sha256 cellar: :any,                 arm64_ventura:  "0dd1b4daa552ea91bd7cf005284ea07a910be3e6d2bde9fcc370b8388a8ddf18"
-    sha256 cellar: :any,                 arm64_monterey: "32cf098e77d5ddacd780be6ae260cecfaa4286127d77c9f8d69ccdd984cf0b15"
-    sha256 cellar: :any,                 sonoma:         "3f8a2b4805d9da11a6322ce90888b20dc11d77b3ed8f44b7be6bd5717d2a1503"
-    sha256 cellar: :any,                 ventura:        "43ec54d11080a0ef985edab917918f06342196378fd1dd5f02c2688722e03bdd"
-    sha256 cellar: :any,                 monterey:       "f67c6f923a5878b8bc0dc8ca71ed0e1585ccdb22fd64e78d3e59549424a968fb"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "ed291d08c027fc186d4859dfb69c56993ee0b85ce6d6ebfb60a110a3e315f26b"
+    sha256 cellar: :any,                 arm64_tahoe:   "49cb1ad33cd2a254b41237c2ce064bda97dc24f74cfae3b81710ddb7d85be1c9"
+    sha256 cellar: :any,                 arm64_sequoia: "b9fe1e781a5fae8818fdd093aba34df2ca8d39c05f44b88ba283f8fccc804d6f"
+    sha256 cellar: :any,                 arm64_sonoma:  "da1e80de87f316015f4df8a677889b8b3ddee005180e289da01088ec9b22aeaa"
+    sha256 cellar: :any,                 sonoma:        "9f7d81616da3c98aaf7ae9821b1790a321bcb6c5b1ddfa93ed35d1cff5f06748"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "f8dfa6ee752c5a807e635c0dae1d411f62f0b2be1a7ea63df6367936555eacfb"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "2fe8d3cf44d3c9199684b3f457b4aba7397f8c864d57ee60a0b09ac042717c60"
   end
 
-  depends_on "pillow"
-  depends_on "python@3.12"
+  depends_on "pillow" => :no_linkage
+  depends_on "python@3.14"
   depends_on "qpdf"
 
   uses_from_macos "libxml2", since: :ventura
   uses_from_macos "libxslt"
 
+  pypi_packages exclude_packages: "pillow"
+
   resource "deprecated" do
-    url "https://files.pythonhosted.org/packages/92/14/1e41f504a246fc224d2ac264c227975427a85caf37c3979979edb9b1b232/Deprecated-1.2.14.tar.gz"
-    sha256 "e5323eb936458dccc2582dc6f9c322c852a775a27065ff2b0c4970b9d53d01b3"
+    url "https://files.pythonhosted.org/packages/49/85/12f0a49a7c4ffb70572b6c2ef13c90c88fd190debda93b23f026b25f9634/deprecated-1.3.1.tar.gz"
+    sha256 "b1b50e0ff0c1fddaa5708a2c6b0a6588bb09b892825ab2b214ac9ea9d92a5223"
   end
 
   resource "lxml" do
-    url "https://files.pythonhosted.org/packages/2b/b4/bbccb250adbee490553b6a52712c46c20ea1ba533a643f1424b27ffc6845/lxml-5.1.0.tar.gz"
-    sha256 "3eea6ed6e6c918e468e693c41ef07f3c3acc310b70ddd9cc72d9ef84bc9564ca"
+    url "https://files.pythonhosted.org/packages/aa/88/262177de60548e5a2bfc46ad28232c9e9cbde697bd94132aeb80364675cb/lxml-6.0.2.tar.gz"
+    sha256 "cd79f3367bd74b317dda655dc8fcfa304d9eb6e4fb06b7168c5cf27f96e0cd62"
   end
 
   resource "packaging" do
-    url "https://files.pythonhosted.org/packages/fb/2b/9b9c33ffed44ee921d0967086d653047286054117d584f1b1a7c22ceaf7b/packaging-23.2.tar.gz"
-    sha256 "048fb0e9405036518eaaf48a55953c750c11e1a1b68e0dd1a9d62ed0c092cfc5"
+    url "https://files.pythonhosted.org/packages/a1/d4/1fc4078c65507b51b96ca8f8c3ba19e6a61c8253c72794544580a7b6c24d/packaging-25.0.tar.gz"
+    sha256 "d443872c98d677bf60f6a1f2f8c1cb748e8fe762d2bf9d3148b5599295b0fc4f"
   end
 
   resource "pikepdf" do
-    url "https://files.pythonhosted.org/packages/f4/8a/23f62747cf7ea02cad56d82ca881c3aeba8a2beaf85c209017a18ab6865f/pikepdf-8.13.0.tar.gz"
-    sha256 "3bbd79c7cd6630361d83e75132aeaf3a64ceb837f82870bafdc210a31e3d917a"
+    url "https://files.pythonhosted.org/packages/d3/1c/c8c8c53d5f2b1e3e9c9a12ff3442aafd5b368ffb167b03c8328da608d72e/pikepdf-10.0.0.tar.gz"
+    sha256 "f1396843aae147328bf221b778725636a1cf33080a46a583b1d18fbb0ca2bcd3"
   end
 
   resource "wrapt" do
-    url "https://files.pythonhosted.org/packages/95/4c/063a912e20bcef7124e0df97282a8af3ff3e4b603ce84c481d6d7346be0a/wrapt-1.16.0.tar.gz"
-    sha256 "5f370f952971e7d17c7d1ead40e49f32345a7f7a5373571ef44d800d06b1899d"
+    url "https://files.pythonhosted.org/packages/49/19/5e5bcd855d808892fe02d49219f97a50f64cd6d8313d75df3494ee97b1a3/wrapt-2.0.0.tar.gz"
+    sha256 "35a542cc7a962331d0279735c30995b024e852cf40481e384fd63caaa391cbb9"
   end
 
   def install
@@ -58,6 +57,6 @@ class Img2pdf < Formula
   test do
     system bin/"img2pdf", test_fixtures("test.png"), test_fixtures("test.jpg"),
                              test_fixtures("test.tiff"), "--pagesize", "A4", "-o", "test.pdf"
-    assert_predicate testpath/"test.pdf", :exist?
+    assert_path_exists testpath/"test.pdf"
   end
 end

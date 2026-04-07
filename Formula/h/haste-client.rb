@@ -4,20 +4,23 @@ class HasteClient < Formula
   url "https://github.com/toptal/haste-client/archive/refs/tags/v0.3.0.tar.gz"
   sha256 "9f7e943be47408ba0b9765328794e7b87bdb2a785f1e9edb5d541d67b4a75d31"
   license "MIT"
-  revision 1
+  revision 2
   head "https://github.com/toptal/haste-client.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "19c113dd6fe207816a9c0dc7b3d16c8242d3302b2c0a0d16182508d3c50b69b0"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "19c113dd6fe207816a9c0dc7b3d16c8242d3302b2c0a0d16182508d3c50b69b0"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "19c113dd6fe207816a9c0dc7b3d16c8242d3302b2c0a0d16182508d3c50b69b0"
-    sha256 cellar: :any_skip_relocation, sonoma:         "19c113dd6fe207816a9c0dc7b3d16c8242d3302b2c0a0d16182508d3c50b69b0"
-    sha256 cellar: :any_skip_relocation, ventura:        "19c113dd6fe207816a9c0dc7b3d16c8242d3302b2c0a0d16182508d3c50b69b0"
-    sha256 cellar: :any_skip_relocation, monterey:       "19c113dd6fe207816a9c0dc7b3d16c8242d3302b2c0a0d16182508d3c50b69b0"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "5ad7b1ac323cd891c96e1b3e83192519c83761f248d8591b7eae25bf5813d939"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "896ee31e42cbb6469b782f0501ff16cad0e536d9e50fcc4f603c15af19c9397a"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "e6968438749dec734a5a5ab8c4dac48fd5eee5b2c8adfe6ec8908d17c72788c1"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "e6968438749dec734a5a5ab8c4dac48fd5eee5b2c8adfe6ec8908d17c72788c1"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "e6968438749dec734a5a5ab8c4dac48fd5eee5b2c8adfe6ec8908d17c72788c1"
+    sha256 cellar: :any_skip_relocation, sonoma:        "e6968438749dec734a5a5ab8c4dac48fd5eee5b2c8adfe6ec8908d17c72788c1"
+    sha256 cellar: :any_skip_relocation, ventura:       "e6968438749dec734a5a5ab8c4dac48fd5eee5b2c8adfe6ec8908d17c72788c1"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "d3a5464d1d5022277c0c64052cc9bc98d2664901f78ad655e153fea1fcb08c44"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "dee9ebcf14e0273c14d8e28ceb77984f9fcd521e11cbc65f74762897d0e73cba"
   end
 
-  uses_from_macos "ruby", since: :high_sierra
+  deprecate! date: "2025-04-18", because: :repo_archived
+
+  uses_from_macos "ruby"
 
   resource "faraday" do
     url "https://rubygems.org/gems/faraday-0.17.6.gem"
@@ -25,7 +28,7 @@ class HasteClient < Formula
   end
 
   resource "json" do
-    on_system :linux, macos: :sierra_or_older do
+    on_linux do
       url "https://rubygems.org/gems/json-2.6.3.gem"
       sha256 "86aaea16adf346a2b22743d88f8dcceeb1038843989ab93cda44b5176c845459"
     end

@@ -1,18 +1,22 @@
 class RekorCli < Formula
   desc "CLI for interacting with Rekor"
   homepage "https://docs.sigstore.dev/logging/overview/"
-  url "https://github.com/sigstore/rekor/archive/refs/tags/v1.3.6.tar.gz"
-  sha256 "15180c244ea11373f268985828ee2b2f40020d09a6886bbc591a4acee97ad53a"
+  url "https://github.com/sigstore/rekor/archive/refs/tags/v1.5.1.tar.gz"
+  sha256 "3b6e0c202ed4e387a095852e680b6503d46d7a26ce8060daf223fe6657450983"
   license "Apache-2.0"
 
+  livecheck do
+    url :stable
+    strategy :github_latest
+  end
+
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "d3fc84c9e35f1246820c00ab49f8fd040be490378d7bee0e501c4e38049be54b"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "777537292bfb1e135878ee833fd25905af9dc24a24c04dde42286d8c2908dc55"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "1233f61dca15831546ac17a78a767fb78998d7c114dd224a050ae159d175ba04"
-    sha256 cellar: :any_skip_relocation, sonoma:         "91a3742f97715cc34a20f2c23b97d7d8403885fb263b12825cf46eaa0d1a4fe1"
-    sha256 cellar: :any_skip_relocation, ventura:        "d2eb978ba461eaf36344b44329d6383697d57a6466634b41291cbb69d7937f25"
-    sha256 cellar: :any_skip_relocation, monterey:       "cdfbf78cf0c8acb8cc9e0f2ec8f87c85295748e72f2ebeae37dff716cbbb69ba"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "e4280fe7989c2e8b4c7548c9e521e3945b14b44f4c2b15bdc5f5b438543d0d79"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "c3015d97b694bd2a14db852c57c9d53a029e77f29b45125d906d3d9fb3715c58"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "c3015d97b694bd2a14db852c57c9d53a029e77f29b45125d906d3d9fb3715c58"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "c3015d97b694bd2a14db852c57c9d53a029e77f29b45125d906d3d9fb3715c58"
+    sha256 cellar: :any_skip_relocation, sonoma:        "8f356be3d43bf51680eaa4aeb76b6ecffd90b0c3db969dd1260c1a7420c9a0b8"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "69b766112dae48f1c329b5550617a7192e2e0514aa752c8818d14c69e981fb29"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "a3767a5534fe576d29b472e5b59053b3d833e3dd400fc6bf72bffe5b5a0a0941"
   end
 
   depends_on "go" => :build
@@ -27,7 +31,7 @@ class RekorCli < Formula
     ]
     system "go", "build", *std_go_args(ldflags:), "./cmd/rekor-cli"
 
-    generate_completions_from_executable(bin/"rekor-cli", "completion")
+    generate_completions_from_executable(bin/"rekor-cli", shell_parameter_format: :cobra)
   end
 
   test do

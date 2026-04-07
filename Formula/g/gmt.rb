@@ -1,21 +1,26 @@
 class Gmt < Formula
   desc "Tools for manipulating and plotting geographic and Cartesian data"
   homepage "https://www.generic-mapping-tools.org/"
-  url "https://github.com/GenericMappingTools/gmt/releases/download/6.5.0/gmt-6.5.0-src.tar.xz"
-  mirror "https://mirrors.ustc.edu.cn/gmt/gmt-6.5.0-src.tar.xz"
-  sha256 "4022adb44033f9c1d5a4d275b69506449e4d486efe2218313f3ff7a6c6c3141e"
+  url "https://github.com/GenericMappingTools/gmt/releases/download/6.6.0/gmt-6.6.0-src.tar.xz"
+  mirror "https://mirrors.ustc.edu.cn/gmt/gmt-6.6.0-src.tar.xz"
+  sha256 "18ac98b11b8fc924463ce5138385c02e9426780fba9ff63a991e2e8ecdbd1082"
   license "LGPL-3.0-or-later"
-  revision 2
+  revision 1
   head "https://github.com/GenericMappingTools/gmt.git", branch: "master"
 
+  livecheck do
+    url :stable
+    strategy :github_releases
+  end
+
   bottle do
-    sha256 arm64_sonoma:   "7a9e2b2d755984f837700e435ed9f7a178d97e731c9c035471216a2bc7229b6a"
-    sha256 arm64_ventura:  "d1417abc1165bddb1bf1a455daa6e9267a443cf45f80c0f0d18c004fb441a1ce"
-    sha256 arm64_monterey: "829748601cadad21494b220e3cbbd9fa73bac30e5653008badb806952d4b59c9"
-    sha256 sonoma:         "d208aa7a4f2583c23df3b997664c665f312246c93e6b5223cdc45e3cc2468e7e"
-    sha256 ventura:        "7fae084040a7434450bac91087439904765faa73e0243c4c5c22998d398a88e1"
-    sha256 monterey:       "9909ef3fdfc45c1e6832a32c32c92ca996b4cab44ea720af3001ea8afb4e0f49"
-    sha256 x86_64_linux:   "0be4e41f6fd938a58ccd09f4afc9d2b11df44c4f30120074e542ea96ac26cdc4"
+    rebuild 1
+    sha256 arm64_tahoe:   "62b4a61ca7facf02308e342b040410293eb975c81e41bd5d7932b5e4ef4306f2"
+    sha256 arm64_sequoia: "bccfe823ce8298c14b07cc0219578045bf84b4251ae8c80ca196d04c809cac41"
+    sha256 arm64_sonoma:  "47b6ac952bc211853f31d86fce3877eb032d35d5d62873b51328e6c2479581b0"
+    sha256 sonoma:        "4c3cb71550b8dab5896bcf74e2ca10044fd89f3c56234abfbb3816207bed4002"
+    sha256 arm64_linux:   "e57abef6646bb5644e01a895eec9477a3bb20c69c88d6ce30943e0c6a895f9be"
+    sha256 x86_64_linux:  "fce66e4f910156ba3037405cf395e388d2459f8708a8f81699fccf294100c738"
   end
 
   depends_on "cmake" => :build
@@ -28,7 +33,10 @@ class Gmt < Formula
   depends_on "pcre2"
 
   uses_from_macos "curl"
-  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   resource "gshhg" do
     url "https://github.com/GenericMappingTools/gshhg-gmt/releases/download/2.3.7/gshhg-gmt-2.3.7.tar.gz"

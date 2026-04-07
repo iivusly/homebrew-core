@@ -1,10 +1,16 @@
 class MingwW64 < Formula
   desc "Minimalist GNU for Windows and GCC cross-compilers"
   homepage "https://sourceforge.net/projects/mingw-w64/"
-  url "https://downloads.sourceforge.net/project/mingw-w64/mingw-w64/mingw-w64-release/mingw-w64-v12.0.0.tar.bz2"
-  sha256 "cc41898aac4b6e8dd5cffd7331b9d9515b912df4420a3a612b5ea2955bbeed2f"
-  license "ZPL-2.1"
-  revision 1
+  url "https://downloads.sourceforge.net/project/mingw-w64/mingw-w64/mingw-w64-release/mingw-w64-v14.0.0.tar.bz2"
+  sha256 "6eaf921d9eb987d3820b364ea9775bc19b965ec81490b6fdd716526c28e1995c"
+  license all_of: [
+    # mingw-w64
+    "ZPL-2.1",
+    # binutils
+    { all_of: ["GPL-2.0-or-later", "GPL-3.0-or-later", "LGPL-2.0-or-later", "LGPL-3.0-only"] },
+    # gcc
+    "GPL-3.0-or-later" => { with: "GCC-exception-3.1" },
+  ]
 
   livecheck do
     url :stable
@@ -12,17 +18,16 @@ class MingwW64 < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "00b5146a2b3bbd942ecf749baa930e2f7b1d5a425cadb69a8f233883eb926e63"
-    sha256 arm64_ventura:  "c52e1f08ce3a00d33b125d85bb8a0a12f03f619c35f65ec8eed8adea99e8498f"
-    sha256 arm64_monterey: "883e7f44acb2e714e7a698f576c32a096bf34edc0627f101cd5e48c26f63eb1c"
-    sha256 sonoma:         "dbfb198d40cff9bb93ac41f0a4422fe823fde2fd2610052956dbc4037e51c482"
-    sha256 ventura:        "eed47c1f6336d28f4cebc5644202bfbc8e7723ef16cc8eef1ab50c3577f6a02b"
-    sha256 monterey:       "5c24fa44d33423e55ac48c43575764e522d46675cdea49ad8d1b6d609b7a7509"
-    sha256 x86_64_linux:   "1b00797a89f30786da9886ac657527b5c8e2dc98432679e9fafc7f7d230e9e87"
+    sha256 arm64_tahoe:   "298d5ca67d497f70b61351ff954b3b3a6384d10d7e23fc35948f227821d730c2"
+    sha256 arm64_sequoia: "07eebaebcae187932b41573b59f3f8e33a92a892608d05ed07cb53930636b129"
+    sha256 arm64_sonoma:  "1add0b74a4cb2cc4980adfdde03e6fda0f9eda143c46ca510f5de8df2176e650"
+    sha256 sonoma:        "fb9719a502355193cf828cb626131890c9e148d3985099d3b0abe6815876a0df"
+    sha256 arm64_linux:   "26f0d10101da67e975b32656345e0bd63affcca8f33f088dd8f3078d66046217"
+    sha256 x86_64_linux:  "27bc6a705a7b8ac8e82b83746dd330d98917bf6741ec3dff8a343558f41f2572"
   end
 
   # binutils searches for zstd using pkg-config
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   # Apple's makeinfo is old and has bugs
   depends_on "texinfo" => :build
 
@@ -32,18 +37,20 @@ class MingwW64 < Formula
   depends_on "mpfr"
   depends_on "zstd"
 
-  uses_from_macos "zlib"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   resource "binutils" do
-    url "https://ftp.gnu.org/gnu/binutils/binutils-2.43.1.tar.bz2"
-    mirror "https://ftpmirror.gnu.org/binutils/binutils-2.43.1.tar.bz2"
-    sha256 "becaac5d295e037587b63a42fad57fe3d9d7b83f478eb24b67f9eec5d0f1872f"
+    url "https://ftpmirror.gnu.org/gnu/binutils/binutils-2.46.0.tar.bz2"
+    mirror "https://ftp.gnu.org/gnu/binutils/binutils-2.46.0.tar.bz2"
+    sha256 "0f3152632a2a9ce066f20963e9bb40af7cf85b9b6c409ed892fd0676e84ecd12"
   end
 
   resource "gcc" do
-    url "https://ftp.gnu.org/gnu/gcc/gcc-14.2.0/gcc-14.2.0.tar.xz"
-    mirror "https://ftpmirror.gnu.org/gcc/gcc-14.2.0/gcc-14.2.0.tar.xz"
-    sha256 "a7b39bc69cbf9e25826c5a60ab26477001f7c08d85cec04bc0e29cabed6f3cc9"
+    url "https://ftpmirror.gnu.org/gnu/gcc/gcc-15.2.0/gcc-15.2.0.tar.xz"
+    mirror "https://ftp.gnu.org/gnu/gcc/gcc-15.2.0/gcc-15.2.0.tar.xz"
+    sha256 "438fd996826b0c82485a29da03a72d71d6e3541a83ec702df4271f6fe025d24e"
   end
 
   def target_archs
@@ -185,21 +192,21 @@ class MingwW64 < Formula
   end
 
   test do
-    (testpath/"hello.c").write <<~EOS
+    (testpath/"hello.c").write <<~C
       #include <stdio.h>
       #include <windows.h>
       int main() { puts("Hello world!");
         MessageBox(NULL, TEXT("Hello GUI!"), TEXT("HelloMsg"), 0); return 0; }
-    EOS
-    (testpath/"hello.cc").write <<~EOS
+    C
+    (testpath/"hello.cc").write <<~CPP
       #include <iostream>
       int main() { std::cout << "Hello, world!" << std::endl; return 0; }
-    EOS
-    (testpath/"hello.f90").write <<~EOS
+    CPP
+    (testpath/"hello.f90").write <<~FORTRAN
       program hello ; print *, "Hello, world!" ; end program hello
-    EOS
+    FORTRAN
     # https://docs.microsoft.com/en-us/windows/win32/rpc/using-midl
-    (testpath/"example.idl").write <<~EOS
+    (testpath/"example.idl").write <<~MIDL
       [
         uuid(ba209999-0c6c-11d2-97cf-00c04f8eea45),
         version(1.0)
@@ -213,7 +220,7 @@ class MingwW64 < Formula
             [out] int outArray[INT_ARRAY_LEN]
         );
       }
-    EOS
+    MIDL
 
     ENV["LC_ALL"] = "C"
     ENV.remove_macosxsdk if OS.mac?
@@ -231,7 +238,7 @@ class MingwW64 < Formula
       assert_match "file format pei-#{outarch}", shell_output("#{bin}/#{target}-objdump -a test.exe")
 
       system bin/"#{target}-widl", "example.idl"
-      assert_predicate testpath/"example_s.c", :exist?, "example_s.c should have been created"
+      assert_path_exists testpath/"example_s.c", "example_s.c should have been created"
     end
   end
 end

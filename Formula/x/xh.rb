@@ -1,19 +1,18 @@
 class Xh < Formula
   desc "Friendly and fast tool for sending HTTP requests"
   homepage "https://github.com/ducaale/xh"
-  url "https://github.com/ducaale/xh/archive/refs/tags/v0.22.2.tar.gz"
-  sha256 "32a6470ab705aba4c37fce9806202dcc0ed24f55e091e2f4bdf7583108a3da63"
+  url "https://github.com/ducaale/xh/archive/refs/tags/v0.25.3.tar.gz"
+  sha256 "ba331c33dc5d222f43cc6ad9f602002817772fd52ae28541976db49f34935ae3"
   license "MIT"
   head "https://github.com/ducaale/xh.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "b46d58846d7759fbe1c736006d0fe857b0492df34d6113a240d4d8cf5cd7a5a3"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "030bcc197bf059e6acf36ce83dd43ed355954db088bdc9a3f2c1b95abfe754d6"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "8d93303512119e48518cdd265c8ef8b3d98446c5c08cf6300b825f4dbcadfb8d"
-    sha256 cellar: :any_skip_relocation, sonoma:         "dec56cd579b6b9ffe387ee5bd885bc8185003772b2af8229bd8889f310faa257"
-    sha256 cellar: :any_skip_relocation, ventura:        "6be7ce74ab53b52cf851c35b666d4fee4ac230344828896a79ae9e915a9434d5"
-    sha256 cellar: :any_skip_relocation, monterey:       "450794b3b28a20add068a288a865b960cbdb20762f0f604ea673ba6520d42328"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "67c42aca06e87462cf8ea08bf38da7e194cafc22797e7b3f43b536e876634195"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "e4a8f271b52fc229048df16f0e422010c50d10484d8d6eb1b5fa2a9724b5d3ab"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "22dacb461b1174a85e381e512a06f88329b905f0d66a2f129362dc06c34d8696"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "ecb25ebe2e75782784f1049ab84eaa78f327527bc835cd4c10d1bf31625f4bb9"
+    sha256 cellar: :any_skip_relocation, sonoma:        "d44547a1508f6ebf8de1943b226971b02ca2958f7a5b57e2b6812470f8b6cb92"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "143b423684816dafd6748cce6f394499d1150f677eed136758ceae3dde7c3d8e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "997b2b36f8648efe2c3ea81e77edcbd3111470c5b13346f850d7f4f03ff4ea3e"
   end
 
   depends_on "rust" => :build
@@ -23,13 +22,13 @@ class Xh < Formula
     bin.install_symlink bin/"xh" => "xhs"
 
     man1.install "doc/xh.1"
-    bash_completion.install "completions/xh.bash"
+    bash_completion.install "completions/xh.bash" => "xh"
     fish_completion.install "completions/xh.fish"
     zsh_completion.install "completions/_xh"
   end
 
   test do
-    hash = JSON.parse(shell_output("#{bin}/xh -I -f POST https://httpbin.org/post foo=bar"))
-    assert_equal hash["form"]["foo"], "bar"
+    assert_match version.to_s, shell_output("#{bin}/xh --version")
+    assert_match "Accept-Encoding: gzip, deflate, br, zstd", shell_output("#{bin}/xh --offline https://httpbin.org/get")
   end
 end

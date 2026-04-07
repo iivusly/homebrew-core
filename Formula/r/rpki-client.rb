@@ -1,8 +1,8 @@
 class RpkiClient < Formula
   desc "OpenBSD portable rpki-client"
   homepage "https://www.rpki-client.org/"
-  url "https://ftp.openbsd.org/pub/OpenBSD/rpki-client/rpki-client-9.2.tar.gz"
-  sha256 "e8e073c271250adf4f665d1c9a98eee1ae589e8e3bbedb2c106a3bd94dee96cc"
+  url "https://ftp.openbsd.org/pub/OpenBSD/rpki-client/rpki-client-9.7.tar.gz"
+  sha256 "fdb3b36e8348a97bb9a37986755cdfc3331a47d2fd684f6814d23cdc63efc9ec"
   license "ISC"
 
   livecheck do
@@ -11,33 +11,34 @@ class RpkiClient < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "aa5dde3a022e5d4fe65685d22b5e0fc5538b90cb131155681b5c613b1c4150b1"
-    sha256 arm64_ventura:  "956c22aad8135b0050ce1d50439fde127dc223587c838d8fcbf7ad93b4e2888d"
-    sha256 arm64_monterey: "1b7f99974f9c6aebd52a71dc87c564cb65283bb9c626aad145f461b548b63d64"
-    sha256 sonoma:         "64474170ed80e48a4b794368a9363699b10e2235d62cc4f231c86bbc9d21bf32"
-    sha256 ventura:        "83709a04905c6b679f1d30ad280065ef91d86b2cb825670d3e1018305f2bcfb6"
-    sha256 monterey:       "95f132d3e69aaef732e0081f9bcc2fc79b34b79155071ca6bee5bfb8a7026b03"
-    sha256 x86_64_linux:   "ef78cb40b1a1706d836fffefd97bec7b144ca47b6fedc38104eda242d7a38c06"
+    rebuild 1
+    sha256 arm64_tahoe:   "170f6d339af9d2f8626780f8857844a000002ac670e20c278f1772233404b283"
+    sha256 arm64_sequoia: "b690b6ac953fb11a5e48342862db54a54cd6380bb7715ac6dae3bd66dd83ce11"
+    sha256 arm64_sonoma:  "87be36de28526c452b70af913afdd9590ab4ad9ad1143192b3cfb6131d0626e1"
+    sha256 sonoma:        "a90db0a3f3d587aafbec958d6ac70c1d2292feb3a29715e4e4efcaceeae5ad3b"
+    sha256 arm64_linux:   "1c2fcfd7c269ea1c72228411476f159e7425700d2616c87321bc8cb6ce8cfe61"
+    sha256 x86_64_linux:  "28b11db7413f349e91313a0297013efe736b5aac296f81b5d72601ce931d33f7"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "libretls"
   depends_on "openssl@3"
   depends_on "rsync"
 
   uses_from_macos "expat"
-  uses_from_macos "zlib"
 
-  def install
-    system "./configure", *std_configure_args,
-                          "--with-rsync=#{Formula["rsync"].opt_bin}/rsync",
-                          "--disable-silent-rules",
-                          "--sysconfdir=#{etc}",
-                          "--localstatedir=#{var}"
-    system "make", "install"
+  on_linux do
+    depends_on "zlib-ng-compat"
   end
 
-  def post_install
+  def install
+    system "./configure", "--with-rsync=#{Formula["rsync"].opt_bin}/rsync",
+                          "--disable-silent-rules",
+                          "--sysconfdir=#{etc}",
+                          "--localstatedir=#{var}",
+                          *std_configure_args
+    system "make", "install"
+
     # make the var/db,cache/rpki-client dirs
     (var/"db/rpki-client").mkpath
     (var/"cache/rpki-client").mkpath

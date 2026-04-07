@@ -1,28 +1,30 @@
 class Vultr < Formula
   desc "Command-line tool for Vultr services"
   homepage "https://github.com/vultr/vultr-cli"
-  url "https://github.com/vultr/vultr-cli/archive/refs/tags/v3.3.1.tar.gz"
-  sha256 "404d4438f6640a34f5f287f6c9af86376ea48c72f7596a4db967dcf9eddd7f17"
+  url "https://github.com/vultr/vultr-cli/archive/refs/tags/v3.9.2.tar.gz"
+  sha256 "27ec2e67054d92c8b8a868be3ee88680f12b72dca7fe9f690371542f89747e0f"
   license "Apache-2.0"
   head "https://github.com/vultr/vultr-cli.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "147bdca0201eb51f327006c0f2bc5af42da388aefeb442c0109ffb2c64702787"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "9eeb1622cbcb598e1a4a7b48ffb0a3382cd468f9ccc2f72e7d3cde442962164a"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "55f2aae6a6700a3fd6e10e5a2097dddd558898296349c81e10b3447d6700de97"
-    sha256 cellar: :any_skip_relocation, sonoma:         "10e38ee119810da411f025a314225c545161f6b102cf8aa52fe2a3c5df6ae978"
-    sha256 cellar: :any_skip_relocation, ventura:        "728ab1a019e443585d483597d975100acc0917b9ebfe9c11758676c1b5178afc"
-    sha256 cellar: :any_skip_relocation, monterey:       "48ed280f9655bdadebc57fdeecf7e6edb138f4e17c56619d0207d99c40dd5bb1"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "dae78f1398416b156e5f07af807e9bc0eb994c5735fb7e7db62a32f6844b8f58"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "37287f43600261e3db244afd905bb03954ae2ed089591d9c3a7f8d3d0ef28445"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "7ae78af808bb9ad831410fa5448ff859cfb98e285fa31aff6e9647bace2f6763"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "9ddaa4376aba659247c84db287d4bc5254918e0e5ad15b9917237f2b4a49398b"
+    sha256 cellar: :any_skip_relocation, sonoma:        "68b37d5d49dc92ca9f4743e01455039fbb345196c8265b57050250fc435d6978"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "2ac796c0b850d269e6bf051c731e5c35aceb9c4380527e45b681fe4d3fb9b622"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "fa0773cf3bba1d7112d9e8c875467ee33108ad93c45be677ab55c03adb2a81d9"
   end
 
   depends_on "go" => :build
 
   def install
     system "go", "build", *std_go_args(ldflags: "-s -w")
+
+    generate_completions_from_executable(bin/"vultr", shell_parameter_format: :cobra)
   end
 
   test do
-    system bin/"vultr", "version"
+    assert_match version.to_s, shell_output("#{bin}/vultr version")
+    assert_match "Custom", shell_output("#{bin}/vultr os list")
   end
 end

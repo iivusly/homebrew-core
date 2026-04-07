@@ -6,58 +6,60 @@ class PythonYq < Formula
   url "https://files.pythonhosted.org/packages/38/6a/eb9721ed0929d0f55d167c2222d288b529723afbef0a07ed7aa6cca72380/yq-3.4.3.tar.gz"
   sha256 "ba586a1a6f30cf705b2f92206712df2281cd320280210e7b7b80adcb8f256e3b"
   license "Apache-2.0"
+  revision 1
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "d4a63ac6260203d6a60d1c8de1cf2ee2134975dfa3c87c77a3e251e14a5388fb"
-    sha256 cellar: :any,                 arm64_ventura:  "20f88a8d36c11e7559624d3c28b01c4607fdd4d0d0c08bdaa960fb9fc848e9b4"
-    sha256 cellar: :any,                 arm64_monterey: "502fa5f120e445b2252c5ab471621389877c5f421c9aa86410403f29de502470"
-    sha256 cellar: :any,                 sonoma:         "2dfe19226f54797ea5781031368d9c512427b9054950c7da2189226e4a3e1eb8"
-    sha256 cellar: :any,                 ventura:        "23d85150011c1351d57b2e2ddaf41eda9d370988f35d3c5a8170fe1611e515df"
-    sha256 cellar: :any,                 monterey:       "b4c2355407bec5cb6c655473842ebbda96b67244df4650a2e83274b57c25becc"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "bc7bbd9af1e510f3d65cc8ccd5a89d52419b87ba022988999b35d6b274878a13"
+    rebuild 2
+    sha256 cellar: :any,                 arm64_tahoe:   "78582756df6d73b461cb5d48153aa07693ba9966df4b870d2947c35ba65d96f3"
+    sha256 cellar: :any,                 arm64_sequoia: "6fcc7e5152176d214b6ed0e8c310f1635b2276704b1cad2d2ee58438abe83ba5"
+    sha256 cellar: :any,                 arm64_sonoma:  "18e8c8295b92643e711ffe3ca298dcb0157052a51e62550c24cac2aab67d1aee"
+    sha256 cellar: :any,                 sonoma:        "0f215ad7173ff1309208dd0526c061d50f5b6b7838853b704fb1c9923473bdf4"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "524ae6c009837ecb5d6c6dab1d93038040d93dce3864c6de2fa477eb0f285806"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ece36385f46a4d31df2fd58129088085b20ca6a964dfb8b8b02b6ec90361e14c"
   end
 
-  depends_on "jq"
   depends_on "libyaml"
-  depends_on "python@3.12"
+  depends_on "python@3.14"
+
+  uses_from_macos "jq", since: :sequoia
 
   conflicts_with "yq", because: "both install `yq` executables"
   conflicts_with "xq", because: "both install `xq` binaries"
 
   resource "argcomplete" do
-    url "https://files.pythonhosted.org/packages/79/51/fd6e293a64ab6f8ce1243cf3273ded7c51cbc33ef552dce3582b6a15d587/argcomplete-3.3.0.tar.gz"
-    sha256 "fd03ff4a5b9e6580569d34b273f741e85cd9e072f3feeeee3eba4891c70eda62"
+    url "https://files.pythonhosted.org/packages/16/0f/861e168fc813c56a78b35f3c30d91c6757d1fd185af1110f1aec784b35d0/argcomplete-3.6.2.tar.gz"
+    sha256 "d0519b1bc867f5f4f4713c41ad0aba73a4a5f007449716b16f385f2166dc6adf"
   end
 
   resource "pyyaml" do
-    url "https://files.pythonhosted.org/packages/cd/e5/af35f7ea75cf72f2cd079c95ee16797de7cd71f29ea7c68ae5ce7be1eda0/PyYAML-6.0.1.tar.gz"
-    sha256 "bfdf460b1736c775f2ba9f6a92bca30bc2095067b8a9d77876d1fad6cc3b4a43"
+    url "https://files.pythonhosted.org/packages/05/8e/961c0007c59b8dd7729d542c61a4d537767a59645b82a0b521206e1e25c2/pyyaml-6.0.3.tar.gz"
+    sha256 "d76623373421df22fb4cf8817020cbb7ef15c725b9d5e45f17e189bfc384190f"
   end
 
   resource "tomlkit" do
-    url "https://files.pythonhosted.org/packages/7d/49/4c0764898ee67618996148bdba4534a422c5e698b4dbf4001f7c6f930797/tomlkit-0.12.4.tar.gz"
-    sha256 "7ca1cfc12232806517a8515047ba66a19369e71edf2439d0f5824f91032b6cc3"
+    url "https://files.pythonhosted.org/packages/cc/18/0bbf3884e9eaa38819ebe46a7bd25dcd56b67434402b66a58c4b8e552575/tomlkit-0.13.3.tar.gz"
+    sha256 "430cf247ee57df2b94ee3fbe588e71d362a941ebb545dec29b53961d61add2a1"
   end
 
   resource "xmltodict" do
-    url "https://files.pythonhosted.org/packages/39/0d/40df5be1e684bbaecdb9d1e0e40d5d482465de6b00cbb92b84ee5d243c7f/xmltodict-0.13.0.tar.gz"
-    sha256 "341595a488e3e01a85a9d8911d8912fd922ede5fecc4dce437eb4b6c8d037e56"
+    url "https://files.pythonhosted.org/packages/6a/aa/917ceeed4dbb80d2f04dbd0c784b7ee7bba8ae5a54837ef0e5e062cd3cfb/xmltodict-1.0.2.tar.gz"
+    sha256 "54306780b7c2175a3967cad1db92f218207e5bc1aba697d887807c0fb68b7649"
   end
 
   def install
     virtualenv_install_with_resources
     %w[yq xq tomlq].each do |script|
       generate_completions_from_executable(libexec/"bin/register-python-argcomplete", script,
-                                           shell_parameter_format: :arg)
+                                           base_name: script, shell_parameter_format: :arg)
     end
   end
 
   test do
-    input = <<~EOS
+    input = <<~YAML
       foo:
        bar: 1
        baz: {bat: 3}
-    EOS
+    YAML
     expected = <<~EOS
       3
       ...

@@ -1,18 +1,17 @@
 class WebExt < Formula
   desc "Command-line tool to help build, run, and test web extensions"
   homepage "https://github.com/mozilla/web-ext"
-  url "https://registry.npmjs.org/web-ext/-/web-ext-8.2.0.tgz"
-  sha256 "b29f14cd9f909fe7714c518527a2f6fffdbc9182cdaa83690eef07cb3fd77e1e"
+  url "https://registry.npmjs.org/web-ext/-/web-ext-10.1.0.tgz"
+  sha256 "aaf961847e37da164f9afd77a061618c02d720a6acdb010ae606e87ca476c924"
   license "MPL-2.0"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "48142765f68650ddaac03558ccb58318e6e6438580b4b734f4d2753baefbc818"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "b164c30476dbb984922b5e40b6470fb6079a547e7b9d1b5bcd5b1307d13cd412"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "7e7360f97526ee4dbbab843c5922e151469555ecc0af493e516e117e354d5340"
-    sha256 cellar: :any_skip_relocation, sonoma:         "0701520e4f7b454a8d62f3884176a95441ec8f64340887e93f24bb833ef7b774"
-    sha256 cellar: :any_skip_relocation, ventura:        "991d4dc4579451a5c1dc91c4b045e30a5131f2deffa92cdccdf311e9628f969d"
-    sha256 cellar: :any_skip_relocation, monterey:       "7ec46ce0f5409217e729d9dcb11ca324ae40d0412b329925680fdfa9114f176a"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "d7e19d476e945cb285263fbba68f94edbefd946e66beefe20147558e494bef51"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "cca4acf8ef2015cbb623a31aec5b3a2649dfdbb91ff9b1301ef66b6a7d029504"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "cca4acf8ef2015cbb623a31aec5b3a2649dfdbb91ff9b1301ef66b6a7d029504"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "cca4acf8ef2015cbb623a31aec5b3a2649dfdbb91ff9b1301ef66b6a7d029504"
+    sha256 cellar: :any_skip_relocation, sonoma:        "cca4acf8ef2015cbb623a31aec5b3a2649dfdbb91ff9b1301ef66b6a7d029504"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "7ab36e66668204365c0c7da1d45fff8a7c1d878d5e36d3c3cc8de5d9c94135e4"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "7ab36e66668204365c0c7da1d45fff8a7c1d878d5e36d3c3cc8de5d9c94135e4"
   end
 
   depends_on "node"
@@ -23,7 +22,7 @@ class WebExt < Formula
 
   def install
     system "npm", "install", *std_npm_args
-    bin.install_symlink Dir["#{libexec}/bin/*"]
+    bin.install_symlink libexec.glob("bin/*")
 
     # Remove vendored pre-built binary `terminal-notifier`
     node_notifier_vendor_dir = libexec/"lib/node_modules/web-ext/node_modules/node-notifier/vendor"
@@ -40,19 +39,19 @@ class WebExt < Formula
   end
 
   test do
-    (testpath/"manifest.json").write <<~EOF
+    (testpath/"manifest.json").write <<~JSON
       {
         "manifest_version": 2,
         "name": "minimal web extension",
         "version": "0.0.1"
       }
-    EOF
-    assert_equal <<~EOF, shell_output("#{bin}/web-ext lint").gsub(/ +$/, "")
+    JSON
+    assert_match <<~EOF, shell_output("#{bin}/web-ext lint").gsub(/ +$/, "")
       Validation Summary:
 
       errors          0
       notices         0
-      warnings        0
+      warnings        2
 
     EOF
 

@@ -1,8 +1,8 @@
 class DockerCompose < Formula
   desc "Isolated development environments using Docker"
   homepage "https://docs.docker.com/compose/"
-  url "https://github.com/docker/compose/archive/refs/tags/v2.29.2.tar.gz"
-  sha256 "f040319023ed33d48aef424f7ac7dce720d5733c513216717044d658bc3782a9"
+  url "https://github.com/docker/compose/archive/refs/tags/v5.1.1.tar.gz"
+  sha256 "32cc81d0a79004c10c6c30052ad96d0a8a72c7e22412aa80da1f8f4c468d3dc1"
   license "Apache-2.0"
   head "https://github.com/docker/compose.git", branch: "main"
 
@@ -15,23 +15,26 @@ class DockerCompose < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "9ba560fe16ecce6a672583c04b0627e4ae3d3b0f29d3b9568393c01372620562"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "4624c6b01fc315c6463591136d31bdeb34552727df283be0374802fcaf2ea490"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "3ec964f44372039c0e2f8eb79d7e1858d0caf2797b59f22a2a2ab2b764b0d7fa"
-    sha256 cellar: :any_skip_relocation, sonoma:         "9ca82a0ad04497f344b89578e7c84e2454f2bfea20d680727416b63b148ddd45"
-    sha256 cellar: :any_skip_relocation, ventura:        "cb8cd96ff9d7416e67799c383b6d88f1844ad951b4c5c79d56544159c8ffc334"
-    sha256 cellar: :any_skip_relocation, monterey:       "db28f641758dfc143310fd6eff6f7dca78562bdab1456216bfd2707196003a03"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "a3cb69f95ae2401219e0fb51666fefbe5d9aab51fd97c3fb2e25c290dcd73ea4"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "716f6a211e08e4f647e90e6cee4f08b9763951b833a0000279bd6df40a412d17"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "efd44dd0e422c78578b4dd5783d98397d5340685b568d46f3c86523c33b6c027"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "e1ef0934e94c85a14cceec14e54d3ced69eded8a84777d975003a75785934fd2"
+    sha256 cellar: :any_skip_relocation, sonoma:        "cf3d45e8c3778a64a4bda2dc4f4e9472e76e8ec8be276af8b6ba51a85977711e"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "f11a9edc0ba131e81c745700a006e1f1a82d074c11d872448cd0c8ed5e623b20"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "053a309694de7bbca11118a83ca0382d94917f87490da0dd107e5df0ca724635"
   end
 
   depends_on "go" => :build
 
+  conflicts_with cask: "docker-desktop"
+
   def install
+    ENV["CGO_ENABLED"] = OS.mac? ? "1" : "0"
     ldflags = %W[
       -s -w
-      -X github.com/docker/compose/v2/internal.Version=#{version}
+      -X github.com/docker/compose/v#{version.major}/internal.Version=#{version}
     ]
-    system "go", "build", *std_go_args(ldflags:), "./cmd"
+    tags = %w[fsnotify] if OS.mac?
+    system "go", "build", *std_go_args(ldflags:, tags:), "./cmd"
 
     (lib/"docker/cli-plugins").install_symlink bin/"docker-compose"
   end
@@ -46,7 +49,8 @@ class DockerCompose < Formula
   end
 
   test do
-    output = shell_output(bin/"docker-compose up 2>&1", 14)
+    output = shell_output("#{bin}/docker-compose up 2>&1", 1)
     assert_match "no configuration file provided", output
+    assert_match version.to_s, shell_output("#{bin}/docker-compose version")
   end
 end

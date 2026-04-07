@@ -1,8 +1,8 @@
 class MscGenerator < Formula
   desc "Draws signalling charts from textual description"
   homepage "https://gitlab.com/msc-generator/msc-generator"
-  url "https://gitlab.com/api/v4/projects/31167732/packages/generic/msc-generator/8.6.2/msc-generator-8.6.2.tar.gz"
-  sha256 "7d565cf5ff39e2ecb04d29daec0eaf674278f6d0a1cb507eed580fe8bc8a0893"
+  url "https://gitlab.com/api/v4/projects/31167732/packages/generic/msc-generator/8.6.4/msc-generator-8.6.4.tar.gz"
+  sha256 "4f9b44f5439c512f95b686755526fd8772aa9df8c52e7e13bd60276a2d558557"
   license "AGPL-3.0-or-later"
 
   livecheck do
@@ -17,20 +17,19 @@ class MscGenerator < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "5f94fd009e0b2fd06ed13995705298907f56a32111a9d4c489c49abf7519be72"
-    sha256 arm64_ventura:  "1226239916c31e57bc51801d867655d282a32258141dd3a63d698b5569d4312f"
-    sha256 arm64_monterey: "81caf56a7e9225793493479648d42c6233f0eca6892f11ce0e8dd21b95b3c99d"
-    sha256 sonoma:         "4b3319591e9619626d4c259fd4c22bdf68e6c025174a433a69c98891deb6b581"
-    sha256 ventura:        "12ef3f1a32694a0cd00547eee5e65096d1dc99d2eb33e68973865cffc70e730a"
-    sha256 monterey:       "56419db7a86687d8aca908bf5e62c7ffda0f373a4c97670bbdadf2819ff94f04"
-    sha256 x86_64_linux:   "b679c4ec1606b7be9c65ba4d7e320b3a48eb7f5bac32374315448ee871e0ec1a"
+    sha256 arm64_tahoe:   "77320a8ba2d8b05c1bb4accb40bb8d8c2863326056916faebd02ec5d6baf7f1e"
+    sha256 arm64_sequoia: "d9edc1a402e83f259f311d7b9820ae2d2f25a15aaf2a71fbcab55ad826054823"
+    sha256 arm64_sonoma:  "443bfcb59db4bf1b282fd5a3805c16e60026ffd6d2ebeb40fbd67250dfce8d4b"
+    sha256 sonoma:        "aaf99db5b0360a364b215c53df1b5976a86afde615ccd62f4453fa779d2fb964"
+    sha256 arm64_linux:   "bcf697f0dad4b80dbac6bf30f4de6d20723f0fdacb502eb7d7c3ee61c175df9e"
+    sha256 x86_64_linux:  "c4cd3b10cf1a761607bce952b2ce0a67bf003dfee4027feba19ff2c20bb3bb62"
   end
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
   depends_on "bison" => :build
   depends_on "help2man" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "cairo"
   depends_on "fontconfig"
   depends_on "gcc"
@@ -58,11 +57,6 @@ class MscGenerator < Formula
   end
 
   def install
-    # Issue ref: https://gitlab.com/msc-generator/msc-generator/-/issues/96
-    odie "Check if workarounds for newer GraphViz can be removed!" if version > "8.6.2"
-    ENV.append_to_cflags "-DGRAPHVIZ_VER=#{Formula["graphviz"].version.major}00 -DTRUE=1"
-    inreplace "src/libgvgen/gvgraphs.cpp", "std::max((float)0, std::min((float)1,", "std::max(0.0, std::min(1.0,"
-
     args = %w[--disable-font-checks --disable-silent-rules]
     make = "make"
 
@@ -91,7 +85,7 @@ class MscGenerator < Formula
     # Construct a simple chart and check if PNG is generated (the default output format)
     (testpath/"simple.signalling").write("a->b;")
     system bin/"msc-gen", "simple.signalling"
-    assert_predicate testpath/"simple.png", :exist?
+    assert_path_exists testpath/"simple.png"
     bytes = File.binread(testpath/"simple.png")
     assert_equal bytes[0..7], "\x89PNG\r\n\x1a\n".force_encoding("ASCII-8BIT")
   end

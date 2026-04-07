@@ -1,24 +1,21 @@
 class Glassfish < Formula
   desc "Java EE application server"
   homepage "https://glassfish.org/"
-  url "https://download.eclipse.org/ee4j/glassfish/glassfish-7.0.16.zip"
-  mirror "https://github.com/eclipse-ee4j/glassfish/releases/download/7.0.16/glassfish-7.0.16.zip"
-  sha256 "0a0457780b7fe23c2c302394355a2dd0d2087fcd641386e37344988cffe72b8b"
+  url "https://download.eclipse.org/ee4j/glassfish/glassfish-8.0.0.zip"
+  mirror "https://github.com/eclipse-ee4j/glassfish/releases/download/8.0.0/glassfish-8.0.0.zip"
+  sha256 "aaacd4f56e7ed32199dfb9d967c548e40669cbd4c1c32bb4d33560f6a37cf125"
   license "EPL-2.0"
 
   livecheck do
-    url "https://projects.eclipse.org/projects/ee4j.glassfish/downloads"
+    url "https://download.eclipse.org/ee4j/glassfish/"
     regex(/href=.*?glassfish[._-]v?(\d+(?:\.\d+)+)\.zip/i)
   end
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, all: "0446d3579a1c34792baa033c3779a4b65276ca8fe23ce9d3a18baeb86acb2973"
+    sha256 cellar: :any_skip_relocation, all: "3991baacb031b50d05839f5f7e969eb0932601af7364351e20deb710db78ec83"
   end
 
-  # no java 22 support for glassfish 7.x
-  # https://github.com/eclipse-ee4j/glassfish/blob/master/docs/website/src/main/resources/download.md
-  depends_on "openjdk@21"
+  depends_on "openjdk"
 
   conflicts_with "payara", because: "both install the same scripts"
 
@@ -27,9 +24,9 @@ class Glassfish < Formula
     rm_r(Dir["bin/*.bat", "glassfish/bin/*.bat"])
 
     libexec.install Dir["*"]
-    bin.install Dir["#{libexec}/bin/*"]
+    bin.install libexec.glob("bin/*")
 
-    env = Language::Java.overridable_java_home_env("21")
+    env = Language::Java.overridable_java_home_env
     env["GLASSFISH_HOME"] = libexec
     bin.env_script_all_files libexec/"bin", env
 
@@ -53,12 +50,9 @@ class Glassfish < Formula
     cp_r libexec/"glassfish/domains", testpath
     inreplace testpath/"domains/domain1/config/domain.xml", "port=\"4848\"", "port=\"#{port}\""
 
-    fork do
-      exec bin/"asadmin", "start-domain", "--domaindir=#{testpath}/domains", "domain1"
-    end
-    sleep 60
+    spawn bin/"asadmin", "start-domain", "--domaindir=#{testpath}/domains", "domain1"
 
-    output = shell_output("curl -s -X GET localhost:#{port}")
+    output = shell_output("curl --silent --retry 5 --retry-connrefused -X GET localhost:#{port}")
     assert_match "GlassFish Server", output
 
     assert_match version.to_s, shell_output("#{bin}/asadmin version")

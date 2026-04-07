@@ -1,8 +1,8 @@
 class GccAT10 < Formula
   desc "GNU compiler collection"
   homepage "https://gcc.gnu.org/"
-  url "https://ftp.gnu.org/gnu/gcc/gcc-10.5.0/gcc-10.5.0.tar.xz"
-  mirror "https://ftpmirror.gnu.org/gcc/gcc-10.5.0/gcc-10.5.0.tar.xz"
+  url "https://ftpmirror.gnu.org/gnu/gcc/gcc-10.5.0/gcc-10.5.0.tar.xz"
+  mirror "https://ftp.gnu.org/gnu/gcc/gcc-10.5.0/gcc-10.5.0.tar.xz"
   sha256 "25109543fdf46f397c347b5d8b7a2c7e5694a5a51cce4b9c6e1ea8a71ca307c1"
   license "GPL-3.0-or-later" => { with: "GCC-exception-3.1" }
 
@@ -15,6 +15,7 @@ class GccAT10 < Formula
     sha256                               ventura:      "1155f38da440c96a9df1442152c3149755dfd369815cf8b967e9bbf2a4874489"
     sha256                               monterey:     "be699cd4f9c26c0023a28eb56e534058cac1ab1b2d06e57b531905cfde49b48e"
     sha256                               big_sur:      "5f40c454e3e3b96578411e28d6ba27679c6d3c182a978c60c3ea8f57f8235033"
+    sha256 cellar: :any_skip_relocation, arm64_linux:  "dc5bb71b10070e7b39378f8daa8192ddac000bbe731000898f8c250570a7e267"
     sha256 cellar: :any_skip_relocation, x86_64_linux: "517a097236a0de677b0718462a752068ce32f5b6b86e044bdfc2fd7c2097207e"
   end
 
@@ -28,18 +29,19 @@ class GccAT10 < Formula
   depends_on "libmpc"
   depends_on "mpfr"
 
-  uses_from_macos "zlib"
-
   on_macos do
     depends_on arch: :x86_64
+    # Align dates to remove Intel macOS support with brew
+    # https://docs.brew.sh/Support-Tiers#future-macos-support
+    deprecate! date: "2025-09-18", because: :unsupported
+    disable! date: "2026-09-18", because: :unsupported
   end
 
   on_linux do
     depends_on "binutils"
+    depends_on "zlib-ng-compat"
+    depends_on "zstd"
   end
-
-  # GCC bootstraps itself, so it is OK to have an incompatible C++ stdlib
-  cxxstdlib_check :skip
 
   def version_suffix
     version.major.to_s
@@ -82,7 +84,7 @@ class GccAT10 < Formula
       args << "--with-system-zlib"
 
       # Xcode 10 dropped 32-bit support
-      args << "--disable-multilib" if DevelopmentTools.clang_build_version >= 1000
+      args << "--disable-multilib"
 
       # System headers may not be in /usr/include
       sdk = MacOS.sdk_path_if_needed
@@ -216,18 +218,18 @@ class GccAT10 < Formula
   end
 
   test do
-    (testpath/"hello-c.c").write <<~EOS
+    (testpath/"hello-c.c").write <<~C
       #include <stdio.h>
       int main()
       {
         puts("Hello, world!");
         return 0;
       }
-    EOS
+    C
     system bin/"gcc-#{version.major}", "-o", "hello-c", "hello-c.c"
     assert_equal "Hello, world!\n", `./hello-c`
 
-    (testpath/"hello-cc.cc").write <<~EOS
+    (testpath/"hello-cc.cc").write <<~CPP
       #include <iostream>
       struct exception { };
       int main()
@@ -238,11 +240,11 @@ class GccAT10 < Formula
           catch (...) { }
         return 0;
       }
-    EOS
+    CPP
     system bin/"g++-#{version.major}", "-o", "hello-cc", "hello-cc.cc"
     assert_equal "Hello, world!\n", `./hello-cc`
 
-    (testpath/"test.f90").write <<~EOS
+    (testpath/"test.f90").write <<~FORTRAN
       integer,parameter::m=10000
       real::a(m), b(m)
       real::fact=0.5
@@ -252,7 +254,7 @@ class GccAT10 < Formula
       end do
       write(*,"(A)") "Done"
       end
-    EOS
+    FORTRAN
     system bin/"gfortran-#{version.major}", "-o", "test", "test.f90"
     assert_equal "Done\n", `./test`
   end

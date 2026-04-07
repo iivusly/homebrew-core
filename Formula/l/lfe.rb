@@ -1,19 +1,21 @@
 class Lfe < Formula
   desc "Concurrent Lisp for the Erlang VM"
   homepage "https://lfe.io/"
-  url "https://github.com/lfe/lfe/archive/refs/tags/v2.1.4.tar.gz"
-  sha256 "450f5eb34d19f7313e5fb5c09427b4109ce08f05f48bda9cdfd8625f5b3b0633"
+  url "https://github.com/lfe/lfe/archive/refs/tags/v2.2.0.tar.gz"
+  sha256 "5c9de979c64de245ac3ae2f9694559a116b538ca7d18bb3ef07716e0e3a696f3"
   license "Apache-2.0"
   head "https://github.com/lfe/lfe.git", branch: "develop"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "ebf3f14f994a161e791af262debd0db7b3d2e917f8945e57b6f151102a9aa92b"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "872b7bab3542a805fa0bbb5f68ee6fccc4b141f6ec07115b2a65cefcade834cd"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "0dcaa4229222b7f9e85e84eb144c43ffa727bd9ac54ed78cb6f6251b12e53c70"
-    sha256 cellar: :any_skip_relocation, sonoma:         "e6f1c6ded306015efa06f98f77a84b41b1a7accff76bf67b4d2e2a5371ff4ccc"
-    sha256 cellar: :any_skip_relocation, ventura:        "1977dc138db8fcc028c33a48f30a5f06eb25f5f05f1c323713ecf9271cb68448"
-    sha256 cellar: :any_skip_relocation, monterey:       "736e2c542dc47042201021e5b8181412461058dea005157c72fdac7633d9fb8b"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "68bc39a7e43dc9b7c067f67fa0ce647cdcb63cf8125ef57ce283e114bc50cf32"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "d5158c69b0a420798bd81ded50265abbc00cb0da90ad7f237c3e266312092304"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "1aee8b425cbd76428a038e8d9d1a074c2e7c3f9c2944673fd9267c77e8d154fb"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "b7c9d4f4a7d9ba6a61e9affb3d8ec94161ac3411c14da462879c348fa59859d0"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "e257ff304896fce1182b709f35b56112c28eba8e43ac6a149725b42917a9bab7"
+    sha256 cellar: :any_skip_relocation, sonoma:        "ed17738b499109261be99c6cd273acf572c4b4a2ea05828aed6ebeaa076f30ec"
+    sha256 cellar: :any_skip_relocation, ventura:       "9e047588e594f9c78f18d8be1966a1987639f98d07e57dcb47f0b2bde46e8199"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "a8d62b19bbae7750b68d0c2a91bfb0e6c478e66cd2a5c889048d355bcfeed117"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "9aceec9c08993a9e551d5b1657a2162afae1f8a248054e6eba1fc4eb5781386c"
   end
 
   depends_on "emacs" => :build

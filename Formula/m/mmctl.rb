@@ -1,31 +1,35 @@
 class Mmctl < Formula
   desc "Remote CLI tool for Mattermost server"
-  homepage "https://github.com/mattermost/mmctl"
-  url "https://github.com/mattermost/mmctl.git",
-      tag:      "v7.10.5",
-      revision: "ce61514f470b82795eb25d927bbf073b3bd037c6"
-  license "Apache-2.0"
-  head "https://github.com/mattermost/mmctl.git", branch: "master"
+  homepage "https://github.com/mattermost/mattermost"
+  url "https://github.com/mattermost/mattermost/archive/refs/tags/v11.5.1.tar.gz"
+  sha256 "d22970680095d6e8e5341f2b06739a2aa6c69097a34e15d021d3b3fd840794a1"
+  license all_of: ["AGPL-3.0-only", "Apache-2.0"]
+  head "https://github.com/mattermost/mattermost.git", branch: "master"
 
-  bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "556076fdaa27b44d9cfdbc10cc906d304d1b04907dc631965c727a4818b7fa3f"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "7f9bbd0ee1ba75322fb8a48fa6e3bbe9df725923d15bcd835484af20dfde6497"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "7f9bbd0ee1ba75322fb8a48fa6e3bbe9df725923d15bcd835484af20dfde6497"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "7f9bbd0ee1ba75322fb8a48fa6e3bbe9df725923d15bcd835484af20dfde6497"
-    sha256 cellar: :any_skip_relocation, sonoma:         "9b62b1e5b52d644412d2d2ad01a9cde33c040a73da9e1d952cbcfa75e12cc61b"
-    sha256 cellar: :any_skip_relocation, ventura:        "ce5037a3240ce5a32b1c0f748823c719e221eee469ee116d4a66469f8c6800a2"
-    sha256 cellar: :any_skip_relocation, monterey:       "ce5037a3240ce5a32b1c0f748823c719e221eee469ee116d4a66469f8c6800a2"
-    sha256 cellar: :any_skip_relocation, big_sur:        "ce5037a3240ce5a32b1c0f748823c719e221eee469ee116d4a66469f8c6800a2"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "4eb33d2c49c5db76ea8afb3bb3a5b28b8c4234e7161a520c3e934f251407538d"
+  livecheck do
+    url :stable
+    strategy :github_latest
   end
 
-  deprecate! date: "2024-08-01", because: :repo_archived
+  bottle do
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "1c6c20fc29bcaafab7f7c195e8e47b4b767f16c0dde42f6f63c0810e03be4707"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "1c6c20fc29bcaafab7f7c195e8e47b4b767f16c0dde42f6f63c0810e03be4707"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "1c6c20fc29bcaafab7f7c195e8e47b4b767f16c0dde42f6f63c0810e03be4707"
+    sha256 cellar: :any_skip_relocation, sonoma:        "06b969313485e4702fdd4d75faf8a68315ba0a1d41cdc140903f6e87bef17cb0"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "bb3754dc6cf264ab5a59719484938a37f57158aa465e4b331d61b3bd03f5c62f"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "cca3399649db125bd0a2a96900215bf852e26d3ad04540e681be1060680ed8e6"
+  end
 
   depends_on "go" => :build
 
   def install
-    ldflags = "-s -w -X github.com/mattermost/mmctl/commands.BuildHash=#{Utils.git_head}"
-    system "go", "build", *std_go_args(ldflags:), "-mod=vendor"
+    # remove non open source files
+    rm_r("server/enterprise")
+    rm Dir["server/cmd/mmctl/commands/compliance_export*"]
+
+    ldflags = "-s -w -X github.com/mattermost/mattermost/server/v8/cmd/mmctl/commands.buildDate=#{time.iso8601}"
+    system "make", "-C", "server", "setup-go-work"
+    system "go", "build", "-C", "server", *std_go_args(ldflags:), "./cmd/mmctl"
 
     # Install shell completions
     generate_completions_from_executable(bin/"mmctl", "completion", shells: [:bash, :zsh])

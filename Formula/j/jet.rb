@@ -1,19 +1,18 @@
 class Jet < Formula
   desc "Type safe SQL builder with code generation and auto query result data mapping"
   homepage "https://github.com/go-jet/jet"
-  url "https://github.com/go-jet/jet/archive/refs/tags/v2.11.1.tar.gz"
-  sha256 "a046e5982eb972825b2dce80548ff1e77dfdaaea2f3dea016e6e5d376cbbc822"
+  url "https://github.com/go-jet/jet/archive/refs/tags/v2.14.1.tar.gz"
+  sha256 "d08ad03aac750cccb82d5decc57e0f7040aa866f3b1028079a052726875632cc"
   license "Apache-2.0"
   head "https://github.com/go-jet/jet.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "c8e365e76e3e2b3bbc4e7a257dfe3ad1004bf5ffc2163c3852c94dc11f380f0e"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "772811a7e784d95d4215cb5fee17f1fa305f5aa7c7340375b6737573ae4c17c6"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "08621eb4c223ed9171115e5e7cf4db9c408194e43ca76031bc2d653692eaea0a"
-    sha256 cellar: :any_skip_relocation, sonoma:         "ff0a49e6c0567d7992a054f8d2b9b68cd4ed785bb20de9a5d30ab75da36eb63c"
-    sha256 cellar: :any_skip_relocation, ventura:        "d1542b742bfab00324695753c04d3376bde37343fd00b0718718c0bd6d8b5426"
-    sha256 cellar: :any_skip_relocation, monterey:       "b8ee73142506f7f5830b70a1c5a6a7ea8ff1043c1ec9ce01de0c0669e4873101"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "c3fcb0048ffc0776f975baea12887b6f12c61baa197372041a79cbe9123239cc"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "e9e5b2da17f204428bd9e47d751750a47bedbb73e4934991cf6ce37a9d448ef0"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "3e137024ad8955f0364c4e738b53bbf49835fb20cd9ee0de764661461bc140a2"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "e1599211d902478a5bffc4b89d2cd564fb55fc77b052cba0d08d64e5e99856a7"
+    sha256 cellar: :any_skip_relocation, sonoma:        "22deb92d0d620fe7075681c0e4b1582e07778679199b066b94a883796a3a6e2a"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "1b568589a19ca662efa63dfb64bca31b92b22442b2aff7009d88bf073e56b38f"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "629d53e3b9234713aba15fd7e572cc1298aee75a4fc0545fbcf255349e15190e"
   end
 
   depends_on "go" => :build

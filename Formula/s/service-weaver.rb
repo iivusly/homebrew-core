@@ -4,12 +4,12 @@ class ServiceWeaver < Formula
   license "Apache-2.0"
 
   stable do
-    url "https://github.com/ServiceWeaver/weaver/archive/refs/tags/v0.24.4.tar.gz"
-    sha256 "00e1f434b0521a25fe205d2eb78490f6e8a13f15fdc989d4d8e26f2f50e21ff1"
+    url "https://github.com/ServiceWeaver/weaver/archive/refs/tags/v0.24.6.tar.gz"
+    sha256 "15b34f1539b6a84f8783009a2e8ce98bb12c9a0c0ba70b4ff055e4a8a3406e10"
 
     resource "weaver-gke" do
-      url "https://github.com/ServiceWeaver/weaver-gke/archive/refs/tags/v0.24.3.tar.gz"
-      sha256 "ce009b862259fcf550c1a36faf3ae53f77289126bdd50b9d67cb880f216ed7e4"
+      url "https://github.com/ServiceWeaver/weaver-gke/archive/refs/tags/v0.24.4.tar.gz"
+      sha256 "97e2bd35b997bc65f824fb1b2eb6500f8ba97d444cc7565be80e61005c462848"
     end
   end
 
@@ -24,13 +24,14 @@ class ServiceWeaver < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "60db371f4bac154898656b9820e443f08a5ba5e03f6acc4a97e45ef83b3acedc"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "da66eb356ec1c4c9035db4654c10a9b32b1b5ceee8fdd405ab8a23f9168bec7e"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "ba4965429a6c390867bbbf4dd92ff6ef4746a1f5ceabf6c4be48f2e3077bdb3f"
-    sha256 cellar: :any_skip_relocation, sonoma:         "9cfad3462c76b1283c3c773aec2ef58e3815fbba6df064bb9592857c56b2ddbe"
-    sha256 cellar: :any_skip_relocation, ventura:        "86ea94f2ef99a815304dff4e76f46757a645354a7b681342223df643feb1734b"
-    sha256 cellar: :any_skip_relocation, monterey:       "143ec06b963a89431bc1786f255a1a1f3215eedb3967217ecc9e644c4f29af3e"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "656ebe886fad2773299045aacc2c3c7ef053473b4943b0f318bbdea262118680"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "cc49ca39bcb55555be333c8ab54c3649cb989e82d04e3d743b1fcc690f26c867"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "76c861065b7ebf0afb19189eda629198c7f2626911edc540aae08660f06a1345"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "e4bf175089ed43e869e3553de0ae5a3b498e9cc796745ce14fa9e2b919273413"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "d58a390f9b42bc7dcd1444399ed11b9a23a2b78c29e62caaf0a0a5963a45d858"
+    sha256 cellar: :any_skip_relocation, sonoma:        "29cb9c8dca107487aaa3edd171d34dce80b9f0e71ac04dd060c2d7b82677e292"
+    sha256 cellar: :any_skip_relocation, ventura:       "258db33d6cf2b2cf520150d3ece5dfffb0a77c325e5248bf0a1886f6627e0719"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "1211e7bf0e83aa596d397fe4e152b7ecf289248ef27bb82b27b7f06c9bbd3f9b"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "385c13a006f40c24d42c8b2f33d1035143f9625b0b08349284a92e71df6972d0"
   end
 
   head do
@@ -41,11 +42,21 @@ class ServiceWeaver < Formula
     end
   end
 
-  depends_on "go" => :build
+  # upstream announcement, https://github.com/ServiceWeaver/weaver/pull/804
+  deprecate! date: "2025-06-14", because: :unmaintained
+
+  depends_on "go@1.23" => :build
 
   conflicts_with "weaver", because: "both install a `weaver` binary"
 
   def install
+    # Workaround to avoid patchelf corruption when cgo is required (for go-sqlite3)
+    if OS.linux? && Hardware::CPU.arch == :arm64
+      ENV["CGO_ENABLED"] = "1"
+      ENV["GO_EXTLINK_ENABLED"] = "1"
+      ENV.append "GOFLAGS", "-buildmode=pie"
+    end
+
     system "go", "build", *std_go_args(ldflags: "-s -w", output: bin/"weaver"), "./cmd/weaver"
     resource("weaver-gke").stage do
       ["weaver-gke", "weaver-gke-local"].each do |f|

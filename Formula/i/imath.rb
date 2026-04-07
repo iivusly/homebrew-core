@@ -1,18 +1,18 @@
 class Imath < Formula
   desc "Library of 2D and 3D vector, matrix, and math operations"
-  homepage "https://www.openexr.com/"
-  url "https://github.com/AcademySoftwareFoundation/Imath/archive/refs/tags/v3.1.11.tar.gz"
-  sha256 "9057849585e49b8b85abe7cc1e76e22963b01bfdc3b6d83eac90c499cd760063"
+  homepage "https://imath.readthedocs.io/en/latest/"
+  url "https://github.com/AcademySoftwareFoundation/Imath/archive/refs/tags/v3.2.2.tar.gz"
+  sha256 "b4275d83fb95521510e389b8d13af10298ed5bed1c8e13efd961d91b1105e462"
   license "BSD-3-Clause"
+  compatibility_version 1
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "9cffec79d68d6577853e7c5328989443d753889688248802e2abadca4e09aa88"
-    sha256 cellar: :any,                 arm64_ventura:  "82dadfb3bbfa4c9305c0f289ad13475b5205acd8394ea13c2880458abb0465d5"
-    sha256 cellar: :any,                 arm64_monterey: "fbc0023344b0fc0a5b37255dc2609c63fdc558635bffe99cb4a1edec17bb5f5d"
-    sha256 cellar: :any,                 sonoma:         "12cb616c568e6f88de3308da46672b100a262a855546b1e224b0b3ad94a07dc2"
-    sha256 cellar: :any,                 ventura:        "9e92fa7fa7f2803cfa73838d963fab399c0e88012fdde0a5fd32c7cbff089b37"
-    sha256 cellar: :any,                 monterey:       "a623aab5fd0f29c3404058db5f6efbb71c057f09cad4e4487c0b996314e84498"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "c405f3c1093df42aa82c2e2da39ed9b83ce0f7569864ec56560e2851c788bedf"
+    sha256 cellar: :any,                 arm64_tahoe:   "ce46ad834b2daf8d6e85f8f2ffa5ee5bb0ef241d8f55effedf54bba69e8a6437"
+    sha256 cellar: :any,                 arm64_sequoia: "473751d9832776b48e077e901e51d68bc141f3b53f84d47ea92ea78acab812d2"
+    sha256 cellar: :any,                 arm64_sonoma:  "695ca118bef6d41442b21fe26c5f26dd22be274dc6a914b535e37b93907f9dc2"
+    sha256 cellar: :any,                 sonoma:        "72a4653f1f1b9e820fcb53cd85720264dd29d9de6346d97a600d8177799020af"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "be13320613472344b92cb55712581bdd059a5137d4f3edd60781b5d99946de95"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "66774757b29808a5fde422b5ddb395c14419f9e8d10bab44897777734fd52d26"
   end
 
   depends_on "cmake" => :build
@@ -28,7 +28,7 @@ class Imath < Formula
   end
 
   test do
-    (testpath/"test.cpp").write <<~'EOS'
+    (testpath/"test.cpp").write <<~'CPP'
       #include <ImathRoots.h>
       #include <algorithm>
       #include <iostream>
@@ -43,7 +43,7 @@ class Imath < Formula
 
         std::cout << n << ", " << x[0] << ", " << x[1] << "\n";
       }
-    EOS
+    CPP
     system ENV.cxx, "-std=c++11", "-I#{include}/Imath", "-o", testpath/"test", "test.cpp"
     assert_equal "2, -2, -1\n", shell_output("./test")
   end

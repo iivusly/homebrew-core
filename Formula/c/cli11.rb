@@ -1,24 +1,30 @@
 class Cli11 < Formula
   desc "Simple and intuitive command-line parser for C++11"
   homepage "https://cliutils.github.io/CLI11/book/"
-  url "https://github.com/CLIUtils/CLI11/archive/refs/tags/v2.4.2.tar.gz"
-  sha256 "f2d893a65c3b1324c50d4e682c0cdc021dd0477ae2c048544f39eed6654b699a"
+  url "https://github.com/CLIUtils/CLI11/archive/refs/tags/v2.6.2.tar.gz"
+  sha256 "c6ea6b2e5608b3ea8617999bd5f47420c71b2ebdb8dc4767c1034d1da5785711"
   license "BSD-3-Clause"
-  head "https://github.com/CLIUtils/CLI11.git", branch: "master"
+  head "https://github.com/CLIUtils/CLI11.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, all: "ac6e1c22dd84d1140e50cb956aa137895d11ab8e0c6343b732f07e3114e31988"
+    sha256 cellar: :any_skip_relocation, all: "f04181692a4d3389a7b03d14388607b5eaac5742d9761cc8c447a5df5416ab75"
   end
 
   depends_on "cmake" => :build
 
   def install
-    system "cmake", ".", "-DCLI11_BUILD_DOCS=OFF", "-DCLI11_BUILD_TESTS=OFF", *std_cmake_args
-    system "make", "install"
+    args = %w[
+      -DCLI11_BUILD_DOCS=OFF
+      -DCLI11_BUILD_TESTS=OFF
+    ]
+
+    system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
+    system "cmake", "--build", "build"
+    system "cmake", "--install", "build"
   end
 
   test do
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include "CLI/App.hpp"
       #include "CLI/Formatter.hpp"
       #include "CLI/Config.hpp"
@@ -33,7 +39,7 @@ class Cli11 < Formula
           std::cout << filename << std::endl;
           return 0;
       }
-    EOS
+    CPP
     system ENV.cxx, "-std=c++11", "test.cpp", "-o", "test", "-I#{include}"
     assert_equal "foo\n", shell_output("./test -r foo")
   end

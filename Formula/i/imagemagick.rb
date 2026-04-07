@@ -1,9 +1,10 @@
 class Imagemagick < Formula
-  desc "Tools and libraries to manipulate images in many formats"
+  desc "Tools and libraries to manipulate images in select formats"
   homepage "https://imagemagick.org/index.php"
-  url "https://imagemagick.org/archive/releases/ImageMagick-7.1.1-38.tar.xz"
-  sha256 "48de548d4977fc226c982ca03b9d6ad8001b47d8dc142b49fdca69333bc4ad82"
+  url "https://imagemagick.org/archive/releases/ImageMagick-7.1.2-18.tar.xz"
+  sha256 "abb85df40f06fddf17d031629c7ad2778a55d478a8bff80d55ffee75c90a3982"
   license "ImageMagick"
+  compatibility_version 1
   head "https://github.com/ImageMagick/ImageMagick.git", branch: "main"
 
   livecheck do
@@ -12,46 +13,35 @@ class Imagemagick < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "6e974a3e9c5b276469857e52bbbed3e4c5a174abd50cf1bb609c1dfcefc01f72"
-    sha256 arm64_ventura:  "3018867e80782b6ab31221788fcc21737da60b15720d60b3fee5ec5fc2dc2290"
-    sha256 arm64_monterey: "e18a67869e57df979c9dc9822b32d1555e1473b8eb4c97b1d02bb79c04684466"
-    sha256 sonoma:         "f87bca63d7147876c4429a00624d427dc34df80587f9328fcbb985edc746b1c7"
-    sha256 ventura:        "5b6e61e1e1a317ec4093951e03149821af11bcdfeaca7cce2265d79ce72c2a53"
-    sha256 monterey:       "39e25acf570b9c4bea567bf3b41058c41463b824bc01d7b47bccf71313725b91"
-    sha256 x86_64_linux:   "9bea8f00bea180267d9d7a846be06d89b5cae842a343b57db575ca50b9ff76a3"
+    sha256 arm64_tahoe:   "e84d15066ccb7643ddbab351b309185f33efa3e9a50d5f26bd9116c901fdd5d3"
+    sha256 arm64_sequoia: "08fadb30aed6727eba073cbd31da801dfdecfd461ad2d94813bda0df3e4508ca"
+    sha256 arm64_sonoma:  "9cc795f1033162f4a0a23c1b548b7b872a9675cda3cd45fee064bc697febe82a"
+    sha256 sonoma:        "4b78871f9c705270d361e057047d8d79eae4c138e9e8fbd1d928d60dcb24c2d9"
+    sha256 arm64_linux:   "72dafd7346fbb523ffd1f547ce587e3d9d3dd4788006853505333165e932a12c"
+    sha256 x86_64_linux:  "4f630c1afd065ebabc9ed34a7fc51f321ead9d63eb573560ec19ddc7a4cd23cd"
   end
 
-  depends_on "pkg-config" => :build
-  depends_on "fontconfig"
+  depends_on "pkgconf" => :build
+
+  # Only add dependencies required for dependents in homebrew-core,
+  # recursive dependencies or INCREDIBLY widely used and light formats in the
+  # current year (2026).
+  # Add other dependencies to imagemagick-full formula.
   depends_on "freetype"
-  depends_on "ghostscript"
   depends_on "jpeg-turbo"
-  depends_on "jpeg-xl"
   depends_on "libheif"
-  depends_on "liblqr"
   depends_on "libpng"
-  depends_on "libraw"
   depends_on "libtiff"
   depends_on "libtool"
   depends_on "little-cms2"
-  depends_on "openexr"
-  depends_on "openjpeg"
   depends_on "webp"
   depends_on "xz"
 
   uses_from_macos "bzip2"
   uses_from_macos "libxml2"
-  uses_from_macos "zlib"
-
-  on_macos do
-    depends_on "gettext"
-    depends_on "glib"
-    depends_on "imath"
-    depends_on "libomp"
-  end
 
   on_linux do
-    depends_on "libx11"
+    depends_on "zlib-ng-compat"
   end
 
   skip_clean :la
@@ -68,35 +58,30 @@ class Imagemagick < Formula
       "--disable-opencl",
       "--enable-shared",
       "--enable-static",
-      "--with-freetype=yes",
       "--with-gvc=no",
       "--with-modules",
-      "--with-openjp2",
-      "--with-openexr",
       "--with-webp=yes",
       "--with-heic=yes",
-      "--with-raw=yes",
-      "--with-gslib",
-      "--with-gs-font-dir=#{HOMEBREW_PREFIX}/share/ghostscript/fonts",
+      "--with-raw=no",
+      "--without-gslib",
       "--with-lqr",
       "--without-djvu",
       "--without-fftw",
       "--without-pango",
       "--without-wmf",
-      "--enable-openmp",
+      "--without-jxl",
+      "--without-openexr",
     ]
-    if OS.mac?
-      args += [
-        "--without-x",
-        # Work around "checking for clang option to support OpenMP... unsupported"
-        "ac_cv_prog_c_openmp=-Xpreprocessor -fopenmp",
-        "ac_cv_prog_cxx_openmp=-Xpreprocessor -fopenmp",
-        "LDFLAGS=-lomp -lz",
-      ]
-    end
+    args << "--without-x" if OS.mac?
 
-    system "./configure", *std_configure_args, *args
+    system "./configure", *args, *std_configure_args
     system "make", "install"
+  end
+
+  def caveats
+    <<~EOS
+      imagemagick-full includes additional tools and libraries that are not included in the regular imagemagick formula.
+    EOS
   end
 
   test do
@@ -104,15 +89,8 @@ class Imagemagick < Formula
 
     # Check support for recommended features and delegates.
     features = shell_output("#{bin}/magick -version")
-    %w[Modules freetype heic jpeg png raw tiff].each do |feature|
+    %w[Modules heic jpeg png tiff].each do |feature|
       assert_match feature, features
     end
-
-    # Check support for a few specific image formats, mostly to ensure LibRaw linked correctly.
-    formats = shell_output("#{bin}/magick -list format")
-    ["AVIF  HEIC      rw+", "ARW  DNG       r--", "DNG  DNG       r--"].each do |format|
-      assert_match format, formats
-    end
-    assert_match "Helvetica", shell_output("#{bin}/magick -list font")
   end
 end

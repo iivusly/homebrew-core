@@ -2,23 +2,23 @@ class Solarus < Formula
   desc "Action-RPG game engine"
   homepage "https://www.solarus-games.org/"
   url "https://gitlab.com/solarus-games/solarus.git",
-      tag:      "v1.6.5",
-      revision: "3aec70b0556a8d7aed7903d1a3e4d9a18c5d1649"
+      tag:      "v2.0.4",
+      revision: "b942f8ce5c0562610a93079dcacf53a51fa88540"
   license "GPL-3.0-or-later"
-  revision 2
+  compatibility_version 1
+
+  livecheck do
+    url :stable
+    regex(/^v?(\d+(?:\.\d+)+)$/i)
+  end
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any,                 arm64_sonoma:   "f26e691c890948a299006ddc3677442e381252d77ba46efb5685e0215600a515"
-    sha256 cellar: :any,                 arm64_ventura:  "20fbf5ecc4020956d8d4938b8e02e0451030e504fe2f0a3493044b55e53763ef"
-    sha256 cellar: :any,                 arm64_monterey: "1df04c516d36ec062f0ad18d10495aa879081a3564210dd264dd36e381410d23"
-    sha256 cellar: :any,                 arm64_big_sur:  "1f9369c5a18363ef3c9fae788c8834f22e501b3edc69c9559747386107a058e3"
-    sha256 cellar: :any,                 sonoma:         "7ca49a0c4ce7d2ce720eec066d4058946e663d147d5a429e96fb0cecfdd1bb43"
-    sha256 cellar: :any,                 ventura:        "16c9bbe34ef0d45488c4406b2a94182784281810f54682dc5b08781476b2fbdb"
-    sha256 cellar: :any,                 monterey:       "6c33e0972e80bac278d3d4e2b2584032a20ca92256231b27c99fb9cb1ab61bb8"
-    sha256 cellar: :any,                 big_sur:        "a0c0902c8ec2ee91d806ac6f65526c76478cae5309dd335ef4fb47ef8d98b651"
-    sha256 cellar: :any,                 catalina:       "a2e50fcb5ead429c8f72c5a484dc45d1089f94f6d2e58420c9fd544057516226"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "08b76ceebc80b02c8ae22dadf8d4b0f22827e8dca8254567951669575360c20f"
+    sha256                               arm64_tahoe:   "b76a690587b54d9f03967cc96f2efc195eb394ebbf7daf8b6a8c04ae1136d156"
+    sha256                               arm64_sequoia: "3b0e4aa0a5d17436c5401c49aa8ba45c362e46843eb4366f9ac4fbdd8ffad067"
+    sha256                               arm64_sonoma:  "e0cea3781cca840a5a2028bba7bc54faceb3ce2f646428627e32a42463afb740"
+    sha256                               sonoma:        "6fc0fd0b677a699281b508289b6d3ead8d76ae7209b3f3cf5ed81acac0beec48"
+    sha256                               arm64_linux:   "2fbcca3c7cf963a0d7e09fdea04e9ea170429750ec8661cb44b8fece0ba255e5"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "1ad431b0d53d648f4d1f8e71322b2d2f9b40ead2fbae3721f52392be551b2352"
   end
 
   depends_on "cmake" => :build
@@ -27,6 +27,9 @@ class Solarus < Formula
   depends_on "libogg"
   depends_on "libvorbis"
   depends_on "luajit"
+  # Upstream only supports OpenAL Soft and not macOS OpenAL.framework
+  # https://gitlab.com/solarus-games/solarus/-/blob/dev/cmake/modules/FindOpenAL.cmake?ref_type=heads#L38
+  depends_on "openal-soft"
   depends_on "physfs"
   depends_on "sdl2"
   depends_on "sdl2_image"
@@ -34,21 +37,19 @@ class Solarus < Formula
 
   on_linux do
     depends_on "mesa"
-    depends_on "openal-soft"
   end
 
-  fails_with gcc: "5" # needs same GLIBCXX as mesa at runtime
-
   def install
-    ENV.append_to_cflags "-I#{Formula["glm"].opt_include}"
-    ENV.append_to_cflags "-I#{Formula["physfs"].opt_include}"
-    system "cmake", "-S", ".", "-B", "build", *std_cmake_args,
+    system "cmake", "-S", ".", "-B", "build",
                     "-DCMAKE_INSTALL_RPATH=#{rpath}",
                     "-DSOLARUS_ARCH=#{Hardware::CPU.arch}",
                     "-DSOLARUS_GUI=OFF",
                     "-DSOLARUS_TESTS=OFF",
                     "-DVORBISFILE_INCLUDE_DIR=#{Formula["libvorbis"].opt_include}",
-                    "-DOGG_INCLUDE_DIR=#{Formula["libogg"].opt_include}"
+                    "-DOGG_INCLUDE_DIR=#{Formula["libogg"].opt_include}",
+                    "-DGLM_INCLUDE_DIR=#{Formula["glm"].opt_include}",
+                    "-DPHYSFS_INCLUDE_DIR=#{Formula["physfs"].opt_include}",
+                    *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
   end

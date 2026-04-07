@@ -1,19 +1,17 @@
 class Transcrypt < Formula
   desc "Configure transparent encryption of files in a Git repo"
   homepage "https://github.com/elasticdog/transcrypt"
-  url "https://github.com/elasticdog/transcrypt/archive/refs/tags/v2.2.3.tar.gz"
-  sha256 "69cf95b2a4d7e89c1f5c84bc4c32aa35f78d08b8f457a003ab9e8be7361a24e5"
+  url "https://github.com/elasticdog/transcrypt/archive/refs/tags/v2.3.1.tar.gz"
+  sha256 "c5f5af35016474ffd1f8605be1eac2e2f17743737237065657e3759c8d8d1a66"
   license "MIT"
   head "https://github.com/elasticdog/transcrypt.git", branch: "main"
 
   bottle do
-    rebuild 2
-    sha256 cellar: :any_skip_relocation, all: "14005806e49b15b371445e7f21d374ca66499c4a6aa031cfe1447f8350552f4a"
+    sha256 cellar: :any_skip_relocation, all: "c796653e0de06fc0a443b591892bd9ad29771a810673a6165d47a61c36c9d157"
   end
 
   on_linux do
     depends_on "util-linux"
-    depends_on "vim" # needed for xxd
   end
 
   def install

@@ -1,18 +1,29 @@
 class Podman < Formula
   desc "Tool for managing OCI containers and pods"
   homepage "https://podman.io/"
-  url "https://github.com/containers/podman.git",
-      tag:      "v5.2.2",
-      revision: "fcee48106a12dd531702d729d17f40f6e152027f"
+  url "https://github.com/containers/podman/archive/refs/tags/v5.8.1.tar.gz"
+  sha256 "b9540ecb19cfcbcfc40e1b81d39930f688c537d8fd6f11ae56be41f2bf9e97a4"
   license all_of: ["Apache-2.0", "GPL-3.0-or-later"]
+  compatibility_version 1
   head "https://github.com/containers/podman.git", branch: "main"
 
+  # There can be a notable gap between when a version is tagged and a
+  # corresponding release is created and upstream uses GitHub releases to
+  # indicate when a version is released, so we check the "latest" release
+  # instead of the Git tags. Maintainers confirmed:
+  # https://github.com/Homebrew/homebrew-core/pull/205162#issuecomment-2607793814
+  livecheck do
+    url :stable
+    strategy :github_latest
+  end
+
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "89ec8d09204532d5164e5b53fe6d4c046bde353ea71e66be1891099c816acdfe"
-    sha256 cellar: :any_skip_relocation, arm64_ventura: "c52d8f4abc506cedddc813aa2c0bbc586177a6ff644f171f694981c203c4a18f"
-    sha256 cellar: :any_skip_relocation, sonoma:        "07a41b8f93a05aa265f93ff7193d472fb21ad8cedf84cf3c7892d749d0ec76d0"
-    sha256 cellar: :any_skip_relocation, ventura:       "271cadf12f04bc0bbe7a35f1ae262a87da016b9298668274af16b1ec7e078fac"
-    sha256                               x86_64_linux:  "ea1b960ea250717e42e368196c1972f9e8bd004cc8fef6d43e8333dea4d4b285"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "66b952f3f826df78e5fd02a7e3d3114a4827499b7a64d1d7ff683d040794ab83"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "2a49f5e58d026cd47b2eb97c5d90fbebdc120bcd9f50490a2bd9662649f3f298"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "8e2f2dd421217c22db4176862635876fa81158c662655244ea8df0af6a874681"
+    sha256 cellar: :any_skip_relocation, sonoma:        "2f114ab84f2fd5f06b74d737d6cedff0c8b3cd4ccac68b9e258380e9de1ccc7b"
+    sha256                               arm64_linux:   "4bac4526d67455fedcf9672490d60af1ff36c8b764f35e116bca817673af32ff"
+    sha256                               x86_64_linux:  "55350c1a5d171f402e47ec903c3ea6f1b79b2b62bf199050bdefa5cdd410213d"
   end
 
   depends_on "go" => :build
@@ -28,7 +39,7 @@ class Podman < Formula
     depends_on "autoconf" => :build
     depends_on "automake" => :build
     depends_on "libtool" => :build
-    depends_on "pkg-config" => :build
+    depends_on "pkgconf" => :build
     depends_on "protobuf" => :build
     depends_on "rust" => :build
     depends_on "conmon"
@@ -38,47 +49,53 @@ class Podman < Formula
     depends_on "libseccomp"
     depends_on "passt"
     depends_on "slirp4netns"
+    depends_on "sqlite"
     depends_on "systemd"
   end
 
+  # Bump these resources versions to match those in the corresponding version-tagged Makefile
+  # at https://github.com/containers/podman/blob/#{version}/contrib/pkginstaller/Makefile
+  #
+  # More context: https://github.com/Homebrew/homebrew-core/pull/205303
   resource "gvproxy" do
     on_macos do
-      url "https://github.com/containers/gvisor-tap-vsock/archive/refs/tags/v0.7.4.tar.gz"
-      sha256 "22a68a0b0f8120c8d4dde29856e2cc38b292ced1b1d4cd8bf3b709acadbddc88"
+      url "https://github.com/containers/gvisor-tap-vsock/archive/refs/tags/v0.8.8.tar.gz"
+      sha256 "4f7c4885225d71b21f6b547b94d92fc6da4a4fef9d382fdd19c8ea67f67be839"
     end
   end
 
   resource "vfkit" do
     on_macos do
-      url "https://github.com/crc-org/vfkit/archive/refs/tags/v0.5.1.tar.gz"
-      sha256 "0825d5efabc5ec8817d2ed89f18717b2b4fa5be804b0f2ccc891b4a23b64d771"
+      url "https://github.com/crc-org/vfkit/archive/refs/tags/v0.6.3.tar.gz"
+      sha256 "bb2a7f9d1bf41d2f823412ca20912bade606ae30b41afcd1366d32e3d100a09e"
     end
   end
 
   resource "catatonit" do
     on_linux do
-      url "https://github.com/openSUSE/catatonit/archive/refs/tags/v0.2.0.tar.gz"
-      sha256 "d0cf1feffdc89c9fb52af20fc10127887a408bbd99e0424558d182b310a3dc92"
+      url "https://github.com/openSUSE/catatonit/archive/refs/tags/v0.2.1.tar.gz"
+      sha256 "771385049516fdd561fbb9164eddf376075c4c7de3900a8b18654660172748f1"
     end
   end
 
   resource "netavark" do
     on_linux do
-      url "https://github.com/containers/netavark/archive/refs/tags/v1.12.2.tar.gz"
-      sha256 "d1e5a7e65b825724fd084b0162084d9b61db8cda1dad26de8a07be1bd6891dbc"
+      url "https://github.com/containers/netavark/archive/refs/tags/v1.17.2.tar.gz"
+      sha256 "284faa7cc525b869cbac4053e0a4127ac743ca7da1457c49fffb35558ea9c78d"
     end
   end
 
   resource "aardvark-dns" do
     on_linux do
-      url "https://github.com/containers/aardvark-dns/archive/refs/tags/v1.12.1.tar.gz"
-      sha256 "557d275c9d7c2367b2d330c14717a36b6046d58eb7288adeebc88a285ad0ede8"
+      url "https://github.com/containers/aardvark-dns/archive/refs/tags/v1.17.0.tar.gz"
+      sha256 "42556bf547c435a8f0ccb586b4f5000da3106a58c26f82e22d9db81ee5bd7eb2"
     end
   end
 
   def install
     if OS.mac?
       ENV["CGO_ENABLED"] = "1"
+      ENV["BUILD_ORIGIN"] = "brew"
 
       system "gmake", "podman-remote"
       bin.install "bin/darwin/podman" => "podman-remote"
@@ -116,13 +133,21 @@ class Podman < Formula
       ENV.O0
       ENV["PREFIX"] = prefix
       ENV["HELPER_BINARIES_DIR"] = opt_libexec/"podman"
+      ENV["BUILD_ORIGIN"] = "brew"
+
+      # Workaround to avoid patchelf corruption when cgo is required
+      if Hardware::CPU.arch == :arm64
+        ENV["CGO_ENABLED"] = "1"
+        ENV["GO_EXTLINK_ENABLED"] = "1"
+        ENV.append "GOFLAGS", "-buildmode=pie -trimpath"
+      end
 
       system "make"
       system "make", "install", "install.completions"
 
-      (prefix/"etc/containers/policy.json").write <<~EOS
+      (prefix/"etc/containers/policy.json").write <<~JSON
         {"default":[{"type":"insecureAcceptAnything"}]}
-      EOS
+      JSON
 
       (prefix/"etc/containers/storage.conf").write <<~EOS
         [storage]
@@ -160,7 +185,7 @@ class Podman < Formula
       EOS
     end
     on_macos do
-      <<-EOS
+      <<~EOS
         In order to run containers locally, podman depends on a Linux kernel.
         One can be started manually using `podman machine` from this package.
         To start a podman VM automatically at login, also install the cask
@@ -170,7 +195,7 @@ class Podman < Formula
   end
 
   service do
-    run linux: [opt_bin/"podman", "system", "service", "--time=0"]
+    run linux: [opt_bin/"podman", "system", "service", "--time", "0"]
     environment_variables PATH: std_service_path_env
     working_dir HOMEBREW_PREFIX
   end

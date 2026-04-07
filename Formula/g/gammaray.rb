@@ -1,37 +1,60 @@
 class Gammaray < Formula
   desc "Examine and manipulate Qt application internals at runtime"
-  homepage "https://www.kdab.com/gammaray"
-  url "https://github.com/KDAB/GammaRay/releases/download/v3.1.0/gammaray-3.1.0.tar.gz"
-  sha256 "93b52d5318374896621e1d8b5dd03379c53e0458b1633b539d18737fe8c300cf"
+  homepage "https://www.kdab.com/software-technologies/developer-tools/gammaray/"
+  url "https://github.com/KDAB/GammaRay/releases/download/v3.4.0/gammaray-3.4.0.tar.gz"
+  sha256 "bcac8aa24671bcfd563213f5cfd9e61cf555b22ee3896e8111a5c3a588aacadf"
   license "GPL-2.0-or-later"
   head "https://github.com/KDAB/GammaRay.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "27b11ab0fe6bbecfd521f137e55db9dbc981f1f36baed3059fb97b1836056def"
-    sha256 cellar: :any,                 arm64_ventura:  "248e616d7cd507ed84bf5f4650b2cb419ba81b00bcace44dde18714b92585ca6"
-    sha256 cellar: :any,                 arm64_monterey: "d524a2b8c87cae2a3f15f81761fc9bb2586861314b252b2f83a0420d8c59d789"
-    sha256 cellar: :any,                 sonoma:         "e577a7147b5fe61916eea610c6fe288ff8748195c1a20efd9d507fbae2789658"
-    sha256 cellar: :any,                 ventura:        "80354ec89605d4ddf345593bb2bcc8b05cde79cbc7ccf972eb5302859e484163"
-    sha256 cellar: :any,                 monterey:       "bcf7529613e3f65821f3709780aa2e36621aa62c4833cccda703c49f3f4fb8ca"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "c9ef430a3fe1d565cf9cd3c129fec0477a3562e862058ffd6caf3cb92e44f14a"
+    sha256 cellar: :any,                 arm64_tahoe:   "c19a1b68812e0bb1532fcc58c22e807e6aa20a019b8d1a7fe8ca272a7275b340"
+    sha256 cellar: :any,                 arm64_sequoia: "92ad089dc006f9eacf961c93fffb74dbf5d21a11622b965aeef3dccbd9cfd665"
+    sha256 cellar: :any,                 arm64_sonoma:  "a606aa3274d822ab188c0e4f1a5a30438bd11fba03212928bc688bcf23821bf5"
+    sha256 cellar: :any,                 sonoma:        "9ee8b02c93141d665fef7bd26941d4669faaf7bc6c150cf36d32152bfd4bcf8b"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "b30b250ba0d8004020e2c2f11ccc4f530eb8a95e1985e4e4b1f3638920280007"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "28019d16d212ca777431dbd65d214ecdeec0e10d92173f469db2e46c94946027"
   end
 
   depends_on "cmake" => :build
   depends_on "graphviz"
-  depends_on "qt"
+  depends_on "qt3d"
+  depends_on "qtbase"
+  depends_on "qtconnectivity"
+  depends_on "qtdeclarative"
+  depends_on "qtpositioning"
+  depends_on "qtscxml"
+  depends_on "qtsvg"
+  depends_on "qttools"
+
+  on_macos do
+    depends_on "qtlocation"
+    depends_on "qtwebchannel"
+  end
+
+  on_sonoma :or_newer do
+    depends_on "qtwebengine"
+  end
 
   on_linux do
     depends_on "elfutils"
+    depends_on "qtwayland"
     depends_on "wayland"
+
+    # TODO: Add dependencies on all Linux when `qtwebengine` is bottled on arm64 Linux
+    on_intel do
+      depends_on "qtwebengine"
+    end
   end
 
-  fails_with gcc: "5"
-
   def install
+    rpaths = [rpath]
+    # Workaround to stop brew from complaining about missing RPATH
+    rpaths << "#{loader_path}/../../../../../../Frameworks" if OS.mac?
+
     system "cmake", "-S", ".", "-B", "build",
                     "-DCMAKE_DISABLE_FIND_PACKAGE_Graphviz=ON",
                     "-DCMAKE_DISABLE_FIND_PACKAGE_VTK=OFF",
-                    "-DCMAKE_INSTALL_RPATH=#{rpath}",
+                    "-DCMAKE_INSTALL_RPATH=#{rpaths.join(";")}",
                     *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"

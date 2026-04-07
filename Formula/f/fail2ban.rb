@@ -13,17 +13,17 @@ class Fail2ban < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "2d091c51f21f9d594185598a9ca6d7845b429622eba307f0eef57a3b8b6e3c5f"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "2d091c51f21f9d594185598a9ca6d7845b429622eba307f0eef57a3b8b6e3c5f"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "2d091c51f21f9d594185598a9ca6d7845b429622eba307f0eef57a3b8b6e3c5f"
-    sha256 cellar: :any_skip_relocation, sonoma:         "b5c158d54cab237debb765bac1afbb9863c7ecd19ad7a37e1d1b6ed0cd06f430"
-    sha256 cellar: :any_skip_relocation, ventura:        "b5c158d54cab237debb765bac1afbb9863c7ecd19ad7a37e1d1b6ed0cd06f430"
-    sha256 cellar: :any_skip_relocation, monterey:       "b5c158d54cab237debb765bac1afbb9863c7ecd19ad7a37e1d1b6ed0cd06f430"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "4c50360cfb4f6a2b5634347c45d934391ac64b3aa9a7f9e1c94168dbdafe6e9f"
+    rebuild 3
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "677ea8041843e75cde2773a39155890cc3612fb584411d85316538caf4193168"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "677ea8041843e75cde2773a39155890cc3612fb584411d85316538caf4193168"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "677ea8041843e75cde2773a39155890cc3612fb584411d85316538caf4193168"
+    sha256 cellar: :any_skip_relocation, sonoma:        "cf820863820ce92f23210ed7a2a390ab1cbe86f67db6f68c911e1d11670dad3e"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "5684265cee6688d49e34a7bc00c529bad87825df415a613b300cf91735e6e53c"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "5684265cee6688d49e34a7bc00c529bad87825df415a613b300cf91735e6e53c"
   end
 
   depends_on "sphinx-doc" => :build
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   # Drop distutils: https://github.com/fail2ban/fail2ban/pull/3728
   patch do
@@ -50,7 +50,7 @@ class Fail2ban < Formula
     inreplace_etc_var(Pathname.glob("fail2ban/**/*").select(&:file?), audit_result: false)
     inreplace_etc_var(Pathname.glob("man/*"), audit_result: false)
 
-    # Update `data_files` from absolute to relative paths for wheel compatability and include doc files
+    # Update `data_files` from absolute to relative paths for wheel compatibility and include doc files
     inreplace "setup.py" do |s|
       s.gsub! "/etc", "./etc"
       s.gsub! "/var", "./var"
@@ -72,26 +72,23 @@ class Fail2ban < Formula
 
     # Install into `bash-completion@2` path as not compatible with `bash-completion`
     (share/"bash-completion/completions").install "files/bash-completion" => "fail2ban"
+
+    (var/"run/fail2ban").mkpath
   end
 
   def inreplace_etc_var(targets, audit_result: true)
     inreplace targets do |s|
-      s.gsub! %r{/etc}, etc, audit_result
-      s.gsub! %r{/var}, var, audit_result
+      s.gsub!(%r{/etc}, etc, audit_result:)
+      s.gsub!(%r{/var}, var, audit_result:)
     end
-  end
-
-  def post_install
-    (etc/"fail2ban").mkpath
-    (var/"run/fail2ban").mkpath
   end
 
   def caveats
     <<~EOS
       You must enable any jails by editing:
-        #{etc}/fail2ban/jail.conf
+        #{pkgetc}/jail.conf
 
-      Other configuration files are in #{etc}/fail2ban. See more instructions at
+      Other configuration files are in #{pkgetc}. See more instructions at
       https://github.com/fail2ban/fail2ban/wiki/Proper-fail2ban-configuration.
     EOS
   end

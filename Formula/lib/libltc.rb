@@ -6,6 +6,8 @@ class Libltc < Formula
   license "LGPL-3.0-or-later"
 
   bottle do
+    sha256 cellar: :any,                 arm64_tahoe:    "96c5103e95fb66b47f93433bf6f7e3a85cf6de5e8540348172062cf1b68920f7"
+    sha256 cellar: :any,                 arm64_sequoia:  "db162961bf9b4cb7fab2db612ffff0b70ab59470d382712417f1868d63500524"
     sha256 cellar: :any,                 arm64_sonoma:   "51fbcf835713464c3adc121dfce5dc240a9364a9c1d597df408fa787c6caeaa7"
     sha256 cellar: :any,                 arm64_ventura:  "317e8d1f146e9c5118dabea794de694186057e4c71688523946fb24859ed4de7"
     sha256 cellar: :any,                 arm64_monterey: "8289e0f5389ee652949981fbde5d3955d78048707c2731619e2d9d046cf1f89a"
@@ -15,6 +17,7 @@ class Libltc < Formula
     sha256 cellar: :any,                 monterey:       "9a4cdb442f640d04e8886b888bbc5427b448cc9d7a160672a505fda5fa1371c8"
     sha256 cellar: :any,                 big_sur:        "a8a22a13e7faa84038e3833a7ad379d5ca3afe26670476fad9f87afc5312338a"
     sha256 cellar: :any,                 catalina:       "2489b05efb1e77a52635ff5cded3850b9c1abe861b01145bccba7a2f6edaafaa"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "9cf04675a7dd67b37fa8b4c48ab7e6903d2caa761704bebdd1e64a5a6d79f863"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "c160950aa4d33232070cb6607deec9ed4fc9b070dd5dcf0c3221404199016c46"
   end
 
@@ -24,7 +27,7 @@ class Libltc < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       // stripped-down copy of:
       // https://raw.githubusercontent.com/x42/libltc/87d45b3/tests/example_encode.c
       #include <stdio.h>
@@ -91,7 +94,7 @@ class Libltc < Formula
 
         return 0;
       }
-    EOS
+    C
     system ENV.cc, "test.c", "-L#{lib}", "-lltc", "-lm", "-o", "test"
     system "./test"
     assert (testpath/"foobar").file?

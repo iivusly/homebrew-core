@@ -8,17 +8,17 @@ class Xxh < Formula
   license "BSD-2-Clause"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "822e1666ce2e955c53623bda48f314623bd13acc5ba4aa6f3a0ddd1caf47ea4f"
-    sha256 cellar: :any,                 arm64_ventura:  "506b28fef997d22a9758465f16f581f50d6930910795959552a22e950069a4fd"
-    sha256 cellar: :any,                 arm64_monterey: "b8a409e38956b865d25c45dcb45b77cd2f2241a8a26bbb0022a94afa1fbae6a8"
-    sha256 cellar: :any,                 sonoma:         "5fa1b2366a20659838f63c3677cd33ada1fc7c720424ed5fd7b1f9a2fb0e25de"
-    sha256 cellar: :any,                 ventura:        "9503143a0ecaedb5d2890e455bea5842875b465753ada89a8222b8ea45a4439c"
-    sha256 cellar: :any,                 monterey:       "3d160118d09b9b87dd435f9874442a56377bb68dccf916e26310201e4e48823b"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "a9cd1234bba4387ec033284cce8258ca2e6ae6911dfd7efe50e277c7c06be975"
+    rebuild 2
+    sha256 cellar: :any,                 arm64_tahoe:   "07ed49c087bd4b82099ff25d213a71627a53d0c86bce7f95938a0072cf1e05ac"
+    sha256 cellar: :any,                 arm64_sequoia: "9d00fc1786130a6714ae9b87c8d2477b4487605bc921fe37666c22d2794a73d1"
+    sha256 cellar: :any,                 arm64_sonoma:  "15847d147ad2cc7806d50a69f2df443ca95a081a99222eac211d809047e57583"
+    sha256 cellar: :any,                 sonoma:        "8a1313dff05fbd4a04345cc3c5782d2142eb07ad9ba0dfa21761d58363ac76c7"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "f69ba9f8e23d52efd349c6d51cdfcd2dec59c8828b76589ba2a2a94765b58301"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "4fe168ea7da7ddf85fba4193337c1c4e60d52f0005fdc48c3510de8c35cef67b"
   end
 
   depends_on "libyaml"
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   resource "pexpect" do
     url "https://files.pythonhosted.org/packages/42/92/cc564bf6381ff43ce1f4d06852fc19a2f11d180f23dc32d9588bee2f149d/pexpect-4.9.0.tar.gz"
@@ -31,8 +31,8 @@ class Xxh < Formula
   end
 
   resource "pyyaml" do
-    url "https://files.pythonhosted.org/packages/cd/e5/af35f7ea75cf72f2cd079c95ee16797de7cd71f29ea7c68ae5ce7be1eda0/PyYAML-6.0.1.tar.gz"
-    sha256 "bfdf460b1736c775f2ba9f6a92bca30bc2095067b8a9d77876d1fad6cc3b4a43"
+    url "https://files.pythonhosted.org/packages/05/8e/961c0007c59b8dd7729d542c61a4d537767a59645b82a0b521206e1e25c2/pyyaml-6.0.3.tar.gz"
+    sha256 "d76623373421df22fb4cf8817020cbb7ef15c725b9d5e45f17e189bfc384190f"
   end
 
   def install
@@ -42,12 +42,12 @@ class Xxh < Formula
   test do
     assert_match version.to_s, shell_output("#{bin}/xxh --version")
 
-    (testpath/"config.xxhc").write <<~EOS
+    (testpath/"config.xxhc").write <<~YAML
       hosts:
         test.localhost:
           -o: HostName=127.0.0.1
           +s: xxh-shell-zsh
-    EOS
+    YAML
     begin
       port = free_port
       server = TCPServer.new(port)
@@ -60,7 +60,7 @@ class Xxh < Formula
       stdout, stderr, = Open3.capture3(
         bin/"xxh", "test.localhost",
         "-p", port.to_s,
-        "+xc", "#{testpath}/config.xxhc",
+        "+xc", testpath/"config.xxhc",
         "+v"
       )
 

@@ -1,23 +1,26 @@
 class Upx < Formula
   desc "Compress/expand executable files"
   homepage "https://upx.github.io/"
-  url "https://github.com/upx/upx/releases/download/v4.1.0/upx-4.1.0-src.tar.xz"
-  sha256 "0582f78b517ea87ba1caa6e8c111474f58edd167e5f01f074d7d9ca2f81d47d0"
+  url "https://github.com/upx/upx/releases/download/v5.1.1/upx-5.1.1-src.tar.xz"
+  sha256 "8eb914115b306fd9fd2110bd3d27ddb8ae7c5a03bb965f7d10f046a3a4ff9dfe"
   license "GPL-2.0-or-later"
   head "https://github.com/upx/upx.git", branch: "devel"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, monterey: "db18963055dd657d579824a7daaf69f79e1639a10fd1accb399e84ddcd5d649c"
-    sha256 cellar: :any_skip_relocation, big_sur:  "8e6aa21f689985270ff1cc3857ef9848f63f3c79a96604884ee846ce76e6401b"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "ea9792e388feed47fb93fa3ac4445c29da427c1c58ce7d61893bfebe07b432ec"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "ac81c14ccf5d7568cd7831dda33ee26adc2995f6688443e1d2c76a7034e20898"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "44cae4d0d58031d25b465bc0694db716baccca93dfbd2b436a2f76a34d54d8bf"
+    sha256 cellar: :any_skip_relocation, sonoma:        "ceace73c72ce5579b77e459c8c2cc0937dd59d996d3318239052de60b73189a0"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "3e9ee8e3613ef3434dff4dfed0ff37eb87406446a6c9cd5dfff4f8beff451754"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ae12d1951368371224a793b2fefbf7f76fb25eca11eaf32caf039fcd348c0b61"
   end
-
-  # https://github.com/upx/upx/issues/612
-  deprecate! date: "2023-10-14", because: "is crashing for macOS Ventura or above"
 
   depends_on "cmake" => :build
   depends_on "ucl" => :build
 
-  uses_from_macos "zlib"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     system "cmake", "-S", ".", "-B", "build", *std_cmake_args
@@ -26,11 +29,8 @@ class Upx < Formula
   end
 
   test do
-    cp bin/"upx", "."
-    chmod 0755, "./upx"
-
-    system bin/"upx", "-1", "--force-execve", "./upx"
-    system "./upx", "-V" # make sure the binary we compressed works
-    system bin/"upx", "-d", "./upx"
+    system bin/"upx", "-1", "-o", "./hello", test_fixtures("elf/c.elf")
+    assert_path_exists testpath/"hello"
+    system bin/"upx", "-d", "./hello"
   end
 end

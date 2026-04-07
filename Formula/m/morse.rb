@@ -1,62 +1,53 @@
 class Morse < Formula
   desc "QSO generator and morse code trainer"
   homepage "http://www.catb.org/~esr/morse/"
-  # reported the artifact issue on the project page, https://gitlab.com/esr/morse-classic/-/issues/1
-  url "https://gitlab.com/esr/morse-classic/-/archive/2.6/morse-classic-2.6.tar.bz2"
-  sha256 "ec44144d52a1eef36fbe0ca400c54556a7ba8f8c3de38d80512d19703b89f615"
+  url "https://gitlab.com/esr/morse-classic/-/archive/2.7/morse-classic-2.7.tar.bz2"
+  sha256 "b0414150fc61387775656a1e7fbbc423eb24f45da063ea531d3810ed951202d7"
   license "BSD-2-Clause"
 
+  # The homepage links to the `stable` tarball but it can take longer than the
+  # ten second livecheck timeout, so we check the Git tags as a workaround.
   livecheck do
-    url :homepage
-    regex(/href=.*?morse[._-]v?(\d+(?:\.\d+)+)\.t/i)
+    url :stable
+    regex(/^v?(\d+(?:\.\d+)+)$/i)
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "0286b2ad85c1add1655abfb88976233c98db5050e38d9d3995c1adb9c9a10a1e"
-    sha256 cellar: :any,                 arm64_ventura:  "2474d8763e32b94635781a29c7ead023710fb0186a9d21fb22cfcd7a8d22e4eb"
-    sha256 cellar: :any,                 arm64_monterey: "b11f64cb45004eba37bf06e0d367e71b6f088fe7d05e80019125c325a48fcd9d"
-    sha256 cellar: :any,                 sonoma:         "6892afd65e72497a1fc11d849031e2ea034ffbd41f644a018ec14d0a1a110bfe"
-    sha256 cellar: :any,                 ventura:        "6b25ce35c70900babe4699533e2161b58b7b73cb9349821e9043b5aa01f95e71"
-    sha256 cellar: :any,                 monterey:       "56d73fcfdfaa67270047046e7785881149585063ea71f9d5da7e32b42f3fcd61"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "6f8504ea84011770dbba7831cfb9a35742be9efc2d849657385fb7a68e7ade6f"
+    sha256 cellar: :any,                 arm64_tahoe:   "63cd5a3269b81c69ab39a3be47d3a76dc0ef9a44f0d41f8bf7e94a109d5108a0"
+    sha256 cellar: :any,                 arm64_sequoia: "d459f6db21be6d02be6458429ced954f31c15ce16ea89cea5f533a3a73fe3cab"
+    sha256 cellar: :any,                 arm64_sonoma:  "21e0fd265edc7277e0254d951755bc47e020bf9f8e184d9500d63fcb5b7b8818"
+    sha256 cellar: :any,                 sonoma:        "519ca305bca624f04b0e42771e335b5d245a21049829de5b1d5677f66d9b6318"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "4089a0dba0e309fc44a067114a1b6f8dd520ad29ba4052f2c10e21b01be9f1ae"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "328a69c6c05be20cf38718ee30eab62aa3dc8a7404c92068bf23f1412e4851ad"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "xmlto" => :build
   depends_on "pulseaudio"
 
-  patch :DATA
+  # Apply Debian patch to open a mono stream to fix "pa_simple_Write failed"
+  patch do
+    url "https://salsa.debian.org/debian-hamradio-team/morse/-/raw/7acc68ab78dc8b634c0c81dc56fee0634fc9fc3b/debian/patches/04fix-pa_simple_write-with-mono-output.patch"
+    sha256 "ae37ff290eba510fd52fe8babbe86c3ab56755b3ad5a9b7f9949b6a899b06288"
+  end
 
   def install
     ENV["XML_CATALOG_FILES"] = "#{etc}/xml/catalog"
 
-    ENV["CC"] = "#{ENV.cc} -Wno-implicit-function-declaration" if DevelopmentTools.clang_build_version >= 1403
+    # Build can fail if morse.1 and QSO.1 run simultaneously
+    ENV.deparallelize
 
-    system "make", "all"
+    system "make", "all", "DEVICE=PA"
     bin.install %w[morse QSO]
     man1.install %w[morse.1 QSO.1]
   end
 
   test do
-    # Fails in Linux CI with "pa_simple_Write failed"
-    return if OS.linux? && ENV["HOMEBREW_GITHUB_ACTIONS"]
-
-    assert_match "Could not initialize audio", shell_output("#{bin}/morse -- 2>&1", 1)
+    if OS.mac?
+      # Cannot set up pulseaudio on CI runners so just check for error message
+      assert_match "Could not initialize audio", shell_output("#{bin}/morse -m brew 2>&1", 1).strip
+    else
+      assert_equal "-... .-. . .--", shell_output("#{bin}/morse -m brew").strip
+    end
   end
 end
-
-__END__
-diff --git a/Makefile b/Makefile
-index 8bdf1f6..df39baa 100644
---- a/Makefile
-+++ b/Makefile
-@@ -28,8 +28,8 @@
- #DEVICE = X11
- #DEVICE = Linux
- #DEVICE = OSS
--DEVICE = ALSA
--#DEVICE = PA
-+#DEVICE = ALSA
-+DEVICE = PA
-
- VERSION=$(shell sed -n <NEWS '/^[0-9]/s/:.*//p' | head -1)

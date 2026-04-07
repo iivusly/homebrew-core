@@ -1,45 +1,31 @@
 class Abseil < Formula
   desc "C++ Common Libraries"
   homepage "https://abseil.io"
-  url "https://github.com/abseil/abseil-cpp/archive/refs/tags/20240722.0.tar.gz"
-  sha256 "f50e5ac311a81382da7fa75b97310e4b9006474f9560ac46f54a9967f07d4ae3"
+  url "https://github.com/abseil/abseil-cpp/archive/refs/tags/20260107.1.tar.gz"
+  sha256 "4314e2a7cbac89cac25a2f2322870f343d81579756ceff7f431803c2c9090195"
   license "Apache-2.0"
+  compatibility_version 1
   head "https://github.com/abseil/abseil-cpp.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "922c5d7b256fed577b3f7c84ec7a8ce67dddfc7670726e417eaed71bb6878fc6"
-    sha256 cellar: :any,                 arm64_ventura:  "0e81f268b9e514694f0dbe17a2cf6fecf1537ed680206e6ef88671345482f7e9"
-    sha256 cellar: :any,                 arm64_monterey: "e10b87de708e6731f27a22e3585884749dbcf967a3bd2486ddcae0f410951c3f"
-    sha256 cellar: :any,                 sonoma:         "e669331fc89560e725f40f61ad5ef970eeb3f883586f482ac45d45bc21124b82"
-    sha256 cellar: :any,                 ventura:        "5d72497268f8335b3955ea9408e33f6235ae1c13dcfb67b14b6a58a0600e4908"
-    sha256 cellar: :any,                 monterey:       "68b478c629ee72fd66bca1b4c3944c29e053d9d85315ffc8cd4fe225daefa9a3"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "847b8ef8ec4bb017c0e43121225b03f742d74d570a560d411db7408d0385e9bd"
+    sha256                               arm64_tahoe:   "90697dc0727974c4a873ed19e63c30bc4c9525566cbd0ff968f980ce15047ae8"
+    sha256                               arm64_sequoia: "5b62b81ba6ae8a78d728573226fb1d3abb14a14806e648dca9bfba84e77d5fb4"
+    sha256                               arm64_sonoma:  "e8854f6a2420abecbbaa1c74bbebc2e5427e7688c35d370e88dd8e9620b37be0"
+    sha256 cellar: :any,                 sonoma:        "e26f9da379d1a093b080e00ce65f550a8c1568edc2d66eec623ec3938fe0ea5f"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "33017a9d85883c652d83a8df3098066e3f482ec3c07d1247461587c9761df664"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "df32cf7d435a18a293204adadceea594bc6c2889765d500d98acc7fb769671ac"
   end
 
   depends_on "cmake" => [:build, :test]
-
-  on_macos do
-    depends_on "googletest" => :build # For test helpers
-  end
-
-  fails_with gcc: "5" # C++17
-
-  # Fix shell option group handling in pkgconfig files
-  # https://github.com/abseil/abseil-cpp/pull/1738
-  patch do
-    url "https://github.com/abseil/abseil-cpp/commit/9dfde0e30a2ce41077758e9c0bb3ff736d7c4e00.patch?full_index=1"
-    sha256 "94a9b4dc980794b3fba0a5e4ae88ef52261240da59a787e35b207102ba4ebfcd"
-  end
+  depends_on "googletest" => :build # For test helpers
 
   def install
     ENV.runtime_cpu_detection
 
-    # Install test helpers. Doing this on Linux requires rebuilding `googltest` with `-fPIC`.
-    extra_cmake_args = if OS.mac?
-      %w[ABSL_BUILD_TEST_HELPERS ABSL_USE_EXTERNAL_GOOGLETEST ABSL_FIND_GOOGLETEST].map do |arg|
-        "-D#{arg}=ON"
-      end
-    end.to_a
+    # Install test helpers.
+    extra_cmake_args = %w[ABSL_BUILD_TEST_HELPERS ABSL_USE_EXTERNAL_GOOGLETEST ABSL_FIND_GOOGLETEST].map do |arg|
+      "-D#{arg}=ON"
+    end
 
     system "cmake", "-S", ".", "-B", "build",
                     "-DCMAKE_INSTALL_RPATH=#{rpath}",
@@ -53,7 +39,7 @@ class Abseil < Formula
   end
 
   test do
-    (testpath/"hello_world.cc").write <<~EOS
+    (testpath/"hello_world.cc").write <<~CPP
       #include <iostream>
       #include <string>
       #include <vector>
@@ -65,8 +51,8 @@ class Abseil < Formula
 
         std::cout << "Joined string: " << s << "\\n";
       }
-    EOS
-    (testpath/"CMakeLists.txt").write <<~EOS
+    CPP
+    (testpath/"CMakeLists.txt").write <<~CMAKE
       cmake_minimum_required(VERSION 3.16)
 
       project(my_project)
@@ -80,7 +66,7 @@ class Abseil < Formula
 
       # Declare dependency on the absl::strings library
       target_link_libraries(hello_world absl::strings)
-    EOS
+    CMAKE
     system "cmake", testpath
     system "cmake", "--build", testpath, "--target", "hello_world"
     assert_equal "Joined string: foo-bar-baz\n", shell_output("#{testpath}/hello_world")

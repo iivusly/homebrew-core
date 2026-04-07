@@ -1,18 +1,20 @@
 class Kubecfg < Formula
   desc "Manage complex enterprise Kubernetes environments as code"
   homepage "https://github.com/kubecfg/kubecfg"
-  url "https://github.com/kubecfg/kubecfg/archive/refs/tags/v0.34.3.tar.gz"
-  sha256 "863b8872a848a1938c471e1690efe9f3e59d8be6e4a407504dc1f8c4b9e96e81"
+  url "https://github.com/kubecfg/kubecfg/archive/refs/tags/v0.36.0.tar.gz"
+  sha256 "0f135465c512f8d5017f30f595669bed6a1c65b39b10178ede6989e15cbc84a9"
   license "Apache-2.0"
+  head "https://github.com/kubecfg/kubecfg.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "b7058cb919bab4944210d6699b907de011e40274b1b092068453c529ceca4e4d"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "7a000e2f42efe132d04532db749a35e0bf7efa027e0e1743b4b5c86eeaadcc41"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "7f9af259c5cc137b202e12b68dfd63cfc257f3b37a4d1c2af99db3ebfd4cf66f"
-    sha256 cellar: :any_skip_relocation, sonoma:         "0775e6e70b9c540f12e42ad181716b666372ce71dfd6243b9be20477dae84e4f"
-    sha256 cellar: :any_skip_relocation, ventura:        "4c428fb6513105d868ce2ae68ccd6fc2eb060409e5f7ccec721cba9eb1f60985"
-    sha256 cellar: :any_skip_relocation, monterey:       "db3e0fcb93a1fc514f00626e8b0ca5b350ae6ccadae85e0155153c32fe081e81"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "f339d39f1b8c81c4dffaeaa19080b59159269140ef5b7f379ae20514bc09ca22"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "dafc40beef50da4e6258e2650d4e74d9038b8b47ac36d607937c2ae468d1e682"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "5d7373d5b92e6d7fa40d26f346278f9946d7ddf773c8312ca49b1e13d06a85df"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "895b4c9f01632ae07409dee040f42fb73ee784a6726cdfbcf22bced5beeb3718"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "0910ce4d7d1fe0cedfa2c3947b21e1b53a88a863ccbb97e42dafb05abccc12f2"
+    sha256 cellar: :any_skip_relocation, sonoma:        "afcc53d1d2bdae49341594f9eaf3741194d1ba7b918a4a65aa21ef4ba39e5110"
+    sha256 cellar: :any_skip_relocation, ventura:       "f693e55e6ca8a34c770b67807e92969817a2a4ee015c84d07057285779d57249"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "03813301e8958ac9dfb657e548d38d919609aef21593df3bcc9917adccfa27bf"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "b82e88d3134489324a448c33bed9315a57878b9aab5b2508ce678a6e2be31a5a"
   end
 
   depends_on "go" => :build

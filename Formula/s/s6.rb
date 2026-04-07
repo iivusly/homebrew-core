@@ -1,85 +1,37 @@
 class S6 < Formula
   desc "Small & secure supervision software suite"
   homepage "https://skarnet.org/software/s6/"
-  url "https://skarnet.org/software/s6/s6-2.13.0.0.tar.gz"
-  sha256 "7e46f8f55d80bb0e2025a64d5d649af4a4ac21e348020caaadde30ba5e5b4830"
+  url "https://skarnet.org/software/s6/s6-2.14.0.1.tar.gz"
+  sha256 "c25afe817cbc3f594efc5050351f8b9101ba78616d0ce915658f370e7ee2e258"
   license "ISC"
-
-  livecheck do
-    url :homepage
-    regex(/href=.*?s6[._-]v?(\d+(?:\.\d+)+)\.t/i)
-  end
+  head "git://git.skarnet.org/s6.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "58518d4c95e24a6b46a44e43916f9c22b7f1257633fc290a5834cc8d9780b4f6"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "37fe43970f0eec3c7898c2b625ef201be5be165e864e496ec92e806026dc64d1"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "cec74cd51d621de4e50d4269108c53ddc78eec6923b4869db5853a67edc62a8b"
-    sha256 cellar: :any_skip_relocation, sonoma:         "d2db3595e3a38f9900cc0cb1c843bca72d97c05fb22deb36d524996eeb38c83f"
-    sha256 cellar: :any_skip_relocation, ventura:        "fb4abfc1c7be1e3d6545d095f4b2849222a4934748730b57ffdaca48be546fe2"
-    sha256 cellar: :any_skip_relocation, monterey:       "0371dba9de65bc315ecab1c2630b5f767a2f03e37eb73c29726eb65680375078"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "87c249fb6a3fba985655871190aab45057a462edca7e92fdacc8e4078fed6f1f"
+    sha256 cellar: :any,                 arm64_tahoe:   "e95cfad8adbf092855ba5944124b102614af34d54a2e230705079e5ff40fc24c"
+    sha256 cellar: :any,                 arm64_sequoia: "7e72f87cb7e627ea5daffcb99e58033ed7f3d5f7f497c846c771a08534686fa5"
+    sha256 cellar: :any,                 arm64_sonoma:  "d5c73ceed74c1069faa28fb477e82156187fbb0eefacf90bb0cac9dfdc15c5f5"
+    sha256 cellar: :any,                 sonoma:        "864fbc30f870d4a8558093e66f1dc61cb80bfd824bcc532a288cb0b64c7a085b"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "0982099a11389c9d3f4d38985de2c070f8c88b1ddc6b7b38e218a0791b7e55e3"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "f1fd2a0f981c7fac694786821beedb20d65b697c486fe6b3d2f575a53ef1334d"
   end
 
-  resource "skalibs" do
-    url "https://skarnet.org/software/skalibs/skalibs-2.14.2.0.tar.gz"
-    sha256 "ddfec5730e5b2f19d0381ecf7f796b39a6e473236bda0ad8d3776a3fe7b07e43"
-  end
-
-  resource "execline" do
-    url "https://skarnet.org/software/execline/execline-2.9.6.0.tar.gz"
-    sha256 "ba2a27e97c5eb6bd7ca6a0987a8925e44465a5be996daa0d18f8feca37d7571a"
-  end
+  depends_on "pkgconf" => :build
+  depends_on "execline"
+  depends_on "skalibs"
 
   def install
-    resources.each { |r| r.stage(buildpath/r.name) }
-    build_dir = buildpath/"build"
-
-    cd "skalibs" do
-      system "./configure", "--disable-shared", "--prefix=#{build_dir}", "--libdir=#{build_dir}/lib"
-      system "make", "install"
-    end
-
-    cd "execline" do
-      system "./configure",
-        "--prefix=#{build_dir}",
-        "--bindir=#{libexec}/execline",
-        "--with-include=#{build_dir}/include",
-        "--with-lib=#{build_dir}/lib",
-        "--with-sysdeps=#{build_dir}/lib/skalibs/sysdeps",
-        "--disable-shared"
-      system "make", "install"
-    end
-
-    system "./configure",
-      "--prefix=#{prefix}",
-      "--libdir=#{build_dir}/lib",
-      "--includedir=#{build_dir}/include",
-      "--with-include=#{build_dir}/include",
-      "--with-lib=#{build_dir}/lib",
-      "--with-lib=#{build_dir}/lib/execline",
-      "--with-sysdeps=#{build_dir}/lib/skalibs/sysdeps",
-      "--disable-static",
-      "--disable-shared"
+    args = %W[
+      --disable-silent-rules
+      --enable-shared
+      --enable-pkgconfig
+      --with-pkgconfig=#{Formula["pkgconf"].opt_bin}/pkg-config
+      --with-sysdeps=#{Formula["skalibs"].opt_lib}/skalibs/sysdeps
+    ]
+    system "./configure", *args, *std_configure_args
     system "make", "install"
-
-    # Some S6 tools expect execline binaries to be on the path
-    bin.env_script_all_files(libexec/"bin", PATH: "#{libexec}/execline:$PATH")
-    sbin.env_script_all_files(libexec/"sbin", PATH: "#{libexec}/execline:$PATH")
-    (bin/"execlineb").write_env_script libexec/"execline/execlineb", PATH: "#{libexec}/execline:$PATH"
-    doc.install Dir["doc/*"]
   end
 
   test do
-    (testpath/"test.eb").write <<~EOS
-      foreground
-      {
-        sleep 1
-      }
-      "echo"
-      "Homebrew"
-    EOS
-    assert_match "Homebrew", shell_output("#{bin}/execlineb test.eb")
-
     (testpath/"log").mkpath
     pipe_output("#{bin}/s6-log #{testpath}/log", "Test input\n", 0)
     assert_equal "Test input\n", File.read(testpath/"log/current")

@@ -1,8 +1,8 @@
 class Logstash < Formula
   desc "Tool for managing events and logs"
   homepage "https://www.elastic.co/products/logstash"
-  url "https://github.com/elastic/logstash/archive/refs/tags/v8.15.0.tar.gz"
-  sha256 "c32186cfce6000458d0dd4012fa8e2178beed7d581e37bfc8381777b2c841b06"
+  url "https://github.com/elastic/logstash/archive/refs/tags/v9.3.2.tar.gz"
+  sha256 "fac99027d3fb057b7cca3192ab2aad20cb169a139481f35a1ea1496418cb45ae"
   license "Apache-2.0"
   version_scheme 1
   head "https://github.com/elastic/logstash.git", branch: "main"
@@ -13,23 +13,30 @@ class Logstash < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "19de66821560f11f267b1a858b34ee9b1efdb1016ad97a52f32b52e939161961"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "d83297ecd0d44c60ced380578f2d9ffc09867d07b5b646cf74e877af49b3e455"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "85c910eb7b34acaf359dc26c03c735e2999eb6ec03fc1ece771abb6c6a73f054"
-    sha256 cellar: :any,                 sonoma:         "e7f348b41ab948c84fdb2f8db07b9cf3e54b6d2889a5a8f555a86dee9beaa6e3"
-    sha256 cellar: :any,                 ventura:        "ae6416c93134750f87879f0d7815e56757cb5e0ec09af4f2588617aa37a1098b"
-    sha256 cellar: :any,                 monterey:       "1af126e7a3a515472d455b7a238aac52f41a06adab8032ad31fc64ec6ba0a1d8"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "6788109b585eab73d0c8c5097d15c6396286846bfcacbcc3cea1e9f673c7b367"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "2a09686c30e926d45b89a47602ea65cf4da14a8e003ee6ef4e26cc362ce4bd58"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "0b1716b3ea6d22ac5bfcd5425683a6deca35dbf08af7eb04a61e59f0e2066b23"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "2223833c290461233dad95b9ff5a3ca2b2e252ab92af6c4eb4f947010a01620c"
+    sha256 cellar: :any,                 sonoma:        "4297f192ea1a19795e6c1d7b1d2c10b574ddf047035593cf6ad208bbd33f60bd"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "2279ae22157295f55beb98f7d277a2eb09834f01ecefb575c1712bdbf4e730f1"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "af50e333234601eb09dec47c02b859ba78662e2c9389d89d8b457ea49863cb93"
   end
 
-  depends_on "openjdk@17"
+  depends_on "gradle@8" => :build # gradle 9 support issue, https://github.com/elastic/logstash/issues/16641
+  depends_on "openjdk@21"
 
   uses_from_macos "ruby" => :build
 
   def install
     # remove non open source files
     rm_r("x-pack")
+    # remove x-pack reference from build.gradle
+    inreplace "build.gradle",
+              'apply from: "${projectDir}/x-pack/distributions/internal/observabilitySRE/build-ext.gradle"',
+              ""
     ENV["OSS"] = "true"
+
+    # Ensure Logstash core jars are built for the no-JDK artifact.
+    system "gradle", "bootstrap"
 
     # Build the package from source
     system "rake", "artifact:no_bundle_jdk_tar"
@@ -58,11 +65,12 @@ class Logstash < Formula
     libexec.install Dir["*"]
 
     # Move config files into etc
-    (etc/"logstash").install Dir[libexec/"config/*"]
+    pkgetc.install Dir[libexec/"config/*"]
     rm_r(libexec/"config")
+    libexec.install_symlink pkgetc => "config"
 
     bin.install libexec/"bin/logstash", libexec/"bin/logstash-plugin"
-    bin.env_script_all_files libexec/"bin", LS_JAVA_HOME: "${LS_JAVA_HOME:-#{Language::Java.java_home("17")}}"
+    bin.env_script_all_files libexec/"bin", LS_JAVA_HOME: "${LS_JAVA_HOME:-#{Language::Java.java_home("21")}}"
 
     # remove non-native architecture pre-built libraries
     paths = [
@@ -74,14 +82,8 @@ class Logstash < Formula
     rm_r libexec/"vendor/jruby/lib/ruby/stdlib/libfixposix/binary/arm64-darwin" if OS.mac? && Hardware::CPU.arm?
   end
 
-  def post_install
-    ln_s etc/"logstash", libexec/"config" unless (libexec/"config").exist?
-  end
-
   def caveats
-    <<~EOS
-      Configuration files are located in #{etc}/logstash/
-    EOS
+    "Configuration files are located in #{pkgetc}/"
   end
 
   service do
@@ -98,9 +100,9 @@ class Logstash < Formula
     ["jvm.options", "log4j2.properties", "startup.options"].each do |f|
       cp prefix/"libexec/config/#{f}", testpath/"config"
     end
-    (testpath/"config/logstash.yml").write <<~EOS
+    (testpath/"config/logstash.yml").write <<~YAML
       path.queue: #{testpath}/queue
-    EOS
+    YAML
     (testpath/"data").mkpath
     (testpath/"logs").mkpath
     (testpath/"queue").mkpath

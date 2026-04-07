@@ -6,18 +6,19 @@
 class Luajit < Formula
   desc "Just-In-Time Compiler (JIT) for the Lua programming language"
   homepage "https://luajit.org/luajit.html"
-  # Update this to the tip of the `v2.1` branch at the start of every month.
+  # Update this to the tip of the `v2.1` branch.
   # Get the latest commit with:
   #   `git ls-remote --heads https://github.com/LuaJIT/LuaJIT.git v2.1`
   # This is a rolling release model so take care not to ignore CI failures that may be regressions.
-  url "https://github.com/LuaJIT/LuaJIT/archive/87ae18af97fd4de790bb6c476b212e047689cc93.tar.gz"
+  url "https://github.com/LuaJIT/LuaJIT/archive/18b087cd2cd4ddc4a79782bf155383a689d5093d.tar.gz"
   # Use the version scheme `2.1.timestamp` where `timestamp` is the Unix timestamp of the
   # latest commit at the time of updating.
   # `brew livecheck luajit` will generate the correct version for you automatically.
-  version "2.1.1725453128"
-  sha256 "7e34f3aac8cbfacfe8dada50140d4b89d708e0fde60f27ec0643226c2f38ab5f"
+  version "2.1.1774896198"
+  sha256 "88a592afa9907d6b0c6e1e7ac9b39982622e3ca086f0646d4ea89b0e4e81f093"
   license "MIT"
-  head "https://luajit.org/git/luajit.git", branch: "v2.1"
+  compatibility_version 7
+  head "https://github.com/LuaJIT/LuaJIT.git", branch: "v2.1"
 
   livecheck do
     url "https://api.github.com/repos/LuaJIT/LuaJIT/branches/v2.1"
@@ -27,14 +28,15 @@ class Luajit < Formula
     end
   end
 
+  no_autobump! because: :incompatible_version_format
+
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "7e6e09419408c38e2649c572cf5d52b39bc43933ef64b7076f0142f12952c57c"
-    sha256 cellar: :any,                 arm64_ventura:  "24db7be30f4aee5744ddbb421a505af97127da7374222b14e1f473cb25ae8b5f"
-    sha256 cellar: :any,                 arm64_monterey: "4a6ba45979a7914a5b9a556d753c0bdac55c318d08d3fc736f19aa663d31dfaa"
-    sha256 cellar: :any,                 sonoma:         "4e8b5b8da2e809262771cc8a816d852651402f56f2dfee16bf5ca9e52cd27d3a"
-    sha256 cellar: :any,                 ventura:        "47115894a5bce0bbd7d8360dca3922dfb60d16c7252b96a1b91ce66c4dacabd1"
-    sha256 cellar: :any,                 monterey:       "4533acc90fd99917ff527e4973cb1eb578e9308c08ce99eefbe73d049ef6b336"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "8ae8c7ad7d769c0bac47ff41ed2192cffa1e36e11fe99584a785b6d32b4b9c8d"
+    sha256 cellar: :any,                 arm64_tahoe:   "0cf1bf9dc443912fe1d129c3dafd807f0862c56510a14f371ef4cce1f06cf693"
+    sha256 cellar: :any,                 arm64_sequoia: "ddb4848c243b68cebd8546fb96000fcd57f32760f4de5903ae3bc8734e785a1e"
+    sha256 cellar: :any,                 arm64_sonoma:  "2b9dd489a6f593d18a3ae38311815587217c3a503f5c3601eed1433742298295"
+    sha256 cellar: :any,                 sonoma:        "8cb8f4baf2c5a00aad2044b3de9f0273089e8c32c0522c96c109f3bc6b8bc2ca"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "a97af5d4ff135e526da7da8eea141f23fc7600f5824c5545f3097f1cdb427424"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "5444e91b64efa53f527302dc914aa5dfd3d08518084b4149f872badc2758c3f3"
   end
 
   def install
@@ -51,9 +53,7 @@ class Luajit < Formula
     ENV["MACOSX_DEPLOYMENT_TARGET"] = MacOS.version.to_s if OS.mac?
 
     # Help the FFI module find Homebrew-installed libraries.
-    ENV.append "LDFLAGS", "-Wl,-rpath,#{rpath(target: HOMEBREW_PREFIX/"lib")}" if HOMEBREW_PREFIX.to_s != "/usr/local"
-    # Fix for clang >= 16, see https://github.com/LuaJIT/LuaJIT/issues/1266
-    ENV.append "LDFLAGS", "-Wl,-no_deduplicate" if DevelopmentTools.clang_build_version >= 1600
+    ENV.append "LDFLAGS", "-Wl,-rpath,#{rpath(target: HOMEBREW_PREFIX/"lib")}"
 
     # Pass `Q= E=@:` to build verbosely.
     verbose_args = %w[Q= E=@:]
@@ -91,7 +91,7 @@ class Luajit < Formula
     # Check that LuaJIT can find its own `jit.*` modules
     touch "empty.lua"
     system bin/"luajit", "-b", "-o", "osx", "empty.lua", "empty.o"
-    assert_predicate testpath/"empty.o", :exist?
+    assert_path_exists testpath/"empty.o"
 
     # Check that we're not affected by LuaJIT/LuaJIT/issues/865.
     require "macho"

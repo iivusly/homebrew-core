@@ -8,6 +8,8 @@ class Slowhttptest < Formula
 
   bottle do
     rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:    "a3f7cc9030661fa31e4cf6db7862dcd47a586303bd71df203b6be39c3fbebb19"
+    sha256 cellar: :any,                 arm64_sequoia:  "2708483fcbd6bb9badf73319ba021792a02638eae74315f9b7489cfa1b1ed526"
     sha256 cellar: :any,                 arm64_sonoma:   "69e91887b20b8954627ba289b3eb711567f93a75582cc9df504d11036cf97a10"
     sha256 cellar: :any,                 arm64_ventura:  "68f9552d0393f75f8530f7e2100e7325178dff70197e0db2df7037f4396bc55f"
     sha256 cellar: :any,                 arm64_monterey: "f44686a2cd459960a69bba155aadf7d83e1bd550d894b349dc6f457a7232c13d"
@@ -17,6 +19,7 @@ class Slowhttptest < Formula
     sha256 cellar: :any,                 monterey:       "85676dfbf81eddac78cb31816f86f8667e6726398ef68be3d2b490f3e78028bc"
     sha256 cellar: :any,                 big_sur:        "1818300aa4c7c76e0eb05f100009faf97a07fe43133a7f66e09abefb61a5c229"
     sha256 cellar: :any,                 catalina:       "bce898dc331e6dbbd7af3c39c8b385eb6deb67eedb1e0ca7344d2a45f7f98442"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "46166ade359384ffdf6af2bc9e5dba58cfa680ad8ee9e8bfe3c380e71c1ec853"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "b3c40357c9bd384b991dc20163d7a1575f2ab2df0f53dfde971a044fd2304e50"
   end
 

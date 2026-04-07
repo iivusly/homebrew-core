@@ -3,26 +3,25 @@ class Snakeviz < Formula
 
   desc "Web-based viewer for Python profiler output"
   homepage "https://jiffyclub.github.io/snakeviz/"
-  url "https://files.pythonhosted.org/packages/64/9b/3983c41e913676d55e4b3de869aa0561e053ad3505f1fd35181670244b70/snakeviz-2.2.0.tar.gz"
-  sha256 "7bfd00be7ae147eb4a170a471578e1cd3f41f803238958b6b8efcf2c698a6aa9"
+  url "https://files.pythonhosted.org/packages/04/06/82f56563b16d33c2586ac2615a3034a83a4ff1969b84c8d79339e5d07d73/snakeviz-2.2.2.tar.gz"
+  sha256 "08028c6f8e34a032ff14757a38424770abb8662fb2818985aeea0d9bc13a7d83"
   license "BSD-3-Clause"
-  revision 1
+  revision 3
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "aa7305a6deb93e6f5659181b44de5d0155a4220a8b390f542308008478b112db"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "0e4a0b2bf73dd3a2e0400b6a2623ca34cc38d3d59017f5584324f3c2698fc6d9"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "94190c13027e896e8ae9bb85e4ee3a76c4a93170b46875781e0ba2c61ce8a4e5"
-    sha256 cellar: :any_skip_relocation, sonoma:         "ad322f258ad80a9a34abee4555ad4c5fbfa612b70b03f18e19c0b07593f519ed"
-    sha256 cellar: :any_skip_relocation, ventura:        "f834932028976a74ee9edbc4fc9250426a754cf153ef28b04dba6843484406a8"
-    sha256 cellar: :any_skip_relocation, monterey:       "758e512224f61b752d846d70c0ea628eb18cf0ec099b195fd472f8370a2c6683"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "bcc336d17fcdb88dd008ace56a09467c24aec73841ed063b9f2ccd2ff96b2a36"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "caa2dfd45227bbabbd439daad82e781b673b9a02fb5843d3272bc67f8f11a580"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "1d9691987dfe92ea0ff438c7b6aaab35dadf969046b006b73f059228a8bc57b6"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "9297c641fd38cd032da52b8da5c9c2e37d1156ff0f1971c7250e4f7fddc3583b"
+    sha256 cellar: :any_skip_relocation, sonoma:        "279721b138f4b503ef168d7d442e725632d517e4afb800ff3c37a919318df06d"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "7a880cbf8ea570d83362a6165bf46da66b01a352b6f305408cd87574c89efdc3"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "b5a31158b1eb517ea39cae27721e1c69059651f881967666947a1c159dec4212"
   end
 
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   resource "tornado" do
-    url "https://files.pythonhosted.org/packages/ee/66/398ac7167f1c7835406888a386f6d0d26ee5dbf197d8a571300be57662d3/tornado-6.4.1.tar.gz"
-    sha256 "92d3ab53183d8c50f8204a51e6f91d18a15d5ef261e84d452800d4ff6fc504e9"
+    url "https://files.pythonhosted.org/packages/f8/f1/3173dfa4a18db4a9b03e5d55325559dab51ee653763bb8745a75af491286/tornado-6.5.5.tar.gz"
+    sha256 "192b8f3ea91bd7f1f50c06955416ed76c6b72f96779b962f07f911b91e8d30e9"
   end
 
   def install
@@ -32,7 +31,7 @@ class Snakeviz < Formula
   test do
     require "cgi"
     system bin/"snakeviz", "--version"
-    system "python3.12", "-m", "cProfile", "-o", "output.prof", "-m", "cProfile"
+    system "python3.14", "-m", "cProfile", "-o", "output.prof", "-m", "cProfile"
 
     port = free_port
 
@@ -42,7 +41,7 @@ class Snakeviz < Formula
       exec bin/"snakeviz", "--port", port.to_s, "--server", output_file
     end
     sleep 3
-    output = shell_output("curl -s http://localhost:#{port}/snakeviz/#{CGI.escape output_file}")
+    output = shell_output("curl -s http://localhost:#{port}/snakeviz/#{ERB::Util.url_encode output_file}")
     assert_match "cProfile", output
   ensure
     Process.kill("HUP", pid)

@@ -1,24 +1,28 @@
 class Pdns < Formula
   desc "Authoritative nameserver"
   homepage "https://www.powerdns.com"
-  url "https://downloads.powerdns.com/releases/pdns-4.9.1.tar.bz2"
-  sha256 "30d9671b8f084774dbcba20f5a53a3134d0822ab2edc3ef968da030e630dd09a"
+  url "https://downloads.powerdns.com/releases/pdns-5.0.3.tar.bz2"
+  sha256 "ec3120501950a772c785c600f599e8f4d711f703a02cbd1bec42edc1a05f81cc"
   license "GPL-2.0-or-later"
   revision 1
 
+  # The first-party download page (https://www.powerdns.com/downloads) isn't
+  # always updated for newer versions, so for now we have to check the
+  # directory listing page where `stable` tarballs are found. We should switch
+  # back to checking the download page if/when it is reliably updated with each
+  # release, as it doesn't have to transfer nearly as much data.
   livecheck do
-    url "https://www.powerdns.com/downloads"
+    url "https://downloads.powerdns.com/releases/"
     regex(/href=.*?pdns[._-]v?(\d+(?:\.\d+)+)\.t/i)
   end
 
   bottle do
-    sha256 arm64_sonoma:   "660e48a419366a19a97f2f05bd5abffdd16fc0e5ae0e1f29cc76923e8d98784a"
-    sha256 arm64_ventura:  "1d36e9e6ffeba02de5e6bad5d320f9ad23f0e7bfc36cab5a1a7c6743a9f5300f"
-    sha256 arm64_monterey: "8dbfe8340a87dc4306b88abeb60bcc2cf1eff2459c48adf5bd456d56df696963"
-    sha256 sonoma:         "10e5ea6461ddddc7f7ecbdcf144566ca7466468d6f8fbd027f45e4625dfaeccf"
-    sha256 ventura:        "20dfdf4113f1804649620d1ae313d62a497cc5ca91b1f353bd69480113da9bdb"
-    sha256 monterey:       "ee59a163a5150373a16dde3346072919c542ac040451ac9d78ad179e41611323"
-    sha256 x86_64_linux:   "391591c9b46eb4e441496ca6923e04529a137ab3734537cede69ac29f26b1c65"
+    sha256 arm64_tahoe:   "c02252c3db32285b1064a57196868f9642328f4c3652e5cc227a9e6cc8877363"
+    sha256 arm64_sequoia: "31864a450be149033007265fa1efcd2506efc80f6a69725bc47978b2dbec35e6"
+    sha256 arm64_sonoma:  "8b3824e0c9af605ff3eee856b722165d42aa3a084868e35171546c3f96d35670"
+    sha256 sonoma:        "0889f0d18d424d65b269e0f3e752dbc174db3203af450c84b6734cb0c0ac3aba"
+    sha256 arm64_linux:   "73f5fdc2c1da5b7ce0d3f3871b792192cabbe650f707161b49d8b7a2794238a1"
+    sha256 x86_64_linux:  "eaee7c1c455c7af9875303d0e990cef8de6e0ceaac9c35a2d597a848fbf0bd7a"
   end
 
   head do
@@ -30,22 +34,13 @@ class Pdns < Formula
     depends_on "ragel"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "boost"
   depends_on "lua"
   depends_on "openssl@3"
   depends_on "sqlite"
 
   uses_from_macos "curl"
-
-  fails_with gcc: "5" # for C++17
-
-  # Fix build with boost 1.86.0. Remove if PR is merged and in a release.
-  # PR ref: https://github.com/PowerDNS/pdns/pull/14562
-  patch do
-    url "https://github.com/PowerDNS/pdns/commit/eed56000b1d68ac083b8e8bea4ff0ea30a1579c4.patch?full_index=1"
-    sha256 "c21a8677c048f3ce023f2e09c5204602031a78c441904567a4da2b7870dc29ad"
-  end
 
   def install
     args = %W[

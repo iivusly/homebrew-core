@@ -1,38 +1,30 @@
 class LibgeditTepl < Formula
   desc "Gedit Technology - Text editor product line"
   homepage "https://gitlab.gnome.org/World/gedit/libgedit-tepl"
-  url "https://gitlab.gnome.org/World/gedit/libgedit-tepl/-/archive/6.10.0/libgedit-tepl-6.10.0.tar.bz2"
-  sha256 "bfaf68a4c81b7e32ff69d102dad1d656c49b5ef8570db15327a3c5479c8c3164"
+  url "https://gitlab.gnome.org/World/gedit/libgedit-tepl/-/archive/6.14.0/libgedit-tepl-6.14.0.tar.bz2"
+  sha256 "2b695f41475573aa59f1cd004b5cc3d2021d0444decf26eb8d38864348fb3577"
   license "LGPL-2.1-or-later"
+  revision 1
   head "https://gitlab.gnome.org/World/gedit/libgedit-tepl.git", branch: "main"
 
-  # https://gitlab.gnome.org/swilmet/tepl/-/blob/main/docs/more-information.md
-  # Tepl follows the even/odd minor version scheme. Odd minor versions are
-  # development snapshots; even minor versions are stable.
-  livecheck do
-    url :stable
-    regex(/^v?(\d+\.\d*[02468](?:\.\d+)*)$/i)
-  end
-
   bottle do
-    sha256 arm64_sonoma:   "b433544a25b334a3fc1d7e788cf8d49e99637390ff7a09ef5693bf366a3a95c2"
-    sha256 arm64_ventura:  "49875c169b846727b8ac55463a86dcbb3b938c12063e9f14b2557901fde3f59e"
-    sha256 arm64_monterey: "afe0dc300dee8af11b6d30b9ce59dc5790b0b9161fcf499138725b9088ee576d"
-    sha256 sonoma:         "968456ec7238409108ecf38183c5829855dcc33324605a4201b1081f1c76d93c"
-    sha256 ventura:        "9fbcbec04391c9acea8794cb736ad4a126644dae87f7a8e9208eb67f71c85806"
-    sha256 monterey:       "78f7e1fdd9fc27ef949c4487704d0d482b146f352c96b36958e4382fd405675e"
-    sha256 x86_64_linux:   "aa06267843aeea879d9aacf3f4415f36650fed599ad25927444d3d16f84b0b8f"
+    sha256 arm64_tahoe:   "20148171f340884e2ea8580f1a4870d15c5a8c498b1029f6515aeb4b735f03eb"
+    sha256 arm64_sequoia: "ea7f006494423aea8a7816f2d3f331eb8116cadc3688bf7f4f052f6462a80b5f"
+    sha256 arm64_sonoma:  "25274a0255b4b8e6d9f36e72ac80eabfde8f4270659c7d4cf73d33e5e828fce2"
+    sha256 sonoma:        "f49ac4935063ff4b08e5cea8959829d7a2f37074a9c69bb6624cd3c9f4a051eb"
+    sha256 arm64_linux:   "ee8f02ca17eec111b5dac39e0ee9b4cfe56809638515f656dcee879014c4cccc"
+    sha256 x86_64_linux:  "1a8e119f8d5b3f48264f88979bae8b14041665aed64dc3aff5b0a46db32918f8"
   end
 
   depends_on "gettext" => :build
   depends_on "gobject-introspection" => :build
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => [:build, :test]
+  depends_on "pkgconf" => [:build, :test]
   depends_on "cairo"
   depends_on "glib"
   depends_on "gtk+3"
-  depends_on "icu4c"
+  depends_on "icu4c@78"
   depends_on "libgedit-amtk"
   depends_on "libgedit-gfls"
   depends_on "libgedit-gtksourceview"
@@ -47,20 +39,28 @@ class LibgeditTepl < Formula
     system "meson", "setup", "build", "-Dgtk_doc=false", *std_meson_args
     system "meson", "compile", "-C", "build", "--verbose"
     system "meson", "install", "-C", "build"
+
+    # `pkg-config --libs libgedit-tepl-6` includes icu-uc and icu-i18n but modules
+    # are from keg-only `icu4c@75` so pkg-config needs to look in the opt path.
+    # TODO: Remove after https://github.com/Homebrew/brew/pull/18229
+    icu4c_dep = deps.find { |dep| dep.name.match?(/^icu4c(@\d+)?$/) }
+    icu4c_pc_dir = icu4c_dep.to_formula.opt_lib/"pkgconfig"
+    inreplace lib/"pkgconfig/libgedit-tepl-6.pc",
+              /^(Requires\.private:.*) icu-uc, icu-i18n,/,
+              "\\1 #{icu4c_pc_dir}/icu-uc.pc, #{icu4c_pc_dir}/icu-i18n.pc,"
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <tepl/tepl.h>
 
       int main(int argc, char *argv[]) {
         GType type = tepl_file_get_type();
         return 0;
       }
-    EOS
+    C
 
-    ENV.prepend_path "PKG_CONFIG_PATH", Formula["icu4c"].opt_lib/"pkgconfig" if OS.mac?
-    flags = shell_output("pkg-config --cflags --libs libgedit-tepl-6").chomp.split
+    flags = shell_output("pkgconf --cflags --libs libgedit-tepl-6").chomp.split
     system ENV.cc, "test.c", "-o", "test", *flags
     system "./test"
   end

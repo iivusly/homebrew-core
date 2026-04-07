@@ -1,10 +1,10 @@
 class Pianobar < Formula
   desc "Command-line player for https://pandora.com"
   homepage "https://6xq.net/pianobar/"
-  url "https://6xq.net/pianobar/pianobar-2022.04.01.tar.bz2"
-  sha256 "1670b28865a8b82a57bb6dfea7f16e2fa4145d2f354910bb17380b32c9b94763"
+  url "https://6xq.net/pianobar/pianobar-2024.12.21.tar.bz2"
+  sha256 "16f4dd2d64da38690946a9670e59bc72a789cf6a323f792e159bb3a39cf4a7f5"
   license "MIT"
-  revision 3
+  revision 1
   head "https://github.com/PromyLOPh/pianobar.git", branch: "master"
 
   livecheck do
@@ -13,31 +13,23 @@ class Pianobar < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "dfecf674a95a0dfcdffe9d0faca825d61e4733c4f9cd9b41a2bfa75635209783"
-    sha256 cellar: :any,                 arm64_ventura:  "ee7d2deecd2fa234a9c14882d25d2828d061de6f5c8b8bbf338a9b97ae040d4b"
-    sha256 cellar: :any,                 arm64_monterey: "6332b45b23dfbd4839745039b7a09150874bee615adba4224407f3e0aa8269e2"
-    sha256 cellar: :any,                 sonoma:         "c781c81b0ac0e187fef19df756e1ce51a49ff3aa76c6a208e5300e9d23cca031"
-    sha256 cellar: :any,                 ventura:        "770e8282379b54adf9e896a90d8ad8bb79595f550117761c27965a5a521e8157"
-    sha256 cellar: :any,                 monterey:       "fe84dfc4bb620a7eae6f8aef7d92b5430349d20cae0fe4aaef0d5a0b6e8afa8b"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "c0bb0c852528eea565637f7859abd86792173da3161ea88390b9ddf05638f760"
+    sha256 cellar: :any,                 arm64_tahoe:   "384c9d511862df579e9edd7e91367408b01841ec5926c239c04680e4f3dad505"
+    sha256 cellar: :any,                 arm64_sequoia: "7d91f1b3141a04ae0dad7baf5cf04ed4f3c79e0bb716fd4fc6e7961441fa2d15"
+    sha256 cellar: :any,                 arm64_sonoma:  "133aa95d8f02358517e87d5afbb0e3a13463be0b03a543cc84181fa4ce90402a"
+    sha256 cellar: :any,                 arm64_ventura: "a8036ec711387dd1e58b765777538d1bf5dde7d16e2c0aec05d80032a8f8ade1"
+    sha256 cellar: :any,                 sonoma:        "e9fce5e9ddfe9a904f139db4ebcd03b78700bbeafbc9abe4e7c40a6c7290039a"
+    sha256 cellar: :any,                 ventura:       "8cc83ae82d7f51480f62258273093c9e51c0cf1cd0911c8bc72f32276602c013"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "3e44848c2f000bfe6e4974e4bfdd1384fe4acbe2e02e260897cc840980be51c5"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "6cba151913c6d32be73748df86c72b88eb28769c718d6d7c8f3378aa175145d9"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "ffmpeg"
   depends_on "json-c"
   depends_on "libao"
   depends_on "libgcrypt"
 
   uses_from_macos "curl"
-
-  fails_with gcc: "5" # ffmpeg is compiled with GCC
-
-  # Fix build with FFmpeg 7.0.
-  # Remove when included in a release.
-  patch do
-    url "https://github.com/PromyLOPh/pianobar/commit/8bf4c1bbaa6a533f34d74f83d72eecc0beb61d4f.patch?full_index=1"
-    sha256 "9ede8281d2c8a056b646f87582b84e20d3fc290df41c6e93336f90729794b58b"
-  end
 
   def install
     # Discard Homebrew's CFLAGS as Pianobar reportedly doesn't like them
@@ -53,12 +45,6 @@ class Pianobar < Formula
   end
 
   test do
-    return if OS.linux? && ENV["HOMEBREW_GITHUB_ACTIONS"]
-
-    require "pty"
-    PTY.spawn(bin/"pianobar") do |stdout, stdin, _pid|
-      stdin.putc "\n"
-      assert_match "pianobar (#{version})", stdout.read
-    end
+    assert_match "pianobar (#{version})", pipe_output(bin/"pianobar", "\n", 0)
   end
 end

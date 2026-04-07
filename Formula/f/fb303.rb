@@ -1,31 +1,29 @@
 class Fb303 < Formula
   desc "Thrift functions for querying information from a service"
   homepage "https://github.com/facebook/fb303"
-  url "https://github.com/facebook/fb303/archive/refs/tags/v2024.08.26.00.tar.gz"
-  sha256 "5fdca6ac4bab1c2ee3bea7157a0d9e5b890c55e945b4dfdec86511f3671275a9"
+  url "https://github.com/facebook/fb303/archive/refs/tags/v2026.03.30.00.tar.gz"
+  sha256 "b7193385301d8aa64dc8bf145f5e8990ed5ac34c566076f91bc35cdffb0e1d4d"
   license "Apache-2.0"
+  compatibility_version 1
   head "https://github.com/facebook/fb303.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "239dec9272405b43eecacd83dc7ce6a40c16decb620d33d5b49b4b0badcfe456"
-    sha256 cellar: :any,                 arm64_ventura:  "57d2ccd82ee07c26175ce754953d6249aea29701820c342e43e427f2f706d75a"
-    sha256 cellar: :any,                 arm64_monterey: "5d1fd6b7bdda311f4df43975fe54288cc14c83e7036aaa5dfbaa7ba719afd4fa"
-    sha256 cellar: :any,                 sonoma:         "cd3dd0e1d312a353945f56c0c89c14dcb4654a4998a8016dbd5a3fda72233a3d"
-    sha256 cellar: :any,                 ventura:        "76fb33057786cc1a8fbfc13d92107c1ae9ceb42d9d6b4c42b96286b45c9d86b1"
-    sha256 cellar: :any,                 monterey:       "052fbeca019503a0ef4dfb313f61db58802d3e4f23876e1d3cfa8eda73c68aa1"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "b094c5064c80fda9777a9a0a861d99cb0c23ac8871cf05cc2bcc7505d577f431"
+    sha256                               arm64_tahoe:   "386da334bd7bb178f71f3a84c421ba71afd60a8dbb74a741da1c5afe6f2bca6e"
+    sha256                               arm64_sequoia: "ec232834087010f944f20634c9f8f5b6d6aa410dc577418727183c5ea0b0dd53"
+    sha256                               arm64_sonoma:  "7c105f2f3e5c26823572178803d6af9860cb678057579e9c78c34a1304f23734"
+    sha256 cellar: :any,                 sonoma:        "ad0261048457fb1b0ea494bb8271bc1db1f2490998e8216e6acbb181d101a94c"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "10bf39a9ccb045d70655b2dbe69d7214972887c85610a22c9a12c1921e0f6867"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "d99a7e732a341dec45b478fafb89f051554e38d0001336e2f0a4a6e6111a851e"
   end
 
-  depends_on "cmake" => :build
+  depends_on "cmake" => [:build, :test]
+  depends_on "fizz" => [:build, :test]
+  depends_on "mvfst" => [:build, :test]
   depends_on "fbthrift"
-  depends_on "fizz"
   depends_on "fmt"
   depends_on "folly"
   depends_on "gflags"
   depends_on "glog"
-  depends_on "openssl@3"
-
-  fails_with gcc: "5" # C++17
 
   def install
     shared_args = ["-DBUILD_SHARED_LIBS=ON", "-DCMAKE_INSTALL_RPATH=#{rpath}"]
@@ -37,7 +35,7 @@ class Fb303 < Formula
   end
 
   test do
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include "fb303/thrift/gen-cpp2/BaseService.h"
       #include <iostream>
       int main() {
@@ -45,21 +43,32 @@ class Fb303 < Formula
         std::cout << service.getGeneratedName() << std::endl;
         return 0;
       }
-    EOS
+    CPP
 
+    (testpath/"CMakeLists.txt").write <<~CMAKE
+      cmake_minimum_required(VERSION 4.0)
+      project(test LANGUAGES CXX)
+      set(CMAKE_CXX_STANDARD 20)
+
+      list(APPEND CMAKE_MODULE_PATH "#{Formula["fizz"].opt_libexec}/cmake")
+      list(APPEND CMAKE_MODULE_PATH "#{Formula["fbthrift"].opt_libexec}/cmake")
+      find_package(FBThrift CONFIG REQUIRED)
+      find_package(wangle CONFIG REQUIRED)
+      find_package(fb303 CONFIG REQUIRED)
+
+      add_executable(test test.cpp)
+      target_link_libraries(test fb303::fb303_thrift_cpp)
+    CMAKE
+
+    ENV.delete "CPATH" if OS.mac?
     if Tab.for_formula(Formula["folly"]).built_as_bottle
       ENV.remove_from_cflags "-march=native"
       ENV.append_to_cflags "-march=#{Hardware.oldest_cpu}" if Hardware::CPU.intel?
     end
 
-    ENV.append "CXXFLAGS", "-std=c++17"
-    system ENV.cxx, *ENV.cxxflags.split, "test.cpp", "-o", "test",
-                    "-I#{include}", "-I#{Formula["openssl@3"].opt_include}",
-                    "-L#{lib}", "-lfb303_thrift_cpp",
-                    "-L#{Formula["folly"].opt_lib}", "-lfolly",
-                    "-L#{Formula["glog"].opt_lib}", "-lglog",
-                    "-L#{Formula["fbthrift"].opt_lib}", "-lthriftprotocol", "-lthriftcpp2",
-                    "-ldl"
+    args = OS.mac? ? [] : ["-DCMAKE_BUILD_RPATH=#{lib};#{HOMEBREW_PREFIX}/lib"]
+    system "cmake", "-S", ".", "-B", ".", *args, *std_cmake_args
+    system "cmake", "--build", "."
     assert_equal "BaseService", shell_output("./test").strip
   end
 end

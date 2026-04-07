@@ -1,33 +1,44 @@
 class Libavif < Formula
   desc "Library for encoding and decoding .avif files"
   homepage "https://github.com/AOMediaCodec/libavif"
-  url "https://github.com/AOMediaCodec/libavif/archive/refs/tags/v1.1.1.tar.gz"
-  sha256 "914662e16245e062ed73f90112fbb4548241300843a7772d8d441bb6859de45b"
+  url "https://github.com/AOMediaCodec/libavif/archive/refs/tags/v1.4.1.tar.gz"
+  sha256 "d4aea31a4becb3273ba7968221be2e48148ba05eb8a68d14e671963e17785648"
   license "BSD-2-Clause"
+  compatibility_version 1
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "d933afea7d7bce60d38fc1458049972f95f27ce057ea4d8b850dc1cd6dcb6de2"
-    sha256 cellar: :any,                 arm64_ventura:  "7a4eaeb370ff41768a9ba47950903fd55b26a483236bf22f6cdd51ea00bb02f4"
-    sha256 cellar: :any,                 arm64_monterey: "5d3979f1377fb7b749d7447ab90d018a454df227bbfe58e2d9f56e42f4fcd4b4"
-    sha256 cellar: :any,                 sonoma:         "540f311fe23279f796ecdbe153b9f8c0d167d83103420c0ba84a574d4b59dae2"
-    sha256 cellar: :any,                 ventura:        "4e251329d5c5a9063db68af15f49c06bc66300593b02badc4f1eeac23940ea5f"
-    sha256 cellar: :any,                 monterey:       "f7a30236240e855c0fd3925306cb5cc779f405925698146504805be441b34c99"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "b20f6d93e81077c5bfc56392436faafdfd25f6fb5934c88f4fcb5f56e4e79b0d"
+    sha256 cellar: :any,                 arm64_tahoe:   "44d57589d5dcaedb19f883c8e4e1d328c9041494d0380c60d97272854a13f749"
+    sha256 cellar: :any,                 arm64_sequoia: "697f6dfd4acd6e06053a7ad50378e80889199b0ccf834d0a1578a497a0cf0aff"
+    sha256 cellar: :any,                 arm64_sonoma:  "cd850b316534c631ba07b625d33eed0d4d5c6001d73bb5783055be1ac2376ebb"
+    sha256 cellar: :any,                 sonoma:        "12d4cc2b73516496876a3e93f821858bad28e47a76fadd3b15c7dcefdc495734"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "6806097bffeb1f1635b3545c8e35c24eecf9a7d89ab7a04b6ff7620f65e1e8c7"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "8631446bdda8ac7f2dfe1142369d91b9d09b317806c2d15263adad5ef67b4ae5"
   end
 
   depends_on "cmake" => :build
   depends_on "nasm" => :build
   depends_on "aom"
+  depends_on "dav1d"
   depends_on "jpeg-turbo"
   depends_on "libpng"
 
-  uses_from_macos "zlib"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
+
+  resource "libargparse" do
+    url "https://github.com/kmurray/libargparse/archive/ee74d1b53bd680748af14e737378de57e2a0a954.tar.gz"
+    sha256 "7727b0498851e5b6a6fcd734eb667a8a231897e2c86a357aec51cc0664813060"
+  end
 
   def install
+    resource("libargparse").unpack(buildpath/"ext/libargparse")
+
     args = %W[
       -DCMAKE_INSTALL_RPATH=#{rpath}
       -DAVIF_CODEC_AOM=SYSTEM
       -DAVIF_BUILD_APPS=ON
+      -DAVIF_CODEC_DAV1D=SYSTEM
       -DAVIF_BUILD_EXAMPLES=OFF
       -DAVIF_BUILD_TESTS=OFF
       -DAVIF_LIBYUV=OFF

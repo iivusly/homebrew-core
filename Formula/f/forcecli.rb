@@ -1,25 +1,26 @@
 class Forcecli < Formula
   desc "Command-line interface to Force.com"
   homepage "https://force-cli.herokuapp.com/"
-  url "https://github.com/ForceCLI/force/archive/refs/tags/v1.0.6.tar.gz"
-  sha256 "c133bdb1d421dfabeff0f8f38c9b72e8e2b046b5dd124afb3b5a6cc9f89c3fb1"
+  url "https://github.com/ForceCLI/force/archive/refs/tags/v1.8.0.tar.gz"
+  sha256 "d3712632060e1c14af81797bcfea42c9809fcd4a7f161f72655c25c39a2de803"
   license "MIT"
   head "https://github.com/ForceCLI/force.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "eae7a40c55ca2a79f4629c946920e4c2b7419dd9019876e43876760d346f07a9"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "eae7a40c55ca2a79f4629c946920e4c2b7419dd9019876e43876760d346f07a9"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "eae7a40c55ca2a79f4629c946920e4c2b7419dd9019876e43876760d346f07a9"
-    sha256 cellar: :any_skip_relocation, sonoma:         "bf32c0a68c8e5481f844f581d830920e4d4bab04104df62b4c1403d4c2450b69"
-    sha256 cellar: :any_skip_relocation, ventura:        "bf32c0a68c8e5481f844f581d830920e4d4bab04104df62b4c1403d4c2450b69"
-    sha256 cellar: :any_skip_relocation, monterey:       "bf32c0a68c8e5481f844f581d830920e4d4bab04104df62b4c1403d4c2450b69"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "f809d52c95330ee517c51fdc9cfbae44f4a9f74e68e8f890b382dcc214054f14"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "1ce6c8ef8f40ae717271d264f48ee67973f48cc596141e2abbb97d568c2b9c59"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "1ce6c8ef8f40ae717271d264f48ee67973f48cc596141e2abbb97d568c2b9c59"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "1ce6c8ef8f40ae717271d264f48ee67973f48cc596141e2abbb97d568c2b9c59"
+    sha256 cellar: :any_skip_relocation, sonoma:        "f17ffba1cba92ae22b568a356a428563bfcfc56da60294507e24c5732759aeda"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "98f8b8b50162c999b8808614ad1080b272b227dd8e9a0e2cc71e7f7ab6b02b50"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "73eab8c3106b385a6cdab9ad81c988f4b0a77e0ef7f81f65df94aec148bcea02"
   end
 
   depends_on "go" => :build
 
   def install
-    system "go", "build", *std_go_args(output: bin/"force")
+    system "go", "build", *std_go_args(ldflags: "-s -w", output: bin/"force")
+
+    generate_completions_from_executable(bin/"force", shell_parameter_format: :cobra)
   end
 
   test do

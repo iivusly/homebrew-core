@@ -4,22 +4,27 @@ class EasyTag < Formula
   url "https://download.gnome.org/sources/easytag/2.4/easytag-2.4.3.tar.xz"
   sha256 "fc51ee92a705e3c5979dff1655f7496effb68b98f1ada0547e8cbbc033b67dd5"
   license "GPL-2.0-or-later"
-  revision 10
+  revision 12
 
   bottle do
-    sha256 arm64_sonoma:   "c20d11415ff4338da9530ca0a9fb2f155105cec63965028b5b045e3b2fa8928c"
-    sha256 arm64_ventura:  "46009b3114243c1b11085877e3bc771160111652ce3cb2950c72a9aaa2702dd7"
-    sha256 arm64_monterey: "fe8d835568ec1832842b1dc9978812269c5ae41bfa678248c2ef5e9ef6db4ad0"
-    sha256 sonoma:         "a5c470008848cd9d62c02f55c224fcd5e5fe40d6b4c7136c96d7586080ccb514"
-    sha256 ventura:        "4943e0cc391ff8084187ffe9ea92b3cd2e106faf5a1ed677603ac52f14c5b8a1"
-    sha256 monterey:       "adeb0d50a0a2f865bf3353264edbbb44b79d9e366aab4a883317264f26408ad5"
-    sha256 x86_64_linux:   "8fc76e69f070f3bc6353479a850ad4cb6884c182bdd1b998624a76c880a10d34"
+    rebuild 1
+    sha256 arm64_tahoe:   "8251a64714fcb33ae2d6952b837cc4441424c68d85194fe85fa1ffb840d8f1af"
+    sha256 arm64_sequoia: "dd969dbf8e9fc12844800194aa455dff8a3196e556167b54b78125e82ff0dfd6"
+    sha256 arm64_sonoma:  "1bb2f7a658bb7ef3cd2d58436cec8bcf915848e13a56537c1085a6153fa02403"
+    sha256 sonoma:        "bb4e3ef00876303f85ddd0013fb353e26317f4ac7d52e3c204a9ff583c4b3be5"
+    sha256 arm64_linux:   "a0e221b36fad5782d5a9a63e55a636ffef07f8780f33263a63752ff9fa11935d"
+    sha256 x86_64_linux:  "9d32bfcd076b17f4e7f4fe1572e456d9a5539d6e7c95b2ecfd14fd960204e5f3"
   end
 
+  depends_on "appstream-glib" => :build
+  depends_on "autoconf" => :build
+  depends_on "automake" => :build
   depends_on "gettext" => :build
   depends_on "intltool" => :build
   depends_on "itstool" => :build
-  depends_on "pkg-config" => :build
+  depends_on "libtool" => :build
+  depends_on "pkgconf" => :build
+  depends_on "yelp-tools" => :build
 
   depends_on "adwaita-icon-theme"
   depends_on "at-spi2-core"
@@ -40,7 +45,6 @@ class EasyTag < Formula
   depends_on "wavpack"
 
   uses_from_macos "perl" => :build
-  uses_from_macos "zlib"
 
   on_macos do
     depends_on "gettext"
@@ -48,10 +52,27 @@ class EasyTag < Formula
 
   on_linux do
     depends_on "perl-xml-parser" => :build
+    depends_on "xorg-server" => :test
+    depends_on "zlib-ng-compat"
+  end
+
+  # easy-tag doesn't support taglib 2.x
+  patch do
+    url "https://sources.debian.org/data/main/e/easytag/2.4.3-9/debian/patches/03_port-to-taglib-2.patch"
+    sha256 "8b096f58ce08a059a992428fb239f8ab3a5887434bf8db33302a8635d0965aa4"
+  end
+
+  patch do
+    url "https://sources.debian.org/data/main/e/easytag/2.4.3-9/debian/patches/04_taglib-2-further-fix.patch"
+    sha256 "3a5a7880e56a011a291b4b2c2c9ba1d378acc505c7eebd0a306735afc58c7b9f"
   end
 
   def install
-    ENV.prepend_path "PERL5LIB", Formula["perl-xml-parser"].libexec/"lib/perl5" unless OS.mac?
+    inreplace "src/tags/gio_wrapper.cc" do |s|
+      s.gsub! "ulong", "unsigned long"
+    end
+    ENV["LIBTOOLIZE"] = "glibtoolize"
+    system "autoreconf", "--force", "--install", "--verbose"
     ENV.append "LIBS", "-lz"
     ENV["DESTDIR"] = "/"
 
@@ -65,10 +86,8 @@ class EasyTag < Formula
   end
 
   test do
-    # Disable test on Linux because it fails with:
-    # Gtk-WARNING **: 18:38:23.471: cannot open display
-    return if OS.linux? && ENV["HOMEBREW_GITHUB_ACTIONS"]
-
-    system bin/"easytag", "--version"
+    cmd = "#{bin}/easytag --version"
+    cmd = "#{Formula["xorg-server"].bin}/xvfb-run #{cmd}" if OS.linux? && ENV.exclude?("DISPLAY")
+    assert_match version.to_s, shell_output(cmd)
   end
 end

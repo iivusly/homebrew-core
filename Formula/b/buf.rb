@@ -1,8 +1,8 @@
 class Buf < Formula
   desc "New way of working with Protocol Buffers"
   homepage "https://github.com/bufbuild/buf"
-  url "https://github.com/bufbuild/buf/archive/refs/tags/v1.39.0.tar.gz"
-  sha256 "8a3856cff8cdc1ffc4c8ae6dd8eec9c1f4a96a0a25e79574d76d8a2d7e3e9196"
+  url "https://github.com/bufbuild/buf/archive/refs/tags/v1.67.0.tar.gz"
+  sha256 "f04bfbd2877aa4e256ab27ddafc9fda29bc9e4d0789c4110a28a38bd9576acc1"
   license "Apache-2.0"
   head "https://github.com/bufbuild/buf.git", branch: "main"
 
@@ -15,13 +15,12 @@ class Buf < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "4009e50840ca7bb2fa73edb10fe5e09379bf69e8ecc3c73e0db4994fb127e076"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "4009e50840ca7bb2fa73edb10fe5e09379bf69e8ecc3c73e0db4994fb127e076"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "4009e50840ca7bb2fa73edb10fe5e09379bf69e8ecc3c73e0db4994fb127e076"
-    sha256 cellar: :any_skip_relocation, sonoma:         "2d45dbbf93e676e248c50ce0c3940c39ece7a2ed5b4f33de47a3b80b100e318b"
-    sha256 cellar: :any_skip_relocation, ventura:        "2d45dbbf93e676e248c50ce0c3940c39ece7a2ed5b4f33de47a3b80b100e318b"
-    sha256 cellar: :any_skip_relocation, monterey:       "2d45dbbf93e676e248c50ce0c3940c39ece7a2ed5b4f33de47a3b80b100e318b"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "df437ebb8f55a5590e4e0706f6537937da97fa6e9776fab8de83952441a5ce7a"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "1ffd50d5f7104128c6b2071736272144f51ee758d6ff5cee1ec6d40959a6f46f"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "1ffd50d5f7104128c6b2071736272144f51ee758d6ff5cee1ec6d40959a6f46f"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "1ffd50d5f7104128c6b2071736272144f51ee758d6ff5cee1ec6d40959a6f46f"
+    sha256 cellar: :any_skip_relocation, sonoma:        "1c12bbe182fb029a597d21698b04b87f47866a11b88d105c8e10a8ce821d1b22"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "5c851dee7b5bc4eea9d68aecf668b4c5c85276ce51d0231bb10341b6bce4dd74"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "b14cd4ca5a3fa108b89928d16161c865b5d0fc2876cd76d1470cb8070250382f"
   end
 
   depends_on "go" => :build
@@ -31,29 +30,29 @@ class Buf < Formula
       system "go", "build", *std_go_args(ldflags: "-s -w", output: bin/name), "./cmd/#{name}"
     end
 
-    generate_completions_from_executable(bin/"buf", "completion")
+    generate_completions_from_executable(bin/"buf", shell_parameter_format: :cobra)
     man1.mkpath
     system bin/"buf", "manpages", man1
   end
 
   test do
-    (testpath/"invalidFileName.proto").write <<~EOS
+    (testpath/"invalidFileName.proto").write <<~PROTO
       syntax = "proto3";
       package examplepb;
-    EOS
+    PROTO
 
-    (testpath/"buf.yaml").write <<~EOS
+    (testpath/"buf.yaml").write <<~YAML
       version: v1
       name: buf.build/bufbuild/buf
       lint:
         use:
-          - DEFAULT
+          - STANDARD
           - UNARY_RPC
       breaking:
         use:
           - FILE
         ignore_unstable_packages: true
-    EOS
+    YAML
 
     expected = <<~EOS
       invalidFileName.proto:1:1:Filename "invalidFileName.proto" should be \

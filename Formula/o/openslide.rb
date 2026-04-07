@@ -4,20 +4,22 @@ class Openslide < Formula
   url "https://github.com/openslide/openslide/releases/download/v4.0.0/openslide-4.0.0.tar.xz"
   sha256 "cc227c44316abb65fb28f1c967706eb7254f91dbfab31e9ae6a48db6cf4ae562"
   license "LGPL-2.1-only"
+  revision 1
+  compatibility_version 1
 
   bottle do
-    sha256 cellar: :any, arm64_sonoma:   "5bdd7e9c3409e9a540d861b0cb58ff7e94b51f38ec1c04d2b07dbf8d69d01933"
-    sha256 cellar: :any, arm64_ventura:  "389ba9d6f9bb8e28d960277976ba1159083ded06ca6b6d01cbbdb5688296579b"
-    sha256 cellar: :any, arm64_monterey: "413e235cb5da773c304affa0719c5b8d1e0031d0f17fbc4263ad411d4c97b784"
-    sha256 cellar: :any, sonoma:         "24268fa9a0759d1ee9997ca8b4f34d8fbd24ad5f0b5b5cbdbf7a4eea8f447324"
-    sha256 cellar: :any, ventura:        "954bbde8c99630dd94c6486021674eed997475307f248d4957767e4a018b0739"
-    sha256 cellar: :any, monterey:       "05788d5b3c3101ce73c9080c0d0c360d151cf2460a68b7dfe0bd3effb2c20460"
-    sha256               x86_64_linux:   "d67053c017a5e1e57189a2d774cac9d8bbe2c655240183ce65247a0a8650c917"
+    rebuild 1
+    sha256 cellar: :any, arm64_tahoe:   "1534ce31db0f8eab68925e3df74fb60fd9b3f461d6d0d99d4699496295d89d86"
+    sha256 cellar: :any, arm64_sequoia: "fd6a1ef0fe67fb6d190693269e25606baf78d468d21b0c3f4e69ffb6d0f4c8db"
+    sha256 cellar: :any, arm64_sonoma:  "5218d6e83f65681f182d1f8bdbe8345856e2b98b768aa75bae4ec938b961715e"
+    sha256 cellar: :any, sonoma:        "929afa35741b04b99c6db1c1c3288f369de57cf068f7238e65f4c64027a67b63"
+    sha256               arm64_linux:   "2efb5e0590e855d721035304d0d56a8d6b6ab3ad5763c2a8f010a11f49d584f3"
+    sha256               x86_64_linux:  "7490f047fab423ba2c71a0290c87f9bb6ac2ed261b300a22b680e92d577f79f3"
   end
 
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
 
   depends_on "cairo"
   depends_on "gdk-pixbuf"
@@ -30,10 +32,12 @@ class Openslide < Formula
   depends_on "openjpeg"
   depends_on "sqlite"
 
-  uses_from_macos "zlib"
-
   on_macos do
     depends_on "gettext"
+  end
+
+  on_linux do
+    depends_on "zlib-ng-compat"
   end
 
   def install

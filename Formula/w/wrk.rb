@@ -16,6 +16,8 @@ class Wrk < Formula
 
   bottle do
     rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:    "006efeee8686cc28a2c7a52afc6e1d21593ff274a6c5a206cc7aec60a756a097"
+    sha256 cellar: :any,                 arm64_sequoia:  "4c5610d7241ae72132fbeeebfea6b912c4f1c7d71a9cb55f523c07bef1d53ee5"
     sha256 cellar: :any,                 arm64_sonoma:   "89a17214695f28852b9be47589b1f8788b7209201c163b2bf39b608c1ba2bacd"
     sha256 cellar: :any,                 arm64_ventura:  "f1838e262aaea9a48cd54b0e33c25e39131a9732d5e9b9748498ef37cf468699"
     sha256 cellar: :any,                 arm64_monterey: "dff2f475aaebf54bf90ca442ed041fb857b43249e9c8c7f4503018bb3970a4e3"
@@ -24,13 +26,12 @@ class Wrk < Formula
     sha256 cellar: :any,                 ventura:        "cd319593d2f5ad2d1335cac14ebbf192af7502a63e83d4b8d1cb6e80fede99e4"
     sha256 cellar: :any,                 monterey:       "86b756396151c118e4a2e419b692923a6c8d71a02f355f5c1390fe11659125ab"
     sha256 cellar: :any,                 big_sur:        "fcb1b19c7ec424642d0dc7cf0a9a1dde8872a64a4e91fdf07a16f0b64ba10e4b"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "09305386a05c3e9f9370c7add8c05415c21593b46366db083464acdaf98a9779"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "e4295514a73470421b9cadc29d0f2873de383cc7b9d31523028d2310ef6e437b"
   end
 
   depends_on "luajit"
   depends_on "openssl@3"
-
-  conflicts_with "wrk-trello", because: "both install `wrk` binaries"
 
   def install
     ENV.deparallelize
@@ -40,7 +41,7 @@ class Wrk < Formula
       WITH_LUAJIT=#{Formula["luajit"].opt_prefix}
       WITH_OPENSSL=#{Formula["openssl@3"].opt_prefix}
     ]
-    args << "VER=#{version}" unless build.head?
+    args << "VER=#{version}" if build.stable?
     system "make", *args
     bin.install "wrk"
   end

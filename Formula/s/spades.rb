@@ -2,11 +2,11 @@ class Spades < Formula
   include Language::Python::Shebang
 
   desc "De novo genome sequence assembly"
-  homepage "https://github.com/ablab/spades"
-  url "https://github.com/ablab/spades/releases/download/v4.0.0/SPAdes-4.0.0.tar.gz"
-  sha256 "07c02eb1d9d90f611ac73bdd30ddc242ed51b00c8a3757189e8a8137ad8cfb8b"
+  homepage "https://ablab.github.io/spades/"
+  url "https://github.com/ablab/spades/releases/download/v4.2.0/SPAdes-4.2.0.tar.gz"
+  sha256 "043322129f8536411f1172b7d1c9adfcb6d49d152c10066ccc03e86b6f615a6b"
   license "GPL-2.0-only"
-  head "https://github.com/ablab/spades.git", branch: "next"
+  head "https://github.com/ablab/spades.git", branch: "main"
 
   livecheck do
     url :stable
@@ -14,33 +14,31 @@ class Spades < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "4211f7c49c9f9b896aba38958fd60c9aa340055362222c5b1b91a96c6d8b1186"
-    sha256 cellar: :any,                 arm64_ventura:  "b7648468fbc39495eae7723bb527af748e863bbff65a0d4341cb5ec8035226f3"
-    sha256 cellar: :any,                 arm64_monterey: "09c312987910e391deaa36ab11a7823ada78074944af6ffcb73b46d6a02006fa"
-    sha256 cellar: :any,                 sonoma:         "4a8945bcd33c7c1c04fa1c538bb6230d4a60f10a71aa4bf5559da15a80d2c9d4"
-    sha256 cellar: :any,                 ventura:        "74edae7cf86ef64da79d13d6fa3cde7a4163f76c25b02cb3a7d2596a467f7363"
-    sha256 cellar: :any,                 monterey:       "294e9d7c5f60ea7fdcd36a0e495f3b1f5c12e835b7d16a5532823180978241e6"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "76478d4ca675a86ece42168bb01720f63e28c273ca8236205bd1451f11c2d175"
+    rebuild 2
+    sha256 cellar: :any,                 arm64_tahoe:   "dfb1b8e8a099823127b97e10c3cf6951b71fa135cbab935f82ebf4beb5fc4bd7"
+    sha256 cellar: :any,                 arm64_sequoia: "4434b0f70adbcc1995b80975edf1d35b0e171524f89e2de496e66cd664090407"
+    sha256 cellar: :any,                 arm64_sonoma:  "787fc89b652698b3610ecfde765de7dfb947a0517e5cd4ff35345303561fad21"
+    sha256 cellar: :any,                 sonoma:        "5c7ce0aa451474c9cb40dfaf9ea5d7d4331dafb3304eb3586e2fea88d3330a61"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "4c9ee246e19db295757ed9cbf2b4f3b75d2476620778e28411feae289bc7ed34"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "56929dd62ca2109f9194096c04452dbe7f572a9858cdc54d1fbeeb7743af4563"
   end
 
   depends_on "cmake" => :build
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
-  uses_from_macos "bzip2"
-  uses_from_macos "ncurses"
-  uses_from_macos "zlib"
+  uses_from_macos "bzip2" => :build
 
   on_macos do
     depends_on "libomp"
   end
 
-  on_linux do
-    depends_on "jemalloc"
-    depends_on "readline"
-  end
-
   def install
     system "cmake", "-S", "src", "-B", "build", *std_cmake_args
+    # Build bundled zlib-ng with runtime detection
+    with_env(HOMEBREW_CCCFG: ENV["HOMEBREW_CCCFG"]) do
+      ENV.runtime_cpu_detection
+      system "cmake", "--build", "build", "--target", "zlibstatic"
+    end
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
     rewrite_shebang detected_python_shebang, *bin.children

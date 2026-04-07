@@ -3,41 +3,64 @@ class CryticCompile < Formula
 
   desc "Abstraction layer for smart contract build systems"
   homepage "https://github.com/crytic/crytic-compile"
-  url "https://files.pythonhosted.org/packages/54/f8/6833fb37702900711e5617e0594e2eeccbb0b716993e84b00ee186907e1c/crytic-compile-0.3.7.tar.gz"
-  sha256 "c7713d924544934d063e68313da8d588a3ad82cd4f40eae30d99f2dd6e640d4b"
+  url "https://files.pythonhosted.org/packages/f4/cb/669ed02fbfe17091998f52a7e3326ac276409117ea10a2c36b2a852a22f9/crytic_compile-0.3.11.tar.gz"
+  sha256 "d4e2253d5d81ec3a75deb3ab9fc2c2d2db56e835001cf07f3703911d74b56716"
   license "AGPL-3.0-only"
+  revision 4
   head "https://github.com/crytic/crytic-compile.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "d1c3595a2496d3e4144602edf23c60531fa1dc9ab3169302c9e5d304a5409533"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "480d968b69cd6d51808292c5625652b27032617db87fb053306b657b4c9f96ba"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "8b3b28b863710ca2bab911ddbd198c434870d0df4f578bb5a91dd6b56184a076"
-    sha256 cellar: :any_skip_relocation, sonoma:         "2635e483dab925dd75dda0b9b00c6880400f10bbd9651d692dee302129642f73"
-    sha256 cellar: :any_skip_relocation, ventura:        "b7c64cb65ef2b4519557617edfb99b32f471b184f5b7c65078e53e504686d8cc"
-    sha256 cellar: :any_skip_relocation, monterey:       "21669063737bf6536e3d9885d1b954f006bd581420c70f7b25e3ed362036f385"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "9d7c35db876889ab8dc97a74dce861690d047a2eb235b5265763b931e0c48e2b"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "9394aee44e21568ac4e7f881f01ea931c5f3cca459676884ec111a7054a854d8"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "5196a0b64edebe6b7e18bef5744061964e08e8c5dcf2773ff0765dd3c258e6f8"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "6c59ab30888ac4bf6fb36304c1cd41fecf11747c4ff08cdbcd0df6d38cd3a242"
+    sha256 cellar: :any_skip_relocation, sonoma:        "52f913765869799f3a068ecac69b98af6450ce630b937a689ebbfeddd46337d1"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "6f7da16cb57e46a7c72922a9aa6a4bd70d499864c5f48910f785e27f8c750c79"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "b94fb720fb758fcd2c10c76c63e89c6e7c5b8d4be8e35c5a1eeea90bb9d5c010"
   end
 
-  depends_on "python@3.12"
+  depends_on "certifi" => :no_linkage
+  depends_on "python@3.14"
+
+  pypi_packages exclude_packages: "certifi"
 
   resource "cbor2" do
-    url "https://files.pythonhosted.org/packages/ca/39/0d0a29671be102bd0c717c60f9c805b46042ff98d4a63282cfaff3704b45/cbor2-5.6.2.tar.gz"
-    sha256 "b7513c2dea8868991fad7ef8899890ebcf8b199b9b4461c3c11d7ad3aef4820d"
+    url "https://files.pythonhosted.org/packages/bd/cb/09939728be094d155b5d4ac262e39877875f5f7e36eea66beb359f647bd0/cbor2-5.9.0.tar.gz"
+    sha256 "85c7a46279ac8f226e1059275221e6b3d0e370d2bb6bd0500f9780781615bcea"
+  end
+
+  resource "charset-normalizer" do
+    url "https://files.pythonhosted.org/packages/7b/60/e3bec1881450851b087e301bedc3daa9377a4d45f1c26aa90b0b235e38aa/charset_normalizer-3.4.6.tar.gz"
+    sha256 "1ae6b62897110aa7c79ea2f5dd38d1abca6db663687c0b1ad9aed6f6bae3d9d6"
+  end
+
+  resource "idna" do
+    url "https://files.pythonhosted.org/packages/6f/6d/0703ccc57f3a7233505399edb88de3cbd678da106337b9fcde432b65ed60/idna-3.11.tar.gz"
+    sha256 "795dafcc9c04ed0c1fb032c2aa73654d8e8c5023a7df64a53f39190ada629902"
   end
 
   resource "packaging" do
-    url "https://files.pythonhosted.org/packages/ee/b5/b43a27ac7472e1818c4bafd44430e69605baefe1f34440593e0332ec8b4d/packaging-24.0.tar.gz"
-    sha256 "eb82c5e3e56209074766e6885bb04b8c38a0c015d0a30036ebe7ece34c9989e9"
+    url "https://files.pythonhosted.org/packages/65/ee/299d360cdc32edc7d2cf530f3accf79c4fca01e96ffc950d8a52213bd8e4/packaging-26.0.tar.gz"
+    sha256 "00243ae351a257117b6a241061796684b084ed1c516a08c48a3f7e147a9d80b4"
   end
 
   resource "pycryptodome" do
-    url "https://files.pythonhosted.org/packages/b9/ed/19223a0a0186b8a91ebbdd2852865839237a21c74f1fbc4b8d5b62965239/pycryptodome-3.20.0.tar.gz"
-    sha256 "09609209ed7de61c2b560cc5c8c4fbf892f8b15b1faf7e4cbffac97db1fffda7"
+    url "https://files.pythonhosted.org/packages/8e/a6/8452177684d5e906854776276ddd34eca30d1b1e15aa1ee9cefc289a33f5/pycryptodome-3.23.0.tar.gz"
+    sha256 "447700a657182d60338bab09fdb27518f8856aecd80ae4c6bdddb67ff5da44ef"
+  end
+
+  resource "requests" do
+    url "https://files.pythonhosted.org/packages/34/64/8860370b167a9721e8956ae116825caff829224fbca0ca6e7bf8ddef8430/requests-2.33.0.tar.gz"
+    sha256 "c7ebc5e8b0f21837386ad0e1c8fe8b829fa5f544d8df3b2253bff14ef29d7652"
   end
 
   resource "solc-select" do
-    url "https://files.pythonhosted.org/packages/60/a0/2a2bfbbab1d9bd4e1a24e3604c30b5d6f84219238f3c98f06191faf5d019/solc-select-1.0.4.tar.gz"
-    sha256 "db7b9de009af6de3a5416b80bbe5b6d636bf314703c016319b8c1231e248a6c7"
+    url "https://files.pythonhosted.org/packages/62/89/51e614fdbf26f47268c18f8a3b6cf1cb67c9a8b48b7b7231c948cae97814/solc_select-1.2.0.tar.gz"
+    sha256 "ad0a7afcae05061ce5e7632950b1fa0193ba9eaf05e4956f86effee024c6fb07"
+  end
+
+  resource "urllib3" do
+    url "https://files.pythonhosted.org/packages/c7/24/5f1b3bdffd70275f6661c76461e25f024d5a38a46f04aaca912426a2b1d3/urllib3-2.6.3.tar.gz"
+    sha256 "1b62b6884944a57dbe321509ab94fd4d3b307075e0c2eae991ac71ee15ad38ed"
   end
 
   def install
@@ -55,6 +78,6 @@ class CryticCompile < Formula
              "--export-format=solc", "--export-dir=#{testpath}/export"
     end
 
-    assert_predicate testpath/"export/combined_solc.json", :exist?
+    assert_path_exists testpath/"export/combined_solc.json"
   end
 end

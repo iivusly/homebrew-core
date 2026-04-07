@@ -1,19 +1,18 @@
 class Tfupdate < Formula
   desc "Update version constraints in your Terraform configurations"
   homepage "https://github.com/minamijoyo/tfupdate"
-  url "https://github.com/minamijoyo/tfupdate/archive/refs/tags/v0.8.5.tar.gz"
-  sha256 "7f118d26885e32b5b1bcac477426437525405ef1f89a5164ff2c646da6f5f1ad"
+  url "https://github.com/minamijoyo/tfupdate/archive/refs/tags/v0.9.3.tar.gz"
+  sha256 "282c5d0cb02d5bc43a4f0e7093e3ddc65ee04acf45ba9d47ec7bafbee19f7208"
   license "MIT"
   head "https://github.com/minamijoyo/tfupdate.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "bcc8a2c59fef1a74eef87ea859df9f70c963e9b10a1781bc7c937579e7280155"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "3acd595d6fcaac1619d7d2fd7ee07dcc18b1e53262af0e186484bb5eef8cb1fc"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "6ebf5cb8df8456456896bd581776c1543aa6b49697a0b6e07e9f9e3ef0f816e0"
-    sha256 cellar: :any_skip_relocation, sonoma:         "62588731be0bd37120b14168ed3e345c3d2fdbaa1a71d57489ad1c60f145cd97"
-    sha256 cellar: :any_skip_relocation, ventura:        "98a4c0e490801db1415de507a10140c85f0e4543d9d0651b827608b3fc25be0c"
-    sha256 cellar: :any_skip_relocation, monterey:       "4da185a6ee55f78e281677558eaab1ebe05d2e615c4c72023d4ad924ad113da5"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "23d034a9be35da9cc453837166f3ffcc5b667e370555a05c9585b2f46869acfb"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "3c014bd0a204f53e02c5fe523946bdd4d07174e70e9ac7bc2588d82aabb9f81c"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "3c014bd0a204f53e02c5fe523946bdd4d07174e70e9ac7bc2588d82aabb9f81c"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "3c014bd0a204f53e02c5fe523946bdd4d07174e70e9ac7bc2588d82aabb9f81c"
+    sha256 cellar: :any_skip_relocation, sonoma:        "b185c8075fdef935fee97a4a8b6e1ff5496839938c06584b96ef43e225ca2975"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "f044c85acf28eb8fb06622077ecb325c6fb0393b5a72411ecfac32817ffe7b6a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "5f1aa6f6d8ffe595cd9878f3ad9d269f293631e2b6aa9c08e3661095e3a29e8a"
   end
 
   depends_on "go" => :build
@@ -23,15 +22,15 @@ class Tfupdate < Formula
   end
 
   test do
-    (testpath/"provider.tf").write <<~EOS
+    (testpath/"provider.tf").write <<~HCL
       provider "aws" {
         version = "2.39.0"
       }
-    EOS
+    HCL
 
     system bin/"tfupdate", "provider", "aws", "-v", "2.40.0", testpath/"provider.tf"
     assert_match "2.40.0", File.read(testpath/"provider.tf")
 
-    assert_match version.to_s, shell_output(bin/"tfupdate --version")
+    assert_match version.to_s, shell_output("#{bin}/tfupdate --version")
   end
 end

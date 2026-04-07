@@ -1,8 +1,8 @@
 class Corsixth < Formula
   desc "Open source clone of Theme Hospital"
   homepage "https://github.com/CorsixTH/CorsixTH"
-  url "https://github.com/CorsixTH/CorsixTH/archive/refs/tags/v0.67.tar.gz"
-  sha256 "4e88cf1916bf4d7c304b551ddb91fb9194f110bad4663038ca73d31b939d69e3"
+  url "https://github.com/CorsixTH/CorsixTH/archive/refs/tags/v0.69.2.tar.gz"
+  sha256 "cbad15f9a16edd4c068ce14fb17f39cdb811dab0135fca80fafffa9a45732aec"
   license "MIT"
   revision 1
   head "https://github.com/CorsixTH/CorsixTH.git", branch: "master"
@@ -16,37 +16,42 @@ class Corsixth < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "753b467230849193995df1896fdad06d676fdf0b9d9a2874bfab2c884722097e"
-    sha256 arm64_ventura:  "8f40760b12987c4563a65dfe7bb6797e5726ecfc615983660f0508f179d39aa2"
-    sha256 arm64_monterey: "8f4a453fddd84c16c5a7359dd32343a08c3049c0297e3ee822d32b95f81e443b"
-    sha256 sonoma:         "9533e126bf883c696cff563b4073e66b73a76c5ee8b5dabf9584aa2993583684"
-    sha256 ventura:        "1b11fdf93d13e5b07ec0f8e4de0f50ff17b421a561da1f46b30556ed8d4937f7"
-    sha256 monterey:       "b4baf26ba433ef5bf8637f8491a5e8bd2a45c2e181ab806a72437c61be405fe0"
-    sha256 x86_64_linux:   "3bb1fcde57e74e97f5a94c2b0d8d438901b0bef8b85898c5b80681ae9d080acd"
+    sha256 arm64_tahoe:   "b4f772b1be3d58659f0f2a8edf319f3d75a5cabce381c00a24249936ccb4c6f1"
+    sha256 arm64_sequoia: "259ef9b4fc61dd9ff3056679d97bfc5f63a2312a671e7432e6f99337f32a486a"
+    sha256 arm64_sonoma:  "37df3671019913aa6856fa54ef77b104b7050c1302e69af55f35744171ed53d7"
+    sha256 sonoma:        "b2fe6522ea0a6678c8ccd1d04c685d5eda18ce288aa9d52f283cab0ab38034d5"
+    sha256 arm64_linux:   "1abb0a5d9fce89718f14d908306a2bcd904cbfa6b9276309f3c7c2455daadc15"
+    sha256 x86_64_linux:  "6590db90107ccdd804ee592950f8f70719d0215feabc76e22bdb2f3525437770"
   end
 
   depends_on "cmake" => :build
   depends_on "luarocks" => :build
-  depends_on xcode: :build
   depends_on "ffmpeg"
   depends_on "freetype"
-  depends_on "lpeg"
-  depends_on "lua"
+  depends_on "lpeg" => :no_linkage
+  depends_on "lua@5.4"
   depends_on "sdl2"
   depends_on "sdl2_mixer"
+
+  uses_from_macos "curl"
 
   on_linux do
     depends_on "mesa"
   end
 
   resource "luafilesystem" do
-    url "https://github.com/keplerproject/luafilesystem/archive/refs/tags/v1_8_0.tar.gz"
-    sha256 "16d17c788b8093f2047325343f5e9b74cccb1ea96001e45914a58bbae8932495"
+    url "https://github.com/keplerproject/luafilesystem/archive/refs/tags/v1_9_0.tar.gz"
+    sha256 "1142c1876e999b3e28d1c236bf21ffd9b023018e336ac25120fb5373aade1450"
+  end
+
+  # Make sure I point to the right version!
+  def lua
+    Formula["lua@5.4"]
   end
 
   def install
-    # Make sure I point to the right version!
-    lua = Formula["lua"]
+    # https://github.com/orgs/CorsixTH/projects/15
+    odie 'Switch to `depends_on "lua"`' if build.stable? && version >= "0.70.0"
 
     ENV["TARGET_BUILD_DIR"] = "."
     ENV["FULL_PRODUCT_NAME"] = "CorsixTH.app"
@@ -58,7 +63,7 @@ class Corsixth < Formula
 
     resources.each do |r|
       r.stage do
-        system "luarocks", "build", r.name, "--tree=#{luapath}"
+        system "luarocks", "make", "--tree=#{luapath}", "--lua-dir=#{lua.opt_prefix}"
       end
     end
 
@@ -96,14 +101,14 @@ class Corsixth < Formula
 
   test do
     if OS.mac?
-      lua = Formula["lua"]
-
+      require "utils/linkage"
       app = prefix/"CorsixTH.app/Contents/MacOS/CorsixTH"
-      assert_includes app.dynamically_linked_libraries, "#{lua.opt_lib}/liblua.dylib"
+      assert Utils.binary_linked_to_library?(app, lua.opt_lib/"liblua.dylib"), "No linkage with lua!"
     end
 
     PTY.spawn(bin/"CorsixTH") do |r, _w, pid|
       sleep 30
+      sleep 30 if OS.mac? && Hardware::CPU.intel?
       Process.kill "KILL", pid
 
       output = ""

@@ -5,34 +5,31 @@ class Lrzip < Formula
   sha256 "2c6389a513a05cba3bcc18ca10ca820d617518f5ac6171e960cda476b5553e7e"
   license "GPL-2.0-or-later"
 
-  livecheck do
-    url "http://ck.kolivas.org/apps/lrzip/"
-    regex(/href=.*?lrzip[._-]v?(\d+(?:\.\d+)+)\.t/i)
+  bottle do
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "eb408946ef673448b1c1d6d14d2f86b5319aa28bb3f0fc22f068a491ccdf26f6"
+    sha256 cellar: :any,                 arm64_sequoia: "12594f990be465df28cd2eda0b23e0daccbf9f1169cf72b0e4427b1e1015de1a"
+    sha256 cellar: :any,                 arm64_sonoma:  "1c6abd74fb352de7f2fbb41a9335d5b8104124649e1116457a68db5eeecc9dc8"
+    sha256 cellar: :any,                 sonoma:        "d5ff4085aae34410488f4a1de66a8725bfe4a402a29d567aa31fae7844f19e91"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "b5b9e0d8a3a15533dfb3cd1486db03ae5288ba4d910651d79d3b9b0929c1d3ec"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "7a051eea9d0b7d80d0f6f42d8be47e98c88aa51edf17a3fad1d87e875ae4f3b6"
   end
 
-  bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "06cde83e30ff4c3ceb76cf9c855fe24540429fb009ab3b4d9cf92a470138240d"
-    sha256 cellar: :any,                 arm64_ventura:  "ad6e28ccfb37ce81646fb1b40b000e7172906ff50da4e9804c8d41f3562e0e63"
-    sha256 cellar: :any,                 arm64_monterey: "187914857fc2edba04f069d8fbd4d69bb8d140a9194b77b5bf45dd0295682c96"
-    sha256 cellar: :any,                 arm64_big_sur:  "d9e67f4c880ecfe1e59f0714073f1dab6ce921a0585e763ab009bac21d545335"
-    sha256 cellar: :any,                 sonoma:         "9c25ec5991ba62aa0f522b11b3c9197f323362326eea09f1a5d30c0bde48e234"
-    sha256 cellar: :any,                 ventura:        "f9b6f58f250151a2c6b859e0c7ce5fc55ba1e721a1bebb879ce7f16f3eb60337"
-    sha256 cellar: :any,                 monterey:       "d270d7085f30f8d07e32f746e8e9a10a09729ef6e60d0fbad9a5af85b1193522"
-    sha256 cellar: :any,                 big_sur:        "33d561fad2bba643625d358fc65cfa2d8f37ae51d3329887da76e884d43b1515"
-    sha256 cellar: :any,                 catalina:       "701705808812d442dbd211235510a039a53cd4de9a4b28c014da5ad8a000014d"
-    sha256 cellar: :any,                 mojave:         "a3230ecfa68e08deb5f1414cb67736cffcde179ba34748df8e0fcdcb0d2c1ef7"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "5515b974789a0665b67ceb99c09d7c2b4edae560c5d7e4d7aee765fe95a563e0"
-  end
+  # Newer versions also don't build
+  deprecate! date: "2026-01-05", because: "is not available via HTTPS"
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
   depends_on "libtool" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "lz4"
   depends_on "lzo"
 
   uses_from_macos "bzip2"
-  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   on_intel do
     depends_on "nasm" => :build
@@ -49,15 +46,12 @@ class Lrzip < Formula
     # Set nasm format correctly on macOS. See https://github.com/ckolivas/lrzip/pull/211
     inreplace "configure.ac", "-f elf64", "-f macho64" if OS.mac?
 
-    system "autoreconf", "-ivf"
+    system "autoreconf", "--force", "--install", "--verbose"
 
-    args = %W[
-      --disable-dependency-tracking
-      --prefix=#{prefix}
-    ]
+    args = []
     args << "--disable-asm" unless Hardware::CPU.intel?
 
-    system "./configure", *args
+    system "./configure", *args, *std_configure_args
     system "make", "SHELL=bash"
     system "make", "install"
   end

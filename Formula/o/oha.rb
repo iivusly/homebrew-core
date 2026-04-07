@@ -1,23 +1,22 @@
 class Oha < Formula
   desc "HTTP load generator, inspired by rakyll/hey with tui animation"
   homepage "https://github.com/hatoo/oha/"
-  url "https://github.com/hatoo/oha/archive/refs/tags/v1.4.6.tar.gz"
-  sha256 "8a68d4411ce241d161aeaa87e9f1e778b381398454bf58e58c976d575fcb2c3b"
+  url "https://github.com/hatoo/oha/archive/refs/tags/v1.14.0.tar.gz"
+  sha256 "2f0448ccaf561a55b90da9dabe1707e4788dc0743dc34ab0621d99f60201c348"
   license "MIT"
   head "https://github.com/hatoo/oha.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "7271f86c11c845efa1ddaaac6003134b13a84bba8c9098c5181f3350fa454e07"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "e231a37455a5615fbe999e4ac87abf1a8f18079b4d98fd220bb68606008112d3"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "9a59c9b88c86bc79446a41d7029b4773d2d36d2d12ca1a6da8b3844cfeeee24e"
-    sha256 cellar: :any_skip_relocation, sonoma:         "4254122db32fe3bcb2fd62aa4396514306bab62955a015ea67b7ac1f7c7d781e"
-    sha256 cellar: :any_skip_relocation, ventura:        "8d9084615711cd10ec4e64c8fe8e6f434d90b3695388f5bf95585b8770e44f66"
-    sha256 cellar: :any_skip_relocation, monterey:       "7aab1a89bda91f90a493f5c6e7e1b78fd79c09fe0ffec793beb8cd45ce97c41c"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "ccacae033d20a23b965aa8e112a65c0ce2cc522b47ae600fc7238985dd3bfecb"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "54df364aa3c5fc5dde6796fe3c2544ed79937589c9fec975dee291632815ea2a"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "6910f582f4b962c2d3c7eab143491b6453c36938d85500d6164b6cec25f701c5"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "1566e0c623e509169050ee9cb180144d5c15889a3dad7e471f285a6190a55a6c"
+    sha256 cellar: :any_skip_relocation, sonoma:        "9df7eeb03187b9258dd06f627ed93567865315d5c99b3fa01682ba36efb972c7"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "9abd021241ca1cedd700471bdafc6ab19b2822ced8f2a6611d7c66cd2169d543"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "2cdae1c9bc6797eda4e7a7384df7d65e62be88fac4bcd7ddcd75e29e18d61d7a"
   end
 
   depends_on "cmake" => :build # for aws-lc-sys
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "rust" => :build
 
   on_linux do

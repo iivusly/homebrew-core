@@ -1,28 +1,26 @@
 class Eleventy < Formula
   desc "Simpler static site generator"
   homepage "https://www.11ty.dev"
-  url "https://registry.npmjs.org/@11ty/eleventy/-/eleventy-2.0.1.tgz"
-  sha256 "08236b693a3a1076b32f6bcba45ae132fbadf1fc2c52eae0cc33951bcd2163dd"
+  url "https://registry.npmjs.org/@11ty/eleventy/-/eleventy-3.1.5.tgz"
+  sha256 "65941649a92338aad8021fc0d0df1954b632f31299579f3e0ac72ef2a20a70d4"
   license "MIT"
-  head "https://github.com/11ty/eleventy.git", branch: "master"
+  head "https://github.com/11ty/eleventy.git", branch: "main"
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "ecfe465a1b07add1f0c6bdf3fb6accef3abcbf2fd81db6eae155da26a235a477"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "ecfe465a1b07add1f0c6bdf3fb6accef3abcbf2fd81db6eae155da26a235a477"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "ecfe465a1b07add1f0c6bdf3fb6accef3abcbf2fd81db6eae155da26a235a477"
-    sha256 cellar: :any_skip_relocation, sonoma:         "bac187fe950966d6957443d4248b67f596ef7a1e5484d752d7801c4fbe7b07e5"
-    sha256 cellar: :any_skip_relocation, ventura:        "bac187fe950966d6957443d4248b67f596ef7a1e5484d752d7801c4fbe7b07e5"
-    sha256 cellar: :any_skip_relocation, monterey:       "bac187fe950966d6957443d4248b67f596ef7a1e5484d752d7801c4fbe7b07e5"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "d6c5486cb85e23084f7fb25e156b8859803caffcf1ec844d9dd19e8d69faf697"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "2af146437081cecba9865461d2e6e1ee4ba12e92683bbb4e130449bebdf8eda5"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "c83fca618ae253e43b5e2eadeacbf8aacabe9cf992fa121079aae280c3e49b73"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "c83fca618ae253e43b5e2eadeacbf8aacabe9cf992fa121079aae280c3e49b73"
+    sha256 cellar: :any_skip_relocation, sonoma:        "905d47811dff6b131df4be72c72447986a391c610d9a8da7388861d95d048bce"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "82175fdcc0139f8c8a2290533a0a8b70016a9a3a231a64efe862e9220d1a56be"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "82175fdcc0139f8c8a2290533a0a8b70016a9a3a231a64efe862e9220d1a56be"
   end
 
   depends_on "node"
 
   def install
     system "npm", "install", *std_npm_args
-    bin.install_symlink Dir["#{libexec}/bin/*"]
-    deuniversalize_machos
+    deuniversalize_machos libexec/"lib/node_modules/@11ty/eleventy/node_modules/fsevents/fsevents.node" if OS.mac?
+    bin.install_symlink libexec.glob("bin/*")
   end
 
   test do

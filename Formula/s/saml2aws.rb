@@ -1,18 +1,19 @@
 class Saml2aws < Formula
   desc "Login and retrieve AWS temporary credentials using a SAML IDP"
   homepage "https://github.com/Versent/saml2aws"
-  url "https://github.com/Versent/saml2aws/archive/refs/tags/v2.36.17.tar.gz"
-  sha256 "b0c4cb7f24f7aa1b49efa62c3eb6d176e1aec195ff76ff7138dde90ff089f188"
+  url "https://github.com/Versent/saml2aws/archive/refs/tags/v2.36.19.tar.gz"
+  sha256 "208ec9e1f2e8c7e1770990825bc5e56c65cd86e8362e1a3e6fa1ef5ecc7bbc91"
   license "MIT"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "87fe1f852e97a27df7094e2aeef86346cb0d05b2365c669f7d173bd8759a5b7d"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "5b0c1ce1057db657731aec64e070fd9270809ba482885a0ea8913da4c68f47f6"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "df320aecc313f3eccfcd1802c40585a30dd8ce4710e6eab446ba941280f14c96"
-    sha256 cellar: :any_skip_relocation, sonoma:         "a44c09975b626ea05e1a56809404bc3ac90bf33bf7bba90b93572667eaa0ab0f"
-    sha256 cellar: :any_skip_relocation, ventura:        "17cbb83765d3aed1320c9072c0ee62bbdc02acd3292189b806f7e1af06674bb9"
-    sha256 cellar: :any_skip_relocation, monterey:       "1f258e7baa6289c4fda8e7db48ec5a3614e79efe0ffd4d1d7c1616a53844ce85"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "6e867ded478efb9fa4a12dcc89d62af1e5c4b530d0b14a42efd1d425d6ef2dd1"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "69e6077ecc29098c8898cb893541b71f13623162e33c8d2f2c8fdcba2b5d67f3"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "a654e7f6931b60cb7a97c06b259a18b85d726500c2628cd032224084f6e4f085"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "1891facfc93e5503e4d43f944a8b997fae5a36096c7f3830f7d2d497e0f799d8"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "23483664f18cf600ecb5005cf41156f729cbb835303a08bdbb213b2af804cd64"
+    sha256 cellar: :any_skip_relocation, sonoma:        "6aa3ed09c1047c5c9815cd2a3c5efac7de53695e20a4bad7e7350f6a87483683"
+    sha256 cellar: :any_skip_relocation, ventura:       "442e6638949edd3ef4ab43cc6e75915145b33f1313e285dcec56a22ba58d3d88"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "6d094d781c37e372b4281139da3bf06920af2c78a483852e69ea9c325bcd8635"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "29e62a8821f75bfab2b35ebdc176976725aac06f4f3e57813d6e8e49c8e2890b"
   end
 
   depends_on "go" => :build
@@ -20,19 +21,9 @@ class Saml2aws < Formula
   def install
     ldflags = "-s -w -X main.Version=#{version}"
     system "go", "build", *std_go_args(ldflags:), "./cmd/saml2aws"
-    (zsh_completion/"_saml2aws").write <<~EOS
-      #compdef saml2aws
 
-      _saml2aws_bash_autocomplete() {
-          local cur prev opts base
-          COMPREPLY=()
-          cur="${COMP_WORDS[COMP_CWORD]}"
-          opts=$( ${COMP_WORDS[0]} --completion-bash ${COMP_WORDS[@]:1:$COMP_CWORD} )
-          COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
-          return 0
-      }
-      complete -F _saml2aws_bash_autocomplete saml2aws
-    EOS
+    generate_completions_from_executable(bin/"saml2aws", shell_parameter_format: "--completion-script-",
+                                                         shells:                 [:bash, :zsh])
   end
 
   test do

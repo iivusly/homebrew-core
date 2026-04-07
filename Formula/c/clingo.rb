@@ -1,9 +1,10 @@
 class Clingo < Formula
   desc "ASP system to ground and solve logic programs"
   homepage "https://potassco.org/clingo/"
-  url "https://github.com/potassco/clingo/archive/refs/tags/v5.7.1.tar.gz"
-  sha256 "544b76779676075bb4f557f05a015cbdbfbd0df4b2cc925ad976e86870154d81"
+  url "https://github.com/potassco/clingo/archive/refs/tags/v5.8.0.tar.gz"
+  sha256 "4ddd5975e79d7a0f8d126039f1b923a371b1a43e0e0687e1537a37d6d6d5cc7c"
   license "MIT"
+  revision 1
 
   livecheck do
     url :stable
@@ -11,13 +12,12 @@ class Clingo < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "64ed41a472f7e07f81420c75bb13c6da83df9dac3fbe0c76c367669484e9eba5"
-    sha256 cellar: :any,                 arm64_ventura:  "29bb65f2229c066ce1cd6621e3ae1d9526832cad125f7ae8ee6e3651418b9569"
-    sha256 cellar: :any,                 arm64_monterey: "f2f79a6aa705a0d0f928512778cc70c0690ebe39cfd681652da7bb270ebc9679"
-    sha256 cellar: :any,                 sonoma:         "c7f60a67614f9e1da49ab636b1b31cc2a0cecf3ba27ac80b0e03d9743c540491"
-    sha256 cellar: :any,                 ventura:        "a63cf8d67cb344877cbc3ed65bf97d278c6bdec1506a2ee4b995ce1b53868693"
-    sha256 cellar: :any,                 monterey:       "522e5cebd4a601f4f56a68d4daf006df5f80c9defd45f3c3a8c0b1478f4510b8"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "4b893cc6d7b66a55c58719b5d2dcd9708bf66168fd548162f29e044bd4fa26d8"
+    sha256 cellar: :any,                 arm64_tahoe:   "7d606936da6a7f4091d200cf507e6d84dbadab7e44ccea7ddf1f85b04e1c92ec"
+    sha256 cellar: :any,                 arm64_sequoia: "cadf7db4623f11e771514eb2a29b08625bffacb5e38289d7f6b8bf76ac84bf36"
+    sha256 cellar: :any,                 arm64_sonoma:  "b6a25764a9f579481219b13cc37b85370e1711d65479ac5157aa174de25dfa38"
+    sha256 cellar: :any,                 sonoma:        "0ce74dea22d40520801a1bad792df7cb8ea148b39f57fa7f24076beae86f01f0"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "295fb70cc8ee473656c529f06107ca59bd4b439fb98fc50af1db18003940a109"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "790e57292114c711904b97f44dfcd4f6bb09535f73b9d0e54d61f4e862d40156"
   end
 
   head do
@@ -28,10 +28,9 @@ class Clingo < Formula
 
   depends_on "cmake" => :build
   depends_on "doxygen" => :build
-  depends_on "python-setuptools" => :build
   depends_on "cffi"
   depends_on "lua"
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   # This formula replaced the clasp & gringo formulae.
   # https://github.com/Homebrew/homebrew-core/pull/20281
@@ -42,7 +41,7 @@ class Clingo < Formula
   link_overwrite "bin/reify"
 
   def python3
-    which("python3.12")
+    which("python3.14")
   end
 
   def install
@@ -64,5 +63,6 @@ class Clingo < Formula
 
   test do
     assert_match "clingo version", shell_output("#{bin}/clingo --version")
+    system python3, "-c", "import clingo"
   end
 end

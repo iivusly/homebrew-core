@@ -1,25 +1,25 @@
 class Mpi4py < Formula
   desc "Python bindings for MPI"
   homepage "https://mpi4py.github.io/"
-  url "https://github.com/mpi4py/mpi4py/releases/download/4.0.0/mpi4py-4.0.0.tar.gz"
-  sha256 "820d31ae184d69c17d9b5d55b1d524d56be47d2e6cb318ea4f3e7007feff2ccc"
+  url "https://github.com/mpi4py/mpi4py/releases/download/4.1.1/mpi4py-4.1.1.tar.gz"
+  sha256 "eb2c8489bdbc47fdc6b26ca7576e927a11b070b6de196a443132766b3d0a2a22"
   license "BSD-3-Clause"
+  revision 1
 
   bottle do
-    sha256 cellar: :any, arm64_sonoma:   "af0b502535e60fc352f583f6dc3e6f22656d51b2b8a6879e286d5746eadbaeaf"
-    sha256 cellar: :any, arm64_ventura:  "3f8f8cd4ab3bf101d205bd7750a0ba506b44f19e4d4a0a77165e9cf3ad485cca"
-    sha256 cellar: :any, arm64_monterey: "e5db582124c03962a6b713df7f224d0c39860e61d60ee8d7bbe3b09fd7a58648"
-    sha256 cellar: :any, sonoma:         "623f199ac2973c68186eccba9126fc3c9845bd2ca5f28eeba2da167df66d745e"
-    sha256 cellar: :any, ventura:        "b4f16e256a6eae84ce6ba36302267080010e9d03ea6bc84098ac19652a0388f9"
-    sha256 cellar: :any, monterey:       "406ac34f87b65a4227b974a1b5f39d20f499a5783900618d6253c206cb051658"
-    sha256               x86_64_linux:   "75879be194af8dc54e5a70960f0fef8e289e10482f85f377e4e298eacd7f6c51"
+    sha256 cellar: :any, arm64_tahoe:   "90e4d286c7363f44451bef72bf75eb139d55454c35bb240eaf37d49c6649ab0d"
+    sha256 cellar: :any, arm64_sequoia: "efcb605cb7760bdee4873a0c3240e54add78210f1c3282c63a61e0aeb94ea753"
+    sha256 cellar: :any, arm64_sonoma:  "19caf71acbf7f93452f674b1aec4f62144246d4c5cbd5d5d4cbf7e11a7243b2d"
+    sha256 cellar: :any, sonoma:        "6fe3a1ea44cc66cd2ab36531d66848f9f0e363591b14c272864d914c1e9422ba"
+    sha256               arm64_linux:   "badce9774ee0885b972ce95082c2dc904d8f7113baae29231a09a884cabbcad2"
+    sha256               x86_64_linux:  "749d4547c856b8cb35bd70869b15deffef02f4e42f9915792715da5338b3deb8"
   end
 
   depends_on "open-mpi"
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   def python3
-    "python3.12"
+    "python3.14"
   end
 
   def install

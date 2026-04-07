@@ -1,12 +1,10 @@
 class Yaz < Formula
   desc "Toolkit for Z39.50/SRW/SRU clients/servers"
   homepage "https://www.indexdata.com/resources/software/yaz/"
-  # TODO: Switch back to homepage if upstream confirms reupload or on next release
-  # Ref: https://github.com/indexdata/yaz/issues/120
-  url "http://deb.debian.org/debian/pool/main/y/yaz/yaz_5.34.1.orig.tar.gz"
-  mirror "https://ftp.indexdata.com/pub/yaz/yaz-5.34.1.tar.gz"
-  sha256 "c7fd8e0222b3b0d1115ad8e7a2ee67be7a2807624d61d5b71854bf5e167ab7a9"
+  url "https://ftp.indexdata.com/pub/yaz/yaz-5.37.0.tar.gz"
+  sha256 "9257feb06e2fdbbfceb7d040c139fa13957c4d1ebba6aa293a6dd13cab2225ce"
   license "BSD-3-Clause"
+  compatibility_version 1
 
   # The latest version text is currently omitted from the homepage for this
   # software, so we have to check the related directory listing page.
@@ -16,13 +14,13 @@ class Yaz < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "dc45f16c09632a6e73e49ace9bd8d0b4e086a5a9c5503cfe7c066f18a59d8f87"
-    sha256 cellar: :any,                 arm64_ventura:  "de294f63ae537046de8e38aab6a66964d142a72bbd5039a1e0510d06444b3d56"
-    sha256 cellar: :any,                 arm64_monterey: "be73925a730bbc3956497ba501596848f6f80292f7ef23cb72490537fd141948"
-    sha256 cellar: :any,                 sonoma:         "7bca2535a733fa5d4d59b565d1844ba549275e7e3deb4ea118a35b8aace8d865"
-    sha256 cellar: :any,                 ventura:        "9df7ada09b950e224f87f15387725a63754d77ea2b5f5f707af654f26a336a47"
-    sha256 cellar: :any,                 monterey:       "a6b19cb6e6905f85aa590d49c4b10aaa28a8364f60aacd76c85d210fa9e760a4"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "019454b127ed23be0ddac5cda1f86e1e011267a6c68ced037c9eeb3843324569"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "e84af7fa65a9d066d920995d1085730cc268015b81760645942a7d48e5caacbe"
+    sha256 cellar: :any,                 arm64_sequoia: "95d1d99ca885bc62dd088899b2cbd3dae10ed6209977f8c633ceec2fb2752502"
+    sha256 cellar: :any,                 arm64_sonoma:  "5ca87c1e4c66f74a5952f37a61933ba05f15994936dbb5d40a1742f5c0c99dc7"
+    sha256                               sonoma:        "91b37a0873a49236f37a54afc1b1993d146261488cd7f42ac42ce07ad36275b8"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "51a62fb7b1544676244df79fded10bee005162e0967ef0a29db7916b005ae142"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "5991097df1bb45e139e42c2fe9939020a283010e2cff59e8673381de966d4edf"
   end
 
   head do
@@ -30,44 +28,38 @@ class Yaz < Formula
 
     depends_on "autoconf" => :build
     depends_on "automake" => :build
+    depends_on "bison" => :build
     depends_on "docbook-xsl" => :build
     depends_on "libtool" => :build
-
-    uses_from_macos "bison" => :build
-    uses_from_macos "tcl-tk" => :build
+    depends_on "tcl-tk" => :build
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "gnutls"
-  depends_on "icu4c"
-  depends_on "readline" # Possible opportunistic linkage. TODO: Check if this can be removed.
+  depends_on "icu4c@78"
 
   uses_from_macos "libxml2"
   uses_from_macos "libxslt"
+
+  on_linux do
+    depends_on "readline" # Possible opportunistic linkage. TODO: Check if this can be removed.
+  end
 
   def install
     if build.head?
       ENV["XML_CATALOG_FILES"] = etc/"xml/catalog"
       system "./buildconf.sh"
     end
-    system "./configure", *std_configure_args,
-                          "--with-gnutls",
+    icu4c = deps.find { |dep| dep.name.match?(/^icu4c(@\d+)?$/) }
+                .to_formula
+    system "./configure", "--with-gnutls",
+                          "--with-icu=#{icu4c.opt_prefix}",
                           "--with-xml2",
-                          "--with-xslt"
+                          "--with-xslt",
+                          *std_configure_args
     system "make", "install"
 
-    # Replace dependencies' cellar paths, which can break build for dependents
-    # (like `metaproxy` and `zebra`) after a dependency is version/revision bumped
-    inreplace bin/"yaz-config" do |s|
-      s.gsub! Formula["gnutls"].prefix.realpath, Formula["gnutls"].opt_prefix
-      s.gsub! Formula["icu4c"].prefix.realpath, Formula["icu4c"].opt_prefix
-    end
-    unless OS.mac?
-      inreplace [bin/"yaz-config", lib/"pkgconfig/yaz.pc"] do |s|
-        s.gsub! Formula["libxml2"].prefix.realpath, Formula["libxml2"].opt_prefix
-        s.gsub! Formula["libxslt"].prefix.realpath, Formula["libxslt"].opt_prefix
-      end
-    end
+    inreplace [bin/"yaz-config", *lib.glob("pkgconfig/yaz*.pc")], prefix, opt_prefix
   end
 
   test do
@@ -82,7 +74,7 @@ class Yaz < Formula
     # Test ICU support by running yaz-icu with the example icu_chain
     # from its man page.
     configfile = testpath/"icu-chain.xml"
-    configfile.write <<~EOS
+    configfile.write <<~XML
       <?xml version="1.0" encoding="UTF-8"?>
       <icu_chain locale="en">
         <transform rule="[:Control:] Any-Remove"/>
@@ -92,7 +84,7 @@ class Yaz < Formula
         <display/>
         <casemap rule="l"/>
       </icu_chain>
-    EOS
+    XML
 
     inputfile = testpath/"icu-test.txt"
     inputfile.write "yaz-ICU	xy!"

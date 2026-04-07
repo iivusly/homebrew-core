@@ -1,26 +1,36 @@
 class Blink < Formula
   desc "Tiniest x86-64-linux emulator"
   homepage "https://github.com/jart/blink"
-  url "https://github.com/jart/blink/releases/download/1.1.0/blink-1.1.0.tar.gz"
-  sha256 "9ac213c7d34a672d2077e79a2aaa85737eb1692d6e533ab2483c07369c60d834"
+  url "https://github.com/jart/blink/archive/refs/tags/1.1.0.tar.gz"
+  sha256 "2649793e1ebf12027f5e240a773f452434cefd9494744a858cd8bff8792dba68"
   license "ISC"
   head "https://github.com/jart/blink.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "2de61fd64e8fbe185bf583189710c8dc8793c13fe5535489638dc4e1116b7901"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "ed08f66b03fb447aac0c38f232f6d0ddf3d193f11e1ccfda27141e1de452d5b5"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "22ddedacbb9166f752850e36aa9b787c66671f0338a452ea465c6bd8e37885d4"
-    sha256 cellar: :any_skip_relocation, sonoma:         "dfc61d7528246380f32c4926b1345e19064fd62d56e635fce1a49aa7ff8ecdcf"
-    sha256 cellar: :any_skip_relocation, ventura:        "5d816c1d15c0eafb78919ce3cf3fe2615835fa35b048ad0925debf212d8e1d82"
-    sha256 cellar: :any_skip_relocation, monterey:       "ca2a5adb954404890dfbf93e0bae8934a5568a87e2425068d90e94922eb60bd7"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "b037ea0f7e1afbba04ffcca29bfdc542fa466be4ffacb9015743b720e227750d"
+    rebuild 2
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "fe96f01e4cb3db83a0d8fe235ce54e5a00ff81d82da4872ac75772d93b49fe02"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "728a23165b6adb6121ef66bf6b0ef9b9e68d863eb66b33bf40814d19bda11134"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "0ce2f125a8c3ce801bd477453488423c476a1768310bc6da2134a1e79f5edef6"
+    sha256 cellar: :any_skip_relocation, sonoma:        "fbbe63a33126b154702707e358e10da2d4adaf9d9fe53db3cad1ed78f9223dac"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "53e2fc3a0987c15b8d8062fd564c33e2a2ed9718ae642480ccbad551b8076922"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "fd87330b12e6d29f51065b58eeef882b7509537e145218f5d49b3102caf6e53e"
   end
 
-  depends_on "make" => :build # Needs Make 4.0+
-  depends_on "pkg-config" => :build
-  uses_from_macos "zlib"
+  depends_on "pkgconf" => :build
+
+  on_macos do
+    depends_on "make" => :build # Needs Make 4.0+
+  end
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
+    # newer linker cause issue as `pointer not aligned at _kWhence+0x4`
+    # upstream bug report, https://github.com/jart/blink/issues/166
+    ENV.append "LDFLAGS", "-Wl,-ld_classic" if DevelopmentTools.clang_build_version >= 1500
+
     system "./configure", "--prefix=#{prefix}", "--enable-vfs"
     # Call `make` as `gmake` to use Homebrew `make`.
     system "gmake" # must be separate steps.

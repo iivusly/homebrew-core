@@ -1,11 +1,20 @@
 class Stp < Formula
   desc "Simple Theorem Prover, an efficient SMT solver for bitvectors"
   homepage "https://stp.github.io/"
-  url "https://github.com/stp/stp/archive/refs/tags/2.3.4.tar.gz"
-  sha256 "dc197e337c058dc048451b712169a610f7040b31d0078b6602b831fbdcbec990"
   license "MIT"
-  revision 1
+  revision 9
   head "https://github.com/stp/stp.git", branch: "master"
+
+  stable do
+    url "https://github.com/stp/stp/archive/refs/tags/2.3.4.tar.gz"
+    sha256 "dc197e337c058dc048451b712169a610f7040b31d0078b6602b831fbdcbec990"
+
+    # Replace distutils for python 3.12+
+    patch do
+      url "https://github.com/stp/stp/commit/fb185479e760b6ff163512cb6c30ac9561aadc0e.patch?full_index=1"
+      sha256 "7e50f26901e31de4f84ceddc1a1d389ab86066a8dcbc5d88e9ec1f0809fa0909"
+    end
+  end
 
   livecheck do
     url :stable
@@ -13,36 +22,40 @@ class Stp < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "95e15af6a14beb3660a270b7686a6d80e5ce0bad483137dd8f6e55b9e084776d"
-    sha256 cellar: :any,                 arm64_ventura:  "46a50b47c60a22bdc702279dd8e87670192255e1512ce9f925a067c049daa0c7"
-    sha256 cellar: :any,                 arm64_monterey: "225bd9e76bdcf19d25386a9987d15aa2a4750581ea44d05cac8e29beb729560c"
-    sha256 cellar: :any,                 sonoma:         "a4db0af253a912c9164c3b1142a98740f2947c1997638d6b85a299afcfd87128"
-    sha256 cellar: :any,                 ventura:        "2fbab5de52f21a9422a222328fa052708e5fd63905519ce91370be39e138b46b"
-    sha256 cellar: :any,                 monterey:       "7622e6bedcc64986cd9a712f524c30971aa277704bf8871c9ea6c5fe90da257e"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "277f72788a93cd7f9eb2585b48b864bc15d40ae055c4569ac7faa6f5e435b061"
+    sha256 cellar: :any,                 arm64_tahoe:   "a116d5592fa317bbda40cb6b5b8704b95adea1f89322d6183a20ec695a3a609e"
+    sha256 cellar: :any,                 arm64_sequoia: "5b49ea62bc28988aee733b93243f04fe061dd9ce89275caf430391f6262f95fc"
+    sha256 cellar: :any,                 arm64_sonoma:  "b677368cd71d24a6477f011838407cb2814e3efd66e35749e27824017ebac958"
+    sha256 cellar: :any,                 sonoma:        "22ab44a28ba6d44ff38f6850eaa040b58ff5139ee5e7519061bb8eb6212807f3"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "39f08ceaa72d2762cc56c642af6bd9f943bd3b8ca6ac82a57a1a53883d640d26"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "8a8f6222a9dcb368f00e9abfd4025b772354644b99ae3e34209690c9ac09bd86"
   end
 
   # stp refuses to build with system bison and flex
   depends_on "bison" => :build
   depends_on "cmake" => :build
   depends_on "flex" => :build
-  depends_on "python-setuptools" => :build
   depends_on "boost"
   depends_on "cryptominisat"
   depends_on "gmp"
   depends_on "minisat"
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   uses_from_macos "perl"
 
+  # Use relative import for library_path
+  patch do
+    url "https://github.com/stp/stp/commit/f81d16c4f15863dd742d220d31db646b5d1c824d.patch?full_index=1"
+    sha256 "c0c38f39371cfc9959df522957f45677f423a6b2d861f4ad87097c9201e00ff4"
+  end
+
   def install
-    python = "python3.12"
+    python = "python3.14"
     site_packages = prefix/Language::Python.site_packages(python)
     site_packages.mkpath
     inreplace "lib/Util/GitSHA1.cpp.in", "@CMAKE_CXX_COMPILER@", ENV.cxx
 
     system "cmake", "-S", ".", "-B", "build",
-                    "-DPYTHON_EXECUTABLE=#{Formula["python@3.12"].opt_bin}/#{python}",
+                    "-DPYTHON_EXECUTABLE=#{which(python)}",
                     "-DPYTHON_LIB_INSTALL_DIR=#{site_packages}",
                     *std_cmake_args
     system "cmake", "--build", "build"
@@ -58,7 +71,7 @@ class Stp < Formula
     EOS
     assert_equal "sat", shell_output("#{bin}/stp --SMTLIB2 prob.smt").chomp
 
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include "stp/c_interface.h"
       #include <assert.h>
       int main() {
@@ -75,7 +88,7 @@ class Stp < Formula
         vc_Destroy(vc);
         return 0;
       }
-    EOS
+    C
 
     expected_output = <<~EOS
       COUNTEREXAMPLE BEGIN:\s
@@ -85,5 +98,19 @@ class Stp < Formula
 
     system ENV.cc, "test.c", "-I#{include}", "-L#{lib}", "-lstp", "-o", "test"
     assert_equal expected_output.chomp, shell_output("./test").chomp
+
+    (testpath/"test.py").write <<~PYTHON
+      import stp
+      s = stp.Solver()
+      a = s.bitvec('a', 32)
+      b = s.bitvec('b', 32)
+      c = s.bitvec('c', 32)
+      s.add(a == 5)
+      s.add(b == 6)
+      s.add(a + b == c)
+      print(s.check())
+    PYTHON
+
+    assert_equal "True\n", shell_output("python3.14 test.py")
   end
 end

@@ -1,8 +1,8 @@
 class Postgrest < Formula
   desc "Serves a fully RESTful API from any existing PostgreSQL database"
   homepage "https://github.com/PostgREST/postgrest"
-  url "https://github.com/PostgREST/postgrest/archive/refs/tags/v12.2.3.tar.gz"
-  sha256 "52b814cb9255c43d7f59f3be50336ae761e103c7c9b083dc4833d2579dd2abcf"
+  url "https://github.com/PostgREST/postgrest/archive/refs/tags/v14.8.tar.gz"
+  sha256 "d87641828f39a487e52ec50bc4a741975de3a1a189beee57d7973f1ecf452e1c"
   license "MIT"
   head "https://github.com/PostgREST/postgrest.git", branch: "main"
 
@@ -12,24 +12,35 @@ class Postgrest < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "68a1b201a0396ca4a9332f68f4a1a039c4239e984dbdd23558778809686237cf"
-    sha256 cellar: :any,                 arm64_ventura:  "73a1a4b53994141d9a64eac3fccc2d174dd899c5ce1c1140b11840929b9ddc25"
-    sha256 cellar: :any,                 arm64_monterey: "d4da709edbc6a334700db58c596495f19690486095c109d175d694346b1c3efc"
-    sha256 cellar: :any,                 sonoma:         "3f8f1332d9b871f608427b742e9d41384a829f21b34bdf1a71a05da6067f8c1e"
-    sha256 cellar: :any,                 ventura:        "24e0aa645cdb647163b94695315dd0cd93d172aed47159caf43e818dee8649a2"
-    sha256 cellar: :any,                 monterey:       "9bc1e3654ec2c4792ca13434f6551af3233d5121db50e1bdfe70c559a041cf5e"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "859074efdeb538c72381300a6a9c9e0454fd0927ef4205dbde0ca6bc69cd60b8"
+    sha256 cellar: :any,                 arm64_tahoe:   "a57fe4fc766688c48b9a0e921128b96a9cd7fe2889d669c334429d8fb275be83"
+    sha256 cellar: :any,                 arm64_sequoia: "0c1414effa1ae0f37b33ae2d7d4a5cc7a3985513d16ba3af13d7d13b81c50b85"
+    sha256 cellar: :any,                 arm64_sonoma:  "9c740551e5b97cc02055fa0c1010c7c7d0a63c36b965099af8a0f849f0712331"
+    sha256 cellar: :any,                 sonoma:        "6f5a68fcb6e3347b7b3984287cecd5fa1de0d3fa9f8ba262052c4c7f17a555c5"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "13b40d918c69508b19ebe43218fc25ba22a6671c1351b6347513bac3ce9e8d49"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "59d25875a12678f6097fc65d6a74db649362216d33de333ab83aaaf726f18539"
   end
 
   depends_on "cabal-install" => :build
-  depends_on "ghc@9.8" => :build
+  depends_on "ghc@9.12" => :build
+  depends_on "gmp"
   depends_on "libpq"
 
-  uses_from_macos "zlib"
+  uses_from_macos "libffi"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
+    # Workaround to build with GHC >= 9.10
+    args = ["--allow-newer=base,fuzzyset:text"]
+    # Workaround for https://github.com/fimad/prometheus-haskell/issues/82
+    args << "--constraint=data-sketches<0.4"
+    # Workaround for newer crypton not working with memory
+    args << "--constraint=crypton<1.1"
+
     system "cabal", "v2-update"
-    system "cabal", "v2-install", "--ignore-project", *std_cabal_v2_args
+    system "cabal", "v2-install", "--ignore-project", *args, *std_cabal_v2_args
   end
 
   test do

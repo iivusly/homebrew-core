@@ -1,20 +1,23 @@
 class Bfs < Formula
   desc "Breadth-first version of find"
   homepage "https://tavianator.com/projects/bfs.html"
-  url "https://github.com/tavianator/bfs/archive/refs/tags/4.0.1.tar.gz"
-  sha256 "8117b76b0a967887278a11470cbfa9e7aeae98f11a7eeb136f456ac462e5ba23"
+  url "https://github.com/tavianator/bfs/archive/refs/tags/4.1.tar.gz"
+  sha256 "7a2ccafc87803b6c42009019e0786cb1307f492c2d61d2fcb0be5dcfdd0049da"
   license "0BSD"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "c0bba5ca44ee38733bd4f6b36f45b368701f7182de7acfca32180fbb7614ad69"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "6be520fda5b754872b7d115e30e1908d00340e9ef286eafcce0057a8fd023141"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "8707a0c519d92c6f38a4fa26a82cc23ce6553d267613eecb6ab127497916541c"
-    sha256 cellar: :any_skip_relocation, sonoma:         "217261ac99dde5e518f2b5d1de00b72a7043771546c404f3dc2570ab271d4600"
-    sha256 cellar: :any_skip_relocation, ventura:        "dc22b663ca732bffa464bfad4c72690c8bcfb8a0572cf9e5a2b906103f0f620a"
-    sha256 cellar: :any_skip_relocation, monterey:       "a32f12ddcf6ea1c81e60310387fbed1e65c5d94e52d2038d3bbde83a0d47b337"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "d6d4a5abcfd4b36d11f61d6115055d55121610f848f1c49a0e57305fafb89ad3"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "2d197823d3ea09db80ff41a0a887b3278c9b1f28db50c683f17f8233a26e95c9"
+    sha256 cellar: :any,                 arm64_sequoia: "cc95849810fe6c692160249cc81d38f1a2cd3e0f5d6f033e0bd9342429116e40"
+    sha256 cellar: :any,                 arm64_sonoma:  "dd75c7c57aa181eb29832ee8c1fb6d4530f8509672d9bfb27e19134309507d2d"
+    sha256 cellar: :any,                 arm64_ventura: "5b0fccf7829272c6a2c9d10c7432b70c912fbb5174eeff38a64ddbbb165bdce2"
+    sha256 cellar: :any,                 sonoma:        "4c121ba08ed118750411c1003e9e078420e98a819258816f133b6ca0c83f2473"
+    sha256 cellar: :any,                 ventura:       "50c78795197923422f8f51d5099dd604027a289701f9af875e7f942e6443e9be"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "2b3a3ee53d9833b58291c0e426afbdd4bac5a880c9bc77585d42e0205fb00785"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "724d215224af855240f52ca8f0ad7fccc8c1d2dace5f770692f699a8dd91c09f"
   end
 
+  depends_on "pkgconf" => :build
   depends_on "oniguruma"
 
   on_macos do
@@ -27,9 +30,11 @@ class Bfs < Formula
     depends_on "liburing"
   end
 
-  def install
-    ENV.llvm_clang if OS.mac? && DevelopmentTools.clang_build_version <= 1300
+  fails_with :clang do
+    build 1300
+  end
 
+  def install
     system "./configure", "--enable-release"
     system "make"
     system "make", "install", "DEST_PREFIX=#{prefix}", "DEST_MANDIR=#{man}"
@@ -39,6 +44,6 @@ class Bfs < Formula
   test do
     touch "foo_file"
     touch "test_file"
-    assert_equal "./test_file", shell_output("#{bin}/bfs -name 'test*' -depth 1").chomp
+    assert_equal "./test_file", shell_output("#{bin}/bfs -name 'test*' -regextype emacs -depth 1").chomp
   end
 end

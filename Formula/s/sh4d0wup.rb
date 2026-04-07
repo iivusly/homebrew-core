@@ -1,45 +1,32 @@
 class Sh4d0wup < Formula
   desc "Signing-key abuse and update exploitation framework"
   homepage "https://github.com/kpcyrd/sh4d0wup"
-  url "https://github.com/kpcyrd/sh4d0wup/archive/refs/tags/v0.9.3.tar.gz"
-  sha256 "7a1258a5dfc48c54cea1092adddb6bcfb1fcf19c7272c0a6a9e1d2d7daee6e12"
+  url "https://github.com/kpcyrd/sh4d0wup/archive/refs/tags/v0.11.0.tar.gz"
+  sha256 "cfc1c38f89d35de6a1822469679a73e5bcb7d5b9f6f8519bee1c3f2948c227f3"
   license "GPL-3.0-or-later"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "6400ac5b11c6bd5e7a057940a73a05824cbe3546ca57f7760f66862975d4dffe"
-    sha256 cellar: :any,                 arm64_ventura:  "9b734ee54116c4288b832c79d3e722c057570e39129ba54163242a74bc0a089d"
-    sha256 cellar: :any,                 arm64_monterey: "3ab07c4272e04dd6625f1c5071f903e3f98334e0055adbb32170df5ae307c565"
-    sha256 cellar: :any,                 sonoma:         "cbb5c0144089d7ade097def6c84e0787a4df4ab567fa9fb4e63ace6e98d6af4d"
-    sha256 cellar: :any,                 ventura:        "6d5f820f18c6fd2c8aace97b28279b6ee73c2a972d62b1a9457beff582b52acb"
-    sha256 cellar: :any,                 monterey:       "0d0abae2ec6ca3d4db3920e3d6b9263100a3092abaea545daefca656d1ef29c3"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "35560cb4308848c78775629660947cb2a49dc473fc605797ea0132458ec058ee"
+    sha256 cellar: :any,                 arm64_tahoe:   "099af7350fa6b8abe3e0cdede86d930f195e06484082345a511ca64eea219b40"
+    sha256 cellar: :any,                 arm64_sequoia: "61e657e991b147d09961e7a31cb8519a0a7d5da5c7549381cc093e6c0f09b865"
+    sha256 cellar: :any,                 arm64_sonoma:  "c6a718415c847755a24e462bdbfcbbfbad1c0c4c5d5346917121bb7b2b817192"
+    sha256 cellar: :any,                 arm64_ventura: "4ad860189d7456e964cb5bf9ca83d58fa42826749fe687f3b7a188df76a84cec"
+    sha256 cellar: :any,                 sonoma:        "5f916dd0b4809e160f6d44f5536d4eec43f75d4dade3b3023dc0667062b73254"
+    sha256 cellar: :any,                 ventura:       "88c8352a703fe178771071b45781127a76a84476104afc1ef1f7042dd0ce9ac4"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "37e09448fc27e25b451c296e0849affe15ee491ebbbaf080756818da61bb6085"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "12ed1c91190821ba799e038cb7723ce0af1ef207b45b74fcc732e8adb233d017"
   end
 
   depends_on "llvm" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "rust" => :build
   depends_on "pgpdump" => :test
 
-  depends_on "gmp"
-  depends_on "nettle"
   depends_on "openssl@3"
   depends_on "pcsc-lite"
   depends_on "xz"
   depends_on "zstd"
 
-  uses_from_macos "bzip2"
-
-  # rust 1.80 build patch, upstream pr ref, https://github.com/kpcyrd/sh4d0wup/pull/32
-  patch do
-    url "https://raw.githubusercontent.com/Homebrew/formula-patches/31f5e08b1c7df4025d7042dafe756e5326151158/sh4d0wup/rust-1.80.patch"
-    sha256 "24f3fc3919ead47c6e38c68a55d8fed0370cfddd92738519de4bd41e4da71e93"
-  end
-
   def install
-    # Work around an Xcode 15 linker issue which causes linkage against LLVM's
-    # libunwind due to it being present in a library search path.
-    ENV.remove "HOMEBREW_LIBRARY_PATHS", Formula["llvm"].opt_lib if DevelopmentTools.clang_build_version >= 15
-
     # Ensure that the `openssl` crate picks up the intended library.
     ENV["OPENSSL_DIR"] = Formula["openssl@3"].opt_prefix
     ENV["OPENSSL_NO_VENDOR"] = "1"
@@ -49,15 +36,9 @@ class Sh4d0wup < Formula
     generate_completions_from_executable(bin/"sh4d0wup", "completions")
   end
 
-  def check_binary_linkage(binary, library)
-    binary.dynamically_linked_libraries.any? do |dll|
-      next false unless dll.start_with?(HOMEBREW_PREFIX.to_s)
-
-      File.realpath(dll) == File.realpath(library)
-    end
-  end
-
   test do
+    require "utils/linkage"
+
     output = shell_output("#{bin}/sh4d0wup keygen tls example.com | openssl x509 -text -noout")
     assert_match("DNS:example.com", output)
 
@@ -74,7 +55,7 @@ class Sh4d0wup < Formula
       Formula["openssl@3"].opt_lib/shared_library("libssl"),
       Formula["openssl@3"].opt_lib/shared_library("libcrypto"),
     ].each do |library|
-      assert check_binary_linkage(bin/"sh4d0wup", library),
+      assert Utils.binary_linked_to_library?(bin/"sh4d0wup", library),
              "No linkage with #{library.basename}! Cargo is likely using a vendored version."
     end
   end

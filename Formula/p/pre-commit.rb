@@ -3,66 +3,66 @@ class PreCommit < Formula
 
   desc "Framework for managing multi-language pre-commit hooks"
   homepage "https://pre-commit.com/"
-  url "https://files.pythonhosted.org/packages/64/10/97ee2fa54dff1e9da9badbc5e35d0bbaef0776271ea5907eccf64140f72f/pre_commit-3.8.0.tar.gz"
-  sha256 "8bb6494d4a20423842e198980c9ecf9f96607a07ea29549e180eef9ae80fe7af"
+  url "https://files.pythonhosted.org/packages/40/f1/6d86a29246dfd2e9b6237f0b5823717f60cad94d47ddc26afa916d21f525/pre_commit-4.5.1.tar.gz"
+  sha256 "eb545fcff725875197837263e977ea257a402056661f09dae08e4b149b030a61"
   license "MIT"
+  revision 1
   head "https://github.com/pre-commit/pre-commit.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "038b2592f3bfeec760057063e5f946e7e47f8f151d9983d77ba6b6cff6b5ba93"
-    sha256 cellar: :any,                 arm64_ventura:  "561bbe8994339275497419d7eef007e8c696222cff93f65d7edd3a0b2f3399d3"
-    sha256 cellar: :any,                 arm64_monterey: "1dd80d9ef9977b5bef5fead88553b984b1170d7d3bb3851682566d0a2386bcb8"
-    sha256 cellar: :any,                 sonoma:         "4eee92e3da7bd144245205b70b8e8d7b45e7b3d10eec74408a45a21527d5742c"
-    sha256 cellar: :any,                 ventura:        "1e1530c1811e238955b98eae971e855bab0e38831e620ac34ab8e5c190e1d8c0"
-    sha256 cellar: :any,                 monterey:       "093e9df946e1e2eefbfa474b165608caaf4fd4b6b6026e7f020ecd8a9ec83aa2"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "bdb2fb46ee71c585ac7260a73a03c682b86f367f04b7d4e28939bbe7e4718fa8"
+    sha256 cellar: :any,                 arm64_tahoe:   "bfe5781f7e3d2edded24cec74fefd25d1d58d37f3045adc3b7280135c84e387e"
+    sha256 cellar: :any,                 arm64_sequoia: "da4bc947ff0eed9ed48016e54f314318458ed42717831f3f745af4b458c1c28a"
+    sha256 cellar: :any,                 arm64_sonoma:  "d21cf318dff70d1c53ee565709903afeca93db5b2c6bf1afb6163b2af9f8d9de"
+    sha256 cellar: :any,                 sonoma:        "8a14b50a953534f2f63d448c62039a64fd61297bf8cc74a13c3f87ef15783eec"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "85b66c178aeca53dc18def7133c75316bb86d550c882a704d93e34c46571b39a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "af1cdac01361e5fb75c642aa81742155864ca6068251b09fba59c3d380068cc3"
   end
 
   depends_on "libyaml"
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   resource "cfgv" do
-    url "https://files.pythonhosted.org/packages/11/74/539e56497d9bd1d484fd863dd69cbbfa653cd2aa27abfe35653494d85e94/cfgv-3.4.0.tar.gz"
-    sha256 "e52591d4c5f5dead8e0f673fb16db7949d2cfb3f7da4582893288f0ded8fe560"
+    url "https://files.pythonhosted.org/packages/4e/b5/721b8799b04bf9afe054a3899c6cf4e880fcf8563cc71c15610242490a0c/cfgv-3.5.0.tar.gz"
+    sha256 "d5b1034354820651caa73ede66a6294d6e95c1b00acc5e9b098e917404669132"
   end
 
   resource "distlib" do
-    url "https://files.pythonhosted.org/packages/c4/91/e2df406fb4efacdf46871c25cde65d3c6ee5e173b7e5a4547a47bae91920/distlib-0.3.8.tar.gz"
-    sha256 "1530ea13e350031b6312d8580ddb6b27a104275a31106523b8f123787f494f64"
+    url "https://files.pythonhosted.org/packages/96/8e/709914eb2b5749865801041647dc7f4e6d00b549cfe88b65ca192995f07c/distlib-0.4.0.tar.gz"
+    sha256 "feec40075be03a04501a973d81f633735b4b69f98b05450592310c0f401a4e0d"
   end
 
   resource "filelock" do
-    url "https://files.pythonhosted.org/packages/08/dd/49e06f09b6645156550fb9aee9cc1e59aba7efbc972d665a1bd6ae0435d4/filelock-3.15.4.tar.gz"
-    sha256 "2207938cbc1844345cb01a5a95524dae30f0ce089eba5b00378295a17e3e90cb"
+    url "https://files.pythonhosted.org/packages/1d/65/ce7f1b70157833bf3cb851b556a37d4547ceafc158aa9b34b36782f23696/filelock-3.20.3.tar.gz"
+    sha256 "18c57ee915c7ec61cff0ecf7f0f869936c7c30191bb0cf406f1341778d0834e1"
   end
 
   resource "identify" do
-    url "https://files.pythonhosted.org/packages/32/f4/8e8f7db397a7ce20fbdeac5f25adaf567fc362472432938d25556008e03a/identify-2.6.0.tar.gz"
-    sha256 "cb171c685bdc31bcc4c1734698736a7d5b6c8bf2e0c15117f4d469c8640ae5cf"
+    url "https://files.pythonhosted.org/packages/5b/8d/e8b97e6bd3fb6fb271346f7981362f1e04d6a7463abd0de79e1fda17c067/identify-2.6.16.tar.gz"
+    sha256 "846857203b5511bbe94d5a352a48ef2359532bc8f6727b5544077a0dcfb24980"
   end
 
   resource "nodeenv" do
-    url "https://files.pythonhosted.org/packages/43/16/fc88b08840de0e0a72a2f9d8c6bae36be573e475a6326ae854bcc549fc45/nodeenv-1.9.1.tar.gz"
-    sha256 "6ec12890a2dab7946721edbfbcd91f3319c6ccc9aec47be7c7e6b7011ee6645f"
+    url "https://files.pythonhosted.org/packages/24/bf/d1bda4f6168e0b2e9e5958945e01910052158313224ada5ce1fb2e1113b8/nodeenv-1.10.0.tar.gz"
+    sha256 "996c191ad80897d076bdfba80a41994c2b47c68e224c542b48feba42ba00f8bb"
   end
 
   resource "platformdirs" do
-    url "https://files.pythonhosted.org/packages/f5/52/0763d1d976d5c262df53ddda8d8d4719eedf9594d046f117c25a27261a19/platformdirs-4.2.2.tar.gz"
-    sha256 "38b7b51f512eed9e84a22788b4bce1de17c0adb134d6becb09836e37d8654cd3"
+    url "https://files.pythonhosted.org/packages/cf/86/0248f086a84f01b37aaec0fa567b397df1a119f73c16f6c7a9aac73ea309/platformdirs-4.5.1.tar.gz"
+    sha256 "61d5cdcc6065745cdd94f0f878977f8de9437be93de97c1c12f853c9c0cdcbda"
   end
 
   resource "pyyaml" do
-    url "https://files.pythonhosted.org/packages/cd/e5/af35f7ea75cf72f2cd079c95ee16797de7cd71f29ea7c68ae5ce7be1eda0/PyYAML-6.0.1.tar.gz"
-    sha256 "bfdf460b1736c775f2ba9f6a92bca30bc2095067b8a9d77876d1fad6cc3b4a43"
+    url "https://files.pythonhosted.org/packages/05/8e/961c0007c59b8dd7729d542c61a4d537767a59645b82a0b521206e1e25c2/pyyaml-6.0.3.tar.gz"
+    sha256 "d76623373421df22fb4cf8817020cbb7ef15c725b9d5e45f17e189bfc384190f"
   end
 
   resource "virtualenv" do
-    url "https://files.pythonhosted.org/packages/68/60/db9f95e6ad456f1872486769c55628c7901fb4de5a72c2f7bdd912abf0c1/virtualenv-20.26.3.tar.gz"
-    sha256 "4c43a2a236279d9ea36a0d76f98d84bd6ca94ac4e0f4a3b9d46d05e10fea542a"
+    url "https://files.pythonhosted.org/packages/aa/a3/4d310fa5f00863544e1d0f4de93bddec248499ccf97d4791bc3122c9d4f3/virtualenv-20.36.1.tar.gz"
+    sha256 "8befb5c81842c641f8ee658481e42641c68b5eab3521d8e092d18320902466ba"
   end
 
   def python3
-    "python3.12"
+    "python3.14"
   end
 
   def install
@@ -74,31 +74,15 @@ class PreCommit < Formula
     virtualenv_install_with_resources
   end
 
-  # Avoid relative paths
-  def post_install
-    xy = Language::Python.major_minor_version Formula["python@3.12"].opt_bin/python3
-    dirs_to_fix = [libexec/"lib/python#{xy}"]
-    dirs_to_fix << (libexec/"bin") if OS.linux?
-    dirs_to_fix.each do |folder|
-      folder.each_child do |f|
-        next unless f.symlink?
-
-        realpath = f.realpath
-        rm f
-        ln_s realpath, f
-      end
-    end
-  end
-
   test do
     system "git", "init"
-    (testpath/".pre-commit-config.yaml").write <<~EOS
+    (testpath/".pre-commit-config.yaml").write <<~YAML
       repos:
       -   repo: https://github.com/pre-commit/pre-commit-hooks
           rev: v0.9.1
           hooks:
           -   id: trailing-whitespace
-    EOS
+    YAML
     system bin/"pre-commit", "install"
     (testpath/"f").write "hi\n"
     system "git", "add", "f"

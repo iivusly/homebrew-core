@@ -6,8 +6,9 @@ class RofsFiltered < Formula
   license "GPL-2.0-or-later"
 
   bottle do
-    rebuild 2
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "a07f54de644092a439c5ae5a537aca17499ea8b1dad446bb1610f1fb30aaf5cf"
+    rebuild 3
+    sha256 cellar: :any_skip_relocation, arm64_linux:  "01d57c6c071aacd6dc92a36f807b1e718f6178b8078f1d871d59941a7228670c"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "ae07e1e4a0daa79c067329aeafc4078dd7f74c793ccb1a2ade7c3dedf0f05ade"
   end
 
   depends_on "cmake" => :build
@@ -15,9 +16,12 @@ class RofsFiltered < Formula
   depends_on :linux # on macOS, requires closed-source macFUSE
 
   def install
-    mkdir "build" do
-      system "cmake", "..", "-DCMAKE_INSTALL_SYSCONFDIR=#{etc}", *std_cmake_args
-      system "make", "install"
-    end
+    system "cmake", "-S", ".", "-B", "build", "-DCMAKE_INSTALL_SYSCONFDIR=#{etc}", *std_cmake_args
+    system "cmake", "--build", "build"
+    system "cmake", "--install", "build"
+  end
+
+  test do
+    assert_match version.to_s, shell_output("#{bin}/rofs-filtered --version 2>&1")
   end
 end

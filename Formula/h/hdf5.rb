@@ -1,73 +1,75 @@
 class Hdf5 < Formula
   desc "File format designed to store large amounts of data"
-  homepage "https://www.hdfgroup.org/HDF5"
-  url "https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.14/hdf5-1.14.3/src/hdf5-1.14.3.tar.bz2"
-  sha256 "9425f224ed75d1280bb46d6f26923dd938f9040e7eaebf57e66ec7357c08f917"
+  homepage "https://www.hdfgroup.org/solutions/hdf5/"
+  url "https://github.com/HDFGroup/hdf5/releases/download/2.1.1/hdf5-2.1.1.tar.gz"
+  sha256 "efff93b5a904d66e8f626d7da60b5eedc9faf544be27dbabbaa87967b8ad798b"
   license "BSD-3-Clause"
-  revision 1
   version_scheme 1
+  compatibility_version 1
 
-  # This regex isn't matching filenames within href attributes (as we normally
-  # do on HTML pages) because this page uses JavaScript to handle the download
-  # buttons and the HTML doesn't contain the related URLs.
+  # Upstream maintains multiple major/minor versions and the "latest" release
+  # may be for a lower version, so we have to check multiple releases to
+  # identify the highest version.
   livecheck do
-    url "https://www.hdfgroup.org/downloads/hdf5/source-code/"
-    regex(/>\s*hdf5[._-]v?(\d+(?:\.\d+)+)(?:-\d+)?\.t/i)
+    url :stable
+    strategy :github_releases
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "0bd0281269f954e5d6cea61797cbe1d285040c00dc46610b97ba35a6bebc0393"
-    sha256 cellar: :any,                 arm64_ventura:  "8675de344a05dc34325ee71ecaceff04795a70ba4c3c4c26ef5916f370b2002e"
-    sha256 cellar: :any,                 arm64_monterey: "395a707db01aee75cc3e287b687c15bc34765a233fb3636f2151f5ca98a2dc5d"
-    sha256 cellar: :any,                 sonoma:         "f1b493887ef96b93a7732f16ec1fde0b4b4543d4bf244392a4caabbb34955301"
-    sha256 cellar: :any,                 ventura:        "3ec0dd000b145448ee040dfe1d8d9e69e90347df6a951a64ceb775fab96f4a37"
-    sha256 cellar: :any,                 monterey:       "3927c9287df13171085b2fabe23ece9d526024afe9be82d24fb475f5b670f252"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "95fb350efd5775377bd85f3eb5e4b6588d3d728323b27a1e3c39f51682431794"
+    sha256 cellar: :any,                 arm64_tahoe:   "114c9d8e9bea42989f21fb2910f29aa80906bd6924c6d332783d2b38c7a63419"
+    sha256 cellar: :any,                 arm64_sequoia: "c6fbf7bfe222ee75a8eec078486f0317e56d7d9c154f22dd135eceda927dfebf"
+    sha256 cellar: :any,                 arm64_sonoma:  "b5f41add9cb70b7f5325fef0be693a8433ea60b72b27acf70c68b043f5e2055e"
+    sha256 cellar: :any,                 sonoma:        "23e4bf63102a12668a5a1cf07e610a46ced3a917b818fa88592cf721dc7e87e1"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "55e6b9b7905a97cc4bb846368bc88f39f9717c8033cf9c2591d15b5b6e47e0a3"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "e8e15df7406f1ae8ef07a41c86c8390a6bf931947becc7de20864206878ad86d"
   end
 
   depends_on "cmake" => :build
   depends_on "gcc" # for gfortran
   depends_on "libaec"
-  depends_on "pkg-config"
+  depends_on "pkgconf"
 
-  uses_from_macos "zlib"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   conflicts_with "hdf5-mpi", because: "hdf5-mpi is a variant of hdf5, one can only use one or the other"
 
   def install
-    ENV["libaec_DIR"] = Formula["libaec"].opt_prefix.to_s
-    args = %w[
+    # Avoid c/c++ shims in settings files
+    inreplace_c_files = %w[
+      src/H5build_settings.cmake.c.in
+      src/libhdf5.settings.in
+    ]
+    inreplace inreplace_c_files do |s|
+      s.gsub! "@CMAKE_C_COMPILER@", ENV.cc
+      s.gsub! "@CMAKE_CXX_COMPILER@", ENV.cxx
+    end
+
+    # CMake FortranCInterface_VERIFY fails with LTO on Linux due to different GCC and GFortran versions
+    ENV.append "FFLAGS", "-fno-lto" if OS.linux?
+
+    args = %W[
+      -DHDF5_H5CC_C_COMPILER=#{ENV.cc}
+      -DHDF5_H5CC_CXX_COMPILER=#{ENV.cxx}
       -DHDF5_USE_GNU_DIRS:BOOL=ON
       -DHDF5_INSTALL_CMAKE_DIR=lib/cmake/hdf5
       -DHDF5_BUILD_FORTRAN:BOOL=ON
       -DHDF5_BUILD_CPP_LIB:BOOL=ON
       -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=ON
+      -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=ON
     ]
+
+    # https://github.com/HDFGroup/hdf5/issues/4310
+    args << "-DHDF5_ENABLE_NONSTANDARD_FEATURE_FLOAT16:BOOL=OFF"
+
     system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
-
-    # Avoid c shims in settings files
-    inreplace_c_files = %w[
-      build/src/H5build_settings.c
-      build/src/libhdf5.settings
-      build/CMakeFiles/h5cc
-      build/CMakeFiles/h5hlcc
-    ]
-    inreplace inreplace_c_files, Superenv.shims_path/ENV.cc, ENV.cc
-
-    # Avoid cpp shims in settings files
-    inreplace_cxx_files = %w[
-      build/CMakeFiles/h5c++
-      build/CMakeFiles/h5hlc++
-    ]
-    inreplace_cxx_files << "build/src/libhdf5.settings" if OS.linux?
-    inreplace inreplace_cxx_files, Superenv.shims_path/ENV.cxx, ENV.cxx
-
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <stdio.h>
       #include "hdf5.h"
       int main()
@@ -75,11 +77,11 @@ class Hdf5 < Formula
         printf("%d.%d.%d\\n", H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);
         return 0;
       }
-    EOS
+    C
     system bin/"h5cc", "test.c"
-    assert_equal version.to_s, shell_output("./a.out").chomp
+    assert_equal version.major_minor_patch.to_s, shell_output("./a.out").chomp
 
-    (testpath/"test.f90").write <<~EOS
+    (testpath/"test.f90").write <<~FORTRAN
       use hdf5
       integer(hid_t) :: f, dspace, dset
       integer(hsize_t), dimension(2) :: dims = [2, 2]
@@ -105,9 +107,9 @@ class Hdf5 < Formula
       if (error /= 0) call abort
       write (*,"(I0,'.',I0,'.',I0)") major, minor, rel
       end
-    EOS
+    FORTRAN
     system bin/"h5fc", "test.f90"
-    assert_equal version.to_s, shell_output("./a.out").chomp
+    assert_equal version.major_minor_patch.to_s, shell_output("./a.out").chomp
 
     # Make sure that it was built with SZIP/libaec
     config = shell_output("#{bin}/h5cc -showconfig")

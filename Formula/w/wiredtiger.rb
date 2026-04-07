@@ -1,8 +1,8 @@
 class Wiredtiger < Formula
   desc "High performance NoSQL extensible platform for data management"
   homepage "https://source.wiredtiger.com/"
-  url "https://github.com/wiredtiger/wiredtiger/archive/refs/tags/11.2.0.tar.gz"
-  sha256 "90d1392a9b10dae5bda02d476cb3204331dcf94b3e47ce5e2ab4d4d9b4dd198c"
+  url "https://github.com/wiredtiger/wiredtiger/archive/refs/tags/11.3.1.tar.gz"
+  sha256 "ac0417c10cecc686baff5fdc00a7872003fc007993163bafba387fad903d5091"
   license any_of: ["GPL-2.0-only", "GPL-3.0-only"]
 
   livecheck do
@@ -11,16 +11,15 @@ class Wiredtiger < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "e197fa1445bd63c676205773ce8e923ddd41710fdf9538f71ba17607630254eb"
-    sha256 cellar: :any,                 arm64_ventura:  "85bcc6b06e613f65e191e0a7d62a0f7f270b20c56cbff82f3ece7b7c12f3a2cd"
-    sha256 cellar: :any,                 arm64_monterey: "56d763ad1949f872340d073ffee0a856bb93b36c95cf4677efece640d276b59b"
-    sha256 cellar: :any,                 sonoma:         "b1a0251185e768cfe22c5a18d16315e2323224b23c06dd8c0a2c5f53ed913d9c"
-    sha256 cellar: :any,                 ventura:        "800a9c02a36cf7896635424ea417cb284bdff6374a001d5f25889c01c7184130"
-    sha256 cellar: :any,                 monterey:       "0a0e6b9bbecd6fd7dfc3f8b733034c4c9be1da777dbd03cf2a8999bcefb6a715"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "1aaf52d23a2472908928ddb309d4f7aa08143e57a178c698805ca1dd3a00bdc9"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "dfd76ff5a1f4613d737c82c0ebb8bcbf5cb79faf7a11a2b103c689bccfbed8f8"
+    sha256 cellar: :any,                 arm64_sequoia: "a7462c10690b4b271a507ebe77a9401f6407fd7730d6cffc3dd91f46cecc7f02"
+    sha256 cellar: :any,                 arm64_sonoma:  "69d074c898cc7496956c98b3bfe5e65e69ffbd164cb8797f33c004de39e15b2d"
+    sha256 cellar: :any,                 sonoma:        "98b5ac96a1369d4e5f87e1538fc4c1d1888ce15949aa901e336561297796fa43"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "ba8058cc496593f04586db264681fa2698427402b7b44de3cccc99402596f2df"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "440d19c8f513fc401876a626f5cbba6ba4750ef959c44bf3106481ec50277098"
   end
 
-  depends_on "ccache" => :build
   depends_on "cmake" => :build
   depends_on "swig" => :build
   depends_on "lz4"
@@ -28,10 +27,19 @@ class Wiredtiger < Formula
   depends_on "zstd"
 
   uses_from_macos "python" => :build
-  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
+
+  conflicts_with "worktrunk", because: "both install `wt` binaries"
 
   def install
+    # CRC32 hardware detection: https://github.com/wiredtiger/wiredtiger/tree/develop/src/checksum
+    ENV.runtime_cpu_detection
+
     args = %W[
+      -DCCACHE_FOUND=CCACHE_FOUND-NOTFOUND
       -DHAVE_BUILTIN_EXTENSION_SNAPPY=1
       -DHAVE_BUILTIN_EXTENSION_ZLIB=1
       -DCMAKE_INSTALL_RPATH=#{rpath}

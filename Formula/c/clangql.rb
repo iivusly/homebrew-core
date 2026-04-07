@@ -1,19 +1,18 @@
 class Clangql < Formula
   desc "Run a SQL like language to perform queries on C/C++ files"
   homepage "https://github.com/AmrDeveloper/ClangQL"
-  url "https://github.com/AmrDeveloper/ClangQL/archive/refs/tags/0.6.0.tar.gz"
-  sha256 "a3ccd60735a57effe8a2aa9ee80ff3fabd1dc0a186365e20b506aa442edc3ac5"
+  url "https://github.com/AmrDeveloper/ClangQL/archive/refs/tags/0.23.0.tar.gz"
+  sha256 "89167e051aa0bd032109e86b56597279c74c6ed09bae4e86331b846696bc02bd"
   license "MIT"
   head "https://github.com/AmrDeveloper/ClangQL.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "dbc98d292a756d55349252eb6b7ef7ba89417928f2dcb300665c16f6d1ae59c8"
-    sha256 cellar: :any,                 arm64_ventura:  "3a0eb7447e69d4fc62f832b6b392ea5069e50b291c7ea9b7cb1d4e438a27c8c1"
-    sha256 cellar: :any,                 arm64_monterey: "85bc2eabea8e81c16da89f60a4ff077f8e53ef505244fdcc25cbb68394a79484"
-    sha256 cellar: :any,                 sonoma:         "e269b472367849b0c751912a3b11135ebc817aab0fe2c0b05f11fdf4656e2508"
-    sha256 cellar: :any,                 ventura:        "c3de99b620d3b8d8191e2af49a5c705d1c9a75f5a9c6aaf0c21d75babd673e00"
-    sha256 cellar: :any,                 monterey:       "02eb426cd8bde020723c39b704873b3c4fba928856210911dbfef4217ab8949b"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "6a14c174a32003873e6dbbafd965b2683c3f91312b48a34819fc4b543a61cd7e"
+    sha256 cellar: :any,                 arm64_tahoe:   "02785e5e478d81ab65d4ba22bb52d9d63de81d4c33485363c972ebd6f6ae804e"
+    sha256 cellar: :any,                 arm64_sequoia: "eef86c95f3a709e4e4049ffb6ff811fb3940d46a8875cb46037a8a0b8a452030"
+    sha256 cellar: :any,                 arm64_sonoma:  "0d638c4d2f0eb2d515dcff9f522fc1ef94f6bcd6569cfee7a71ecfe7ff5249f8"
+    sha256 cellar: :any,                 sonoma:        "4b164924eb731e51b32b6d7bba098b3bf2fa3e6557b85d64d3641649e1f2fac5"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "cfeb186e26729d019ced82cf94306af7ccc13ef03cc7a6d7d5d97c6332b7044a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "b74cae08c14d98f1e672d1ea149d28a299fcb698a6d657a1216c0e5ef95dca2e"
   end
 
   depends_on "rust" => :build
@@ -24,12 +23,12 @@ class Clangql < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       int main()
       {
           return 0;
       }
-    EOS
+    C
 
     output = JSON.parse(shell_output("#{bin}/clangql -f test.c -q 'SELECT name FROM functions' -o json"))
     assert_equal "main", output.first["name"]

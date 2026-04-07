@@ -1,9 +1,10 @@
 class Nss < Formula
   desc "Libraries for security-enabled client and server applications"
   homepage "https://firefox-source-docs.mozilla.org/security/nss/index.html"
-  url "https://ftp.mozilla.org/pub/security/nss/releases/NSS_3_103_RTM/src/nss-3.103.tar.gz"
-  sha256 "7b4ab657f772dc7520c46e8d481940b292dcfc6a4c90150a7c26672384cee962"
+  url "https://ftp.mozilla.org/pub/security/nss/releases/NSS_3_122_RTM/src/nss-3.122.tar.gz"
+  sha256 "2699478b843b9f09c61f85341578df514463a0069447c816bef0d59bd800d777"
   license "MPL-2.0"
+  compatibility_version 1
 
   livecheck do
     url "https://ftp.mozilla.org/pub/security/nss/releases/"
@@ -14,24 +15,29 @@ class Nss < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "13b64e612f1917e15d72228145f2077b51b796cf2b089516c3dc1570a660033c"
-    sha256 cellar: :any,                 arm64_ventura:  "3b3b58524069e2b914f8073fb9d9e5edfebabdfedc06341c1ed6174d4767830d"
-    sha256 cellar: :any,                 arm64_monterey: "70d4b06731f185234c8853a714b8357ba91b67fffe005cf74772b1b7ede650a3"
-    sha256 cellar: :any,                 sonoma:         "5a8a462a1d123cf4942560ddb69f26fa6d4a00ddb2ad17cc222880656e1b7100"
-    sha256 cellar: :any,                 ventura:        "c269abcdd66e5a69bbeabc548654ba5aa7f66c8d68557130900aa65b802b957c"
-    sha256 cellar: :any,                 monterey:       "5f6f4a93a1da6f6a8b8d8ae9704b191b10426673b3e63df8a28fba4d8f433aaf"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "cafff175c33815fceff36031591002a74cc1b4fc89bf7e5e319ec952a6eb9123"
+    sha256 cellar: :any,                 arm64_tahoe:   "2ff9225460dea6c23165348ae5615fff897ef138395dbd0358ee0254dc7d5cb8"
+    sha256 cellar: :any,                 arm64_sequoia: "99af24353e0ef6e2afde5edd263ca2d0bdbf5b53eade9c5dfb064116d964f8d5"
+    sha256 cellar: :any,                 arm64_sonoma:  "1114d9c50108c6a572e4f832026a658795cb8b95951791e87c9aecb548ac077b"
+    sha256 cellar: :any,                 sonoma:        "8ea2d7a168c5346cf7240aa11e2f75bbcc6d92b0d6f803f2db3b8e2375094c83"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "360aa324e754485d549126d56572504ee1d32346505fbf929f1e7baec366f02f"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "38f7c06cccafc7525f9475f8b9cb0692b2e88576ac68bce71ffd77a7617939a9"
   end
 
   depends_on "nspr"
 
   uses_from_macos "sqlite"
-  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   conflicts_with "arabica", because: "both install `mangle` binaries"
   conflicts_with "resty", because: "both install `pp` binaries"
 
   def install
+    # Fails on arm64 macOS for some reason with:
+    #   aes-armv8.c:14:2: error: "Compiler option is invalid"
+    ENV.runtime_cpu_detection if OS.linux? || Hardware::CPU.intel?
     ENV.deparallelize
     cd "nss"
 
@@ -61,7 +67,7 @@ class Nss < Formula
       cp file, bin unless file.include? ".dylib"
     end
 
-    include_target = include + "nss"
+    include_target = include/"nss"
     include_target.mkpath
     Dir.glob("public/{dbm,nss}/*") { |file| cp file, include_target }
 

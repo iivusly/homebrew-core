@@ -1,31 +1,39 @@
 class Activemq < Formula
   desc "Apache ActiveMQ: powerful open source messaging server"
   homepage "https://activemq.apache.org/"
-  url "https://www.apache.org/dyn/closer.lua?path=activemq/6.1.3/apache-activemq-6.1.3-bin.tar.gz"
-  mirror "https://archive.apache.org/dist/activemq/6.1.3/apache-activemq-6.1.3-bin.tar.gz"
-  sha256 "cad14e816e990f1312709ebfc228f42895d8c54c652d3cd56f0b5145635dc794"
+  url "https://www.apache.org/dyn/closer.lua?path=activemq/6.2.3/apache-activemq-6.2.3-bin.tar.gz"
+  mirror "https://archive.apache.org/dist/activemq/6.2.3/apache-activemq-6.2.3-bin.tar.gz"
+  sha256 "750d42313c6852e95b1d11dbd994afec41ed4f6cbc021b9a55dbff7f1bf42878"
   license "Apache-2.0"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "fd0dfc580d6eb5d4ce59737872fa38e3f5249308364104cf26c5eff8e65a80f2"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "a29869c57b4bd7467181a1e1ad99e8a2716fa3e523f66dfb6ca1bf21afbc47be"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "583263dcbe34a451a96b1d0f4d049ea0a92e5b6b02227663f7a147e71f6ec3fa"
-    sha256 cellar: :any_skip_relocation, sonoma:         "ecfd2e949264406479e5002d43715258316155ee59d63cb05bf71f3f7de498bc"
-    sha256 cellar: :any_skip_relocation, ventura:        "ddf65ea177a13d2b13d043a9e21bba44cb8a03d8cb3d58c340f6209ffc25a523"
-    sha256 cellar: :any_skip_relocation, monterey:       "ed437a8fb40d66072e52dc1965e44907324a20265ce3843efd0819a7f4ac3a9c"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "bd1bcab1a02b097d92e4a35aad0f2a7426193db590e473d1405254690eb3d071"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "84332de537f92169b3e3d0f8a60940c7aa8b476cc199c4040c34b816fb0a8ce1"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "a60dd628c2c7ad0ed26fda9eb8a13a9b1fd5491cb85aeca1b8da6a3548f88f03"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "d2caee31b53c4decb828c196b6f287fe1a6f14363c77f1661589a76876e5c150"
+    sha256 cellar: :any_skip_relocation, sonoma:        "6c98298aec5158973e2015047959810b8545f3d609c8d51907c0cbb9684d8c69"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "cf2b51bc4fa630de2cf1cf21e5da10da77f80a0015f3b84ffb8a79962e38c055"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "d9f2d233fd9097fe9aea3a5418f9fb8333a7e13ffb0615d860256224ac9bdc14"
   end
 
   depends_on "java-service-wrapper"
   depends_on "openjdk"
 
   def install
-    useless = OS.mac? ? "linux" : "{macosx,linux-x86-32}"
-    buildpath.glob("bin/#{useless}*").map(&:rmtree)
+    if OS.mac?
+      wrapper_dir = "macosx"
+    else
+      # https://github.com/apache/activemq/blob/main/assembly/src/release/bin/linux-x86-64/activemq#L176-L183
+      arch = Hardware::CPU.intel? ? "x86" : Utils.safe_popen_read("uname", "-p").downcase.strip
+      wrapper_dir = "#{OS.kernel_name.downcase}-#{arch}-#{Hardware::CPU.bits}"
+      odie "Remove workaround for arm64 linux!" unless buildpath.glob("bin/linux-{arm,aarch}*").empty?
+      mv "bin/linux-x86-64", "bin/#{wrapper_dir}" unless Hardware::CPU.intel?
+    end
+
+    useless = OS.mac? ? "linux" : "macosx"
+    rm_r buildpath.glob("bin/#{useless}*")
+    rm buildpath.glob("bin/#{wrapper_dir}/{wrapper,libwrapper.{so,jnilib}}")
 
     libexec.install buildpath.children
-    wrapper_dir = OS.mac? ? "macosx" : "#{OS.kernel_name.downcase}-#{Hardware::CPU.arch}".tr("_", "-")
-    libexec.glob("bin/#{wrapper_dir}/{wrapper,libwrapper.{so,jnilib}}").map(&:unlink)
     (bin/"activemq").write_env_script libexec/"bin/activemq", Language::Java.overridable_java_home_env
 
     wrapper = Formula["java-service-wrapper"].opt_libexec

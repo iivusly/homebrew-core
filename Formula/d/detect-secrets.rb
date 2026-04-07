@@ -6,46 +6,47 @@ class DetectSecrets < Formula
   url "https://files.pythonhosted.org/packages/69/67/382a863fff94eae5a0cf05542179169a1c49a4c8784a9480621e2066ca7d/detect_secrets-1.5.0.tar.gz"
   sha256 "6bb46dcc553c10df51475641bb30fd69d25645cc12339e46c824c1e0c388898a"
   license "Apache-2.0"
-  revision 2
+  revision 7
   head "https://github.com/Yelp/detect-secrets.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "9e5624cbe73f49b1ebbffcfda700f1f623bb6582258572bde646c42a00fe39af"
-    sha256 cellar: :any,                 arm64_ventura:  "e26c739780cc319a3b8cef1d1e1cb905eb0de581eab3b7276e902d07b8aa1af2"
-    sha256 cellar: :any,                 arm64_monterey: "367476416d869fe677128fcbfca1ee187e03cb812761f4a21e1ef8000d2fc231"
-    sha256 cellar: :any,                 sonoma:         "f76bcb80d787214a14cf6bf48fe99406b498dcecc80ec2ac14bc3854f52c935a"
-    sha256 cellar: :any,                 ventura:        "be69b69450ff8ad0c1db35952d9d90e9c64506fda2aeb74bbcff372381d53e81"
-    sha256 cellar: :any,                 monterey:       "2352b1aa00aea7861a7ca3b65ecc839db820a1800156c8ffe402fd9a37f57335"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "728c3b633a97b44e60129ae6a792ade97cad0ac8bc500bb043370be32be81d98"
+    sha256 cellar: :any,                 arm64_tahoe:   "510a7e52266614e8f7c1cb141d9167d4eb9a17b453e2105c773482b3af17965d"
+    sha256 cellar: :any,                 arm64_sequoia: "116b437e5912a07d51a8aa7c783998eeb9633652e6a2a99a5cb6c65e897ea4d9"
+    sha256 cellar: :any,                 arm64_sonoma:  "059c1855e513cb3f38916c67f490387f37281f0b1e6098a9b339b87645f177e3"
+    sha256 cellar: :any,                 sonoma:        "ed7197d05d601754669f46d38c94369bf40de0c371970b84e67c044f42a58523"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "2cecc92f480ad22f7c6d703042b0fc07f2abba3ea882fb1af8c72dd57955f7dc"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "7c779b82565efa8b0ed07f99c3c286b998290595523c721e3df35f96c892290c"
   end
 
-  depends_on "certifi"
+  depends_on "certifi" => :no_linkage
   depends_on "libyaml"
-  depends_on "python@3.12"
+  depends_on "python@3.14"
+
+  pypi_packages exclude_packages: "certifi"
 
   resource "charset-normalizer" do
-    url "https://files.pythonhosted.org/packages/63/09/c1bc53dab74b1816a00d8d030de5bf98f724c52c1635e07681d312f20be8/charset-normalizer-3.3.2.tar.gz"
-    sha256 "f30c3cb33b24454a82faecaf01b19c18562b1e89558fb6c56de4d9118a032fd5"
+    url "https://files.pythonhosted.org/packages/7b/60/e3bec1881450851b087e301bedc3daa9377a4d45f1c26aa90b0b235e38aa/charset_normalizer-3.4.6.tar.gz"
+    sha256 "1ae6b62897110aa7c79ea2f5dd38d1abca6db663687c0b1ad9aed6f6bae3d9d6"
   end
 
   resource "idna" do
-    url "https://files.pythonhosted.org/packages/21/ed/f86a79a07470cb07819390452f178b3bef1d375f2ec021ecfc709fc7cf07/idna-3.7.tar.gz"
-    sha256 "028ff3aadf0609c1fd278d8ea3089299412a7a8b9bd005dd08b9f8285bcb5cfc"
+    url "https://files.pythonhosted.org/packages/6f/6d/0703ccc57f3a7233505399edb88de3cbd678da106337b9fcde432b65ed60/idna-3.11.tar.gz"
+    sha256 "795dafcc9c04ed0c1fb032c2aa73654d8e8c5023a7df64a53f39190ada629902"
   end
 
   resource "pyyaml" do
-    url "https://files.pythonhosted.org/packages/cd/e5/af35f7ea75cf72f2cd079c95ee16797de7cd71f29ea7c68ae5ce7be1eda0/PyYAML-6.0.1.tar.gz"
-    sha256 "bfdf460b1736c775f2ba9f6a92bca30bc2095067b8a9d77876d1fad6cc3b4a43"
+    url "https://files.pythonhosted.org/packages/05/8e/961c0007c59b8dd7729d542c61a4d537767a59645b82a0b521206e1e25c2/pyyaml-6.0.3.tar.gz"
+    sha256 "d76623373421df22fb4cf8817020cbb7ef15c725b9d5e45f17e189bfc384190f"
   end
 
   resource "requests" do
-    url "https://files.pythonhosted.org/packages/63/70/2bf7780ad2d390a8d301ad0b550f1581eadbd9a20f896afe06353c2a2913/requests-2.32.3.tar.gz"
-    sha256 "55365417734eb18255590a9ff9eb97e9e1da868d4ccd6402399eaf68af20a760"
+    url "https://files.pythonhosted.org/packages/34/64/8860370b167a9721e8956ae116825caff829224fbca0ca6e7bf8ddef8430/requests-2.33.0.tar.gz"
+    sha256 "c7ebc5e8b0f21837386ad0e1c8fe8b829fa5f544d8df3b2253bff14ef29d7652"
   end
 
   resource "urllib3" do
-    url "https://files.pythonhosted.org/packages/43/6d/fa469ae21497ddc8bc93e5877702dca7cb8f911e337aca7452b5724f1bb6/urllib3-2.2.2.tar.gz"
-    sha256 "dd505485549a7a552833da5e6063639d0d177c04f23bc3864e41e5dc5f612168"
+    url "https://files.pythonhosted.org/packages/c7/24/5f1b3bdffd70275f6661c76461e25f024d5a38a46f04aaca912426a2b1d3/urllib3-2.6.3.tar.gz"
+    sha256 "1b62b6884944a57dbe321509ab94fd4d3b307075e0c2eae991ac71ee15ad38ed"
   end
 
   def install

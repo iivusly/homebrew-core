@@ -1,22 +1,21 @@
 class Ord < Formula
   desc "Index, block explorer, and command-line wallet"
   homepage "https://ordinals.com/"
-  url "https://github.com/ordinals/ord/archive/refs/tags/0.20.0.tar.gz"
-  sha256 "6d0c61e7657b1a76717a7c93109bbc5de0e11c27733098a3ee972d3b7b407d72"
+  url "https://github.com/ordinals/ord/archive/refs/tags/0.27.1.tar.gz"
+  sha256 "032cc27775e2a6fa0ccb92afb44ea37f35ea38b58a7b413759ed65ab4ad1d5e0"
   license "CC0-1.0"
   head "https://github.com/ordinals/ord.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "e5c25a2646af6cfd11773436d95a4924850b03c6d9c97420f9679e4125648e75"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "70a702d1f1db605cc5c661b89d658a6a2bfb0f981ff35947aac2631b4f97c8c3"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "241cf0c83aa50d199e723cfb9669324ba4e1490e9ba7c30683d015d4a6fd0904"
-    sha256 cellar: :any_skip_relocation, sonoma:         "1edf24dd01838d5bdebb5b2360008db2b7ec5be35d3c15ddd9abcc31f29f24e5"
-    sha256 cellar: :any_skip_relocation, ventura:        "1e7030adf86d6b58695947b8efe9517288b152d6925e87bfa16b23d8c8dc520d"
-    sha256 cellar: :any_skip_relocation, monterey:       "10a9282b42ebfa6e08610a510d05614a67909b92932a3270d72db9ba09cc911b"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "17096fd535dd5ed2f999fcaa63f543d9189026f606a77de755b233b5d451ccea"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "adecb3b51924055c92e8560d77fad316632e3a272a04779f698627db48067621"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "9abbf1074988e3db66b6d498000a92e60ca81b2790ea4de9907b3fb01065352f"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "7688da465f0e1fc76452989c2c907960775ac5ff5d2dc200d4fe69d90872f5a5"
+    sha256 cellar: :any_skip_relocation, sonoma:        "aaa2622bd8a3673d9e846f40dd54a74eba9e5b273f7b727c2318ea41f3825fd9"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "5ca0e065daef5811382d11861d5ca6de9535dd3ac0b71152f5cae69f594f979f"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ac94987211d6d4959d69fabee084a737923586cfd53eaed49566802a78923648"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "rust" => :build
 
   on_linux do

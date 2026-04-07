@@ -1,9 +1,10 @@
 class OpenjdkAT17 < Formula
   desc "Development kit for the Java programming language"
-  homepage "https://openjdk.java.net/"
-  url "https://github.com/openjdk/jdk17u/archive/refs/tags/jdk-17.0.12-ga.tar.gz"
-  sha256 "74654bdd094c466217d3c65d71622f5ad9039d86d0c1b5eaa0bf6b2ae6e0822d"
+  homepage "https://openjdk.org/"
+  url "https://github.com/openjdk/jdk17u/archive/refs/tags/jdk-17.0.18-ga.tar.gz"
+  sha256 "15c4fbd1d69254d362c24e82f4e9ab7ed69c8ebc7daf996500210698c944230a"
   license "GPL-2.0-only" => { with: "Classpath-exception-2.0" }
+  compatibility_version 1
 
   livecheck do
     url :stable
@@ -11,46 +12,44 @@ class OpenjdkAT17 < Formula
   end
 
   bottle do
-    sha256 cellar: :any, arm64_sonoma:   "3b29caef76d813ed09ab21895f936d1cbfeaa82036cf2c11c60921edbb695a1a"
-    sha256 cellar: :any, arm64_ventura:  "63c80057ba27ee109b7ae201ed1c636d96a4d7b70c51e5173d3b8d954c8e01fc"
-    sha256 cellar: :any, arm64_monterey: "6fa7a88b24590d26454d2098d436593117bba45683cb54b32fa3ec0ed5bf63e4"
-    sha256 cellar: :any, sonoma:         "e15a14c4af6f59721addd21288a9f8e767ae30021d2caec8fb4093ae84e5ada4"
-    sha256 cellar: :any, ventura:        "17a2ee28099824bd37941ce63d80b068913999daa2010e332a04ee1aa6755bed"
-    sha256 cellar: :any, monterey:       "c0057a4f9927733cc670444c0f2f4c9eab2ce51f21d2bca08cbc661c024299e0"
-    sha256               x86_64_linux:   "ea8063d59d2c2d5a27d6355b2378840067418f0d92f061a891d2414e2a7cdf3a"
+    rebuild 1
+    sha256 cellar: :any, arm64_tahoe:   "e9ad612f9cd77e4625a0ea2f435836a53c7daa3dfc096e8b7cc8e1692f90523f"
+    sha256 cellar: :any, arm64_sequoia: "7a58416a3a4e307102994dd5707a237b2b63f6572700efbd41987340ffaacbd3"
+    sha256 cellar: :any, arm64_sonoma:  "cd8eb3dde743ab124f119484c6d7ba654a6da4728e86ade88da865c95353794d"
+    sha256 cellar: :any, sonoma:        "7c16fef9be614cc6034a5fae5f63f3c9ca46463888722ce37fab0eb2c6fa8467"
+    sha256               arm64_linux:   "70f0f1b67c3bb57dd855c0cfd7818e4c9f3a4cdaf8b91e7b8d9a77af1936de2d"
+    sha256               x86_64_linux:  "a4705f945ae748f1a17d6217ec78e4c2addc0959c4842847641941d155a20361"
   end
 
   keg_only :versioned_formula
 
   depends_on "autoconf" => :build
-  depends_on "pkg-config" => :build
-  depends_on xcode: :build
+  depends_on "pkgconf" => :build
+  depends_on xcode: :build # for metal
 
+  depends_on "freetype"
   depends_on "giflib"
   depends_on "harfbuzz"
   depends_on "jpeg-turbo"
   depends_on "libpng"
-  depends_on "libxi"
   depends_on "little-cms2"
 
   uses_from_macos "cups"
   uses_from_macos "unzip"
   uses_from_macos "zip"
-  uses_from_macos "zlib"
 
   on_linux do
     depends_on "alsa-lib"
     depends_on "fontconfig"
-    depends_on "freetype"
     depends_on "libx11"
     depends_on "libxext"
+    depends_on "libxi"
     depends_on "libxrandr"
     depends_on "libxrender"
     depends_on "libxt"
     depends_on "libxtst"
+    depends_on "zlib-ng-compat"
   end
-
-  fails_with gcc: "5"
 
   # From https://jdk.java.net/archive/
   resource "boot-jdk" do
@@ -97,6 +96,7 @@ class OpenjdkAT17 < Formula
       --with-version-build=#{revision}
       --without-version-opt
       --without-version-pre
+      --with-freetype=system
       --with-giflib=system
       --with-harfbuzz=system
       --with-lcms=system
@@ -109,8 +109,13 @@ class OpenjdkAT17 < Formula
     args += if OS.mac?
       ldflags << "-headerpad_max_install_names"
 
+      # Allow unbundling `freetype` on macOS
+      inreplace "make/autoconf/lib-freetype.m4", '= "xmacosx"', '= ""'
+
       %W[
         --enable-dtrace
+        --with-freetype-include=#{Formula["freetype"].opt_include}
+        --with-freetype-lib=#{Formula["freetype"].opt_lib}
         --with-sysroot=#{MacOS.sdk_path}
       ]
     else
@@ -118,11 +123,14 @@ class OpenjdkAT17 < Formula
         --with-x=#{HOMEBREW_PREFIX}
         --with-cups=#{HOMEBREW_PREFIX}
         --with-fontconfig=#{HOMEBREW_PREFIX}
-        --with-freetype=system
         --with-stdc++lib=dynamic
       ]
     end
     args << "--with-extra-ldflags=#{ldflags.join(" ")}"
+
+    if DevelopmentTools.clang_build_version == 1600 && MacOS::Xcode.version < "16.2"
+      args << "--with-extra-cflags=-mllvm -enable-constraint-elimination=0"
+    end
 
     system "bash", "configure", *args
 
@@ -153,13 +161,13 @@ class OpenjdkAT17 < Formula
   end
 
   test do
-    (testpath/"HelloWorld.java").write <<~EOS
+    (testpath/"HelloWorld.java").write <<~JAVA
       class HelloWorld {
         public static void main(String args[]) {
           System.out.println("Hello, world!");
         }
       }
-    EOS
+    JAVA
 
     system bin/"javac", "HelloWorld.java"
 

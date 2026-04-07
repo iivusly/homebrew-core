@@ -1,8 +1,8 @@
 class Libphonenumber < Formula
   desc "C++ Phone Number library by Google"
   homepage "https://github.com/google/libphonenumber"
-  url "https://github.com/google/libphonenumber/archive/refs/tags/v8.13.44.tar.gz"
-  sha256 "ef97fb52384e1dcb25bbb26ea4c598962efea6400acf857a38287a3e4ff72690"
+  url "https://github.com/google/libphonenumber/archive/refs/tags/v9.0.27.tar.gz"
+  sha256 "ef218661f1a3ed531580e851eb4524c2203ca04243852719621d3cd9285f89b4"
   license "Apache-2.0"
 
   livecheck do
@@ -11,38 +11,38 @@ class Libphonenumber < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "de04868b203fe5c2641efca3f7293557be9d9728cef1b75b59c1537327aeb9ad"
-    sha256 cellar: :any,                 arm64_ventura:  "38b12ed21a76927626465f734f30ed38ad700ed12bd14c0bbe9304c9d0c70d18"
-    sha256 cellar: :any,                 arm64_monterey: "54f352d91e7c35b32f298c75f74e54b69bed4090194d53dd7f521aa6cc584969"
-    sha256 cellar: :any,                 sonoma:         "65ab7f6c05c44ad09b578f6e71a45aed8f027ba2ff8b7ea476495724e9fc155e"
-    sha256 cellar: :any,                 ventura:        "ffa3d91777949bd6149cf06348717ad4e5a90b4eea79c7f428ab8af2aefb696b"
-    sha256 cellar: :any,                 monterey:       "ac454d331b5de9146fcd90db7b417c415a57fd3019922c2e30fe82ce09fd60a3"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "77439e54cf22087925f3c1dcc3e000962aea7339b2f7682a654bfba9c9a91058"
+    sha256 cellar: :any,                 arm64_tahoe:   "6e67a97a9e974f2a884f96f2960f61235f7baf0e34b29710de65a440a272ce98"
+    sha256 cellar: :any,                 arm64_sequoia: "2c28a61e11b97794b94aa2943a77a80aa509d9c8aac1d45038b36af6102321dc"
+    sha256 cellar: :any,                 arm64_sonoma:  "4bfcd63d7085a2d3b22c444148d4fad506df0ec73c68643edd1d9365122f1855"
+    sha256 cellar: :any,                 sonoma:        "272a5c8e09525bb7b0d279e3ba7b4b139e288a7abe6e2e2e4b8ba830843cf0d6"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "759feea1c832530f4241fce8e63c055e081019a0f584faadaf6327c65a137cc0"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "e2612465366d1afa038386b0419a9b2706a99123a0215ed7b4536505bc2013de"
   end
 
-  depends_on "cmake" => :build
-  depends_on "googletest" => :build
+  depends_on "cmake" => [:build, :test]
   depends_on "openjdk" => :build
   depends_on "abseil"
   depends_on "boost"
-  depends_on "icu4c"
+  depends_on "icu4c@78"
   depends_on "protobuf"
-  depends_on "re2"
 
-  fails_with gcc: "5" # For abseil and C++17
+  # Fix build with Boost 1.89.0, pr ref: https://github.com/google/libphonenumber/pull/3903
+  patch do
+    url "https://github.com/google/libphonenumber/commit/72c1023fbf00fc48866acab05f6ccebcae7f3213.patch?full_index=1"
+    sha256 "6bce9d77b45f35a84ef39831bf2cca793b11aa7b92bd6d71000397d3176f0345"
+  end
 
   def install
     ENV.append_to_cflags "-Wno-sign-compare" # Avoid build failure on Linux.
     system "cmake", "-S", "cpp", "-B", "build",
                     "-DCMAKE_CXX_STANDARD=17", # keep in sync with C++ standard in abseil.rb
-                    "-DGTEST_INCLUDE_DIR=#{Formula["googletest"].opt_include}",
                      *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
   end
 
   test do
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include <phonenumbers/phonenumberutil.h>
       #include <phonenumbers/phonenumber.pb.h>
       #include <iostream>
@@ -53,7 +53,7 @@ class Libphonenumber < Formula
       int main() {
         PhoneNumberUtil *phone_util_ = PhoneNumberUtil::GetInstance();
         PhoneNumber test_number;
-        string formatted_number;
+        std::string formatted_number;
         test_number.set_country_code(1);
         test_number.set_national_number(6502530000ULL);
         phone_util_->Format(test_number, PhoneNumberUtil::E164, &formatted_number);
@@ -63,8 +63,20 @@ class Libphonenumber < Formula
           return 1;
         }
       }
-    EOS
-    system ENV.cxx, "-std=c++17", "test.cpp", "-L#{lib}", "-lphonenumber", "-o", "test"
-    system "./test"
+    CPP
+
+    (testpath/"CMakeLists.txt").write <<~CMAKE
+      cmake_minimum_required(VERSION 3.14)
+      set(CMAKE_CXX_STANDARD 17)
+      project(test LANGUAGES CXX)
+      find_package(Boost COMPONENTS date_time system thread)
+      find_package(libphonenumber CONFIG REQUIRED)
+      add_executable(test test.cpp)
+      target_link_libraries(test libphonenumber::phonenumber-shared)
+    CMAKE
+
+    system "cmake", "-S", ".", "-B", "build", *std_cmake_args
+    system "cmake", "--build", "build"
+    system "./build/test"
   end
 end

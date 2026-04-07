@@ -1,39 +1,33 @@
 class VercelCli < Formula
   desc "Command-line interface for Vercel"
   homepage "https://vercel.com/home"
-  url "https://registry.npmjs.org/vercel/-/vercel-37.3.0.tgz"
-  sha256 "454cf5dd8dea9c7757dd9a36d448fc4ff930a46adf956a8c8955acb10d9c3805"
+  url "https://registry.npmjs.org/vercel/-/vercel-50.40.0.tgz"
+  sha256 "cf54d224fe34347a7685a15b0d01551355a4bafb596d73eba12037d4ca298bb1"
   license "Apache-2.0"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "1561843fab1d3b91af5ccca2beb54e21b06d389df959560b495afe6b6f49ca57"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "1561843fab1d3b91af5ccca2beb54e21b06d389df959560b495afe6b6f49ca57"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "1561843fab1d3b91af5ccca2beb54e21b06d389df959560b495afe6b6f49ca57"
-    sha256 cellar: :any_skip_relocation, sonoma:         "c4e31325ea6283826cd41bc682acf83184bd814d0fb73bda7dec81c91cfde9a9"
-    sha256 cellar: :any_skip_relocation, ventura:        "c4e31325ea6283826cd41bc682acf83184bd814d0fb73bda7dec81c91cfde9a9"
-    sha256 cellar: :any_skip_relocation, monterey:       "c4e31325ea6283826cd41bc682acf83184bd814d0fb73bda7dec81c91cfde9a9"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "a86ea3538b9340c54f464877f59fad8a1eabca6f43c5023bda140d0b2497d94b"
+    sha256 cellar: :any,                 arm64_tahoe:   "4f839d1b3b40137b2040aaa9d22f25e150d3861c33d6f01bf48af6908a593066"
+    sha256 cellar: :any,                 arm64_sequoia: "9f3be21667d89627cb79a102c4baed44166557ae93f5a1cf6bfc6631931aaac0"
+    sha256 cellar: :any,                 arm64_sonoma:  "9f3be21667d89627cb79a102c4baed44166557ae93f5a1cf6bfc6631931aaac0"
+    sha256 cellar: :any,                 sonoma:        "0681db0144512d120fd088ba8394e9a002397a7bc7721e1c23dc8d1a46523680"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "bda44071f29c7f00c7955b39d7e9307c24b8aac264e22295e5c58fad273a553a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ef2f8175ceab17dcfb3d1afc00b57f4f8e96bdf1800c2ee8444aaf59226718f8"
   end
 
   depends_on "node"
 
   def install
-    inreplace "dist/index.js", "${await getUpdateCommand()}",
-                               "brew upgrade vercel-cli"
-    system "npm", "install", *std_npm_args
-    bin.install_symlink Dir["#{libexec}/bin/*"]
+    inreplace "dist/index.js", "await getUpdateCommand()",
+                               '"brew upgrade vercel-cli"'
 
-    # Remove incompatible deasync modules
-    os = OS.kernel_name.downcase
-    arch = Hardware::CPU.intel? ? "x64" : Hardware::CPU.arch.to_s
-    node_modules = libexec/"lib/node_modules/vercel/node_modules"
-    node_modules.glob("deasync/bin/*")
-                .each { |dir| rm_r(dir) if dir.basename.to_s != "#{os}-#{arch}" }
+    system "npm", "install", *std_npm_args
+    deuniversalize_machos libexec/"lib/node_modules/vercel/node_modules/fsevents/fsevents.node" if OS.mac?
+    bin.install_symlink libexec.glob("bin/*")
   end
 
   test do
     system bin/"vercel", "init", "jekyll"
-    assert_predicate testpath/"jekyll/_config.yml", :exist?, "_config.yml must exist"
-    assert_predicate testpath/"jekyll/README.md", :exist?, "README.md must exist"
+    assert_path_exists testpath/"jekyll/_config.yml", "_config.yml must exist"
+    assert_path_exists testpath/"jekyll/README.md", "README.md must exist"
   end
 end

@@ -13,24 +13,24 @@ class JohnJumbo < Formula
   end
 
   bottle do
-    rebuild 1
-    sha256 arm64_sonoma:   "4cc3fcf34d2fdfb2595cd689475d5337267edd8273b2aee87b875e8bbb729017"
-    sha256 arm64_ventura:  "82da2e81fdeedfb9a71f1740ff7bfef4641ccce5f31d51fa6d1ca7fdd576f6ef"
-    sha256 arm64_monterey: "4bccbd52d70bbdffc767cf12cfe177bf32002504a300de3d52e91ec8d4d19691"
-    sha256 arm64_big_sur:  "3441957c8cd6257a3f4d6cda745aaf22d461a9688408e81cebf538b6f5131663"
-    sha256 sonoma:         "e5cdbd5549c1b835b881f67de28cd54ef1fe2f9c6d3147fe9b3577c8a7c88c41"
-    sha256 ventura:        "503d1df42838b5d921ab6994410ff2e37b6d3717944fee0440e331f867c8e978"
-    sha256 monterey:       "0ace1b1a1ce24edde854033c8bae3c4b3d42379f569f374d9f43b56856f90eae"
-    sha256 big_sur:        "7ee4f489b10109d93d69757ffc0cb8b8538e7b391d549d9d133400d39433c22c"
-    sha256 x86_64_linux:   "2c1c1fa912ee63f865d0f61c11188f50d1d600e2c8af616175db78c9f51c154a"
+    rebuild 3
+    sha256 arm64_tahoe:   "448e0b52a33cd8611647ecc701949472f5ef720c473a63664b28ffa481e9beb0"
+    sha256 arm64_sequoia: "a940aac8b599b0346e085a473e3367e773f8b9d44048fb4e47f9a53b9394d283"
+    sha256 arm64_sonoma:  "5d50196128ef065a5c546ebd40346729616b4889133d8746e77d14a8e68be5be"
+    sha256 sonoma:        "406c9044ec72e8e28fcd908cdd46de40c2b29fb05a2137a6cb6a8c5dbb4d328b"
+    sha256 arm64_linux:   "ace4712b54d8585933de16c79f39c4a3231b0d341b6402601f00fee252a937ee"
+    sha256 x86_64_linux:  "caa234a6f29de486c38d075ef354608086b4787ac005226a17794d62afd8afdc"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "gmp"
   depends_on "openssl@3"
 
   uses_from_macos "libxcrypt"
-  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   conflicts_with "john", because: "both install the same binaries"
 
@@ -64,7 +64,7 @@ class JohnJumbo < Formula
   # https://github.com/openwall/john/commit/c9825e688d1fb9fdd8942ceb0a6b4457b0f9f9b4
   # https://github.com/openwall/john/commit/716279addd5a0870620fac8a6e944916b2228cc2
   patch do
-    url "https://raw.githubusercontent.com/Homebrew/formula-patches/50a00afbf4549fbc0ffd3855c884f7d045cf4f93/john-jumbo/john_jumbo_m1.diff"
+    url "https://raw.githubusercontent.com/Homebrew/homebrew-core/1cf441a0/Patches/john-jumbo/john_jumbo_m1.diff"
     sha256 "6658f02056fd6d54231d3fdbf84135b32d47c09345fc07c6f861a1feebd00902"
   end
 
@@ -98,7 +98,7 @@ class JohnJumbo < Formula
     (share/"john").install Dir["run/*"]
     bin.install_symlink share/"john/john"
 
-    bash_completion.install share/"john/john.bash_completion" => "john.bash"
+    bash_completion.install share/"john/john.bash_completion" => "john"
     zsh_completion.install share/"john/john.zsh_completion" => "_john"
   end
 

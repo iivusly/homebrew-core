@@ -1,46 +1,42 @@
 class NodeAT18 < Formula
-  desc "Platform built on V8 to build network applications"
+  desc "Open-source, cross-platform JavaScript runtime environment"
   homepage "https://nodejs.org/"
-  url "https://nodejs.org/dist/v18.20.4/node-v18.20.4.tar.xz"
-  sha256 "a76c7ea1b96aeb6963a158806260c8094b6244d64a696529d020547b9a95ca2a"
+  url "https://nodejs.org/dist/v18.20.8/node-v18.20.8.tar.xz"
+  sha256 "36a7bf1a76d62ce4badd881ee5974a323c70e1d8d19165732684e145632460d9"
   license "MIT"
 
-  livecheck do
-    url "https://nodejs.org/dist/"
-    regex(%r{href=["']?v?(18(?:\.\d+)+)/?["' >]}i)
-  end
-
   bottle do
-    sha256 arm64_sonoma:   "7c337fb805a9514a54c8095b2552e98722ae330d764b42f446646a5fad202939"
-    sha256 arm64_ventura:  "8bc5c8830486ba150dea2fc6d1b78f8a25a5f4b0c98f5534559edf41e89c1a57"
-    sha256 arm64_monterey: "74d61167b069210de31f17e3be2cc6ff60a00788976007e42beb23bda4be7315"
-    sha256 sonoma:         "c9d9984520b1b793563d1fa1cada6ee38b9582a282a6e9d1c4a24ab22b28aa8b"
-    sha256 ventura:        "63cefefafcd17a416e54963f5d39740cb2850593f0046ce9b5a30a37ad6aee24"
-    sha256 monterey:       "415d5afb5aaf3e8e428365ad8844335a0c77eda5f0f686950c17ee67eb2b8944"
-    sha256 x86_64_linux:   "1e9afb516b736af7765900fa4e908c9a00c740b71887910a22a7af005046a7aa"
+    sha256 arm64_tahoe:   "99e7e2eb7d40cae9e51afac2f7c67921c7a4a72100ffd3c2a45d90db142d5020"
+    sha256 arm64_sequoia: "85339a0121bfd4eade3f70a49197c59fd1d0dee18511edf924d4acf4d81cc012"
+    sha256 arm64_sonoma:  "cce72f3a40cb31861f419e0ea364cf0581e6f59b28f3e5c00196ccdea6a9f295"
+    sha256 arm64_ventura: "abf275d5c731c19cc83cac346960ee3d53e845c35e1cb04278d31e26a9aad9ec"
+    sha256 sonoma:        "5d6cc20ba0c4f0e75534b961530c236222d2f11b8fb5dd890f0f2f7d71d778cb"
+    sha256 ventura:       "979121dc9e057de08c03b75690f3111b7d3bfb03974299bc340166441f0a3ce8"
+    sha256 arm64_linux:   "006629948d696eaebdc65531418f095b71e4f3fd66e966f594f61021137c771c"
+    sha256 x86_64_linux:  "47a91f8bf2f6c0915eebc7793c97ea3d980d292c0242e1cc376e621fbb9d18d5"
   end
 
   keg_only :versioned_formula
 
   # https://github.com/nodejs/release#release-schedule
-  # disable! date: "2025-04-30", because: :unsupported
   deprecate! date: "2024-10-29", because: :unsupported
+  disable! date: "2025-10-29", because: :unsupported
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "python-setuptools" => :build
-  depends_on "python@3.12" => :build
+  depends_on "python@3.13" => :build
   depends_on "brotli"
   depends_on "c-ares"
-  depends_on "icu4c"
+  depends_on "icu4c@77"
   depends_on "libnghttp2"
   depends_on "libuv"
   depends_on "openssl@3"
 
-  uses_from_macos "python", since: :catalina
+  uses_from_macos "python"
   uses_from_macos "zlib"
 
   on_macos do
-    depends_on "llvm" => [:build, :test] if DevelopmentTools.clang_build_version <= 1100
+    depends_on "llvm" => :build if DevelopmentTools.clang_build_version <= 1100
   end
 
   fails_with :clang do
@@ -50,13 +46,23 @@ class NodeAT18 < Formula
     EOS
   end
 
-  fails_with gcc: "5"
+  # Backport support for ICU 76+
+  patch do
+    url "https://github.com/nodejs/node/commit/81517faceac86497b3c8717837f491aa29a5e0f9.patch?full_index=1"
+    sha256 "79a5489617665c5c88651a7dc364b8967bebdea5bdf361b85572d041a4768662"
+  end
 
   def install
-    ENV.llvm_clang if OS.mac? && (DevelopmentTools.clang_build_version <= 1100)
+    # Fix to avoid fdopen() redefinition for vendored `zlib`
+    # Too many commits to backport, so apply a workaround
+    if OS.mac? && DevelopmentTools.clang_build_version >= 1700
+      inreplace "deps/v8/third_party/zlib/zutil.h",
+                "#        define fdopen(fd,mode) NULL /* No fdopen() */",
+                ""
+    end
 
     # make sure subprocesses spawned by make are using our Python 3
-    ENV["PYTHON"] = which("python3.12")
+    ENV["PYTHON"] = which("python3.13")
 
     args = %W[
       --prefix=#{prefix}
@@ -107,12 +113,12 @@ class NodeAT18 < Formula
     ENV.prepend_path "PATH", opt_bin
     ENV.delete "NVM_NODEJS_ORG_MIRROR"
     assert_equal which("node"), opt_bin/"node"
-    assert_predicate bin/"npm", :exist?, "npm must exist"
+    assert_path_exists bin/"npm", "npm must exist"
     assert_predicate bin/"npm", :executable?, "npm must be executable"
     npm_args = ["-ddd", "--cache=#{HOMEBREW_CACHE}/npm_cache", "--build-from-source"]
     system bin/"npm", *npm_args, "install", "npm@latest"
     system bin/"npm", *npm_args, "install", "ref-napi"
-    assert_predicate bin/"npx", :exist?, "npx must exist"
+    assert_path_exists bin/"npx", "npx must exist"
     assert_predicate bin/"npx", :executable?, "npx must be executable"
     assert_match "< hello >", shell_output("#{bin}/npx --yes cowsay hello")
   end

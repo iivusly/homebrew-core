@@ -3,57 +3,59 @@ class YleDl < Formula
 
   desc "Download Yle videos from the command-line"
   homepage "https://aajanki.github.io/yle-dl/index-en.html"
-  url "https://files.pythonhosted.org/packages/1f/82/cf37a73bb0c223e80484d337aed3fa0d6b855512b1b36dde9b8eb062907a/yle_dl-20240806.tar.gz"
-  sha256 "7697c7e232858ecd74bd5850314ed2ebeb85bca855056f111920cb1192c64cab"
+  url "https://files.pythonhosted.org/packages/a1/92/f2c10d7390899c9f26e08102143d9c0a8d375a7d7a7314e17913ddfa162e/yle_dl-20250730.tar.gz"
+  sha256 "2122741f515d5829eff28b2f6b96c251f4f7434412ea6c3ca60e526e60563c89"
   license "GPL-3.0-or-later"
+  revision 4
   head "https://github.com/aajanki/yle-dl.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "bad19e5d0bf45516e2998bcfb3859cdb1c65aaba9406b22df3ba0a91778a16b1"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "c3e450a91ff7d87d600926df7e0ab3f4cd42a644d52e96da818436c58638e158"
-    sha256 cellar: :any,                 arm64_monterey: "1de9a5ccf63b004b5fa64db2142feed97ee20518e63ba20a2815573e8846f70d"
-    sha256 cellar: :any_skip_relocation, sonoma:         "69d77238a756584fd72fa4b1737c8d74ed61a20fe3f87ab8b3a594b5377344fd"
-    sha256 cellar: :any_skip_relocation, ventura:        "c72b69b7ecf3e0a0e1e63bf885628c86c54b1af87abe1e4c19ec83662111fa01"
-    sha256 cellar: :any,                 monterey:       "a1f39a0105371462475fd626e84333d31a3ea15923572761c76d9b7d75bd7a22"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "d9352dac3bbad3596b9796cb98f1ca988bb1557038f833362a2a13b03cd22ad1"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "90311e915e82878f8cb60361c81cea20fdd21c35f84d6b88e32b2d313a8e432d"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "10f59139055226fd4054035c98a7b07ca273899a93eb2157fa5964cbf70dcf4d"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "b7a96f194bc482634ea3a343382ab16397f7e53bfd2cc2daeff28adf2ceacc30"
+    sha256 cellar: :any_skip_relocation, sonoma:        "daaa2502a79ca0d1cfb7d53d1bb974762a77970b1a12e8beee4f6aabb381fc06"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "2651d054d3ca3f503f2f6110857d90774ef712e0015f6fd841fb0f4b44ed17c5"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "3a395957b730f575d0f631946a665e59b25a95af38aa61066ba4db8ca99b2ab6"
   end
 
   depends_on "certifi"
   depends_on "ffmpeg"
-  depends_on "python@3.12"
+  depends_on "python@3.14"
   depends_on "rtmpdump"
 
   uses_from_macos "libxml2", since: :ventura
   uses_from_macos "libxslt"
 
+  pypi_packages exclude_packages: "certifi"
+
   resource "charset-normalizer" do
-    url "https://files.pythonhosted.org/packages/63/09/c1bc53dab74b1816a00d8d030de5bf98f724c52c1635e07681d312f20be8/charset-normalizer-3.3.2.tar.gz"
-    sha256 "f30c3cb33b24454a82faecaf01b19c18562b1e89558fb6c56de4d9118a032fd5"
+    url "https://files.pythonhosted.org/packages/7b/60/e3bec1881450851b087e301bedc3daa9377a4d45f1c26aa90b0b235e38aa/charset_normalizer-3.4.6.tar.gz"
+    sha256 "1ae6b62897110aa7c79ea2f5dd38d1abca6db663687c0b1ad9aed6f6bae3d9d6"
   end
 
   resource "configargparse" do
-    url "https://files.pythonhosted.org/packages/70/8a/73f1008adfad01cb923255b924b1528727b8270e67cb4ef41eabdc7d783e/ConfigArgParse-1.7.tar.gz"
-    sha256 "e7067471884de5478c58a511e529f0f9bd1c66bfef1dea90935438d6c23306d1"
+    url "https://files.pythonhosted.org/packages/3f/0b/30328302903c55218ffc5199646d0e9d28348ff26c02ba77b2ffc58d294a/configargparse-1.7.5.tar.gz"
+    sha256 "e3f9a7bb6be34d66b2e3c4a2f58e3045f8dfae47b0dc039f87bcfaa0f193fb0f"
   end
 
   resource "idna" do
-    url "https://files.pythonhosted.org/packages/21/ed/f86a79a07470cb07819390452f178b3bef1d375f2ec021ecfc709fc7cf07/idna-3.7.tar.gz"
-    sha256 "028ff3aadf0609c1fd278d8ea3089299412a7a8b9bd005dd08b9f8285bcb5cfc"
+    url "https://files.pythonhosted.org/packages/6f/6d/0703ccc57f3a7233505399edb88de3cbd678da106337b9fcde432b65ed60/idna-3.11.tar.gz"
+    sha256 "795dafcc9c04ed0c1fb032c2aa73654d8e8c5023a7df64a53f39190ada629902"
   end
 
   resource "lxml" do
-    url "https://files.pythonhosted.org/packages/63/f7/ffbb6d2eb67b80a45b8a0834baa5557a14a5ffce0979439e7cd7f0c4055b/lxml-5.2.2.tar.gz"
-    sha256 "bb2dc4898180bea79863d5487e5f9c7c34297414bad54bcd0f0852aee9cfdb87"
+    url "https://files.pythonhosted.org/packages/aa/88/262177de60548e5a2bfc46ad28232c9e9cbde697bd94132aeb80364675cb/lxml-6.0.2.tar.gz"
+    sha256 "cd79f3367bd74b317dda655dc8fcfa304d9eb6e4fb06b7168c5cf27f96e0cd62"
   end
 
   resource "requests" do
-    url "https://files.pythonhosted.org/packages/63/70/2bf7780ad2d390a8d301ad0b550f1581eadbd9a20f896afe06353c2a2913/requests-2.32.3.tar.gz"
-    sha256 "55365417734eb18255590a9ff9eb97e9e1da868d4ccd6402399eaf68af20a760"
+    url "https://files.pythonhosted.org/packages/34/64/8860370b167a9721e8956ae116825caff829224fbca0ca6e7bf8ddef8430/requests-2.33.0.tar.gz"
+    sha256 "c7ebc5e8b0f21837386ad0e1c8fe8b829fa5f544d8df3b2253bff14ef29d7652"
   end
 
   resource "urllib3" do
-    url "https://files.pythonhosted.org/packages/43/6d/fa469ae21497ddc8bc93e5877702dca7cb8f911e337aca7452b5724f1bb6/urllib3-2.2.2.tar.gz"
-    sha256 "dd505485549a7a552833da5e6063639d0d177c04f23bc3864e41e5dc5f612168"
+    url "https://files.pythonhosted.org/packages/c7/24/5f1b3bdffd70275f6661c76461e25f024d5a38a46f04aaca912426a2b1d3/urllib3-2.6.3.tar.gz"
+    sha256 "1b62b6884944a57dbe321509ab94fd4d3b307075e0c2eae991ac71ee15ad38ed"
   end
 
   def install

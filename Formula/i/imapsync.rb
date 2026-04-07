@@ -1,10 +1,11 @@
 class Imapsync < Formula
   desc "Migrate or backup IMAP mail accounts"
   homepage "https://imapsync.lamiral.info/"
-  url "https://imapsync.lamiral.info/dist2/imapsync-2.290.tgz"
+  url "https://imapsync.lamiral.info/dist2/imapsync-2.314.tgz"
   # NOTE: The mirror will return 404 until the version becomes outdated.
-  sha256 "b85853c676940cfefdde2b1fa45ffb4fc7780275c32f8b8deb353c8a063e1051"
+  sha256 "34e1715c6584889ff3bd9c0acc2fab254446282beda90c8e5a71a83b3a59dbca"
   license "NLPL"
+  revision 1
   head "https://github.com/imapsync/imapsync.git", branch: "master"
 
   livecheck do
@@ -13,26 +14,26 @@ class Imapsync < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "8edf209e49e0f273a7957fcdb5a463c92a815b8ba0e7e0c4555d2df638c4e43f"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "3f96bcbd8aa6e9722ab99ae734ab8d0d3d31eb7bc146087f80a231b6b892476d"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "214decc2f2c614d9d965fcde0a6cd4012185050d6594018b4c60ed8dc21c8eee"
-    sha256 cellar: :any_skip_relocation, sonoma:         "2792cb717bf0bfb14b3201ca35210bb73c468c1e837876e6036b0233cc07db71"
-    sha256 cellar: :any_skip_relocation, ventura:        "231e639c77b7e96090239390deb489042fb95732dfa05d6685207c83ef958aca"
-    sha256 cellar: :any_skip_relocation, monterey:       "c8365356e611c663d8633477157ea9bc340788570faac7a04cd808a866188e88"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "c6ad6d83c11f4cfb2dfcbc11796de7b07909f0904c4541cdf749a6243396f69e"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "965e00bdc9ebeb638179d508afbf1b40c53762fa86dcc9c41f46bd84413afeec"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "5c3226f22365a2a589c0f256ab5626028e4efe7b79dfac78668197a41dc06c21"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "5065fd3ae71fd7c7fdbe71de82198b95fc091652b87d9a5b13dfbb3210d6c70c"
+    sha256 cellar: :any_skip_relocation, sonoma:        "4d8ec5703a89b1486a13c11b2c2efa15273c4c9d5e7747dade01b579eaf88e61"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "eca8142d92a9cac7d7ade73bb2673a35f3d52f4ec0257bb1f67331fa6d0db09b"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "b6ace18f9b7a36d71151ac94d4b61477b60c6043e1f0820f4702a349090a1b8c"
   end
 
   depends_on "pod2man" => :build
 
   uses_from_macos "perl"
-  uses_from_macos "zlib"
 
   on_linux do
     depends_on "openssl@3"
+    depends_on "zlib-ng-compat"
 
     resource "Digest::HMAC_SHA1" do
-      url "https://cpan.metacpan.org/authors/id/A/AR/ARODLAND/Digest-HMAC-1.04.tar.gz"
-      sha256 "d6bc8156aa275c44d794b7c18f44cdac4a58140245c959e6b19b2c3838b08ed4"
+      url "https://cpan.metacpan.org/authors/id/A/AR/ARODLAND/Digest-HMAC-1.05.tar.gz"
+      sha256 "215cb59cba610745cfb2d4b3f8ef756d590e57e3ad7986a992e87c4969fcdc7a"
     end
 
     resource "IO::Socket::INET6" do
@@ -46,8 +47,8 @@ class Imapsync < Formula
     end
 
     resource "IO::Socket::SSL" do
-      url "https://cpan.metacpan.org/authors/id/S/SU/SULLR/IO-Socket-SSL-2.088.tar.gz"
-      sha256 "9d27a31f0b617022180a1d1c45664beb76f51f3b8caede1404072a87dab74536"
+      url "https://cpan.metacpan.org/authors/id/S/SU/SULLR/IO-Socket-SSL-2.095.tar.gz"
+      sha256 "7e764392b1b8bd44e654183c082b75be47800e98d7cd325f0e1b76c7d9a6b768"
     end
 
     resource "Net::SSLeay" do
@@ -71,13 +72,13 @@ class Imapsync < Formula
     end
 
     resource "ExtUtils::Helpers" do
-      url "https://cpan.metacpan.org/authors/id/L/LE/LEONT/ExtUtils-Helpers-0.027.tar.gz"
-      sha256 "9d592131dc5845a86dc28be9143f764e73cb62db06fedf50a895be1324b6cec5"
+      url "https://cpan.metacpan.org/authors/id/L/LE/LEONT/ExtUtils-Helpers-0.028.tar.gz"
+      sha256 "c8574875cce073e7dc5345a7b06d502e52044d68894f9160203fcaab379514fe"
     end
 
     resource "ExtUtils::InstallPaths" do
-      url "https://cpan.metacpan.org/authors/id/L/LE/LEONT/ExtUtils-InstallPaths-0.013.tar.gz"
-      sha256 "65969d3ad8a3a2ea8ef5b4213ed5c2c83961bb5bd12f7ad35128f6bd5b684aa0"
+      url "https://cpan.metacpan.org/authors/id/L/LE/LEONT/ExtUtils-InstallPaths-0.014.tar.gz"
+      sha256 "ae65d20cc3c7e14b3cd790915c84510f82dfb37a4c9b88aa74b2e843af417d01"
     end
   end
 
@@ -89,8 +90,8 @@ class Imapsync < Formula
   end
 
   resource "Encode::IMAPUTF7" do
-    url "https://cpan.metacpan.org/authors/id/P/PM/PMAKHOLM/Encode-IMAPUTF7-1.05.tar.gz"
-    sha256 "470305ddc37483cfe8d3c16d13770a28011f600bf557acb8c3e07739997c37e1"
+    url "https://cpan.metacpan.org/authors/id/R/RJ/RJBS/Encode-IMAPUTF7-1.07.tar.gz"
+    sha256 "52352b8ac0843b932f2a3c4abf817d3ce5a1b71274e1ad9d4e4eb094eb0f1d1c"
   end
 
   resource "Unicode::String" do
@@ -139,8 +140,8 @@ class Imapsync < Formula
   end
 
   resource "Module::Build::Tiny" do
-    url "https://cpan.metacpan.org/authors/id/L/LE/LEONT/Module-Build-Tiny-0.048.tar.gz"
-    sha256 "79a73e506fb7badabdf79137a45c6c5027daaf6f9ac3dcfb9d4ffcce92eb36bd"
+    url "https://cpan.metacpan.org/authors/id/L/LE/LEONT/Module-Build-Tiny-0.052.tar.gz"
+    sha256 "bd10452c9f24d4b4fe594126e3ad231bab6cebf16acda40a4e8dc784907eb87f"
   end
 
   resource "Readonly" do
@@ -159,8 +160,8 @@ class Imapsync < Formula
   end
 
   resource "IO::Socket::IP" do
-    url "https://cpan.metacpan.org/authors/id/P/PE/PEVANS/IO-Socket-IP-0.42.tar.gz"
-    sha256 "f97a3846c50a4e0658ce1722ce7cc2acad9472e70478bfbe9c794fb1db6a6b13"
+    url "https://cpan.metacpan.org/authors/id/P/PE/PEVANS/IO-Socket-IP-0.43.tar.gz"
+    sha256 "ebf6217f48f537ae9a78126f0ecb4baa3d4820e3e26153ce250f3bffd05f6d0b"
   end
 
   def install

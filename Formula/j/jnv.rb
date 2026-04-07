@@ -1,38 +1,35 @@
 class Jnv < Formula
   desc "Interactive JSON filter using jq"
   homepage "https://github.com/ynqa/jnv"
-  url "https://github.com/ynqa/jnv/archive/refs/tags/v0.4.0.tar.gz"
-  sha256 "88462d1a8dbb2a362a594d09c75b52d5798124981c9924ae7cff704e213b24f4"
+  url "https://github.com/ynqa/jnv/archive/refs/tags/v0.7.1.tar.gz"
+  sha256 "22423fe5d621848f2b7dd3b94511d74068b763235d07a30a191d086f6a98b6b5"
   license "MIT"
   head "https://github.com/ynqa/jnv.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "e15f5c54af7a1adb674d21e6fedf227aed2120749b7220f3bf04c5af66b4ee3f"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "2a5848f6388855039fac36451406ccfe402e8b366c1e51e218f9bd9a679440d9"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "c9a287a8a7fa860dc6229cb2284a549266c426c874e459ea2808e15dc21568f1"
-    sha256 cellar: :any_skip_relocation, sonoma:         "27676c6754ba27df10748d59700582513f4bf42a1842a309eb76f3820b434d33"
-    sha256 cellar: :any_skip_relocation, ventura:        "520081042e5315dac739fc8cfbb89178474d4f7c12a37f896637cdcf12516475"
-    sha256 cellar: :any_skip_relocation, monterey:       "6106bb0500fc2de37af637e4d4438bc3e6dc402c34c4f29e8bf28e6c942fcb03"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "5aca9c959f02aa0e6e1457bba747e59de193014e7be626d65bc924df3cc79e71"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "272d9f011fb98188406a0d10efb323e2b8e4f800dd0d15070074e0d39ce4a671"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "ae8feccd4810098d6c84882fb8f3912706cf4f36979d7cfc1c0f2fe67ed5c54a"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "cb8f91de5e610e09ba3a1de0625d977d432423372532828eb714fe17b3d9f960"
+    sha256 cellar: :any_skip_relocation, sonoma:        "edf64bce1912b31ae9fc2218351b1b3cafda3432cffcc7088400ac8ef6d22c03"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "4ed01cb4c627230047d2505596e9c54a610811d2c5cc9e37d55d86fd133a4117"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "2e233d3a3c0c1f53a06155449293815381ff8fc0ff6f0f0c486a5c4d0e600a2c"
   end
 
-  depends_on "autoconf" => :build
-  depends_on "automake" => :build
-  depends_on "libtool" => :build
   depends_on "rust" => :build
-
-  on_linux do
-    depends_on "llvm" => :build
-  end
 
   def install
     system "cargo", "install", *std_cargo_args
   end
 
   test do
-    assert_match version.to_s, shell_output(bin/"jnv --version")
+    assert_match version.to_s, shell_output("#{bin}/jnv --version")
 
     output = pipe_output("#{bin}/jnv 2>&1", "homebrew", 1)
-    assert_match "Error: expected value at line 1 column 1", output
+    expected_output = if OS.mac?
+      "Error: The cursor position could not be read within a normal duration"
+    else
+      "Error: No such device or address"
+    end
+    assert_match expected_output, output
   end
 end

@@ -1,10 +1,11 @@
 class Xapian < Formula
   desc "C++ search engine library"
   homepage "https://xapian.org/"
-  url "https://oligarchy.co.uk/xapian/1.4.26/xapian-core-1.4.26.tar.xz"
-  sha256 "9e6a7903806966d16ce220b49377c9c8fad667c8f0ffcb23a3442946269363a7"
+  url "https://oligarchy.co.uk/xapian/2.0.0/xapian-core-2.0.0.tar.xz"
+  sha256 "6cea3f49952a47224439a40bdb3608f928d121ad8721b9921cc42802d548ecf8"
   license "GPL-2.0-or-later"
   version_scheme 1
+  compatibility_version 1
 
   livecheck do
     url "https://xapian.org/download"
@@ -12,33 +13,35 @@ class Xapian < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "07decf41d64c07c0a0653021ac8678443c3232a04dd2849d46d206ed9548e9f2"
-    sha256 cellar: :any,                 arm64_ventura:  "380744bae8696f969718d55207d6e9de4e2c07caf0244841b0b82744c23934b1"
-    sha256 cellar: :any,                 arm64_monterey: "d97229e5c6b1647f52930c84d5ff8c1fe11f2efc9ea71a4f42a527771680620b"
-    sha256 cellar: :any,                 sonoma:         "a1569363bb93a8c08068d3064c28d6b4a3a5985a5f8136db8bbfee73cb4474a0"
-    sha256 cellar: :any,                 ventura:        "f3ba4f60e6e4ceb61b20a0c9dfbd85b348dc0c45b583b9e2709b2755f49f14b8"
-    sha256 cellar: :any,                 monterey:       "1b73672a7cefb347504609444ab53af5e8e1874d5331c9af69916c3d8137d19b"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "c02a51043edab37a11b9abeee6d6bc19496f0546b00c3300bab131983bcdb0d8"
+    sha256 cellar: :any,                 arm64_tahoe:   "5b3662944f7d62252755c60a30a9d45c278030ec35ff2b26df81a1f771db6679"
+    sha256 cellar: :any,                 arm64_sequoia: "acea926df0ec8313a5ce4200b0d16d37799e6061c3faaffe1758b5fd44c7da03"
+    sha256 cellar: :any,                 arm64_sonoma:  "21eda4fcd6301dcc53653840f69fb24299b132b9d4ce17fc45888cb132f0e5bd"
+    sha256 cellar: :any,                 sonoma:        "6991ce3e145fddebb0081696d5b590b2e5b93cbadbc76a958263ba170bcb7b82"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "8a2cd147c9b3b56210d73a97acc54106953e62619b08af56c8236e5b6a73a251"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "7d1c8e93aa12e1285ecbf15640e8fcede10547801eacea3333833417255eaa02"
   end
 
-  depends_on "python@3.12" => [:build, :test]
+  depends_on "python@3.14" => [:build, :test]
   depends_on "sphinx-doc" => :build
-
-  uses_from_macos "zlib"
 
   on_linux do
     depends_on "util-linux"
+    depends_on "zlib-ng-compat"
   end
 
   skip_clean :la
 
   resource "bindings" do
-    url "https://oligarchy.co.uk/xapian/1.4.26/xapian-bindings-1.4.26.tar.xz"
-    sha256 "550873573ee0401199f835fef51ddf89ca7bc26f7b8d1bdcca59da643fb3ca81"
+    url "https://oligarchy.co.uk/xapian/2.0.0/xapian-bindings-2.0.0.tar.xz"
+    sha256 "9a544b69c31355a92edbcd4102cf0f1ec4407fd0a4645f4870fb52300b736910"
+
+    livecheck do
+      formula :parent
+    end
   end
 
   def python3
-    "python3.12"
+    "python3.14"
   end
 
   def install

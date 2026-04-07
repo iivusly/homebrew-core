@@ -1,24 +1,26 @@
 class BuildpulseTestReporter < Formula
   desc "Connect your CI to BuildPulse to detect, track, and rank flaky tests"
   homepage "https://buildpulse.io"
-  url "https://github.com/buildpulse/test-reporter/archive/refs/tags/v0.28.0.tar.gz"
-  sha256 "8006002a0899470f782a965724ebb3ab19fd48873cb50ce7722d474710d22995"
+  url "https://github.com/buildpulse/test-reporter/archive/refs/tags/v0.29.0.tar.gz"
+  sha256 "605e87f4d566f14455f6c1e609eabd3fc2337a09d695fafc489011ce48b02035"
   license "MIT"
   head "https://github.com/buildpulse/test-reporter.git", branch: "main"
 
   livecheck do
     url :stable
-    regex(/^v?(\d+(?:\.\d+)+)$/i)
+    strategy :github_latest
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "210c03916b8e4ec0d2172f9b7a4f52ca5447a81e6517979609b0d958d8b4fcc5"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "5446e9c167595aa6e31a558b0ba82d5505d58cd07f6168dac76474f57bf4417a"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "04e6c06647c7d0dc90497ffaf4cffa437f41259e53070fee8bac6cf465941a52"
-    sha256 cellar: :any_skip_relocation, sonoma:         "17a887a1df832df6cb9d37705395b962cae39a22c859387be3f34864cad7d54e"
-    sha256 cellar: :any_skip_relocation, ventura:        "7a96a8f6df56003b66454334f86760a0f151d4182e2a3884ffcfdde4246dc297"
-    sha256 cellar: :any_skip_relocation, monterey:       "1da2717a31beea4f4a469d611beb9e0f568da7ba85b8dd2783850e16e1969c35"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "34af7cf6797de10a49d6f03cc1b9a4899715ec223fe0bfe7adc02a41e2386d43"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "4711592a6b669b5d417bf261032b49b16a0939ccd1af8d0b72bf09eff8875988"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "d9517c8459dbd5480f9c0d20230d1a331e22de9225109d0b777fc9c438fbb366"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "d9517c8459dbd5480f9c0d20230d1a331e22de9225109d0b777fc9c438fbb366"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "d9517c8459dbd5480f9c0d20230d1a331e22de9225109d0b777fc9c438fbb366"
+    sha256 cellar: :any_skip_relocation, sonoma:        "3f5d4e0bcadb62fd9c54073b4868129f67bb484189800987c64a663a6b594a49"
+    sha256 cellar: :any_skip_relocation, ventura:       "3f5d4e0bcadb62fd9c54073b4868129f67bb484189800987c64a663a6b594a49"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "b19d3cb0925d0cb510b6a5fd8e0fb277309db68a43bda6e6687cb474b6e0e734"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "a2acf192f12d0435f4d764e2fccd9a532b708ec0bd24cfc2d4b7a0beed3840c2"
   end
 
   depends_on "go" => :build

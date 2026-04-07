@@ -1,9 +1,10 @@
 class Libxslt < Formula
   desc "C XSLT library for GNOME"
   homepage "http://xmlsoft.org/XSLT/"
-  url "https://download.gnome.org/sources/libxslt/1.1/libxslt-1.1.42.tar.xz"
-  sha256 "85ca62cac0d41fc77d3f6033da9df6fd73d20ea2fc18b0a3609ffb4110e1baeb"
+  url "https://download.gnome.org/sources/libxslt/1.1/libxslt-1.1.45.tar.xz"
+  sha256 "9acfe68419c4d06a45c550321b3212762d92f41465062ca4ea19e632ee5d216e"
   license "X11"
+  compatibility_version 1
 
   # We use a common regex because libxslt doesn't use GNOME's "even-numbered
   # minor is stable" version scheme.
@@ -13,13 +14,13 @@ class Libxslt < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "3c3a336b56c8384b9c2956202cc78e28271db8b627a65227f77f049d387b8c05"
-    sha256 cellar: :any,                 arm64_ventura:  "fd6b363128cde585e7086df6d54c8473475a568842b6aa04add1947dae8b9135"
-    sha256 cellar: :any,                 arm64_monterey: "27c8a5e233ab19a82557b33c99f4e226610859832b27c18276a49c1a3765621d"
-    sha256 cellar: :any,                 sonoma:         "33fbe4982e16be91957f9eeb77f35f70385831d479a15b87908389a1077a475c"
-    sha256 cellar: :any,                 ventura:        "82e7425e4331d0024a053434efbd3e6035721a3f792b3fb5b8b8d72fce88cc73"
-    sha256 cellar: :any,                 monterey:       "1609668b445f07134b3f6fafa6cc0307d0659466f2d4aa708e0787bf3a064a6b"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "222f19398d1b8f2d1efb196b2336d9b6a8b805abd6b3ab3f1d002112dc7fa67c"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "5247978b2374fcb0d2a4f9b0ce74c08fde85305c2d2816b458e8a64fc7013c7d"
+    sha256 cellar: :any,                 arm64_sequoia: "f1ba7468eded4f5db764b1a35802820af8be74455130443dce0748370b9d4e54"
+    sha256 cellar: :any,                 arm64_sonoma:  "97e95a9b6f10e601120a14bb003b6bb4ca6248123368425ea6295cc36f40f4e3"
+    sha256 cellar: :any,                 sonoma:        "75584f355ae00d06a7e5b1844e08acad55ea3a8d48db8425ef7f5066db590a5c"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "4a08d60e1ea50a89702e83b5ac483104831961bb42d47684ba7f6f8bd3bbed98"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "4b03c065c1b506ebe8caac9d6ad14b9d46950faad527e6ca89aafcd9eec234e5"
   end
 
   head do
@@ -32,7 +33,7 @@ class Libxslt < Formula
 
   keg_only :provided_by_macos
 
-  depends_on "icu4c"
+  depends_on "pkgconf" => :build
   depends_on "libgcrypt"
   depends_on "libxml2"
 
@@ -40,22 +41,18 @@ class Libxslt < Formula
     depends_on "libgpg-error"
   end
 
-  on_linux do
-    depends_on "pkg-config" => :build
-  end
-
   def install
     libxml2 = Formula["libxml2"]
     system "autoreconf", "--force", "--install", "--verbose" if build.head?
-    system "./configure", "--disable-dependency-tracking",
-                          "--disable-silent-rules",
-                          "--prefix=#{prefix}",
+    system "./configure", "--disable-silent-rules",
                           "--without-python",
                           "--with-crypto",
-                          "--with-libxml-prefix=#{libxml2.opt_prefix}"
+                          "--with-libxml-prefix=#{libxml2.opt_prefix}",
+                          *std_configure_args
     system "make"
     system "make", "install"
-    inreplace [bin/"xslt-config", lib/"xsltConf.sh"], libxml2.prefix.realpath, libxml2.opt_prefix
+
+    inreplace [bin/"xslt-config", lib/"pkgconfig/libxslt.pc", lib/"pkgconfig/libexslt.pc"], prefix, opt_prefix
   end
 
   def caveats
@@ -67,13 +64,13 @@ class Libxslt < Formula
 
   test do
     assert_match version.to_s, shell_output("#{bin}/xslt-config --version")
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <libexslt/exslt.h>
       int main(int argc, char *argv[]) {
         exsltCryptoRegister();
         return 0;
       }
-    EOS
+    C
     flags = shell_output("#{bin}/xslt-config --cflags --libs").chomp.split
     system ENV.cc, "test.c", "-o", "test", *flags, "-lexslt"
     system "./test"

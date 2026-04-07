@@ -1,28 +1,38 @@
 class WoofDoom < Formula
   desc "Woof! is a continuation of the Boom/MBF bloodline of Doom source ports"
   homepage "https://github.com/fabiangreffrath/woof"
-  url "https://github.com/fabiangreffrath/woof/archive/refs/tags/woof_14.5.0.tar.gz"
-  sha256 "1ad9e27ffeb70a60344e98f08bf17650856ffb51aa32cffd94468dacd9f1d42a"
   license "GPL-2.0-only"
-  head "https://github.com/fabiangreffrath/woof.git", branch: "master"
+
+  stable do
+    url "https://github.com/fabiangreffrath/woof/archive/refs/tags/woof_15.3.0.tar.gz"
+    sha256 "ace929952479bf42f2bbf404f6bc95ca5fabde23f3c8d656c6d1339b9baebbcc"
+
+    depends_on "sdl2"
+    depends_on "sdl2_net"
+  end
 
   bottle do
-    sha256 arm64_sonoma:   "b36d61351eb20860130ebef15f2d351aa57c1b53a7144941ceb55c0e15954795"
-    sha256 arm64_ventura:  "6512b577a17cc18d6b33892d6bcfdd4b1b39b8c97602ad6dbe0a0af00075c683"
-    sha256 arm64_monterey: "e3926cf17f95f3c9e522c5780664fc7140503d58ba4b30957cb3c73d26cd5c33"
-    sha256 sonoma:         "db9287960e269240a49e68e2c3b90ae29ff0dcd49ad6d059f5a2662c77a7fdc5"
-    sha256 ventura:        "e2d4953664a4d0a550cb4f05df6a0694abe359722d4173d158f67b426afc2a3b"
-    sha256 monterey:       "0c25e98829bb5c3c28a9fed56288f127578b245250b1b1780e97a65219236b5a"
-    sha256 x86_64_linux:   "b9d8f3a75f9802616af365eb50055efa92c5278b63a436938e9d3c9b0f9bca11"
+    sha256 cellar: :any,                 arm64_tahoe:   "5fe5942382f6b24dfd928f023279f36ea7fc8686a92affbfe9dac93d4df6ea50"
+    sha256 cellar: :any,                 arm64_sequoia: "9af289e62db9550c0d9d04903f596e46f0ab67a3fe7d42fff1294511549b6fa9"
+    sha256 cellar: :any,                 arm64_sonoma:  "eefa1a71e7e29f5a19ee0f50f6332ac37d1334d2b6c72e09eddeb9e9dd2de9a8"
+    sha256 cellar: :any,                 sonoma:        "ce1a252768cd9d70a653330c55b3fc53b8a8c922d15fd7184d36561e2403a48a"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "f97536230d32c3733dbee65719503d45d620112ab004de741542f1c125e193f1"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "6f25b3b170b7b2b6bd627f551ea0dd4fe229898bf039a72508a441fd1ecf4ca6"
+  end
+
+  head do
+    url "https://github.com/fabiangreffrath/woof.git", branch: "master"
+
+    depends_on "sdl3"
   end
 
   depends_on "cmake" => :build
   depends_on "fluid-synth"
+  depends_on "libebur128"
   depends_on "libsndfile"
   depends_on "libxmp"
   depends_on "openal-soft"
-  depends_on "sdl2"
-  depends_on "sdl2_net"
+  depends_on "yyjson"
 
   on_linux do
     depends_on "alsa-lib"
@@ -31,18 +41,22 @@ class WoofDoom < Formula
   conflicts_with "woof", because: "both install `woof` binaries"
 
   def install
+    # Remove bundled libraries
+    rm_r("third-party/yyjson")
+
     system "cmake", "-S", ".", "-B", "build", *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
   end
 
   test do
-    testdata = <<~EOS
+    (testpath/"test_invalid.wad").write <<~EOS
       Invalid IWAD file
     EOS
-    (testpath/"test_invalid.wad").write testdata
 
-    expected_output = "Wad file test_invalid.wad doesn't have IWAD or PWAD id"
+    expected_output = "Error: Failed to load test_invalid.wad"
     assert_match expected_output, shell_output("#{bin}/woof -nogui -iwad test_invalid.wad 2>&1", 255)
+
+    assert_match version.to_s, shell_output("#{bin}/woof -version")
   end
 end

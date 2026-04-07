@@ -9,38 +9,41 @@ class TrashCli < Formula
   head "https://github.com/andreafrancia/trash-cli.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "52494b0f151cb64bcbaf135234a3dba653c62ba58acab0738238ef76a0e7e5d9"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "840acb0031d2dff6846a108168e587565c668408ff198114705956afef881a4b"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "2260988e4f3d877e696902b51ea38df68e2b54d48abfcabe897efbe88b683883"
-    sha256 cellar: :any_skip_relocation, sonoma:         "c71b355edab688f219463348e5212574f1647c994e7e807f886fc526cae95976"
-    sha256 cellar: :any_skip_relocation, ventura:        "38638689e159a256579221c3e05c81c746de0e76e8cdc890bcac13e67a557743"
-    sha256 cellar: :any_skip_relocation, monterey:       "effc0045b6313f3c46375dfe54ab9d69410e478f7bbdae82aad27c422e6049b6"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "079ba93c9e3201cb09eeeea1d838e6221c9eaf06ecaab8519a58c6b49859fd2f"
+    rebuild 2
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "096c7187b9376eb817001e3ed11ea683e43d81c25c493c9f1036dc3bea281823"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "e5cefc22f1ecb8432383170c378630a1b2ab97fbdcd63006cddf43eedd70b41f"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "ce16cef08f1698139e1e509ff3c42621cdad38fe96634593c0ecc7a10458d218"
+    sha256 cellar: :any_skip_relocation, sonoma:        "a0cc43661442da45b0e393fc69c9a92adf86dec427dcea7b64bc39bfee6ded85"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "7f6ad80444c0db11ae7faf5bfa3e119eb09603242938e35ef89fe3e3b080a09d"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "88aba05ddc72fd1c30e4aa6e69351cd59e4aaf11d043d2eeafa013f0c574c9ba"
   end
 
-  depends_on "python@3.12"
+  keg_only :shadowed_by_macos
+
+  depends_on "python@3.14"
 
   conflicts_with "macos-trash", because: "both install a `trash` binary"
+  conflicts_with "osx-trash", because: "both install a `trash` binary"
   conflicts_with "trash", because: "both install a `trash` binary"
 
   resource "psutil" do
-    url "https://files.pythonhosted.org/packages/90/c7/6dc0a455d111f68ee43f27793971cf03fe29b6ef972042549db29eec39a2/psutil-5.9.8.tar.gz"
-    sha256 "6be126e3225486dff286a8fb9a06246a5253f4c7c53b475ea5f5ac934e64194c"
+    url "https://files.pythonhosted.org/packages/b3/31/4723d756b59344b643542936e37a31d1d3204bcdc42a7daa8ee9eb06fb50/psutil-7.1.0.tar.gz"
+    sha256 "655708b3c069387c8b77b072fc429a57d0e214221d01c0a772df7dfedcb3bcd2"
   end
 
   resource "six" do
-    url "https://files.pythonhosted.org/packages/71/39/171f1c67cd00715f190ba0b100d606d440a28c93c7714febeca8b79af85e/six-1.16.0.tar.gz"
-    sha256 "1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"
+    url "https://files.pythonhosted.org/packages/94/e7/b2c673351809dca68a0e064b6af791aa332cf192da575fd474ed7d6f16a2/six-1.17.0.tar.gz"
+    sha256 "ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81"
   end
 
   def install
-    virtualenv_install_with_resources(link_manpages: true)
+    virtualenv_install_with_resources
   end
 
   test do
     touch "testfile"
-    assert_predicate testpath/"testfile", :exist?
+    assert_path_exists testpath/"testfile"
     system bin/"trash-put", "testfile"
-    refute_predicate testpath/"testfile", :exist?
+    refute_path_exists testpath/"testfile"
   end
 end

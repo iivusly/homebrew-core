@@ -8,6 +8,8 @@ class ActivemqCpp < Formula
   revision 2
 
   bottle do
+    sha256 cellar: :any,                 arm64_tahoe:    "a0f11adf35cbc7f7295a0d056b8255af8d54bab66c242fa31704f54070aaa1a7"
+    sha256 cellar: :any,                 arm64_sequoia:  "9662d2f91d16d3077aabec66a532efde437d18987dd1a7be434e3c118a5e1eb9"
     sha256 cellar: :any,                 arm64_sonoma:   "9c0b1a20e016293fcd540c357d6d879c82446c00720b447ae4e1ee1d1eb546ad"
     sha256 cellar: :any,                 arm64_ventura:  "9b637874d78138b4debd3b45d1bbd54d79babf16bfdfbf9acc340103208262bd"
     sha256 cellar: :any,                 arm64_monterey: "aecbae4664dd780644ff782462ea5bcdcc592917dfad01dde5370a93db641319"
@@ -17,16 +19,17 @@ class ActivemqCpp < Formula
     sha256 cellar: :any,                 monterey:       "fc59b7bff98816254d9180614b72606f424c209a97ae1a0a6e28985af8889f6a"
     sha256 cellar: :any,                 big_sur:        "cce6f6a49cb80accb399d33826380c4220d01701b2b53f14eafde10406f835b5"
     sha256 cellar: :any,                 catalina:       "296375b0118271838d46daf6722954f6e5a8c791f08245324abd7289b4ded719"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "07d0b32de8d78022c5498d1ff144d16c573bd5de3edf91239f8404dc72cd64a2"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "fa16d5eb67f51eb3d9e648447398db44713695f5e1c5279c70f7a2229e607a9a"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "apr"
   depends_on "openssl@3"
 
   # Fix -flat_namespace being used on Big Sur and later.
   patch do
-    url "https://raw.githubusercontent.com/Homebrew/formula-patches/03cf8088210822aa2c1ab544ed58ea04c897d9c4/libtool/configure-big_sur.diff"
+    url "https://raw.githubusercontent.com/Homebrew/homebrew-core/1cf441a0/Patches/libtool/configure-big_sur.diff"
     sha256 "35acd6aebc19843f1a2b3a63e880baceb0f5278ab1ace661e57a502d9d78c93c"
   end
 

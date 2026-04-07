@@ -7,8 +7,8 @@ class Homeshick < Formula
   head "https://github.com/andsens/homeshick.git", branch: "master"
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, all: "619e2b433b3d43170b65dff75fa3f204a021a166a54d96c0e07e3ee3523c0efd"
+    rebuild 2
+    sha256 cellar: :any_skip_relocation, all: "9a93b6514577c36a3de2d9c6a8c3cf9474a6534cc9547407f49ebc0325b20a8d"
   end
 
   def install
@@ -18,7 +18,7 @@ class Homeshick < Formula
     fish_function.install "homeshick.fish"
     bin.install "bin/homeshick"
     zsh_completion.install "completions/_homeshick"
-    bash_completion.install "completions/homeshick-completion.bash"
+    bash_completion.install "completions/homeshick-completion.bash" => "homeshick"
     fish_completion.install "completions/homeshick.fish"
   end
 
@@ -33,13 +33,14 @@ class Homeshick < Formula
   end
 
   test do
-    (testpath/"test.sh").write <<~EOS
+    (testpath/"test.sh").write <<~SHELL
       #!/bin/sh
       export HOMESHICK_DIR="#{opt_prefix}"
       source "#{opt_prefix}/homeshick.sh"
       homeshick generate test
       homeshick list
-    EOS
+    SHELL
+
     assert_match "test", shell_output("bash #{testpath}/test.sh")
   end
 end

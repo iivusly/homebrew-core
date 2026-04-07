@@ -6,21 +6,21 @@ class Msgpack < Formula
   license "BSL-1.0"
   head "https://github.com/msgpack/msgpack-c.git", branch: "c_master"
 
-  # Upstream creates releases that use a stable tag (e.g., `v1.2.3`) but are
-  # labeled as "pre-release" on GitHub before the version is released, so it's
-  # necessary to use the `GithubLatest` strategy.
   livecheck do
     url :stable
-    strategy :github_latest
+    regex(/^c[._-]v?(\d+(?:\.\d+)+)$/i)
   end
 
   bottle do
+    sha256 cellar: :any,                 arm64_tahoe:    "5a412a93e8367e656022e5c0810632cba0d5c924e1cdf5f5bc64f1a0501a6aa9"
+    sha256 cellar: :any,                 arm64_sequoia:  "fef7b080476f8c2ea5d3478775fb8ba7861cb2c5b25a5c06a575eabf303d6085"
     sha256 cellar: :any,                 arm64_sonoma:   "7a4291f35809d557ff65bdec687fc12468b557d8c27499fad634b84fc27c6a65"
     sha256 cellar: :any,                 arm64_ventura:  "9798f9eb15c335c663271387feedb42a24953c8a869d657e1b3d58868fb97177"
     sha256 cellar: :any,                 arm64_monterey: "eb59d97db589ebe5afa0c0ae7f8ac4f07ae39433c323e6d90532301ff19a6c69"
     sha256 cellar: :any,                 sonoma:         "f8a10c653f0e071f725866c790eebef4161f4c172315388aefdada07682c46bd"
     sha256 cellar: :any,                 ventura:        "c7e8c2eddc2b55a71e6e6a6a3f63c90cb66369727b990cc553470b7b91ceb599"
     sha256 cellar: :any,                 monterey:       "0c0c337dad512678ec60426c448aded9965daef3b4ee89eec9f98faad1789012"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "07097acd7e8f4e885cf3917b684a45721344db7aa38edea9ad01c8c6acdbe141"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "95d7d9a41f1c13c5ce0e1a2ec77f119a3b55e2ad88f0f98d3e5a04d323896171"
   end
 
@@ -46,7 +46,7 @@ class Msgpack < Formula
                  "Upstream has bumped `SOVERSION`! The workaround in the `install` method can be removed"
 
     # Reference: https://github.com/msgpack/msgpack-c/blob/c_master/QUICKSTART-C.md
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <msgpack.h>
       #include <stdio.h>
 
@@ -76,7 +76,7 @@ class Msgpack < Formula
              puts("");
          }
       }
-    EOS
+    C
 
     system ENV.cc, "-o", "test", "test.c", "-L#{lib}", "-lmsgpack-c"
     assert_equal "1\n2\n3\n", `./test`

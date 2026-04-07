@@ -1,23 +1,24 @@
 class Debianutils < Formula
   desc "Miscellaneous utilities specific to Debian"
-  homepage "https://packages.debian.org/sid/debianutils"
-  url "https://deb.debian.org/debian/pool/main/d/debianutils/debianutils_5.17.tar.xz"
-  sha256 "367654878388f532cd8a897fe64766e2d57ae4c60da1d4d8f20dcdf2fb0cbde8"
+  homepage "https://tracker.debian.org/pkg/debianutils"
+  url "https://deb.debian.org/debian/pool/main/d/debianutils/debianutils_5.23.2.tar.xz"
+  sha256 "79e524b7526dba2ec5c409d0ee52ebec135815cf5b2907375d444122e0594b69"
   license "GPL-2.0-or-later"
 
   livecheck do
-    url "https://packages.qa.debian.org/d/debianutils.html"
+    url :homepage
     regex(/href=.*?debianutils[._-]v?(\d+(?:\.\d+)+).dsc/i)
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "8a78370632d98050927e832d1cfdb80ed64a690964445f1f88dc58a5e5628011"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "907fadee8644858dfc4271262edb7a68ee7a30e820d5ccf623d9234b08aa9521"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "62356ab51a377150e2df6a9ec13cb254852b43e99cd7ecdfe24a5623b9bf91c9"
-    sha256 cellar: :any_skip_relocation, sonoma:         "4ea1b528e74fce94809b36ee581a91a4e9a242195fe3be11c412fb0e59733eb3"
-    sha256 cellar: :any_skip_relocation, ventura:        "3243ef275bc47e5e9b6897d04438e225b4d43e8ec9816ea6c8abbdf5384a0864"
-    sha256 cellar: :any_skip_relocation, monterey:       "362d1a754b001b1b20660b859d8bf527fff2573e47a68eba7f7450cc3b002dea"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "9983d6defe478b019c2a76efa8f16b54e4e61aefe111d41d811f5414d6ab3cd5"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "329887b6a8522b5f303b0787af83a7b26ae386d7feb87c069c4ce2387a9ab785"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "697c3bde9f2847949cd3b06bcb526b7afc8526828d5c9498b6826a77f5e69f3c"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "05a1e2686176a116605d4ab6e5264340ca9dd83aca4533ada3f2cd56dc7a5dff"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "467ec22e22e45c4bf5ac0ec66521805fd548a2067fd35255e3cfc29a773aca36"
+    sha256 cellar: :any_skip_relocation, sonoma:        "08d55d96cb4eae2950159943ba4f0e010adfeb01c8541a2d14edce96a4bcb945"
+    sha256 cellar: :any_skip_relocation, ventura:       "cf09f6c0bd7042a1c473c9970ab98f28abc2fb3e7fb77cf51f7180ad05b07299"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "8f255a4df75b8734c998aa1ba8215d945bc542ad7c119854f48cefbaa6ab8909"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "3425081c6784a3a440bad62d02f8d0111decbf747bcf7df94676bd4b74e36e76"
   end
 
   depends_on "autoconf" => :build
@@ -41,6 +42,6 @@ class Debianutils < Formula
 
   test do
     output = shell_output("#{bin}/tempfile -d #{Dir.pwd}").strip
-    assert_predicate Pathname.new(output), :exist?
+    assert_path_exists Pathname.new(output)
   end
 end

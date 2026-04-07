@@ -1,38 +1,35 @@
 class AvroC < Formula
   desc "Data serialization system"
   homepage "https://avro.apache.org/"
-  # Upstreams tar.gz can't be opened by bsdtar on macOS
-  # https://github.com/Homebrew/homebrew-core/pull/146296#issuecomment-1737945877
-  # https://apple.stackexchange.com/questions/197839/why-is-extracting-this-tgz-throwing-an-error-on-my-mac-but-not-on-linux
-  url "https://github.com/apache/avro.git",
-      tag:      "release-1.11.3",
-      revision: "35ff8b997738e4d983871902d47bfb67b3250734"
+  url "https://www.apache.org/dyn/closer.lua?path=avro/avro-1.12.1/c/avro-c-1.12.1.tar.gz"
+  mirror "https://archive.apache.org/dist/avro/avro-1.12.1/c/avro-c-1.12.1.tar.gz"
+  sha256 "b64e31b94719499549622aa92f1d96d1742967ced261a0931b63be3bbe907f2c"
   license "Apache-2.0"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "486572382a8323c7816b6244588ecbd2dbf4d39fb1deea0c12600abe86df2f29"
-    sha256 cellar: :any,                 arm64_ventura:  "753a5f373fb25d3d992539750fa36b68a981d7529fee9eb6b702090e61dc5939"
-    sha256 cellar: :any,                 arm64_monterey: "a67d4adccc1ab3face3d67c7fbfcd85701eefd48d200f6897e4ad05aa91b0b26"
-    sha256 cellar: :any,                 sonoma:         "9b78764d59ba53b7472c07367e63f04b3168ddbb0dac230216e4188165285b10"
-    sha256 cellar: :any,                 ventura:        "21ab5db9c56aeda49e97fd561116d8e554b7bba66d2d3cb7d19db4cb40fc1852"
-    sha256 cellar: :any,                 monterey:       "fe874bc1b1f28d006e362b10543cb63b06ceb99baaa90b1d4ac9c87b33d24ffe"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "0385f75fb76a3c8bf9cb71e85a0db0c5b1563481ec19afdb6f985a58065c4141"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "abb6d682b6136ad799198b11633ab0a197bae12b256ab0ddd5d7d0ea77bf3f41"
+    sha256 cellar: :any,                 arm64_sequoia: "44c05e639545cf1f19322088a4becef2a6918d55bd531be545af501dfee7b39c"
+    sha256 cellar: :any,                 arm64_sonoma:  "1907a3e4371b719d35b0a56d265d6c7c425d11ec5e4f14ac3a08a9c11ad52580"
+    sha256 cellar: :any,                 sonoma:        "f59a5d3deb7314c5c9c1fbb149e7e74470fc6b160b33e4e10dd0c71adff72658"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "0fa921d188143ffc18e81dd7c664593775e6496d921c85b4a63d6e1fde0b1b81"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "d1c7c2673ab920322902e435fb6b4c562c90b3c5fbbaf1b2f62d15a5e7db1edc"
   end
 
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "jansson"
   depends_on "snappy"
   depends_on "xz"
 
-  uses_from_macos "zlib"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
-    cd "lang/c" do
-      system "cmake", "-S", ".", "-B", "build", *std_cmake_args
-      system "cmake", "--build", "build"
-      system "cmake", "--install", "build"
-    end
+    system "cmake", "-S", ".", "-B", "build", *std_cmake_args
+    system "cmake", "--build", "build"
+    system "cmake", "--install", "build"
   end
 
   test do
@@ -43,6 +40,6 @@ class AvroC < Formula
 
     testpath.install resource("homebrew-example")
     system ENV.cc, "quickstop.c", "-o", "test", "-I#{include}", "-L#{lib}", "-lavro"
-    system "./test", ">> /dev/null"
+    assert_match "Silent |  (555) 123-6422 | 29 |", shell_output("./test")
   end
 end

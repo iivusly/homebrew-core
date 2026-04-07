@@ -1,77 +1,80 @@
 class Distcc < Formula
-  include Language::Python::Virtualenv
-
   desc "Distributed compiler client and server"
   homepage "https://github.com/distcc/distcc/"
-  url "https://github.com/distcc/distcc/releases/download/v3.4/distcc-3.4.tar.gz"
-  sha256 "2b99edda9dad9dbf283933a02eace6de7423fe5650daa4a728c950e5cd37bd7d"
   license "GPL-2.0-or-later"
-  revision 2
-  head "https://github.com/distcc/distcc.git", branch: "master"
+  revision 3
 
-  livecheck do
-    url :stable
-    strategy :github_latest
+  stable do
+    url "https://github.com/distcc/distcc/releases/download/v3.4/distcc-3.4.tar.gz"
+    sha256 "2b99edda9dad9dbf283933a02eace6de7423fe5650daa4a728c950e5cd37bd7d"
+
+    # TODO: Remove in the next release
+    # https://github.com/distcc/distcc/commit/6d54352e209066418b4b268c7d2d266e05df1eb3
+    resource "libiberty" do
+      url "https://ftp.debian.org/debian/pool/main/libi/libiberty/libiberty_20250315.orig.tar.xz"
+      sha256 "5b510b5e0918dcb00a748900103365a00411855f202089ff81dc5ef99d8beeaa"
+    end
+
+    # Python 3.10+ compatibility
+    patch do
+      url "https://github.com/distcc/distcc/commit/83e030a852daf1d4d8c906e46f86375d421b781e.patch?full_index=1"
+      sha256 "d65097b7c13191e18699d3a9c7c9df5566bba100f8da84088aa4e49acf46b6a7"
+    end
+
+    # Switch from distutils to setuptools
+    patch do
+      url "https://github.com/distcc/distcc/commit/76873f8858bf5f32bda170fcdc1dfebb69de0e4b.patch?full_index=1"
+      sha256 "611910551841854755b06d2cac1dc204f7aaf8c495a5efda83ae4a1ef477d588"
+    end
   end
 
   bottle do
-    rebuild 2
-    sha256 arm64_sonoma:   "86f9db8cf49b2761bed7f067435d5e44a7e6d766f926d889b07feff6f0faf606"
-    sha256 arm64_ventura:  "2e5d348a1fadf36a192c384d570935d3207c4328b56989429ccba71009218a65"
-    sha256 arm64_monterey: "fbab64f137d740df58d38572b657f223ee7ac9b9b0bae4831a6a1d15b614a5c3"
-    sha256 sonoma:         "622db90f14bcdefda607c55b5ac3591a851ee10b2a5824f1a847117839f4486b"
-    sha256 ventura:        "1f1403908514f997b9adb2c7533c95d327e59af14d77debb6735020301cfaade"
-    sha256 monterey:       "f45fc0328cf2e97468b13f407ac8dd594df7d456c55f24a7d077ace92777bd55"
-    sha256 x86_64_linux:   "e8044112f0fb9eead14311e10e8ca49e8ff4d5eab6bd58c7ffb0a4bbd00aba42"
+    rebuild 1
+    sha256 arm64_tahoe:   "09fcd33f368d1daff6716752ee32cf50cbb62f7acb0200a0a07bd676d65cd3f2"
+    sha256 arm64_sequoia: "232f2d8db68393c3f700e16d29d914e19aa565f2e8a6d2e0e3846c8b317fd931"
+    sha256 arm64_sonoma:  "a25d35cebbe97e9bb683c53994a2956e256d4f7dfb1bd024e1a412826ee7c1d1"
+    sha256 sonoma:        "ab7cc55d6cfae2c77316093229ae3668f7e34d2d80713e4eec5f2c41f69983d2"
+    sha256 arm64_linux:   "42071ee608cbbcfcc761fe4a9b18ed90499115dab3108c03ff72a27825a2beef"
+    sha256 x86_64_linux:  "d04aa534933e21b7e469f009c76e5bde6e50ecadecbab3d6de4f134db8f7eef2"
   end
 
-  depends_on "python@3.12"
+  head do
+    url "https://github.com/distcc/distcc.git", branch: "master"
 
-  resource "libiberty" do
-    url "https://ftp.debian.org/debian/pool/main/libi/libiberty/libiberty_20210106.orig.tar.xz"
-    sha256 "9df153d69914c0f5a9145e0abbb248e72feebab6777c712a30f1c3b8c19047d4"
+    depends_on "autoconf" => :build
+    depends_on "automake" => :build
+    depends_on "pkgconf" => :build
+    depends_on "popt"
   end
 
-  resource "setuptools" do
-    url "https://files.pythonhosted.org/packages/d6/4f/b10f707e14ef7de524fe1f8988a294fb262a29c9b5b12275c7e188864aed/setuptools-69.5.1.tar.gz"
-    sha256 "6c1fccdac05a97e598fb0ae3bbed5904ccb317337a51139dcd51453611bbb987"
-  end
-
-  # Python 3.10+ compatibility
-  patch do
-    url "https://github.com/distcc/distcc/commit/83e030a852daf1d4d8c906e46f86375d421b781e.patch?full_index=1"
-    sha256 "d65097b7c13191e18699d3a9c7c9df5566bba100f8da84088aa4e49acf46b6a7"
-  end
-
-  # Switch from distutils to setuptools
-  patch do
-    url "https://github.com/distcc/distcc/commit/76873f8858bf5f32bda170fcdc1dfebb69de0e4b.patch?full_index=1"
-    sha256 "611910551841854755b06d2cac1dc204f7aaf8c495a5efda83ae4a1ef477d588"
-  end
+  depends_on "python-setuptools" => :build
+  depends_on "python@3.14"
 
   def install
-    ENV["PYTHON"] = python3 = which("python3.12")
+    ENV["PYTHON"] = python3 = which("python3.14")
     site_packages = prefix/Language::Python.site_packages(python3)
 
-    build_venv = virtualenv_create(buildpath/"venv", python3)
-    build_venv.pip_install resource("setuptools")
-    ENV.prepend_create_path "PYTHONPATH", build_venv.site_packages
+    if build.stable?
+      odie "Remove libiberty!" if version > "3.4"
 
-    # While libiberty recommends that packages vendor libiberty into their own source,
-    # distcc wants to have a package manager-installed version.
-    # Rather than make a package for a floating package like this, let's just
-    # make it a resource.
-    resource("libiberty").stage do
-      system "./libiberty/configure", "--prefix=#{buildpath}", "--enable-install-libiberty"
-      system "make", "install"
+      # While libiberty recommends that packages vendor libiberty into their own source,
+      # distcc wants to have a package manager-installed version.
+      # Rather than make a package for a floating package like this, let's just
+      # make it a resource.
+      resource("libiberty").stage do
+        system "./libiberty/configure", "--prefix=#{buildpath}", "--enable-install-libiberty"
+        system "make", "install"
+      end
+      ENV.append "CPPFLAGS", "-I#{buildpath}/include"
+      ENV.append "LDFLAGS", "-L#{buildpath}/lib"
     end
-    ENV.append "CPPFLAGS", "-I#{buildpath}/include"
-    ENV.append "LDFLAGS", "-L#{buildpath}/lib"
 
     # Work around Homebrew's "prefix scheme" patch which causes non-pip installs
     # to incorrectly try to write into HOMEBREW_PREFIX/lib since Python 3.10.
     inreplace "Makefile.in", '--root="$$DESTDIR"', "--install-lib='#{site_packages}'"
-    system "./configure", "--prefix=#{prefix}"
+
+    system "./autogen.sh" if build.head?
+    system "./configure", *std_configure_args
     system "make", "install"
   end
 
@@ -84,10 +87,10 @@ class Distcc < Formula
   test do
     system bin/"distcc", "--version"
 
-    (testpath/"Makefile").write <<~EOS
+    (testpath/"Makefile").write <<~MAKE
       default:
-      \t@echo Homebrew
-    EOS
+      	@echo Homebrew
+    MAKE
     assert_match "distcc hosts list does not contain any hosts", shell_output("#{bin}/pump make 2>&1", 1)
 
     # `pump make` timeout on linux runner and is not reproducible, so only run this test for macOS runners

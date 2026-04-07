@@ -6,6 +6,8 @@ class Fann < Formula
   license "LGPL-2.1-or-later"
 
   bottle do
+    sha256 cellar: :any,                 arm64_tahoe:    "2ac389dc68554448627859dcea8a703c0d81adce8de6fd1c32a4f43ac467ec7a"
+    sha256 cellar: :any,                 arm64_sequoia:  "1a57d8d2501d63d56451fb00bc9fed3e5596b0afd995638b1c290e6a7aa663f5"
     sha256 cellar: :any,                 arm64_sonoma:   "b89f592bc6efa6bc3098f6881b6e6af8adf0ca7a1dc3e6eb4677ba86f9ac44dc"
     sha256 cellar: :any,                 arm64_ventura:  "5d06935d9df379bbb543080a1cfb15503854cd88cb88c6d14186187fdd18607a"
     sha256 cellar: :any,                 arm64_monterey: "dd693aef10b32db6fe84a9eabfbd1e05c1d4ed83c4e48e936745fa76b2af7a4f"
@@ -15,14 +17,16 @@ class Fann < Formula
     sha256 cellar: :any,                 monterey:       "468d340a979831b709a4a67defc13796a7763019836d15d98f723aa1b8cb1981"
     sha256 cellar: :any,                 big_sur:        "4d7d975ad6d820ce4938ba6235881b11cfebb93ad8f5ac4cb5dabf2356f2ffa0"
     sha256 cellar: :any,                 catalina:       "61d506a68652f81b0f93120b7ed1fb049510f18381e35a52abe52f0170e589a6"
-    sha256 cellar: :any,                 mojave:         "f4ff7eaa67aad30f4c544b3c9e20d4b4f9204807d97b900004ec65a27a2b6175"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "be290090d8260f04dd59deda3e8197a1d0547686e3387d49379ea850990d57d9"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "1596e86f9b80da14fc97d5841253dc22c3ffe2e47991ef0c161d4512ef72f65d"
   end
 
   depends_on "cmake" => :build
 
   def install
-    system "cmake", "-S", ".", "-B", "build", *std_cmake_args
+    # Workaround to build with CMake 4
+    args = %w[-DCMAKE_POLICY_VERSION_MINIMUM=3.5]
+    system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
   end
@@ -43,7 +47,7 @@ class Fann < Formula
     desired_error = 0.001
     max_epochs = 500000
 
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <fann.h>
       int main()
       {
@@ -64,14 +68,14 @@ class Fann < Formula
           fann_destroy(ann);
           return 0;
       }
-    EOS
+    C
 
     system ENV.cc, "test.c", "-I#{include}", "-L#{lib}", "-lfann", "-lm", "-o", "test"
     output = shell_output(testpath/"test")
     epoch, error = output.lines.last.match(/Epochs\s+(\d+)\.\s+Current error:\s+(\d+\.\d+)\. Bit fail 0\./).captures
 
-    assert epoch.to_i <= max_epochs
-    assert error.to_f <= desired_error
-    assert_predicate testpath/"xor_float.net", :exist?
+    assert_operator max_epochs, :>=, epoch.to_i
+    assert_operator desired_error, :>=, error.to_f
+    assert_path_exists testpath/"xor_float.net"
   end
 end

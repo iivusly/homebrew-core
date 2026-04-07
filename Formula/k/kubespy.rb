@@ -4,23 +4,24 @@ class Kubespy < Formula
   url "https://github.com/pulumi/kubespy/archive/refs/tags/v0.6.3.tar.gz"
   sha256 "1975bf0a0aeb03e69c42ac626c16cd404610226cc5f50fab96d611d9eb6a6d29"
   license "Apache-2.0"
+  head "https://github.com/pulumi/kubespy.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "fda3f73dff9a59dff79bdc79351361a6f737e298c02bef4b585f0991e80e793c"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "e78222b47bc21a5c77b73dbe032ad775d8a22d6e468029c5c3e10e23b89f39ca"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "1cfb8c02d7e116cee63aa1e520d774ea7ca40869eabce292a529058c40072ba4"
-    sha256 cellar: :any_skip_relocation, sonoma:         "52cd6b8254a177de282c0c484dcb04219151f2f90c934d0f2a9916e65d006070"
-    sha256 cellar: :any_skip_relocation, ventura:        "ff33031c27f3b7a78d9a82b065b9c9659f5c9cb5a5362e216a9ad30628287631"
-    sha256 cellar: :any_skip_relocation, monterey:       "f17c5dbafa0861d76ccb6a19f8619c4e241bf62ec204595f6578eb690de3078b"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "df523bc15f0a2c1d79906b32e4d2ca64896969770f5c235cde3b46e91e5736e7"
+    rebuild 2
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "029feef7bf428cc4b613f95bdbd189e7277d400cb6f54165933dddbcb04be245"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "c37522a8957c50550223fb4b2328c1898e03ac58b396b4a29935bfa0ba117ad0"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "5ddb3fd9926acbd341443c5cba25eadb6033a63777be75c8ffd8634bf4d1d976"
+    sha256 cellar: :any_skip_relocation, sonoma:        "624ad6a1151a4771a25cfea3900ca0292ce77d97aa2da129cc7e9c9db2733513"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "5f43edfd8aafe2b5519b54c17e7028b53b365c29f5543b6af289ea84da49749d"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "f904a862816e12c913d12694bcfe8dab2bd6735704c2a33f75267e9888452f45"
   end
 
   depends_on "go" => :build
 
   def install
-    system "go", "build", *std_go_args(ldflags: "-X github.com/pulumi/kubespy/version.Version=#{version}")
+    system "go", "build", *std_go_args(ldflags: "-s -w -X github.com/pulumi/kubespy/version.Version=#{version}")
 
-    generate_completions_from_executable(bin/"kubespy", "completion")
+    generate_completions_from_executable(bin/"kubespy", shell_parameter_format: :cobra)
   end
 
   test do

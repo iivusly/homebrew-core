@@ -1,27 +1,31 @@
 class Futhark < Formula
   desc "Data-parallel functional programming language"
   homepage "https://futhark-lang.org/"
-  url "https://github.com/diku-dk/futhark/archive/refs/tags/v0.25.21.tar.gz"
-  sha256 "241e9908c2ef5071a53fd39b36414790dea085bf2b7bc913725d395fb23ad97b"
+  url "https://github.com/diku-dk/futhark/archive/refs/tags/v0.25.37.tar.gz"
+  sha256 "2b793dcfa6273d0a42449ad3777ebcd54abfe2b756afcc322d95849b8d6b57c9"
   license "ISC"
   head "https://github.com/diku-dk/futhark.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "e4eae53a4972001cb11b9645bb805313b53062a62ea1946aab7b1da488b9b3dc"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "8175c4da540ef3fd491916f85080111d82f1cfde57a48b63169c7ee21efae3ac"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "cabb9f3e63cbe45964aff2dda53e0915a85a7aba3e16d517724c162428f22d56"
-    sha256 cellar: :any_skip_relocation, sonoma:         "033e33226cfc5b97185e1301cf0402025712385f51cde70395f358ec199b8cab"
-    sha256 cellar: :any_skip_relocation, ventura:        "f9f5b084817efba8654b2c1b53ceeba23437b2aa0ca55e3b0563ecbf864787d6"
-    sha256 cellar: :any_skip_relocation, monterey:       "c02d2a62de81035004d032398d227c8083d8966269c2738852add0fd2ee1279e"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "c337b3d00569e63ac8540956fc61cea0689837a6304ebb2b1f1791afdc17b28c"
+    sha256 cellar: :any,                 arm64_tahoe:   "1e25f708464a1e6b0a0e7e6eb74ad785d7830b9ae6c9976b38da1b6d920a8df2"
+    sha256 cellar: :any,                 arm64_sequoia: "0217c57b93676babdf85e02057c75e844df4080c51c5d29e931a7482239c7f16"
+    sha256 cellar: :any,                 arm64_sonoma:  "283beff38c7ce55d7ca1b2487827c688a8e82b08f026800cca1ac4e028373914"
+    sha256 cellar: :any,                 sonoma:        "79ed078d51abfcd9a75999e6700ae50660d2537e3f859e9be49bb18e1dc89b22"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "076625a07bf44e52ed2912fb844ac0cccf1c1f71bf340083a15db9cb93437ca2"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "e3cb68108a94bca17ef144d95c028882f6da1dab8b97f41055eb121de0d56286"
   end
 
   depends_on "cabal-install" => :build
   depends_on "ghc" => :build
   depends_on "sphinx-doc" => :build
+  depends_on "gmp"
 
+  uses_from_macos "libffi"
   uses_from_macos "ncurses"
-  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     system "cabal", "v2-update"

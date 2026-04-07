@@ -1,19 +1,18 @@
 class LinkGrammar < Formula
   desc "Carnegie Mellon University's link grammar parser"
   homepage "https://github.com/opencog/link-grammar"
-  url "https://github.com/opencog/link-grammar/archive/refs/tags/link-grammar-5.12.5.tar.gz"
-  sha256 "04d04c6017a99f38e1cef1fee8238d2c444fffc90989951cfd64331f156d0340"
+  url "https://github.com/opencog/link-grammar/archive/refs/tags/link-grammar-5.13.0.tar.gz"
+  sha256 "a545b7efb7aceab2d8ad301466f199778a3da712928999ed8d66deb32ca3184f"
   license "LGPL-2.1-or-later"
   head "https://github.com/opencog/link-grammar.git", branch: "master"
 
   bottle do
-    sha256 arm64_sonoma:   "18358c44bd3d2e2a1f9890dee6ce8e200876e22d07e7a699b19ccc4ea161bdaf"
-    sha256 arm64_ventura:  "e5afe2d8e8eab8fab995baabf62cf0826d367213354f9108081484c04efef4e3"
-    sha256 arm64_monterey: "9246771db1a1c670fcca1dbd16716ea91e94211e9815f87c2da453de68a13188"
-    sha256 sonoma:         "70870df7a0d5f8c55e005c8ce1e07fd36aa56fd992cce23988e620611c116042"
-    sha256 ventura:        "e4463f81638102c1514527f4443a82dff59a46eec880de83aac8bdc6d3f11112"
-    sha256 monterey:       "217da87c271c6650225561095f571a8b4a713a0b5c03af06dbab09d9d05d99f8"
-    sha256 x86_64_linux:   "75048ee666d4d971e2f7bba40f205ebdf4b6e670f74a005cc00ac6faf8e41024"
+    sha256 arm64_tahoe:   "5082434ff9e6e700ef8355dbb540108970a46a576bd16adc45355d34942afe61"
+    sha256 arm64_sequoia: "31cc3eed5672970a75316f8d48d903929cb384f3431493276ad8f57595c9cb35"
+    sha256 arm64_sonoma:  "496da3ec09a9cd14994de8ca1e243f9246d6519df45c0cbedc43193a7a4fb13e"
+    sha256 sonoma:        "547980bfce54be897fb4095e0a172523e96574d668d881dfe6788bf8783e6427"
+    sha256 arm64_linux:   "33ffa53d4b71da419d2216e3d108ede83b23655ae0bddb3afab8f4f27be964b0"
+    sha256 x86_64_linux:  "3c3a54388b2f5f386aa59849f1f5f6197c09a97da3b62bfaa1232eb0d820e093"
   end
 
   depends_on "ant" => :build
@@ -21,8 +20,8 @@ class LinkGrammar < Formula
   depends_on "autoconf-archive" => :build
   depends_on "automake" => :build
   depends_on "libtool" => :build
-  depends_on "pkg-config" => :build
-  depends_on "python@3.12" => :build
+  depends_on "pkgconf" => :build
+  depends_on "python@3.14" => :build
   depends_on "swig" => :build
 
   uses_from_macos "flex" => :build
@@ -36,12 +35,12 @@ class LinkGrammar < Formula
     ENV["PYTHON_LIBS"] = "-undefined dynamic_lookup"
     inreplace "bindings/python/Makefile.am", "$(PYTHON_LDFLAGS) -module -no-undefined",
                                              "$(PYTHON_LDFLAGS) -module"
-    system "autoreconf", "--verbose", "--install", "--force"
-    system "./configure", *std_configure_args, "--with-regexlib=c"
+    system "autoreconf", "--force", "--install", "--verbose"
+    system "./configure", "--with-regexlib=c", *std_configure_args
 
     # Work around error due to install using detected path inside Python formula.
     # install: .../site-packages/linkgrammar.pth: Operation not permitted
-    site_packages = prefix/Language::Python.site_packages("python3.12")
+    site_packages = prefix/Language::Python.site_packages("python3.14")
     system "make", "install", "pythondir=#{site_packages}",
                               "pyexecdir=#{site_packages}"
   end

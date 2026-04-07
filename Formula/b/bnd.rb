@@ -1,8 +1,8 @@
 class Bnd < Formula
   desc "Swiss Army Knife for OSGi bundles"
   homepage "https://bnd.bndtools.org/"
-  url "https://search.maven.org/remotecontent?filepath=biz/aQute/bnd/biz.aQute.bnd/7.0.0/biz.aQute.bnd-7.0.0.jar"
-  sha256 "674080fc8bb766af9bd721f4847467c6a7a25de3ea6a444525241b34126688b1"
+  url "https://search.maven.org/remotecontent?filepath=biz/aQute/bnd/biz.aQute.bnd/7.2.3/biz.aQute.bnd-7.2.3.jar"
+  sha256 "0122ea026c24285fdff48c5f523bc83750956bb920c12615c497f3d1c175f08b"
   license any_of: ["Apache-2.0", "EPL-2.0"]
 
   livecheck do
@@ -11,8 +11,7 @@ class Bnd < Formula
   end
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, all: "86bbe1cc55024ae4f3fc2b1781cd28ef757f57ad0df873983ab9fd89f13d6e8a"
+    sha256 cellar: :any_skip_relocation, all: "731e5b852f0bc3d2f0173e17515cea7f904e3ea22a3bfaca6ec333e43ce76d33"
   end
 
   depends_on "openjdk"
@@ -29,7 +28,7 @@ class Bnd < Formula
     test_version = "1.0.0"
     test_version_next = "1.0.1"
     test_file_name = "#{test_bsn}-#{test_version}.jar"
-    (testpath/"index.xml").write <<~EOS
+    (testpath/"index.xml").write <<~XML
       <?xml version="1.0" encoding="utf-8"?>
       <repository increment="0" name="Untitled" xmlns="http://www.osgi.org/xmlns/repository/v1.0.0">
         <resource>
@@ -44,7 +43,7 @@ class Bnd < Formula
           </capability>
         </resource>
       </repository>
-    EOS
+    XML
 
     (testpath/"launch.bndrun").write <<~EOS
       -standalone: ${.}/index.xml

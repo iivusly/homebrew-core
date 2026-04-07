@@ -1,30 +1,41 @@
 class Aerc < Formula
   desc "Email client that runs in your terminal"
   homepage "https://aerc-mail.org/"
-  url "https://git.sr.ht/~rjarry/aerc/archive/0.18.2.tar.gz"
-  sha256 "78408b3fe7a4991a6097c961c348fb7583af52dff80cbfcd99808415cf3d7586"
+  url "https://git.sr.ht/~rjarry/aerc/archive/0.21.0.tar.gz"
+  mirror "https://github.com/rjarry/aerc/archive/refs/tags/0.21.0.tar.gz"
+  sha256 "3f1469bbaea982fc58352f2682932ecc2fb50c705994d96b2343e771747745a7"
   license "MIT"
   head "https://git.sr.ht/~rjarry/aerc", branch: "master"
 
   bottle do
-    sha256 arm64_sonoma:   "0e45fdcaf540c298c7b135144d7eb67eddddd4b26ae5513842c3c4e5f954ad22"
-    sha256 arm64_ventura:  "9465440c9a9799b8e4b6544bb369c4cc988836e86bb8c91f0036f463f774c526"
-    sha256 arm64_monterey: "39c67445c4e18f65a634633632aabff711a1cf94cabcf84e3ee7b94a4fbf1209"
-    sha256 sonoma:         "1fcfc86803cb283e391daea387457fafbf50019706f4a7105058fe8f53804b70"
-    sha256 ventura:        "cdabe2f89e91c3cd42eeea0851bb1d91a0aa535229c15e510f566dd32d21d267"
-    sha256 monterey:       "b7197c015ac239b9f7695386f90654ef03f0541497dc218727835508254b5bf9"
-    sha256 x86_64_linux:   "589b8963d1e494d234d37f0e1982e67eecd6a13b36faf11840a0146a455b4c8c"
+    sha256 arm64_tahoe:   "a8f207daf51b4be7b0645bf3e81cacc2687190713bb13a59ad246419c469affb"
+    sha256 arm64_sequoia: "1bc0619b2b30691c09fab1382cd6a9510b66278e08b58fb8255e62d2929f08d7"
+    sha256 arm64_sonoma:  "fbd0023ba20b2075790a2a558434aa4c3fe18098d17cb129122f7ade45a8c4d5"
+    sha256 arm64_ventura: "a993460fcf4acfdcef595f4ce9e4ae678358c11f79c9dff6bc7f09d5edb73d94"
+    sha256 sonoma:        "8b46596c840dd14a947428e4669704bdee42c36d6ddaa617d8d69453137e5664"
+    sha256 ventura:       "c04471c53a6b7db1b349937a7b81ecf5ea794f41aad35e9d9bc0e69e309453d0"
+    sha256 arm64_linux:   "6d9361c0ff2d2c7fb8bfb3d80ec789d012547fed90bab51941250c10a07c6024"
+    sha256 x86_64_linux:  "5f8a0e69f2b07a3fbbc3615af3ed930151e4d601632f2c25a3e8928068106492"
   end
 
   depends_on "go" => :build
   depends_on "scdoc" => :build
+  depends_on "notmuch"
 
   def install
+    # Workaround to avoid patchelf corruption when cgo is required
+    if OS.linux? && Hardware::CPU.arch == :arm64
+      ENV["CGO_ENABLED"] = "1"
+      ENV["GO_EXTLINK_ENABLED"] = "1"
+      ENV["BUILD_OPTS"] = "-buildmode=pie -trimpath"
+    end
+
     system "make", "PREFIX=#{prefix}", "VERSION=#{version}"
     system "make", "install", "PREFIX=#{prefix}"
   end
 
   test do
-    system bin/"aerc", "-v"
+    output = shell_output("#{bin}/aerc -v")
+    assert_match(/aerc #{version} \+notmuch\.*/, output)
   end
 end

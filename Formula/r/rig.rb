@@ -6,21 +6,16 @@ class Rig < Formula
   license "GPL-2.0-or-later"
 
   bottle do
-    sha256                               arm64_sonoma:   "c49772908fab4d132435015e225760d30f00d742f5e09123c71cdf90a453d3ea"
-    sha256                               arm64_ventura:  "1ffffb584e30f49d7b8c4b5dcc99141fff24697dc0512a6cfd8deba04720ef54"
-    sha256                               arm64_monterey: "beffb2a7922b42831deb088af7d1f9ae0aefd703f676a1bafffa420ea96bf23c"
-    sha256                               arm64_big_sur:  "b9736b9b35547ab9af2afc1e84698f5001e7f0ba9208ee171a58f554d9780c25"
-    sha256                               sonoma:         "643e207aeaaeefde3364f9d95eb743afd98973cce9220c374bb4b23cbc0740dc"
-    sha256                               ventura:        "605e1c4428ce942389573258015a36bc3a20c8e5dc7464ff3fd57240a816f72f"
-    sha256 cellar: :any_skip_relocation, monterey:       "5b3a4522d3f584f5239b2e993517d20f5d37fcfa474c8ba0fad8be7aa91372d5"
-    sha256 cellar: :any_skip_relocation, big_sur:        "e763b581f6a9410df5cca2384f0f9108c06a1c2e90ad3ebfccf7bf2297b7b641"
-    sha256 cellar: :any_skip_relocation, catalina:       "e75fa428f9833207c6fa53e005e32c8d3af48206e08ded637d9633c2af1e0643"
-    sha256 cellar: :any_skip_relocation, mojave:         "8f311170956140550544c6a9e9b31068b61c5db52fefa2c92dd0ad565c0fc145"
-    sha256 cellar: :any_skip_relocation, high_sierra:    "770e85dcfaeec7cf4e4799572b102bf436afc9f3d28eb828ef838b5a1e1a8152"
-    sha256 cellar: :any_skip_relocation, sierra:         "fcc18ba335af01c00a5a7e7e41f6431192393d13eb374513ebe9b0b2a75ab0a0"
-    sha256 cellar: :any_skip_relocation, el_capitan:     "d82301a0557554e57252ea0d020f32e1d13485077c54f4d68cce01ee9d1b34a3"
-    sha256                               x86_64_linux:   "ea660b88d2d27477728bd628b496e6a6588c7dff8d4a46051e2b9fd0504e726b"
+    rebuild 1
+    sha256 arm64_tahoe:   "dad2501e03504d0b5bbb423d2c9ef324aadf56f790f696c0a46ae04c6dab206f"
+    sha256 arm64_sequoia: "2a9e7e9827a5a060ef485b046834ce2c9c8d592079c84c2385e5a68a533b367f"
+    sha256 arm64_sonoma:  "bb02988845e379f76e2e403ff006185b67a490fcf399654a904adab3ea8a4c13"
+    sha256 sonoma:        "23fd05abeb97e297ba941e14570cfcbe0a2c06a4b41b1413d1845fa44215123e"
+    sha256 arm64_linux:   "55d7f3414a507b5c8d884ccb5c5d515bf9741d1190ebc88aba59f1c1ea57c45c"
+    sha256 x86_64_linux:  "562461182b7a6e85a39b6128addfe1cf719486b27504f9b7e61d466cfec400bd"
   end
+
+  conflicts_with "r-rig", because: "both install `rig` binary"
 
   # Fix build failure because of missing #include <cstring> on Linux.
   # Patch submitted to author by email.

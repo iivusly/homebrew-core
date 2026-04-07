@@ -3,47 +3,43 @@ class Jinja2Cli < Formula
 
   desc "CLI for the Jinja2 templating language"
   homepage "https://github.com/mattrobenolt/jinja2-cli"
-  url "https://files.pythonhosted.org/packages/a4/22/c922839761b311b72ccc95c2ca2239311a3e80916458878962626f96922a/jinja2-cli-0.8.2.tar.gz"
-  sha256 "a16bb1454111128e206f568c95938cdef5b5a139929378f72bb8cf6179e18e50"
+  url "https://files.pythonhosted.org/packages/91/b3/19afd8cfe9b6664fcc200befbc71a393cbbe343bb76a6acbeff1709d0c83/jinja2_cli-1.0.1.tar.gz"
+  sha256 "cca3e59494558640af52add7b8636cfa82eba72871a21cbbdc0a6f2000a4e5b7"
   license "BSD-2-Clause"
-  revision 1
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "5a422900be3d065fb5cd68129cd7d702e5399c564759cf21f9bc169223c69cb6"
-    sha256 cellar: :any,                 arm64_ventura:  "80dfa76703902486f622b6de9c24e4f28fd1da701c966c2e4034b8b4ed41b7f8"
-    sha256 cellar: :any,                 arm64_monterey: "3e5e4715c5c4e8309d65131567f0288cc1e7c3fd9fcda4a290dea8afa00c6ae3"
-    sha256 cellar: :any,                 sonoma:         "8722e2649db6798374bfcbb93ad6043fcc53efda58085220ef8293e853762ca9"
-    sha256 cellar: :any,                 ventura:        "81cba3a13cd26ab9acb08dd1172ba78486b5c7f9f343f5814305f90f28afa4b3"
-    sha256 cellar: :any,                 monterey:       "1bd54d03fb909d3c75370d74fd2cdc5b76c0372b76b1ca5bb02c15d50ac2eed8"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "f536e019bb6ba1d365c2ce7f2e3ac84c1d2f22065e690fdbd1e8da68387de246"
+    sha256 cellar: :any,                 arm64_tahoe:   "684ea655961fe3fa1d9cb29bc9e9e37953a4e4e40f0cd77ebc9b53429f21bb16"
+    sha256 cellar: :any,                 arm64_sequoia: "78cd8059e59ebb5b31c076281b2119a205caf82a08fb4645d9e02493d35670f8"
+    sha256 cellar: :any,                 arm64_sonoma:  "c589aaf5e1a7f329112a88ec10114ed85551469b69645c28d5deae854d2a3c4b"
+    sha256 cellar: :any,                 sonoma:        "cd31e70f879e729e8c0bcc0b70be096e1377d79f2d3429e3f3b399b611ae5009"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "5c858f22dca555fc3d6a213c7544cb5f29f8713c3c20183fe908b5205499f37f"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "d69fb38f48f16b2061722212f05ccbcb9236040b3211c44f46fcecfc3b18fd84"
   end
 
+  depends_on "rust" => :build
   depends_on "libyaml"
-  depends_on "python@3.12"
+  depends_on "python@3.14"
+
+  pypi_packages package_name: "jinja2-cli[yaml,toml,xml]"
 
   resource "jinja2" do
-    url "https://files.pythonhosted.org/packages/ed/55/39036716d19cab0747a5020fc7e907f362fbf48c984b14e62127f7e68e5d/jinja2-3.1.4.tar.gz"
-    sha256 "4a3aee7acbbe7303aede8e9648d13b8bf88a429282aa6122a993f0ac800cb369"
+    url "https://files.pythonhosted.org/packages/df/bf/f7da0350254c0ed7c72f3e33cef02e048281fec7ecec5f032d4aac52226b/jinja2-3.1.6.tar.gz"
+    sha256 "0137fb05990d35f1275a587e9aee6d56da821fc83491a0fb838183be43f66d6d"
   end
 
   resource "markupsafe" do
-    url "https://files.pythonhosted.org/packages/87/5b/aae44c6655f3801e81aa3eef09dbbf012431987ba564d7231722f68df02d/MarkupSafe-2.1.5.tar.gz"
-    sha256 "d283d37a890ba4c1ae73ffadf8046435c76e7bc2247bbb63c00bd1a709c6544b"
+    url "https://files.pythonhosted.org/packages/7e/99/7690b6d4034fffd95959cbe0c02de8deb3098cc577c67bb6a24fe5d7caa7/markupsafe-3.0.3.tar.gz"
+    sha256 "722695808f4b6457b320fdc131280796bdceb04ab50fe1795cd540799ebe1698"
   end
 
   resource "pyyaml" do
-    url "https://files.pythonhosted.org/packages/cd/e5/af35f7ea75cf72f2cd079c95ee16797de7cd71f29ea7c68ae5ce7be1eda0/PyYAML-6.0.1.tar.gz"
-    sha256 "bfdf460b1736c775f2ba9f6a92bca30bc2095067b8a9d77876d1fad6cc3b4a43"
-  end
-
-  resource "toml" do
-    url "https://files.pythonhosted.org/packages/be/ba/1f744cdc819428fc6b5084ec34d9b30660f6f9daaf70eead706e3203ec3c/toml-0.10.2.tar.gz"
-    sha256 "b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f"
+    url "https://files.pythonhosted.org/packages/05/8e/961c0007c59b8dd7729d542c61a4d537767a59645b82a0b521206e1e25c2/pyyaml-6.0.3.tar.gz"
+    sha256 "d76623373421df22fb4cf8817020cbb7ef15c725b9d5e45f17e189bfc384190f"
   end
 
   resource "xmltodict" do
-    url "https://files.pythonhosted.org/packages/39/0d/40df5be1e684bbaecdb9d1e0e40d5d482465de6b00cbb92b84ee5d243c7f/xmltodict-0.13.0.tar.gz"
-    sha256 "341595a488e3e01a85a9d8911d8912fd922ede5fecc4dce437eb4b6c8d037e56"
+    url "https://files.pythonhosted.org/packages/19/70/80f3b7c10d2630aa66414bf23d210386700aa390547278c789afa994fd7e/xmltodict-1.0.4.tar.gz"
+    sha256 "6d94c9f834dd9e44514162799d344d815a3a4faec913717a9ecbfa5be1bb8e61"
   end
 
   def install
@@ -51,12 +47,8 @@ class Jinja2Cli < Formula
   end
 
   test do
-    output = if OS.mac?
-      shell_output("script -q /dev/null #{bin}/jinja2 --version")
-    else
-      shell_output("script -q /dev/null -e -c \"#{bin}/jinja2 --version\"")
-    end
-    assert_match version.to_s, output
+    assert_match version.to_s, shell_output("#{bin}/jinja2 --version 2>&1")
+
     expected_result = <<~EOS
       The Beatles:
       - Ringo Starr
@@ -72,7 +64,7 @@ class Jinja2Cli < Formula
       {% endfor -%}
     EOS
     template_variables_file = testpath/"my-template-variables.json"
-    template_variables_file.write <<~EOS
+    template_variables_file.write <<~JSON
       {
         "band": {
           "name": "The Beatles",
@@ -84,8 +76,8 @@ class Jinja2Cli < Formula
           ]
         }
       }
-    EOS
+    JSON
     output = shell_output("#{bin}/jinja2 #{template_file} #{template_variables_file}")
-    assert_equal output, expected_result
+    assert_equal expected_result, output
   end
 end

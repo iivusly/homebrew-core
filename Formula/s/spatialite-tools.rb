@@ -1,31 +1,42 @@
 class SpatialiteTools < Formula
   desc "CLI tools supporting SpatiaLite"
   homepage "https://www.gaia-gis.it/fossil/spatialite-tools/index"
-  url "https://www.gaia-gis.it/gaia-sins/spatialite-tools-sources/spatialite-tools-5.1.0.tar.gz"
-  sha256 "df3030367c089ca90fa6630897f3f1a280784da29e1ba634f340dba4b08583b5"
+  url "https://www.gaia-gis.it/gaia-sins/spatialite-tools-sources/spatialite-tools-5.1.0a.tar.gz"
+  sha256 "119e34758e8088cdbb43ed81b4a6eaea88c764b0b7da19001a5514b2545501ce"
   license "GPL-3.0-or-later"
+  revision 1
 
   livecheck do
     url "https://www.gaia-gis.it/gaia-sins/spatialite-tools-sources/"
-    regex(/href=.*?spatialite-tools[._-]v?(\d+(?:\.\d+)+)\.(?:t|zip)/i)
+    regex(/href=.*?spatialite-tools[._-]v?(\d+(?:\.\d+)+[a-z]?)\.(?:t|zip)/i)
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "4bd025e06a9466bab7e2c623b67d793069852b860456c1b08e43b8c5365515f7"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "9ec7d078c58b3eef0e931c6f0bef1760eaf288501c2cb45efa78ab11f4934efa"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "095be35895db6bfe29a616f878845db1798cde3d97d27c9ac26003f85ea5f589"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "a5641d6bb597c7cf039b33b9bd9b3d54f37659ce3aaa278f1fc211ea80efeb82"
-    sha256 cellar: :any,                 sonoma:         "25a7d8b7bd24d839a25840dfb2251e05b6db76b7c34ead2914ccc77a245ee2c5"
-    sha256 cellar: :any_skip_relocation, ventura:        "94eb1627d64ec557b504def0c18548fe159c84132dd85b2656764c11ff4b2758"
-    sha256 cellar: :any_skip_relocation, monterey:       "8e59743367a535c343149b04d25f4abda572f34469516851c3e6b606db6fc7d0"
-    sha256 cellar: :any_skip_relocation, big_sur:        "73c977980d27f5a82f2cc7f21a843b9c2c9b912501d503998312756dd9ab9430"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "cbf36de708f0b4ade1201cdf1e0878b08283c155fd486fb9d7ec8d856e3a2e78"
+    sha256 cellar: :any,                 arm64_tahoe:   "069ec4b7d85f688eb77bad3c5feeca57ee0c791c666bea3413ea8ce710a5acaa"
+    sha256 cellar: :any,                 arm64_sequoia: "b95d28cf596499b58e056c8036a12aa8d642dcbca6f798eeaf4d24b21b6f985b"
+    sha256 cellar: :any,                 arm64_sonoma:  "e0a3160b4865ca95d21573b74f9f55a359aaa59f94fd6056530e71a19ff253ca"
+    sha256 cellar: :any,                 sonoma:        "5221eae263ba51e8fa7cdf15531d3e1b8c5e3ba155778a5c5462173a2cef6c54"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "4e62a762b38e87ffdb9843897642b86deb5efec236179c21663acf933451d3d1"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "daae488886ac7af7caf09434e40eacc7ae30a8c9dc578f079e791440ab2d15b8"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
+
   depends_on "libspatialite"
+  depends_on "libxml2"
   depends_on "proj"
+  depends_on "readline"
   depends_on "readosm"
+  depends_on "sqlite"
+
+  uses_from_macos "expat"
+
+  on_macos do
+    depends_on "freexl"
+    depends_on "geos"
+    depends_on "librttopo"
+    depends_on "minizip"
+  end
 
   def install
     # See: https://github.com/Homebrew/homebrew/issues/3328
@@ -35,8 +46,11 @@ class SpatialiteTools < Formula
     ENV.prepend "LDFLAGS", "-L#{sqlite.opt_lib} -lsqlite3"
     ENV.prepend "CFLAGS", "-I#{sqlite.opt_include}"
 
-    system "./configure", "--disable-dependency-tracking",
-                          "--prefix=#{prefix}"
+    args = []
+    # Help old config scripts identify arm64 linux
+    args << "--build=aarch64-unknown-linux-gnu" if OS.linux? && Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
+
+    system "./configure", *args, *std_configure_args
     system "make", "install"
   end
 

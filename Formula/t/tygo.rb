@@ -2,19 +2,18 @@ class Tygo < Formula
   desc "Generate Typescript types from Golang source code"
   homepage "https://github.com/gzuidhof/tygo"
   url "https://github.com/gzuidhof/tygo.git",
-      tag:      "v0.2.15",
-      revision: "2986c9a038b6d5e5babb55fb78dbad96a78e89b7"
+      tag:      "v0.2.21",
+      revision: "0b55b7f6509c82f14206cc704eb4a230ece9efe4"
   license "MIT"
   head "https://github.com/gzuidhof/tygo.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "d4f17c28b88367cdae42a6f18661e1e950c9437f73dc7771195d90d33b501136"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "076ab53d41892e8ec2dced7a3ed97e2f41e514dd9ff6984719566c7f8a9f3b52"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "24d969116e753863c168efc633d263f928679f48a6a8e709d773a530c2c87ea1"
-    sha256 cellar: :any_skip_relocation, sonoma:         "01b5ac6ba7c4ee07352a8230fb2aa5eb1585154b132989261942601565e4b279"
-    sha256 cellar: :any_skip_relocation, ventura:        "d21753faddc09f7c031d7de8049c8647fff9fb3328aaa4339adefe04f656944f"
-    sha256 cellar: :any_skip_relocation, monterey:       "f8381c7a1fe507fa4c319bb9a8210b591bdf21c6d3904abf46b1d8d02d7b86fe"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "52890861b2fb17f60bee0b9873378d8ad07d5212218203edaeb8f4406425c99b"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "d6e0ae5facaea779a8caa8e373545281381c6c489d1d59faa80f7f29291e7620"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "d6e0ae5facaea779a8caa8e373545281381c6c489d1d59faa80f7f29291e7620"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "d6e0ae5facaea779a8caa8e373545281381c6c489d1d59faa80f7f29291e7620"
+    sha256 cellar: :any_skip_relocation, sonoma:        "6fe4d2012cf85e05ea22599a7bd21015598b1facfc84d87616138e7c39869e31"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "5a63d67c0d602c13917d2bb06e643c4d896dd95fb688b788bbbb4b470eae9a44"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "027f518b0f4829a2b3a7340652877d4157e45c28780c75b1e64a2b25f92cd016"
   end
 
   depends_on "go" => [:build, :test]
@@ -29,12 +28,12 @@ class Tygo < Formula
 
     system "go", "build", *std_go_args(ldflags:)
 
-    generate_completions_from_executable(bin/"tygo", "completion")
+    generate_completions_from_executable(bin/"tygo", shell_parameter_format: :cobra)
     pkgshare.install "examples"
   end
 
   test do
-    (testpath/"tygo.yml").write <<~EOS
+    (testpath/"tygo.yml").write <<~YAML
       packages:
         - path: "simple"
           type_mappings:
@@ -43,7 +42,7 @@ class Tygo < Formula
             null.Bool: "null | boolean"
             uuid.UUID: "string /* uuid */"
             uuid.NullUUID: "null | string /* uuid */"
-    EOS
+    YAML
 
     system "go", "mod", "init", "simple"
     cp pkgshare/"examples/simple/simple.go", testpath

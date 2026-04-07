@@ -1,19 +1,18 @@
 class Zix < Formula
   desc "C99 portability and data structure library"
   homepage "https://gitlab.com/drobilla/zix"
-  url "https://gitlab.com/drobilla/zix/-/archive/v0.4.2/zix-v0.4.2.tar.gz"
-  sha256 "f6e885025d516638d07e1ead6a809be75790355c47c1143272e69b9153321ed4"
+  url "https://gitlab.com/drobilla/zix/-/archive/v0.8.0/zix-v0.8.0.tar.gz"
+  sha256 "51d70d63e970214db84e32d55377d84090c02145f5768265ab140d117f2b8e24"
   license "ISC"
   head "https://gitlab.com/drobilla/zix.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "de2695c9a13e9503c8d1ac8a9214f78ce3a0aa4780a61de4680cf551ff33d086"
-    sha256 cellar: :any,                 arm64_ventura:  "33009c89adb75856bdfa543b31ddc1696358e3f39b9fb92e0b55bae7a4db9e28"
-    sha256 cellar: :any,                 arm64_monterey: "1aa17041299618bf01269c414131d7b2ff0dc74732e825b41a7b66c251447847"
-    sha256 cellar: :any,                 sonoma:         "d8435c8e9e3a5753ed713366ae736b135257f29952049c4b233fa7f08e0ec27c"
-    sha256 cellar: :any,                 ventura:        "1add27a68635d9b065694cf46e26fb0069e7782748c7272b0c57cf67dd45259a"
-    sha256 cellar: :any,                 monterey:       "ec944e9f9fd697dc6341c69419f7a922f949e44b3e3598794c1d1683c7034a06"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "667583fc8f16b2297f949407233524d146ad1bf7ec1f87f625aa70f7b8728879"
+    sha256 cellar: :any,                 arm64_tahoe:   "a2caa9a4a3c1d808886349f7e83a4faf142e9bd013b881047ecfcee1ce5b6338"
+    sha256 cellar: :any,                 arm64_sequoia: "c5af8595950f1294f8cec733c452c09742721ec154477103b3e4ad0270afa20e"
+    sha256 cellar: :any,                 arm64_sonoma:  "601886f43ccadbd571d61385ae8487f5bf40563cb1e2aec7b3925d0eb52ed6c6"
+    sha256 cellar: :any,                 sonoma:        "0d3ee7b239f61e53be24ca66fc61b1fa51e64709e855c705e4013c96c46b7e76"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "abb43fca2d5a4418b636b99560f30e051b1d83f57c16b2a171b5d4e9590624fa"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "94d2a4ebb9e9d5f9a1bd1d991ed5da942df3630636b45b5c31db7537bc811e1c"
   end
 
   depends_on "meson" => :build
@@ -31,7 +30,7 @@ class Zix < Formula
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include "zix/attributes.h"
       #include "zix/string_view.h"
 
@@ -74,7 +73,7 @@ class Zix < Formula
       #if defined(__GNUC__)
       #  pragma GCC diagnostic pop
       #endif
-    EOS
+    C
     system ENV.cc, "test.c", "-I#{include}/zix-0", "-o", "test"
     system "./test"
   end

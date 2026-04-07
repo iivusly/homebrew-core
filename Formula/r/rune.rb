@@ -1,22 +1,32 @@
 class Rune < Formula
   desc "Embeddable dynamic programming language for Rust"
   homepage "https://rune-rs.github.io"
-  url "https://github.com/rune-rs/rune/archive/refs/tags/0.13.4.tar.gz"
-  sha256 "f6a1e89e4824d98319ec46722c05f1e62434543875ff3667732c161a0807ae20"
+  url "https://github.com/rune-rs/rune/archive/refs/tags/0.14.0.tar.gz"
+  sha256 "96d6d488f57215afbeb12b7b77f89b4463ab209cbfabf03e83e56908ff7ed233"
   license any_of: ["Apache-2.0", "MIT"]
   head "https://github.com/rune-rs/rune.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "137ef65d7d822c2ed57bff8bc098ab11168c925d8198918f87b1fa93a376d362"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "336b0e074f43614610e54d207985063f9fe0a1440df2bf482efef46de51da3a9"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "17027733a8674785f55c44a21d2485ffb4d6ec6ef22c77868afad0094ce816bd"
-    sha256 cellar: :any_skip_relocation, sonoma:         "5938be9883cd38e142b464027dd8f8b28373544e815220131c9b3591e7e45369"
-    sha256 cellar: :any_skip_relocation, ventura:        "52b9a187f6b9b775b7eba9844bf7fe9630e333e3dfb59393f588bb91997aa470"
-    sha256 cellar: :any_skip_relocation, monterey:       "80c71954d4cb1d1fb5f6b2e629d1dedda3692499cae1f42feb5865db1a210b51"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "69183574c6b982ee2514f426b7d3c09e35e0fbdff198e6f9bf546a37d1197ba2"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "98e5d320cbbbb7e69af88b3336419fef1300f6533d3cf0681446bd4dc5fc115b"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "ebcb56c53e49fea08a2ec6af57dae05a0a619238ee74d81d232c3cc154ffdae2"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "9f234fd924889af3d16deeb4db3531f0fe978f82c971ba6d0e9f995f0e800a5c"
+    sha256 cellar: :any_skip_relocation, sonoma:        "3d746cfbab04df2582234d67eca27d2a6be15b5a9c31c391a6a775448193844e"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "75b2583e54c1bd7da75aabea5b82e2247ae45648a4256621852f22dbbee5d81e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "e28dcbc87969e792495a32fdd21f244ec98eaf4f145ffa9b315143c98161a843"
   end
 
   depends_on "rust" => :build
+
+  # Fix build with Rust 1.89
+  patch do
+    url "https://github.com/rune-rs/rune/commit/6594f08038c3474de6e6e3b215a15c3940f71473.patch?full_index=1"
+    sha256 "8fcd1f04856df66883975fcbcf7aa8e36607d258049fd2e57991c27e2542cf9c"
+  end
+  patch do
+    url "https://github.com/rune-rs/rune/commit/f49ba15e62589025eba7fa3e01cccd9842c7acee.patch?full_index=1"
+    sha256 "e8d34a1c4c476c5cc56ecf0f925db23f2c29a9a48fb6fd1b039dd28057ca9fe6"
+  end
 
   def install
     system "cargo", "install", *std_cargo_args(path: "crates/rune-cli")
@@ -24,11 +34,12 @@ class Rune < Formula
   end
 
   test do
-    (testpath/"hello.rn").write <<~EOS
+    (testpath/"main.rn").write <<~EOS
       pub fn main() {
         println!("Hello, world!");
       }
     EOS
-    assert_match "Hello, world!", shell_output("#{bin/"rune"} run #{testpath/"hello.rn"}").strip
+
+    assert_equal "Hello, world!", shell_output("#{bin/"rune"} run").strip
   end
 end

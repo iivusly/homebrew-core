@@ -1,19 +1,17 @@
 class Gource < Formula
   desc "Version Control Visualization Tool"
-  homepage "https://github.com/acaudwell/Gource"
-  url "https://github.com/acaudwell/Gource/releases/download/gource-0.55/gource-0.55.tar.gz"
-  sha256 "c8239212d28b07508d9e477619976802681628fc25eb3e04f6671177013c0142"
+  homepage "https://gource.io/"
+  url "https://github.com/acaudwell/Gource/releases/download/gource-0.56/gource-0.56.tar.gz"
+  sha256 "332d89b9a979b17417fbce0edd72b19914f1409fd126a13d11787d0e15dc0d79"
   license "GPL-3.0-or-later"
-  revision 1
 
   bottle do
-    sha256 arm64_sonoma:   "0e04c59ea31bcac42b276ddb55c793c3965c7c95863ee93980321a20768ba82b"
-    sha256 arm64_ventura:  "f0c75e3218b79997ea769dc36701f78cd9c3471184f984b60ffb5d0dbec86268"
-    sha256 arm64_monterey: "bd2bad94832bbc7e1a668c70b97dd7a2c432a43cdf316d753c29c5c739c04319"
-    sha256 sonoma:         "e5b2f41f0a965a3dd857ff701ba535b85fe08719e395b1ddcb4aea54f81f3d63"
-    sha256 ventura:        "99b2e09613f40fe201663c5e72d2688214358dc97373cfce90d8f73232eb61d5"
-    sha256 monterey:       "bcbe2dbfcb48406b6f28a3579dc45a9c8a1c0c60cc8a6563301e1b52c2c9d73a"
-    sha256 x86_64_linux:   "164916b7277e4beb805bd690735a859475dcd5d83690f5daff348eebb62d0374"
+    sha256 arm64_tahoe:   "195d55d440abf1c3e5104a9a672d5bc2e26493ed55b7f8082b491b70f4bd8114"
+    sha256 arm64_sequoia: "bdc1ba6b4089ae9296e1172d7ec5b6e0a1e641ea047d21fe43db0cb6c5836a4c"
+    sha256 arm64_sonoma:  "c1b92f684ac3635b9f0f7a54a5735f42ba3f65a42de81af94c75006e6207a915"
+    sha256 sonoma:        "892e81a39c48e764d9cb54db41544789e29e22578392c6a05ea560aef0b6d2ec"
+    sha256 arm64_linux:   "0d8a1d48795700cc8d69560330eb550bdb6dd68e3bc05b0630e28bf91dcaaf97"
+    sha256 x86_64_linux:  "c042625f61fdcafba8f37a0bfd60181d7ed194101323ab408806c8d5b59a4425"
   end
 
   head do
@@ -25,7 +23,7 @@ class Gource < Formula
   end
 
   depends_on "glm" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
 
   depends_on "boost"
   depends_on "freetype"
@@ -41,11 +39,6 @@ class Gource < Formula
   end
 
   def install
-    ENV.cxx11
-
-    # clang on Mt. Lion will try to build against libstdc++,
-    # despite -std=gnu++0x
-    ENV.libcxx
     ENV.append "LDFLAGS", "-pthread" if OS.linux?
 
     system "autoreconf", "--force", "--install", "--verbose" if build.head?

@@ -1,39 +1,41 @@
 class Licensed < Formula
   desc "Cache and verify the licenses of dependencies"
-  homepage "https://github.com/github/licensed"
-  url "https://github.com/github/licensed.git",
-      tag:      "v4.5.0",
-      revision: "b83dac625d37b9e5c5151569b011be2a57816e38"
+  homepage "https://github.com/licensee/licensed"
+  url "https://github.com/licensee/licensed.git",
+      tag:      "v5.0.6",
+      revision: "30a7f6abb2b1ba6d960f2878233009766430e085"
   license "MIT"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "d4b7ad01ee7de55961e95f82b808d2bba758459c8fb79d768df1d9489941223a"
-    sha256 cellar: :any,                 arm64_ventura:  "2f4b5e92a768349a8167efc94cbe602be17c7af4899cc827c534107bf336b18c"
-    sha256 cellar: :any,                 arm64_monterey: "25fac47c545d7442c1d7b4aba19cca2b6d103ec7e09c17565ac7eaf32cfd4b17"
-    sha256 cellar: :any,                 sonoma:         "ebc8d31605c467416f0a693bb3214dff84948b0788d00f9a19c7ffb18bd89366"
-    sha256 cellar: :any,                 ventura:        "23a1d65eafe0f8902da4ebe265d9d81de979f53a0818233dad818922f95fcc94"
-    sha256 cellar: :any,                 monterey:       "d1ba0b84009f3ff750e71a2acccfd54583223b53275e991f993aca29ea1abe48"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "216517ba4f2526dc918c7c5350a068b59ceb876c7c8b4fa1eea14038976e3c43"
+    sha256 cellar: :any,                 arm64_tahoe:   "c88684d9683431a42b1fab8b4be83c95b5699cb571383d58e44c295342b56ae9"
+    sha256 cellar: :any,                 arm64_sequoia: "ad97635e2a83084e400112444db2f5674af5ce2f3c91ca2bb9f235147858756a"
+    sha256 cellar: :any,                 arm64_sonoma:  "d9bf2af64ef09eb7278ce260ada09b6ffc001c77dcc46c89f24c5540bb6bee68"
+    sha256 cellar: :any,                 sonoma:        "a15d6aae872eeea77f0099b0fa5dd410058779396a2327db4c5591990d79de93"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "59ae55e6198311fc0186cca96569da692ddd305bfeb939791eb2c8da952b3e3d"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "f03ed2f11a7cdb3a2bf05b2670004612b42717b2cc9073753eb8ac3da7d9c860"
   end
 
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "ruby"
   depends_on "xz"
 
-  uses_from_macos "zlib"
-
   on_linux do
     depends_on "openssl@3"
+    depends_on "zlib-ng-compat"
   end
 
   def install
+    ENV["BUNDLE_FORCE_RUBY_PLATFORM"] = "1"
+    ENV["BUNDLE_VERSION"] = "system" # Avoid installing Bundler into the keg
+    ENV["BUNDLE_WITHOUT"] = "development test"
     ENV["GEM_HOME"] = libexec
-    system "bundle", "config", "set", "without", "development", "test"
+
     system "bundle", "install"
-    system "gem", "build", "licensed.gemspec"
-    system "gem", "install", "licensed-#{version}.gem"
-    bin.install libexec/"bin/licensed"
+    system "gem", "build", "#{name}.gemspec"
+    system "gem", "install", "#{name}-#{version}.gem"
+
+    bin.install libexec/"bin/#{name}"
     bin.env_script_all_files(libexec/"bin", GEM_HOME: ENV["GEM_HOME"])
 
     # Avoid references to the Homebrew shims directory
@@ -57,13 +59,12 @@ class Licensed < Formula
       gem 'licensed', '#{version}'
     EOS
 
-    (testpath/".licensed.yml").write <<~EOS
+    (testpath/".licensed.yml").write <<~YAML
       name: 'test'
       allowed:
         - mit
-    EOS
+    YAML
 
-    assert_match "Caching dependency records for test",
-                        shell_output(bin/"licensed cache")
+    assert_match "Caching dependency records for test", shell_output("#{bin}/licensed cache")
   end
 end

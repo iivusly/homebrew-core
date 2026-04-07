@@ -3,34 +3,38 @@ class Pythran < Formula
 
   desc "Ahead of Time compiler for numeric kernels"
   homepage "https://pythran.readthedocs.io/"
-  url "https://files.pythonhosted.org/packages/73/32/f892675c5009cd4c1895ded3d6153476bf00adb5ad1634d03635620881f5/pythran-0.16.1.tar.gz"
-  sha256 "861748c0f9c7d422b32724b114b3817d818ed4eab86c09781aa0a3f7ceabb7f9"
+  url "https://files.pythonhosted.org/packages/d4/84/17c4c44a24f5ec709991e603e601bf316d09c4fe915fbe348c689dede998/pythran-0.18.1.tar.gz"
+  sha256 "8803ed948bf841a11bbbb10472a8ff6ea24ebd70e67c3f77b77be3db900eccfe"
   license "BSD-3-Clause"
   head "https://github.com/serge-sans-paille/pythran.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "c102e65b23490ba1aa5a454f78991b83a5df12b28dcfdc80ef8deee1d612ef81"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "c102e65b23490ba1aa5a454f78991b83a5df12b28dcfdc80ef8deee1d612ef81"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "c102e65b23490ba1aa5a454f78991b83a5df12b28dcfdc80ef8deee1d612ef81"
-    sha256 cellar: :any_skip_relocation, sonoma:         "1836a0fed68f565d8031c1e15449f8d322f9c0076570a1482466fcbd88f9c74d"
-    sha256 cellar: :any_skip_relocation, ventura:        "1836a0fed68f565d8031c1e15449f8d322f9c0076570a1482466fcbd88f9c74d"
-    sha256 cellar: :any_skip_relocation, monterey:       "1836a0fed68f565d8031c1e15449f8d322f9c0076570a1482466fcbd88f9c74d"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "1a390654163b4ce2a13919606c598bd6f61b412400ce5c7f899b568eedbb4c51"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "aff9d2c2a5d918f91c0a5b127b29d0bebd75fb0462792029c38328001aa2ff65"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "aff9d2c2a5d918f91c0a5b127b29d0bebd75fb0462792029c38328001aa2ff65"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "aff9d2c2a5d918f91c0a5b127b29d0bebd75fb0462792029c38328001aa2ff65"
+    sha256 cellar: :any_skip_relocation, sonoma:        "c286044b3234f30a258ad58e431437afb2d91f72c6279dc8bb73f83a1871f03e"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "149c237198e2b7a95bf33157b5ba16d5a02c6b571480401a988d3fec0b86ed2d"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "149c237198e2b7a95bf33157b5ba16d5a02c6b571480401a988d3fec0b86ed2d"
   end
 
-  depends_on "gcc" # for OpenMP
+  depends_on "gcc" => :test
+  depends_on "boost" => :no_linkage
   depends_on "numpy"
-  depends_on "openblas"
-  depends_on "python@3.12"
+  depends_on "openblas" => :no_linkage
+  depends_on "python@3.14"
+  depends_on "xsimd" => :no_linkage
+
+  pypi_packages exclude_packages: "numpy"
 
   resource "beniget" do
-    url "https://files.pythonhosted.org/packages/14/e7/50cbac38f77eca8efd39516be6651fdb9f3c4c0fab8cf2cf05f612578737/beniget-0.4.1.tar.gz"
-    sha256 "75554b3b8ad0553ce2f607627dad3d95c60c441189875b98e097528f8e23ac0c"
+    url "https://files.pythonhosted.org/packages/2e/27/5bb01af8f2860d431b98d0721b96ff2cea979106cae3f2d093ec74f6400c/beniget-0.4.2.post1.tar.gz"
+    sha256 "a0258537e65e7e14ec33a86802f865a667f949bb6c73646d55e42f7c45a052ae"
   end
 
   resource "gast" do
-    url "https://files.pythonhosted.org/packages/e4/41/f26f62ebef1a80148e20951a6e9ef4d0ebbe2090124bc143da26e12a934c/gast-0.5.4.tar.gz"
-    sha256 "9c270fe5f4b130969b54174de7db4e764b09b4f7f67ccfc32480e29f78348d97"
+    url "https://files.pythonhosted.org/packages/3c/14/c566f5ca00c115db7725263408ff952b8ae6d6a4e792ef9c84e77d9af7a1/gast-0.6.0.tar.gz"
+    sha256 "88fc5300d32c7ac6ca7b515310862f71e6fdf2c029bbec7c66c0f5dd47b6b1fb"
   end
 
   resource "ply" do
@@ -39,57 +43,65 @@ class Pythran < Formula
   end
 
   resource "setuptools" do
-    url "https://files.pythonhosted.org/packages/aa/60/5db2249526c9b453c5bb8b9f6965fcab0ddb7f40ad734420b3b421f7da44/setuptools-70.0.0.tar.gz"
-    sha256 "f211a66637b8fa059bb28183da127d4e86396c991a942b028c6650d4319c3fd0"
+    url "https://files.pythonhosted.org/packages/18/5d/3bf57dcd21979b887f014ea83c24ae194cfcd12b9e0fda66b957c69d1fca/setuptools-80.9.0.tar.gz"
+    sha256 "f36b47402ecde768dbfafc46e8e4207b4360c654f1f3bb84475f0a28628fb19c"
   end
 
   def install
-    if OS.mac?
-      gcc_major_ver = Formula["gcc"].any_installed_version.major
-      inreplace "pythran/pythran-darwin.cfg" do |s|
-        s.gsub!(/^include_dirs=/, "include_dirs=#{Formula["openblas"].opt_include}")
-        s.gsub!(/^library_dirs=/, "library_dirs=#{Formula["openblas"].opt_lib}")
-        s.gsub!(/^blas=.*/, "blas=openblas")
-        s.gsub!(/^CC=.*/, "CC=#{Formula["gcc"].opt_bin}/gcc-#{gcc_major_ver}")
-        s.gsub!(/^CXX=.*/, "CXX=#{Formula["gcc"].opt_bin}/g++-#{gcc_major_ver}")
-      end
+    # Remove bundled libraries
+    rm_r(["pythran/boost", "pythran/xsimd"])
+
+    # Help find Homebrew libraries at runtime even if unlinked
+    deps_f = %w[boost openblas xsimd].map { |f| Formula[f] }
+    include_dirs = [*deps_f.map(&:opt_include).select(&:directory?), HOMEBREW_PREFIX/"include"].join(" ")
+    library_dirs = [*deps_f.map(&:opt_lib).select(&:directory?), HOMEBREW_PREFIX/"lib"].join(" ")
+    cfgs = %w[darwin linux linux2].map { |os| "pythran/pythran-#{os}.cfg" }
+    inreplace cfgs do |s|
+      s.gsub!(/^include_dirs=/, "include_dirs=#{include_dirs}")
+      s.gsub!(/^library_dirs=/, "library_dirs=#{library_dirs}")
     end
 
     virtualenv_install_with_resources
   end
 
   test do
-    python3 = which("python3.12")
-    pythran = Formula["pythran"].opt_bin/"pythran"
+    python3 = which("python3.14")
 
-    (testpath/"dprod.py").write <<~EOS
-      #pythran export dprod(int list, int list)
-      def dprod(arr0, arr1):
-        return sum([x*y for x,y in zip(arr0, arr1)])
-    EOS
-    system pythran, testpath/"dprod.py"
-    rm(testpath/"dprod.py")
+    (testpath/"test.py").write <<~PYTHON
+      #pythran export b(int)
+      import numpy
+      def b(n):
+        return numpy.ones((n, n)) @ numpy.ones((n, n))
+    PYTHON
 
-    assert_equal "11", shell_output("#{python3} -c 'import dprod; print(dprod.dprod([1,2], [3,4]))'").chomp
-
-    (testpath/"arc_distance.py").write <<~EOS
+    (testpath/"arc_distance.py").write <<~PYTHON
       #pythran export arc_distance(float[], float[], float[], float[])
       import numpy as np
       def arc_distance(theta_1, phi_1, theta_2, phi_2):
-        """
-        Calculates the pairwise arc distance between all points in vector a and b.
-        """
         temp = np.sin((theta_2-theta_1)/2)**2 + np.cos(theta_1)*np.cos(theta_2)*np.sin((phi_2-phi_1)/2)**2
         distance_matrix = 2 * np.arctan2(np.sqrt(temp), np.sqrt(1-temp))
         return distance_matrix
-    EOS
-    # Test with configured gcc to detect breakages from gcc major versions and for OpenMP support
-    with_env(CC: nil, CXX: nil) do
-      system pythran, "-DUSE_XSIMD", "-fopenmp", "-march=native", testpath/"arc_distance.py"
-    end
-    rm(testpath/"arc_distance.py")
+    PYTHON
 
-    system python3, "-c", <<~EOS
+    system bin/"pythran", testpath/"test.py"
+    with_env(CXX: "g++-#{Formula["gcc"].version.major}") do
+      # Test common optimizations can be enabled. Using GCC as easier to enable OpenMP
+      system bin/"pythran", "-DUSE_XSIMD", "-fopenmp", "-march=native", testpath/"arc_distance.py"
+    end
+    rm(Dir["*.py"])
+
+    # Test OpenBLAS is correctly linked
+    require "utils/linkage"
+    openblas = Formula["openblas"].lib/shared_library("libblas")
+    assert Utils.binary_linked_to_library?(testpath.glob("test.*.so").first, openblas), "Test not linked to OpenBLAS!"
+
+    assert_equal <<~EOS, shell_output("#{python3} -c 'import test; print(test.b(3))'")
+      [[3. 3. 3.]
+       [3. 3. 3.]
+       [3. 3. 3.]]
+    EOS
+
+    system python3, "-c", <<~PYTHON
       import numpy as np
       import arc_distance
       d = arc_distance.arc_distance(
@@ -97,6 +109,6 @@ class Pythran < Formula
         np.array([3.45,1.5,55.4,567.0,43.2]), np.array([56.1,3.4,1.34,-56.9,-3.4]),
       )
       assert ([1.927, 1., 1.975, 1.83, 1.032] == np.round(d, 3)).all()
-    EOS
+    PYTHON
   end
 end

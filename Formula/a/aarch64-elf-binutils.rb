@@ -1,9 +1,9 @@
 class Aarch64ElfBinutils < Formula
   desc "GNU Binutils for aarch64-elf cross development"
   homepage "https://www.gnu.org/software/binutils/"
-  url "https://ftp.gnu.org/gnu/binutils/binutils-2.43.1.tar.bz2"
-  mirror "https://ftpmirror.gnu.org/binutils/binutils-2.43.1.tar.bz2"
-  sha256 "becaac5d295e037587b63a42fad57fe3d9d7b83f478eb24b67f9eec5d0f1872f"
+  url "https://ftpmirror.gnu.org/gnu/binutils/binutils-2.46.0.tar.bz2"
+  mirror "https://ftp.gnu.org/gnu/binutils/binutils-2.46.0.tar.bz2"
+  sha256 "0f3152632a2a9ce066f20963e9bb40af7cf85b9b6c409ed892fd0676e84ecd12"
   license "GPL-3.0-or-later"
 
   livecheck do
@@ -11,22 +11,23 @@ class Aarch64ElfBinutils < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "d58aeae4ea9f3f1016c401588502c0f5908693ec904334ebcb4505564cfba1c3"
-    sha256 arm64_ventura:  "4504615ff3eab4d10e2d4ea2c27e7dcf48ae6eed1f98b36869ecf42d7eafdd83"
-    sha256 arm64_monterey: "fc33b4a2f5f4e7a93ea4017b1fa629ded1f4dacbb4072d9c0912ebaecf4d27a2"
-    sha256 sonoma:         "c0f977599a2aedab5da2baa19e42813658143bfc11f6fbe082bb858564b21789"
-    sha256 ventura:        "3509ff0abd672d5dd9f1e822f2da8815ce3a5d12dced44e68b66d8929103f55c"
-    sha256 monterey:       "99158042d186229a5c35dbf47b7bbf54ed279d0195fc989412d450f3e6056124"
-    sha256 x86_64_linux:   "2b9af0cd8bdfa3f67fd1bb431bef2e3507d379922d4a63864d6be56a257d1082"
+    sha256 arm64_tahoe:   "b551ada8f9a18ae28a308346a364b02015fc9e8da71fed07ca1007be3f9f9033"
+    sha256 arm64_sequoia: "dc662682d7410d10798269944b4fabf07cf19e6e1c59026b07ad5f719a024bcd"
+    sha256 arm64_sonoma:  "9f0216d763ea8e35bba5ed3910893460d378542139b1801c88f506480527c9dc"
+    sha256 sonoma:        "259070e96a7e549ace586ebe32a067ec2219079fa12b6c2b1880dc308f7607fa"
+    sha256 arm64_linux:   "7a18b15ccbc99b5ecde7ceb9fa36770fbe88c386944be122076ce1d235e4974c"
+    sha256 x86_64_linux:  "090651a9a079134a2f23919531e9aa2a57286d04a9ff78755e846b6e0bc8fc68"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "zstd"
-
-  uses_from_macos "zlib"
 
   on_system :linux, macos: :ventura_or_newer do
     depends_on "texinfo" => :build
+  end
+
+  on_linux do
+    depends_on "zlib-ng-compat"
   end
 
   def install
@@ -43,14 +44,14 @@ class Aarch64ElfBinutils < Formula
   end
 
   test do
-    (testpath/"test-s.s").write <<~EOS
+    (testpath/"test-s.s").write <<~ASM
       .section .text
       .globl _start
       _start:
           mov x0, #0
           mov x16, #1
           svc #0x80
-    EOS
+    ASM
     system bin/"aarch64-elf-as", "-o", "test-s.o", "test-s.s"
     assert_match "file format elf64-littleaarch64",
                  shell_output("#{bin}/aarch64-elf-objdump -a test-s.o")

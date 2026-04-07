@@ -1,28 +1,46 @@
 class Gnutls < Formula
   desc "GNU Transport Layer Security (TLS) Library"
   homepage "https://gnutls.org/"
-  url "https://www.gnupg.org/ftp/gcrypt/gnutls/v3.8/gnutls-3.8.4.tar.xz"
-  mirror "https://www.mirrorservice.org/sites/ftp.gnupg.org/gcrypt/gnutls/v3.8/gnutls-3.8.4.tar.xz"
-  sha256 "2bea4e154794f3f00180fa2a5c51fe8b005ac7a31cd58bd44cdfa7f36ebc3a9b"
+  url "https://www.gnupg.org/ftp/gcrypt/gnutls/v3.8/gnutls-3.8.12.tar.xz"
+  mirror "https://www.mirrorservice.org/sites/ftp.gnupg.org/gcrypt/gnutls/v3.8/gnutls-3.8.12.tar.xz"
+  sha256 "a7b341421bfd459acf7a374ca4af3b9e06608dcd7bd792b2bf470bea012b8e51"
   license all_of: ["LGPL-2.1-or-later", "GPL-3.0-only"]
+  compatibility_version 1
 
+  # The download page links to the directory listing pages for the "Next" and
+  # "Current stable" versions. We use the "Next" version in the formula, so we
+  # match versions from the tarball links on that directory listing page.
   livecheck do
-    url "https://www.gnutls.org/news.html"
-    regex(/>\s*GnuTLS\s*v?(\d+(?:\.\d+)+)\s*</i)
+    url "https://www.gnutls.org/download.html"
+    regex(/href=.*?gnutls[._-]v?(\d+(?:\.\d+)+)\.t/i)
+    strategy :page_match do |page, regex|
+      # Find the higher version from the directory listing page URLs
+      highest_version = page.scan(%r{href=.*?/gnutls/v?(\d+(?:\.\d+)+)/?["' >]}i)
+                            .map { |match| match[0] }
+                            .max_by { |v| Version.new(v) }
+      next unless highest_version
+
+      # Fetch the related directory listing page
+      files_page = Homebrew::Livecheck::Strategy.page_content(
+        "https://www.gnupg.org/ftp/gcrypt/gnutls/v#{highest_version}",
+      )
+      next if (files_page_content = files_page[:content]).blank?
+
+      files_page_content.scan(regex).map { |match| match[0] }
+    end
   end
 
   bottle do
-    sha256 arm64_sonoma:   "46373a7206cc70289bfef2081508c62cc74a2589060b21ce26c44c4c86fbda41"
-    sha256 arm64_ventura:  "7b18d9403f8cc6a5e2e3fd427a07e32ccb1d7969715fbf5b72cfb4b5a01d8a3c"
-    sha256 arm64_monterey: "2a6bb19c341be5dcc2e351e68380b05f246407bd57b2dc7e94743d14e473cde8"
-    sha256 sonoma:         "7136ceb68e1bf94ad28db2990cc10da909b742390be65963b78e8b115f97b51d"
-    sha256 ventura:        "08b8fc7ded2a17510ab505965c754bccf3cf21ae690d76af744f96d800223de2"
-    sha256 monterey:       "80f7875ba4d2409f85851a3c61bf8c178415e863528357bc587578e8d0536c10"
-    sha256 x86_64_linux:   "9bedb5b302e02e32c64bf75c488216dd644bc205d9e99d2b26edfdf7f3d81b93"
+    sha256 arm64_tahoe:   "df6bfd97301eefdd39186a84e2089cd6b2ac62655a5bcf005e23c1b1e6631628"
+    sha256 arm64_sequoia: "2c852d43e0792be1e1091677c8bd3021c69b6d4cd237ea35918c033893f9ab1b"
+    sha256 arm64_sonoma:  "da087cf434671200e3c1b77f21341d9b5deb6e3df64b3868cc21212b965f9358"
+    sha256 sonoma:        "6dd581133c9f496152ed69d45129f53408035392101cd9c44d64649d0fba8bfb"
+    sha256 arm64_linux:   "ee21922877570b314f7457e9030fd915ca55ea6c0c343c8ccfce82b1f4914c5e"
+    sha256 x86_64_linux:  "d99e673012799fbe5648e8f511230233f9280a6aaba82bb5e3fa4b257bc4d9e0"
   end
 
-  depends_on "pkg-config" => :build
-
+  depends_on "pkgconf" => :build
+  depends_on "texinfo" => :build
   depends_on "ca-certificates"
   depends_on "gmp"
   depends_on "libidn2"
@@ -32,10 +50,18 @@ class Gnutls < Formula
   depends_on "p11-kit"
   depends_on "unbound"
 
-  uses_from_macos "zlib"
-
   on_macos do
+    depends_on "llvm" => :build if DevelopmentTools.clang_build_version <= 1400
     depends_on "gettext"
+  end
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
+
+  fails_with :clang do
+    build 1400
+    cause "error: CRAU_MAYBE_UNUSED is not getting defined"
   end
 
   def install
@@ -48,8 +74,10 @@ class Gnutls < Formula
       --with-p11-kit
     ]
 
-    system "./configure", *args, *std_configure_args.reject { |s| s["--disable-debug"] }
+    system "./configure", *args, *std_configure_args
     system "make", "install"
+
+    inreplace [lib/"pkgconfig/gnutls.pc", lib/"pkgconfig/gnutls-dane.pc"], prefix, opt_prefix
 
     # certtool shadows the macOS certtool utility
     mv bin/"certtool", bin/"gnutls-certtool"
@@ -62,9 +90,7 @@ class Gnutls < Formula
   end
 
   def caveats
-    <<~EOS
-      Guile bindings are now in the `guile-gnutls` formula.
-    EOS
+    "Guile bindings are now in the `guile-gnutls` formula."
   end
 
   test do

@@ -1,8 +1,8 @@
 class Musikcube < Formula
   desc "Terminal-based audio engine, library, player and server"
   homepage "https://musikcube.com"
-  url "https://github.com/clangen/musikcube/archive/refs/tags/3.0.4.tar.gz"
-  sha256 "25bb95b8705d8c79bde447e7c7019372eea7eaed9d0268510278e7fcdb1378a5"
+  url "https://github.com/clangen/musikcube/archive/refs/tags/3.0.5.tar.gz"
+  sha256 "708292a583bb5072a8dbb14e408c2a1f61de9b8c9786d4e53b3e69bef5dad8c5"
   license all_of: [
     "BSD-3-Clause",
     "GPL-2.0-or-later", # src/plugins/supereqdsp/supereq/
@@ -22,18 +22,17 @@ class Musikcube < Formula
 
   bottle do
     rebuild 1
-    sha256 cellar: :any,                 arm64_sonoma:   "00e57d9c9357ab897d8323351cf88191b9cad6287137d0ae825f75bf0372e353"
-    sha256 cellar: :any,                 arm64_ventura:  "e6ca7dd553d722a0770980c8a28fca32bfff4493a14e09e09e9767ec223f727b"
-    sha256 cellar: :any,                 arm64_monterey: "20dea11a6b5a33fca28fa4bd4f78b3c81a464d14e441c95d402cd3c751b5fbf7"
-    sha256 cellar: :any,                 sonoma:         "0d6f7ff35bdd8033ba4b90d3b027b8d64cb1429dfcee43b084bfa1ae7804d3f3"
-    sha256 cellar: :any,                 ventura:        "4dd0a8e8881f3e1ca1cb537b13c5b0492af99838e9c2d14b2c60b4c2820fad4f"
-    sha256 cellar: :any,                 monterey:       "b57720e0c6a394c9e52406ed7bbc942ec61b01e9d1705b2caecf571fcbd478a5"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "a1615f9ef8bf8645ecf31d0679e1a96a526e881beddbc1e25d0fe8089f6385eb"
+    sha256 cellar: :any,                 arm64_tahoe:   "f079cd99390fa8cfde2954b29c85ec1dbb7463fcda7379d7d65a9728dd70135c"
+    sha256 cellar: :any,                 arm64_sequoia: "61f16a85ce157e22e75af7904af8dca3b3dd24a0ead22ee487303a8a231fe17e"
+    sha256 cellar: :any,                 arm64_sonoma:  "eaf80bc92fb9ff264094e71104f563709c8f5aa8c6cf6719c2b4099ff47c2559"
+    sha256 cellar: :any,                 sonoma:        "902d978d1bf5ad4507cb22e6bdbed88d4ce91a40d9978148064ff2cb31afbb4b"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "0aca547fb4d9aba99e8a2c85cd7c2c512699c40ab6ff058e5df2c7bf3de62e1f"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "6ce68dae9715ffd29bf3fbf6884ff2797f20fee61bd972dfb4bf63763bba390e"
   end
 
   depends_on "asio" => :build
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
 
   depends_on "ffmpeg"
   depends_on "game-music-emu"
@@ -47,7 +46,6 @@ class Musikcube < Formula
   depends_on "taglib"
 
   uses_from_macos "curl"
-  uses_from_macos "zlib"
 
   on_macos do
     depends_on "gnutls"
@@ -58,6 +56,7 @@ class Musikcube < Formula
     depends_on "alsa-lib"
     depends_on "pulseaudio"
     depends_on "systemd"
+    depends_on "zlib-ng-compat"
   end
 
   def install

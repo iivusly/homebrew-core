@@ -1,30 +1,27 @@
 class Nuraft < Formula
   desc "C++ implementation of Raft core logic as a replication library"
   homepage "https://github.com/eBay/NuRaft"
-  url "https://github.com/eBay/NuRaft/archive/refs/tags/v2.1.0.tar.gz"
-  sha256 "42d19682149cf24ae12de0dabf70d7ad7e71e49fbfa61d565e9b46e2b3cd517f"
+  url "https://github.com/eBay/NuRaft/archive/refs/tags/v3.0.0.tar.gz"
+  sha256 "073c3b321efec9ce6b2bc487c283e493a1b2dd41082c5e9ac0b8f00f9b73832d"
   license "Apache-2.0"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "c920e4db840519a912a09fdc910ea3460c629d7b86094117cef833a921789b48"
-    sha256 cellar: :any,                 arm64_ventura:  "17cdd2860bbcd32bfa028c1706c02da066a796b0f1abfca96c76bdbcb05ca012"
-    sha256 cellar: :any,                 arm64_monterey: "5d024f15a5a6644bb74b7293ab5939376e9115102c3dcf466d9ef209496a27c4"
-    sha256 cellar: :any,                 arm64_big_sur:  "46efae0c6123d49ce9cf3f9f4798b4a556bf55e1cf7fbb1aaa12ce6b458613b8"
-    sha256 cellar: :any,                 sonoma:         "40cbb00d86e4ae30fd5f3c351f05339e8b0f0f70f8c579e346113853126c0d17"
-    sha256 cellar: :any,                 ventura:        "e38d6cbd1be543fc3ee42ce4573309c0f058c83d8151519f9ce9272c4edd82f3"
-    sha256 cellar: :any,                 monterey:       "81250cae0a2c2ef68e88b1ab3e0f394d6ad803f257e23cac33ce07c7f4bfbe93"
-    sha256 cellar: :any,                 big_sur:        "668d54563b382c1160246452e6cf54fd6832c238e33731613d6537418f474b0a"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "72a6fa91392aacbbc97f42a17330a2bc0c4b38dc97c3477f87b6c9c90474bd28"
+    rebuild 1
+    sha256 arm64_tahoe:   "ea3f306e6ff8caed8af6766269952ba484a9c93616bd3022536ecdf594244293"
+    sha256 arm64_sequoia: "d8c11cb1794414a156702a0dd8e2e4c2f1364b3ce70d72fe0621ec8ee38e3153"
+    sha256 arm64_sonoma:  "12ba02a1696da77e500b797871ae74e95faef90716c9926226a89eb27bccc1b9"
+    sha256 sonoma:        "6448d43767ede630932d6bdb91a5d898fa1009c2fe50ef151c39c02d9d1b6c01"
+    sha256 arm64_linux:   "fc1791ce60a81c886fe5c3484636b8ef7645eb8fa08d7d4a0f1d7ab65d40b277"
+    sha256 x86_64_linux:  "922ce348211e72adc865d2a6976cd7a2b914d1ea88c4508fb80fd7430cac185a"
   end
 
   depends_on "cmake" => :build
+
   depends_on "asio"
   depends_on "openssl@3"
 
-  # patch to include missing header, `event_awaiter.h`, remove when it is available
-  patch do
-    url "https://github.com/eBay/NuRaft/commit/65736ff4314a0fa15f724a213fa42bf26bc86f70.patch?full_index=1"
-    sha256 "0d06d4a6b5b6fa348affacfff6bc100df1403a7194d7caf2b205e8a142401863"
+  on_linux do
+    depends_on "zlib-ng-compat"
   end
 
   def install

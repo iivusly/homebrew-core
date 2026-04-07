@@ -7,12 +7,15 @@ class Canfigger < Formula
   head "https://github.com/andy5995/canfigger.git", branch: "trunk"
 
   bottle do
+    sha256 cellar: :any,                 arm64_tahoe:    "6a1990da902b615052fa6d3b98704b8a0dc1320d7545feb2f9a86d8a9413288a"
+    sha256 cellar: :any,                 arm64_sequoia:  "1eea36988f6c7adf32c10b85effe85af3344fd9c294de23c7d3f8b391222c56e"
     sha256 cellar: :any,                 arm64_sonoma:   "d55f2ee425decbb379da3105d48ec055a42b87f72efbffa6a875d53e74faebfb"
     sha256 cellar: :any,                 arm64_ventura:  "ca6dbe2e1c9d8841cf927367e9f472b1fed91d84ada7ac1295e78e7c135f6341"
     sha256 cellar: :any,                 arm64_monterey: "4fa68580783fc78146550db423b46e27004fe2c83ff54135159e750b399f06e5"
     sha256 cellar: :any,                 sonoma:         "ae03386506e951da6525a8c437c62aee6e232ab8a52ab14bcb7c63de103d4903"
     sha256 cellar: :any,                 ventura:        "163c84d05419a4c6f58fbfaa5923ef2bea68a5c7fb8e89bb7080323840ffe6a5"
     sha256 cellar: :any,                 monterey:       "2481309bc1cc7485ae7fca15bcb396498b19a5ef370cb3a71c9e608b8bc16fd7"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "c8f836846182fc7b48b5375c1a69bb771b3ab32f38e4e7dece9c687960cd4739"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "1b3630e0553221aa87402808455550585ca65a0549a6ca12f1c6d1fa85366596"
   end
 
@@ -30,7 +33,7 @@ class Canfigger < Formula
       Numbers = list, one , two, three, four, five, six, seven
     EOS
 
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <canfigger.h>
       #include <stdio.h>
 
@@ -62,7 +65,7 @@ class Canfigger < Formula
 
         return 0;
       }
-    EOS
+    C
 
     system ENV.cc, "test.c", "-L#{lib}", "-lcanfigger", "-o", "test"
     assert_match <<~EOS, shell_output("./test")

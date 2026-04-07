@@ -1,19 +1,18 @@
 class Httm < Formula
   desc "Interactive, file-level Time Machine-like tool for ZFS/btrfs"
   homepage "https://github.com/kimono-koans/httm"
-  url "https://github.com/kimono-koans/httm/archive/refs/tags/0.42.4.tar.gz"
-  sha256 "f2d811afdae96c04935fc61f9ba3e1ad28b1c85fce148913ff06a2ab66b06527"
+  url "https://github.com/kimono-koans/httm/archive/refs/tags/0.49.9.tar.gz"
+  sha256 "c9d24d296942569408fe5a625a0fbb8d833ffd7d43d56532396d7dfad3033f80"
   license "MPL-2.0"
   head "https://github.com/kimono-koans/httm.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "598fb42f47ce2425289a53e5417ffbcf01bc481d4567b5e3f557c325302d6676"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "b8b8ad5b476e81c8052715ab859b6181e8424503292bb035b5dd4c0be3a2f28e"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "357b950d575b81231176f35edb389045f9f795c83914297d2f10cb5ef792ae20"
-    sha256 cellar: :any_skip_relocation, sonoma:         "1e79d0afc67ddbe99d1f7d896afa1ec186da86487f330ce069ccb1609265c1f5"
-    sha256 cellar: :any_skip_relocation, ventura:        "900eb35739951d0b34424ab01122faef3a11902387b4b70f3f010511b19685dc"
-    sha256 cellar: :any_skip_relocation, monterey:       "4b2804cf74c5f981b9ef9bdbafae60f9f2259d3d3c39ff717a93723d6046d7fb"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "ddb20f055add8a4583e77c124bd04426ef0d20ebae790eb71bd229cae0a73edb"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "08a10782768d68b15eef56e3818fe93920c79c1730388c641d2b9a52c417d407"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "116dd30cbeef177bae5dd044704bddc865e614a85bb1ac0ebf5e8541a3381faf"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "c641ecc94b07cfa7a42b19bea9333d152f05ab7fe4ccbd0729ffb7f31f989417"
+    sha256 cellar: :any_skip_relocation, sonoma:        "24eab643a38917fa113c2f2936ae34545ae6a177052beff6c228b2a91d371172"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "755cb3101755824614938e4163569c460a63f7e742e06dec7941f88ac1a390ba"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "e4e254e917848d604518a8a4a7302b331e938a31944755f95ff2afa2114b75dc"
   end
 
   depends_on "rust" => :build
@@ -25,7 +24,7 @@ class Httm < Formula
   conflicts_with "nicotine-plus", because: "both install `nicotine` binaries"
 
   def install
-    system "cargo", "install", "--features", "xattrs,acls", *std_cargo_args
+    system "cargo", "install", *std_cargo_args(features: ["xattrs", "acls"])
     man1.install "httm.1"
 
     bin.install "scripts/ounce.bash" => "ounce"
@@ -36,7 +35,7 @@ class Httm < Formula
 
   test do
     touch testpath/"foo"
-    assert_equal "Error: httm could not find any valid datasets on the system.",
+    assert_equal "ERROR: httm could not find any valid datasets on the system.",
       shell_output("#{bin}/httm #{testpath}/foo 2>&1", 1).strip
     assert_equal "httm #{version}", shell_output("#{bin}/httm --version").strip
   end

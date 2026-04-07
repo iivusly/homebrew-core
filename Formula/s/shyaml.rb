@@ -10,22 +10,24 @@ class Shyaml < Formula
   head "https://github.com/0k/shyaml.git", branch: "master"
 
   bottle do
-    rebuild 4
-    sha256 cellar: :any,                 arm64_sonoma:   "dfef640dec7d7feda0631dee64cecf64cbfa4f652fb904968aeb3559689df56d"
-    sha256 cellar: :any,                 arm64_ventura:  "ca3e01a14e019cb5631b9e2650389b9dce17e669a030dec0f7e76d2a4229cb57"
-    sha256 cellar: :any,                 arm64_monterey: "4af452f5d5c74a91d59137836d1ba084fb9ec74a42deffe6adfa347eb8e96bb7"
-    sha256 cellar: :any,                 sonoma:         "6f01fcbb83d7129550d9edf349dfbca663922bed9a3658c92c34632abad19661"
-    sha256 cellar: :any,                 ventura:        "60ea04a3903772b63ef876d1d20d44f954f189abf7187a1373dd25917eb6919e"
-    sha256 cellar: :any,                 monterey:       "9ad3c28af300bbcac8dc4e62dcffee9e91405cc6b2097efebc7267975b8998ec"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "5c85847600b5161298d5cb8df0466940912c75b3f11ee8fa4d81bd5078a89db7"
+    rebuild 6
+    sha256 cellar: :any,                 arm64_tahoe:   "84f85648e8f7a9e3b6d23bc774b4035e68987ec320afa9a26681a34984f54606"
+    sha256 cellar: :any,                 arm64_sequoia: "12253411fc0733aeb8580e76eb8c498e968d5fbf26fc2c9ee0a969ed3d81f896"
+    sha256 cellar: :any,                 arm64_sonoma:  "8bc9980e56a28c35bb9e73b018296a99a2d327d00886079362e13074516bcf6c"
+    sha256 cellar: :any,                 sonoma:        "53720f2b4c3d835c02119ee91e3108b5aa9adda2ec3fda2964d672a8c42f11ac"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "06fdc63c06d8747e6865af44a5e5b93a6c69688b03957c5d2e5f8bd77f98d52d"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "94fa46b2c7b21233b659a07743538eca11873d6787515cf74b98b8632e014abf"
   end
 
+  # Last release in 2020, needs patch to build with modern setuptools
+  deprecate! date: "2025-10-26", because: :unmaintained, replacement_formula: "yq"
+
   depends_on "libyaml"
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   resource "pyyaml" do
-    url "https://files.pythonhosted.org/packages/cd/e5/af35f7ea75cf72f2cd079c95ee16797de7cd71f29ea7c68ae5ce7be1eda0/PyYAML-6.0.1.tar.gz"
-    sha256 "bfdf460b1736c775f2ba9f6a92bca30bc2095067b8a9d77876d1fad6cc3b4a43"
+    url "https://files.pythonhosted.org/packages/05/8e/961c0007c59b8dd7729d542c61a4d537767a59645b82a0b521206e1e25c2/pyyaml-6.0.3.tar.gz"
+    sha256 "d76623373421df22fb4cf8817020cbb7ef15c725b9d5e45f17e189bfc384190f"
   end
 
   def install
@@ -36,12 +38,12 @@ class Shyaml < Formula
   end
 
   test do
-    yaml = <<~EOS
+    yaml = <<~YAML
       key: val
       arr:
         - 1st
         - 2nd
-    EOS
+    YAML
     assert_equal "val", pipe_output("#{bin}/shyaml get-value key", yaml, 0)
     assert_equal "1st", pipe_output("#{bin}/shyaml get-value arr.0", yaml, 0)
     assert_equal "2nd", pipe_output("#{bin}/shyaml get-value arr.-1", yaml, 0)

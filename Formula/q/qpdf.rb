@@ -1,25 +1,28 @@
 class Qpdf < Formula
   desc "Tools for and transforming and inspecting PDF files"
   homepage "https://github.com/qpdf/qpdf"
-  url "https://github.com/qpdf/qpdf/releases/download/v11.9.1/qpdf-11.9.1.tar.gz"
-  sha256 "2ba4d248f9567a27c146b9772ef5dc93bd9622317978455ffe91b259340d13d1"
+  url "https://github.com/qpdf/qpdf/releases/download/v12.3.2/qpdf-12.3.2.tar.gz"
+  sha256 "6cba2f9f2cd887d905faeb99e0e51a307b217920d1bbf3e9cfbb2e8178a2deda"
   license "Apache-2.0"
+  compatibility_version 1
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "a4aa3f1a65544861debcfbf6c5df9283e17e4a2f40b14b8c680fa9e8636c0ae9"
-    sha256 cellar: :any,                 arm64_ventura:  "e9f29cb2c999847320165614618f92d9487172a6c5ca09a2691159b934072399"
-    sha256 cellar: :any,                 arm64_monterey: "546a9271c1e4fa88c50a15ed0a6baf4a10e6729e249cdda7642337c125d309fc"
-    sha256 cellar: :any,                 sonoma:         "0af29572086526cbd6e8ec28526d5b02fb97f0b3c7dca97bcf9de7d42a5f555d"
-    sha256 cellar: :any,                 ventura:        "a7b542a3cbfeeaf64f7481d9cbc8a9edd2c4367783519281d59309578d50f8c1"
-    sha256 cellar: :any,                 monterey:       "fe39e820c2a21942e07975bd1f1dc2b596219ffb3b90aa4053fe41223c08eeda"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "f208edd304c812097562ceb2e069dc472d1b5a630086eedf4b645451f6a90384"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "e1c5478e15efb7eccf35f0e1464ea0384d4afcd8c6d8347de2dd1ef3cdbd48da"
+    sha256 cellar: :any,                 arm64_sequoia: "ef43a7ee011cdc0f8401a11392270f07c6c1de49dfbcdc516c53a218fd576402"
+    sha256 cellar: :any,                 arm64_sonoma:  "18e956371a6fdc8607834ef6cb7424aac6e925ab72b5621a5517bb1926b66019"
+    sha256 cellar: :any,                 sonoma:        "ae97ea43f6d048aeb39bb4ef894305a6c5181bfc1436e415073add0c0ac93b3f"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "017679e381a1b0179fead06203c3fceb0123d239c5443840a2e62e6327d3f38a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "257890275f350e66b25c6cdd5769713d038c41890d4710c644cffc1eb5cc6d66"
   end
 
   depends_on "cmake" => :build
   depends_on "jpeg-turbo"
   depends_on "openssl@3"
 
-  uses_from_macos "zlib"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     system "cmake", "-S", ".", "-B", "build",

@@ -1,30 +1,38 @@
 class Cxxopts < Formula
   desc "Lightweight C++ command-line option parser"
   homepage "https://github.com/jarro2783/cxxopts"
-  url "https://github.com/jarro2783/cxxopts/archive/refs/tags/v3.2.1.tar.gz"
-  sha256 "841f49f2e045b9c6365997c2a8fbf76e6f215042dda4511a5bb04bc5ebc7f88a"
+  url "https://github.com/jarro2783/cxxopts/archive/refs/tags/v3.3.1.tar.gz"
+  sha256 "3bfc70542c521d4b55a46429d808178916a579b28d048bd8c727ee76c39e2072"
   license "MIT"
   head "https://github.com/jarro2783/cxxopts.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, all: "883a901ef150f303dfba9430fc0fd7f29a9f132406b35ebd9dcf481f23029957"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, all: "5c90eb7984473c65039f6dce14c4d9df760f5545777d8901dd5725a87f72a43c"
   end
 
   depends_on "cmake" => :build
 
   def install
+    # set `CXXOPTS_CMAKE_DIR` and `CMAKE_INSTALL_LIBDIR_ARCHIND` to create an `:all` bottle.
     args = %w[
+      -DCMAKE_INSTALL_LIBDIR_ARCHIND=share
       -DCXXOPTS_BUILD_EXAMPLES=OFF
       -DCXXOPTS_BUILD_TESTS=OFF
+      -DCXXOPTS_CMAKE_DIR=share/cmake/cxxopts
     ]
 
+    # We don't need to run `cmake --build` because this is header-only.
     system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
-    system "cmake", "--build", "build"
     system "cmake", "--install", "build"
+
+    return unless (lib/"pkgconfig").directory?
+
+    share.install lib/"pkgconfig"
   end
 
   test do
-    (testpath/"test.cc").write <<~EOS
+    (testpath/"test.cc").write <<~CPP
       #include <iostream>
       #include <cstdlib>
       #include <cxxopts.hpp>
@@ -48,7 +56,7 @@ class Cxxopts < Formula
 
           return 0;
       }
-    EOS
+    CPP
 
     system ENV.cxx, "-std=c++11", "test.cc", "-I#{include}", "-o", "test"
     assert_equal "echo string", shell_output("./test -e 'echo string'").strip

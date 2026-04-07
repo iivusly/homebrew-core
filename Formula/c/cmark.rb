@@ -1,29 +1,26 @@
 class Cmark < Formula
   desc "Strongly specified, highly compatible implementation of Markdown"
   homepage "https://commonmark.org/"
-  url "https://github.com/commonmark/cmark/archive/refs/tags/0.31.1.tar.gz"
-  sha256 "3da93db5469c30588cfeb283d9d62edfc6ded9eb0edc10a4f5bbfb7d722ea802"
+  url "https://github.com/commonmark/cmark/archive/refs/tags/0.31.2.tar.gz"
+  sha256 "f9bc5ca38bcb0b727f0056100fac4d743e768872e3bacec7746de28f5700d697"
   license "BSD-2-Clause"
+  compatibility_version 1
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "1ddac8c6456bff3ff163cb189b713cf3993cc2515d740e39b4f135d4233eb368"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "19bbac821a80898d2fc9174479d3b0e6e8ec8e1fa104069714d504e8a859b4a5"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "9520669d2fd57eb90ecda887a67c706bde219508516a1876ec73d4047acd0467"
-    sha256 cellar: :any_skip_relocation, sonoma:         "bc90c65f67d701afea02da66a2748b2cf5531a9ea490aca25ae05cab740b5550"
-    sha256 cellar: :any_skip_relocation, ventura:        "574b08c9836e1c14a4956b5fdf387c97ba36d7956be1c59db8315586ec37de45"
-    sha256 cellar: :any_skip_relocation, monterey:       "e94600f55338f8f6a328d24b917dfe4f2786f847f07bb178317aaf254c905bd8"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "44766462af04cc1d8e0ed724abd72297db90add455b432a395ba7c6caf175591"
+    sha256 cellar: :any,                 arm64_tahoe:   "23df2262fb8ef016f8f60bdfcd875a08de7f184f60c2263991c79af9cd772ae6"
+    sha256 cellar: :any,                 arm64_sequoia: "91068cdaa2e4a69d056cf074c5e4b74737b749c40a4c3ee9fba0db317cdc4761"
+    sha256 cellar: :any,                 arm64_sonoma:  "42f38683fb7789c186d4ffff629a423421fdb332d1265e5d738d6d104ca14e22"
+    sha256 cellar: :any,                 sonoma:        "768afbf8cba6067e2c4935dfaf79c3fab51bd0561c0daebb126b6501d63054a6"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "d653712866e26d9a1ccc17543cb7d88e6419ed94c5cc7617e25692482ec9b99e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "4d4c24cef6d576e564ddcb2660e6796d73d76a656966d75075e2113088e4efac"
   end
 
   depends_on "cmake" => :build
+
   uses_from_macos "python" => :build
 
-  conflicts_with "cmark-gfm", because: "both install a `cmark.h` header"
-
   def install
-    system "cmake", "-S", ".", "-B", "build",
-                        "-DCMAKE_INSTALL_LIBDIR=lib",
-                        *std_cmake_args
+    system "cmake", "-S", ".", "-B", "build", "-DBUILD_SHARED_LIBS=ON", *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
   end

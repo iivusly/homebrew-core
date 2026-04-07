@@ -1,26 +1,38 @@
 class Planck < Formula
   desc "Stand-alone ClojureScript REPL"
   homepage "https://planck-repl.org/"
-  url "https://github.com/planck-repl/planck/archive/refs/tags/2.28.0.tar.gz"
-  sha256 "44f52e170d9a319ec89d3f7a67a7bb8082354f3da385a83bd3c7ac15b70b9825"
   license "EPL-1.0"
+  revision 4
   head "https://github.com/planck-repl/planck.git", branch: "master"
 
-  bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "d191a614bd84bcc9d260923fa40aeaa05519773c758f2731fc12724c478a9b40"
-    sha256 cellar: :any,                 arm64_ventura:  "417db2a6168646c53b8bf748fc8920c97f41e362e463042fad5548106ae0b235"
-    sha256 cellar: :any,                 arm64_monterey: "a2d86b54405f284660eeb8199488b1892747d60aafdc453598d85cc8b2ddd84d"
-    sha256 cellar: :any,                 sonoma:         "2ea02808fba9f62cb10fa592381cbce8c2a737b3c634bcc6eaec1c94f4566633"
-    sha256 cellar: :any,                 ventura:        "26434fb97e32d2e244d5964e061ae7706ca416fafe6c4600c33548b5bb35f554"
-    sha256 cellar: :any,                 monterey:       "baa4b152e861f9f1579e64a84c925970a9a813c15d2006da864eeed74383016c"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "716444d924733adfecb5382de8260cdc0537b49afee6e4a2622a49d1da4853c1"
+  stable do
+    url "https://github.com/planck-repl/planck/archive/refs/tags/2.28.0.tar.gz"
+    sha256 "44f52e170d9a319ec89d3f7a67a7bb8082354f3da385a83bd3c7ac15b70b9825"
+
+    # Backport fix for CMake 4
+    patch do
+      url "https://github.com/planck-repl/planck/commit/0e336f722b52f18e130d3866d4c512b20bafcbd7.patch?full_index=1"
+      sha256 "685fb05b666f5ed419d986be6a35bda6448f062eaeb6666a9910a2c4dd4fd16a"
+    end
   end
+
+  bottle do
+    sha256 cellar: :any,                 arm64_tahoe:   "98d3b85da67804836fdaa7db623e74ef82ab3e72ccbf8c421fa7fe7d9f16528d"
+    sha256 cellar: :any,                 arm64_sequoia: "0342856b9f0638676afb22a4ba1117b942a777a17e077b808803077b7f490f7e"
+    sha256 cellar: :any,                 arm64_sonoma:  "fbf8b5b7574a2e2b4470d1e90d48b1ea0006cc52f4882b301c22635bb71274b8"
+    sha256 cellar: :any,                 sonoma:        "0b1b53725d302dabc755d9ee0ea2049ad1c95f292dac414c1b31b42d544e0aad"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "4d317813fd2924a36aa989fcbd2ac729277ad0b7b0302bdfa07f4cd7c52b14bc"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "52ba1633a236729c1ef9108e169c8bbf1bc4ca262a5cd05f67f7a2dc4f70ae37"
+  end
+
+  deprecate! date: "2026-02-21", because: :does_not_build
+  disable! date: "2027-02-21", because: :does_not_build
 
   depends_on "clojure" => :build
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on xcode: :build
-  depends_on "icu4c"
+  depends_on "icu4c@78"
   depends_on "libzip"
 
   uses_from_macos "vim" => :build # for xxd
@@ -30,8 +42,6 @@ class Planck < Formula
   on_linux do
     depends_on "webkitgtk"
   end
-
-  fails_with gcc: "5"
 
   # Don't mix our ICU4C headers with the system `libicucore`.
   # TODO: Upstream this.

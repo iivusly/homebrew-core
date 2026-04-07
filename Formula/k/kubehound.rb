@@ -1,18 +1,24 @@
 class Kubehound < Formula
   desc "Tool for building Kubernetes attack paths"
   homepage "https://kubehound.io"
-  url "https://github.com/DataDog/KubeHound/archive/refs/tags/v1.4.0.tar.gz"
-  sha256 "9f047d7fa3f5e27d1b5db974ce34622e6960c7ad9ab7b354572486c6f08362db"
+  url "https://github.com/DataDog/KubeHound/archive/refs/tags/v1.6.7.tar.gz"
+  sha256 "b753e20ef6200e1bb0e26e0afba9bf9e76f5ea7a2d823bf90dc88b60f4ebd31d"
   license "Apache-2.0"
+  head "https://github.com/DataDog/KubeHound.git", branch: "main"
+
+  livecheck do
+    url :stable
+    strategy :github_latest
+  end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "a02aba0d6a0dc6e0f5bc9c5b02f6148bb66d42235e2e2d92b417c7bcbfcbc629"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "4e1a38640d095b9ba84550564aa457dca1290ac9575e98190a2726d10b710ba0"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "1ab4b02298d45ea221457c5455fa662227261982a5622a70e7902dfe81f66c58"
-    sha256 cellar: :any_skip_relocation, sonoma:         "1be0bbd65c84695b90a1ce21c716b07595f1d291cea7b4192c555712a6c34fb0"
-    sha256 cellar: :any_skip_relocation, ventura:        "e1a9ec7f118f611dfb69d2afc642df3e3e385f5d39cc95e513d490e68cfa23ef"
-    sha256 cellar: :any_skip_relocation, monterey:       "4e98e2229c5f01c307e316916195c0e8eaa3895792abbd58f3a7476cbd3c1b19"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "a4066baa79df387838477c5665820fdddf42042eb5d212cbba6883f59e0836cc"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "6ed0e5bcc02c1fe5fd9097597ec362a713a01d8dba8aed76a1dc35dca5423458"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "22a99818f4c97fa26941886c33aafdacfb5c90ba0d6891d3004a0917dcf27ea8"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "7c3f643db8156e52a8918569bd9e7a4b6ff46f471dacfe350fd1653160d4ffb7"
+    sha256 cellar: :any_skip_relocation, sonoma:        "79367aaf47312361c2e27be4467c9038e71a51eb1143dcb9ab22b34b7f6b7c5b"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "714f67c61f7051582d98cbcb3ad49b36df56f2cef8c60f5aad12806b166877a4"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "a7ae490424140e2fbd8d5d6ec33763774e4a566571cc70d77c2d10149e34d980"
   end
 
   depends_on "go" => [:build, :test]
@@ -28,14 +34,16 @@ class Kubehound < Formula
       -X github.com/DataDog/KubeHound/pkg/config.BuildOs=#{goos}
       -X github.com/DataDog/KubeHound/pkg/config.BuildArch=#{goarch}
     ]
-    system "go", "build", *std_go_args(ldflags:), "./cmd/kubehound/"
+    system "go", "build", *std_go_args(ldflags:, tags: "no_backend"), "./cmd/kubehound/"
+
+    generate_completions_from_executable(bin/"kubehound", shell_parameter_format: :cobra)
   end
 
   test do
     assert_match "kubehound version: v#{version}", shell_output("#{bin}/kubehound version")
 
     ENV["DOCKER_HOST"] = "unix://#{testpath}/invalid.sock"
-    error_message = "error starting the kubehound stack: Cannot connect to the Docker daemon"
+    error_message = "error starting the kubehound stack"
     assert_match error_message, shell_output("#{bin}/kubehound backend up 2>&1", 1)
   end
 end

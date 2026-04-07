@@ -1,8 +1,8 @@
 class Msmtp < Formula
   desc "SMTP client that can be used as an SMTP plugin for Mutt"
   homepage "https://marlam.de/msmtp/"
-  url "https://marlam.de/msmtp/releases/msmtp-1.8.26.tar.xz"
-  sha256 "6cfc488344cef189267e60aea481f00d4c7e2a59b53c6c659c520a4d121f66d8"
+  url "https://marlam.de/msmtp/releases/msmtp-1.8.32.tar.xz"
+  sha256 "20cd58b58dd007acf7b937fa1a1e21f3afb3e9ef5bbcfb8b4f5650deadc64db4"
   license "GPL-3.0-or-later"
 
   livecheck do
@@ -11,22 +11,21 @@ class Msmtp < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "9b5033e58a0c952161ece88e2b4c554af6e7c171e7e740bf02aa5f2e74767041"
-    sha256 arm64_ventura:  "56711594d87c2709e82f626e1d8296b71aa9b1071d214bc0a8c00d2a7ddeb956"
-    sha256 arm64_monterey: "f6298cd53a86c6b7dc877598260ff2f0d5b93a51dd3a93d49e090365e1721a40"
-    sha256 sonoma:         "87c6b49b175acd851200467f401a492e6c7cdf53ea564e5fd7bb6e2265866cdd"
-    sha256 ventura:        "8a14bfa72ab0de378e8e7b840165105c7cd7f1434ca2bd4bd53536378aea03f4"
-    sha256 monterey:       "10ff50baba4c580c49131bf41773ce9cf979fb1d1d3162f87255bdce0190868f"
-    sha256 x86_64_linux:   "71df3b5a4e31df54427f47a395df4506704fd495995cc807f8aad54131088b09"
+    sha256 cellar: :any, arm64_tahoe:   "fb73c1d4d6cf6a3eaa9d58dd28e92a3236b7391fae2d952b5905e4b2aaa69f2d"
+    sha256 cellar: :any, arm64_sequoia: "c4bb0636780fd6fc1b2fc13590d52b7b9b3332278494b15a6004a9b6dbf3afbb"
+    sha256 cellar: :any, arm64_sonoma:  "f7ad2eb8f4e8af3da9ac87aec6cab70ffa98851883b9fd91d10fa3fc8bee6c89"
+    sha256 cellar: :any, sonoma:        "48fd217589c9426abb52e7ab4f39f5cb1187cf0deb5771100d8e867d58339f40"
+    sha256               arm64_linux:   "f9d5377da5a884596453a9415f0bd97023e0e658c63b99cae4e1055d48576d4e"
+    sha256               x86_64_linux:  "d59eb5c9d9210d35fa752ba933abdc5f85f58df3106482273b8f73dec56b5bb4"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "gettext"
   depends_on "gnutls"
   depends_on "libidn2"
 
   def install
-    system "./configure", *std_configure_args, "--disable-silent-rules", "--with-macosx-keyring"
+    system "./configure", "--disable-silent-rules", "--with-macosx-keyring", *std_configure_args
     system "make", "install"
     (pkgshare/"scripts").install "scripts/msmtpq"
   end

@@ -1,8 +1,8 @@
 class FabricInstaller < Formula
   desc "Installer for Fabric for the vanilla launcher"
   homepage "https://fabricmc.net/"
-  url "https://maven.fabricmc.net/net/fabricmc/fabric-installer/1.0.1/fabric-installer-1.0.1.jar"
-  sha256 "62edf170bdcc41edea85d33acf3eb85474258699b3d41f9418d286c836cb088d"
+  url "https://maven.fabricmc.net/net/fabricmc/fabric-installer/1.1.1/fabric-installer-1.1.1.jar"
+  sha256 "2487a69dd6f9d9c2605265a7142d77c26ab62edc620e6bcf810d581d2ee31b79"
   license "Apache-2.0"
 
   # The first-party download page (https://fabricmc.net/use/) uses JavaScript
@@ -19,7 +19,7 @@ class FabricInstaller < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, all: "5417e368ad080b296504ee2193dbcf6ab29b48fe829aea628b34b5136d3e22a3"
+    sha256 cellar: :any_skip_relocation, all: "33c010e8e272dff69ac9bc2ff67413f6b36e0523e4e7db6255d851a761a7c4ff"
   end
 
   depends_on "openjdk"
@@ -31,6 +31,6 @@ class FabricInstaller < Formula
 
   test do
     system bin/"fabric-installer", "server"
-    assert_predicate testpath/"fabric-server-launch.jar", :exist?
+    assert_path_exists testpath/"fabric-server-launch.jar"
   end
 end

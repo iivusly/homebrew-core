@@ -1,31 +1,27 @@
 class SocketVmnet < Formula
   desc "Daemon to provide vmnet.framework support for rootless QEMU"
   homepage "https://github.com/lima-vm/socket_vmnet"
-  url "https://github.com/lima-vm/socket_vmnet/archive/refs/tags/v1.1.4.tar.gz"
-  sha256 "38ee9a3aa6e990ae35128813d6927b64f95bfb5b9e13f8ac8885ab71394499b8"
+  url "https://github.com/lima-vm/socket_vmnet/archive/refs/tags/v1.2.2.tar.gz"
+  sha256 "7341cab86654a171a427799f9e472696dad17215641c39c4b26de8d2181933a0"
   license "Apache-2.0"
   head "https://github.com/lima-vm/socket_vmnet.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "b3fdabd6b7f9902acebb939a7e291ea5f97f3e36aedf1e8fb3a18c0b1fc6c8eb"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "f8597587e961d4482d83739489badf3cb8c6a75402692d613c045229203c8392"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "a6c24f2176c97e6061015d76ad48a1c468f85b3c4198fa4f2d0e43d229a50fca"
-    sha256 cellar: :any_skip_relocation, sonoma:         "565371131fde789b35b61c90ebfdc1f97295ac36b8732fa9ef850e02610af506"
-    sha256 cellar: :any_skip_relocation, ventura:        "29533f07316e19eb86a4a0e1986185c059344df516f8798c2056ca7128e3ea01"
-    sha256 cellar: :any_skip_relocation, monterey:       "1339b46316025f75bd1206d941c399155b0287422b8ac5e8c5bedeb84458e3d2"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "15b3703e48a5f03c38e5f854d8c50dc24a532138af2fc94587767d19d7e2eea5"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "be269d31b6494cf8c4b14e5421201409e7dbd63337046befd3712c6c926a8562"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "489e6807062d831fb5f961946b7f89576c8d48eaf35833dfb3f891f275294946"
+    sha256 cellar: :any_skip_relocation, sonoma:        "a9c7d0037ddec9a8e178f8ac0dfa567a625be9412a690d42818b59acf5ea94d2"
   end
 
-  keg_only "Homebrew's bin directory is often writable by a non-admin user"
+  keg_only "it should not be in Homebrew's bin directory, which is often writable by a non-admin user"
 
   depends_on :macos
-  depends_on macos: :catalina
 
   def install
     # make: skip "install.launchd"
     system "make", "install.bin", "install.doc", "VERSION=#{version}", "PREFIX=#{prefix}"
-  end
 
-  def post_install
     (var/"run").mkpath
     (var/"log/socket_vmnet").mkpath
   end

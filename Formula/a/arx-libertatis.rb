@@ -4,6 +4,7 @@ class ArxLibertatis < Formula
   url "https://arx-libertatis.org/files/arx-libertatis-1.2.1/arx-libertatis-1.2.1.tar.xz"
   sha256 "aafd8831ee2d187d7647ad671a03aabd2df3b7248b0bac0b3ac36ffeb441aedf"
   license "GPL-3.0-or-later"
+  revision 1
 
   livecheck do
     url "https://arx-libertatis.org/files/"
@@ -11,16 +12,13 @@ class ArxLibertatis < Formula
   end
 
   bottle do
-    sha256 arm64_sonoma:   "2c520ea9e3ce0eb1066cd47fd192e73bda08a3e27b39b1efa6b5dcef7614dedf"
-    sha256 arm64_ventura:  "1db7612e1dbbe5d1515b7578a2c20a3b62dd4f65c37257237d10bf7e48723448"
-    sha256 arm64_monterey: "9fd235faef3f4cac1fa1bc33acace5545839c5bf9a4344793225f734dc0f4b7e"
-    sha256 arm64_big_sur:  "5b7dd893fd8ab89d9265dc031d48781b14437ba175265f89a316a0d60686927e"
-    sha256 sonoma:         "57d56bfaf644da9ad8cfda24e22bef0e474bd46d5ad4d5a3ffd6279b7d5777bf"
-    sha256 ventura:        "2969e73fdbd0e6d7c8a72891440da7ea868bcdb35776fafb425e81f369d4df6d"
-    sha256 monterey:       "d9c218e036852e73dea349e17eaa6e03358f7118bd41acd98a5f4bae7b25bc9d"
-    sha256 big_sur:        "e855dfe524dd05d0ebf94acee4cb2e74f2037d0c4c44eb76fd5f49fbbb8477f8"
-    sha256 catalina:       "a8a9036477373bd0065f739c0bbc8bd6e20b09da4d643f20483ab6aec6a6d289"
-    sha256 x86_64_linux:   "fcdc6dcedd23cc35e9bf57f97b4aa5946fe36adc3ffc9e15140224f79cc7d14f"
+    rebuild 1
+    sha256 arm64_tahoe:   "d56d81aaee01fa139752c15b0fbc8332ed44443c94a9826771be22cc2544a77f"
+    sha256 arm64_sequoia: "14a65b2ec634da2454970e12de3b588f0826e121c04da2569857dd753cb0a797"
+    sha256 arm64_sonoma:  "96be79e0ee8f79cfa402f327be3ee1faa6f509e609d6d8c48c368b5b83112e9b"
+    sha256 sonoma:        "38f33f4125e39dc04470caab71dac5869f57044d4ed829433cb038ef1b4d531f"
+    sha256 arm64_linux:   "9c882ed838c94379ea0f0425dde3f5c144ab4024582524e44442924daa06d5e9"
+    sha256 x86_64_linux:  "819d7a57ea0a2f2bf4a0d1b8af9c62c07db85f75ad23166be635140235f0f70f"
   end
 
   head do
@@ -39,11 +37,10 @@ class ArxLibertatis < Formula
   depends_on "innoextract"
   depends_on "sdl2"
 
-  uses_from_macos "zlib"
-
   on_linux do
     depends_on "mesa"
     depends_on "openal-soft"
+    depends_on "zlib-ng-compat"
   end
 
   conflicts_with "rnv", because: "both install `arx` binaries"

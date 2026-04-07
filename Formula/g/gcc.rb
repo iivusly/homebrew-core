@@ -2,18 +2,31 @@ class Gcc < Formula
   desc "GNU compiler collection"
   homepage "https://gcc.gnu.org/"
   license "GPL-3.0-or-later" => { with: "GCC-exception-3.1" }
+  revision 1
+  compatibility_version 1
   head "https://gcc.gnu.org/git/gcc.git", branch: "master"
 
   stable do
-    url "https://ftp.gnu.org/gnu/gcc/gcc-14.2.0/gcc-14.2.0.tar.xz"
-    mirror "https://ftpmirror.gnu.org/gcc/gcc-14.2.0/gcc-14.2.0.tar.xz"
-    sha256 "a7b39bc69cbf9e25826c5a60ab26477001f7c08d85cec04bc0e29cabed6f3cc9"
+    url "https://ftpmirror.gnu.org/gnu/gcc/gcc-15.2.0/gcc-15.2.0.tar.xz"
+    mirror "https://ftp.gnu.org/gnu/gcc/gcc-15.2.0/gcc-15.2.0.tar.xz"
+    sha256 "438fd996826b0c82485a29da03a72d71d6e3541a83ec702df4271f6fe025d24e"
 
     # Branch from the Darwin maintainer of GCC, with a few generic fixes and
     # Apple Silicon support, located at https://github.com/iains/gcc-14-branch
     patch do
-      url "https://raw.githubusercontent.com/Homebrew/formula-patches/d5dcb918a951b2dcf2d7702db75eb29ef144f614/gcc/gcc-14.2.0.diff"
-      sha256 "70a994d2c7861f844dbfc8ca2700f6c1ce9881f51c45bb6fda2fd212ccb1ff03"
+      on_macos do
+        url "https://raw.githubusercontent.com/Homebrew/homebrew-core/1cf441a0/Patches/gcc/gcc-15.1.0.diff"
+        sha256 "360fba75cd3ab840c2cd3b04207f745c418df44502298ab156db81d41edf3594"
+      end
+    end
+
+    # Fix pthread_incomplete_struct_argument incorrectly applied on modern glibc
+    # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=118009
+    patch do
+      on_linux do
+        url "https://gcc.gnu.org/cgit/gcc/patch/?id=ea2798892de373b14f9fc7ae8a0d820eaddca98c"
+        sha256 "9c0d8abe93398320b9c69a21d3925c131d45d850fc1c1620df7919464db04af8"
+      end
     end
   end
 
@@ -23,13 +36,14 @@ class Gcc < Formula
   end
 
   bottle do
-    sha256                               arm64_sonoma:   "1f68353bd346d182e0037a6cd24140e16c8984b3a26092578d4fe2c1e5560adb"
-    sha256                               arm64_ventura:  "ac0d447abd61d6e312942ca3df2ad03bc9e4ff41edff884816ffc9cdfb78331b"
-    sha256                               arm64_monterey: "485bee1b2f704a0a9a503c999bfd990daad938ca780d8fd8d0c32116ff22e120"
-    sha256                               sonoma:         "28abc77cbd95939a7048e89c74b994a7288309e9bf87f93a2434b7fcf676a8b5"
-    sha256                               ventura:        "556a4d7a23b6f3c697eff9fab92095ecf183c62aebe947555d368ed0440b8176"
-    sha256                               monterey:       "6ffeeef02dfcfcd8a7081910d59089eda12f5f4343864436da7cd0f472b429b3"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "a86493a7d4c2f4507c49a8599e9464367b812f9d051aa63e8690d6ed7096fb40"
+    sha256                               arm64_tahoe:   "e208fa3a5ea6887bb9a81cee5ca629230f1f24eff3970f0d69f7dcf5dd5b7b80"
+    sha256                               arm64_sequoia: "49b6841a2b7af55b29db5d63ee47a433bd75f85e3c5620c6615e7528252ffd63"
+    sha256                               arm64_sonoma:  "31240b1bccad45ed8f17009c0c5c6f0018b8d7695e826d2d79e417c15fb88e4e"
+    sha256                               tahoe:         "6def38300e2044dbbe17801485f0a959fb05b408545f5c6c0ccc160d7e9e40c2"
+    sha256                               sequoia:       "04ffbfaa63efe558b4b782b200e0eab4f1e472ed1780862972bb3702a730a611"
+    sha256                               sonoma:        "893b6a357fdb8bce2dc15f827117247e4d719e4cfbd0f29b3adee68e794a4d49"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "cf5774859ce6ff3958bb987ff07d9308d3d72da4d9afda38085d4c9379b5887f"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "606c8f502852d586f85fba5754e255fa8bf8b81d371c1f75cf7edae19d852f0c"
   end
 
   # The bottles are built on systems with the CLT installed, and do not work
@@ -44,7 +58,6 @@ class Gcc < Formula
 
   uses_from_macos "flex" => :build
   uses_from_macos "m4" => :build
-  uses_from_macos "zlib"
 
   on_macos do
     # macOS make is too old, has intermittent parallel build issue
@@ -53,10 +66,8 @@ class Gcc < Formula
 
   on_linux do
     depends_on "binutils"
+    depends_on "zlib-ng-compat"
   end
-
-  # GCC bootstraps itself, so it is OK to have an incompatible C++ stdlib
-  cxxstdlib_check :skip
 
   def version_suffix
     if build.head?
@@ -72,9 +83,14 @@ class Gcc < Formula
 
     # We avoiding building:
     #  - Ada and D, which require a pre-existing GCC to bootstrap
+    #  - Cobol, not fully stable yet
     #  - Go, currently not supported on macOS
     #  - BRIG
-    languages = %w[c c++ objc obj-c++ fortran m2]
+    languages = %w[c c++ objc obj-c++ fortran]
+
+    # Modula-2 has problems with macOS 15 for now
+    # https://github.com/Homebrew/homebrew-core/pull/221029
+    languages << "m2" if !OS.mac? || MacOS.version < :sequoia
 
     pkgversion = "Homebrew GCC #{pkg_version} #{build.used_options*" "}".strip
 
@@ -105,11 +121,11 @@ class Gcc < Formula
       sdk = MacOS.sdk_path_if_needed
       args << "--with-sysroot=#{sdk}" if sdk
 
-      make_args = []
+      # Avoid this semi-random failure:
+      # "Error: Failed changing install name"
+      # "Updated load commands do not fit in the header"
+      make_args = %w[BOOT_LDFLAGS=-Wl,-headerpad_max_install_names]
     else
-      # Fix cc1: error while loading shared libraries: libisl.so.15
-      args << "--with-boot-ldflags=-static-libstdc++ -static-libgcc #{ENV.ldflags}"
-
       # Fix Linux error: gnu/stubs-32.h: No such file or directory.
       args << "--disable-multilib"
 
@@ -119,11 +135,10 @@ class Gcc < Formula
       # Change the default directory name for 64-bit libraries to `lib`
       # https://stackoverflow.com/a/54038769
       inreplace "gcc/config/i386/t-linux64", "m64=../lib64", "m64="
+      inreplace "gcc/config/aarch64/t-aarch64-linux", "lp64=../lib64", "lp64="
 
-      make_args = %W[
-        BOOT_CFLAGS=-I#{Formula["zlib"].opt_include}
-        BOOT_LDFLAGS=-L#{Formula["zlib"].opt_lib}
-      ]
+      ENV.append_path "CPATH", Formula["zlib-ng-compat"].opt_include
+      ENV.append_path "LIBRARY_PATH", Formula["zlib-ng-compat"].opt_lib
     end
 
     mkdir "build" do
@@ -251,18 +266,18 @@ class Gcc < Formula
   end
 
   test do
-    (testpath/"hello-c.c").write <<~EOS
+    (testpath/"hello-c.c").write <<~C
       #include <stdio.h>
       int main()
       {
         puts("Hello, world!");
         return 0;
       }
-    EOS
+    C
     system bin/"gcc-#{version_suffix}", "-o", "hello-c", "hello-c.c"
     assert_equal "Hello, world!\n", shell_output("./hello-c")
 
-    (testpath/"hello-cc.cc").write <<~EOS
+    (testpath/"hello-cc.cc").write <<~CPP
       #include <iostream>
       struct exception { };
       int main()
@@ -273,11 +288,11 @@ class Gcc < Formula
           catch (...) { }
         return 0;
       }
-    EOS
+    CPP
     system bin/"g++-#{version_suffix}", "-o", "hello-cc", "hello-cc.cc"
     assert_equal "Hello, world!\n", shell_output("./hello-cc")
 
-    (testpath/"test.f90").write <<~EOS
+    (testpath/"test.f90").write <<~FORTRAN
       integer,parameter::m=10000
       real::a(m), b(m)
       real::fact=0.5
@@ -287,9 +302,12 @@ class Gcc < Formula
       end do
       write(*,"(A)") "Done"
       end
-    EOS
+    FORTRAN
     system bin/"gfortran", "-o", "test", "test.f90"
     assert_equal "Done\n", shell_output("./test")
+
+    # Modula-2 is temporarily disabled on macOS 15
+    return if OS.mac? && MacOS.version >= :sequoia
 
     (testpath/"hello.mod").write <<~EOS
       MODULE hello;

@@ -1,9 +1,9 @@
 class Icon < Formula
   desc "General-purpose programming language"
-  homepage "https://www.cs.arizona.edu/icon/"
-  url "https://github.com/gtownsend/icon/archive/refs/tags/v9.5.24a.tar.gz"
-  version "9.5.24a"
-  sha256 "73eaf9b1bd0d0bb21c252110e7e9e5d146ef37bef2cd72c46e023d71305fa801"
+  homepage "https://www2.cs.arizona.edu/icon/"
+  url "https://github.com/gtownsend/icon/archive/refs/tags/v9.5.25a.tar.gz"
+  version "9.5.25a"
+  sha256 "ab15b7fc5a96e8b4da1b76cc6c7935400879f8a54b0fcf94a947c02815f21006"
   license :public_domain
 
   livecheck do
@@ -12,13 +12,14 @@ class Icon < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "50c961d672798efd89cf786552fb5b13bb20fc5a69614557e00ce9869e7c433a"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "887a3e2b038e7fcefaed54e5723e06430f5d85d39eeb0596eaee11699e8d2ee1"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "d2368ee3c88bc2b4f8a9893e17505ae1f5b7865ad6107c476e928fdbb059d22d"
-    sha256 cellar: :any_skip_relocation, sonoma:         "5b22e92e8df2a03eb928266aadd6d14cde29e7382daa90d7baa01108fb6e2cf4"
-    sha256 cellar: :any_skip_relocation, ventura:        "a88a1dff7475114aa8ec7c0a01bb235f9aee0563b4791aa6b0d2dc41712566ca"
-    sha256 cellar: :any_skip_relocation, monterey:       "7b404b8b761701feb03fb117175158c733e180e55a27a05405ba096dc9199a9c"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "9792ec4c98487c1b1d31e25376b2da6688d97dc2c5605e88684f043eb42e95e9"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "6389f8ee12843eb77bb7616c24e3a139ff00668a41c5d1bd0dade1a3f89cefd0"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "670c7d0db69776c23a1fb47a46f04e81879f7d15fa5480daf1904466addd8a96"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "dcedcb08469ce0d12cc78a4430a38726bab27d02c2747c3bddcf1763c7095f91"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "97b1ec91900660d31bc530aff49aa30d7354501c7d94dc6b4520dfea770bdd35"
+    sha256 cellar: :any_skip_relocation, sonoma:        "9d4c55825605494439b932ea0b15ca777d20a2ba1f17d93cafbfee848ce97e08"
+    sha256 cellar: :any_skip_relocation, ventura:       "88420a8637449dd69ae7e959176dd1a287565779f997cf73c1bf27a57f512bc1"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "0e24c26298a3ec9764f6c38b55eb08220ee71ac8029130393908ea539659d6bb"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "9f8c26a910871b5eaaf6ccbd110aff1fd188817edb466695df7c46275db0f5c3"
   end
 
   def install

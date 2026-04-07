@@ -3,47 +3,48 @@ class OpenAdventure < Formula
 
   desc "Colossal Cave Adventure, the 1995 430-point version"
   homepage "http://www.catb.org/~esr/open-adventure/"
-  url "http://www.catb.org/~esr/open-adventure/advent-1.19.tar.gz"
-  sha256 "9e3a845850587f3b82a480da72330f55529c6568278ca5dcab5429775a25e1c0"
+  url "https://gitlab.com/esr/open-adventure/-/archive/1.20/open-adventure-1.20.tar.bz2"
+  sha256 "d976df7b90d9b5cb3c93f3ac99b12392e60852557b2651e7c4dc15f51a74a5ad"
   license "BSD-2-Clause"
   head "https://gitlab.com/esr/open-adventure.git", branch: "master"
 
+  # The homepage links to the `stable` tarball but it can take longer than the
+  # ten second livecheck timeout, so we check the Git tags as a workaround.
   livecheck do
-    url :homepage
-    regex(/href=.*?advent[._-]v?(\d+(?:\.\d+)+)\.t/i)
+    url :head
+    regex(/^v?(\d+(?:\.\d+)+)$/i)
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "c8b58ea57fc94e7e5d78a633cfded0e32ebe46e6c584198da2045c674d85ad35"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "47f4abc89eb1ba51fe70087c34175242ac77cd8a7072e12c52f80d24ac7ed0ea"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "823788b5c989833f75cf132d68966c291f40947848a2b766ccb6ad307a4a5692"
-    sha256 cellar: :any_skip_relocation, sonoma:         "9d9b4b32105645c7d6ae5a96315b80cbab181096a4dd46cee35be896b8b4a0c4"
-    sha256 cellar: :any_skip_relocation, ventura:        "7696829dc8a02ce5fdb38bea18d962eaf00fafca82e0ee60c891b3459b449894"
-    sha256 cellar: :any_skip_relocation, monterey:       "2d75eac4397870a341941b4e0e1cfdbdc29879a5fa42dd1ff71eb2b15724a50b"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "086875ba8785868a58c1dfbb712cef156e5d0696d37cb9f3b9a36603cc6ad8ad"
+    rebuild 2
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "a5cd8f69998d91913b55151dd6d546ad6ae558913b5691a446313bb7c479abd4"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "6a87d0c7a7e99a6170f9e899c298109ad6443bd4b1fefe8efbbcf68c245c5878"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "cb42895c9ea5740634c62e6c16f1680cd1f640b0c0a00cab5a6d3be53e92b039"
+    sha256 cellar: :any_skip_relocation, sonoma:        "703624eecbc0d021d1ea47e49738a074fb7f0f973d5b1b013c7532dd8da2ec75"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "11986ede6b55b722c796c6e80f3eed1ac1fa3d4757b3dbc7a04a1df37f509e08"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "e0aa4f90ca96e69a747ffa5e90d2f8388248c077f0c5f9154322f8df690bf048"
   end
 
-  depends_on "asciidoc" => :build
+  depends_on "asciidoctor" => :build
   depends_on "libyaml" => :build
-  depends_on "python@3.12" => :build
+  depends_on "pkgconf" => :build
+  depends_on "python@3.14" => :build
 
-  uses_from_macos "libxml2" => :build
   uses_from_macos "libedit"
 
-  on_linux do
-    depends_on "pkg-config" => :build
-  end
+  pypi_packages package_name:   "",
+                extra_packages: "pyyaml"
 
   resource "pyyaml" do
-    url "https://files.pythonhosted.org/packages/cd/e5/af35f7ea75cf72f2cd079c95ee16797de7cd71f29ea7c68ae5ce7be1eda0/PyYAML-6.0.1.tar.gz"
-    sha256 "bfdf460b1736c775f2ba9f6a92bca30bc2095067b8a9d77876d1fad6cc3b4a43"
+    url "https://files.pythonhosted.org/packages/05/8e/961c0007c59b8dd7729d542c61a4d537767a59645b82a0b521206e1e25c2/pyyaml-6.0.3.tar.gz"
+    sha256 "d76623373421df22fb4cf8817020cbb7ef15c725b9d5e45f17e189bfc384190f"
   end
 
   def install
-    venv = virtualenv_create(buildpath, "python3.12")
+    venv = virtualenv_create(buildpath, "python3.14")
     venv.pip_install resources
     system venv.root/"bin/python", "./make_dungeon.py"
-    system "make"
+    system "make", "advent", "advent.6"
     bin.install "advent"
     man6.install "advent.6"
   end

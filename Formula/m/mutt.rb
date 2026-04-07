@@ -10,30 +10,35 @@
 class Mutt < Formula
   desc "Mongrel of mail user agents (part elm, pine, mush, mh, etc.)"
   homepage "http://www.mutt.org/"
-  url "https://bitbucket.org/mutt/mutt/downloads/mutt-2.2.13.tar.gz"
-  sha256 "eb23faddc1cc97d867693f3a4a9f30949ad93765ad5b6fdae2797a4001c58efb"
+  url "https://ftp.osuosl.org/pub/mutt/mutt-2.3.1.tar.gz"
+  mirror "http://ftp.mutt.org/pub/mutt/mutt-2.3.1.tar.gz"
+  sha256 "470d7b0e3d134a05fb8064dedd74771b06bcd639c80fccd7773dc322aafbb7b6"
   license "GPL-2.0-or-later"
 
+  livecheck do
+    url "http://www.mutt.org/download.html"
+    regex(/href=.*?mutt[._-]v?(\d+(?:\.\d+)+)\.t/i)
+  end
+
   bottle do
-    sha256 arm64_sonoma:   "40c414cbb65f0e9be27d487c9b7c87c63a822060e0afcc3f815848db10909892"
-    sha256 arm64_ventura:  "7d0e947b105c9787a9c90f97ff52ac4c89614de091af864c304cef72ce7a8350"
-    sha256 arm64_monterey: "87c4c4462ef88fd861ca8eb19611206b0cdb4175b478af24dba1448be962fc5a"
-    sha256 sonoma:         "83fc9e8ecb09b0e5face8b52265b0fcf862d66de53be933285884beb458c139f"
-    sha256 ventura:        "26067cb236bc01f97b58900574731fbc39d56fe9d8547a48dfe433912a10f385"
-    sha256 monterey:       "06b8ad27c9e37f1bf2f5a2bbbeadd4f9c2f48fb345b665e30532fc7626f29510"
-    sha256 x86_64_linux:   "d4c0e1f95a35b53d50ad2c0e1fed4cbea20d72092a3deaa7d99277031ed68085"
+    sha256 arm64_tahoe:   "b492a0d6b74fb1dbb1477a327c55b26cc8eaa8451c867b837d6e49b5181acd6d"
+    sha256 arm64_sequoia: "f09b1a41cc515b3d29eb77ff21e8e0ca7ae512420812f9a55836ad8d6d69fe13"
+    sha256 arm64_sonoma:  "2e173621795ea192e4160e2a14b10e40379331e8e71f62b6066a5ed0e141b602"
+    sha256 sonoma:        "f7456438cf78303733ab16e7ebbf8f99a216963e6a7fd14a1ecd64061dd126f5"
+    sha256 arm64_linux:   "8c2aeb33074a52410e91c6937b9cffcc0d3a4ed104df826834131e8af0d0e371"
+    sha256 x86_64_linux:  "1b4c6b177722724195f77220714a5c8aed80ae28cc5e5fa0bab09fc5bf5e05cc"
   end
 
   head do
     url "https://gitlab.com/muttmua/mutt.git", branch: "master"
 
+    depends_on "autoconf" => :build
+    depends_on "automake" => :build
+
     resource "html" do
       url "https://muttmua.gitlab.io/mutt/manual-dev.html"
     end
   end
-
-  depends_on "autoconf" => :build
-  depends_on "automake" => :build
 
   depends_on "gpgme"
   depends_on "libgpg-error"
@@ -45,11 +50,14 @@ class Mutt < Formula
   uses_from_macos "bzip2"
   uses_from_macos "cyrus-sasl"
   uses_from_macos "krb5"
-  uses_from_macos "zlib"
 
   on_macos do
     depends_on "gettext"
     depends_on "libunistring"
+  end
+
+  on_linux do
+    depends_on "zlib-ng-compat"
   end
 
   conflicts_with "tin", because: "both install mmdf.5 and mbox.5 man pages"
@@ -73,7 +81,8 @@ class Mutt < Formula
       --with-tokyocabinet
     ]
 
-    system "./prepare", *args, *std_configure_args
+    configure = build.head? ? "./prepare" : "./configure"
+    system configure, *args, *std_configure_args
     system "make"
 
     # This permits the `mutt_dotlock` file to be installed under a group

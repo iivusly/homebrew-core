@@ -1,46 +1,54 @@
 class Libwmf < Formula
   desc "Library for converting WMF (Window Metafile Format) files"
-  homepage "https://wvware.sourceforge.net/libwmf.html"
-  url "https://downloads.sourceforge.net/project/wvware/libwmf/0.2.8.4/libwmf-0.2.8.4.tar.gz"
-  sha256 "5b345c69220545d003ad52bfd035d5d6f4f075e65204114a9e875e84895a7cf8"
-  license "LGPL-2.1-only" # http://wvware.sourceforge.net/libwmf.html#download
-  revision 3
-
-  livecheck do
-    url :stable
-    regex(%r{url=.*?/libwmf[._-]v?(\d+(?:\.\d+)+)\.t}i)
-  end
+  homepage "https://github.com/caolanm/libwmf"
+  url "https://github.com/caolanm/libwmf/releases/download/v0.2.15/libwmf-0.2.15.tar.gz"
+  sha256 "bbc90f22b9e86d5f1890d7da11cf7a8e61f429d4c220d900c285021deabe7a52"
+  license all_of: [
+    "LGPL-2.0-or-later",
+    "GPL-2.0-or-later", # COPYING
+    "GD", # src/extra/gd
+  ]
 
   bottle do
-    sha256 arm64_sonoma:   "877950d7e281db2ae95cb74cab50330b721416f6389f5f9bdc985bf2e2c5b926"
-    sha256 arm64_ventura:  "bd3df915d0b9d87c94aab7ee63670f911c971c7733d7f4a5b711b65e4d6a05b0"
-    sha256 arm64_monterey: "3e48bed98b30b6740c80267498806123a035d100711c6ed8afcb5399dabd2d06"
-    sha256 arm64_big_sur:  "544befd86f2efc9ba73b08b2724c0e1951d88c8fe753aa568e442df449d55192"
-    sha256 sonoma:         "64679a33288e29e92ec766c07e47afc1131eb48d6acb088317557bfaeddc4ac0"
-    sha256 ventura:        "c5c923d66e7954cb488c631bc0dc9f1fa52c1fd5b63d50639d78020db10d88f3"
-    sha256 monterey:       "f83417389f14343ca059d9c13c91b01cef4b5fa8ecccee254bbbcf830a6c0c2f"
-    sha256 big_sur:        "5886a1a89f5a13f4b1d6e3b9bf5d6d9bbc237833e9ff0347679cf17a6b5d40f8"
-    sha256 catalina:       "5a79438b49930e82ab4761644daa03d4843041ed4e245b47a208301a4a88d35e"
-    sha256 x86_64_linux:   "a18467741b4b8a3b995017473f8481d46023e36f5af44b28be538aa306007962"
+    sha256 arm64_tahoe:   "2c6e1d26d2213cbe408a6289a20cab2d9a385babb56997ad30afc0c733f89569"
+    sha256 arm64_sequoia: "648aebf55487d4a5dffd40319f0fc2309e1cfb075e88a27dc03e777f9c8d6f5a"
+    sha256 arm64_sonoma:  "b69efed6e318df46ace734007e3099d1d08dc5753b56b0b9eb8e6fc111083209"
+    sha256 sonoma:        "96d66c997be9b333c085daeda09d2ec1bca0613cfbb6ea66b5ec6bfac260129e"
+    sha256 arm64_linux:   "71f7063942f28d921e37b56cba7b7a323ac3d27fde289ab4adc4f1dabf4f207c"
+    sha256 x86_64_linux:  "bdf120383ed21317c5931926dcc30b3c8d662b0e0873213b321a72ec07b5411f"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
 
   depends_on "freetype"
-  depends_on "gd"
   depends_on "jpeg-turbo"
   depends_on "libpng"
 
   uses_from_macos "expat"
-  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
-    system "./configure", "--with-png=#{Formula["libpng"].opt_prefix}",
-                          "--with-freetype=#{Formula["freetype"].opt_prefix}",
-                          "--with-jpeg=#{Formula["jpeg-turbo"].opt_prefix}",
+    system "./configure", "--disable-silent-rules",
+                          "--with-gsfontdir=#{HOMEBREW_PREFIX}/share/ghostscript/fonts",
+                          "--with-gsfontmap=#{HOMEBREW_PREFIX}/share/ghostscript/Resource/Init/Fontmap.GS",
+                          "--without-x",
                           *std_configure_args
-    system "make"
-    ENV.deparallelize # yet another rubbish Makefile
     system "make", "install"
+  end
+
+  test do
+    resource "formula1.wmf" do
+      url "https://github.com/caolanm/libwmf/raw/3ea3a65ad1b4528ed1c5795071a0142a0e61ec7b/examples/formula1.wmf"
+      sha256 "a0d9829692eebfa3bdb23d62f474d58cc4ea2489c07c6fcb63338eb3fb2c14d2"
+    end
+    resource("formula1.wmf").stage(testpath)
+
+    output = shell_output("#{bin}/wmf2svg --maxwidth=100 --maxheight=100 formula1.wmf")
+    assert_match '<svg width="100" height="18"', output
+
+    assert_match version.major_minor_patch.to_s, shell_output("#{bin}/wmf2svg --version 2>&1", 2)
   end
 end

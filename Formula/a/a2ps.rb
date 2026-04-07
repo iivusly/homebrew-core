@@ -1,40 +1,41 @@
 class A2ps < Formula
   desc "Any-to-PostScript filter"
   homepage "https://www.gnu.org/software/a2ps/"
-  url "https://ftp.gnu.org/gnu/a2ps/a2ps-4.15.6.tar.gz"
-  mirror "https://ftpmirror.gnu.org/a2ps/a2ps-4.15.6.tar.gz"
-  sha256 "87ff9d801cb11969181d5b8cf8b65e65e5b24bb0c76a1b825e8098f2906fbdf4"
+  url "https://ftpmirror.gnu.org/gnu/a2ps/a2ps-4.15.8.tar.gz"
+  mirror "https://ftp.gnu.org/gnu/a2ps/a2ps-4.15.8.tar.gz"
+  sha256 "8d13915a36ebbfa8e7b236b350cc81adc714acb217a18e8d8c60747c0ad353f9"
   license "GPL-3.0-or-later"
 
   bottle do
-    sha256 arm64_sonoma:   "65b376bbaea1ccebe7b46ed808d280c966c0e24fb22f6e92e86dd6eb9d769b75"
-    sha256 arm64_ventura:  "3e182ba99072bc793eaa3e93761288026df7fec9520a39f3f51f1436fe7f5230"
-    sha256 arm64_monterey: "1e6ab666ea444efe10b8892b9923264b8dc0d5961674b3a0937a9cd94397542b"
-    sha256 sonoma:         "010728f54b885a9c8697a81b3602427ccabb10da153d0d74a25526a8144a0e1c"
-    sha256 ventura:        "4b2439ff98f5db6e8c4e3894ba0ab09a4e38e7404a7db950b42de46afeddc62a"
-    sha256 monterey:       "361d7e19f0811037af034bb5a7e582c0cea350cc5a9754f0d05e0094faadf5bb"
-    sha256 x86_64_linux:   "6df41a07d6bd52713e700a83a2994c5955b305ee068b73c50e4786cbb8213dae"
+    sha256 arm64_tahoe:   "f6895a00c5e039d81af9950d1e22c6012e50d6b8c19b5ad576953d06194ffc41"
+    sha256 arm64_sequoia: "2a959e7d521d6fd47fb598017109de310a72d25939dad660f24083b033155b13"
+    sha256 arm64_sonoma:  "a28d04c14c4444bd70fb99801cf541e167508e39720136ad8085b8cc33132f6a"
+    sha256 sonoma:        "1460a22fe6091322739e60676866cca20541f9c6789a1c698468e702f3e99789"
+    sha256 arm64_linux:   "72508d993a610ed1bf5a8f8c59e381265c6d2ef3327f68d68319c6dd536e4032"
+    sha256 x86_64_linux:  "f683fec596b5cfeb6d64503ca3a776969de98ee6b44b4a551a05db5e4ff4e230"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "bdw-gc"
   depends_on "libpaper"
-  uses_from_macos "gperf"
 
   def install
-    system "./configure", *std_configure_args,
-                          "--sysconfdir=#{etc}",
+    system "./configure", "--sysconfdir=#{etc}",
                           "--with-lispdir=#{elisp}",
                           "--with-packager=#{tap.user}",
                           "--with-packager-version=#{pkg_version}",
-                          "--with-packager-bug-reports=#{tap.issues_url}"
-    system "make", "install"
-    inreplace etc/"a2ps.cfg", prefix, opt_prefix
+                          "--with-packager-bug-reports=#{tap.issues_url}",
+                          *std_configure_args
+    system "make"
+    # Avoid overwriting existing a2ps.cfg
+    system "make", "install", "sysconfdir=#{prefix}/etc"
+    inreplace prefix/"etc/a2ps.cfg", prefix, opt_prefix
+    etc.install (prefix/"etc").children
   end
 
   test do
     (testpath/"test.txt").write("Hello World!\n")
     system bin/"a2ps", "test.txt", "-o", "test.ps"
-    assert File.read("test.ps").start_with?("")
+    assert_match "(Hello World!) p n\n", File.read("test.ps")
   end
 end

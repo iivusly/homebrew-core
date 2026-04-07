@@ -1,20 +1,18 @@
 class GnuUnits < Formula
   desc "GNU unit conversion tool"
   homepage "https://www.gnu.org/software/units/"
-  url "https://ftp.gnu.org/gnu/units/units-2.23.tar.gz"
-  mirror "https://ftpmirror.gnu.org/units/units-2.23.tar.gz"
-  sha256 "d957b451245925c9e614c4513397449630eaf92bd62b8495ba09bbe351a17370"
+  url "https://ftpmirror.gnu.org/gnu/units/units-2.27.tar.gz"
+  mirror "https://ftp.gnu.org/gnu/units/units-2.27.tar.gz"
+  sha256 "e1bbdb09672e7c08eee986749e7a1629eb84a6bdf41f5a2a79d6804444abbe10"
   license "GPL-3.0-or-later"
 
   bottle do
-    rebuild 1
-    sha256 arm64_sonoma:   "473f619fae31245e4b4d04c66e74b0363cb64d43964a5e82307d2dae10e20254"
-    sha256 arm64_ventura:  "e364dbbb0ad04977a9e1ac93c47355a153e4b3b73089b126ea708df02dd24029"
-    sha256 arm64_monterey: "b0153e8b43b52bcdec45fd79d59208658fad30548138ccb8be565975daee2373"
-    sha256 sonoma:         "22d8e72eb6255cdb7530e64d86d2e93eff2a6346ff0000c48d64b9c998f251a2"
-    sha256 ventura:        "100129725430b6f71f48ee93d999c0735cea0e6bfac0d2f4d0c4505329a6ac29"
-    sha256 monterey:       "8d116d2d4e98f362e0213daf131db29d60282df0e83838feaa9eb0c4aa9d9d36"
-    sha256 x86_64_linux:   "cca502b31e282cfffb7c30ffc204cecdf2d6a9aba8b23310e886719096465fe0"
+    sha256 arm64_tahoe:   "1bfa5b9ccb5932b8517abef2af4e421ad782237868cadf9046ec3368f3a8d61d"
+    sha256 arm64_sequoia: "0f83de7bbcba4d246ff388c2d6ced55bb0a1d129b62e9b550c30c8e92ae10888"
+    sha256 arm64_sonoma:  "0eecf6ffaf5f6b5d7383ac6af26e5d8fb120ff2e21dc15a132401faba5bd069a"
+    sha256 sonoma:        "0d619ebea3a4d427f217f12e073ea693760eb2ed75a0570a00eba5ca4b3cd372"
+    sha256 arm64_linux:   "55e570d4e93da9b3f1703254056a786d56f25f16725e3d8b06a339870e7ac8b8"
+    sha256 x86_64_linux:  "6bef3ad4bb7c1746ba681f0dfaa94c9290072dc1974466c3b8f5ad5e0ee13660"
   end
 
   depends_on "readline"

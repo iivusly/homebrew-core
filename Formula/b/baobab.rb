@@ -1,18 +1,17 @@
 class Baobab < Formula
   desc "Gnome disk usage analyzer"
   homepage "https://apps.gnome.org/Baobab/"
-  url "https://download.gnome.org/sources/baobab/46/baobab-46.0.tar.xz"
-  sha256 "ce4def5c82d05671a5009f7bebcf85ac98675d9d8160d28ad9181b269a72e37c"
+  url "https://download.gnome.org/sources/baobab/50/baobab-50.0.tar.xz"
+  sha256 "573c84f15f5f963a440500f6f43412c928ac2335f6b69dcb58f1a1fe5201024b"
   license "GPL-2.0-or-later"
 
   bottle do
-    sha256 arm64_sonoma:   "b2b03a56d8ac4a7499d8bcc100d66a3898898d89d5b43b0ff0838096774eb941"
-    sha256 arm64_ventura:  "36fa0972f41310643be85354a2a098e73713aaf27521a29982c899a9e12bafc1"
-    sha256 arm64_monterey: "da943150c400c94b10d540d494aa40569523b1afb25ed30a53efa7b8ca61c4a2"
-    sha256 sonoma:         "998e2590ecc63ffd66624d49ddb1d206be2e5cc1a5c049234779b2e0f1e41caf"
-    sha256 ventura:        "9bf97e0440388cfbd896fb6eb41a7adfeea17d29593cca2f23849f71289a5c8b"
-    sha256 monterey:       "396e9b0686844b2d7ab83c12a87155f3cdbf4691fa42f91b1bf6ce4eeffd6102"
-    sha256 x86_64_linux:   "dd385933494b6cb5e6a6b0b911c83f4c6cf9922d8a17830d61cca27d763cf659"
+    sha256 arm64_tahoe:   "201ffa3b00055221be59e714d0b9d550ece6b77a811139346b64b4204107b3a0"
+    sha256 arm64_sequoia: "f68026988ed1215d921954b1e3d837ee275b3f091a8fb0569125f4b2980006dc"
+    sha256 arm64_sonoma:  "9ba5f0c502674bfe24a96db55fc8ee8b794c86d770003011fa2c30fc64b53c87"
+    sha256 sonoma:        "2fba77061cb9530f9cae2a1a69e7f3bb9b9fdd7ca0d832a9e39554ba17e689e1"
+    sha256 arm64_linux:   "3b646e6805843441709711db33468ea9ddcaab2a1e916244df8e2246a670afc6"
+    sha256 x86_64_linux:  "a4625726683a287c735411240865f6abcf30b8b4da252476215d63fe9db203c7"
   end
 
   depends_on "desktop-file-utils" => :build
@@ -20,12 +19,13 @@ class Baobab < Formula
   depends_on "itstool" => :build
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "vala" => :build
 
   depends_on "adwaita-icon-theme"
   depends_on "cairo"
   depends_on "glib"
+  depends_on "graphene"
   depends_on "gtk4"
   depends_on "hicolor-icon-theme"
   depends_on "libadwaita"

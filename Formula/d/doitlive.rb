@@ -3,27 +3,25 @@ class Doitlive < Formula
 
   desc "Replay stored shell commands for live presentations"
   homepage "https://doitlive.readthedocs.io/en/latest/"
-  url "https://files.pythonhosted.org/packages/32/75/c94e4d4e7fac8606e199fad35a00b33e4252d00078f25285f91e97e546c0/doitlive-5.1.0.tar.gz"
-  sha256 "b6bcd25f9f037b7e96e34d68549306adb3e8c83f6e92c51ec2b225abc05b25c5"
+  url "https://files.pythonhosted.org/packages/3f/50/d2715aa1b4dd5bfe1c91e5a332f5123180c2f2b1c8b0879389179b9f9c5e/doitlive-5.2.1.tar.gz"
+  sha256 "7587a57c04fa74718e76cb4622f99ef6b762f1c861d0c1c2f843ab6bec53d063"
   license "MIT"
-  revision 1
-  head "https://github.com/sloria/doitlive.git", branch: "dev"
+  head "https://github.com/sloria/doitlive.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "2daa5f32027ff7712740051dcb330a1c848b36e0334c02cedfcea3f4a137ef85"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "946ce9358688fb5634500b7af4355a724f7862a8fb948d6a54ec1c0c10497ce1"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "301116d0a62a38271ae8c912c52685033f55ced59502dde85b37f93e35335e49"
-    sha256 cellar: :any_skip_relocation, sonoma:         "d9b79c717364cb83be9b5755758627c4e24bb3689aaa8280840d5d4c5e0fd3d3"
-    sha256 cellar: :any_skip_relocation, ventura:        "be879e2d977218eb0e9fbab32439641da043c72c7ff51672950bb4907926e5dc"
-    sha256 cellar: :any_skip_relocation, monterey:       "05ad943f30291839b9222947eb266559bc51be832071e62b8ccd7cf17b2ca248"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "42f21feed234fdca264d7c8064df700bad1a6bbfcf37cfb1b9a59caf46f3a9ea"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "ad9ad788d8f55216c2de2ce98bfc1de2f9f93b6f3705d3c20140c920cad71e61"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "a47920e296dce436daebe68c3ae423cdee4807ae552b82aa2c14690ddd609109"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "493a7df97e0c82c5e933302a6dceb656880e0c904b432ed41d65a6381cf50a11"
+    sha256 cellar: :any_skip_relocation, sonoma:        "7a644b8fb2f5b57461fc7c26611898285734c646157f3334a5b4f8d0fed1c30c"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "060e55176c3398eeaadec86f02006a74ccc51db74f81391843dfcfca9558fc94"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ed0dcc035ead07431fa4f62a61cc880c3ca4dbb47132fdb6fb8b8f868a13f2cd"
   end
 
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   resource "click" do
-    url "https://files.pythonhosted.org/packages/96/d3/f04c7bfcf5c1862a2a5b845c6b2b360488cf47af55dfa79c98f6a6bf98b5/click-8.1.7.tar.gz"
-    sha256 "ca9853ad459e787e2192211578cc907e7594e294c7ccc834310722b41b9ca6de"
+    url "https://files.pythonhosted.org/packages/3d/fa/656b739db8587d7b5dfa22e22ed02566950fbfbcdc20311993483657a5c0/click-8.3.1.tar.gz"
+    sha256 "12ff4785d337a1bb490bb7e9c2b1ee5da3112e94a8622f26a6c77f5d2fc6842a"
   end
 
   resource "click-completion" do
@@ -37,13 +35,13 @@ class Doitlive < Formula
   end
 
   resource "jinja2" do
-    url "https://files.pythonhosted.org/packages/ed/55/39036716d19cab0747a5020fc7e907f362fbf48c984b14e62127f7e68e5d/jinja2-3.1.4.tar.gz"
-    sha256 "4a3aee7acbbe7303aede8e9648d13b8bf88a429282aa6122a993f0ac800cb369"
+    url "https://files.pythonhosted.org/packages/df/bf/f7da0350254c0ed7c72f3e33cef02e048281fec7ecec5f032d4aac52226b/jinja2-3.1.6.tar.gz"
+    sha256 "0137fb05990d35f1275a587e9aee6d56da821fc83491a0fb838183be43f66d6d"
   end
 
   resource "markupsafe" do
-    url "https://files.pythonhosted.org/packages/87/5b/aae44c6655f3801e81aa3eef09dbbf012431987ba564d7231722f68df02d/MarkupSafe-2.1.5.tar.gz"
-    sha256 "d283d37a890ba4c1ae73ffadf8046435c76e7bc2247bbb63c00bd1a709c6544b"
+    url "https://files.pythonhosted.org/packages/7e/99/7690b6d4034fffd95959cbe0c02de8deb3098cc577c67bb6a24fe5d7caa7/markupsafe-3.0.3.tar.gz"
+    sha256 "722695808f4b6457b320fdc131280796bdceb04ab50fe1795cd540799ebe1698"
   end
 
   resource "shellingham" do
@@ -52,8 +50,8 @@ class Doitlive < Formula
   end
 
   resource "six" do
-    url "https://files.pythonhosted.org/packages/71/39/171f1c67cd00715f190ba0b100d606d440a28c93c7714febeca8b79af85e/six-1.16.0.tar.gz"
-    sha256 "1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"
+    url "https://files.pythonhosted.org/packages/94/e7/b2c673351809dca68a0e064b6af791aa332cf192da575fd474ed7d6f16a2/six-1.17.0.tar.gz"
+    sha256 "ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81"
   end
 
   def install

@@ -1,36 +1,34 @@
 class Elixir < Formula
   desc "Functional metaprogramming aware language built on Erlang VM"
   homepage "https://elixir-lang.org/"
-  url "https://github.com/elixir-lang/elixir/archive/refs/tags/v1.17.2.tar.gz"
-  sha256 "7bb8e6414b77c1707f39f620a2ad54f68d64846d663ec78069536854247fb1ab"
+  url "https://github.com/elixir-lang/elixir/archive/refs/tags/v1.19.5.tar.gz"
+  sha256 "10750b8bd74b10ac1e25afab6df03e3d86999890fa359b5f02aa81de18a78e36"
   license "Apache-2.0"
+  compatibility_version 1
   head "https://github.com/elixir-lang/elixir.git", branch: "main"
 
+  livecheck do
+    url :stable
+    regex(/^v?(\d+(?:\.\d+)+)$/i)
+  end
+
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "424318d1e358738bae6b7962592be58a3254172872a6d78640a97e45ac475ae7"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "5aea5e80878f7ea14ed3fd534bf26a0c2bf3fffac5323c0bf349d7ccffb21999"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "4bddc5525f797de8a69a156eea21111499d2ea0da39ae70ea8c3ecbacb6515ac"
-    sha256 cellar: :any_skip_relocation, sonoma:         "e2725b97ebda4e2d34277c129cd173d244de4ece061e12dc31f9abf952c7dca5"
-    sha256 cellar: :any_skip_relocation, ventura:        "75dec7062894feb5ef0ea2c1002bec5609b387afe302146a651e0fccf1b644f5"
-    sha256 cellar: :any_skip_relocation, monterey:       "84ee927110ebe3741751680cfc9c060919ecb6479973a0c05f9dcd9d141f926d"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "6d380aa5f17083f3a8493e6f0991e2738773bee44badab0bfb39d18033307de4"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "786c67ab9d62cbc12fa8d4f82ba793deb6e1709ae17893e56052b3898b242b9a"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "7ee758eff7bf952f2ce1e9d185e7e282da61a3f820442ba274584ef27e001d8a"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "33b2ef7a55e6baa0333700bc147f9d463f70cee44b045d6d6f4264710889d588"
+    sha256 cellar: :any_skip_relocation, sonoma:        "472c46ab5c968e22076c4fae7d1bd1a532dd476707eea57c4b5f0ee04eff7aaa"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "0301eddeaf80ff83bdf56b419c5e176914cd8b0e620ba309c65b3f182bd12f35"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "8443035821fa8345ad64183634b17e8945736331c8d9692e28424341a3058cbc"
   end
 
   depends_on "erlang"
 
   def install
-    system "make"
-    bin.install Dir["bin/*"] - Dir["bin/*.{bat,ps1}"]
-
-    Dir.glob("lib/*/ebin") do |path|
-      app = File.basename(File.dirname(path))
-      (lib/app).install path
-    end
-
-    system "make", "install_man", "PREFIX=#{prefix}"
+    # Set `Q=` for verbose `make` output
+    system "make", "Q=", "PREFIX=#{prefix}", "install"
   end
 
   test do
-    assert_match(%r{(compiled with Erlang/OTP 26)}, shell_output("#{bin}/elixir -v"))
+    assert_match(%r{(compiled with Erlang/OTP \d+)}, shell_output("#{bin}/elixir -v"))
   end
 end

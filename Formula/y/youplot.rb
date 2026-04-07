@@ -4,15 +4,15 @@ class Youplot < Formula
   url "https://github.com/red-data-tools/YouPlot/archive/refs/tags/v0.4.6.tar.gz"
   sha256 "126278103f6dbc4e28983b9e90a4e593f17e78b38d925a7df16965b5d3c145a4"
   license "MIT"
+  revision 2
 
   bottle do
-    sha256                               arm64_sonoma:   "34886703341b58e351283223a6fe19717d404120c709ed1a518753ac07f16e85"
-    sha256                               arm64_ventura:  "224f2643f50bbd531e19ec45f9a56ec760304379a943420a42c0038b0d5ca2c2"
-    sha256                               arm64_monterey: "e2f7ef7149fec5451496cdc50394a718084180d792d08f7b7db3085db1f56fa3"
-    sha256                               sonoma:         "15297f02a8a7176c2cae1a2f541ce7bd8884b15d097070b8882ad6e2fc54d7a6"
-    sha256                               ventura:        "3ed832d8288148f3ce99bb857538dabcdca8821e33215db6910c2c0f7075a9ae"
-    sha256                               monterey:       "0ab163b9eb0c815a52b0ae4122d3e7ac41c2ad885c39b7106e0bd1b909cd3f92"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "e036b00579b5ab8dab662523782303690222a42b3f21197769191c690f1adb87"
+    sha256                               arm64_tahoe:   "1c739f9e27747bdbec27e82a88c3cc9ce882974a6918a3815cf5547d19f255e3"
+    sha256                               arm64_sequoia: "3188353334f66de3bc164af96efd052c0cd7041164d7f04be0fe6d24bdb0d66d"
+    sha256                               arm64_sonoma:  "02fa87a89be61f440f0729e7b2a89f51a898e7a94f167500244de0d345988d1b"
+    sha256                               sonoma:        "c0f738a4dd673db99a6541d7ec7a94314c7d9823a6a543902f1a090c39ed46b3"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "5765565dd1195a9709e85821ae349f88b87b4519fc27f6305260460d6e4eb545"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "7cf27ee6dd3a4fc889a2d085f897132c2586462351eb9e8731e8b8bd6952afb7"
   end
 
   uses_from_macos "ruby"
@@ -45,12 +45,12 @@ class Youplot < Formula
   end
 
   test do
-    (testpath/"test.csv").write <<~EOS
+    (testpath/"test.csv").write <<~CSV
       A,20
       B,30
       C,40
       D,50
-    EOS
+    CSV
     expected_output = [
       "     ┌           ┐ ",
       "   A ┤■■ 20.0      ",

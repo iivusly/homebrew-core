@@ -1,21 +1,20 @@
 class Feroxbuster < Formula
   desc "Fast, simple, recursive content discovery tool written in Rust"
   homepage "https://epi052.github.io/feroxbuster"
-  url "https://github.com/epi052/feroxbuster/archive/refs/tags/v2.10.4.tar.gz"
-  sha256 "6eea0602971de78fe24b5c93c1985e57e0b8cb5a8f3a05688d2465e96b27329c"
+  url "https://github.com/epi052/feroxbuster/archive/refs/tags/v2.13.1.tar.gz"
+  sha256 "6f1f3466319ea5485b9d6f05000718c6ccbe1210c1cea7b2af83a5343d068a23"
   license "MIT"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "deb6a5f5e0d086c3b48694f1f571036a07265e21a94af1610e90cdc9cfc783bd"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "4bd32781603abaafa34c092cf83681779d7fdc18f5fdf2217fbe1c840793f4ab"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "8f1f11691218e38df06fc75788693b75c76893a42c9a8d4e0801bd42d383cda5"
-    sha256 cellar: :any_skip_relocation, sonoma:         "2c0542e745b92048e6b0f46588f07176abb2f604b4c8608b939fe624c4ca43ee"
-    sha256 cellar: :any_skip_relocation, ventura:        "1a0c17f47377b4d28ef3b937623fc043ad6f156374fd3872eba02bb84bea865b"
-    sha256 cellar: :any_skip_relocation, monterey:       "ea383abecb20d6e7473f026acd5f88b6def15a1c65d8c3d44c501d4b98d82e32"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "c16bda01bb5093d778bb252c297ac77adadf53b8ae7e4a151f551b2318ce81fe"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "cf3d55e45eb9afabc85f7c67eae77c6709d1fc4a8185778623123a80122c6c28"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "7ab47077afdd89da24c43701285b8c72907793e5f8c37c45937d658477468b78"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "48a383c603dd30adc6c913746686c4e7ffa734b7a5891e0fa26ec70a7e3d763a"
+    sha256 cellar: :any_skip_relocation, sonoma:        "71c0e2331a9c2181491888c1bc1c76aadd6ee454fea4c872115ae661ea2abd19"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "2352ef2c7a4f221b5ab323274e35ff40793ec3d787a0daf8744637645b7467f7"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "20afd4144eff9917898c9708e1073c071c27a5a8b4dfff6ba65f211b86862c9c"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "rust" => :build
   depends_on "miniserve" => :test
   depends_on "openssl@3"
@@ -26,6 +25,10 @@ class Feroxbuster < Formula
     ENV["OPENSSL_NO_VENDOR"] = "1"
 
     system "cargo", "install", *std_cargo_args
+
+    bash_completion.install "shell_completions/feroxbuster.bash" => "feroxbuster"
+    fish_completion.install "shell_completions/feroxbuster.fish"
+    zsh_completion.install "shell_completions/_feroxbuster"
   end
 
   test do
@@ -39,10 +42,7 @@ class Feroxbuster < Formula
     (testpath/"web/b.txt").write "b"
 
     port = free_port
-    pid = fork do
-      exec "miniserve", testpath/"web", "-i", "127.0.0.1", "--port", port.to_s
-    end
-
+    pid = spawn "miniserve", testpath/"web", "-i", "127.0.0.1", "--port", port.to_s
     sleep 1
 
     begin

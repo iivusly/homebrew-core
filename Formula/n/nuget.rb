@@ -1,27 +1,33 @@
 class Nuget < Formula
   desc "Package manager for Microsoft development platform including .NET"
   homepage "https://www.nuget.org/"
-  url "https://dist.nuget.org/win-x86-commandline/v6.11.0/nuget.exe"
-  sha256 "133b9c1efdc8d86bdccae9e296c9e4bc45a6d6472368611aa96b51b3e75fd2e3"
+  url "https://dist.nuget.org/win-x86-commandline/v7.3.0/nuget.exe"
+  sha256 "39b6309e76c832e4de2ac7f86da9a8afaa12bc5b4307ea335e9d69e2d6d1a94a"
   license "MIT"
 
   livecheck do
     url "https://dist.nuget.org/tools.json"
-    regex(%r{"url":\s*?"[^"]+/v?(\d+(?:\.\d+)+)/nuget\.exe",\s*?"stage":\s*?"ReleasedAndBlessed"}i)
+    strategy :json do |json|
+      json["nuget.exe"]&.map do |item|
+        next if item["stage"] != "ReleasedAndBlessed"
+
+        item["version"]
+      end
+    end
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, all: "6706b2a51e71261d40d69583575bb2954baf3f2518174bc8b1594c11f995bb5d"
+    sha256 cellar: :any_skip_relocation, all: "4c1d29e3cf9ae3eb3b914156e703c0c800002be58d823db623514a6f9b1fb057"
   end
 
   depends_on "mono"
 
   def install
     libexec.install "nuget.exe" => "nuget.exe"
-    (bin/"nuget").write <<~EOS
+    (bin/"nuget").write <<~BASH
       #!/bin/bash
       mono #{libexec}/nuget.exe "$@"
-    EOS
+    BASH
   end
 
   test do

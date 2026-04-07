@@ -1,14 +1,14 @@
 class GitExtras < Formula
   desc "Small git utilities"
   homepage "https://github.com/tj/git-extras"
-  url "https://github.com/tj/git-extras/archive/refs/tags/7.2.0.tar.gz"
-  sha256 "f570f19b9e3407e909cb98d0536c6e0b54987404a0a053903a54b81680c347f1"
+  url "https://github.com/tj/git-extras/archive/refs/tags/7.4.0.tar.gz"
+  sha256 "aaab3bab18709ec6825a875961e18a00e0c7d8214c39d6e3a63aeb99fa11c56e"
   license "MIT"
   head "https://github.com/tj/git-extras.git", branch: "main"
 
   bottle do
     rebuild 1
-    sha256 cellar: :any_skip_relocation, all: "9aa768d24cd1fe6488e792da9771cac6f3738a3d4c6fe3767c568bf374d857d1"
+    sha256 cellar: :any_skip_relocation, all: "68e0ef44b443f683c0f8d21f1a72162ff1063377582b60855a7fbace9ad3a5ab"
   end
 
   on_linux do
@@ -16,12 +16,14 @@ class GitExtras < Formula
   end
 
   conflicts_with "git-delete-merged-branches", because: "both install `git-delete-merged-branches` binaries"
+  conflicts_with "git-ignore", because: "both install a `git-ignore` binary"
   conflicts_with "git-standup", because: "both install `git-standup` binaries"
   conflicts_with "git-sync", because: "both install a `git-sync` binary"
   conflicts_with "ugit", because: "both install `git-undo` binaries"
 
   def install
     system "make", "PREFIX=#{prefix}", "COMPL_DIR=#{bash_completion}", "INSTALL_VIA=brew", "install"
+    fish_completion.install "etc/git-extras.fish"
     pkgshare.install "etc/git-extras-completion.zsh"
   end
 

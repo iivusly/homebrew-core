@@ -1,18 +1,17 @@
 class Docuum < Formula
   desc "Perform least recently used (LRU) eviction of Docker images"
   homepage "https://github.com/stepchowfun/docuum"
-  url "https://github.com/stepchowfun/docuum/archive/refs/tags/v0.25.0.tar.gz"
-  sha256 "26bf153c72185516db77ffabc00d75f0ae9d642792ccf204f843ceee94236756"
+  url "https://github.com/stepchowfun/docuum/archive/refs/tags/v0.27.0.tar.gz"
+  sha256 "aac9e31da12abdf5065b19738058738712efbf379f69056dbda1a6bd0c124c0f"
   license "MIT"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "affa59dad018a494a5f1ebd4ae95e6923b5de38921385138f29874e8d3e52de9"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "8c73857d61f8266046e879d12f4a527a8381c4e1320332cf9116ff25ba316820"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "a0cd97e7867b1fc163b34c9b74d34644c24899d3dfed2f330d09657359674ad3"
-    sha256 cellar: :any_skip_relocation, sonoma:         "8774fc1059a912cc7f102617177f0c756b98b4e9f1d4781c630d8ce425b24042"
-    sha256 cellar: :any_skip_relocation, ventura:        "18b42e43794e140650178212b3a20df43897e9766ee1b94f7faaa2ab6e4795f1"
-    sha256 cellar: :any_skip_relocation, monterey:       "ec9aa82548bc0fee393165d179eb607f91e558d569bee74f1181b843c37d3f96"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "3bc6a5414cae362c54b12ee5cdff8212bce7f84a6f7bc670271796fb44d1a7ff"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "df126d1091922f2f25086b0ed7f4524bcb539b7915d3e2327f4383bc7b671e48"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "046ff07e26bf346e9edae7802a4b2ba340a75ef91d7ae31d4b7277b8d61facee"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "b77b29b54abe9c4b289e308a81482766e1c75a92f963522387e48bb83c8d4f20"
+    sha256 cellar: :any_skip_relocation, sonoma:        "c7228f946d6b7d74badf7cb706f1ca8a8b875d21953ec7f6a0eb2ec4b9477a4b"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "6a07d1c7caaf46024041b806477d93f25a380e07d7ba88d3720e968ae824ee7f"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "d21df3b909376d5cf985debfe951c5939f6d54dd38b0ef7ecd9f50c2726b5236"
   end
 
   depends_on "rust" => :build

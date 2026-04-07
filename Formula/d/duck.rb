@@ -1,34 +1,32 @@
 class Duck < Formula
   desc "Command-line interface for Cyberduck (a multi-protocol file transfer tool)"
   homepage "https://duck.sh/"
-  url "https://dist.duck.sh/duck-src-9.0.1.41941.tar.gz"
-  sha256 "265c6bfef4a500336417c6d674f224f64f1cd53ef91b308be88c15367f233cca"
+  url "https://dist.duck.sh/duck-src-9.4.1.44384.tar.gz"
+  sha256 "cef789cb1900d03b38606eecd8f05e9e2b02cf50d8100680eb74230dd1a3bc60"
   license "GPL-3.0-only"
   head "https://github.com/iterate-ch/cyberduck.git", branch: "master"
 
   livecheck do
     url "https://dist.duck.sh/"
-    regex(/href=.*?duck-src[._-]v?(\d+(?:\.\d+)+)\.t/i)
+    regex(/href=.*?duck(?:-src)?[._-]v?(\d+(?:\.\d+)+)\.t/i)
   end
 
   bottle do
-    sha256 cellar: :any, arm64_sonoma:   "457e1c33bda569182b91cfd16cc1ea6f09641927bb4471576124c3d4915e9d35"
-    sha256 cellar: :any, arm64_ventura:  "1c27967ffea11eb260a0823dc8e7257b6d4ae9888fff196c539e82a51cb6fd3b"
-    sha256 cellar: :any, arm64_monterey: "44cc4aaeb7b62ba2ca21c66f8a1da2a660cede322b86b6153ec1dd351c8e4313"
-    sha256 cellar: :any, sonoma:         "11f8c41aa10107581b5eed23af2a9b02be4464ab0e0420bafb06394bc18a8689"
-    sha256 cellar: :any, ventura:        "fc3878115f65558dc213b2cf01f963c1c0bf823e1cbd9a8ec2c4371217dd9d7e"
-    sha256 cellar: :any, monterey:       "9b8e1431cb1964ce332d832a7f580ed417ef2509734f6170b00f7d3cc9ae6a82"
-    sha256               x86_64_linux:   "bcd0411a1f962cca75784cb6341b403e2d38f802311bb80f7cb0b0dab4eb6c1e"
+    sha256 cellar: :any,                 arm64_tahoe:   "6c7beee978d94549eceb854c2353afae491885e1843ce3c4f21cec0508417e92"
+    sha256 cellar: :any,                 arm64_sequoia: "430326879c496571ba9d1591572ee51039ce861743050f02aa7f3f30ee15406b"
+    sha256 cellar: :any,                 arm64_sonoma:  "91685b49d8fb529457eba7edc03096b12ff6034aee64888053237ab3e7d6883e"
+    sha256 cellar: :any,                 sonoma:        "91455b2daf90459c7045654df2038922b9f74a559cf25f06102346a68cdeeac3"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "176967fccc1caf93661202497e940cfce47b1842192dc9f20a1502775bb7a826"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "d555076a7fd4a2592f13e94e47c3e5d28ac7e99ae368a7af4a5bde52315b848f"
   end
 
   depends_on "ant" => :build
   depends_on "maven" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on xcode: ["13.1", :build]
   depends_on "openjdk"
 
   uses_from_macos "libffi", since: :monterey # Uses `FFI_BAD_ARGTYPE`.
-  uses_from_macos "zlib"
 
   on_linux do
     depends_on "alsa-lib"
@@ -43,18 +41,19 @@ class Duck < Formula
     depends_on "libxrender"
     depends_on "libxtst"
     depends_on "little-cms2"
+    depends_on "zlib-ng-compat"
   end
 
   conflicts_with "duckscript", because: "both install `duck` binaries"
 
   resource "jna" do
-    url "https://github.com/java-native-access/jna/archive/refs/tags/5.14.0.tar.gz"
-    sha256 "b8a51f4c97708171fc487304f98832ce954b6c02e85780de71d18888fddc69e3"
+    url "https://github.com/java-native-access/jna/archive/refs/tags/5.18.1.tar.gz"
+    sha256 "9af4d468a8b94def8c08761780766e919a0806d636b4c2ac55be0afe94cb8bb9"
   end
 
   resource "rococoa" do
-    url "https://github.com/iterate-ch/rococoa/archive/refs/tags/0.9.1.tar.gz"
-    sha256 "62c3c36331846384aeadd6014c33a30ad0aaff7d121b775204dc65cb3f00f97b"
+    url "https://github.com/iterate-ch/rococoa/archive/refs/tags/0.10.0.tar.gz"
+    sha256 "8ce789a7b27c37ed37dcb6517b76de8eee144bf7269c3c645d791f21c20a3046"
   end
 
   resource "JavaNativeFoundation" do
@@ -182,7 +181,8 @@ class Duck < Formula
   end
 
   test do
-    system bin/"duck", "--download", "https://ftp.gnu.org/gnu/wget/wget-1.19.4.tar.gz", testpath/"test"
-    assert_equal (testpath/"test").sha256, "93fb96b0f48a20ff5be0d9d9d3c4a986b469cb853131f9d5fe4cc9cecbc8b5b5"
+    test_url = "https://www.mirrorservice.org/sites/ftp.gnu.org/gnu/wget/wget-1.19.4.tar.gz"
+    system bin/"duck", "--download", test_url, testpath/"test"
+    assert_equal "93fb96b0f48a20ff5be0d9d9d3c4a986b469cb853131f9d5fe4cc9cecbc8b5b5", (testpath/"test").sha256
   end
 end

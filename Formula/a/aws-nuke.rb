@@ -1,50 +1,41 @@
 class AwsNuke < Formula
   desc "Nuke a whole AWS account and delete all its resources"
-  homepage "https://github.com/rebuy-de/aws-nuke"
-  url "https://github.com/rebuy-de/aws-nuke.git",
-      tag:      "v2.25.0",
-      revision: "2bd22d5e5c0cf6a4011b3c08a5b1c25e2e6c75bd"
+  homepage "https://github.com/ekristen/aws-nuke"
+  url "https://github.com/ekristen/aws-nuke/archive/refs/tags/v3.64.1.tar.gz"
+  sha256 "23c28fd84afdf16eb69725055dce59cb1581d0ba38e07c5ba6bbd431e0b98ba9"
   license "MIT"
-  head "https://github.com/rebuy-de/aws-nuke.git", branch: "main"
+  head "https://github.com/ekristen/aws-nuke.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "c3286cec74fcdd7867c2ab1a0594b80107c75f049b04c833977814fe3e407930"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "12c5e77d73638f6bfee30759160f559aed88ab964c0af28732c76a5bcab5bdb4"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "12c5e77d73638f6bfee30759160f559aed88ab964c0af28732c76a5bcab5bdb4"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "12c5e77d73638f6bfee30759160f559aed88ab964c0af28732c76a5bcab5bdb4"
-    sha256 cellar: :any_skip_relocation, sonoma:         "f10b53d737493b2b2e4a31b34b450fa601369cb68643ea2e99b534f4e5168a0c"
-    sha256 cellar: :any_skip_relocation, ventura:        "9bfc6b886796a4059e9440a28375985a7eb5d5ed336098c6065f0d10bb3ef7e5"
-    sha256 cellar: :any_skip_relocation, monterey:       "9bfc6b886796a4059e9440a28375985a7eb5d5ed336098c6065f0d10bb3ef7e5"
-    sha256 cellar: :any_skip_relocation, big_sur:        "9bfc6b886796a4059e9440a28375985a7eb5d5ed336098c6065f0d10bb3ef7e5"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "c22ad093adadf1577b33212b71a82f23d0e1ae9c5e81e792186caa3c63125e2a"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "6784837f24c15cd38dcbeb29b4701fc5815ea344b2911872623028c417fb1007"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "6784837f24c15cd38dcbeb29b4701fc5815ea344b2911872623028c417fb1007"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "6784837f24c15cd38dcbeb29b4701fc5815ea344b2911872623028c417fb1007"
+    sha256 cellar: :any_skip_relocation, sonoma:        "09c58faaff36f92470c5bffbc0ac720ec67a982fbe9d44293e978f8378c4315e"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "758a800a0ec1d7dbd058a3b37de7aabbefe885485c90746aa2e2d710441348d2"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "8a3ed7053a33da0e671133aa32e506b158efa513c9fe30ba859722412df92b24"
   end
 
   depends_on "go" => :build
 
   def install
-    build_xdst="github.com/rebuy-de/aws-nuke/v#{version.major}/cmd"
     ldflags = %W[
       -s -w
-      -X #{build_xdst}.BuildVersion=#{version}
-      -X #{build_xdst}.BuildDate=#{time.strftime("%F")}
-      -X #{build_xdst}.BuildHash=#{Utils.git_head}
-      -X #{build_xdst}.BuildEnvironment=#{tap.user}
+      -X github.com/ekristen/aws-nuke/v#{version.major}/pkg/common.SUMMARY=#{version}
     ]
-    with_env(
-      "CGO_ENABLED" => "0",
-    ) do
-      system "go", "build", *std_go_args(ldflags:)
-    end
+    ENV["CGO_ENABLED"] = "0"
+    system "go", "build", *std_go_args(ldflags:)
 
-    pkgshare.install "config"
+    pkgshare.install "pkg/config"
 
-    generate_completions_from_executable(bin/"aws-nuke", "completion")
+    generate_completions_from_executable(bin/"aws-nuke", shell_parameter_format: :cobra)
   end
 
   test do
+    assert_match version.to_s, shell_output("#{bin}/aws-nuke --version")
     assert_match "InvalidClientTokenId", shell_output(
-      "#{bin}/aws-nuke --config #{pkgshare}/config/example.yaml --access-key-id fake --secret-access-key fake 2>&1",
-      255,
+      "#{bin}/aws-nuke run --config #{pkgshare}/config/testdata/example.yaml \
+      --access-key-id fake --secret-access-key fake 2>&1",
+      1,
     )
     assert_match "IAMUser", shell_output("#{bin}/aws-nuke resource-types")
   end

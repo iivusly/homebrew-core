@@ -1,9 +1,10 @@
 class XmlToolingC < Formula
   desc "Provides a higher level interface to XML processing"
   homepage "https://wiki.shibboleth.net/confluence/display/OpenSAML/XMLTooling-C"
-  url "https://shibboleth.net/downloads/c++-opensaml/3.2.1/xmltooling-3.2.4.tar.bz2"
-  sha256 "92db9b52f28f854ba2b3c3b5721dc18c8bd885c1e0d9397f0beb3415e88e3845"
+  url "https://shibboleth.net/downloads/c++-opensaml/3.3.0/xmltooling-3.3.0.tar.bz2"
+  sha256 "0a2c421be976f3a44b876d6b06ba1f6a2ffbc404f4622f8a65a66c3ba77cb047"
   license "Apache-2.0"
+  revision 2
 
   livecheck do
     url "https://shibboleth.net/downloads/c++-opensaml/latest/"
@@ -11,32 +12,50 @@ class XmlToolingC < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "672e8c185c451dad3d04b70756130b8d634115a694ae4cfbdf559d2876685d27"
-    sha256 cellar: :any,                 arm64_ventura:  "ae4ac6f8e8c3316ecde0a3ee93a9ccb6378cda802cc091cd171a4730e677f17f"
-    sha256 cellar: :any,                 arm64_monterey: "5a8b264c7570c6ad106eb2edd451c11157373f206346eb8a4b8998e9ed62a851"
-    sha256 cellar: :any,                 arm64_big_sur:  "abcb3207ed424a52d6b5555c63fe484f34022b09c5e25c8ae3dd99bb898c5ad5"
-    sha256 cellar: :any,                 sonoma:         "6d21ebd6fb31b2e87a6cd17b2f445f044d9f9a570c0797ecf63d278bf56f5dc2"
-    sha256 cellar: :any,                 ventura:        "079ed64f572a73735ec306bb7d011e3ffe429c496001fafc1498937d8684a78a"
-    sha256 cellar: :any,                 monterey:       "df0f4a56208757543bb35a7f56d5c56b68699a7422af4f908d83d4ec585cdc4d"
-    sha256 cellar: :any,                 big_sur:        "d9b9cc4501d19a476a3f2a0dbde388b3d50102518bd54cf018e642ff881f042b"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "e6e7112c339d983cd2238781a912a5b972b49e6290f0ba17ccfa8835bf19ad2b"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "98e9218a11ab243b50f41dc092aa691ea2b67e377c8f4c3180b2534daa3e282a"
+    sha256 cellar: :any,                 arm64_sequoia: "88e0d5685d1d26583ce3cac5ae06004e09c1e644a994cbd842edf135c387eeee"
+    sha256 cellar: :any,                 arm64_sonoma:  "67698bf4e3539ca4a65b1abedf1412bebfca329752966af395fb6ad26fd01674"
+    sha256 cellar: :any,                 sonoma:        "bdccad5c69d8fc2e9b803d308e2a577e186d73126f2550e173bb6e73b5270d12"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "6a2daaf7d5f7c2851c7aedbe0916231d6f05a86bcca21deb89878a69160a8044"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "2e44b389fa4a9ef04945d051fd6b66e6a22b4389b968eccdcae9a1634a221886"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "boost"
+  depends_on "curl"
   depends_on "log4shib"
   depends_on "openssl@3"
   depends_on "xerces-c"
   depends_on "xml-security-c"
 
-  uses_from_macos "curl"
-  uses_from_macos "zlib"
+  on_sequoia do
+    depends_on xcode: ["16.4", :build]
+  end
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     ENV.cxx11
-    ENV.prepend_path "PKG_CONFIG_PATH", "#{Formula["openssl@3"].opt_lib}/pkgconfig"
-
     system "./configure", "--disable-silent-rules", *std_configure_args
     system "make", "install"
+  end
+
+  test do
+    (testpath/"test.cpp").write <<~CPP
+      #include <xmltooling/XMLToolingConfig.h>
+      int main() {
+        xmltooling::XMLToolingConfig::getConfig().log_config("CRIT");
+        xmltooling::XMLToolingConfig::getConfig().init();
+        xmltooling::XMLToolingConfig::getConfig().getPathResolver();
+        return 0;
+      }
+    CPP
+    system ENV.cxx, "-std=c++11", "test.cpp", "-o", "test",
+                    "-L#{lib}", "-lxmltooling", "-L#{Formula["xerces-c"].opt_lib}", "-lxerces-c"
+    output = shell_output("./test 2>&1")
+    refute_match("libcurl lacks OpenSSL-specific options", output)
   end
 end

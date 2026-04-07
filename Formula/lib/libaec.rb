@@ -1,22 +1,22 @@
 class Libaec < Formula
   desc "Adaptive Entropy Coding implementing Golomb-Rice algorithm"
   homepage "https://gitlab.dkrz.de/k202009/libaec"
-  url "https://gitlab.dkrz.de/k202009/libaec/-/archive/v1.1.3/libaec-v1.1.3.tar.bz2"
-  sha256 "46216f9d2f2d3ffea4c61c9198fe0236f7f316d702f49065c811447186d18222"
+  url "https://gitlab.dkrz.de/k202009/libaec/-/archive/v1.1.6/libaec-v1.1.6.tar.bz2"
+  sha256 "41777c62cd109bee692a4976496ad680aa015016840b79ce2f84b8ac0d4d7dac"
   license "BSD-2-Clause"
+  compatibility_version 1
   head "https://gitlab.dkrz.de/k202009/libaec.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "c226a16104f6c585188316a0873bd793c71721f5c39648a346648d5a05a28d3c"
-    sha256 cellar: :any,                 arm64_ventura:  "d16c49cbbc3255ee5acdf072ac7803bda2f25bdaa3feea465ad3add3abc882fd"
-    sha256 cellar: :any,                 arm64_monterey: "c70deb367fb14342dae88999341df49e67ee77198c0c3b46b18d087923228664"
-    sha256 cellar: :any,                 sonoma:         "f75484ecbbd01f45417f8a1e4994d6ee8c814cabac6bcf799b183fca13184670"
-    sha256 cellar: :any,                 ventura:        "e7100d69258e016d8840ee20ee61367f1c48df8f42c3d19b1c0ab67404658a8d"
-    sha256 cellar: :any,                 monterey:       "91b09dc81cfa80f1d2c9dab7b17d471225fc11d93bb9631a6ac8cc9e506735bb"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "32d3097aa577be93f7d534d6460fc190fc7234a77f34c561ef44d59a6e57d539"
+    sha256 cellar: :any,                 arm64_tahoe:   "d190d6d012003126a1eafb3dc218bb33eef869ae7bb8cca7e8637ac6f2cd703c"
+    sha256 cellar: :any,                 arm64_sequoia: "01d7d32366e84925fe8d1bbbad28b614862298d88d8db4d6e540c030585c5753"
+    sha256 cellar: :any,                 arm64_sonoma:  "8cc94718f5b8e9b4b2aba76a8a86f20d03519f0e35cfd6c8188be5141247d73b"
+    sha256 cellar: :any,                 sonoma:        "f70bd70809d3884ac7992e8a145698ec6ab4987311a98b562a36bb56ddca9ba4"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "01b9577127b1597ba3be92bc0d7df3da1da4a040a79ffc0b0a56722385b11aba"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "f37c5777a53b8c787c337a8d6c199e5bd269166f7ebf325ad5b6ddfa3d6a7a10"
   end
 
-  depends_on "cmake" => :build
+  depends_on "cmake" => [:build, :test]
 
   # These may have been linked by `szip` before keg_only change
   link_overwrite "include/szlib.h"
@@ -27,16 +27,19 @@ class Libaec < Formula
   link_overwrite "lib/libsz.so.2"
 
   def install
-    mkdir "build" do
-      # We run `make test` for libraries
-      system "cmake", "..", *std_cmake_args, "-DBUILD_TESTING=ON"
-      system "make", "install"
-      system "make", "test"
-    end
+    # run ctest for libraries, also added `"-DBUILD_TESTING=ON` in the end as
+    # `std_cmake_args` has `BUILD_TESTING` off
+    system "cmake", "-S", ".", "-B", "build", *std_cmake_args, "-DBUILD_TESTING=ON"
+    system "cmake", "--build", "build"
+    system "ctest", "--test-dir", "build", "--verbose"
+    system "cmake", "--install", "build"
   end
 
   test do
-    (testpath/"test.cpp").write <<~EOS
+    # Check directory structure of CMake file in case new release changed layout
+    assert_path_exists lib/"cmake/libaec/libaec-config.cmake"
+
+    (testpath/"test.cpp").write <<~CPP
       #include <cassert>
       #include <cstddef>
       #include <cstdlib>
@@ -62,8 +65,21 @@ class Libaec < Formula
         free(compressed);
         return 0;
       }
-    EOS
-    system ENV.cc, "test.cpp", "-I#{include}", "-L#{lib}", "-laec", "-o", "test"
-    system "./test"
+    CPP
+
+    # Test CMake config package can be automatically found
+    (testpath/"CMakeLists.txt").write <<~CMAKE
+      cmake_minimum_required(VERSION 3.10)
+      project(test LANGUAGES CXX)
+
+      find_package(libaec CONFIG REQUIRED)
+
+      add_executable(test test.cpp)
+      target_link_libraries(test libaec::aec)
+    CMAKE
+
+    system "cmake", "-S", ".", "-B", "build", *std_cmake_args
+    system "cmake", "--build", "build"
+    system "./build/test"
   end
 end

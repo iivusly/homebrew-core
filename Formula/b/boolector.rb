@@ -6,16 +6,19 @@ class Boolector < Formula
   license "MIT"
 
   bottle do
+    sha256 cellar: :any_skip_relocation, arm64_sequoia:  "c36e9fe92bb625ab45e83a8b889a4f29264b4a6dca0b5da3e72c133724b6ddd2"
     sha256 cellar: :any_skip_relocation, arm64_sonoma:   "eb34a8aa518c75108be45137f5f72401f2a429d5c2aa5485e4addf5f9b7e2397"
     sha256 cellar: :any_skip_relocation, arm64_ventura:  "a1cc2c76b073b53af089a7f14191ffaf3d2f5cc72946ad10456e56b4c05c24cb"
     sha256 cellar: :any_skip_relocation, arm64_monterey: "59043051dc8c304152d395edc3d3460af08a95922fbc0bb7014a0041be9813aa"
     sha256 cellar: :any_skip_relocation, sonoma:         "4a4617f2272b60e1abed3faa99242423bdae8d761d508abe457b68487f91a030"
     sha256 cellar: :any_skip_relocation, ventura:        "9c19e47efd028a1a3104a53a1102d30ebc239828b5756461e2a7df222c1ee98d"
     sha256 cellar: :any_skip_relocation, monterey:       "7b93dcb7a6974662f62d5bd7b24138117d80d474ca82c3eca2ba42d138040631"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "d6312b85c8f97aafbe24c940186b4fb2e12990ca54e93fe5edf29401b7966081"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "4745395152455d49e3833ee69624a437e36fba98caf9d1d57f0c168d3e9034ca"
   end
 
   deprecate! date: "2024-08-24", because: :repo_archived
+  disable! date: "2025-08-24", because: :repo_archived, replacement_formula: "bitwuzla"
 
   depends_on "cmake" => :build
 

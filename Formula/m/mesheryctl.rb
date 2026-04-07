@@ -2,31 +2,32 @@ class Mesheryctl < Formula
   desc "Command-line utility for Meshery, the cloud native management plane"
   homepage "https://meshery.io"
   url "https://github.com/meshery/meshery.git",
-      tag:      "v0.7.92",
-      revision: "b0b7c85873dda556dcc6badc36fd6507bd4ee640"
+      tag:      "v1.0.1",
+      revision: "32bea3e108a70378faca7daa2ffaa9a5cfd66705"
   license "Apache-2.0"
   head "https://github.com/meshery/meshery.git", branch: "master"
 
+  no_autobump! because: :bumped_by_upstream
+
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "55ebc705370316a9e129f3bc22a5b58f8b053d4a1f40ae673696ab8b4550ddfb"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "55ebc705370316a9e129f3bc22a5b58f8b053d4a1f40ae673696ab8b4550ddfb"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "55ebc705370316a9e129f3bc22a5b58f8b053d4a1f40ae673696ab8b4550ddfb"
-    sha256 cellar: :any_skip_relocation, sonoma:         "c67403c53138b9878d725354cacbe08d481ccc621d1471fa5eba23ba8bebc178"
-    sha256 cellar: :any_skip_relocation, ventura:        "c67403c53138b9878d725354cacbe08d481ccc621d1471fa5eba23ba8bebc178"
-    sha256 cellar: :any_skip_relocation, monterey:       "c67403c53138b9878d725354cacbe08d481ccc621d1471fa5eba23ba8bebc178"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "e437519597b8bdfba769a1767b0e3e49e9b8bdd8d0016fc93d6142feaa8cb3d0"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "7f0dd1d31eac308e569201e82554d30de6e383e8884ed2ecb30e1cda58a9a5e8"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "5ab95c343dc8a94fc82665f604a983ee925a98e14591fe9b1b22ca50fcc2fa19"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "a8b2e5b96dc78c5105c42fcd857aeb170e5092ddd15086ad67bf035f5fd00c9e"
+    sha256 cellar: :any_skip_relocation, sonoma:        "8c20cf14b8d64482a72c506f46161b004e43564aaec75db9ba6da8c0c05be37a"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "dfc5f6c885a8d29e9ec0d5637dcb9341fd16844fadf464fac5b25121604770fc"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "d3dcbc3e0bd878bbf2ed1723d44d0b08ea2a0126eb40703167b3fd8fc93f7d20"
   end
 
   depends_on "go" => :build
 
   def install
-    ENV["CGO_ENABLED"] = "0"
+    ENV["CGO_ENABLED"] = "0" if OS.linux?
 
     ldflags = %W[
       -s -w
-      -X github.com/layer5io/meshery/mesheryctl/internal/cli/root/constants.version=v#{version}
-      -X github.com/layer5io/meshery/mesheryctl/internal/cli/root/constants.commitsha=#{Utils.git_short_head}
-      -X github.com/layer5io/meshery/mesheryctl/internal/cli/root/constants.releasechannel=stable
+      -X github.com/meshery/meshery/mesheryctl/internal/cli/root/constants.version=v#{version}
+      -X github.com/meshery/meshery/mesheryctl/internal/cli/root/constants.commitsha=#{Utils.git_short_head}
+      -X github.com/meshery/meshery/mesheryctl/internal/cli/root/constants.releasechannel=stable
     ]
 
     system "go", "build", *std_go_args(ldflags:), "./mesheryctl/cmd/mesheryctl"

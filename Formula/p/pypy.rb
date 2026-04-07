@@ -1,8 +1,8 @@
 class Pypy < Formula
   desc "Highly performant implementation of Python 2 in Python"
   homepage "https://pypy.org/"
-  url "https://downloads.python.org/pypy/pypy2.7-v7.3.17-src.tar.bz2"
-  sha256 "50e06840f4bbde91448080a4118068a89b8fbcae25ff8da1e2bb1402dc9a0346"
+  url "https://downloads.python.org/pypy/pypy2.7-v7.3.21-src.tar.bz2"
+  sha256 "23537c62e875ad1a3e675c64d4435eff392ea20843e20d690fd1400b79363d64"
   license "MIT"
   head "https://github.com/pypy/pypy.git", branch: "main"
 
@@ -12,27 +12,29 @@ class Pypy < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "e9e1692654a5a54459c12935d7d76db83e7989e1e0053060352568c463186f41"
-    sha256 cellar: :any,                 arm64_ventura:  "257f74a40fdcab7bb8e7108e8194b7fa9a88b365679a3c7fa45966a6874612c3"
-    sha256 cellar: :any,                 arm64_monterey: "64714ae5428b2af013f92ce9f4480de7a71dbfa670a2913bb2fc7f08bb50cf8b"
-    sha256 cellar: :any,                 sonoma:         "6627476c297b9029617c8cb58c813c486f75a992971996a49e4aef963acf3243"
-    sha256 cellar: :any,                 ventura:        "e2d4ff49951bf76f28213309cded300c955787c8563ffa4789ea71ff315f8674"
-    sha256 cellar: :any,                 monterey:       "a0309fa68cbbf79b6daab43676f848d9ff2a83222e7a6d72c9f2577715b94d3c"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "f6c8401527975c32039611ee2f7f54ef68cb3317e56df56f64dde5c73232dbc5"
+    sha256 cellar: :any,                 arm64_tahoe:   "36d9cf694cfd593c6e7bee6062749b88bc13b585e8ae3e9db8fc5e3eb4dd4a31"
+    sha256 cellar: :any,                 arm64_sequoia: "c9efcb91aa406ca6c2c618712013655bb873f18047dee6b7af9ac4a0d716d26d"
+    sha256 cellar: :any,                 arm64_sonoma:  "d15a72ab63690f79f685a78f6f9a5fa4b8a1c77f85d014431ae5e48f210806d9"
+    sha256 cellar: :any,                 sonoma:        "40d7a665ea9dcf3f56738d213659dfeb14b9bd7f1db70bc5f729577e368f1e5d"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "1056baf16f2311a1b2ac1b3a6cffaf5974133d1e83b3bb0cf222689689348cd5"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "6eca856704967e468bdb8b64ccb32bf27996ca91565cbe1a088cd8064714e45c"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "gdbm"
   depends_on "openssl@3"
   depends_on "sqlite"
-  depends_on "tcl-tk"
+  depends_on "tcl-tk@8"
 
   uses_from_macos "bzip2"
   uses_from_macos "expat"
   uses_from_macos "libffi"
   uses_from_macos "ncurses"
   uses_from_macos "unzip"
-  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   resource "bootstrap" do
     on_macos do
@@ -46,8 +48,14 @@ class Pypy < Formula
       end
     end
     on_linux do
-      url "https://downloads.python.org/pypy/pypy2.7-v7.3.11-linux64.tar.bz2"
-      sha256 "ba8ed958a905c0735a4cfff2875c25089954dc020e087d982b0ffa5b9da316cd"
+      on_arm do
+        url "https://downloads.python.org/pypy/pypy2.7-v7.3.11-aarch64.tar.bz2"
+        sha256 "ea924da1defe9325ef760e288b04f984614e405580f5321eb6a5c8f539bd415a"
+      end
+      on_intel do
+        url "https://downloads.python.org/pypy/pypy2.7-v7.3.11-linux64.tar.bz2"
+        sha256 "ba8ed958a905c0735a4cfff2875c25089954dc020e087d982b0ffa5b9da316cd"
+      end
     end
   end
 
@@ -68,17 +76,25 @@ class Pypy < Formula
   # Build fixes:
   # - Disable Linux tcl-tk detection since the build script only searches system paths.
   #   When tcl-tk is not found, it uses unversioned `-ltcl -ltk`, which breaks build.
-  patch :DATA
+  patch do
+    url "https://raw.githubusercontent.com/Homebrew/homebrew-core/f3c99d21d0b8fe79a579ef1a7405f10fa18ccde8/Patches/pypy/tcl-tk.diff"
+    sha256 "ed10c9fc9d3a5b8f43ef51c23224605e0ac7bca07aa2e8dc20335b69d13a082f"
+  end
 
   def install
     # Work-around for build issue with Xcode 15.3
     # upstream bug report, https://github.com/pypy/pypy/issues/4931
     ENV.append_to_cflags "-Wno-incompatible-function-pointer-types" if DevelopmentTools.clang_build_version >= 1500
 
+    # Avoid statically linking to libffi
+    inreplace "rpython/rlib/clibffi.py", '"libffi.a"', "\"#{shared_library("libffi")}\""
+
     # The `tcl-tk` library paths are hardcoded and need to be modified for non-/usr/local prefix
+    tcltk = Formula["tcl-tk@8"]
     inreplace "lib_pypy/_tkinter/tklib_build.py" do |s|
-      s.gsub! "/usr/local/opt/tcl-tk/", Formula["tcl-tk"].opt_prefix/""
-      s.gsub! "/include'", "/include/tcl-tk'"
+      s.gsub! "['/usr/local/opt/tcl-tk/include']", "[]"
+      s.gsub! "(homebrew + '/opt/tcl-tk@8/include/tcl-tk')", "('#{tcltk.opt_include}/tcl-tk')"
+      s.gsub! "(homebrew + '/opt/tcl-tk@8/lib')", "('#{tcltk.opt_lib}')"
     end
 
     if OS.mac?
@@ -142,10 +158,10 @@ class Pypy < Formula
 
     # Tell distutils-based installers where to put scripts
     scripts_folder.mkpath
-    (distutils/"distutils.cfg").atomic_write <<~EOS
+    (distutils/"distutils.cfg").atomic_write <<~INI
       [install]
       install-scripts=#{scripts_folder}
-    EOS
+    INI
 
     %w[setuptools pip].each do |pkg|
       resource(pkg).stage do
@@ -203,25 +219,3 @@ class Pypy < Formula
     system scripts_folder/"pip", "list"
   end
 end
-
-__END__
---- a/lib_pypy/_tkinter/tklib_build.py
-+++ b/lib_pypy/_tkinter/tklib_build.py
-@@ -17,7 +17,7 @@ elif sys.platform == 'win32':
-     incdirs = []
-     linklibs = ['tcl86t', 'tk86t']
-     libdirs = []
--elif sys.platform == 'darwin':
-+else:
-     # homebrew
-     homebrew = os.environ.get('HOMEBREW_PREFIX', '')
-     incdirs = ['/usr/local/opt/tcl-tk/include']
-@@ -26,7 +26,7 @@ elif sys.platform == 'darwin':
-     if homebrew:
-         incdirs.append(homebrew + '/include')
-         libdirs.append(homebrew + '/opt/tcl-tk/lib')
--else:
-+if False: # disable Linux system tcl-tk detection
-     # On some Linux distributions, the tcl and tk libraries are
-     # stored in /usr/include, so we must check this case also
-     libdirs = []

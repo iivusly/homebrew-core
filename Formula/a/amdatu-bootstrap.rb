@@ -6,16 +6,25 @@ class AmdatuBootstrap < Formula
   license "Apache-2.0"
   revision 2
 
-  livecheck do
-    url "https://bitbucket.org/amdatuadm/amdatu-bootstrap/downloads/"
-    regex(/href=.*?bootstrap[._-]v?(?:bin-)?r(\d+(?:\.\d+)*)(?:-bin)?\./i)
-  end
+  no_autobump! because: :incompatible_version_format
 
   bottle do
-    sha256 cellar: :any_skip_relocation, all: "f59cda35ffdacba6fb9c7f4d29fe641164995b42cf6f3bfeb169882c501559cc"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, all: "0094a50b87c8bf6f25f9fc0e68bcb95a2c46923a240eb83210748a280ee8cd27"
   end
 
+  # Deprecated since:
+  # * No arm64 macOS support: https://docs.brew.sh/Support-Tiers#future-macos-support
+  # * No upstream activity since 2015
+  # * Still needs OpenJDK 8
+  deprecate! date: "2025-09-25", because: :unmaintained
+  disable! date: "2026-09-25", because: :unmaintained
+
   depends_on "openjdk@8"
+
+  on_macos do
+    depends_on arch: :x86_64 # openjdk@8 is not supported on ARM
+  end
 
   def install
     env = Language::Java.java_home_env("1.8")

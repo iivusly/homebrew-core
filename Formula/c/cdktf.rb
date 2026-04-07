@@ -1,27 +1,40 @@
 class Cdktf < Formula
   desc "Cloud Development Kit for Terraform"
   homepage "https://github.com/hashicorp/terraform-cdk"
-  url "https://registry.npmjs.org/cdktf-cli/-/cdktf-cli-0.20.4.tgz"
-  sha256 "a2e5c935958828154ce736888a4259a5e782130a6cc628baab91050686c2fe42"
+  url "https://registry.npmjs.org/cdktf-cli/-/cdktf-cli-0.21.0.tgz"
+  sha256 "5885318063a55b44f87c917fe5806379937f7aecad5fe766bc898a1519de56b6"
   license "MPL-2.0"
+  revision 1
 
   bottle do
-    sha256                               arm64_sonoma:   "c6c3fd92fa6fb45295ee9753873e04d226ddd633dcb639eb89d18ebd4a375caf"
-    sha256                               arm64_ventura:  "a8292a25b7d45df4ba791f40872165dee2785efe0d753a1d9888e742fab9250c"
-    sha256                               arm64_monterey: "0e511a319c8ee3169b04f1305945c5307aee19bbad9f2890cc33fa35de9cfd5c"
-    sha256                               sonoma:         "ab6caaa54e6917839f4ae365d69981097f2e2037d2e8169538a4220d9aefb29d"
-    sha256                               ventura:        "a492ddf71a3f462cc5ad66e991c28b0135073b37c144cd679ae4e1f45cc3f87a"
-    sha256                               monterey:       "d303976fa24b5cd3ff52542fd6e94ff11c0515398c2e9b285c9b67f754883848"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "3672caff49c3eedaa4014e4da69d7bc198d68344000473d45305716352e4fc00"
+    rebuild 1
+    sha256                               arm64_tahoe:   "0e40207364977f0eb648b11eae2b766f395a8b6dbaf680eecd2cb801b84ef05e"
+    sha256                               arm64_sequoia: "d2628c7283e20253e054eaeb7fafda0ccfdea6ccebe1f669ba298c856df85e7a"
+    sha256                               arm64_sonoma:  "949a4c44c8a74fc2a603272681a0c28e74215b7a7a231f7872b62155c5992bd2"
+    sha256                               sonoma:        "bfb78f5f4bc567f55479f27a3311345e03e6243e2d4e28b5e534d9835e1de15e"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "3f49385492136b6ebfb77a1b6997404bdacfa0e51f19a88bd594728b7c98e556"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "76169751063d6f5b6a692119e83dcc4038d92456e9870877947dd3981277d3f6"
   end
 
-  deprecate! date: "2024-03-13", because: "uses soon-to-be deprecated terraform"
+  # Upstream sunset notice: CDKTF is deprecated and the repo was archived on 2025-12-10.
+  # See: https://github.com/hashicorp/terraform-cdk#sunset-notice
+  #      https://developer.hashicorp.com/terraform/cdktf
+  deprecate! date: "2025-12-10", because: :unmaintained
+  disable!   date: "2026-12-10", because: :unmaintained
 
+  depends_on "opentofu" => :test
   depends_on "node"
-  depends_on "terraform"
+
+  on_macos do
+    depends_on "llvm" => :build if DevelopmentTools.clang_build_version <= 1699
+  end
+
+  fails_with :clang do
+    build 1699
+  end
 
   def install
-    system "npm", "install", *std_npm_args
+    system "npm", "install", *std_npm_args(ignore_scripts: false)
     bin.install_symlink libexec.glob("bin/*")
 
     # remove non-native architecture pre-built binaries
@@ -29,7 +42,7 @@ class Cdktf < Formula
     arch = Hardware::CPU.intel? ? "x64" : Hardware::CPU.arch.to_s
     node_modules = libexec/"lib/node_modules/cdktf-cli/node_modules"
     node_pty_prebuilds = node_modules/"@cdktf/node-pty-prebuilt-multiarch/prebuilds"
-    (node_pty_prebuilds/"linux-x64").glob("node.abi*.musl.node").map(&:unlink)
+    node_pty_prebuilds.glob("linux-{x64,arm64}/node.abi*.musl.node").map(&:unlink)
     node_pty_prebuilds.each_child { |dir| rm_r(dir) if dir.basename.to_s != "#{os}-#{arch}" }
 
     generate_completions_from_executable(libexec/"bin/cdktf", "completion",
@@ -37,7 +50,10 @@ class Cdktf < Formula
   end
 
   test do
-    assert_match "ERROR: Cannot initialize a project in a non-empty directory",
-      shell_output("#{bin}/cdktf init --template='python' 2>&1", 1)
+    ENV["TERRAFORM_BINARY_NAME"] = "tofu"
+
+    touch "unwanted-file"
+    output = shell_output("#{bin}/cdktf init --template=python 2>&1", 1)
+    assert_match "ERROR: Cannot initialize a project in a non-empty directory", output
   end
 end

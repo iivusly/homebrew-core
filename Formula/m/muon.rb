@@ -1,48 +1,63 @@
 class Muon < Formula
   desc "Meson-compatible build system"
   homepage "https://muon.build"
-  url "https://git.sr.ht/~lattis/muon/archive/0.2.0.tar.gz"
-  sha256 "d73db1be5388821179a25a15ba76fd59a8bf7c8709347a4ec2cb91755203f36c"
+  url "https://git.sr.ht/~lattis/muon/archive/0.5.0.tar.gz"
+  sha256 "565c1b6e1e58f7e90d8813fda0e2102df69fb493ddab4cf6a84ce3647466bee5"
   license "GPL-3.0-only"
   head "https://git.sr.ht/~lattis/muon", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "b8f93def427f4c722d5408c1a8b25c356f166426c3ab4bb8902e7c1e1698c788"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "18b3d76e8b2ebb078b87ce9c442168e9543df14e014442dc239554b83d633c91"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "6327c8aa41fbbd6ba927a03d093f2f09f66e8a26b69e369add305e4179d5e3ff"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "9506eb66834d26363c3de7b52dc930c8c80d821ec54aa2a76ea9c850d9eb7fae"
-    sha256 cellar: :any_skip_relocation, sonoma:         "70f39de6ed30f8deacadffece7fa1c1b4b94c12c8a8223635a92b901e47a571c"
-    sha256 cellar: :any_skip_relocation, ventura:        "fb33b7d82f66af0010f5a47db3a90a9f7bc5bd195dc8a11b80f01ad22ce76909"
-    sha256 cellar: :any_skip_relocation, monterey:       "e3f056c2235a9bd35602454cc0a696b342a6324b18a90195ad5c2390de5134c7"
-    sha256 cellar: :any_skip_relocation, big_sur:        "f0ace57d38a0d5156f80359e08e688facfafd5ba487146013480a58bfb32385f"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "1ccf7ccaf0a8b108319e15a8e0a172db4d7561009f3519f205ac34e4151da50e"
+    sha256 cellar: :any, arm64_tahoe:   "ee83480a39f996d669a98cec8b764ae5411b5ffb22ba81c2576a529a90d45f82"
+    sha256 cellar: :any, arm64_sequoia: "830db56ee195c9fc5541176c4ff9abaf02e255440879c089f66e91582c720915"
+    sha256 cellar: :any, arm64_sonoma:  "34a03c29eafa2fed72cd8f065b6339b562019e3a84a7d1455be2b4748c6cb57d"
+    sha256 cellar: :any, arm64_ventura: "fc1623b314de7b4d3e138d0bed0fe271ae2da205eb032bc5da2462bd6927d318"
+    sha256 cellar: :any, sonoma:        "7b84b3449e6fab539f2a740c055419775388cf9155711adf63c88f3fe140d0ad"
+    sha256 cellar: :any, ventura:       "525804c85af78bda0109ba747ec613d6089312f9bc4d157d2fd1b0dde86c9d71"
+    sha256               arm64_linux:   "23221d5b0b3fe07ec7510852ed6cd065326204d26b95bd2ac254d07507cdd07b"
+    sha256               x86_64_linux:  "333c9fadf69b0e182ccca75f781c8017e5a5dbc2f0bde8924f6e59b0b1a47ac5"
   end
 
+  depends_on "meson" => :build
+  depends_on "scdoc" => :build
+  depends_on "libarchive"
   depends_on "ninja"
-  depends_on "pkg-config"
+  depends_on "pkgconf"
+
+  uses_from_macos "curl"
 
   def install
-    system "./bootstrap.sh", "build"
-    system "./build/muon", "setup", "-Dprefix=#{prefix}", "build"
-    system "ninja", "-C", "build"
-    system "./build/muon", "-C", "build", "install"
+    args = %w[
+      -Dman-pages=enabled
+      -Dmeson-docs=disabled
+      -Dmeson-tests=disabled
+      -Dlibarchive=enabled
+      -Dlibcurl=enabled
+      -Dlibpkgconf=enabled
+      -Dsamurai=disabled
+      -Dtracy=disabled
+      --force-fallback-for=tinyjson
+    ]
+
+    system "meson", "setup", "build", *args, *std_meson_args
+    system "meson", "compile", "-C", "build", "--verbose"
+    system "meson", "install", "-C", "build"
   end
 
   test do
-    (testpath/"helloworld.c").write <<~EOS
+    (testpath/"helloworld.c").write <<~C
       #include <stdio.h>
       int main() {
         puts("hi");
         return 0;
       }
-    EOS
-    (testpath/"meson.build").write <<~EOS
+    C
+    (testpath/"meson.build").write <<~MESON
       project('hello', 'c')
       executable('hello', 'helloworld.c')
-    EOS
+    MESON
 
     system bin/"muon", "setup", "build"
-    assert_predicate testpath/"build/build.ninja", :exist?
+    assert_path_exists testpath/"build/build.ninja"
 
     system "ninja", "-C", "build", "--verbose"
     assert_equal "hi", shell_output("build/hello").chomp

@@ -1,24 +1,22 @@
 class Libxmp < Formula
   desc "C library for playback of module music (MOD, S3M, IT, etc)"
   homepage "https://xmp.sourceforge.net/"
-  url "https://downloads.sourceforge.net/project/xmp/libxmp/4.6.0/libxmp-4.6.0.tar.gz"
-  sha256 "2d3c45fe523b50907e89e60f9a3b7f4cc9aab83ec9dbba7743eaffbcdcb35ea6"
+  url "https://downloads.sourceforge.net/project/xmp/libxmp/4.7.0/libxmp-4.7.0.tar.gz"
+  sha256 "b6251de1859352c6988752563d60983cb8aa9fd7dfe9f81b8bc6688da47f3464"
   license "LGPL-2.1-or-later"
+  compatibility_version 1
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "94c26999911fa5ebc6f479d16379a978991b4e9d27a32ae32ffe1009204e5bbd"
-    sha256 cellar: :any,                 arm64_ventura:  "029903dce869ca4f3f82fb7b01a8b0212e295cd196492054e91406f33854a2e6"
-    sha256 cellar: :any,                 arm64_monterey: "9c57ab8f4034df4437ab073dcee4620619ec871bafef40056211040cf4a5b39e"
-    sha256 cellar: :any,                 arm64_big_sur:  "dae1b586020c2313cb250cbae91dcf6d1c7460ba41140651a6adbcf36c4d5b5b"
-    sha256 cellar: :any,                 sonoma:         "93ba8ff0aad9a3eb3593c800a5b5f035c6ae88345226a455f7eb0bf8e509d1aa"
-    sha256 cellar: :any,                 ventura:        "a91c6641aeb8c38f4ad918552e2d800b11a71c079547e5fa4aaa191b2c90cb1b"
-    sha256 cellar: :any,                 monterey:       "86f47ba5a880837e146fcceff8f84e871f036819c113b37bfee14030c4f14705"
-    sha256 cellar: :any,                 big_sur:        "2f5fbbafd7ab69435770417e3f4a8733278a9c1c5ffef54917ac0959e12b244a"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "aeaed38946aed912b19cbd140270eeea27f60e5735b7840b64a6e51d836463b6"
+    sha256 cellar: :any,                 arm64_tahoe:   "88d5d2388523d805708402d5fcadb0f3063e7bf11f2d5fe8ddd035710efb50ee"
+    sha256 cellar: :any,                 arm64_sequoia: "f2e1fef29eb4abc782ab10aa63c6c72e1fefaaa22d9aafa2f466065ae83b3cc5"
+    sha256 cellar: :any,                 arm64_sonoma:  "8b6fc49f02c1f0d33ddf757dc1c6ac79ccb6abb286440458514bf4c7f4958de7"
+    sha256 cellar: :any,                 sonoma:        "08ee2e1f97a46b501c5a8b7d379c91374f52c1e24f988ea02198cb43d5b952d9"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "8cd5f291ec22438e9858e6004785557d40091ca60ca69383c39478b687f995fa"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "0dcdfe5efc08578f47881a4143f474122ba91a603c001ef0fb3ddedc9dbdcb68"
   end
 
   head do
-    url "https://git.code.sf.net/p/xmp/libxmp.git", branch: "master"
+    url "https://github.com/libxmp/libxmp.git", branch: "master"
     depends_on "autoconf" => :build
   end
 
@@ -31,7 +29,7 @@ class Libxmp < Formula
 
   def install
     system "autoconf" if build.head?
-    system "./configure", "--prefix=#{prefix}"
+    system "./configure", *std_configure_args
     system "make", "install"
 
     pkgshare.install resource("demo_mods")
@@ -39,7 +37,8 @@ class Libxmp < Formula
 
   test do
     test_mod = "#{pkgshare}/give-me-an-om.mod"
-    (testpath/"libxmp_test.c").write <<~EOS
+
+    (testpath/"libxmp_test.c").write <<~C
       #include <stdio.h>
       #include "xmp.h"
 
@@ -59,9 +58,9 @@ class Libxmp < Formula
           puts(mi.mod->name);
           return 0;
       }
-    EOS
+    C
 
     system ENV.cc, "libxmp_test.c", "-L#{lib}", "-lxmp", "-o", "libxmp_test"
-    assert_equal "give me an om", shell_output("\"#{testpath}/libxmp_test\" #{test_mod}").chomp
+    assert_equal "give me an om", shell_output("#{testpath}/libxmp_test #{test_mod}").chomp
   end
 end

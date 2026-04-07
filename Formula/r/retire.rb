@@ -1,20 +1,19 @@
 class Retire < Formula
   desc "Scanner detecting the use of JavaScript libraries with known vulnerabilities"
   homepage "https://retirejs.github.io/retire.js/"
-  url "https://registry.npmjs.org/retire/-/retire-5.2.2.tgz"
-  sha256 "2e5998d559f651ef813421b3d1f9fac1eb892647f21ccd9274d80dee4d68fce2"
+  url "https://registry.npmjs.org/retire/-/retire-5.4.2.tgz"
+  sha256 "49de4054a0dce5c990a3513fe5886c6c43bb0c236d199986090701e94f01e20e"
   license "Apache-2.0"
-  head "https://github.com/RetireJS/retire.js.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, all: "452c052a08345dda137e112a66ddd05221eeafccb45fc29f1022b864c05cd8c6"
+    sha256 cellar: :any_skip_relocation, all: "0c59e4ae0e2ad4c5459c63fff56eac6c09a2a0e3b1b0fba846c790b94a12ce24"
   end
 
   depends_on "node"
 
   def install
     system "npm", "install", *std_npm_args
-    bin.install_symlink Dir["#{libexec}/bin/*"]
+    bin.install_symlink libexec.glob("bin/*")
   end
 
   test do

@@ -1,59 +1,45 @@
 class Librest < Formula
   desc "Library to access RESTful web services"
-  homepage "https://wiki.gnome.org/Projects/Librest"
-  url "https://download.gnome.org/sources/rest/0.8/rest-0.8.1.tar.xz"
-  sha256 "0513aad38e5d3cedd4ae3c551634e3be1b9baaa79775e53b2dba9456f15b01c9"
+  homepage "https://gitlab.gnome.org/GNOME/librest"
+  url "https://download.gnome.org/sources/librest/0.10/librest-0.10.2.tar.xz"
+  sha256 "7b6cb912bb3a22cfa7dcf005925dcb62883024db0c09099486e7d6851185c9b8"
   license all_of: ["LGPL-2.1-or-later", "LGPL-3.0-or-later"]
-  revision 4
 
   # librest doesn't seem to follow the typical GNOME version scheme, so we
   # provide a regex to disable the `Gnome` strategy's version filtering.
   livecheck do
     url :stable
-    regex(/rest[._-]v?(\d+(?:\.\d+)+)\.t/i)
+    regex(/librest[._-]v?(\d+(?:\.\d+)+)\.t/i)
   end
 
   bottle do
-    rebuild 1
-    sha256                               arm64_sonoma:   "83899cbb34ed5f7f1015a92854e0593d720bdbe31d1f44a0b29e24823e26503d"
-    sha256                               arm64_ventura:  "5b9577e9c171c879a9fe98ed60239ac2997732b0d3d23be936ec4c8b51e660d7"
-    sha256                               arm64_monterey: "b82cb89cd5181ce20e2bce9f9255bd7878a13d9badb6c0c8fe633be3c1fe748a"
-    sha256                               arm64_big_sur:  "ce82e6e380a02285f90307b8609e63cba7dfa52a3d1fae7092296f49e67f624f"
-    sha256                               sonoma:         "d1addd9b604b10a54daecd910eeb9eb739349d9e46d2c9fe4c58d3c7d8e64def"
-    sha256                               ventura:        "0d09e17ff17368fce86679192c085e87cb17d48dc71e95cc27caa653b5ea614f"
-    sha256                               monterey:       "fc839b0cce9619c5489fe51408792ada7ab2a5569419cd38569ca13fa6ef356b"
-    sha256                               big_sur:        "83313f7234d69f6801104ba55c1b60933d8db57d8b8f818b336b8a498043b067"
-    sha256                               catalina:       "7616a630b4f286a28c6520917353196f29e5ddbc488bf6880d14cb518271ff26"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "8ea0c9d41ed04199de23e8cc5cc1b0dc8ea45e24f437b0b78dc823ce0dea0018"
+    sha256 cellar: :any, arm64_tahoe:   "4953ad6e88b6646bcf562d66193b617cbd2bba6c9dfecb37eed108f971be575b"
+    sha256 cellar: :any, arm64_sequoia: "22bd743bb1c8dd2453fd90278636395f2cafb6fe2adb734e67f1cfc2e7ac4333"
+    sha256 cellar: :any, arm64_sonoma:  "0a87dcb8ffcc161c718f36342ba14c14ed6f82bd4b4a54be4b0d54f0df3f1966"
+    sha256 cellar: :any, sonoma:        "f3019e4787530901ecbddda6775b47cedd8c44f1b7d7441e458675bc8ae31500"
+    sha256               arm64_linux:   "a2ed194719ac2d8318a309c63da0506d345c83691d1481ca4545579b874b40ef"
+    sha256               x86_64_linux:  "44ba6aff805854a906f060100e335f0d608618ceda53249ecd9c6b0d8b0df58d"
   end
 
   depends_on "gobject-introspection" => :build
-  depends_on "pkg-config" => :build
+  depends_on "meson" => :build
+  depends_on "ninja" => :build
+  depends_on "pkgconf" => [:build, :test]
 
   depends_on "glib"
-  depends_on "libsoup@2"
+  depends_on "json-glib"
+  depends_on "libsoup"
 
   uses_from_macos "libxml2"
 
-  on_macos do
-    depends_on "gettext"
-  end
-
   def install
-    ENV.prepend_path "PKG_CONFIG_PATH", Formula["libsoup@2"].opt_lib/"pkgconfig"
-    ENV.prepend_path "XDG_DATA_DIRS", Formula["libsoup@2"].opt_share
-    ENV.prepend_path "XDG_DATA_DIRS", HOMEBREW_PREFIX/"share"
-
-    system "./configure", "--disable-silent-rules",
-                          "--without-gnome",
-                          "--without-ca-certificates",
-                          "--enable-introspection=yes",
-                          *std_configure_args
-    system "make", "install"
+    system "meson", "setup", "build", "-Dexamples=false", "-Dgtk_doc=false", "-Dtests=false", *std_meson_args
+    system "meson", "compile", "-C", "build", "--verbose"
+    system "meson", "install", "-C", "build"
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <stdlib.h>
       #include <rest/rest-proxy.h>
 
@@ -64,20 +50,9 @@ class Librest < Formula
 
         return EXIT_SUCCESS;
       }
-    EOS
-    glib = Formula["glib"]
-    libsoup = Formula["libsoup@2"]
-    flags = %W[
-      -I#{libsoup.opt_include}/libsoup-2.4
-      -I#{glib.opt_include}/glib-2.0
-      -I#{glib.opt_lib}/glib-2.0/include
-      -I#{include}/rest-0.7
-      -L#{libsoup.opt_lib}
-      -L#{glib.opt_lib}
-      -L#{lib}
-      -lrest-0.7
-      -lgobject-2.0
-    ]
+    C
+
+    flags = shell_output("pkgconf --cflags --libs rest-1.0").chomp.split
     system ENV.cc, "test.c", "-o", "test", *flags
     system "./test"
   end

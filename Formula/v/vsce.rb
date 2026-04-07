@@ -1,32 +1,35 @@
 class Vsce < Formula
   desc "Tool for packaging, publishing and managing VS Code extensions"
   homepage "https://code.visualstudio.com/api/working-with-extensions/publishing-extension#vsce"
-  url "https://registry.npmjs.org/vsce/-/vsce-2.15.0.tgz"
-  sha256 "df4dd4002ad13c4787d29f4ced37133970c89db04af1c9041ad14b279b2a722f"
+  url "https://registry.npmjs.org/@vscode/vsce/-/vsce-3.7.1.tgz"
+  sha256 "aebab0210edcc5ddc5d3c90f420ba283dd6552968448714640fb78c2a0c4ce35"
   license "MIT"
   head "https://github.com/microsoft/vscode-vsce.git", branch: "main"
 
   livecheck do
-    url "https://registry.npmjs.org/vsce/latest"
-    regex(/["']version["']:\s*?["']([^"']+)["']/i)
+    url "https://registry.npmjs.org/@vscode/vsce/latest"
+    strategy :json do |json|
+      json["version"]
+    end
   end
 
   bottle do
     rebuild 1
-    sha256                               arm64_sonoma:   "48d0726cf723c7bc8a7cc6dc70ac7264acd991fb754d3f532221b30f46f69b06"
-    sha256                               arm64_ventura:  "0c6eb6b03b64e309d96faf44d2472a96d7fbcd3f6159530f46dd735b30ebd8a4"
-    sha256                               arm64_monterey: "3095ea99be11fdcba4cd2e1c5e347c6a11b68e32c401fd0e361262e0328b00ac"
-    sha256                               sonoma:         "afe4a6cf108c2aee2a672a8dff18b1161ca6c66da40a95527f366233000020fd"
-    sha256                               ventura:        "aad312e494c4dab3ec434fc833fe4d3390a0e2419b2ab4f9336cb43aafc1d318"
-    sha256                               monterey:       "d6d5b20923a47882415980fd659a0c3b5313811fa747fba41ed47acc2ab91dda"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "67ee6be7fadd75c972f68455ac4c3c75a9fa7f8de4ac1205dbb80df6d9889e66"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "d5dbdbbd13544c659059724ba4b29f8b458e777bb9068afccd635800c0cd4b73"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "d5dbdbbd13544c659059724ba4b29f8b458e777bb9068afccd635800c0cd4b73"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "d5dbdbbd13544c659059724ba4b29f8b458e777bb9068afccd635800c0cd4b73"
+    sha256 cellar: :any_skip_relocation, sonoma:        "697e277fb152068f51a02471c748118f6d6e47a74a059b3b1f4f915dc95eb093"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "fb6c71ce803227a87a139b666302048a8764083521124526920462df2778506d"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "51bd0dc9c14019f99dbfe25d4a164ed639347ef5ef346fa4ab574c5d08e871c2"
   end
 
+  depends_on "pkgconf" => :build
   depends_on "node"
 
   on_linux do
-    depends_on "pkg-config" => :build
+    depends_on "glib"
     depends_on "libsecret"
+    depends_on "zlib-ng-compat"
   end
 
   def install
@@ -35,7 +38,7 @@ class Vsce < Formula
   end
 
   test do
-    error = shell_output(bin/"vsce verify-pat 2>&1", 1)
-    assert_match "The Personal Access Token is mandatory", error
+    error = shell_output("#{bin}/vsce verify-pat 2>&1", 1)
+    assert_match "Extension manifest not found:", error
   end
 end

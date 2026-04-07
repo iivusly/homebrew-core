@@ -1,8 +1,8 @@
 class DnscryptProxy < Formula
   desc "Secure communications between a client and a DNS resolver"
   homepage "https://dnscrypt.info"
-  url "https://github.com/DNSCrypt/dnscrypt-proxy/archive/refs/tags/2.1.5.tar.gz"
-  sha256 "044c4db9a3c7bdcf886ff8f83c4b137d2fd37a65477a92bfe86bf69587ea7355"
+  url "https://github.com/DNSCrypt/dnscrypt-proxy/archive/refs/tags/2.1.15.tar.gz"
+  sha256 "57da91dd2a3992a1528e764bcfe9b48088c63c933c0c571a2cac3d27ac8c7546"
   license "ISC"
   head "https://github.com/DNSCrypt/dnscrypt-proxy.git", branch: "master"
 
@@ -12,14 +12,12 @@ class DnscryptProxy < Formula
   end
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "5ba1ce4730b6a4cfc8c9bc0dee6673fa4976fd93210a9cfd0bda31cf323d7788"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "1347d13d9ace17fc3ae034f12a3accff227cc6ae72a25a10981456fbd6de7d26"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "ed1192dffd1484ecfb6a5802a4e09ad00a16f5d907a09399cfc4132487ad8265"
-    sha256 cellar: :any_skip_relocation, sonoma:         "378fc9e369a39cd6a5274b8a6b61fecb9b409b36730aa1b8458fa7af78fe9495"
-    sha256 cellar: :any_skip_relocation, ventura:        "c27f790ca8f3e0c04b6f6cfc5fc0ccf7527d1e3447bd8728f15398731c008e19"
-    sha256 cellar: :any_skip_relocation, monterey:       "3624afaabee33cee1775589243dd20a6dfb9191bd5589d1a650ee3ee95d660e9"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "6deb6772518d34e6845e043bf3eb00bfc4831d7a2a422156cf5ba50388b88297"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "9f52afc199f9685dcfe202b307ab4dfb6570079b4ab0138b84db59b3be369931"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "9f52afc199f9685dcfe202b307ab4dfb6570079b4ab0138b84db59b3be369931"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "9f52afc199f9685dcfe202b307ab4dfb6570079b4ab0138b84db59b3be369931"
+    sha256 cellar: :any_skip_relocation, sonoma:        "adaf7f330014bb1479e5ca2afaa0ce0641d7248327bbf637ef26bb71e928c097"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "3ee8dd5efa82fd9c23293928ac29b523ed1a4afebacc80b26047c3bea0596edb"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "50ff10c841e16bc412d0d21d18f18a05909f8948a9861100f82b73cbfa0305fb"
   end
 
   depends_on "go" => :build

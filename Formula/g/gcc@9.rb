@@ -1,8 +1,8 @@
 class GccAT9 < Formula
   desc "GNU compiler collection"
   homepage "https://gcc.gnu.org/"
-  url "https://ftp.gnu.org/gnu/gcc/gcc-9.5.0/gcc-9.5.0.tar.xz"
-  mirror "https://ftpmirror.gnu.org/gcc/gcc-9.5.0/gcc-9.5.0.tar.xz"
+  url "https://ftpmirror.gnu.org/gnu/gcc/gcc-9.5.0/gcc-9.5.0.tar.xz"
+  mirror "https://ftp.gnu.org/gnu/gcc/gcc-9.5.0/gcc-9.5.0.tar.xz"
   sha256 "27769f64ef1d4cd5e2be8682c0c93f9887983e6cfd1a927ce5a0a2915a95cf8f"
   license "GPL-3.0-or-later" => { with: "GCC-exception-3.1" }
 
@@ -15,6 +15,7 @@ class GccAT9 < Formula
     sha256                               monterey:     "9aa22339b3002ae9b3bde3ed9034238d80b07cff4a5c3c60f3f3653f52c55ce3"
     sha256                               big_sur:      "ea000947da4131b653f137e3e275c061b34d7faa6b961896ecabc3717009df32"
     sha256                               catalina:     "464e3f7571feace6ab25eb79e10c5a882656f26cb83b07b4052020da152e0d96"
+    sha256 cellar: :any_skip_relocation, arm64_linux:  "1f64298822307229b75f242408db959d2013ca23f9da2579519234e95380e97c"
     sha256 cellar: :any_skip_relocation, x86_64_linux: "b42b21daea2631464b36bdb47c6fe99ed6f14e0fab563c89857d13b1466f4b40"
   end
 
@@ -23,20 +24,23 @@ class GccAT9 < Formula
   pour_bottle? only_if: :clt_installed
 
   depends_on maximum_macos: [:monterey, :build]
-  depends_on arch: :x86_64
   depends_on "gmp"
   depends_on "isl"
   depends_on "libmpc"
   depends_on "mpfr"
 
-  uses_from_macos "zlib"
+  on_macos do
+    depends_on arch: :x86_64
+    # Align dates to remove Intel macOS support with brew
+    # https://docs.brew.sh/Support-Tiers#future-macos-support
+    deprecate! date: "2025-09-18", because: :unsupported
+    disable! date: "2026-09-18", because: :unsupported
+  end
 
   on_linux do
     depends_on "binutils"
+    depends_on "zlib-ng-compat"
   end
-
-  # GCC bootstraps itself, so it is OK to have an incompatible C++ stdlib
-  cxxstdlib_check :skip
 
   def version_suffix
     version.major.to_s
@@ -79,7 +83,7 @@ class GccAT9 < Formula
       args << "--with-system-zlib"
 
       # Xcode 10 dropped 32-bit support
-      args << "--disable-multilib" if DevelopmentTools.clang_build_version >= 1000
+      args << "--disable-multilib"
 
       # Workaround for Xcode 12.5 bug on Intel
       # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=100340
@@ -102,6 +106,7 @@ class GccAT9 < Formula
       # Change the default directory name for 64-bit libraries to `lib`
       # https://www.linuxfromscratch.org/lfs/view/development/chapter06/gcc-pass2.html
       inreplace "gcc/config/i386/t-linux64", "m64=../lib64", "m64="
+      inreplace "gcc/config/aarch64/t-aarch64-linux", "lp64=../lib64", "lp64="
     end
 
     mkdir "build" do
@@ -214,18 +219,18 @@ class GccAT9 < Formula
   end
 
   test do
-    (testpath/"hello-c.c").write <<~EOS
+    (testpath/"hello-c.c").write <<~C
       #include <stdio.h>
       int main()
       {
         puts("Hello, world!");
         return 0;
       }
-    EOS
+    C
     system bin/"gcc-#{version.major}", "-o", "hello-c", "hello-c.c"
     assert_equal "Hello, world!\n", `./hello-c`
 
-    (testpath/"hello-cc.cc").write <<~EOS
+    (testpath/"hello-cc.cc").write <<~CPP
       #include <iostream>
       struct exception { };
       int main()
@@ -236,11 +241,11 @@ class GccAT9 < Formula
           catch (...) { }
         return 0;
       }
-    EOS
+    CPP
     system bin/"g++-#{version.major}", "-o", "hello-cc", "hello-cc.cc"
     assert_equal "Hello, world!\n", `./hello-cc`
 
-    (testpath/"test.f90").write <<~EOS
+    (testpath/"test.f90").write <<~FORTRAN
       integer,parameter::m=10000
       real::a(m), b(m)
       real::fact=0.5
@@ -250,7 +255,7 @@ class GccAT9 < Formula
       end do
       write(*,"(A)") "Done"
       end
-    EOS
+    FORTRAN
     system bin/"gfortran-#{version.major}", "-o", "test", "test.f90"
     assert_equal "Done\n", `./test`
   end

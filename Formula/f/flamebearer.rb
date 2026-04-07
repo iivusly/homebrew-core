@@ -6,21 +6,15 @@ class Flamebearer < Formula
   license "ISC"
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "c60358a7a0492572ad61ea16c4747366addf4d31e360c4a59ec9561f1d725d0c"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "c60358a7a0492572ad61ea16c4747366addf4d31e360c4a59ec9561f1d725d0c"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "c60358a7a0492572ad61ea16c4747366addf4d31e360c4a59ec9561f1d725d0c"
-    sha256 cellar: :any_skip_relocation, sonoma:         "461a3c6c6f5a9980766696e8bb718be59f6f758f07ca302a6be7ad97fba362da"
-    sha256 cellar: :any_skip_relocation, ventura:        "461a3c6c6f5a9980766696e8bb718be59f6f758f07ca302a6be7ad97fba362da"
-    sha256 cellar: :any_skip_relocation, monterey:       "461a3c6c6f5a9980766696e8bb718be59f6f758f07ca302a6be7ad97fba362da"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "703f25da914a0c179baf31870d97d396d5b3e8378ce7cefdf16e0c1809f072cd"
+    rebuild 2
+    sha256 cellar: :any_skip_relocation, all: "fa4b1af3c1cbdce03df418410f78ada2b106c7383539b2f7a9e5183ba2b75b71"
   end
 
   depends_on "node"
 
   def install
     system "npm", "install", *std_npm_args
-    bin.install_symlink Dir["#{libexec}/bin/*"]
+    bin.install_symlink libexec.glob("bin/*")
   end
 
   test do
@@ -34,6 +28,6 @@ class Flamebearer < Formula
         shell_output("#{Formula["node"].bin}/node --prof-process --preprocess -j #{logs.join(" ")}"),
       )
 
-    assert_predicate testpath/"flamegraph.html", :exist?
+    assert_path_exists testpath/"flamegraph.html"
   end
 end

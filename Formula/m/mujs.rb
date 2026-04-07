@@ -1,10 +1,11 @@
 class Mujs < Formula
   desc "Embeddable Javascript interpreter"
   homepage "https://www.mujs.com/"
-  url "https://mujs.com/downloads/mujs-1.3.5.tar.gz"
-  sha256 "78a311ae4224400774cb09ef5baa2633c26971513f8b931d3224a0eb85b13e0b"
+  url "https://mujs.com/downloads/mujs-1.3.9.tar.gz"
+  sha256 "956d5a20dd4efe5aa58673558787b9e2539255f9bf62585e90e1921fa040d89d"
   license "ISC"
-  head "https://github.com/ccxvii/mujs.git", branch: "master"
+  compatibility_version 1
+  head "https://codeberg.org/ccxvii/mujs.git", branch: "master"
 
   livecheck do
     url "https://mujs.com/downloads/"
@@ -12,19 +13,24 @@ class Mujs < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "730e76d17786653ff4a36ce09f749b203b6883195f645fefb9958d413a5cef66"
-    sha256 cellar: :any,                 arm64_ventura:  "bdc098dc98efa7aaa8ea6ddb60d8ee9213172c287a5c3118d0f9575b862f8305"
-    sha256 cellar: :any,                 arm64_monterey: "21a773ee06aae5577d93ce0ac15e87074fe99e93f1f2cbebb25d6c3c3f828c7c"
-    sha256 cellar: :any,                 sonoma:         "a9dff00d5a896f441559aed7e1cfa583938e7889fd7b6cf9f0522dc2c4ab8e87"
-    sha256 cellar: :any,                 ventura:        "171d8c3d6413c3a97c4d3dd39cb1babf13a92cd460f8803362a82d9ad513704e"
-    sha256 cellar: :any,                 monterey:       "4d25f724d36fc11718a2937dcf44e846156f7dd1c9dd4cc4fd0cdc28248be239"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "a5a378c307b4b3d0f14c3035959ea57f956023b93bc38011e9e8e7102b59b4ee"
+    sha256 cellar: :any,                 arm64_tahoe:   "2814b3eab41c69484ac739e66bfeaf6bb2f61b7df974c5866e3934844d8acc0b"
+    sha256 cellar: :any,                 arm64_sequoia: "0b8f0ef456a43755bc65a729760c2033f581db40b9843ac3247ef6aa79a2ddf5"
+    sha256 cellar: :any,                 arm64_sonoma:  "710aff8637dab71ffa1b013c9fe7108d7a14e644a252728674b82fe4d5dc62fb"
+    sha256 cellar: :any,                 sonoma:        "d3658e31032b05342d35990a7a4829922ddf5e40bfecd8c39669003bc50b154f"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "62a937838c05b66d72f159d3bbd0a5f16a9b4132de069cbb07a2f75a610ce202"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "6d65afabe2832997c8b0bac97b58f05a429b4404f726c089476fef68130df1da"
   end
 
-  depends_on "pkg-config" => :test
+  depends_on "pkgconf" => :test
 
   on_linux do
     depends_on "readline"
+  end
+
+  # update build for `utfdata.h`, upstream pr ref, https://github.com/ccxvii/mujs/pull/203
+  patch do
+    url "https://github.com/ccxvii/mujs/commit/e21c6bfdce374e19800f2455f45828a90fce39da.patch?full_index=1"
+    sha256 "e10de8b9c3a62ffe121b61fe60b67ba8faa68eaace9a3b17a13f46a2cc795a11"
   end
 
   def install
@@ -34,15 +40,15 @@ class Mujs < Formula
   end
 
   test do
-    (testpath/"test.js").write <<~EOS
+    (testpath/"test.js").write <<~JAVASCRIPT
       print('hello, world'.split().reduce(function (sum, char) {
         return sum + char.charCodeAt(0);
       }, 0));
-    EOS
+    JAVASCRIPT
     assert_equal "104", shell_output("#{bin}/mujs test.js").chomp
     # test pkg-config setup correctly
-    assert_match "-I#{include}", shell_output("pkg-config --cflags mujs")
-    assert_match "-L#{lib}", shell_output("pkg-config --libs mujs")
-    system "pkg-config", "--atleast-version=#{version}", "mujs"
+    assert_match "-I#{include}", shell_output("pkgconf --cflags mujs")
+    assert_match "-L#{lib}", shell_output("pkgconf --libs mujs")
+    system "pkgconf", "--atleast-version=#{version}", "mujs"
   end
 end

@@ -1,19 +1,18 @@
 class WoodpeckerCli < Formula
   desc "CLI client for the Woodpecker Continuous Integration server"
   homepage "https://woodpecker-ci.org/"
-  url "https://github.com/woodpecker-ci/woodpecker/archive/refs/tags/v2.7.0.tar.gz"
-  sha256 "4ea8563221807153302ebfc3d1f9c826cafadcaaffb2ee0fc3e2f67cf06988af"
+  url "https://github.com/woodpecker-ci/woodpecker/archive/refs/tags/v3.13.0.tar.gz"
+  sha256 "fd6a1bdd91bf5ff2dfdc801678de85e3d73718e0878e43766d56255ec91a4944"
   license "Apache-2.0"
   head "https://github.com/woodpecker-ci/woodpecker.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "62118fa8c27bc74a51b0b0dade07b6c5ff32a5b2e44ed77ecf950e57dc954aca"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "a54616f6b529a1fd6b9b0714e0bbc91e140a1ab972f27645653baf508872628c"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "a500dd4a280d84ae81a982ddb939354380d175157f7c5330a11884f0364eb9be"
-    sha256 cellar: :any_skip_relocation, sonoma:         "2a80c6d0c0890b3fd353cf81500ee528b5f8733aac652bb46823166c5b4305cf"
-    sha256 cellar: :any_skip_relocation, ventura:        "2b335c000d7f30904be9194261eecbd411ff86521e7baaa16b8e77beaea99f76"
-    sha256 cellar: :any_skip_relocation, monterey:       "a5029bff2021870610f4d0890b91741b2736a84646ef95924b6be9faabbf0abe"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "fbc089a3f76f42de6dbcaa6e417976c09b560f48abe97dd960524f7056791ba4"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "8fd4b19b9cfd0e7ba841f346e4f541fe1ad1b9dc73ba3741babe57027fb3f586"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "8fd4b19b9cfd0e7ba841f346e4f541fe1ad1b9dc73ba3741babe57027fb3f586"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "8fd4b19b9cfd0e7ba841f346e4f541fe1ad1b9dc73ba3741babe57027fb3f586"
+    sha256 cellar: :any_skip_relocation, sonoma:        "112c2d9fba139e54bd05cce40c4e1c62dd5d01285f46fce0b76607f108b86e80"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "a36e900e3891748e4a2063fe51398c9b9824aa3ed4e6cc030a1345955f446a12"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "0da612e7334c621f34092406f7ad1328696e911a9a82fb190593c9918a976958"
   end
 
   depends_on "go" => :build
@@ -25,7 +24,7 @@ class WoodpeckerCli < Formula
 
   test do
     output = shell_output("#{bin}/woodpecker-cli info 2>&1", 1)
-    assert_match "woodpecker-cli is not yet set up", output
+    assert_match "woodpecker-cli is not set up", output
 
     output = shell_output("#{bin}/woodpecker-cli lint 2>&1", 1)
     assert_match "could not detect pipeline config", output

@@ -1,23 +1,23 @@
 class Neomutt < Formula
   desc "E-mail reader with support for Notmuch, NNTP and much more"
   homepage "https://neomutt.org/"
-  url "https://github.com/neomutt/neomutt/archive/refs/tags/20240425.tar.gz"
-  sha256 "a5aed0a0f506260997821c23cb148bc5ca4938fd613e0e8b89556f397ffc17f7"
+  url "https://github.com/neomutt/neomutt/archive/refs/tags/20260406.tar.gz"
+  sha256 "bd6ef5aa0d53ee23ce15b0f8624a6450d119623931708df998c6ebee7e528d17"
   license "GPL-2.0-or-later"
+  version_scheme 1
   head "https://github.com/neomutt/neomutt.git", branch: "main"
 
   bottle do
-    sha256 arm64_sonoma:   "bc7fdea677bc8393abc760dcc3ee3be1628c41e17a227dd686e0433c7273bfed"
-    sha256 arm64_ventura:  "ac38b9aeecd87df8ab6e5a4fe24785c2b8801a2d10bcda667b85a63d5aad42cd"
-    sha256 arm64_monterey: "9327bfac4994e34c6199182aa61ba081bbbf871bc429acf7210f73e15edebd07"
-    sha256 sonoma:         "c9c3b1aa6564f0a440b2f419fd38a2f5d14a1fef5110024a546f9da0ee9f9ec6"
-    sha256 ventura:        "e79de801c9ce1aec01b0e9077a5be4fa96287fc86dc32bdd9b5193cdbf60c862"
-    sha256 monterey:       "465a0f3a2ffb435334fc71f15115b092a568cbf25995083a20ab0957f2831fd1"
-    sha256 x86_64_linux:   "e7647714a64ec9e65bcc014557938039aea02bcb435b24344bf30577840412b6"
+    sha256 arm64_tahoe:   "5187c6aa23a3639e1a26e40006b9cc3aeabfaacde7a35d946cb7bee1f6bc33f5"
+    sha256 arm64_sequoia: "0aa0e5169c531f71f22659975c32072209c3a15b42b64f897b5b45a6d9f332e0"
+    sha256 arm64_sonoma:  "ef4f61bc67d6f829513a45926bcfc42ab77a88121de9343398115a01974d25d3"
+    sha256 sonoma:        "3eafbe45cf4be3d97c8912aa5f4dde93766400e7a1a0f35c30eb01ed6f538e42"
+    sha256 arm64_linux:   "079e1204f13b47d41e2439a00efb6ddef8d75e19ddabd24e006b6c65ea8be7df"
+    sha256 x86_64_linux:  "b5f634193c40187d5002a7763df29049234c02b4a07c83175f5d762caa55c445"
   end
 
   depends_on "docbook-xsl" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   # The build breaks when it tries to use system `tclsh`.
   depends_on "tcl-tk" => :build
   depends_on "gettext"
@@ -35,13 +35,16 @@ class Neomutt < Formula
   uses_from_macos "libxslt" => :build # for xsltproc
   uses_from_macos "cyrus-sasl"
   uses_from_macos "krb5"
-  uses_from_macos "zlib"
 
   on_macos do
     depends_on "libgpg-error"
     # Build again libiconv for now on,
     # but reconsider when macOS 14.2 is released
     depends_on "libiconv"
+  end
+
+  on_linux do
+    depends_on "zlib-ng-compat"
   end
 
   def install
@@ -75,7 +78,6 @@ class Neomutt < Formula
   end
 
   test do
-    output = shell_output("#{bin}/neomutt -F /dev/null -Q debug_level")
-    assert_equal "set debug_level = 0", output.chomp
+    assert_match "set debug_level = 0", shell_output("#{bin}/neomutt -F /dev/null -Q debug_level")
   end
 end

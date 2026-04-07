@@ -1,23 +1,21 @@
 class Fnt < Formula
   desc "Apt for fonts, the missing font manager for macOS/linux"
   homepage "https://github.com/alexmyczko/fnt"
-  url "https://github.com/alexmyczko/fnt/archive/refs/tags/1.6.tar.gz"
-  sha256 "fc799acaa3cb9d038b26d753fb86e8cc5c09ffc3f3164c458b4d84827494c81e"
+  url "https://github.com/alexmyczko/fnt/archive/refs/tags/1.9.1.tar.gz"
+  sha256 "d3021cbed37ae39a58e8b18ed5bdc471a12660b12e368d91270b438e58df671f"
   license "MIT"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "c6cd82cb4d413c71869f4dca03328912c5f32f6b1f1e30fb229cc39cb9e972c3"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "c6cd82cb4d413c71869f4dca03328912c5f32f6b1f1e30fb229cc39cb9e972c3"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "c6cd82cb4d413c71869f4dca03328912c5f32f6b1f1e30fb229cc39cb9e972c3"
-    sha256 cellar: :any_skip_relocation, sonoma:         "a55fcbfa443ac93d1171748db6e6edafde0040f83d6ec1270a6a475af8104fb2"
-    sha256 cellar: :any_skip_relocation, ventura:        "a55fcbfa443ac93d1171748db6e6edafde0040f83d6ec1270a6a475af8104fb2"
-    sha256 cellar: :any_skip_relocation, monterey:       "a55fcbfa443ac93d1171748db6e6edafde0040f83d6ec1270a6a475af8104fb2"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "c6cd82cb4d413c71869f4dca03328912c5f32f6b1f1e30fb229cc39cb9e972c3"
+    sha256 cellar: :any_skip_relocation, all: "739eb3bc354e7cb07938c6e58079a7a56b143feacd8eecba4b841d6ac2b34ebb"
   end
 
   depends_on "chafa"
   depends_on "lcdf-typetools"
   depends_on "xz"
+
+  on_sonoma :or_older do
+    depends_on "coreutils" # needs md5sum
+  end
 
   def install
     bin.install "fnt"

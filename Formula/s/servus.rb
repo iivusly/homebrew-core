@@ -7,6 +7,8 @@ class Servus < Formula
   license "LGPL-3.0-only"
 
   bottle do
+    sha256 cellar: :any,                 arm64_tahoe:    "ab13ed2c0b20bf5161935890b6ee47ecf74f0a05c68e9beba5bbc3c77727fd6b"
+    sha256 cellar: :any,                 arm64_sequoia:  "e4e1dc29b490f71552d5037b7eec4b049884e7ab5942f543fc65392f856f6ce0"
     sha256 cellar: :any,                 arm64_sonoma:   "1ca10abd68ab48408bc5d5db44e2512345ceab9ba48765c61f6ac2079268dcb5"
     sha256 cellar: :any,                 arm64_ventura:  "1efa83c497c61c33ffaa0217aebd141898bd6b1ae4302116d8a9e7deb1737f53"
     sha256 cellar: :any,                 arm64_monterey: "ed3be1f83df1a364a0eb5161853e369777ee882950c8a7237ee5dd10fa6cf6b4"
@@ -16,9 +18,7 @@ class Servus < Formula
     sha256 cellar: :any,                 monterey:       "af895ca95876fe36403308b673b0d7a1fdf0b5579e3f651f0dbb9449ace86e65"
     sha256 cellar: :any,                 big_sur:        "4e2b2042868af63bf0d39f10821afdd04d37da37ad8ba4da41dff0a73fae7787"
     sha256 cellar: :any,                 catalina:       "e0629cca8bee46595c540c2240ed1cc599c5f676527a21f951bfc89a0335c54e"
-    sha256 cellar: :any,                 mojave:         "65921c797c3a2bf7953cf692dee5852de3fd6c2b2466268221a9dfcb7eab960e"
-    sha256 cellar: :any,                 high_sierra:    "763042d70e605154698d686554d26f6bab46f30200df8a8c3af9c40faeffca64"
-    sha256 cellar: :any,                 sierra:         "bcfa24ee0545c044c32391ac72d54a5151de64170c777409163c0688cd9bf671"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "eeb97d385641030178dc69f111e80af9c20ed5900aa48083006426755c1fed67"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "f36a572c2f9e4f6bb483e11b286ce99c37c4e45a3028a196478d6e9ccaedcb99"
   end
 
@@ -32,14 +32,16 @@ class Servus < Formula
   end
 
   def install
-    system "cmake", "-S", ".", "-B", "build", *std_cmake_args
+    # Workaround to build with CMake 4
+    args = %w[-DCMAKE_POLICY_VERSION_MINIMUM=3.5]
+    system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
   end
 
   test do
     # Embed "serializeable" test from the servus 1.5.0 source
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #define BOOST_TEST_MODULE servus_serializable
       #include <boost/test/unit_test.hpp>
 
@@ -128,7 +130,7 @@ class Servus < Formula
           // default toJson (unimplemented)
           BOOST_CHECK_THROW( obj.toJSON(), std::runtime_error );
       }
-    EOS
+    CPP
     system ENV.cxx, "test.cpp", "-L#{lib}", "-lServus", "-DBOOST_TEST_DYN_LINK",
                     "-L#{Formula["boost"].opt_lib}", "-lboost_unit_test_framework",
                     "-std=gnu++11", "-o", "test"

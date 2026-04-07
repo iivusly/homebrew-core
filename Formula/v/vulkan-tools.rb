@@ -1,29 +1,29 @@
 class VulkanTools < Formula
   desc "Vulkan utilities and tools"
   homepage "https://github.com/KhronosGroup/Vulkan-Tools"
-  url "https://github.com/KhronosGroup/Vulkan-Tools/archive/refs/tags/v1.3.295.tar.gz"
-  sha256 "caaf5972173e986605df279b5714f4fc0295769527372ec1752b87e001a8e7cf"
+  url "https://github.com/KhronosGroup/Vulkan-Tools/archive/refs/tags/vulkan-sdk-1.4.341.0.tar.gz"
+  sha256 "dc65f1ea97dd0b2155c2281a79e87d27183c0737fb96377744091a3c8460ae1e"
   license "Apache-2.0"
+  revision 1
   head "https://github.com/KhronosGroup/Vulkan-Tools.git", branch: "main"
 
   livecheck do
     url :stable
-    regex(/^v?(\d+(?:\.\d+)+)$/i)
+    regex(/^vulkan-sdk[._-]v?(\d+(?:\.\d+)+)$/i)
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "a1ddb5ed78903bdd0821809805c5849dc09e6dd77270d8eb342bdf42ab8b5da7"
-    sha256 cellar: :any,                 arm64_ventura:  "58bb9f4fbf9f4db3c272d235dfd39f45a0e7e3a954f9a4ee59c3867c842d3681"
-    sha256 cellar: :any,                 arm64_monterey: "53d46b185c346c9785fa7966e142eca3541948c5715c240c58161b71ea940a34"
-    sha256 cellar: :any,                 sonoma:         "f385f6e25348def071aa4f1b2227ffd7b25f818a78d085935e47160c205e4f28"
-    sha256 cellar: :any,                 ventura:        "2e507ab4231ddee93c6d42e6e43c6a4cb31abdcca056267e4f7f8aad1a305af6"
-    sha256 cellar: :any,                 monterey:       "fc0f619de7722d9add38b52e08244f866ff70b51259051778a1c4f77eabd2d78"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "d8c0f6a72c0b225450d0f1d15667699ff6ebc39502f3d1b05e49e1e53920aa10"
+    sha256                               arm64_tahoe:   "fe466af64eb0df78741dd5589227b82965852cdb0facdcc6678249b230ae53bf"
+    sha256                               arm64_sequoia: "ec4caa656999c05c1ea1bcf916a06311cd7ab99c95d5d1a51f88d3fc65d43671"
+    sha256                               arm64_sonoma:  "3041f942f46481d8d0c903306127f525a0e06cdf1fa43d2067bc74d9636ce0be"
+    sha256 cellar: :any,                 sonoma:        "351bae3eac14ac1ce4a2e287eab054667447e4f63184491a9a08e490e5876c87"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "ee0b9073a9d84d9f838d4c11a074ed078fa1b9183ed21387028156b04cb6842a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "42cb62a3d420ec2e1eee6c3cba7a8ae54c26a0c6d68871fe7cc580ba96e594e7"
   end
 
   depends_on "cmake" => :build
-  depends_on "python@3.12" => :build
-  depends_on "vulkan-volk" => :build
+  depends_on "pkgconf" => :build
+  depends_on xcode: :build # for ibtool
   depends_on "glslang"
   depends_on "vulkan-headers"
   depends_on "vulkan-loader"
@@ -33,7 +33,6 @@ class VulkanTools < Formula
   end
 
   on_linux do
-    depends_on "pkg-config" => :build
     depends_on "libx11"
     depends_on "libxcb"
     depends_on "libxkbfile"
@@ -47,20 +46,16 @@ class VulkanTools < Formula
       # account for using already-built MoltenVK instead of the source repo
       inreplace "cube/CMakeLists.txt",
                 "${MOLTENVK_DIR}/MoltenVK/icd/MoltenVK_icd.json",
-                "${MOLTENVK_DIR}/share/vulkan/icd.d/MoltenVK_icd.json"
-      inreplace buildpath.glob("*/macOS/*/CMakeLists.txt") do |s|
-        s.gsub! "${MOLTENVK_DIR}/MoltenVK/include",
-                "${MOLTENVK_DIR}/include"
-        s.gsub! "${MOLTENVK_DIR}/Package/Release/MoltenVK/dynamic/dylib/macOS/libMoltenVK.dylib",
+                "${MOLTENVK_DIR}/etc/vulkan/icd.d/MoltenVK_icd.json"
+      inreplace buildpath.glob("*/macOS/*/CMakeLists.txt"),
+                "${MOLTENVK_DIR}/Package/Release/MoltenVK/dynamic/dylib/macOS/libMoltenVK.dylib",
                 "${MOLTENVK_DIR}/lib/libMoltenVK.dylib"
-      end
     end
 
     args = [
       "-DBUILD_ICD=ON",
       "-DBUILD_CUBE=ON",
       "-DBUILD_VULKANINFO=ON",
-      "-DTOOLS_CODEGEN=ON", # custom codegen
       "-DINSTALL_ICD=OFF", # we will manually place it in a nonconflicting location
       "-DGLSLANG_INSTALL_DIR=#{Formula["glslang"].opt_prefix}",
       "-DVULKAN_HEADERS_INSTALL_DIR=#{Formula["vulkan-headers"].opt_prefix}",
@@ -108,7 +103,17 @@ class VulkanTools < Formula
   end
 
   test do
-    ENV["VK_ICD_FILENAMES"] = lib/"mock_icd/VkICD_mock_icd.json"
-    system bin/"vulkaninfo", "--summary"
+    with_env(VK_ICD_FILENAMES: lib/"mock_icd/VkICD_mock_icd.json") do
+      assert_match "Vulkan Mock Device", shell_output("#{bin}/vulkaninfo --summary")
+    end
+
+    return if !OS.mac? || (Hardware::CPU.intel? && ENV["HOMEBREW_GITHUB_ACTIONS"])
+
+    # Disable Metal argument buffers for macOS Sonoma on arm
+    ENV["MVK_CONFIG_USE_METAL_ARGUMENT_BUFFERS"] = "0" if MacOS.version == :sonoma
+
+    with_env(XDG_DATA_DIRS: testpath) do
+      assert_match "DRIVER_ID_MOLTENVK", shell_output("#{bin}/vulkaninfo --summary")
+    end
   end
 end

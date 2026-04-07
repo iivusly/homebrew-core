@@ -1,44 +1,47 @@
 class Fizz < Formula
   desc "C++14 implementation of the TLS-1.3 standard"
   homepage "https://github.com/facebookincubator/fizz"
-  url "https://github.com/facebookincubator/fizz/releases/download/v2024.08.26.00/fizz-v2024.08.26.00.tar.gz"
-  sha256 "551523d0630c51f9df38c1e3029403299aad2540bf06b78fda69ccae56db6d5d"
+  url "https://github.com/facebookincubator/fizz/archive/refs/tags/v2026.03.30.00.tar.gz"
+  sha256 "ccf686c3dd0037012cc626e0127df76ccd7ebd8ca0499cc550c0f49382dbb533"
   license "BSD-3-Clause"
+  compatibility_version 1
   head "https://github.com/facebookincubator/fizz.git", branch: "main"
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any,                 arm64_sonoma:   "3d8a91cfe4802bd9b3d56aa7b8fe812e7f7457708617c473c7239a2c5911f24c"
-    sha256 cellar: :any,                 arm64_ventura:  "31aa7c93301780c9854395be52ef20e6def30ff596a4b294d5d86009289c68aa"
-    sha256 cellar: :any,                 arm64_monterey: "e572b3a59435ee5c2a9fde8210b59184d6c6145ea1a54a39e4fcf6ffdb2c9c84"
-    sha256 cellar: :any,                 sonoma:         "8f80aedd89eb4941f7fe64154fed1dc2d4d6dd7340923ed6b083fd69b8cf01d2"
-    sha256 cellar: :any,                 ventura:        "33ba6b8a1328f7632cb72a591eafc982e1b3977ed78afa7e62f06e7aedae1443"
-    sha256 cellar: :any,                 monterey:       "e58084ea7fb7ee4fe28272ca071785477cce5d7e9662a30555018b4947869325"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "d7e975c0052dca9bbc146f105b5e7df789675d9790d21a82084a2381b1a13081"
+    sha256 cellar: :any,                 arm64_tahoe:   "997c8d0117b8540857ffeabcb410cd358d1dd0ac33d6c8680c9637215348c02e"
+    sha256 cellar: :any,                 arm64_sequoia: "1394e9c9a6c4094a671438b9dfb53777c7965aeb6f63e2e8e09f2d07b67d0cfe"
+    sha256 cellar: :any,                 arm64_sonoma:  "0d998567e4883298aed0e17251345c1180b3a70df32f2da38a90f77ebf1de91f"
+    sha256 cellar: :any,                 sonoma:        "157aef22dee65b44b5dbcc6db3f7f809a1d32f1efdb6929c3095f556b73155e3"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "51637620c794ebd11d43bc0cffef1430a32ea19ab55c2dc2175de5a4bcd2ad74"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "802b03d2a901f972a79e13ad2643b91acc6546a04e668aa381937937a57ba558"
   end
 
   depends_on "cmake" => [:build, :test]
+  depends_on "gflags" => :build
   depends_on "libevent" => :build
-  depends_on "double-conversion"
   depends_on "fmt"
   depends_on "folly"
-  depends_on "gflags"
   depends_on "glog"
   depends_on "libsodium"
   depends_on "openssl@3"
   depends_on "zstd"
 
-  uses_from_macos "zlib"
-
-  fails_with gcc: "5"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
-    args = ["-DBUILD_TESTS=OFF", "-DBUILD_SHARED_LIBS=ON", "-DCMAKE_INSTALL_RPATH=#{rpath}"]
+    args = %W[
+      -DBUILD_EXAMPLES=OFF
+      -DBUILD_TESTS=OFF
+      -DBUILD_SHARED_LIBS=ON
+      -DCMAKE_INSTALL_RPATH=#{rpath}
+    ]
     if OS.mac?
       # Prevent indirect linkage with boost and snappy.
-      args += [
-        "-DCMAKE_EXE_LINKER_FLAGS=-Wl,-dead_strip_dylibs",
-        "-DCMAKE_SHARED_LINKER_FLAGS=-Wl,-dead_strip_dylibs",
+      args += %w[
+        -DCMAKE_EXE_LINKER_FLAGS=-Wl,-dead_strip_dylibs
+        -DCMAKE_SHARED_LINKER_FLAGS=-Wl,-dead_strip_dylibs
       ]
     end
     system "cmake", "-S", "fizz", "-B", "build", *args, *std_cmake_args
@@ -58,7 +61,7 @@ class Fizz < Formula
   end
 
   test do
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include <fizz/client/AsyncFizzClient.h>
       #include <iostream>
 
@@ -66,12 +69,12 @@ class Fizz < Formula
         auto context = fizz::client::FizzClientContext();
         std::cout << toString(context.getSupportedVersions()[0]) << std::endl;
       }
-    EOS
+    CPP
 
-    (testpath/"CMakeLists.txt").write <<~EOS
-      cmake_minimum_required(VERSION 3.5)
+    (testpath/"CMakeLists.txt").write <<~CMAKE
+      cmake_minimum_required(VERSION 4.0)
       project(test LANGUAGES CXX)
-      set(CMAKE_CXX_STANDARD 17)
+      set(CMAKE_CXX_STANDARD 20)
 
       list(APPEND CMAKE_MODULE_PATH "#{libexec}/cmake")
       find_package(gflags REQUIRED)
@@ -79,11 +82,13 @@ class Fizz < Formula
 
       add_executable(test test.cpp)
       target_link_libraries(test fizz::fizz)
-    EOS
+    CMAKE
 
     ENV.delete "CPATH"
-    system "cmake", ".", *std_cmake_args
-    system "cmake", "--build", "."
-    assert_match "TLS", shell_output("./test")
+
+    args = OS.mac? ? [] : ["-DCMAKE_BUILD_RPATH=#{lib};#{HOMEBREW_PREFIX}/lib"]
+    system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
+    system "cmake", "--build", "build"
+    assert_match "TLS", shell_output("./build/test")
   end
 end

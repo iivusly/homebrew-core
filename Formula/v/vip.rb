@@ -1,7 +1,7 @@
 class Vip < Formula
   desc "Program that provides for interactive editing in a pipeline"
-  homepage "https://www.cs.duke.edu/~des/vip.html"
-  url "https://www.cs.duke.edu/~des/scripts/vip"
+  homepage "https://users.cs.duke.edu/~des/vip.html"
+  url "https://users.cs.duke.edu/~des/scripts/vip"
   version "19971113"
   sha256 "171278e8bd43abdbd3a4c35addda27a0d3c74fc784dbe60e4783d317ac249d11"
   # Permission is granted to reproduce and distribute this program
@@ -28,6 +28,8 @@ class Vip < Formula
     end
   end
 
+  no_autobump! because: :incompatible_version_format
+
   bottle do
     rebuild 2
     sha256 cellar: :any_skip_relocation, all: "4168bb377aa3ca2722f484c1bfbd8c5d89e9231565439ac1ad2ad06ddfeb3d20"
@@ -40,7 +42,7 @@ class Vip < Formula
 
   # use awk and /var/tmp as temporary directory
   patch do
-    url "https://raw.githubusercontent.com/Homebrew/formula-patches/85fa66a9/vip/19971113.patch"
+    url "https://raw.githubusercontent.com/Homebrew/homebrew-core/1cf441a0/Patches/vip/19971113.patch"
     sha256 "96879c8d778f21b21aa27eb138424a82ffa8e8192b8cf15b2c4a5794908ef790"
   end
 

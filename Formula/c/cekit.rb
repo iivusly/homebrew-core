@@ -3,31 +3,30 @@ class Cekit < Formula
 
   desc "Container Evolution Kit"
   homepage "https://cekit.io"
-  url "https://files.pythonhosted.org/packages/45/68/5adda4ed0c9f5443110ac7b3c41f5492f09d34d939c39fccba6b0a5a00e9/cekit-4.13.0.tar.gz"
-  sha256 "be38d96435c645504698afbc55b73c5737f7b79b574d3e796e19301012e91318"
+  url "https://files.pythonhosted.org/packages/13/3c/099c13b239c38a09de0225cf7240bc216ff530bb7966bd76bda912552b85/cekit-4.16.0.tar.gz"
+  sha256 "1a8bd5c3e86713e28ac01e884cdb7df758791fb022d0beff87ff33d504aa48c9"
   license "MIT"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "fb0a95631a856938106488e9a6d23cbe53b8b36dc0782cb932b0a3cf5a6420d3"
-    sha256 cellar: :any,                 arm64_ventura:  "9f8c0f38b03c397767ce0cba8579f94ecd19d254aa71a849af983cfe351cfdfc"
-    sha256 cellar: :any,                 arm64_monterey: "e490ba9b58d640414d7977df4b80049f0d67c0749985ae3da52f16385428f266"
-    sha256 cellar: :any,                 sonoma:         "5cc6fddf2a194819e118839705788373cdf8522cc1c527a6e1265d37d3525b5b"
-    sha256 cellar: :any,                 ventura:        "aee9f1d7194d2abcfdb96a7cc490bd5c2f769d889b2d8806233674201542ddf5"
-    sha256 cellar: :any,                 monterey:       "4f9b79d9101aa3e7d2955ed99723a179edfbfbae96f7f1178ee4000cbd6be881"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "d6ceaba47f98eaff881e69d124e2302d94433a2496443188eda8b1baf63c5327"
+    sha256 cellar: :any,                 arm64_tahoe:   "87c37dcbed05db79ec5b50b9276dcf59b919651359aaa4f6dc32d288752eaafe"
+    sha256 cellar: :any,                 arm64_sequoia: "c835d727e0ba9e7433e09aa85f49dffc90a4d55e68c39f643b5c584ce98799e9"
+    sha256 cellar: :any,                 arm64_sonoma:  "c41f78aaf385b0bcae1fd86833ce720883c1f8f93a277e2022c6cbd372065029"
+    sha256 cellar: :any,                 sonoma:        "edb62835bb61b5103635737185c0b0d05f03c6dbcc46d8eea531c9be08bf7e3a"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "c51f4773091b2ebd1eaf8150882fbf92e26354ce249d35d056418b57c4b0a1c7"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "298b831ac276a17cc40a389484be26ea952a061d83cf7aeb78ce3c97cdc0fe39"
   end
 
   depends_on "libyaml"
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   resource "click" do
-    url "https://files.pythonhosted.org/packages/96/d3/f04c7bfcf5c1862a2a5b845c6b2b360488cf47af55dfa79c98f6a6bf98b5/click-8.1.7.tar.gz"
-    sha256 "ca9853ad459e787e2192211578cc907e7594e294c7ccc834310722b41b9ca6de"
+    url "https://files.pythonhosted.org/packages/3d/fa/656b739db8587d7b5dfa22e22ed02566950fbfbcdc20311993483657a5c0/click-8.3.1.tar.gz"
+    sha256 "12ff4785d337a1bb490bb7e9c2b1ee5da3112e94a8622f26a6c77f5d2fc6842a"
   end
 
   resource "colorlog" do
-    url "https://files.pythonhosted.org/packages/db/38/2992ff192eaa7dd5a793f8b6570d6bbe887c4fbbf7e72702eb0a693a01c8/colorlog-6.8.2.tar.gz"
-    sha256 "3e3e079a41feb5a1b64f978b5ea4f46040a94f11f0e8bbb8261e3dbbeca64d44"
+    url "https://files.pythonhosted.org/packages/a2/61/f083b5ac52e505dfc1c624eafbf8c7589a0d7f32daa398d2e7590efa5fda/colorlog-6.10.1.tar.gz"
+    sha256 "eb4ae5cb65fe7fec7773c2306061a8e63e02efc2c72eba9d27b0fa23c94f1321"
   end
 
   resource "docopt" do
@@ -36,18 +35,18 @@ class Cekit < Formula
   end
 
   resource "jinja2" do
-    url "https://files.pythonhosted.org/packages/ed/55/39036716d19cab0747a5020fc7e907f362fbf48c984b14e62127f7e68e5d/jinja2-3.1.4.tar.gz"
-    sha256 "4a3aee7acbbe7303aede8e9648d13b8bf88a429282aa6122a993f0ac800cb369"
+    url "https://files.pythonhosted.org/packages/df/bf/f7da0350254c0ed7c72f3e33cef02e048281fec7ecec5f032d4aac52226b/jinja2-3.1.6.tar.gz"
+    sha256 "0137fb05990d35f1275a587e9aee6d56da821fc83491a0fb838183be43f66d6d"
   end
 
   resource "markupsafe" do
-    url "https://files.pythonhosted.org/packages/87/5b/aae44c6655f3801e81aa3eef09dbbf012431987ba564d7231722f68df02d/MarkupSafe-2.1.5.tar.gz"
-    sha256 "d283d37a890ba4c1ae73ffadf8046435c76e7bc2247bbb63c00bd1a709c6544b"
+    url "https://files.pythonhosted.org/packages/7e/99/7690b6d4034fffd95959cbe0c02de8deb3098cc577c67bb6a24fe5d7caa7/markupsafe-3.0.3.tar.gz"
+    sha256 "722695808f4b6457b320fdc131280796bdceb04ab50fe1795cd540799ebe1698"
   end
 
   resource "packaging" do
-    url "https://files.pythonhosted.org/packages/51/65/50db4dda066951078f0a96cf12f4b9ada6e4b811516bf0262c0f4f7064d4/packaging-24.1.tar.gz"
-    sha256 "026ed72c8ed3fcce5bf8950572258698927fd1dbda10a5e981cdf0ac37f4f002"
+    url "https://files.pythonhosted.org/packages/65/ee/299d360cdc32edc7d2cf530f3accf79c4fca01e96ffc950d8a52213bd8e4/packaging-26.0.tar.gz"
+    sha256 "00243ae351a257117b6a241061796684b084ed1c516a08c48a3f7e147a9d80b4"
   end
 
   resource "pykwalify" do
@@ -61,48 +60,39 @@ class Cekit < Formula
   end
 
   resource "pyyaml" do
-    url "https://files.pythonhosted.org/packages/54/ed/79a089b6be93607fa5cdaedf301d7dfb23af5f25c398d5ead2525b063e17/pyyaml-6.0.2.tar.gz"
-    sha256 "d584d9ec91ad65861cc08d42e834324ef890a082e591037abe114850ff7bbc3e"
+    url "https://files.pythonhosted.org/packages/05/8e/961c0007c59b8dd7729d542c61a4d537767a59645b82a0b521206e1e25c2/pyyaml-6.0.3.tar.gz"
+    sha256 "d76623373421df22fb4cf8817020cbb7ef15c725b9d5e45f17e189bfc384190f"
   end
 
   resource "ruamel-yaml" do
-    url "https://files.pythonhosted.org/packages/29/81/4dfc17eb6ebb1aac314a3eb863c1325b907863a1b8b1382cdffcb6ac0ed9/ruamel.yaml-0.18.6.tar.gz"
-    sha256 "8b27e6a217e786c6fbe5634d8f3f11bc63e0f80f6a5890f28863d9c45aac311b"
-  end
-
-  resource "ruamel-yaml-clib" do
-    url "https://files.pythonhosted.org/packages/46/ab/bab9eb1566cd16f060b54055dd39cf6a34bfa0240c53a7218c43e974295b/ruamel.yaml.clib-0.2.8.tar.gz"
-    sha256 "beb2e0404003de9a4cab9753a8805a8fe9320ee6673136ed7f04255fe60bb512"
+    url "https://files.pythonhosted.org/packages/c7/3b/ebda527b56beb90cb7652cb1c7e4f91f48649fbcd8d2eb2fb6e77cd3329b/ruamel_yaml-0.19.1.tar.gz"
+    sha256 "53eb66cd27849eff968ebf8f0bf61f46cdac2da1d1f3576dd4ccee9b25c31993"
   end
 
   resource "six" do
-    url "https://files.pythonhosted.org/packages/71/39/171f1c67cd00715f190ba0b100d606d440a28c93c7714febeca8b79af85e/six-1.16.0.tar.gz"
-    sha256 "1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"
+    url "https://files.pythonhosted.org/packages/94/e7/b2c673351809dca68a0e064b6af791aa332cf192da575fd474ed7d6f16a2/six-1.17.0.tar.gz"
+    sha256 "ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81"
   end
 
   def install
-    # Work around ruamel.yaml.clib not building on Xcode 15.3, remove after a new release
-    # has resolved: https://sourceforge.net/p/ruamel-yaml-clib/tickets/32/
-    ENV.append_to_cflags "-Wno-incompatible-function-pointer-types" if DevelopmentTools.clang_build_version >= 1500
-
     virtualenv_install_with_resources
 
-    generate_completions_from_executable(bin/"cekit", shells: [:fish, :zsh], shell_parameter_format: :click)
+    generate_completions_from_executable(bin/"cekit", shell_parameter_format: :click)
   end
 
   test do
     assert_match version.to_s, shell_output("#{bin}/cekit --version")
-    (testpath/"test.yml").write <<~EOS
+    (testpath/"test.yml").write <<~YAML
       schema_version: 1
       from: "scratch"
       name: &name "test"
       version: &version "0.0.1"
       description: "Test Description"
-    EOS
+    YAML
     assert_match "INFO  Finished!",
 shell_output("#{bin}/cekit --descriptor #{testpath}/test.yml build --dry-run docker 2>&1")
-    system bin/"cekit", "--descriptor", "#{testpath}/test.yml", "build", "--dry-run", "docker"
-    assert_predicate testpath/"target/image/Dockerfile", :exist?
+    system bin/"cekit", "--descriptor", testpath/"test.yml", "build", "--dry-run", "docker"
+    assert_path_exists testpath/"target/image/Dockerfile"
     assert_match "FROM scratch", File.read(testpath/"target/image/Dockerfile")
   end
 end

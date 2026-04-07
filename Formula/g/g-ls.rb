@@ -1,19 +1,18 @@
 class GLs < Formula
   desc "Powerful and cross-platform ls"
   homepage "https://g.equationzhao.space"
-  url "https://github.com/Equationzhao/g/archive/refs/tags/v0.29.0.tar.gz"
-  sha256 "c76566378d8aca166ba33e441d9730e01838ade28f221e9256d5123c1d75e560"
+  url "https://github.com/Equationzhao/g/archive/refs/tags/v0.31.2.tar.gz"
+  sha256 "a1ef8a6872fa80625287c19167152081b833abc4db88910ab145b35b3bbc6da3"
   license "MIT"
   head "https://github.com/Equationzhao/g.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "b4ab4e88bf5ea2d58748f80ee923e7fa4098bd3359181024f07eacd372dce51a"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "f6c823cd9480687caa3f4df92dc5fd8495fed9b9f7fa4e8bd0e97a6a753ad657"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "1d7b1e0b9b17e8b1567eeac93a8cc46ebe8094348ffc8108c1594bac6be2bf53"
-    sha256 cellar: :any_skip_relocation, sonoma:         "9be4467bb38010cfe2f42c99119eabcb08e1f08649a5a0ceae389ef6bf8ba302"
-    sha256 cellar: :any_skip_relocation, ventura:        "98b43c29665fe23dcda5c677e766686a51cbb1e0e86a7741fb5a7d272b9cb490"
-    sha256 cellar: :any_skip_relocation, monterey:       "3d281739ac9228f5285a84dce93af1f16bff71d3aff2249d988896c15b5eef5d"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "0362f1f6586b1588c894f64b54af22a87aae22cfac101730aa49e5c47e8278d5"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "c10dd7d5f17f3f28774bce6f3337fea1448c43c69ce13a2348bc703ba5358d2f"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "410ebe35920decbb9a8d33a277e5bba7cf0c539768a84522d035f0983d4a6bf2"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "25a7a46ea6ea08bf6bd69a85dfa3ebe6e6193e87e95ee2eb02c113fe1e7f81ee"
+    sha256 cellar: :any_skip_relocation, sonoma:        "a5ae88093499d0e6581b7db2078cc73fdb34e5aee1cc2420b49bf5098b6564c0"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "aeb4dbf3c8c017ccfcd4ec77abc39842329e2e793f1bc0a1bb976d7a1e490389"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "67cfa779494f020ecbc18a8342b430829d8b53b3ff31696402e6efa41d4c3d07"
   end
 
   depends_on "go" => :build
@@ -21,8 +20,10 @@ class GLs < Formula
   def install
     system "go", "build", *std_go_args(output: bin/"g", ldflags: "-s -w")
 
-    man1.install buildpath.glob("man/*.1.gz")
+    bash_completion.install "completions/bash/g-completion.bash" => "g"
+    fish_completion.install "completions/fish/g.fish"
     zsh_completion.install "completions/zsh/_g"
+    man1.install buildpath.glob("man/*.1.gz")
   end
 
   test do

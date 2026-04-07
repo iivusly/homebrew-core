@@ -14,6 +14,8 @@ class Opendbx < Formula
   end
 
   bottle do
+    sha256 arm64_tahoe:    "8cc990504a450685d677e758cf6741b058dd5b82e1ddf2f10c1e70bac003d58a"
+    sha256 arm64_sequoia:  "b355d6e9d840dd066aa4e71bbc2b4ebcca2f13741b07153fcc91a159b0d1665c"
     sha256 arm64_sonoma:   "f5a84ad8458393c0dea21c9e640de968ae3184ddfcf0cf3f25136d376622d564"
     sha256 arm64_ventura:  "847f22724b3cd9e0fe820e25fdf778e5190f347b2bba2b81fda5753dacf44d67"
     sha256 arm64_monterey: "40c22caf4823f43a2014c73f4ef86a2f6556107c2e5752975ddbf1924c9bc80c"
@@ -23,9 +25,7 @@ class Opendbx < Formula
     sha256 monterey:       "7002fcd03b711f7dbefacd3287435d2ec4fbf96f6410dcefc1fb0d36bc3a2f25"
     sha256 big_sur:        "80d655556c77aeb341dd0fc52d70e61dfd8a3518cf689bcb68af6f0aacc04bd5"
     sha256 catalina:       "9a95027d4121667ec569d3aac52ec540a0aacd393e584b503aae73f35808ab0d"
-    sha256 mojave:         "9f4ed6175131681d7aa68a5cc62a3fab535f428f05982873c756d534ce4a71f9"
-    sha256 high_sierra:    "8acc7893f16018ca7946d5a087459f7defbaa3fa3a17759d9eec5eaaffd27458"
-    sha256 sierra:         "4adab552ad5d1fca471ba71734b784de2d6005717cef6908c0e8366b217c4dd1"
+    sha256 arm64_linux:    "16be2c0b756f68f456251052c96ac4436e92a96be74ff9c0e2d935be95bd2e62"
     sha256 x86_64_linux:   "9ef3f4d6acb641cbe910f05f8ec191ffdc886b80c1bed89a962a27031071a940"
   end
 
@@ -33,25 +33,28 @@ class Opendbx < Formula
   depends_on "sqlite"
 
   def install
+    ENV.cxx11
+
     # Reported upstream: http://bugs.linuxnetworks.de/index.php?do=details&id=40
     inreplace "utils/Makefile.in", "$(LIBSUFFIX)", ".dylib" if OS.mac?
 
-    system "./configure", "--disable-dependency-tracking",
-                          "--prefix=#{prefix}",
-                          "--with-backends=sqlite3"
-    system "make"
+    args = []
+    # Help old config scripts identify arm64 linux
+    args << "--build=aarch64-unknown-linux-gnu" if OS.linux? && Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
+
+    system "./configure", "--with-backends=sqlite3", *args, *std_configure_args
     system "make", "install"
   end
 
   test do
     testfile = testpath/"test.sql"
-    testfile.write <<~EOS
+    testfile.write <<~SQL
       create table t(x);
       insert into t values("Hello");
       .header
       select * from t;
       .quit
-    EOS
+    SQL
 
     assert_match '"Hello"',
       pipe_output("#{bin}/odbx-sql odbx-sql -h ./ -d test.sqlite3 -b sqlite3", (testpath/"test.sql").read)

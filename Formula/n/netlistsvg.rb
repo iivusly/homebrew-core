@@ -15,11 +15,11 @@ class Netlistsvg < Formula
 
   def install
     system "npm", "install", *std_npm_args
-    bin.install_symlink Dir["#{libexec}/bin/*"]
+    bin.install_symlink libexec.glob("bin/*")
   end
 
   test do
-    (testpath/"dff.v").write <<~EOS
+    (testpath/"dff.v").write <<~VERILOG
       module DFF (output reg Q, input C, D, R);
       always @(posedge C)
         if (~R) begin
@@ -28,9 +28,9 @@ class Netlistsvg < Formula
             Q <= D;
         end
       endmodule
-    EOS
+    VERILOG
     system "yosys -q -p \"prep -top DFF; write_json dff.json\" dff.v"
     system bin/"netlistsvg", "dff.json", "-o", "dff.svg"
-    assert_predicate testpath/"dff.svg", :exist?
+    assert_path_exists testpath/"dff.svg"
   end
 end

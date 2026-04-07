@@ -7,8 +7,7 @@ class LlvmAT14 < Formula
   license "Apache-2.0" => { with: "LLVM-exception" }
 
   livecheck do
-    url :stable
-    regex(/^llvmorg[._-]v?(14(?:\.\d+)+)$/i)
+    skip "No longer developed or maintained"
   end
 
   bottle do
@@ -19,6 +18,7 @@ class LlvmAT14 < Formula
     sha256 cellar: :any,                 sonoma:         "88ef0c0f3a9876fe2831f1b7f38aee95b43fadd816b6622b76583461d685bbae"
     sha256 cellar: :any,                 ventura:        "e66da1e873688670be544c1bd796edaabfb1bd75704bf0726ec0eeb4001c9a20"
     sha256 cellar: :any,                 monterey:       "a17201d682ba0390cf148afa82e0796cfb95c8d0bd0029abd4553a4a16cd041b"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "f022789750bb9997fc7bfa5810d35cd3dbae901787885e92e4ef16e3b13a7ae9"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "584cd6ac9de19540bce25bfb1e35af872d34f0ad5723dbb5a63c7561dfd1091d"
   end
 
@@ -31,32 +31,33 @@ class LlvmAT14 < Formula
   # We intentionally use Make instead of Ninja.
   # See: Homebrew/homebrew-core/issues/35513
   depends_on "cmake" => :build
-  depends_on "python@3.12" => :build
+  # sanitizer_mac.cpp:621:15: error: constexpr function never produces a constant expression [-Winvalid-constexpr]
+  # constexpr u16 GetOSMajorKernelOffset() {
+  depends_on maximum_macos: [:ventura, :build]
+  depends_on "python@3.12" => [:build, :test]
 
-  uses_from_macos "python" => :test
   uses_from_macos "libedit"
-  uses_from_macos "libffi", since: :catalina
+  uses_from_macos "libffi"
   uses_from_macos "ncurses"
-  uses_from_macos "zlib"
 
   on_linux do
-    depends_on "pkg-config" => :build
+    depends_on "pkgconf" => :build
     depends_on "python-setuptools" => :build
     depends_on "binutils" # needed for gold
     depends_on "elfutils" # openmp requires <gelf.h>
+    depends_on "zlib-ng-compat"
   end
-
-  # Fails at building LLDB
-  fails_with gcc: "5"
 
   # Fix build with Xcode 15
   # https://github.com/spack/spack/issues/40158
   # Backport of https://reviews.llvm.org/D130060
   patch :DATA
 
-  def install
-    python3 = "python3.12"
+  def python3
+    "python3.12"
+  end
 
+  def install
     # The clang bindings need a little help finding our libclang.
     inreplace "clang/bindings/python/clang/cindex.py",
               /^(\s*library_path\s*=\s*)None$/,
@@ -132,10 +133,8 @@ class LlvmAT14 < Formula
 
     if OS.mac?
       macos_sdk = MacOS.sdk_path_if_needed
-      if MacOS.version >= :catalina
-        args << "-DFFI_INCLUDE_DIR=#{macos_sdk}/usr/include/ffi"
-        args << "-DFFI_LIBRARY_DIR=#{macos_sdk}/usr/lib"
-      end
+      args << "-DFFI_INCLUDE_DIR=#{macos_sdk}/usr/include/ffi"
+      args << "-DFFI_LIBRARY_DIR=#{macos_sdk}/usr/lib"
 
       args << "-DLLVM_BUILD_LLVM_C_DYLIB=ON"
       args << "-DLLVM_ENABLE_LIBCXX=ON"
@@ -274,7 +273,7 @@ class LlvmAT14 < Formula
     assert_equal (lib/shared_library("libLLVM-#{soversion}")).to_s,
                  shell_output("#{bin}/llvm-config --libfiles").chomp
 
-    (testpath/"omptest.c").write <<~EOS
+    (testpath/"omptest.c").write <<~C
       #include <stdlib.h>
       #include <stdio.h>
       #include <omp.h>
@@ -285,7 +284,7 @@ class LlvmAT14 < Formula
           }
           return EXIT_SUCCESS;
       }
-    EOS
+    C
 
     system bin/"clang", "-L#{lib}", "-fopenmp", "-nobuiltininc",
                            "-I#{lib}/clang/#{llvm_version.major_minor_patch}/include",
@@ -301,23 +300,23 @@ class LlvmAT14 < Formula
     EOS
     assert_equal expected_result.strip, sorted_testresult.strip
 
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <stdio.h>
       int main()
       {
         printf("Hello World!\\n");
         return 0;
       }
-    EOS
+    C
 
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include <iostream>
       int main()
       {
         std::cout << "Hello World!" << std::endl;
         return 0;
       }
-    EOS
+    CPP
 
     # Testing default toolchain and SDK location.
     system bin/"clang++", "-v",
@@ -403,19 +402,19 @@ class LlvmAT14 < Formula
         refute_match(/libunwind/, lib)
       end
 
-      (testpath/"test_plugin.cpp").write <<~EOS
+      (testpath/"test_plugin.cpp").write <<~CPP
         #include <iostream>
         __attribute__((visibility("default")))
         extern "C" void run_plugin() {
           std::cout << "Hello Plugin World!" << std::endl;
         }
-      EOS
-      (testpath/"test_plugin_main.c").write <<~EOS
+      CPP
+      (testpath/"test_plugin_main.c").write <<~C
         extern void run_plugin();
         int main() {
           run_plugin();
         }
-      EOS
+      C
       system bin/"clang++", "-v", "-o", "test_plugin.so",
              "-shared", "-fPIC", "test_plugin.cpp", "-L#{opt_lib}",
              "-stdlib=libc++", "-rtlib=compiler-rt",
@@ -432,7 +431,7 @@ class LlvmAT14 < Formula
       end
     else
       # FIXME: scan-build test appears to be broken on Linux.
-      (testpath/"scanbuildtest.cpp").write <<~EOS
+      (testpath/"scanbuildtest.cpp").write <<~CPP
         #include <iostream>
         int main() {
           int *i = new int;
@@ -441,53 +440,53 @@ class LlvmAT14 < Formula
           std::cout << *i << std::endl;
           return 0;
         }
-      EOS
+      CPP
       assert_includes shell_output("#{bin}/scan-build clang++ scanbuildtest.cpp 2>&1"),
         "warning: Use of memory after it is freed"
     end
 
     # Testing mlir
-    (testpath/"test.mlir").write <<~EOS
+    (testpath/"test.mlir").write <<~MLIR
       func @bad_branch() {
         br ^missing  // expected-error {{reference to an undefined block}}
       }
-    EOS
+    MLIR
     system bin/"mlir-opt", "--verify-diagnostics", "test.mlir"
 
-    (testpath/"clangformattest.c").write <<~EOS
+    (testpath/"clangformattest.c").write <<~C
       int    main() {
           printf("Hello world!"); }
-    EOS
+    C
     assert_equal "int main() { printf(\"Hello world!\"); }\n",
       shell_output("#{bin}/clang-format -style=google clangformattest.c")
 
     # This will fail if the clang bindings cannot find `libclang`.
-    # We explicitly call `"python3"` instead of the method to be able to do
-    # `uses_from_macos "python" => :test`.
-    with_env(PYTHONPATH: prefix/Language::Python.site_packages("python3")) do
-      system "python3", "-c", <<~EOS
+    with_env(PYTHONPATH: prefix/Language::Python.site_packages(python3)) do
+      system python3, "-c", <<~PYTHON
         from clang import cindex
         cindex.Config().get_cindex_library()
-      EOS
+      PYTHON
     end
 
     # Ensure LLVM did not regress output of `llvm-config --system-libs` which for a time
     # was known to output incorrect linker flags; e.g., `-llibxml2.tbd` instead of `-lxml2`.
     # On the other hand, note that a fully qualified path to `dylib` or `tbd` is OK, e.g.,
     # `/usr/local/lib/libxml2.tbd` or `/usr/local/lib/libxml2.dylib`.
+    abs_path_exts = [".tbd", ".dylib"]
     shell_output("#{bin}/llvm-config --system-libs").chomp.strip.split.each do |lib|
       if lib.start_with?("-l")
         assert !lib.end_with?(".tbd"), "expected abs path when lib reported as .tbd"
         assert !lib.end_with?(".dylib"), "expected abs path when lib reported as .dylib"
       else
         p = Pathname.new(lib)
-        if p.extname == ".tbd" || p.extname == ".dylib"
+        if abs_path_exts.include?(p.extname)
           assert p.absolute?, "expected abs path when lib reported as .tbd or .dylib"
         end
       end
     end
   end
 end
+
 __END__
 --- a/compiler-rt/lib/sanitizer_common/sanitizer_platform_limits_posix.cpp
 +++ b/compiler-rt/lib/sanitizer_common/sanitizer_platform_limits_posix.cpp

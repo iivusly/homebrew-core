@@ -7,53 +7,63 @@ class YelpTools < Formula
   url "https://download.gnome.org/sources/yelp-tools/42/yelp-tools-42.1.tar.xz"
   sha256 "3e496a4020d4145b99fd508a25fa09336a503a4e8900028421e72c6a4b11f905"
   license "GPL-2.0-or-later"
+  revision 2
 
   bottle do
-    rebuild 3
-    sha256 cellar: :any,                 arm64_sonoma:   "fbae1e97dd9800a69ea65c94ce2344358543be53546bef33033e15ac820892da"
-    sha256 cellar: :any,                 arm64_ventura:  "b9aaee8bdd73c94f40d388b2a71d440cb3af6b94a4232547d73221c342647fdb"
-    sha256 cellar: :any,                 arm64_monterey: "fc21e8eaa199474b8995401cb18602da05b93f621aeb04e4275206aa7717eb71"
-    sha256 cellar: :any,                 sonoma:         "b8c8fade4e54ceb8404e7752d231f1067e4a158f7ba0111f35cc16faeef2a39e"
-    sha256 cellar: :any,                 ventura:        "2dd792141d0defb21675d6033c943fb688f2c7de6a2b8aedd524e34de8b20696"
-    sha256 cellar: :any,                 monterey:       "57497f6983883ffcef9a672347ab3a414ea496626448936874681c9d100d8b05"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "673a9997e83219618a3b26a5c80944ab0f4c96417a2cd97242a97710590ee030"
+    sha256 cellar: :any,                 arm64_tahoe:   "b1e968b17741ac5251b5d267e252fb186ac87d51335623d366c064883b60b80b"
+    sha256 cellar: :any,                 arm64_sequoia: "8c4def7b0209ba8c22ab1111f4cfae24e11897873278cad833900265798e5c04"
+    sha256 cellar: :any,                 arm64_sonoma:  "40fdc7a8081d17bbe2be6b588f93b3a68cd235383c26c7aae127e24bfc97f06a"
+    sha256 cellar: :any,                 sonoma:        "10c1dd7a18701ef9cfdf745ea02e88402b4ba99200c839e9a9315f0247555c81"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "84ee16a1c90b1a7b3dc7a5f65550d91a3cfc1652834bdafc28885ed095b79559"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "bd0b3f493de1f048bd054a086715d76ec67d01ec1fdf95bb7023c6fcd5ce4b73"
   end
 
-  depends_on "gettext" => :build
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "itstool"
-  depends_on "python@3.12"
+  depends_on "libxml2"
+  depends_on "python@3.14"
+  depends_on "yelp-xsl" => :no_linkage
 
-  uses_from_macos "libxml2", since: :ventura
   uses_from_macos "libxslt"
 
+  pypi_packages package_name:   "",
+                extra_packages: "lxml"
+
   resource "lxml" do
-    url "https://files.pythonhosted.org/packages/2b/b4/bbccb250adbee490553b6a52712c46c20ea1ba533a643f1424b27ffc6845/lxml-5.1.0.tar.gz"
-    sha256 "3eea6ed6e6c918e468e693c41ef07f3c3acc310b70ddd9cc72d9ef84bc9564ca"
+    url "https://files.pythonhosted.org/packages/aa/88/262177de60548e5a2bfc46ad28232c9e9cbde697bd94132aeb80364675cb/lxml-6.0.2.tar.gz"
+    sha256 "cd79f3367bd74b317dda655dc8fcfa304d9eb6e4fb06b7168c5cf27f96e0cd62"
   end
 
-  resource "yelp-xsl" do
-    url "https://download.gnome.org/sources/yelp-xsl/42/yelp-xsl-42.0.tar.xz"
-    sha256 "29b273cc0bd16efb6e983443803f1e9fdc03511e5c4ff6348fd30a604d4dc846"
+  resource "mallard-rng" do
+    url "https://github.com/projectmallard/projectmallard.org/raw/refs/tags/mallard-rng-1.1.0/download/mallard-rng-1.1.0.tar.bz2"
+    mirror "https://deb.debian.org/debian/pool/main/m/mallard-rng/mallard-rng_1.1.0.orig.tar.bz2"
+    sha256 "66bc8c38758801d5a1330588589b6e81f4d7272a6fbdad0cd4cfcd266848e160"
+
+    livecheck do
+      url :url
+      regex(/^mallard-rng[._-]v?(\d+(?:\.\d+)+)$/i)
+    end
   end
 
   def install
-    venv = virtualenv_create(libexec, "python3.12")
-    venv.pip_install resource("lxml")
-    ENV.prepend_path "PATH", venv.root/"bin"
-
-    resource("yelp-xsl").stage do
-      system "./configure", *std_configure_args, "--disable-silent-rules"
+    resource("mallard-rng").stage do
+      system "./configure", "--disable-silent-rules", *std_configure_args(prefix: libexec)
       system "make", "install"
-      ENV.append_path "PKG_CONFIG_PATH", share/"pkgconfig"
     end
+
+    venv = virtualenv_create(libexec, "python3.14")
+    venv.pip_install resources.reject { |r| r.name == "mallard-rng" }
+    ENV.prepend_path "PATH", venv.root/"bin"
 
     system "meson", "setup", "build", *std_meson_args
     system "meson", "compile", "-C", "build", "--verbose"
     system "meson", "install", "-C", "build"
     rewrite_shebang python_shebang_rewrite_info(venv.root/"bin/python"), *bin.children
+
+    xml_catalog_files = libexec/"etc/xml/mallard/catalog"
+    bin.env_script_all_files(libexec/"bin", XML_CATALOG_FILES: "${XML_CATALOG_FILES:-#{xml_catalog_files}}")
   end
 
   test do

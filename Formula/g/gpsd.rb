@@ -1,10 +1,11 @@
 class Gpsd < Formula
   desc "Global Positioning System (GPS) daemon"
   homepage "https://gpsd.gitlab.io/gpsd/"
-  url "https://download.savannah.gnu.org/releases/gpsd/gpsd-3.25.tar.xz"
-  mirror "https://download-mirror.savannah.gnu.org/releases/gpsd/gpsd-3.25.tar.xz"
-  sha256 "7e5e53e5ab157dce560a2f22e20322ef1136d3ebde99162def833a3306de01e5"
+  url "https://download.savannah.gnu.org/releases/gpsd/gpsd-3.27.5.tar.xz"
+  mirror "https://download-mirror.savannah.gnu.org/releases/gpsd/gpsd-3.27.5.tar.xz"
+  sha256 "dc4a62bad835282bae788772bc7cc8f8bec4c7a48e8dceeb37477a89091c4656"
   license "BSD-2-Clause"
+  head "https://gitlab.com/gpsd/gpsd.git", branch: "master"
 
   livecheck do
     url "https://download.savannah.gnu.org/releases/gpsd/"
@@ -12,23 +13,27 @@ class Gpsd < Formula
   end
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any,                 arm64_sonoma:   "938cf9f4d6bd4ad1ab1ef1f553921dbc6db46810fff2715f25ad8c0aae4a1258"
-    sha256 cellar: :any,                 arm64_ventura:  "12a924778ab1fcc13aff5d84ac712db09bc964f85fc57b7677f1566c5e870008"
-    sha256 cellar: :any,                 arm64_monterey: "7ce33dccf34d5beab1ebd4a98dfd1b3bb284be93a43e367e5bb446258da36144"
-    sha256 cellar: :any,                 sonoma:         "db21b97f74091e71a97e6e0aa09352bc651c6dd95245d408b9ab11c1b4354a07"
-    sha256 cellar: :any,                 ventura:        "2b7ae1f6de349089583d3a426f4240eca86cb98d478ed11a1156f8835664f4d1"
-    sha256 cellar: :any,                 monterey:       "583ff8896e5f9f211c5487dc35cb54b1ccecb16b1b3d466c5ba8112ff90ea0fe"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "06b4c52b968483ec4a90e103696af37e423555b2c3808ce726feb0a1855f87b8"
+    sha256 cellar: :any,                 arm64_tahoe:   "a5cdc0a238acdc4be1f968169fd823ee8a138bacad9eff804f893be065dc7d82"
+    sha256 cellar: :any,                 arm64_sequoia: "a0e7d0e6077b4987e4e7d6ba2e3c969fd3e7cf0c054bed1978df3968a569ee0b"
+    sha256 cellar: :any,                 arm64_sonoma:  "d55005371ee46f49596bb42f99bb043a4150b201a877795d06c643b0b20e34ba"
+    sha256 cellar: :any,                 sonoma:        "80c664a6bbd8649eb3e82e2b3c357f41552996310a7c6a6d84e6101561705692"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "d0e890be6d0dad6ef97fc14eb6cfd7cfafec60ce53c61d15def98640dfb50bfe"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "f1966e876bbef9de7ddc508979cd0557c66f5d0cb321fa7d333b855e43a5b6e8"
   end
 
   depends_on "asciidoctor" => :build
-  depends_on "python-setuptools" => :build
   depends_on "scons" => :build
 
   uses_from_macos "ncurses"
 
   def install
+    if OS.linux?
+      ncurses = Formula["ncurses"]
+
+      ENV.append "CFLAGS", "-I#{ncurses.opt_include}"
+      ENV.append "LDFLAGS", "-L#{ncurses.opt_lib} -Wl,-rpath,#{ncurses.opt_lib}"
+    end
+
     system "scons", "chrpath=False", "python=False", "strip=False", "prefix=#{prefix}/"
     system "scons", "install"
   end

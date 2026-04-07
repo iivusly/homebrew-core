@@ -3,22 +3,17 @@ class Ptpython < Formula
 
   desc "Advanced Python REPL"
   homepage "https://github.com/prompt-toolkit/ptpython"
-  url "https://files.pythonhosted.org/packages/56/61/352792c9f47de98a910526ff8a684466a6217e53ffa6627b3781960e4f0d/ptpython-3.0.29.tar.gz"
-  sha256 "b9d625183aef93a673fc32cbe1c1fcaf51412e7a4f19590521cdaccadf25186e"
+  url "https://files.pythonhosted.org/packages/b6/8c/7e904ceeb512b4530c7ca1d918d3565d694a1fa7df337cdfc36a16347d68/ptpython-3.0.32.tar.gz"
+  sha256 "11651778236de95c582b42737294e50a66ba4a21fa01c0090ea70815af478fe0"
   license "BSD-3-Clause"
-  head "https://github.com/prompt-toolkit/ptpython.git", branch: "master"
+  revision 1
+  head "https://github.com/prompt-toolkit/ptpython.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "969a5aa84d7dcf9d003bcf774cf1561867d624b5cf7d73dba6219f9300e22122"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "969a5aa84d7dcf9d003bcf774cf1561867d624b5cf7d73dba6219f9300e22122"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "969a5aa84d7dcf9d003bcf774cf1561867d624b5cf7d73dba6219f9300e22122"
-    sha256 cellar: :any_skip_relocation, sonoma:         "3ae059b9b30acb2b7136ee06ce89c37a5035b0d2709caf553c75f73582d2ab74"
-    sha256 cellar: :any_skip_relocation, ventura:        "3ae059b9b30acb2b7136ee06ce89c37a5035b0d2709caf553c75f73582d2ab74"
-    sha256 cellar: :any_skip_relocation, monterey:       "3ae059b9b30acb2b7136ee06ce89c37a5035b0d2709caf553c75f73582d2ab74"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "29922808046c45096717d09e2a59f171c1d90a24ff77e812a2fa0b63f05b0723"
+    sha256 cellar: :any_skip_relocation, all: "ad1dcf5f065450ae165fdaccb42449caf5203e884253d70b4b4dcaf1cd5b68ac"
   end
 
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   resource "appdirs" do
     url "https://files.pythonhosted.org/packages/d7/d8/05696357e0311f5b5c316d7b95f46c669dd9c15aaeecbb48c7d0aeb88c40/appdirs-1.4.4.tar.gz"
@@ -26,28 +21,28 @@ class Ptpython < Formula
   end
 
   resource "jedi" do
-    url "https://files.pythonhosted.org/packages/d6/99/99b493cec4bf43176b678de30f81ed003fd6a647a301b9c927280c600f0a/jedi-0.19.1.tar.gz"
-    sha256 "cf0496f3651bc65d7174ac1b7d043eff454892c708a87d1b683e57b569927ffd"
+    url "https://files.pythonhosted.org/packages/72/3a/79a912fbd4d8dd6fbb02bf69afd3bb72cf0c729bb3063c6f4498603db17a/jedi-0.19.2.tar.gz"
+    sha256 "4770dc3de41bde3966b02eb84fbcf557fb33cce26ad23da12c742fb50ecb11f0"
   end
 
   resource "parso" do
-    url "https://files.pythonhosted.org/packages/66/94/68e2e17afaa9169cf6412ab0f28623903be73d1b32e208d9e8e541bb086d/parso-0.8.4.tar.gz"
-    sha256 "eb3a7b58240fb99099a345571deecc0f9540ea5f4dd2fe14c2a99d6b281ab92d"
+    url "https://files.pythonhosted.org/packages/81/76/a1e769043c0c0c9fe391b702539d594731a4362334cdf4dc25d0c09761e7/parso-0.8.6.tar.gz"
+    sha256 "2b9a0332696df97d454fa67b81618fd69c35a7b90327cbe6ba5c92d2c68a7bfd"
   end
 
   resource "prompt-toolkit" do
-    url "https://files.pythonhosted.org/packages/47/6d/0279b119dafc74c1220420028d490c4399b790fc1256998666e3a341879f/prompt_toolkit-3.0.47.tar.gz"
-    sha256 "1e1b29cb58080b1e69f207c893a1a7bf16d127a5c30c9d17a25a5d77792e5360"
+    url "https://files.pythonhosted.org/packages/a1/96/06e01a7b38dce6fe1db213e061a4602dd6032a8a97ef6c1a862537732421/prompt_toolkit-3.0.52.tar.gz"
+    sha256 "28cde192929c8e7321de85de1ddbe736f1375148b02f2e17edd840042b1be855"
   end
 
   resource "pygments" do
-    url "https://files.pythonhosted.org/packages/8e/62/8336eff65bcbc8e4cb5d05b55faf041285951b6e80f33e2bff2024788f31/pygments-2.18.0.tar.gz"
-    sha256 "786ff802f32e91311bff3889f6e9a86e81505fe99f2735bb6d60ae0c5004f199"
+    url "https://files.pythonhosted.org/packages/c3/b2/bc9c9196916376152d655522fdcebac55e66de6603a76a02bca1b6414f6c/pygments-2.20.0.tar.gz"
+    sha256 "6757cd03768053ff99f3039c1a36d6c0aa0b263438fcab17520b30a303a82b5f"
   end
 
   resource "wcwidth" do
-    url "https://files.pythonhosted.org/packages/6c/63/53559446a878410fc5a5974feb13d31d78d752eb18aeba59c7fef1af7598/wcwidth-0.2.13.tar.gz"
-    sha256 "72ea0c06399eb286d978fdedb6923a9eb47e1c486ce63e9b4e64fc18303972b5"
+    url "https://files.pythonhosted.org/packages/35/a2/8e3becb46433538a38726c948d3399905a4c7cabd0df578ede5dc51f0ec2/wcwidth-0.6.0.tar.gz"
+    sha256 "cdc4e4262d6ef9a1a57e018384cbeb1208d8abbc64176027e2c2455c81313159"
   end
 
   def install

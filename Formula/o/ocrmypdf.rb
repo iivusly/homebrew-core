@@ -3,50 +3,57 @@ class Ocrmypdf < Formula
 
   desc "Adds an OCR text layer to scanned PDF files"
   homepage "https://ocrmypdf.readthedocs.io/en/latest/"
-  url "https://files.pythonhosted.org/packages/2c/85/439deb5b418261dbfd844dbae8c1d8713c9c7bc5dd36a59577a77d7ffbbb/ocrmypdf-16.5.0.tar.gz"
-  sha256 "cd96bddfb3a986be7bf7857757919332e1db5dab780eb7b321fdea38f60127ac"
+  url "https://files.pythonhosted.org/packages/88/b9/01f5cbd062f680af8a3f8f883f8e71de8be7979c3256f509661c1e2e2065/ocrmypdf-17.4.0.tar.gz"
+  sha256 "4bbc53249f3981599565f670c5de774d6440832eede87c515e6608880fa02a34"
   license "MPL-2.0"
+  revision 1
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "ba66320394edb0c2d3db4951022117bc1b4512cf3be351cac9ee461e1727744b"
-    sha256 cellar: :any,                 arm64_ventura:  "cb2f27a81182604604b82b38df25f62cb0fc7635040832fa6dda8563b694c149"
-    sha256 cellar: :any,                 arm64_monterey: "c25265f48bce9e10f80863e5524ea6d3cba54148e2bc108da3209020c0e137d3"
-    sha256 cellar: :any,                 sonoma:         "ce2ebd67be7c626f6d51ee7f5c85675b400f2b02ed4e2d5b3da671f7d29df94d"
-    sha256 cellar: :any,                 ventura:        "4b38e1d045dcb84f1285cd5e10ecdbd9ac2bf1e0c0f2184ce7fdc4f5ddaef8d8"
-    sha256 cellar: :any,                 monterey:       "09ae46940d17c6eb9ac4869673e6b7ec92051fc2daa8964b332e00191fb3005b"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "5b8e8701c3a16b56d4f647b4a0a69284eec27ae2f8dcbfb22c7ebf977ab02a3a"
+    sha256 cellar: :any,                 arm64_tahoe:   "009226b45fd571aff7a98f560a546df45e6f8b2c736ed7ab763328662208699c"
+    sha256 cellar: :any,                 arm64_sequoia: "12dc2369b6a17e240cecf82991537f56209db4cc477941e112be1752dd2fcebd"
+    sha256 cellar: :any,                 arm64_sonoma:  "504bc4cba04039fdc52094db0516981debe49cd4cad3e43b16c2aa28385d646b"
+    sha256 cellar: :any,                 sonoma:        "e6ceeca9ffb3c262dba4e55930bdd1c53555574a6ce7e302568ae700fdd9d709"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "4e5728e7cf281c3e15dd96f769efd7cc9e6f6f76d9f48780660143f3f03bfdea"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "2d4f05c3d434738337d2e8f55a6a0cdc9daf8dd8c738d87069727953ba7ffda6"
   end
 
-  depends_on "pkg-config" => :build
-  depends_on "cryptography"
+  depends_on "cmake" => :build # for pikepdf
+  depends_on "pkgconf" => :build
+  depends_on "cryptography" => :no_linkage
   depends_on "freetype"
   depends_on "ghostscript"
   depends_on "img2pdf"
   depends_on "jbig2enc"
   depends_on "libheif"
   depends_on "libpng"
-  depends_on "pillow"
+  depends_on "pillow" => :no_linkage
   depends_on "pngquant"
   depends_on "pybind11"
-  depends_on "python@3.12"
+  depends_on "pydantic" => :no_linkage
+  depends_on "python@3.14"
   depends_on "qpdf"
   depends_on "tesseract"
   depends_on "unpaper"
 
-  uses_from_macos "libffi", since: :catalina
+  uses_from_macos "libffi"
   uses_from_macos "libxml2", since: :ventura
   uses_from_macos "libxslt"
 
-  fails_with gcc: "5"
+  pypi_packages exclude_packages: %w[cryptography pillow pydantic]
 
   resource "charset-normalizer" do
-    url "https://files.pythonhosted.org/packages/63/09/c1bc53dab74b1816a00d8d030de5bf98f724c52c1635e07681d312f20be8/charset-normalizer-3.3.2.tar.gz"
-    sha256 "f30c3cb33b24454a82faecaf01b19c18562b1e89558fb6c56de4d9118a032fd5"
+    url "https://files.pythonhosted.org/packages/7b/60/e3bec1881450851b087e301bedc3daa9377a4d45f1c26aa90b0b235e38aa/charset_normalizer-3.4.6.tar.gz"
+    sha256 "1ae6b62897110aa7c79ea2f5dd38d1abca6db663687c0b1ad9aed6f6bae3d9d6"
+  end
+
+  resource "defusedxml" do
+    url "https://files.pythonhosted.org/packages/0f/d5/c66da9b79e5bdb124974bfe172b4daf3c984ebd9c2a06e2b8a4dc7331c72/defusedxml-0.7.1.tar.gz"
+    sha256 "1bb3032db185915b62d7c6209c5a8792be6a32ab2fedacc84e01b52c51aa3e69"
   end
 
   resource "deprecated" do
-    url "https://files.pythonhosted.org/packages/92/14/1e41f504a246fc224d2ac264c227975427a85caf37c3979979edb9b1b232/Deprecated-1.2.14.tar.gz"
-    sha256 "e5323eb936458dccc2582dc6f9c322c852a775a27065ff2b0c4970b9d53d01b3"
+    url "https://files.pythonhosted.org/packages/49/85/12f0a49a7c4ffb70572b6c2ef13c90c88fd190debda93b23f026b25f9634/deprecated-1.3.1.tar.gz"
+    sha256 "b1b50e0ff0c1fddaa5708a2c6b0a6588bb09b892825ab2b214ac9ea9d92a5223"
   end
 
   resource "deprecation" do
@@ -54,19 +61,29 @@ class Ocrmypdf < Formula
     sha256 "72b3bde64e5d778694b0cf68178aed03d15e15477116add3fb773e581f9518ff"
   end
 
+  resource "fonttools" do
+    url "https://files.pythonhosted.org/packages/9a/08/7012b00a9a5874311b639c3920270c36ee0c445b69d9989a85e5c92ebcb0/fonttools-4.62.1.tar.gz"
+    sha256 "e54c75fd6041f1122476776880f7c3c3295ffa31962dc6ebe2543c00dca58b5d"
+  end
+
+  resource "fpdf2" do
+    url "https://files.pythonhosted.org/packages/27/f2/72feae0b2827ed38013e4307b14f95bf0b3d124adfef4d38a7d57533f7be/fpdf2-2.8.7.tar.gz"
+    sha256 "7060ccee5a9c7ab0a271fb765a36a23639f83ef8996c34e3d46af0a17ede57f9"
+  end
+
   resource "img2pdf" do
-    url "https://files.pythonhosted.org/packages/36/92/6ac4d61951ba507b499f674c90dfa7b48fa776b56f6f068507f8751c03f1/img2pdf-0.5.1.tar.gz"
-    sha256 "73847e47242f4b5bd113c70049e03e03212936c2727cd2a8bf564229a67d0b95"
+    url "https://files.pythonhosted.org/packages/8e/97/ca44c467131b93fda82d2a2f21b738c8bcf63b5259e3b8250e928b8dd52a/img2pdf-0.6.3.tar.gz"
+    sha256 "219518020f5bd242bdc46493941ea3f756f664c2e86f2454721e74353f58cd95"
   end
 
   resource "lxml" do
-    url "https://files.pythonhosted.org/packages/e7/6b/20c3a4b24751377aaa6307eb230b66701024012c29dd374999cc92983269/lxml-5.3.0.tar.gz"
-    sha256 "4e109ca30d1edec1ac60cdbe341905dc3b8f55b16855e03a54aaf59e51ec8c6f"
+    url "https://files.pythonhosted.org/packages/aa/88/262177de60548e5a2bfc46ad28232c9e9cbde697bd94132aeb80364675cb/lxml-6.0.2.tar.gz"
+    sha256 "cd79f3367bd74b317dda655dc8fcfa304d9eb6e4fb06b7168c5cf27f96e0cd62"
   end
 
   resource "markdown-it-py" do
-    url "https://files.pythonhosted.org/packages/38/71/3b932df36c1a044d397a1f92d1cf91ee0a503d91e470cbd670aa66b07ed0/markdown-it-py-3.0.0.tar.gz"
-    sha256 "e3f60a94fa066dc52ec76661e37c851cb232d92f9886b15cb560aaada2df8feb"
+    url "https://files.pythonhosted.org/packages/5b/f5/4ec618ed16cc4f8fb3b701563655a69816155e79e24a17b651541804721d/markdown_it_py-4.0.0.tar.gz"
+    sha256 "cb0a2b4aa34f932c007117b194e945bd74e0ec24133ceb5bac59009cda1cb9f3"
   end
 
   resource "mdurl" do
@@ -75,43 +92,53 @@ class Ocrmypdf < Formula
   end
 
   resource "packaging" do
-    url "https://files.pythonhosted.org/packages/51/65/50db4dda066951078f0a96cf12f4b9ada6e4b811516bf0262c0f4f7064d4/packaging-24.1.tar.gz"
-    sha256 "026ed72c8ed3fcce5bf8950572258698927fd1dbda10a5e981cdf0ac37f4f002"
+    url "https://files.pythonhosted.org/packages/65/ee/299d360cdc32edc7d2cf530f3accf79c4fca01e96ffc950d8a52213bd8e4/packaging-26.0.tar.gz"
+    sha256 "00243ae351a257117b6a241061796684b084ed1c516a08c48a3f7e147a9d80b4"
   end
 
   resource "pdfminer-six" do
-    url "https://files.pythonhosted.org/packages/e3/37/63cb918ffa21412dd5d54e32e190e69bfc340f3d6aa072ad740bec9386bb/pdfminer.six-20240706.tar.gz"
-    sha256 "c631a46d5da957a9ffe4460c5dce21e8431dabb615fee5f9f4400603a58d95a6"
+    url "https://files.pythonhosted.org/packages/34/a4/5cec1112009f0439a5ca6afa8ace321f0ab2f48da3255b7a1c8953014670/pdfminer_six-20260107.tar.gz"
+    sha256 "96bfd431e3577a55a0efd25676968ca4ce8fd5b53f14565f85716ff363889602"
   end
 
   resource "pi-heif" do
-    url "https://files.pythonhosted.org/packages/8e/12/b477e3bc1ce4a7e9db9ff85f22c89ccd5199c04c150d9cef1bbd444b1672/pi_heif-0.18.0.tar.gz"
-    sha256 "0a690159607beaa6712f2c8abaa5168a22314d18f00a617d691548f5acba8070"
+    url "https://files.pythonhosted.org/packages/34/4a/4a18057a7b64254abdcc4f78d92503fc4f5b8fcc66da118ba87989111ee8/pi_heif-1.3.0.tar.gz"
+    sha256 "58151840d0d60507330654a466b06cbf7ca8fb3759eadb5234d70b4dc2bc990c"
   end
 
   resource "pikepdf" do
-    url "https://files.pythonhosted.org/packages/1a/7b/da1b6baeb4361420d6531c90723b33a6e0071118316950a3b35be8375e0c/pikepdf-9.2.0.tar.gz"
-    sha256 "a666479a5a8cd5d8b86baa1010e5517c2c60dc3df586accacbd94377b744f034"
+    url "https://files.pythonhosted.org/packages/2c/66/32a45480d84cb239c7ad31209c956496fe5b20f6fb163d794db4c79f840c/pikepdf-10.5.1.tar.gz"
+    sha256 "ffa6c7d0b77deb3af9735e0b0cae177c897431e10d342bb171b62e5527a622b7"
   end
 
   resource "pluggy" do
-    url "https://files.pythonhosted.org/packages/96/2d/02d4312c973c6050a18b314a5ad0b3210edb65a906f868e31c111dede4a6/pluggy-1.5.0.tar.gz"
-    sha256 "2cffa88e94fdc978c4c574f15f9e59b7f4201d439195c3715ca9e2486f1d0cf1"
+    url "https://files.pythonhosted.org/packages/f9/e2/3e91f31a7d2b083fe6ef3fa267035b518369d9511ffab804f839851d2779/pluggy-1.6.0.tar.gz"
+    sha256 "7dcc130b76258d33b90f61b658791dede3486c3e6bfb003ee5c9bfb396dd22f3"
   end
 
   resource "pygments" do
-    url "https://files.pythonhosted.org/packages/8e/62/8336eff65bcbc8e4cb5d05b55faf041285951b6e80f33e2bff2024788f31/pygments-2.18.0.tar.gz"
-    sha256 "786ff802f32e91311bff3889f6e9a86e81505fe99f2735bb6d60ae0c5004f199"
+    url "https://files.pythonhosted.org/packages/c3/b2/bc9c9196916376152d655522fdcebac55e66de6603a76a02bca1b6414f6c/pygments-2.20.0.tar.gz"
+    sha256 "6757cd03768053ff99f3039c1a36d6c0aa0b263438fcab17520b30a303a82b5f"
+  end
+
+  resource "pypdfium2" do
+    url "https://files.pythonhosted.org/packages/3b/01/be763b9081c7eb823196e7d13d9c145bf75ac43f3c1466de81c21c24b381/pypdfium2-5.6.0.tar.gz"
+    sha256 "bcb9368acfe3547054698abbdae68ba0cbd2d3bda8e8ee437e061deef061976d"
   end
 
   resource "rich" do
-    url "https://files.pythonhosted.org/packages/cf/60/5959113cae0ce512cf246a6871c623117330105a0d5f59b4e26138f2c9cc/rich-13.8.0.tar.gz"
-    sha256 "a5ac1f1cd448ade0d59cc3356f7db7a7ccda2c8cbae9c7a90c28ff463d3e91f4"
+    url "https://files.pythonhosted.org/packages/b3/c6/f3b320c27991c46f43ee9d856302c70dc2d0fb2dba4842ff739d5f46b393/rich-14.3.3.tar.gz"
+    sha256 "b8daa0b9e4eef54dd8cf7c86c03713f53241884e814f4e2f5fb342fe520f639b"
+  end
+
+  resource "uharfbuzz" do
+    url "https://files.pythonhosted.org/packages/1c/8d/7c82298bfa5c96f018541661bc2ccdf90dfe397bb2724db46725bf495466/uharfbuzz-0.53.3.tar.gz"
+    sha256 "9a87175c14d1361322ce2a3504e63c6b66062934a5edf47266aed5b33416806c"
   end
 
   resource "wrapt" do
-    url "https://files.pythonhosted.org/packages/95/4c/063a912e20bcef7124e0df97282a8af3ff3e4b603ce84c481d6d7346be0a/wrapt-1.16.0.tar.gz"
-    sha256 "5f370f952971e7d17c7d1ead40e49f32345a7f7a5373571ef44d800d06b1899d"
+    url "https://files.pythonhosted.org/packages/2e/64/925f213fdcbb9baeb1530449ac71a4d57fc361c053d06bf78d0c5c7cd80c/wrapt-2.1.2.tar.gz"
+    sha256 "3996a67eecc2c68fd47b4e3c564405a5777367adfd9b8abb58387b63ee83b21e"
   end
 
   def install
@@ -124,6 +151,6 @@ class Ocrmypdf < Formula
   test do
     system bin/"ocrmypdf", "-f", "-q", "--deskew",
                            test_fixtures("test.pdf"), "ocr.pdf"
-    assert_predicate testpath/"ocr.pdf", :exist?
+    assert_path_exists testpath/"ocr.pdf"
   end
 end

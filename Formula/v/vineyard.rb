@@ -1,26 +1,31 @@
 class Vineyard < Formula
-  include Language::Python::Virtualenv
-
   desc "In-memory immutable data manager. (Project under CNCF)"
   homepage "https://v6d.io"
-  url "https://github.com/v6d-io/v6d/releases/download/v0.23.2/v6d-0.23.2.tar.gz"
-  sha256 "2a2788ed77b9459477b3e90767a910e77e2035a34f33c29c25b9876568683fd4"
+  url "https://github.com/v6d-io/v6d/releases/download/v0.24.4/v6d-0.24.4.tar.gz"
+  sha256 "055bab09ca67542ccb13229de8c176b7875b4ba8c8a818e942218dccc32a6bae"
   license "Apache-2.0"
-  revision 2
+  revision 8
 
   bottle do
-    sha256                               arm64_sonoma:   "b8e3536263aa443e1470e32f30a9ca7256b551e104689e0a265dfac22d0e1821"
-    sha256                               arm64_ventura:  "52bbe6e043bbb75dd8d5e70a964012045d75c5e60218cd41f1db38869b0799ea"
-    sha256                               arm64_monterey: "5b441eb66d81bc59736933a5953c0eaebdbb6337f18b1d6e298cd57ed14ce562"
-    sha256                               sonoma:         "f2f82b33cc4ed6a4b224332f58907265397ac695bd02a4a46f0b3b7b0ecccc16"
-    sha256                               ventura:        "d5eb9d7a6e858e2cebced5e26d7980d907cab9a83b8802cee23fff783c1422f0"
-    sha256                               monterey:       "30c5104aaf7425e92de4c9871e1b057b4d6c15165061b99555d1c712117e8169"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "458712fa6edc1cb5a6f58dbcaea6872872018d8aedf0d3e3d2c5ec0595b228eb"
+    sha256                               arm64_tahoe:   "919c4b1917e6c9de9ac61fb81fddaa53341a4ccd5006b37303ee8912dbd083b6"
+    sha256                               arm64_sequoia: "7115452ec4ac6196760c896397ef8f9b7501ed68d025f617bc414ee5d50fac93"
+    sha256                               arm64_sonoma:  "961ce13405feed87837d8a59b9f73d4ce279d98d935698615b7f0255f3ecaf82"
+    sha256                               sonoma:        "a04569fcbe3d84dbf0b0201db5f6ebb0ccc11fbce5f35d840a36c060acd96f62"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "cc5088eb334d6fc02585840db5bb706abc3bf5eff6f6e4a7530d9b2d1cca4273"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "898b18380f4cc4dd14a07b242a0764379d41f4b412c3c4b843b4f685d7aa46de"
   end
 
+  # Multiple workarounds needed to build. No response to upstream issues/PRs:
+  # - https://github.com/v6d-io/v6d/issues/2041
+  # - https://github.com/v6d-io/v6d/pull/2066
+  deprecate! date: "2026-02-13", because: :unsupported
+  disable! date: "2027-02-13", because: :unsupported
+
   depends_on "cmake" => [:build, :test]
-  depends_on "llvm" => [:build, :test]
-  depends_on "python@3.12" => :build
+  depends_on "llvm" => :build # for clang Python bindings
+  depends_on "openssl@3" => :build # indirect (not linked) but CMakeLists.txt checks for it
+  depends_on "python-setuptools" => :build
+  depends_on "python@3.14" => :build
   depends_on "apache-arrow"
   depends_on "boost"
   depends_on "cpprestsdk"
@@ -28,57 +33,103 @@ class Vineyard < Formula
   depends_on "etcd-cpp-apiv3"
   depends_on "gflags"
   depends_on "glog"
-  depends_on "grpc"
-  depends_on "hiredis"
   depends_on "libgrape-lite"
   depends_on "open-mpi"
-  depends_on "openssl@3"
-  depends_on "protobuf"
-  depends_on "redis"
 
-  on_macos do
-    depends_on "abseil"
-    depends_on "c-ares"
-    depends_on "re2"
+  on_tahoe do
+    fails_with :clang do
+      build 1700
+      cause "https://github.com/llvm/llvm-project/issues/142118"
+    end
   end
 
-  fails_with gcc: "5"
+  on_linux do
+    depends_on "autoconf" => :build
+    depends_on "automake" => :build
+    depends_on "libtool" => :build
+  end
 
-  resource "setuptools" do
-    url "https://files.pythonhosted.org/packages/1c/1c/8a56622f2fc9ebb0df743373ef1a96c8e20410350d12f44ef03c588318c3/setuptools-70.1.0.tar.gz"
-    sha256 "01a1e793faa5bd89abc851fa15d0a0db26f160890c7102cd8dce643e886b47f5"
+  # apache-arrow 21.0.0 support
+  # https://github.com/v6d-io/v6d/pull/2052
+  patch do
+    url "https://github.com/v6d-io/v6d/commit/cab3ed986e15464d6b544a98bac4db38d0e89e3a.patch?full_index=1"
+    sha256 "ce1325c893f210a3eae9ff29a8ab6cfa377d6672ab260db58de8522857856206"
+  end
+
+  # Apply open PR to build with glog >= 0.7
+  # PR ref: https://github.com/v6d-io/v6d/pull/2066
+  patch do
+    url "https://github.com/v6d-io/v6d/commit/45e06b0309397f713437ad64b545dc26fb18863d.patch?full_index=1"
+    sha256 "bb5745c04b86b9a31847b24b00973bf87891a3bb7896cf9f204592032a419af1"
   end
 
   def install
-    python = "python3.12"
-    venv = virtualenv_create(libexec, python)
-    venv.pip_install resources
+    # Workaround for older libstdc++
+    ENV.append "CXXFLAGS", "-include memory_resource" if OS.linux?
+
+    # Workaround to support Boost 1.87.0+ until upstream fix for https://github.com/v6d-io/v6d/issues/2041
+    boost_asio_post_files = %w[
+      src/server/async/socket_server.cc
+      src/server/server/vineyard_server.cc
+      src/server/services/etcd_meta_service.cc
+      src/server/services/local_meta_service.cc
+      src/server/services/local_meta_service.h
+      src/server/services/meta_service.cc
+    ]
+    inreplace boost_asio_post_files, /^(\s*)(\S+)\.post\(/, "\\1boost::asio::post(\\2,"
+    inreplace "src/server/services/etcd_meta_service.cc", "backoff_timer_->cancel(ec);", "backoff_timer_->cancel();"
+
+    # Workaround to support Boost 1.88.0+
+    # TODO: Try upstreaming fix along with above
+    boost_process_files = %w[
+      src/server/util/etcd_launcher.cc
+      src/server/util/etcd_member.cc
+      src/server/util/kubectl.cc
+      src/server/util/proc.cc
+      src/server/util/proc.h
+      src/server/util/redis_launcher.h
+    ]
+    inreplace boost_process_files, '#include "boost/process.hpp"', ""
+    inreplace "src/server/util/etcd_launcher.h", '#include "boost/process/child.hpp"', ""
+    ENV.append "CXXFLAGS", "-std=c++17"
+    ENV.append "CXXFLAGS", "-DBOOST_PROCESS_VERSION=1"
+    headers = %w[args async child env environment io search_path]
+    headers.each { |header| ENV.append "CXXFLAGS", "-include boost/process/v1/#{header}.hpp" }
+
+    python3 = "python3.14"
     # LLVM is keg-only.
-    ENV.prepend_path "PYTHONPATH", Formula["llvm"].opt_prefix/Language::Python.site_packages(python)
+    llvm = deps.map(&:to_formula).find { |f| f.name.match?(/^llvm(@\d+)?$/) }
+    ENV.prepend_path "PYTHONPATH", llvm.opt_prefix/Language::Python.site_packages(python3)
 
-    # Work around an Xcode 15 linker issue which causes linkage against LLVM's
-    # libunwind due to it being present in a library search path.
-    ENV.remove "HOMEBREW_LIBRARY_PATHS", Formula["llvm"].opt_lib
+    args = [
+      "-DBUILD_VINEYARD_PYTHON_BINDINGS=OFF",
+      "-DBUILD_VINEYARD_TESTS=OFF",
+      "-DCMAKE_CXX_STANDARD=17",
+      "-DCMAKE_CXX_STANDARD_REQUIRED=TRUE",
+      "-DCMAKE_FIND_PACKAGE_PREFER_CONFIG=ON", # for newer protobuf
+      "-DCMAKE_POLICY_VERSION_MINIMUM=3.5",
+      "-DLIBGRAPELITE_INCLUDE_DIRS=#{Formula["libgrape-lite"].opt_include}",
+      "-DOPENSSL_ROOT_DIR=#{Formula["openssl@3"].opt_prefix}",
+      "-DPYTHON_EXECUTABLE=#{which(python3)}",
+      "-DUSE_EXTERNAL_ETCD_LIBS=ON",
+      "-DUSE_EXTERNAL_HIREDIS_LIBS=ON",
+      "-DUSE_EXTERNAL_REDIS_LIBS=ON",
+      "-DUSE_LIBUNWIND=OFF",
+    ]
+    args << "-DCMAKE_EXE_LINKER_FLAGS=-Wl,-dead_strip_dylibs" if OS.mac?
 
-    system "cmake", "-S", ".", "-B", "build",
-                    "-DCMAKE_CXX_STANDARD=17",
-                    "-DCMAKE_CXX_STANDARD_REQUIRED=TRUE",
-                    "-DPYTHON_EXECUTABLE=#{venv.root}/bin/python",
-                    "-DUSE_EXTERNAL_ETCD_LIBS=ON",
-                    "-DUSE_EXTERNAL_REDIS_LIBS=ON",
-                    "-DUSE_EXTERNAL_HIREDIS_LIBS=ON",
-                    "-DBUILD_VINEYARD_TESTS=OFF",
-                    "-DUSE_LIBUNWIND=OFF",
-                    "-DLIBGRAPELITE_INCLUDE_DIRS=#{Formula["libgrape-lite"].opt_include}",
-                    "-DOPENSSL_ROOT_DIR=#{Formula["openssl@3"].opt_prefix}",
-                    "-DBUILD_VINEYARD_SERVER_ETCD=OFF", # Fails with protobuf 27
-                    *std_cmake_args
+    system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
+
+    # Replace `open-mpi` Cellar path that breaks on `open-mpi` version/revision bumps.
+    # CMake FindMPI uses REALPATH so there isn't a clean way to handle during generation.
+    openmpi = Formula["open-mpi"]
+    inreplace lib/"cmake/vineyard/vineyard-targets.cmake", openmpi.prefix.realpath, openmpi.opt_prefix
   end
 
   test do
-    (testpath/"test.cc").write <<~EOS
+    (testpath/"test.cc").write <<~CPP
       #include <iostream>
       #include <memory>
 
@@ -94,9 +145,9 @@ class Vineyard < Formula
 
         return 0;
       }
-    EOS
+    CPP
 
-    (testpath/"CMakeLists.txt").write <<~EOS
+    (testpath/"CMakeLists.txt").write <<~CMAKE
       cmake_minimum_required(VERSION 3.5)
 
       project(vineyard-test LANGUAGES C CXX)
@@ -106,33 +157,26 @@ class Vineyard < Formula
       add_executable(vineyard-test ${CMAKE_CURRENT_SOURCE_DIR}/test.cc)
       target_include_directories(vineyard-test PRIVATE ${VINEYARD_INCLUDE_DIRS})
       target_link_libraries(vineyard-test PRIVATE ${VINEYARD_LIBRARIES})
-    EOS
-
-    # Work around an Xcode 15 linker issue which causes linkage against LLVM's
-    # libunwind due to it being present in a library search path.
-    ENV.remove "HOMEBREW_LIBRARY_PATHS", Formula["llvm"].opt_lib
+    CMAKE
 
     # Remove Homebrew's lib directory from LDFLAGS as it is not available during
     # `shell_output`.
     ENV.remove "LDFLAGS", "-L#{HOMEBREW_PREFIX}/lib"
 
-    # macos AppleClang doesn't support -fopenmp
-    system "cmake", "-S", testpath, "-B", testpath/"build",
-                    "-DCMAKE_C_COMPILER=#{Formula["llvm"].bin}/clang",
-                    "-DCMAKE_CXX_COMPILER=#{Formula["llvm"].bin}/clang++",
-                    *std_cmake_args
-    system "cmake", "--build", testpath/"build"
+    system "cmake", "-S", ".", "-B", "build", *std_cmake_args
+    system "cmake", "--build", "build"
 
+    vineyard_sock = testpath/"vineyard.sock"
     # prepare vineyardd
     vineyardd_pid = spawn bin/"vineyardd", "--norpc",
                                            "--meta=local",
-                                           "--socket=#{testpath}/vineyard.sock"
+                                           "--socket=#{vineyard_sock}"
 
     # sleep to let vineyardd get its wits about it
-    sleep 10
+    sleep 10 until vineyard_sock.exist? && vineyard_sock.socket?
 
     assert_equal("vineyard instance is: 0\n",
-                 shell_output("#{testpath}/build/vineyard-test #{testpath}/vineyard.sock"))
+                 shell_output("#{testpath}/build/vineyard-test #{vineyard_sock}"))
   ensure
     # clean up the vineyardd process before we leave
     Process.kill("HUP", vineyardd_pid)

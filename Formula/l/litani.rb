@@ -9,14 +9,13 @@ class Litani < Formula
   license "Apache-2.0"
 
   bottle do
-    rebuild 2
-    sha256 cellar: :any,                 arm64_sonoma:   "408a0d598275dc4a3871764f95d3d7ddc0826a343ebf4dd7596b57b51f9bbec4"
-    sha256 cellar: :any,                 arm64_ventura:  "93b45f62fedbde680a8d8f8790492199d3de3f3474b034d9588b6fe0dfea6e71"
-    sha256 cellar: :any,                 arm64_monterey: "b37771876e6b276e86044e1de6ac2b827531158f361d23e564145a23d93b782c"
-    sha256 cellar: :any,                 sonoma:         "96a1153878cfd5873fa3826c3ad52ccdcbc5d61961f11b12c89a8551fdc64055"
-    sha256 cellar: :any,                 ventura:        "05d05b60fb1ff44f6a3eff263a971ef53f5e3e46c52ce36f565f6c1f78d07eb4"
-    sha256 cellar: :any,                 monterey:       "e9a74083982b0345fcafab7158af89e0889b342441ff7634a7defbf356e5bd43"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "74a1598f4a7d1f14a4c55bf1c4e775e75dba57267bb0a795627fc97a41bc5467"
+    rebuild 5
+    sha256 cellar: :any,                 arm64_tahoe:   "9759632a6582af9013d067c4461d07a5cd713405b2325593dcbbcd80dba1dee5"
+    sha256 cellar: :any,                 arm64_sequoia: "e90d4268066cfc34e1324f2b65fbc83ebd8b2c13727a8e5bb9fe2720fd7335bc"
+    sha256 cellar: :any,                 arm64_sonoma:  "d3e1a4ef297c94137c6ee223fa246f89c45b11a2dd92a3778415efb923f8ec08"
+    sha256 cellar: :any,                 sonoma:        "aa07f4bd06cfef36b6c1aeb00f0399dde3a5f2757905891ca77ba4ffaca0127e"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "626ef7ddbb0b86a50f8f7f6e3f846afe918bb3820a26a4861e03186e1be97e0f"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "0331320a1a3ab0d6b7564b35460c0b455824aaadc7f9d0f757c73aee894e71c2"
   end
 
   depends_on "coreutils" => :build
@@ -26,26 +25,29 @@ class Litani < Formula
   depends_on "graphviz"
   depends_on "libyaml"
   depends_on "ninja"
-  depends_on "python@3.12"
+  depends_on "python@3.14"
+
+  pypi_packages package_name:   "",
+                extra_packages: %w[jinja2 markupsafe pyyaml]
 
   resource "jinja2" do
-    url "https://files.pythonhosted.org/packages/7a/ff/75c28576a1d900e87eb6335b063fab47a8ef3c8b4d88524c4bf78f670cce/Jinja2-3.1.2.tar.gz"
-    sha256 "31351a702a408a9e7595a8fc6150fc3f43bb6bf7e319770cbc0db9df9437e852"
+    url "https://files.pythonhosted.org/packages/df/bf/f7da0350254c0ed7c72f3e33cef02e048281fec7ecec5f032d4aac52226b/jinja2-3.1.6.tar.gz"
+    sha256 "0137fb05990d35f1275a587e9aee6d56da821fc83491a0fb838183be43f66d6d"
   end
 
   resource "markupsafe" do
-    url "https://files.pythonhosted.org/packages/6d/7c/59a3248f411813f8ccba92a55feaac4bf360d29e2ff05ee7d8e1ef2d7dbf/MarkupSafe-2.1.3.tar.gz"
-    sha256 "af598ed32d6ae86f1b747b82783958b1a4ab8f617b06fe68795c7f026abbdcad"
+    url "https://files.pythonhosted.org/packages/7e/99/7690b6d4034fffd95959cbe0c02de8deb3098cc577c67bb6a24fe5d7caa7/markupsafe-3.0.3.tar.gz"
+    sha256 "722695808f4b6457b320fdc131280796bdceb04ab50fe1795cd540799ebe1698"
   end
 
   resource "pyyaml" do
-    url "https://files.pythonhosted.org/packages/cd/e5/af35f7ea75cf72f2cd079c95ee16797de7cd71f29ea7c68ae5ce7be1eda0/PyYAML-6.0.1.tar.gz"
-    sha256 "bfdf460b1736c775f2ba9f6a92bca30bc2095067b8a9d77876d1fad6cc3b4a43"
+    url "https://files.pythonhosted.org/packages/05/8e/961c0007c59b8dd7729d542c61a4d537767a59645b82a0b521206e1e25c2/pyyaml-6.0.3.tar.gz"
+    sha256 "d76623373421df22fb4cf8817020cbb7ef15c725b9d5e45f17e189bfc384190f"
   end
 
   def install
     ENV.prepend_path "PATH", libexec/"vendor/bin"
-    venv = virtualenv_create(libexec/"vendor", "python3.12")
+    venv = virtualenv_create(libexec/"vendor", "python3.14")
     venv.pip_install resources
 
     libexec.install Dir["*"] - ["test", "examples"]

@@ -8,17 +8,20 @@ class Mitie < Formula
   head "https://github.com/mit-nlp/MITIE.git", branch: "master"
 
   bottle do
-    rebuild 2
-    sha256 cellar: :any,                 arm64_sonoma:   "206757071c813ec8b7464f15c897775fc3fa3c30520c2f28f4393139930cafa6"
-    sha256 cellar: :any,                 arm64_ventura:  "f12722f2d8be28dccf40dd9a6db1daaafe471274c94d1a1f042f4ee2b44cd2d0"
-    sha256 cellar: :any,                 arm64_monterey: "476290231b1f8e2bcef9c6100f7d0855dacfb9fb07d3701d440109ea42f91251"
-    sha256 cellar: :any,                 sonoma:         "3d4defc02f23e98c3c21ef64054f1584ca5dfa6ca169c9ec6da679996d9f75c1"
-    sha256 cellar: :any,                 ventura:        "85fc39c96b7fff74e52bacd3f586c2c8e7f57d619fdbc5ebfda3391ad196db1c"
-    sha256 cellar: :any,                 monterey:       "10455cf05c6209440d4bcd837f6f5b2e89f7ab74030171ae0ce27d60baaf14a1"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "89bc3e10846c5aeef3669467f1aea054fb198772418f428c3dcfcdeb3d95d84a"
+    rebuild 4
+    sha256 cellar: :any,                 arm64_tahoe:   "025cb3eb83b916c6311a5282c51ba1c44d9890dcb158b4b8327e5ae0deda4a8b"
+    sha256 cellar: :any,                 arm64_sequoia: "9aa9238fdd29d5a705c3e342f883e147424c62329bc9cdb81ef939079c7d67f3"
+    sha256 cellar: :any,                 arm64_sonoma:  "876af22594ab08bfb316893df9fd16f8e761c42502bafde4eaf82fd188a3f420"
+    sha256 cellar: :any,                 sonoma:        "71792924c5aca7fe2d3db9db416c89552b95690ecf236e681cbe2d1e846ba72e"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "c9999c37c7d297991dd328c5868a1eea42dc26a193e5725d9a766e2c11852394"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "906519532491d62f21e16e31ef3fccb49672ca033bf811cf289f93bcb6468eeb"
   end
 
-  depends_on "python@3.12"
+  depends_on "python@3.14"
+
+  on_sequoia do
+    depends_on xcode: ["15.3", :build]
+  end
 
   resource "models-english" do
     url "https://downloads.sourceforge.net/project/mitie/binaries/MITIE-models-v0.2.tar.bz2"
@@ -35,7 +38,7 @@ class Mitie < Formula
     include.install Dir["mitielib/include/*"]
     lib.install "mitielib/#{shared_library("libmitie")}", "mitielib/libmitie.a"
 
-    (prefix/Language::Python.site_packages("python3.12")).install "mitielib/mitie.py"
+    (prefix/Language::Python.site_packages("python3.14")).install "mitielib/mitie.py"
     pkgshare.install "examples", "sample_text.txt",
                      "sample_text.reference-output",
                      "sample_text.reference-output-relations"

@@ -1,8 +1,8 @@
 class Wimlib < Formula
   desc "Library to create, extract, and modify Windows Imaging files"
   homepage "https://wimlib.net/"
-  url "https://wimlib.net/downloads/wimlib-1.14.4.tar.gz"
-  sha256 "3633db2b6c8b255eb86d3bf3df3059796bd1f08e50b8c9728c7eb66662e51300"
+  url "https://wimlib.net/downloads/wimlib-1.14.5.tar.gz"
+  sha256 "84221a3abd5b91228f15f8e6065c335a336237b5738197b75bf419eea561a194"
   license "GPL-3.0-or-later"
 
   livecheck do
@@ -11,28 +11,26 @@ class Wimlib < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "8cbbeec3b621170d4577412d4c0a240e27a07a9471ffa6f28186ccb26c601592"
-    sha256 cellar: :any,                 arm64_ventura:  "295512a48ab0166b7e217a83b106bc7e7e01cbf3a6f343eaedfa97a899eb4d92"
-    sha256 cellar: :any,                 arm64_monterey: "9f8f4f22847e831915fccdeedfc885108dc2d6f6d80e276d4932484015bba54a"
-    sha256 cellar: :any,                 sonoma:         "9822e536911e162bb367cfd73ac94ff7ef30a9b0d604400d7702fb4bee072f0e"
-    sha256 cellar: :any,                 ventura:        "77a2f91a0c2ca081a2f50ff5f4b9f3ea4f9e79a3c19705f71309c8c60d08e5d8"
-    sha256 cellar: :any,                 monterey:       "0f92288eb4efd7316e705cf1a6d1729f8b6eee81beb7ea57daf15f968c0c53ff"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "4710658e4473cd5744958616b25eb4c19bf61ffec09c42cd748ef4d0ce26c3b0"
+    sha256 cellar: :any,                 arm64_tahoe:   "951bf9ddae69ebd6442a44d1f1e39679a2c5655c4fcd32510eb6643db62dc3ea"
+    sha256 cellar: :any,                 arm64_sequoia: "f68999bc5e316bdbe49da07b9e19d666d4af22cfb142f5cefa17a6164230f5cc"
+    sha256 cellar: :any,                 arm64_sonoma:  "e1ea0499d1740f2f5068cc4f7a298020559924e9be21c76d30a5dbeb8d93f4ae"
+    sha256 cellar: :any,                 sonoma:        "705581a3fc296d50a26abc3fd4a998e4e09e146366e636c9486ead31855d1372"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "a6c19ffd2caac844bbee911908b820cd7345455b089e0aa20438ed4aee1f0319"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "be666177d8950f104c6bd2e72d7c19a89477e24e5c1873b66539bce538a0415d"
   end
 
-  depends_on "pkg-config" => :build
-  depends_on "openssl@3"
+  depends_on "pkgconf" => :build
 
-  uses_from_macos "libxml2"
+  on_linux do
+    depends_on "libfuse"
+    depends_on "ntfs-3g"
+  end
 
   def install
-    # fuse requires librt, unavailable on OSX
-    args = %w[
-      --disable-silent-rules
-      --without-fuse
-      --without-ntfs-3g
-    ]
-    system "./configure", *std_configure_args, *args
+    args = %w[--disable-silent-rules]
+    args += %w[--without-fuse --without-ntfs-3g] if OS.mac?
+
+    system "./configure", *args, *std_configure_args
     system "make", "install"
   end
 
@@ -48,7 +46,7 @@ class Wimlib < Formula
     # capture an image
     ENV.append "WIMLIB_IMAGEX_USE_UTF8", "1"
     system bin/"wimcapture", "foo", "bar.wim"
-    assert_predicate testpath/"bar.wim", :exist?
+    assert_path_exists testpath/"bar.wim"
 
     # get info on the image
     system bin/"wiminfo", "bar.wim"

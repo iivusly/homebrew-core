@@ -1,24 +1,26 @@
 class Optipng < Formula
   desc "PNG file optimizer"
   homepage "https://optipng.sourceforge.net/"
-  url "https://downloads.sourceforge.net/project/optipng/OptiPNG/optipng-0.7.8/optipng-0.7.8.tar.gz"
-  sha256 "25a3bd68481f21502ccaa0f4c13f84dcf6b20338e4c4e8c51f2cefbd8513398c"
+  url "https://downloads.sourceforge.net/project/optipng/OptiPNG/optipng-7.9.1/optipng-7.9.1.tar.gz"
+  sha256 "c2579be58c2c66dae9d63154edcb3d427fef64cb00ec0aff079c9d156ec46f29"
   license "Zlib"
-  head "http://hg.code.sf.net/p/optipng/mercurial", using: :hg
+  head "https://git.code.sf.net/p/optipng/code.git", branch: "tmp/main"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "c1b42258526f71e84ecda4f7e72ca8c8a9e6685179a7b0b792d37c29cbbb03a2"
-    sha256 cellar: :any,                 arm64_ventura:  "ad99b4693060ef805451b6d3a3bc9c2fbbdec2284d18395a686eeba68d33a5d3"
-    sha256 cellar: :any,                 arm64_monterey: "c560ecc7ba7c3f33620b4d808e498ee8d1cdb693da8830424aa2de76fc8561a9"
-    sha256 cellar: :any,                 sonoma:         "345a986c5e59c4c14d43500de9862e5b3c09f75916da5d979603877d0b27f844"
-    sha256 cellar: :any,                 ventura:        "03b4a5b9aba8fa77b708a64417d26362860fcbfb8b563b4d2fa7f1be2e15135a"
-    sha256 cellar: :any,                 monterey:       "86ff3ec0b11f375a0efe8b02bfd6e39d929199623f6b898651ce5f565983f685"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "5e41ab8506824deb6ce70a14bef6d4c9d15209e1c19316934c859e6111fccee4"
+    rebuild 1
+    sha256 cellar: :any,                 arm64_tahoe:   "7bc1a16e16342def4b3cb3264737beaa1319d6487d812066d341b2d7e7652512"
+    sha256 cellar: :any,                 arm64_sequoia: "04c60466375077fc2707c4b663c4557f684c2a5a0ad6492f16e6b20faa8c02f9"
+    sha256 cellar: :any,                 arm64_sonoma:  "24a250dca1b1322b7f7bd3057752f92e5d77c232342c8e3649b10fbe1eb617f9"
+    sha256 cellar: :any,                 sonoma:        "fce585cdebd10bee1694e8b44078da666cd5d1459634f8ac22a8202711254a55"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "ad4fcb25fbeaa03ff1a1f53a22c4660ab127f14a6e2370814135bd645692500e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "a0d382808f584669781d2c1bdc4db551cad72e10408669a4618db0f2e3532a67"
   end
 
   depends_on "libpng"
 
-  uses_from_macos "zlib"
+  on_linux do
+    depends_on "zlib-ng-compat"
+  end
 
   def install
     system "./configure", "--with-system-zlib",

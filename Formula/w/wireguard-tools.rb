@@ -1,10 +1,9 @@
 class WireguardTools < Formula
   desc "Tools for the WireGuard secure network tunnel"
   homepage "https://www.wireguard.com/"
-  url "https://git.zx2c4.com/wireguard-tools/snapshot/wireguard-tools-1.0.20210914.tar.xz"
-  sha256 "97ff31489217bb265b7ae850d3d0f335ab07d2652ba1feec88b734bc96bd05ac"
+  url "https://git.zx2c4.com/wireguard-tools/snapshot/wireguard-tools-1.0.20260223.tar.xz"
+  sha256 "af459827b80bfd31b83b08077f4b5843acb7d18ad9a33a2ef532d3090f291fbf"
   license "GPL-2.0-only"
-  revision 1
   head "https://git.zx2c4.com/wireguard-tools.git", branch: "master"
 
   livecheck do
@@ -13,16 +12,12 @@ class WireguardTools < Formula
   end
 
   bottle do
-    rebuild 2
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "afec9bdf1a24e98a53e4568fb82cce22ca05ac4607f48a84e67fb9e5ed6a9df4"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "00c5b2ed459e7beae63c31d85c5be506b43dc2936439c5139bb92482a5df9b37"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "25c8ed67136dcaa8d5292aae40793fd68fe6b803d57fc698a9bc7712bfc1c37f"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "b73274d92eb5cc895635e2f8baf8f3483dc373e6b6591cd101e2a3bc6ddbae8e"
-    sha256 cellar: :any_skip_relocation, sonoma:         "369edbf097e3ac528853e5c696502fc41cb1fce55f4cb654ad5611ea4511edd7"
-    sha256 cellar: :any_skip_relocation, ventura:        "ccfe3d35f1cdcb6df435e96fed4cff835274a9a34530c270e71660b65c667ff7"
-    sha256 cellar: :any_skip_relocation, monterey:       "61ae65bc95ae1ff7497a7d3f6128054f21fc0daafc089553c3f44a8f7b5b34b0"
-    sha256 cellar: :any_skip_relocation, big_sur:        "7998a72195a995ee53e1360a42532bcb6fa42fda1002f16674c695ef5cea101e"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "b742a6fbc6894b5da2865387e48a7481d894ba90bc37eb5fd38081b2f3af1817"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "0dacbfadaa9a5ed82a409138304c28b34cd13509f10ae25b788d1e72f7250281"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "00e71a7b3c0c144730bfcdd4e87001fefd9960ce6a9f842bc85794f4138e62d7"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "a8103231bca48f4d0db2257a2429f1f3ec18203cc654c48b24736552b3623128"
+    sha256 cellar: :any_skip_relocation, sonoma:        "82e2046eb5642fd202ed22a2012cc1ef2c62b0c95499865bb040801ee37f525a"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "cc1772493a5cf8e05ef603563d6fee4bad183deacf21a0db46e9f7e3fe716d0f"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "0af7756dee0ec6ea3053e5b055259b66b45a6a67a80862a8d280028be5c6aa54"
   end
 
   depends_on "bash"

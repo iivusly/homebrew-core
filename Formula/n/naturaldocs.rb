@@ -1,9 +1,9 @@
 class Naturaldocs < Formula
   desc "Extensible, multi-language documentation generator"
   homepage "https://www.naturaldocs.org/"
-  url "https://downloads.sourceforge.net/project/naturaldocs/Stable%20Releases/2.3/Natural_Docs_2.3.zip"
-  mirror "https://naturaldocs.org/download/natural_docs/2.3/Natural_Docs_2.3.zip"
-  sha256 "37dcfeaa0aee2a3622adc85882edacfb911c2e713dba6592cbee6812deddd2f2"
+  url "https://downloads.sourceforge.net/project/naturaldocs/Stable%20Releases/2.3.1/Natural_Docs_2.3.1.zip"
+  mirror "https://naturaldocs.org/download/natural_docs/2.3.1/Natural_Docs_2.3.1.zip"
+  sha256 "92144e2deb1ff2606d29343cfea203ea890549ad2f77c03df1cea2d8014972cb"
   license "AGPL-3.0-only"
 
   livecheck do
@@ -13,13 +13,7 @@ class Naturaldocs < Formula
 
   bottle do
     rebuild 1
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "c8381f2df948395879acd6d145586b1f94f94cb99d5f7fb5a60560b2584934bf"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "c8381f2df948395879acd6d145586b1f94f94cb99d5f7fb5a60560b2584934bf"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "c8381f2df948395879acd6d145586b1f94f94cb99d5f7fb5a60560b2584934bf"
-    sha256 cellar: :any_skip_relocation, sonoma:         "c8381f2df948395879acd6d145586b1f94f94cb99d5f7fb5a60560b2584934bf"
-    sha256 cellar: :any_skip_relocation, ventura:        "c8381f2df948395879acd6d145586b1f94f94cb99d5f7fb5a60560b2584934bf"
-    sha256 cellar: :any_skip_relocation, monterey:       "c8381f2df948395879acd6d145586b1f94f94cb99d5f7fb5a60560b2584934bf"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "5c39b957abe3a6a51190a7ad008dc9bd8c7ef2014b8c03ff5f0b258c1293735e"
+    sha256 cellar: :any_skip_relocation, all: "a439b159358c64b91076716aa62efc0f80cd08938a4a35daa35dd397817a474a"
   end
 
   depends_on "mono"
@@ -29,12 +23,12 @@ class Naturaldocs < Formula
     arch = Hardware::CPU.intel? ? "x64" : Hardware::CPU.arch.to_s
 
     libexec.install Dir["*"]
-    (bin/"naturaldocs").write <<~EOS
+    (bin/"naturaldocs").write <<~BASH
       #!/bin/bash
       mono #{libexec}/NaturalDocs.exe "$@"
-    EOS
+    BASH
 
-    libexec.install_symlink etc/"naturaldocs" => "config"
+    libexec.install_symlink etc/"naturaldocs" => "Config"
 
     libexec.glob("libSQLite.*").each do |f|
       rm f if f.basename.to_s != "libSQLite.#{os}.#{arch}"
@@ -42,9 +36,9 @@ class Naturaldocs < Formula
   end
 
   test do
-    assert_match version.to_s, shell_output(bin/"naturaldocs -v")
+    assert_match version.to_s, shell_output("#{bin}/naturaldocs -v")
 
-    output = shell_output(bin/"naturaldocs --list-encodings")
+    output = shell_output("#{bin}/naturaldocs --list-encodings")
     assert_match "Unicode (UTF-8)", output
   end
 end

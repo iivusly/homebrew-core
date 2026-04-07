@@ -1,31 +1,31 @@
 class Pgsync < Formula
   desc "Sync Postgres data between databases"
   homepage "https://github.com/ankane/pgsync"
-  url "https://github.com/ankane/pgsync/archive/refs/tags/v0.8.0.tar.gz"
-  sha256 "385aa0be8683ae4877fc6b39a3a4a0664680ed1631559fadd7b5113d7724ecea"
+  url "https://github.com/ankane/pgsync/archive/refs/tags/v0.8.1.tar.gz"
+  sha256 "485c38e4c5bfec943bf8781f8c8ca4b773011c5767fb30be44d373566f40d5dc"
   license "MIT"
+  revision 1
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "d0fca0241bcd1370d86a97de70e9a6255eb8233e732da09777c2b5894c493374"
-    sha256 cellar: :any,                 arm64_ventura:  "cf0802b4607cd6561a44ab652c5d6fcee8606d30ee2ab26fd6dc173a2861b225"
-    sha256 cellar: :any,                 arm64_monterey: "140280805ff038e3ac4acaebe412c00cefc83ab4ead853f4ae118df3ce9ec1cd"
-    sha256 cellar: :any,                 sonoma:         "11f63bba4caf4667f0932a4478b35796c149f6abb6123cb52ca5f9cd9d6fad29"
-    sha256 cellar: :any,                 ventura:        "4266dc4941f0a59b6501366328621230140dca93095da411ca59b295864264be"
-    sha256 cellar: :any,                 monterey:       "685537766509336ec0a61b47a202c279303740e6284ecf85e31a20dfc9a91d28"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "be09e2268832219f7fe75c3dcb8c0baf0067cee5a80c325f423f07ab788fba29"
+    sha256 cellar: :any,                 arm64_tahoe:   "fe769a833d393d4a1a2d14e5ec710ce30ba26100f26c7de7afe3070772f92406"
+    sha256 cellar: :any,                 arm64_sequoia: "5799a23728b227d10d0b8502f3e16d911d77da00466cc5e70acfc53b51822cd8"
+    sha256 cellar: :any,                 arm64_sonoma:  "59dfc0e99d2e655745377685522d88f6fbe0f49e0c8646ae17377d4c0255bc29"
+    sha256 cellar: :any,                 sonoma:        "892cb4b2ca7209d33bf1c80d44e71c4b5e6c91000ff3bd719612dbb281bd6fd9"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "9596851af03225d8b7b43404b9cca41330948a7db7eb79601f4bde1c4a5f72ca"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "57b9865d679544372d9bd0dabbb86025790c1a8f401e00a9251352f0b4a8a004"
   end
 
   depends_on "libpq"
   depends_on "ruby"
 
   resource "parallel" do
-    url "https://rubygems.org/gems/parallel-1.25.1.gem"
-    sha256 "12e089b9aa36ea2343f6e93f18cfcebd031798253db8260590d26a7f70b1ab90"
+    url "https://rubygems.org/gems/parallel-1.27.0.gem"
+    sha256 "4ac151e1806b755fb4e2dc2332cbf0e54f2e24ba821ff2d3dcf86bf6dc4ae130"
   end
 
   resource "pg" do
-    url "https://rubygems.org/gems/pg-1.5.6.gem"
-    sha256 "4bc3ad2438825eea68457373555e3fd4ea1a82027b8a6be98ef57c0d57292b1c"
+    url "https://rubygems.org/gems/pg-1.6.2.gem"
+    sha256 "58614afd405cc9c2c9e15bffe8432e0d6cfc58b722344ad4a47c73a85189c875"
   end
 
   resource "slop" do
@@ -62,6 +62,6 @@ class Pgsync < Formula
 
   test do
     system bin/"pgsync", "--init"
-    assert_predicate testpath/".pgsync.yml", :exist?
+    assert_path_exists testpath/".pgsync.yml"
   end
 end

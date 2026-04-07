@@ -1,48 +1,31 @@
 class ActionValidator < Formula
   desc "Tool to validate GitHub Action and Workflow YAML files"
   homepage "https://github.com/mpalmer/action-validator"
+  # Using crates.io source as it includes schemastore submodule code
+  url "https://static.crates.io/crates/action-validator/action-validator-0.9.0.crate"
+  sha256 "e379b5be9a8a4659aaec855a3321e40d98c5216d6191bc362a24d5b605a2cbcb"
   license "GPL-3.0-only"
-
-  stable do
-    url "https://github.com/mpalmer/action-validator/archive/refs/tags/v0.6.0.tar.gz"
-    sha256 "bdec75f6383a887986192685538a736c88be365505e950aab262977c8845aa88"
-
-    # always pull the HEAD commit hash
-    resource "schemastore" do
-      url "https://github.com/SchemaStore/schemastore.git",
-          revision: "7bf746bd90d7e88cd11f0a9dc4bc34c91fbbf7b4"
-    end
-  end
+  head "https://github.com/mpalmer/action-validator.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "347c3544b0c5726c557d949e4169d7e31e8e9b6ddb8d10fe30cd763dc7df030f"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "d788de5edb5dcc71093119528a77e9cdbfe62a3de062e42f437057c7c46d70b3"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "70fad7c8608b4e2ed2940a68b94a527cc609c279a422c326c18fae57e20095bd"
-    sha256 cellar: :any_skip_relocation, sonoma:         "e2c2aa5d31932a9b2e40c136da4608b0db775aa60b730b70131ee7f1a81cf9ad"
-    sha256 cellar: :any_skip_relocation, ventura:        "36815305c61bb8943c8393f98dcf53495ce9164a736108ca97aee7c70c57342f"
-    sha256 cellar: :any_skip_relocation, monterey:       "8e6f2d8e17962160c4b61ce9401decef9dc6d062a3da67838192e9d185277a65"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "151521ccea42db3b37dcd607c8fa70bf3b974d6fe03050ec0538c8ecea4d6c49"
-  end
-
-  head do
-    url "https://github.com/mpalmer/action-validator.git", branch: "main"
-
-    resource "schemastore" do
-      url "https://github.com/SchemaStore/schemastore.git", branch: "master"
-    end
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "12edda1e1aa6916ec8afaab4e068395e3ec81d2ff319ef572fe2c4187309470d"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "6166f38a0e059a1a1d8c28ba7aee2656e9769182add2154703f636fee323a4cc"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "14ab16254be123c6604ed9127ec2290858c83b338779f867e073c18646e8f931"
+    sha256 cellar: :any_skip_relocation, sonoma:        "543d0e8f0e3a0fa20b7b1ded901d0112c4e2f52fb3e46400dca43b2d11e627d1"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "e50f6621e00aa7e515d73a7765296a05c8fb0882734224c6fcc103d72a5fb9aa"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "d8f9021532e74756bad01482d0d435e1ec420429521c27c5c06e243c2108e3f5"
   end
 
   depends_on "rust" => :build
 
   def install
-    (buildpath/"src/schemastore").install resource("schemastore")
-
+    ENV["GEN_DIR"] = buildpath
     system "cargo", "install", *std_cargo_args
   end
 
   test do
     test_action = testpath/"action.yml"
-    test_action.write <<~EOS
+    test_action.write <<~YAML
       name: "Brew Test Action"
       description: "Test Action"
       inputs:
@@ -52,10 +35,10 @@ class ActionValidator < Formula
       runs:
         using: "node20"
         main: "index.js"
-    EOS
+    YAML
 
     test_workflow = testpath/"workflow.yml"
-    test_workflow.write <<~EOS
+    test_workflow.write <<~YAML
       name: "Brew Test Workflow"
       on: [push111]
       jobs:
@@ -63,7 +46,7 @@ class ActionValidator < Formula
           runs-on: ubuntu-latest
           steps:
             - uses: actions/checkout@v4
-    EOS
+    YAML
 
     output = shell_output("#{bin}/action-validator --verbose #{test_action}")
     assert_match "Treating action.yml as an Action definition", output

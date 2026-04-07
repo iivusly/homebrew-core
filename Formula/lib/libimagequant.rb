@@ -1,18 +1,18 @@
 class Libimagequant < Formula
   desc "Palette quantization library extracted from pnquant2"
   homepage "https://pngquant.org/lib/"
-  url "https://github.com/ImageOptim/libimagequant/archive/refs/tags/4.3.3.tar.gz"
-  sha256 "c50a59003a4c4ce53c76314e62f1e86d86d882bc09addb13daa0faa9260b9614"
+  url "https://github.com/ImageOptim/libimagequant/archive/refs/tags/4.4.1.tar.gz"
+  sha256 "2464a3e922b5a220b633d674062b82f0670114f8f3dd30d1935a621c95965f1b"
   license all_of: ["GPL-3.0-or-later", "HPND"]
+  compatibility_version 1
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "979e2b7ba7184cfa5c8f7f6c6f49ac20483c319421ea0de84e64846683635d5f"
-    sha256 cellar: :any,                 arm64_ventura:  "aa15ba471418f6a856f757c0bd1a5cec72a395dd6165fb047de74a2cb49e1762"
-    sha256 cellar: :any,                 arm64_monterey: "b992cfca22175166db0ff267ad0b1e8e45302670abb24c6766e1ca397239965f"
-    sha256 cellar: :any,                 sonoma:         "c7abdc523621e1b109df3441e62897806e25adf78d5a8ad6458102a9d1d8b2f1"
-    sha256 cellar: :any,                 ventura:        "a73a58ebbfe42f237b93273f9a00b6a074cb98fa44ddd5bc7709531108ab8d47"
-    sha256 cellar: :any,                 monterey:       "dab7441d58d0073025823ae1925c5aa10cd14258f0d134b0fdff4d6f5f7fa6d5"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "d6c9141dc8c392d162db72c6038c546e7ea82194c517a948ce3c6c43b40ddfe1"
+    sha256 cellar: :any,                 arm64_tahoe:   "9fe68c59c0500f834deced30fcd58c965148988f238d51791d39c6c284d71684"
+    sha256 cellar: :any,                 arm64_sequoia: "35636b9bf13cd99e77dec879e87736122925c790fec18da07dbcbea76083bdc6"
+    sha256 cellar: :any,                 arm64_sonoma:  "f1cfb5f5fb3e31907edf925d0df58be68d53fd4241fb819e946aba322cda4375"
+    sha256 cellar: :any,                 sonoma:        "8a25e968794937adcb94e84e2421a0b8fd48503205451fcc24ddd41ed84ad8be"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "0884471a064070eb8209c726fbb5e2068c6dcc4a3f2f74b6fb0e69b4117e51e7"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "f9943e809de898982fbd65821564d201a4f88d0d902d504d2b8f4a059ab9c94c"
   end
 
   depends_on "cargo-c" => :build
@@ -20,12 +20,12 @@ class Libimagequant < Formula
 
   def install
     cd "imagequant-sys" do
-      system "cargo", "cinstall", "--prefix", prefix, "--libdir", lib
+      system "cargo", "cinstall", "--jobs", ENV.make_jobs.to_s, "--release", "--prefix", prefix, "--libdir", lib
     end
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <libimagequant.h>
 
       int main()
@@ -38,7 +38,7 @@ class Libimagequant < Formula
           return 0;
         }
       }
-    EOS
+    C
     system ENV.cc, "test.c", "-I#{include}", "-L#{lib}", "-limagequant", "-o", "test"
     system "./test"
   end

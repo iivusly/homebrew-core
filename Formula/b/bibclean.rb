@@ -11,6 +11,8 @@ class Bibclean < Formula
   end
 
   bottle do
+    sha256 arm64_tahoe:    "879cc1d92309684de3e1d3aac3f3ceae0751b013e52bee638c67c18fd63dbf92"
+    sha256 arm64_sequoia:  "13c1d6444ba0a4dd09e6840c29240a230d4d5bab8946912b275fc53fca9558bc"
     sha256 arm64_sonoma:   "9ec0d9aaf5fa2f6f48a1fd7d221a8f76d0af01d2adc36be38ad81a9660750fbe"
     sha256 arm64_ventura:  "d3fe9381c582b76b086b44099f31247d59ce061cd28332df637410c9249ea801"
     sha256 arm64_monterey: "13dab8081ee1d770d8ee59434aff9960da2210f8e20c41f95d23cdfa263b2041"
@@ -19,6 +21,7 @@ class Bibclean < Formula
     sha256 ventura:        "b186cd7d543fd826e467a97c399e9fbd0cffb1bf65db3e31967aac99ef685093"
     sha256 monterey:       "0fd480cd271181b46c149447a7e982d70e7f196548407ed20a7557066e5124eb"
     sha256 big_sur:        "dd7f3ef2672e9f562a7248ae269a12b959b6606dff0aac1fbc0b59869a7d1fd3"
+    sha256 arm64_linux:    "d700d842f1381f0c09f7580584db46a2ccc558fd0fbf95b17fc45ea242061036"
     sha256 x86_64_linux:   "3e6f4a7531a9e96f3cdb75f01271287c7bb477566ccf80438895c730d35c995d"
   end
 
@@ -46,7 +49,7 @@ class Bibclean < Formula
   end
 
   test do
-    (testpath/"test.bib").write <<~EOS
+    (testpath/"test.bib").write <<~BIBTEX
       @article{small,
       author = {Test, T.},
       title = {Test},
@@ -54,7 +57,7 @@ class Bibclean < Formula
       year = 2014,
       note = {test},
       }
-    EOS
+    BIBTEX
 
     system bin/"bibclean", "test.bib"
   end

@@ -1,35 +1,69 @@
 class GnuGetopt < Formula
   desc "Command-line option parsing utility"
   homepage "https://github.com/util-linux/util-linux"
-  url "https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.40/util-linux-2.40.2.tar.xz"
-  sha256 "d78b37a66f5922d70edf3bdfb01a6b33d34ed3c3cafd6628203b2a2b67c8e8b3"
+  url "https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.42/util-linux-2.42.tar.xz"
+  sha256 "3452b260bbaa775d6e749ac3bb22111785003fc1f444970025c8da26dfa758e9"
   license "GPL-2.0-or-later"
+  compatibility_version 1
 
-  bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "ab9985a8189d89d997042764ca3a413380798f7faddb032c77613c392724daae"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "d15c97983241a60691b09b15684351304f1d00933c46a103ef9521b985a34e52"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "63ab4b156e1fcc16b6e014f5a92fac3087c7c371004c134d12276e3f4f469d46"
-    sha256 cellar: :any_skip_relocation, sonoma:         "116ef535edda1d42f67f7eb1411cddeea237e835ae69c2171d9fa6b2df843f37"
-    sha256 cellar: :any_skip_relocation, ventura:        "97cedb6c84bf6bb1d3a9335800992efe37b5aebd56daf0f99f3b752bff1a3c3e"
-    sha256 cellar: :any_skip_relocation, monterey:       "c70effa81195e0495de1ae6538c0efcf35397aedeb756ef7294376e3bbe2f0c1"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "c0accfa7f1ff3844f5976a87e794812ffc3598251542dbb370cf0f4e43623f37"
+  livecheck do
+    url "https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/"
+    regex(/href=.*?util-linux[._-]v?(\d+(?:\.\d+)+)\.t/i)
+    strategy :page_match do |page, regex|
+      # Match versions from directories
+      versions = page.scan(%r{href=["']?v?(\d+(?:\.\d+)+)/?["' >]}i)
+                     .flatten
+                     .uniq
+                     .sort_by { |v| Version.new(v) }
+      next versions if versions.blank?
+
+      # Check the highest version, falling back to the second-highest version
+      # if no matching versions are found in the version directory (e.g.,
+      # upstream has created a version directory using a stable version format
+      # but the version directory only contained unstable versions).
+      dir_versions = []
+      versions[-2..].reverse_each do |version|
+        # Fetch the page for the version directory
+        dir_page = Homebrew::Livecheck::Strategy.page_content(
+          URI.join(@url, "v#{version}/").to_s,
+        )
+        next versions if dir_page[:content].blank?
+
+        # Identify versions from files in the version directory
+        dir_versions = dir_page[:content].scan(regex).flatten
+        break unless dir_versions.empty?
+      end
+
+      dir_versions.presence || versions
+    end
   end
 
-  keg_only :provided_by_macos
+  bottle do
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "c3cc8fd191a5a86f3a4513da7802a88d6ad099e356eda8638d3be820d7b88966"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "e6d10dbbad97abd5182b002696df07c3c922d622057c0e3fc3df92dc7d011030"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "b0653f00fcd1bd3877418161cfc82e66b2dce6ab93befccaa4778e80610ecfc9"
+    sha256 cellar: :any_skip_relocation, sonoma:        "73a1eecae19dc3d2974367d98b70a481e96955c9f440a913d78ecc62a6f3546c"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "f335139ba28c77ff23c03188414769cac5b880b6a4431961afec0f3380c02bcd"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "e2532f0fe367ea8450cfd00a5a2482d6ec3bd3662fa84ef36fa121153d4c57e7"
+  end
 
-  depends_on "asciidoctor" => :build
-  depends_on "autoconf" => :build
-  depends_on "automake" => :build
-  depends_on "pkg-config" => :build
+  keg_only :shadowed_by_macos, "macOS provides BSD getopt"
 
   on_linux do
-    keg_only "conflicts with util-linux"
+    keg_only "it conflicts with util-linux"
+  end
+
+  # Fix macOS builds
+  # https://github.com/util-linux/util-linux/pull/4173
+  patch do
+    url "https://github.com/util-linux/util-linux/commit/d22edc2f100eb8dd83d3515758565cb73b0d2eed.patch?full_index=1"
+    sha256 "2fb01154faa3fd8b0fce27eb88049ed9c8f839e706e412399c19c087f7f3b5e1"
   end
 
   def install
-    system "./configure", *std_configure_args,
-                          "--disable-silent-rules",
-                          "--disable-liblastlog2"
+    system "./configure", "--disable-silent-rules",
+                          "--disable-liblastlog2",
+                          *std_configure_args
 
     system "make", "getopt", "misc-utils/getopt.1"
 
@@ -40,9 +74,9 @@ class GnuGetopt < Formula
   end
 
   test do
-    system bin/"getopt", "-o", "--test"
+    output = shell_output("#{bin}/getopt --longoptions foo --options ab:c test -b bar --foo baz")
+    assert_equal " -b 'bar' --foo -- 'test' 'baz'\n", output
     # Check that getopt is enhanced
-    quiet_system bin/"getopt", "-T"
-    assert_equal 4, $CHILD_STATUS.exitstatus
+    assert_empty shell_output("#{bin}/getopt --test", 4)
   end
 end

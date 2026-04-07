@@ -1,9 +1,10 @@
 class DockerCredentialHelperEcr < Formula
   desc "Docker Credential Helper for Amazon ECR"
   homepage "https://github.com/awslabs/amazon-ecr-credential-helper"
-  url "https://github.com/awslabs/amazon-ecr-credential-helper/archive/refs/tags/v0.8.0.tar.gz"
-  sha256 "7014f4c972ef360b7204d376bbd771aeebb8f1e9281948688de1bcebb0d0b0a4"
+  url "https://github.com/awslabs/amazon-ecr-credential-helper/archive/refs/tags/v0.12.0.tar.gz"
+  sha256 "c874cc88850330fd7a93452c7c654737fa37f06916153cf818e49088197a5e4c"
   license "Apache-2.0"
+  head "https://github.com/awslabs/amazon-ecr-credential-helper.git", branch: "main"
 
   livecheck do
     url :stable
@@ -11,16 +12,17 @@ class DockerCredentialHelperEcr < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "3f873d6f0c3a04233146794507346b99f55abfd85a130ec35bcf9a8d29dd82b4"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "3f873d6f0c3a04233146794507346b99f55abfd85a130ec35bcf9a8d29dd82b4"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "3f873d6f0c3a04233146794507346b99f55abfd85a130ec35bcf9a8d29dd82b4"
-    sha256 cellar: :any_skip_relocation, sonoma:         "c46a758bda76377f33b87d2f612dbda72b990aeee931429aee3d7b18650c27e4"
-    sha256 cellar: :any_skip_relocation, ventura:        "c46a758bda76377f33b87d2f612dbda72b990aeee931429aee3d7b18650c27e4"
-    sha256 cellar: :any_skip_relocation, monterey:       "c46a758bda76377f33b87d2f612dbda72b990aeee931429aee3d7b18650c27e4"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "2f4418572e63b5dfae324fd48ebf7fbc6d1cc5add18698b88cc6ae95579c0e44"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "08d041e92bae5951b08ae9481e3c6bcf4aec5583324e7393e9aa7538c693d08a"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "08d041e92bae5951b08ae9481e3c6bcf4aec5583324e7393e9aa7538c693d08a"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "08d041e92bae5951b08ae9481e3c6bcf4aec5583324e7393e9aa7538c693d08a"
+    sha256 cellar: :any_skip_relocation, sonoma:        "e82694f2c5f37d9690cd1c2060d7cc94a5cee9d7bc88b93735dd225e4cd29336"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "86525ade6158507fbba5982051aff57d186bbcadf576c82ab73f3062cf22dd02"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "8e6a16b2fee9192ce8c0dcea3f97cb7709b5faee28cb34418d46f25396fbfb0e"
   end
 
   depends_on "go" => :build
+
+  conflicts_with cask: "docker-desktop"
 
   def install
     (buildpath/"GITCOMMIT_SHA").write tap.user

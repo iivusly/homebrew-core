@@ -1,46 +1,39 @@
 class Libconfig < Formula
   desc "Configuration file processing library"
   homepage "https://hyperrealm.github.io/libconfig/"
-  url "https://github.com/hyperrealm/libconfig/releases/download/v1.7.3/libconfig-1.7.3.tar.gz"
-  sha256 "545166d6cac037744381d1e9cc5a5405094e7bfad16a411699bcff40bbb31ee7"
+  url "https://github.com/hyperrealm/libconfig/archive/refs/tags/v1.8.2.tar.gz"
+  sha256 "8e71983761b08c65b15b769b3ec1d980036c461fdfd415c7183378a4b3eac8f4"
   license "LGPL-2.1-or-later"
+  compatibility_version 1
+  head "https://github.com/hyperrealm/libconfig.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "9e363cc4e1dbc5f70fc60aa16d54c1c09b39a096b3d5ffb75a340c3203110cae"
-    sha256 cellar: :any,                 arm64_ventura:  "2bf05c92de1c235a0ba6f4ff4fb37d2451bf50057b5af52ecabb1a03ea3892fd"
-    sha256 cellar: :any,                 arm64_monterey: "8074ac817099b848dfda57a98dcb10eac98781d1aeb85425d6e1713650da8c09"
-    sha256 cellar: :any,                 arm64_big_sur:  "e675d6e4c47ca13fe8a8faaf02364c5e09c43f7212b33040aa49c06a808c077c"
-    sha256 cellar: :any,                 sonoma:         "31f5a9ed48cc40b4c8abd7e7f611e4039866fdd5bfc09a4d7f8e51795320abb3"
-    sha256 cellar: :any,                 ventura:        "b5b55ab30a17d2c5c66dd3ea18b6368452683b2ffdeec4892af58f5e65220470"
-    sha256 cellar: :any,                 monterey:       "c5fe41cc40b814c29ddfe551058e204f2e50e76dd056aeae57d28cca24be672e"
-    sha256 cellar: :any,                 big_sur:        "90fad29e719a3bd1b8ebe4eb857299b8a78a229543c3062d370bcdcfa0b8cd5c"
-    sha256 cellar: :any,                 catalina:       "88689325264c406acb9f624b0c66cae10e2c7b5874b4d78335751b4627a5496c"
-    sha256 cellar: :any,                 mojave:         "f5470e709146445744e2f9a200e0ea8042be9cd144a3e0b9f0a664b07e1aadc9"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "1ddc0a7e749416e1a6f0b1eb2f96fc272af064f5f0f447c647b5d996d798eace"
+    sha256 cellar: :any,                 arm64_tahoe:   "c2aba8caea48796a25a27d4096e8815ac2504b89cce8f9d5338b370a59c47986"
+    sha256 cellar: :any,                 arm64_sequoia: "ebaf461f4cbeec58dceeec947802aff7ad7aa909f8197b0d3441f3a2604d6897"
+    sha256 cellar: :any,                 arm64_sonoma:  "9ffaa431732a3806799bfa22dd3b7270cde21f535987a65a083e408d1e01491d"
+    sha256 cellar: :any,                 sonoma:        "87545a69b32f537dc0e1c3c91009b6266007739e06bdddd3e2de4d3295e708f7"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "1e0bf4cd0d19b56a595c906370f714f71489d3b823399750e7fe2045d186f84f"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "c8d07d69996141d177790414cdfac85da7c40d714a0d3343475c7748b196ad5f"
   end
 
-  head do
-    url "https://github.com/hyperrealm/libconfig.git", branch: "master"
+  depends_on "autoconf" => :build
+  depends_on "automake" => :build
+  depends_on "libtool" => :build
 
-    depends_on "autoconf" => :build
-    depends_on "automake" => :build
-    depends_on "libtool" => :build
+  uses_from_macos "flex" => :build
 
-    uses_from_macos "flex" => :build
-
-    on_system :linux, macos: :ventura_or_newer do
-      depends_on "texinfo" => :build
-    end
+  on_system :linux, macos: :ventura_or_newer do
+    depends_on "texinfo" => :build
   end
 
   def install
-    system "autoreconf", "-fiv" if build.head?
-    system "./configure", "--disable-dependency-tracking", "--prefix=#{prefix}"
+    system "autoreconf", "--force", "--install", "--verbose"
+    system "./configure", *std_configure_args
     system "make", "install"
   end
 
   test do
-    (testpath/"test.c").write <<~EOS
+    (testpath/"test.c").write <<~C
       #include <libconfig.h>
       int main() {
         config_t cfg;
@@ -48,7 +41,7 @@ class Libconfig < Formula
         config_destroy(&cfg);
         return 0;
       }
-    EOS
+    C
     system ENV.cc, testpath/"test.c", "-I#{include}",
            "-L#{lib}", "-lconfig", "-o", testpath/"test"
     system "./test"

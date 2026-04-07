@@ -10,20 +10,24 @@ class Unoconv < Formula
   head "https://github.com/unoconv/unoconv.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "f8af20011a8567f3c979711096d8c65dc3eeb6ee134b5138372ebe6ab7bb25f8"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "f8af20011a8567f3c979711096d8c65dc3eeb6ee134b5138372ebe6ab7bb25f8"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "f8af20011a8567f3c979711096d8c65dc3eeb6ee134b5138372ebe6ab7bb25f8"
-    sha256 cellar: :any_skip_relocation, sonoma:         "7da033bfdb25d20d669a453db4b17ca681078bd44c77e46fbf32baae5e27b1ad"
-    sha256 cellar: :any_skip_relocation, ventura:        "7da033bfdb25d20d669a453db4b17ca681078bd44c77e46fbf32baae5e27b1ad"
-    sha256 cellar: :any_skip_relocation, monterey:       "7da033bfdb25d20d669a453db4b17ca681078bd44c77e46fbf32baae5e27b1ad"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "0b46a9ee60e4247006945a036caca418b2f6e4e567643ec21c25e8f624f6a6aa"
+    rebuild 2
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "f291c61047fa90c216cc24d8363d849594bfac8ecbe103a4163a5fdd1c2621ab"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "f291c61047fa90c216cc24d8363d849594bfac8ecbe103a4163a5fdd1c2621ab"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "f291c61047fa90c216cc24d8363d849594bfac8ecbe103a4163a5fdd1c2621ab"
+    sha256 cellar: :any_skip_relocation, sonoma:        "ff27d27f6639defe6172e7fa54ba4421e3b89fa89cea8bd6982072899bb0bc1e"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "ff27d27f6639defe6172e7fa54ba4421e3b89fa89cea8bd6982072899bb0bc1e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ff27d27f6639defe6172e7fa54ba4421e3b89fa89cea8bd6982072899bb0bc1e"
   end
 
-  depends_on "python@3.12"
+  deprecate! date: "2025-04-27", because: :repo_archived, replacement_formula: "unoserver"
+
+  depends_on "python@3.14"
+
+  pypi_packages extra_packages: "setuptools"
 
   resource "setuptools" do
-    url "https://files.pythonhosted.org/packages/65/d8/10a70e86f6c28ae59f101a9de6d77bf70f147180fbf40c3af0f64080adc3/setuptools-70.3.0.tar.gz"
-    sha256 "f171bab1dfbc86b132997f26a119f6056a57950d058587841a0082e8830f9dc5"
+    url "https://files.pythonhosted.org/packages/18/5d/3bf57dcd21979b887f014ea83c24ae194cfcd12b9e0fda66b957c69d1fca/setuptools-80.9.0.tar.gz"
+    sha256 "f36b47402ecde768dbfafc46e8e4207b4360c654f1f3bb84475f0a28628fb19c"
   end
 
   def install

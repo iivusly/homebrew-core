@@ -3,20 +3,20 @@ class Pyupgrade < Formula
 
   desc "Upgrade syntax for newer versions of Python"
   homepage "https://github.com/asottile/pyupgrade"
-  url "https://files.pythonhosted.org/packages/7a/79/15cd93e47b5d670f0e32a540eb3f11bac4b5800cf1f796590eb448c6a768/pyupgrade-3.17.0.tar.gz"
-  sha256 "d5dd1dcaf9a016c31508bb9d3d09fd335d736578092f91df52bb26ac30c37919"
+  url "https://files.pythonhosted.org/packages/7f/a1/dc63caaeed232b1c58eae1b7a75f262d64ab8435882f696ffa9b58c0c415/pyupgrade-3.21.2.tar.gz"
+  sha256 "1a361bea39deda78d1460f65d9dd548d3a36ff8171d2482298539b9dc11c9c06"
   license "MIT"
   head "https://github.com/asottile/pyupgrade.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, all: "d064264b637f3c73b8e7a8b5de52d011bd19347e5b65a6e9bb402a6ba8f31f41"
+    sha256 cellar: :any_skip_relocation, all: "ca8e4a4fdb95ae8628d558473f7bf140ca5a2ffcd4258a4d8768cfa1bac2951b"
   end
 
-  depends_on "python@3.12"
+  depends_on "python@3.14"
 
   resource "tokenize-rt" do
-    url "https://files.pythonhosted.org/packages/7d/09/6257dabdeab5097d72c5d874f29b33cd667ec411af6667922d84f85b79b5/tokenize_rt-6.0.0.tar.gz"
-    sha256 "b9711bdfc51210211137499b5e355d3de5ec88a85d2025c520cbb921b5194367"
+    url "https://files.pythonhosted.org/packages/69/ed/8f07e893132d5051d86a553e749d5c89b2a4776eb3a579b72ed61f8559ca/tokenize_rt-6.2.0.tar.gz"
+    sha256 "8439c042b330c553fdbe1758e4a05c0ed460dbbbb24a606f11f0dee75da4cad6"
   end
 
   def install
@@ -24,9 +24,9 @@ class Pyupgrade < Formula
   end
 
   test do
-    (testpath/"test.py").write <<~EOS
+    (testpath/"test.py").write <<~PYTHON
       print(("foo"))
-    EOS
+    PYTHON
 
     system bin/"pyupgrade", "--exit-zero-even-if-changed", testpath/"test.py"
     assert_match "print(\"foo\")", (testpath/"test.py").read

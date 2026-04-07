@@ -6,6 +6,8 @@ class Gaul < Formula
   license "GPL-2.0-or-later"
 
   bottle do
+    sha256 cellar: :any,                 arm64_tahoe:    "e6d6c2c5f3c790afcff2232f8d2dc371a425fdedc42aa52a33daf94b0816439e"
+    sha256 cellar: :any,                 arm64_sequoia:  "f6ef6f6e6711082dd49cae45e516aa9f8fdf0f2942ff4224f6c30d9e75976dcc"
     sha256 cellar: :any,                 arm64_sonoma:   "619d02cf0a65573901c3b83a642203dae07540475bb5e1ea054b67e9ae1ed086"
     sha256 cellar: :any,                 arm64_ventura:  "75cba0ced64826f1b48b0622ae5c7a3b2acbe99c33f7b97ec02378b3f97db95a"
     sha256 cellar: :any,                 arm64_monterey: "26e4e30f26cf04cd953e2ec43503a616d52a4024d2131cbcce5bc13d28ad93ea"
@@ -15,27 +17,32 @@ class Gaul < Formula
     sha256 cellar: :any,                 monterey:       "4541d4d7d5d7ef43cc1acf3c57516e67fecf69e12f455f944d0a326816c400cd"
     sha256 cellar: :any,                 big_sur:        "e6a64a500ac22aec1a76616d86ea2f70449dfa30d37543faf9a135c2f98e1a07"
     sha256 cellar: :any,                 catalina:       "f2f98c2f7d23ae7c1862702c6d17d4449bbcc2164940d9157ea12b97deadb273"
-    sha256 cellar: :any,                 mojave:         "0f60116cbca6bb8986ffbd291d34a22c6426ad4c22bcedca2873aa24ab237eeb"
-    sha256 cellar: :any,                 high_sierra:    "f1b6b4fedb8820b14b6384d612b16a1acca71efa26a0d81881c1730720518765"
-    sha256 cellar: :any,                 sierra:         "5dcd424881f8395070bf534b8bd480279a17cbf8a5784ba2be7dffdbfbc85f51"
-    sha256 cellar: :any,                 el_capitan:     "0a6fb9c8ae17bb0785cc9c9da0fa0b3bf5fd6ca69b1ef8516b800d0d28d77360"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "53fc9d9d00e8829b40586ca4786c0848b543d5f42b191bde994139d284371a4c"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "86d80af0c4bdef2186dccac01b0046ca2ca2c81c484b7c5f279553b2e190b53c"
   end
 
-  on_macos do
-    depends_on "autoconf" => :build
-    depends_on "automake" => :build
-    depends_on "libtool" => :build
-  end
+  depends_on "autoconf" => :build
+  depends_on "automake" => :build
+  depends_on "libtool" => :build
 
   def install
-    # Run autoreconf on macOS to rebuild configure script so that it doesn't try
-    # to build with a flat namespace.
-    system "autoreconf", "--force", "--verbose", "--install" if OS.mac?
-    system "./configure", "--disable-dependency-tracking",
-                          "--disable-debug",
-                          "--disable-g",
-                          "--prefix=#{prefix}"
+    # Run autoreconf to regenerate the configure script and update outdated macros.
+    # This ensures that the build system is properly configured on both macOS
+    # (avoiding issues like flat namespace conflicts) and Linux (where outdated
+    # config scripts may fail to detect the correct build type).
+    system "autoreconf", "--force", "--verbose", "--install"
+    system "./configure", "--disable-g", *std_configure_args
     system "make", "install"
+  end
+
+  test do
+    resource "gaul-examples" do
+      url "https://downloads.sourceforge.net/project/gaul/gaul-examples/0.1849/gaul-examples-0.1849-0.tar.bz2"
+      sha256 "f4f59a0d676b0d58ba068424dfcb2c1715ff9aeaa940cab2daebff323274594c"
+    end
+    testpath.install resource("gaul-examples")
+
+    system ENV.cc, "src/struggle.c", "-o", "test", "-L#{lib}", "-lgaul_util", "-lgaul"
+    assert_match "The solution with seed = 49 was:\nWhen w^ yeil^ct%on%this strsggln,", shell_output("./test")
   end
 end

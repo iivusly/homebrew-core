@@ -1,8 +1,8 @@
 class Latex2html < Formula
   desc "LaTeX-to-HTML translator"
   homepage "https://www.latex2html.org"
-  url "https://github.com/latex2html/latex2html/archive/refs/tags/v2024.tar.gz"
-  sha256 "554a51f83431683521b9e47a19edf07c90960feb040048a08ad8301bdca2c6fa"
+  url "https://github.com/latex2html/latex2html/archive/refs/tags/v2026.tar.gz"
+  sha256 "f91c0c9bc8dbcadbba883f912f9d1cd2382b563fd754456488a95c120f24331e"
   license "GPL-2.0-or-later"
 
   livecheck do
@@ -11,13 +11,12 @@ class Latex2html < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "f51edb7b0b1c5e91a3920324770d0140dabd25463a47a2637326cea1eb6ef096"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "4ac8a480f394fa974959d53a32fffb93ac1cfabce1e3fb391cb664742a8fae1e"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "f841da77f49f00b9a8a8414b4409d5fea0a0b2176fa398ec897af94f741a9791"
-    sha256 cellar: :any_skip_relocation, sonoma:         "a125f130e4c05ed129abf0f22e5c57cf93964af9f62b27324ccc2df69a72ffd4"
-    sha256 cellar: :any_skip_relocation, ventura:        "a37239f2570dda92f06b72b76df67e98f0746999294aa91a675736d85caf8e15"
-    sha256 cellar: :any_skip_relocation, monterey:       "c88bf6e30994439a8791def38f7d4d0cc4b6514d2e19ad3ba32cf2e03a701d37"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "39c72d2b7f896dd2fa3b9c55e14ee0e857f1df963af5f26d1f79e8de71c36cc0"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "c4eab1a95e9acbb8c752f81b1edcf03f4f0f0cb287c8c865fb565f68e722075c"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "7faf0c531948aa38a9bb1025c69c82ef0b66f4c74c2e1b5a6de4239dbd8ab179"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "500bad6a08f2ca7f94d3ce34f5c9e441b9ec1436afc9626d783cc45a354f521f"
+    sha256 cellar: :any_skip_relocation, sonoma:        "9b75fab8d6cc429e7d328bc62b6a677f259fe89cddbd74382b609932d99546ec"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "fb5fda4ff20cacc7e15cabac8d97e860679d03a9b4c3c07196249500bfae1514"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "4707cdb1549e57bd8b2f89dd533e9d76fcc99ae6461a251ee574703d32533bc3"
   end
 
   depends_on "ghostscript"
@@ -31,15 +30,15 @@ class Latex2html < Formula
   end
 
   test do
-    (testpath/"test.tex").write <<~EOS
-      \\documentclass{article}
-      \\usepackage[utf8]{inputenc}
-      \\title{Experimental Setup}
-      \\date{\\today}
-      \\begin{document}
-      \\maketitle
-      \\end{document}
-    EOS
+    (testpath/"test.tex").write <<~'TEX'
+      \documentclass{article}
+      \usepackage[utf8]{inputenc}
+      \title{Experimental Setup}
+      \date{\today}
+      \begin{document}
+      \maketitle
+      \end{document}
+    TEX
     system bin/"latex2html", "test.tex"
     assert_match "Experimental Setup", File.read("test/test.html")
   end

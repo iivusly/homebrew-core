@@ -6,14 +6,8 @@ class Pandemics < Formula
   license "BSD-3-Clause"
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "ba38e44b4f4b7d27ff08bb11cfc4d0ff0c3acc0643748668cdd9cca3e015f365"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "ba38e44b4f4b7d27ff08bb11cfc4d0ff0c3acc0643748668cdd9cca3e015f365"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "ba38e44b4f4b7d27ff08bb11cfc4d0ff0c3acc0643748668cdd9cca3e015f365"
-    sha256 cellar: :any_skip_relocation, sonoma:         "a759108afc20634004c21dde25897cf10004a275c33706af36f4c6a2e19bbaf0"
-    sha256 cellar: :any_skip_relocation, ventura:        "a759108afc20634004c21dde25897cf10004a275c33706af36f4c6a2e19bbaf0"
-    sha256 cellar: :any_skip_relocation, monterey:       "a759108afc20634004c21dde25897cf10004a275c33706af36f4c6a2e19bbaf0"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "c286b0bc6887c50d894e25699b0e312a2663b40e5d8c44dbc73501cca334d8e4"
+    rebuild 2
+    sha256 cellar: :any_skip_relocation, all: "56f5dfc850d49885e631d590e330b5555985312ec11a483ac8001b3ca9f5be46"
   end
 
   depends_on "librsvg"
@@ -25,10 +19,10 @@ class Pandemics < Formula
     ENV["PANDEMICS_DEPS"]="0"
     # npm ignores config and ENV when in global mode so:
     # - install without running the package install script
-    system "npm", "install", "--ignore-scripts", *std_npm_args
+    system "npm", "install", *std_npm_args
     # - call install script manually to ensure ENV is respected
     system "npm", "run", "--prefix", libexec/"lib/node_modules/pandemics", "install"
-    bin.install_symlink Dir["#{libexec}/bin/*"]
+    bin.install_symlink libexec.glob("bin/*")
   end
 
   test do
@@ -36,7 +30,7 @@ class Pandemics < Formula
     assert_equal version, shell_output("#{libexec}/bin/pandemics --version")
     # does compile to pdf?
     touch testpath/"test.md"
-    system bin/"pandemics", "publish", "--format", "html", "#{testpath}/test.md"
-    assert_predicate testpath/"pandemics/test.html", :exist?
+    system bin/"pandemics", "publish", "--format", "html", testpath/"test.md"
+    assert_path_exists testpath/"pandemics/test.html"
   end
 end

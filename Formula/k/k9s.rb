@@ -2,8 +2,8 @@ class K9s < Formula
   desc "Kubernetes CLI To Manage Your Clusters In Style!"
   homepage "https://k9scli.io/"
   url "https://github.com/derailed/k9s.git",
-      tag:      "v0.32.5",
-      revision: "1440643e8d1a101a38d9be1933131ddf5c863940"
+      tag:      "v0.50.18",
+      revision: "6dbf571c59fd48dc5b384aa46ee7f3e5decfae2b"
   license "Apache-2.0"
   head "https://github.com/derailed/k9s.git", branch: "master"
 
@@ -13,13 +13,12 @@ class K9s < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "b96fe20b0004ed9f2a6733043d65bfdcbdbfff5470ea8531c6f49888819f48e0"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "4dc659225c3b753e87eedd2d19d2f5d54db55b4c504924095fce8c182bbe044e"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "8bccb8d9998a875cab724bd11e7510e5a930cbc0b1ade3f1522b0127427adc01"
-    sha256 cellar: :any_skip_relocation, sonoma:         "1f4bf7e0ecf3cc4414e491403d5e24be996fe525f52aba1509c8579cbfd120c3"
-    sha256 cellar: :any_skip_relocation, ventura:        "5387789b43544fdd2328cfa5d9a332f620e1b0daa9e753f9eb6780f20fc5c0a2"
-    sha256 cellar: :any_skip_relocation, monterey:       "a76ab5bed463ad3cb0729d4363641debd25a324016dbe77c31014abb61d87c0f"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "7976a912773c66e26bac3c89e5886dc369f2d23f34efc916f76ec28a16e5c5cf"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "640c74ca18c9ccfbf9fc9f903223fb8b8acaefc07ed36e50c82324311b2dce95"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "bd8d2d9b3d1514a4ae71f441f42974e699bda7bbce9640621802a55b5b7b6ed6"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "f6b82ca069e6ff73a5ab7cb6732f1e64abfbc127a10958c9ccd55d0740d94110"
+    sha256 cellar: :any_skip_relocation, sonoma:        "48a6671360c2266758916b585748e18dfd2c359631c344cb0e005f4068d9be62"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "346696b92754e55d665b5c55ba3cca18b28b1c2696bbc331674b6502e5415b0b"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "d3752c9e54adb8cc77cf821ef3e952a89acac090681135bb2e42836515a2e20b"
   end
 
   depends_on "go" => :build
@@ -32,7 +31,7 @@ class K9s < Formula
     ]
     system "go", "build", *std_go_args(ldflags:)
 
-    generate_completions_from_executable(bin/"k9s", "completion")
+    generate_completions_from_executable(bin/"k9s", shell_parameter_format: :cobra)
   end
 
   test do

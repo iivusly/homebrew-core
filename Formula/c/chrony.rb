@@ -1,8 +1,8 @@
 class Chrony < Formula
   desc "Versatile implementation of the Network Time Protocol (NTP)"
   homepage "https://chrony-project.org"
-  url "https://chrony-project.org/releases/chrony-4.6.tar.gz"
-  sha256 "9adad4a5014420fc52b695896556fdfb49709dc7cd72d7f688d9eb85d5a274d5"
+  url "https://chrony-project.org/releases/chrony-4.8.tar.gz"
+  sha256 "33ea8eb2a4daeaa506e8fcafd5d6d89027ed6f2f0609645c6f149b560d301706"
   license "GPL-2.0-only"
 
   livecheck do
@@ -11,16 +11,17 @@ class Chrony < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "8dd39a73c72e5eb5a672b27116f0fd8f26fa0a4007ce2613be40def748f19645"
-    sha256 cellar: :any,                 arm64_ventura:  "f32fd2718dfa16bafe27de82d88bd85e820342061a88b8122a1e0b50a1006a1b"
-    sha256 cellar: :any,                 arm64_monterey: "771a70145c907d1f00427dbaf21b73eb18c8fee321910daca5c13de408780f72"
-    sha256 cellar: :any,                 sonoma:         "246323fd8a3bf0207a1d00a3ed1b0a96b7d1b8d0d2abb91dc76f6beb557ea147"
-    sha256 cellar: :any,                 ventura:        "54d5f0f621055661d0ae4c27a9288f345d05c4970a30e28ba9a41e436d1ebb61"
-    sha256 cellar: :any,                 monterey:       "2847a89576282ed278e8045f8566c74eeeb9f2bed67ff0252324057960ecc387"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "cf993c8b196e32abc3ea453038ea3a0eb7ec305e2fe0d1d9f99e5e8d26ac941b"
+    sha256 cellar: :any,                 arm64_tahoe:   "e361230f241f273ef878f5f2bdc2899a414a7973dbd65854e44dfaaa70efc95e"
+    sha256 cellar: :any,                 arm64_sequoia: "c69f2a33c2f23e19668207e8a7f019476d48ddd21aac4ac297e447c4f368a8d7"
+    sha256 cellar: :any,                 arm64_sonoma:  "d625684f40a9cfb51d98b1ca92f212e940074e4303931fd2e4cf3598b4c2f51c"
+    sha256 cellar: :any,                 arm64_ventura: "c9f89d4196e6a7cc762937dea9cb6c2409240399ae95b5077901ae0bf66ead25"
+    sha256 cellar: :any,                 sonoma:        "0f77335cd443a3cf8415f1bd44a82b8c0493aee02037130f829bce8dae1c9604"
+    sha256 cellar: :any,                 ventura:       "fdd09def3431e2f0d55de1d4c9d6196c7ebb3cef7d82d0ba5160ebbcfe8243a4"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "c392cca54e58164bdfd794709eb64f0a3effb3f3f996dbc112e440459d8ffa45"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "eb65a129ec2f9117babdb703ec57e86857110f0e8cf8e74c14fa22f9c51ffd20"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "gnutls"
   depends_on "nettle"
 
@@ -33,7 +34,7 @@ class Chrony < Formula
 
   test do
     (testpath/"test.conf").write "pool pool.ntp.org iburst\n"
-    output = shell_output(sbin/"chronyd -Q -f #{testpath}/test.conf 2>&1")
+    output = shell_output("#{sbin}/chronyd -Q -f #{testpath}/test.conf 2>&1")
     assert_match(/System clock wrong by -?\d+\.\d+ seconds \(ignored\)/, output)
   end
 end

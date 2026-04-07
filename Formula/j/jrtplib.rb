@@ -10,6 +10,8 @@ class Jrtplib < Formula
   end
 
   bottle do
+    sha256 cellar: :any,                 arm64_tahoe:    "bcb22fe985a65c6e46980fa6837c761e266a0202076688362d846dcc48ff4a55"
+    sha256 cellar: :any,                 arm64_sequoia:  "ef88fc08dc41b679c8ccdcaebabab8303f7eb30ccc8cddb2776e4952f335d2f0"
     sha256 cellar: :any,                 arm64_sonoma:   "c21691446176fd07d6163eece3a708d9088739e61fa29671cdeacdb3737fabc5"
     sha256 cellar: :any,                 arm64_ventura:  "82b8535c4b305e27653d742b771ba387c09e937be9917a8e53a8aa2c04034e2f"
     sha256 cellar: :any,                 arm64_monterey: "66a2c5923fb2f9999ea1a5adcacbceb38398231be4536f51f8902e4f84b5cdc4"
@@ -19,22 +21,24 @@ class Jrtplib < Formula
     sha256 cellar: :any,                 monterey:       "f45e63073ae1de1f32605d885a92565dff5297205c875c27dfe36b270ca826b6"
     sha256 cellar: :any,                 big_sur:        "c025524ef889d74cc261768b9e12f8d3ffe57802adef254e2a01850db983e269"
     sha256 cellar: :any,                 catalina:       "05fc5e0747f7d5f725f9dda22cf39d414e8ee751829d14e9c32fa12279834cfc"
-    sha256 cellar: :any,                 mojave:         "1b48b36e9011b4aa675f1d581e900c64bcad93ba15fc86d1e27db09ed2c75ce9"
-    sha256 cellar: :any,                 high_sierra:    "420016bd3f9981189dc8bf69dc7520da8d9cbde848147dde495792c1a5a984fa"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "5b43949d28bbbce5b86915445eafbd3bf25b40f38e8439487ccb3f7b54da00b4"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "2c3a63a9f2e44c207522cb93a0bd93e429ed65937d74ea2b5d7a4110e46d9284"
   end
 
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "jthread"
 
   def install
-    system "cmake", ".", *std_cmake_args
-    system "make", "install"
+    # Workaround to build with CMake 4
+    args = %w[-DCMAKE_POLICY_VERSION_MINIMUM=3.5]
+    system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
+    system "cmake", "--build", "build"
+    system "cmake", "--install", "build"
   end
 
   test do
-    (testpath/"test.cpp").write <<~EOS
+    (testpath/"test.cpp").write <<~CPP
       #include <jrtplib3/rtpsessionparams.h>
       using namespace jrtplib;
       int main() {
@@ -42,7 +46,7 @@ class Jrtplib < Formula
         sessionparams.SetOwnTimestampUnit(1.0/8000.0);
         return 0;
       }
-    EOS
+    CPP
 
     system ENV.cxx, "test.cpp", "-I#{include}", "-L#{lib}", "-ljrtp",
                     "-o", "test"

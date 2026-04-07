@@ -1,18 +1,18 @@
 class Evernote2md < Formula
   desc "Convert Evernote .enex file to Markdown"
   homepage "https://github.com/wormi4ok/evernote2md"
-  url "https://github.com/wormi4ok/evernote2md/archive/refs/tags/v0.21.0.tar.gz"
-  sha256 "4d608ed86533b0ee3b7d4a238ec183201ba63feaa8ae11d14961b92c2cb9b718"
+  url "https://github.com/wormi4ok/evernote2md/archive/refs/tags/v0.22.2.tar.gz"
+  sha256 "643b6f12f2a6874293f7ed0c0de69089cd5c7cd8ee30899f1a85f9a63008fd9d"
   license "MIT"
+  head "https://github.com/wormi4ok/evernote2md.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "ccb9aac82b25b78b834109a161d48b357342e716af6e88f384c4709cfb7712aa"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "01f1aad2d6a402313f960430ce120e07a8613a6eae066bfb2cc1480da4b0bdea"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "91e8e4e938de5aeb9544c33319d88e41f70d98dec7fd21008d1c0b79774860cd"
-    sha256 cellar: :any_skip_relocation, sonoma:         "18d4e96aa9a4e9fed3087a9a042e1d5db71228b50f9e90c5e4721161a827c012"
-    sha256 cellar: :any_skip_relocation, ventura:        "8a586e0a6b3ca5aa6e75d71c417a43d9273a03bbeedb6caec98bea43037bea64"
-    sha256 cellar: :any_skip_relocation, monterey:       "acc746601cda076bc612d2f19849c6be0ab85999da3390426cb442608c669add"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "62cfd6b1fe467b630ec4ae563557965739c05d115c9012882814866ae1cb197f"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "cc05023d2f533a633f39bdc2b459410d5641f34d25ad36869564cfb1a5588b93"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "cc05023d2f533a633f39bdc2b459410d5641f34d25ad36869564cfb1a5588b93"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "cc05023d2f533a633f39bdc2b459410d5641f34d25ad36869564cfb1a5588b93"
+    sha256 cellar: :any_skip_relocation, sonoma:        "b7dbea9edb565c916a6421b4ccca7e02bbc3103717363865a48bcca01988c110"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "355b84e80e8c95f159d6c1323b5765177b4b285139aede2db278ab44dd89577d"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ad6aabd701ef98384847b5911bc5740aac59ef85bf9792c52145fec41f344449"
   end
 
   depends_on "go" => :build
@@ -36,6 +36,6 @@ class Evernote2md < Formula
       </en-export>
     EOF
     system bin/"evernote2md", "export.enex"
-    assert_predicate testpath/"notes/Test.md", :exist?
+    assert_path_exists testpath/"notes/Test.md"
   end
 end

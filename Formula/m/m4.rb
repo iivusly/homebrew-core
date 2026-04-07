@@ -1,23 +1,21 @@
 class M4 < Formula
   desc "Macro processing language"
   homepage "https://www.gnu.org/software/m4/"
-  url "https://ftp.gnu.org/gnu/m4/m4-1.4.19.tar.xz"
-  mirror "https://ftpmirror.gnu.org/m4/m4-1.4.19.tar.xz"
-  sha256 "63aede5c6d33b6d9b13511cd0be2cac046f2e70fd0a07aa9573a04a82783af96"
+  url "https://ftpmirror.gnu.org/gnu/m4/m4-1.4.21.tar.xz"
+  mirror "https://ftp.gnu.org/gnu/m4/m4-1.4.21.tar.xz"
+  sha256 "f25c6ab51548a73a75558742fb031e0625d6485fe5f9155949d6486a2408ab66"
   license "GPL-3.0-or-later"
+  compatibility_version 1
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "f42d89db519a07d67bcaead6c8dfb2da45e8266bebb996dd8b3f19b1ca13b8a0"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "11308abe8d607be35da9e88a1d789f191914bf043bca4fdde2b50a6cbf1713cc"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "8e9fa0d7d946f7c38e1a6f596aab3169d2440fccd34ec321b9a032d903ec951c"
-    sha256 cellar: :any_skip_relocation, arm64_big_sur:  "ea1be04e51645f9e31c8d2cab6d144bb7f47efb1f35214b9f1014e27db5a3bc1"
-    sha256 cellar: :any_skip_relocation, sonoma:         "8434a67a4383836b2531a6180e068640c5b482ee6781b673d65712e4fc86ca76"
-    sha256 cellar: :any_skip_relocation, ventura:        "0c7707d23c005fb7cfae158c696f3173698feca3a535d8f22959df18b9659575"
-    sha256 cellar: :any_skip_relocation, monterey:       "8a17c921e5135206c382fc67ae53ba8835684dac5bfe7eb2bcdfa79df4d2731d"
-    sha256 cellar: :any_skip_relocation, big_sur:        "b22472f659112cf12163bba770d891618b3ada5aaf5baa01516d80fef6214617"
-    sha256 cellar: :any_skip_relocation, catalina:       "e0fec6a49fd80cc7279c71f319d70d01ed49e894b53cd91e39f170288232fa93"
-    sha256 cellar: :any_skip_relocation, mojave:         "0cf53207764a2311db75b19628e2395ac6655ea1f7fdac97a33a0de34f315018"
-    sha256                               x86_64_linux:   "f6d1087a51e0ff2e582b3043a25a51b67971b2246cf65167ef3abf1230160f04"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "81e05b29593d5a7a5dc4fe5f245fc62623a84b82c67183bf26385cb86939c6d4"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "80f871ba39104ef553d5a15e2c70639c69dd4fb76568842f5dc1ef451918c6a8"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "72ca35bf13692b0dc9b3880170a0272e76c96f90e499dbbc6fb8a3765df1be31"
+    sha256 cellar: :any_skip_relocation, tahoe:         "a7da5c29823df4a3c80723639e17153dc6fc71621d87cdc8f5e88f628764c816"
+    sha256 cellar: :any_skip_relocation, sequoia:       "9956d5e742750c93d61a27ac209e7dfe7a6e0de2dfbc2ea73210741eb2e51461"
+    sha256 cellar: :any_skip_relocation, sonoma:        "0cf6a1f36ee3fba3f5a68541cbea8bce737766b02a1805e211deef5b3b3867a6"
+    sha256                               arm64_linux:   "eb1ff0c26cd770b61fffa8bc5b47bd3822ae800ef1174a4e15929648ca657a20"
+    sha256                               x86_64_linux:  "ba0b5d546365710422739b622d9a2301f9096f78bc7d6dd5b3cb4cc4a55e184f"
   end
 
   keg_only :provided_by_macos

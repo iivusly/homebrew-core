@@ -1,26 +1,28 @@
 class Snapcast < Formula
   desc "Synchronous multiroom audio player"
-  homepage "https://github.com/badaix/snapcast"
-  url "https://github.com/badaix/snapcast/archive/refs/tags/v0.29.0.tar.gz"
-  sha256 "ecfb2c96a4920adc4121b1180b37bb86566c359914c14831c0abea4e65d23f92"
+  homepage "https://github.com/snapcast/snapcast"
+  url "https://github.com/snapcast/snapcast/archive/refs/tags/v0.35.0.tar.gz"
+  sha256 "cb75a71479bf52910bf5f47ae8120ec41c89459b0d77d7cd560e674e437ef050"
   license "GPL-3.0-or-later"
 
   bottle do
-    sha256 cellar: :any, arm64_sonoma:   "e076ca61d99aeddad5ab382e4f41065351cd22d56e109e60b0ccaf76efe94790"
-    sha256 cellar: :any, arm64_ventura:  "365c1db7191bb5d2f70003ccc55145853432aac3f9bcd84e8e18dfe3ce9907bf"
-    sha256 cellar: :any, arm64_monterey: "f8b852400170331a4fc74987f28014ce13e318efdf78cebf8dbac90750e65926"
-    sha256 cellar: :any, sonoma:         "5f3f8d975856a3fca7883b19bd745b5e29f93c99caf2e23db942298a944abe9d"
-    sha256 cellar: :any, ventura:        "13691ba0b30c5fb0c79e03ef74c58da3af7f8eca534a59b541714d1737b7bc9c"
-    sha256 cellar: :any, monterey:       "f7d46b2c184101630b7f98a8b62f82f465bcf4a4a846756806530c339d9d7d19"
+    sha256 cellar: :any,                 arm64_tahoe:   "d61c8d4bfd965dd2ddcbc77eb73e12a59aef21dd2835bbca7e8b246b110750f4"
+    sha256 cellar: :any,                 arm64_sequoia: "dacaa2ae4beec81fafada1b9549b04b8bba3d6276827b7988844b1a6810e05f8"
+    sha256 cellar: :any,                 arm64_sonoma:  "a9613d42b9eeafb28a03889f260adbc225865dca3715ddf8023a903e6fcbc807"
+    sha256 cellar: :any,                 sonoma:        "14aa0fbaf99749b161e79b1f216d1e4396f550d8ed242733bc058e7eacb4528a"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "7e40d4b536ed307ff8f8982fbb660ef400444c5096f894834470c3596fcf4593"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "cf3c9e17907d2351ada549641c22b570b970d35b46d41d6fc1e045dc50acf1f2"
   end
 
   depends_on "boost" => :build
   depends_on "cmake" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
+
   depends_on "flac"
   depends_on "libogg"
   depends_on "libsoxr"
   depends_on "libvorbis"
+  depends_on "openssl@3"
   depends_on "opus"
 
   uses_from_macos "expat"
@@ -35,27 +37,25 @@ class Snapcast < Formula
     system "cmake", "-S", ".", "-B", "build", *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
-    # FIXME: if permissions aren't changed, the install fails with:
-    # Error: Failed to read Mach-O binary: share/snapserver/plug-ins/meta_mpd.py
-    chmod 0555, share/"snapserver/plug-ins/meta_mpd.py"
   end
 
   test do
-    server_pid = fork do
-      exec bin/"snapserver"
+    server_pid = spawn bin/"snapserver"
+    sleep 2
+
+    begin
+      output_log = testpath/"output.log"
+      client_pid = spawn bin/"snapclient", [:out, :err] => output_log.to_s
+      sleep 10
+      if OS.mac?
+        assert_match version.to_s, output_log.read
+      else
+        # Needs Avahi (which also needs D-Bus system bus) which requires root
+        assert_match "BrowseAvahi - Failed to create client", output_log.read
+      end
+    ensure
+      Process.kill("SIGTERM", client_pid)
     end
-
-    r, w = IO.pipe
-    client_pid = spawn bin/"snapclient", out: w
-    w.close
-
-    sleep 5
-    Process.kill("SIGTERM", client_pid)
-
-    output = r.read
-    r.close
-
-    assert_match("Connected to", output)
   ensure
     Process.kill("SIGTERM", server_pid)
   end

@@ -1,39 +1,37 @@
 class Gtranslator < Formula
   desc "GNOME gettext PO file editor"
   homepage "https://wiki.gnome.org/Design/Apps/Translator"
-  url "https://download.gnome.org/sources/gtranslator/46/gtranslator-46.1.tar.xz"
-  sha256 "b4af3184891491fd89c1a0465652310156c07d156b6a24e1c07f3a4cf7579568"
+  url "https://download.gnome.org/sources/gtranslator/50/gtranslator-50.0.tar.xz"
+  sha256 "857b51c78f54df42418ff6fa9e62b8554df7f021cb12338c1fc0d85b99c918ef"
   license "GPL-3.0-or-later"
 
   bottle do
-    sha256 arm64_sonoma:   "fbb4c4aaa2d292c41f7b9026a336581b861fd665f98955c14576a3638bd63aa1"
-    sha256 arm64_ventura:  "98b7deff1b67b1ef789a461669cc008629e27f2338f1629539e9d29a6ecf1841"
-    sha256 arm64_monterey: "013ac98c2e2d0b73d8505e8037dbd46c7046df35e320ab66580fbf757f65930d"
-    sha256 sonoma:         "cc38acbdb52fdad5d9adeee5ffeb9abcdb517967856c0f8bec26a165ed90f3d2"
-    sha256 ventura:        "1947fb586d1218db9977a77869c130742db4db07a4992f119ba84ac0dbcc06bb"
-    sha256 monterey:       "809b20c039c167429a5af8ed8ba73c32a59808e14d434e03ee029feefda9afa1"
-    sha256 x86_64_linux:   "c41a8150fa0f64e40c47a0c00f121a8005656d9b678671faac04c6389018234e"
+    sha256 arm64_tahoe:   "8b3109a1729b655d93d1633ac69ad4400eec4df32265c44ffdc690d6f60e6bad"
+    sha256 arm64_sequoia: "d3852d2a411fcf522fbb2b726666e792a0f9df79f9c1360583054e7ecf872b1c"
+    sha256 arm64_sonoma:  "bb1248e9810dcfd4621c357697f45ad77fe7bd054a05dd1eb89f51b76512ae4c"
+    sha256 sonoma:        "562065e41ea4d65419ddfef02430f0a3e69817e7b01e236cf1e98a51ca95e611"
+    sha256 arm64_linux:   "64f3b299245f9a3dbaaf10a33f0912c821e7c7c77bc6db909fbc9d9a72db873e"
+    sha256 x86_64_linux:  "96a0880c5627f73fc47cff866a6f173f0e966d760bbec15d14e036ced0bbfb58"
   end
 
   depends_on "desktop-file-utils" => :build # for update-desktop-database
   depends_on "itstool" => :build
   depends_on "meson" => :build
   depends_on "ninja" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
 
-  depends_on "adwaita-icon-theme"
+  depends_on "adwaita-icon-theme" => :no_linkage
   depends_on "cairo"
   depends_on "gettext"
   depends_on "glib"
-  depends_on "gspell"
   depends_on "gtk4"
   depends_on "gtksourceview5"
   depends_on "json-glib"
   depends_on "libadwaita"
-  depends_on "libgda"
   depends_on "libsoup"
   depends_on "libspelling"
   depends_on "pango"
+  depends_on "sqlite"
 
   uses_from_macos "libxml2"
 
@@ -48,7 +46,7 @@ class Gtranslator < Formula
 
   def post_install
     system "#{Formula["glib"].opt_bin}/glib-compile-schemas", "#{HOMEBREW_PREFIX}/share/glib-2.0/schemas"
-    system "#{Formula["gtk+3"].opt_bin}/gtk3-update-icon-cache", "-f", "-t", "#{HOMEBREW_PREFIX}/share/icons/hicolor"
+    system "#{Formula["gtk4"].opt_bin}/gtk4-update-icon-cache", "-f", "-t", "#{HOMEBREW_PREFIX}/share/icons/hicolor"
   end
 
   test do

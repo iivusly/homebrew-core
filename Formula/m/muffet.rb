@@ -1,19 +1,18 @@
 class Muffet < Formula
   desc "Fast website link checker in Go"
   homepage "https://github.com/raviqqe/muffet"
-  url "https://github.com/raviqqe/muffet/archive/refs/tags/v2.10.2.tar.gz"
-  sha256 "eca6234caf3d278696a969f630c1b62b634731d247b16474750c9fa75f1128c3"
+  url "https://github.com/raviqqe/muffet/archive/refs/tags/v2.11.2.tar.gz"
+  sha256 "cbf83979c7a257b22ccdd9f102eed3876e237f699e3279602269ac635d728ff5"
   license "MIT"
-  head "https://github.com/raviqqe/muffet.git", branch: "master"
+  head "https://github.com/raviqqe/muffet.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "b2fba005dc5480c45438c8715c01a8eb792ceded2fe622ed01126aad71cfe652"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "4da53b95da11db4afbc38f15eb901eb7483fe6f4e31b880b73bbea1d2517c4ba"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "d1efa606875f4f228c550ba98ec178c60887bcec41638440efe3fa1b59994ead"
-    sha256 cellar: :any_skip_relocation, sonoma:         "b0ac5eb5a6a32b76c80de96e79efced9b36e1962d0458144f4cce1d68e33f47c"
-    sha256 cellar: :any_skip_relocation, ventura:        "795dc4c58e54404ae020a1046a86059f21ca65e51cbe73113897d5ec7a693cd3"
-    sha256 cellar: :any_skip_relocation, monterey:       "07cfb063b6d40b05be40eaf5d27464cc76f474cbbfd8a0b36582f2c1917891fd"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "8eae28aa9eafdd5d26f7ee4e915a313265f41dc09d6065728e0680ffdb03a60c"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "fb71acafe9cd0f03be60e2a870046c7ca2896aeb138334382e66c4b4a14f8953"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "fb71acafe9cd0f03be60e2a870046c7ca2896aeb138334382e66c4b4a14f8953"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "fb71acafe9cd0f03be60e2a870046c7ca2896aeb138334382e66c4b4a14f8953"
+    sha256 cellar: :any_skip_relocation, sonoma:        "5f4cb0df2bb0b46e9e8d398762c4cbbc4f1e0210b07bd3de1dfa2588cc0a1526"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "24c3ed122b0b527b8310e31e08e1756782c25944a2f8275c367ecfc7c23ddb62"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "889b6520680af87d4fe7f843d84cb6f07680cf0b531ba678ebb4105b7a253756"
   end
 
   depends_on "go" => :build
@@ -23,10 +22,12 @@ class Muffet < Formula
   end
 
   test do
+    assert_match version.to_s, shell_output("#{bin}/muffet --version")
+
     assert_match(/failed to fetch root page: lookup does\.not\.exist.*: no such host/,
                  shell_output("#{bin}/muffet https://does.not.exist 2>&1", 1))
 
-    assert_match "https://example.com/",
-                 shell_output("#{bin}/muffet https://example.com 2>&1", 1)
+    assert_match "https://httpbin.org/",
+                 shell_output("#{bin}/muffet https://httpbin.org/ 2>&1", 1)
   end
 end

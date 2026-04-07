@@ -1,19 +1,18 @@
 class EditorconfigChecker < Formula
   desc "Tool to verify that your files are in harmony with your .editorconfig"
   homepage "https://github.com/editorconfig-checker/editorconfig-checker"
-  url "https://github.com/editorconfig-checker/editorconfig-checker/archive/refs/tags/v3.0.3.tar.gz"
-  sha256 "b3d927bbbf3a89bc75d91ce00dcb3c836906e6522097c836285adb26850ca3eb"
+  url "https://github.com/editorconfig-checker/editorconfig-checker/archive/refs/tags/v3.6.1.tar.gz"
+  sha256 "8c8e6662b076fdb21767e0df99b12b71cbcde5cfbbd8a084b4cf94fe09b72826"
   license "MIT"
   head "https://github.com/editorconfig-checker/editorconfig-checker.git", branch: "main"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "448f1ebb1897e6d07f5d6928066339ce01ea89f7e1f6e820bbbd483dafac853f"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "448f1ebb1897e6d07f5d6928066339ce01ea89f7e1f6e820bbbd483dafac853f"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "448f1ebb1897e6d07f5d6928066339ce01ea89f7e1f6e820bbbd483dafac853f"
-    sha256 cellar: :any_skip_relocation, sonoma:         "e16b0702aa4bbba6586ca67b2ec147fd781c3b480f1df50a68eda6d4eaa090e1"
-    sha256 cellar: :any_skip_relocation, ventura:        "e16b0702aa4bbba6586ca67b2ec147fd781c3b480f1df50a68eda6d4eaa090e1"
-    sha256 cellar: :any_skip_relocation, monterey:       "e16b0702aa4bbba6586ca67b2ec147fd781c3b480f1df50a68eda6d4eaa090e1"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "bfc53564fea2c9f3fddc605ad05d7e083be27a830ade4236713e8699daeb71be"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "5c3943c8c379e3ed6edbaaf7ff729bbead0ce913291ca9096d7f27c35bc6c9d5"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "5c3943c8c379e3ed6edbaaf7ff729bbead0ce913291ca9096d7f27c35bc6c9d5"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "5c3943c8c379e3ed6edbaaf7ff729bbead0ce913291ca9096d7f27c35bc6c9d5"
+    sha256 cellar: :any_skip_relocation, sonoma:        "1c44690c2c2877d318e4159e0789d2c2ee26f8e7a63585b538abc57e2bb9b56d"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "37c5ce8d2cfbb5514eb05cf4c9f83bd6fda82e6e5b6936112596446e704a19c1"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "07ec5262b1ab9d209a5bd9b0cb9f5740cfd99e30009e2aaf25f0ee8180512964"
   end
 
   depends_on "go" => :build
@@ -24,6 +23,10 @@ class EditorconfigChecker < Formula
   end
 
   test do
+    (testpath/".editorconfig").write <<~EOS
+      [version.txt]
+      charset = utf-8
+    EOS
     (testpath/"version.txt").write <<~EOS
       version=#{version}
     EOS

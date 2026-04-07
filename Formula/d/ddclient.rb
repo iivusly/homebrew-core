@@ -1,10 +1,10 @@
 class Ddclient < Formula
   desc "Update dynamic DNS entries"
   homepage "https://ddclient.net/"
-  url "https://github.com/ddclient/ddclient/archive/refs/tags/v3.11.2.tar.gz"
-  sha256 "243cd832abd3cdd2b49903e1b5ed7f450e2d9c4c0eaf8ce4fe692c244d3afd77"
+  url "https://github.com/ddclient/ddclient/archive/refs/tags/v4.0.0.tar.gz"
+  sha256 "4b37c99ac0011102d7db62f1ece7ff899b06df3d4b172e312703931a3c593c93"
   license "GPL-2.0-or-later"
-  head "https://github.com/ddclient/ddclient.git", branch: "master"
+  head "https://github.com/ddclient/ddclient.git", branch: "main"
 
   livecheck do
     url :stable
@@ -12,21 +12,23 @@ class Ddclient < Formula
   end
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "414220db19df958c45f3d8ad699841ac8e115d1cba7a2c2b3768e36c9e0bbfbd"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "414220db19df958c45f3d8ad699841ac8e115d1cba7a2c2b3768e36c9e0bbfbd"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "414220db19df958c45f3d8ad699841ac8e115d1cba7a2c2b3768e36c9e0bbfbd"
-    sha256 cellar: :any_skip_relocation, sonoma:         "414220db19df958c45f3d8ad699841ac8e115d1cba7a2c2b3768e36c9e0bbfbd"
-    sha256 cellar: :any_skip_relocation, ventura:        "414220db19df958c45f3d8ad699841ac8e115d1cba7a2c2b3768e36c9e0bbfbd"
-    sha256 cellar: :any_skip_relocation, monterey:       "414220db19df958c45f3d8ad699841ac8e115d1cba7a2c2b3768e36c9e0bbfbd"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "99341145cb0d0dcd3e2f2da1b726372b72e33a5ac9807d1b8f5a0bab26392078"
+    rebuild 2
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "fd99a31bc382b37fb1c30b0951207f62cac95ca4a63e1aa8b33418d8c7835b02"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "fd99a31bc382b37fb1c30b0951207f62cac95ca4a63e1aa8b33418d8c7835b02"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "fd99a31bc382b37fb1c30b0951207f62cac95ca4a63e1aa8b33418d8c7835b02"
+    sha256 cellar: :any_skip_relocation, sonoma:        "f21970276380eb8695cf3d1fe7db5e34ebb4f6a30e5e016a40f09f9aaea3a463"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "7e668a3f6c30e6ee9161cee638436862bf180227acaf1d9d18c91f3c5fc11993"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "21970b6c0bf60078a269f10b8e22da146a75f65ef69cead984b9026203664493"
   end
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
+
   uses_from_macos "perl"
 
   on_linux do
     depends_on "openssl@3"
+    depends_on "zlib-ng-compat"
 
     resource "IO::Socket::INET6" do
       url "https://cpan.metacpan.org/authors/id/S/SH/SHLOMIF/IO-Socket-INET6-2.73.tar.gz"
@@ -64,37 +66,24 @@ class Ddclient < Formula
     end
 
     system "./autogen"
-    system "./configure", *std_configure_args, "--sysconfdir=#{etc}", "--localstatedir=#{var}", "CURL=curl"
+    system "./configure", "--sysconfdir=#{etc}", "--localstatedir=#{var}", "CURL=curl", *std_configure_args
     system "make", "install", "CURL=curl"
 
     # Install sample files
-    inreplace "sample-ddclient-wrapper.sh", "/etc/ddclient", "#{etc}/ddclient"
+    inreplace "sample-ddclient-wrapper.sh", "/etc/ddclient/", "#{pkgetc}/"
     inreplace "sample-etc_cron.d_ddclient", "/usr/bin/ddclient", "#{opt_bin}/ddclient"
 
     doc.install %w[sample-ddclient-wrapper.sh sample-etc_cron.d_ddclient]
     bin.env_script_all_files(libexec/"bin", PERL5LIB: ENV["PERL5LIB"]) if OS.linux?
-  end
 
-  def post_install
     (var/"run").mkpath
-    chmod "go-r", etc/"ddclient.conf"
-
-    # Migrate old configuration files to the new location that `ddclient` checks.
-    # Remove on 31/12/2023.
-    old_config_file = pkgetc/"ddclient.conf"
-    return unless old_config_file.exist?
-
-    new_config_file = etc/"ddclient.conf"
-    ohai "Migrating `#{old_config_file}` to `#{new_config_file}`..."
-    etc.install new_config_file => "ddclient.conf.default" if new_config_file.exist?
-    etc.install old_config_file
-    rm_r(pkgetc) if pkgetc.empty?
+    chmod "go-r", pkgetc/"ddclient.conf"
   end
 
   def caveats
     <<~EOS
       For ddclient to work, you will need to customise the configuration
-      file at `#{etc}/ddclient.conf`.
+      file at `#{pkgetc}/ddclient.conf`.
 
       Note: don't enable daemon mode in the configuration file; see
       additional information below.
@@ -107,7 +96,7 @@ class Ddclient < Formula
   end
 
   service do
-    run [opt_bin/"ddclient", "-file", etc/"ddclient.conf"]
+    run [opt_bin/"ddclient", "-file", etc/"ddclient/ddclient.conf"]
     run_type :interval
     interval 300
     require_root true
@@ -115,14 +104,14 @@ class Ddclient < Formula
 
   test do
     begin
-      pid = fork do
-        exec bin/"ddclient", "-file", etc/"ddclient.conf", "-debug", "-verbose", "-noquiet"
-      end
+      pid = spawn bin/"ddclient", "-file", pkgetc/"ddclient.conf", "-debug", "-verbose", "-noquiet"
       sleep 1
     ensure
       Process.kill "TERM", pid
       Process.wait
     end
     $CHILD_STATUS.success?
+
+    assert_equal "0600", (pkgetc/"ddclient.conf").stat.mode.to_s(8)[-4..], "ddclient.conf permissions"
   end
 end

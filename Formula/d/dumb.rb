@@ -8,6 +8,8 @@ class Dumb < Formula
   license :cannot_represent
 
   bottle do
+    sha256 cellar: :any,                 arm64_tahoe:    "d04fae5e3adcd02d608e3f3b8238a5702b0e74ab1c295128f3e65af4f494e3f4"
+    sha256 cellar: :any,                 arm64_sequoia:  "7158a40eed75a578dd615fdf83840be91a4fd565b0ce5170c4e91d494e0a0a16"
     sha256 cellar: :any,                 arm64_sonoma:   "f9510e55b969457e77567594f6963a7a6470f86dac7f252ed3c01757314c44dd"
     sha256 cellar: :any,                 arm64_ventura:  "6ec724316f7ab409767fdb3b240bf6bd00c0753a66ea048b1a1527c19b659a6f"
     sha256 cellar: :any,                 arm64_monterey: "f046a0784378b98ac76156a7a5c306a8c4d931130309c64d6205b1bfd2d0dcfe"
@@ -17,8 +19,12 @@ class Dumb < Formula
     sha256 cellar: :any,                 monterey:       "a0933282bbe2feb52a06cac1a1a189b83af422e422036f78b0fcfa0e55f5726c"
     sha256 cellar: :any,                 big_sur:        "2dade8ff6646f71df07f3b2d586c9bb49ae24c3f0b5ddddea7a09a3762501f5c"
     sha256 cellar: :any,                 catalina:       "f9d0768b3b50614adfb2190899362e250f20a14be0fb0c2d21d37bee0afea672"
+    sha256 cellar: :any_skip_relocation, arm64_linux:    "040bc8a1b4387d297c3c83f33fc68f79b885a4fe0530e9ce9c70257f38faadc9"
     sha256 cellar: :any_skip_relocation, x86_64_linux:   "de4310947cbbc1807cf9c2bbdb9dcc42cc381de7153b3dc4f206718a1923fe40"
   end
+
+  deprecate! date: "2025-07-03", because: :repo_archived
+  disable! date: "2026-07-03", because: :repo_archived, replacement_formula: "libopenmpt"
 
   depends_on "cmake" => :build
   depends_on "argtable"
@@ -28,6 +34,7 @@ class Dumb < Formula
     args = std_cmake_args + %w[
       -DBUILD_ALLEGRO4=OFF
       -DBUILD_EXAMPLES=ON
+      -DCMAKE_POLICY_VERSION_MINIMUM=3.5
     ]
 
     # Build shared library

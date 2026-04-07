@@ -4,7 +4,7 @@ class BulkExtractor < Formula
   url "https://github.com/simsong/bulk_extractor/releases/download/v2.1.1/bulk_extractor-2.1.1.tar.gz"
   sha256 "0cd57c743581a66ea94d49edac2e89210c80a2a7cc90dd254d56940b3d41b7f7"
   license "MIT"
-  revision 1
+  revision 3
 
   livecheck do
     url :stable
@@ -12,13 +12,13 @@ class BulkExtractor < Formula
   end
 
   bottle do
-    sha256 cellar: :any,                 arm64_sonoma:   "d076c3c6ce906ef9136700601f34b51f720d3fc50d96ad04b578dcafa041c4d9"
-    sha256 cellar: :any,                 arm64_ventura:  "90bd56b74f11074cc420af7df33a15435cd46071eabaad0c7c081b7a225b83ae"
-    sha256 cellar: :any,                 arm64_monterey: "2bc48e662bd411bdaf258a34e214b00b6ee80f60904c8d846472610b798cbe67"
-    sha256 cellar: :any,                 sonoma:         "fa9d38135e6b10cdfeec2a55a259a936ba7fb8468ec91ab952edef37d46fdec2"
-    sha256 cellar: :any,                 ventura:        "e0d758881ed2de967484c0ab5ddf5bf815af8beed5c7cb52b5d434b1e762ee18"
-    sha256 cellar: :any,                 monterey:       "c68a03087991b70830a1d0fe79fdb7886767841335aebbee7060d8faf6e7f7ce"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "ce9af040a2bc16c10f0752d4d78261753b076986d4b5a7ee420a8cca72b46cd1"
+    rebuild 2
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "fce16972463075eb40a46aff2cec48868513aeeb181a67fbdf41ead522d06d0e"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "d584ce493285ccd23882534b8707dc2635a97ff4890fb3c84051a2544b9eaf91"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "ba5d8eec3919cad2196afcabb07b9f92d04de7e46d908887aae54cdb655a57fa"
+    sha256 cellar: :any_skip_relocation, sonoma:        "cd2032241f7acb78ae73beb4254a1c9a55ad60b88568b52e260859ae01eacc41"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "63def3013392e1b55add767f77b6722108804e57ccf91090ea82f3cff28292aa"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "19a7347706e0ec70fd5db04d47420c392ff30a7f9da887cb8f66c56c86ba7c6b"
   end
 
   head do
@@ -27,16 +27,23 @@ class BulkExtractor < Formula
     depends_on "automake" => :build
   end
 
-  depends_on "pkg-config" => :build
-  depends_on "openssl@3"
-  depends_on "re2"
+  depends_on "pkgconf" => :build
+  # Not actually used at runtime, but required at build-time
+  # due to a stray `RE2::` reference.
+  depends_on "re2" => :build
 
   uses_from_macos "flex" => :build
   uses_from_macos "expat"
   uses_from_macos "ncurses"
-  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "openssl@3" # uses CommonCrypto on macOS
+    depends_on "zlib-ng-compat"
+  end
 
   def install
+    # Avoid overlinkage with abseil and re2.
+    ENV.append "LDFLAGS", "-Wl,-dead_strip_dylibs" if OS.mac?
     system "./bootstrap.sh" if build.head?
     # Disable RAR to avoid problematic UnRAR license
     system "./configure", *std_configure_args, "--disable-rar", "--disable-silent-rules"

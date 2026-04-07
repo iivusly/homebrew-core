@@ -11,8 +11,8 @@ class Apgdiff < Formula
   end
 
   bottle do
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, all: "22236801bcf19f2b8beb312287dc2b3a8d9ebdef2ee0fa56779ed0abc3e44fc4"
+    rebuild 2
+    sha256 cellar: :any_skip_relocation, all: "0ec6832a82b7a0fa10bc3e009c8a85f07439dcc0f94fe9e8e05509c52abe3719"
   end
 
   head do
@@ -38,28 +38,26 @@ class Apgdiff < Formula
     sql_orig = testpath/"orig.sql"
     sql_new = testpath/"new.sql"
 
-    sql_orig.write <<~EOS
+    sql_orig.write <<~SQL
       SET search_path = public, pg_catalog;
       SET default_tablespace = '';
       CREATE TABLE testtable (field1 integer);
       ALTER TABLE public.testtable OWNER TO fordfrog;
-    EOS
+    SQL
 
-    sql_new.write <<~EOS
+    sql_new.write <<~SQL
       SET search_path = public, pg_catalog;
       SET default_tablespace = '';
       CREATE TABLE testtable (field1 integer,
         field2 boolean DEFAULT false NOT NULL);
       ALTER TABLE public.testtable OWNER TO fordfrog;
-    EOS
+    SQL
 
-    expected = <<~EOS.strip
+    expected = <<~SQL.strip
       ALTER TABLE testtable
       \tADD COLUMN field2 boolean DEFAULT false NOT NULL;
-    EOS
+    SQL
 
-    result = pipe_output("#{bin}/apgdiff #{sql_orig} #{sql_new}").strip
-
-    assert_equal result, expected
+    assert_equal expected, shell_output("#{bin}/apgdiff #{sql_orig} #{sql_new}").strip
   end
 end

@@ -1,29 +1,28 @@
 class Starship < Formula
   desc "Cross-shell prompt for astronauts"
-  homepage "https://starship.rs"
-  url "https://github.com/starship/starship/archive/refs/tags/v1.20.1.tar.gz"
-  sha256 "851d84be69f9171f10890e3b58b8c5ec6057dd873dc83bfe0bdf965f9844b5dc"
+  homepage "https://starship.rs/"
+  url "https://github.com/starship/starship/archive/refs/tags/v1.24.2.tar.gz"
+  sha256 "b7ab0ef364f527395b46d2fb7f59f9592766b999844325e35f62c8fa4d528795"
   license "ISC"
   head "https://github.com/starship/starship.git", branch: "master"
 
   bottle do
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:   "0c4a9a5065b898767b818d6efd9967a8721584b856d2ae50291d93378dd6308d"
-    sha256 cellar: :any_skip_relocation, arm64_ventura:  "0e45c4772e04bda7e40ea8c87c67665ca60c1bd50ee62a5808ac40422f0506eb"
-    sha256 cellar: :any_skip_relocation, arm64_monterey: "c8a3541a380c006638c61de8613a66232f307f7b933e8a8c376bd2986ec74108"
-    sha256 cellar: :any_skip_relocation, sonoma:         "4d29c18c5c58c41bce81e84519650310694db6f26172191bb880253176aecb6a"
-    sha256 cellar: :any_skip_relocation, ventura:        "4da07ebf4ce68ad9c995981099605962721e4b68aa3c2ee75964bea9654c5516"
-    sha256 cellar: :any_skip_relocation, monterey:       "dd431900a3a652d4588ea1c915ee6765d7586c7d68aea8cb17218e8a6e336c0b"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:   "47effdd4cebfc40f3d4518bc941eadda39a423af2980b625f4bde2bbcadee718"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "261c37914c6e39b9f05633501ae38c7c44d0784a4886941a23f15bd6c49f7faa"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "afffc7a2bf021cac23ee10af2cee207ac2e16d193425935a34d3f58eb276da52"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "d1bb0af009b2965ec7b6dd8410f068c90a7ba4c017b71243613185a7517c4540"
+    sha256 cellar: :any_skip_relocation, sonoma:        "b2751c138704236385e82030494728e08b839fa5935a38aab40a8bcc5ae9ca31"
+    sha256 cellar: :any_skip_relocation, arm64_linux:   "1ca52b67cf4b6f3004cbb3977d11923787ec17763cff6f448a339ac5643c1395"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "493d58232e62a9ae7ef86d039d442b7463495a907ffe14cb795cc590fadee3cb"
   end
 
   depends_on "cmake" => :build
+  depends_on "pkgconf" => :build
   depends_on "rust" => :build
 
-  uses_from_macos "zlib"
-
   on_linux do
-    depends_on "pkg-config" => :build
     depends_on "dbus"
+    depends_on "zlib-ng-compat"
   end
 
   def install
